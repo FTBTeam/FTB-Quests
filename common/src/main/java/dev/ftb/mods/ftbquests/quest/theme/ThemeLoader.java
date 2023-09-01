@@ -1,6 +1,7 @@
 package dev.ftb.mods.ftbquests.quest.theme;
 
 import dev.ftb.mods.ftbquests.FTBQuests;
+import dev.ftb.mods.ftbquests.api.FTBQuestsAPI;
 import dev.ftb.mods.ftbquests.quest.QuestObjectType;
 import dev.ftb.mods.ftbquests.quest.QuestShape;
 import dev.ftb.mods.ftbquests.quest.theme.property.ThemeProperties;
@@ -31,7 +32,7 @@ public class ThemeLoader implements ResourceManagerReloadListener {
 		Map<ThemeSelector, SelectorProperties> map = new HashMap<>();
 
 		try {
-			for (Resource resource : resourceManager.getResourceStack(new ResourceLocation(FTBQuests.MOD_ID, "ftb_quests_theme.txt"))) {
+			for (Resource resource : resourceManager.getResourceStack(new ResourceLocation(FTBQuestsAPI.MOD_ID, "ftb_quests_theme.txt"))) {
 				try (InputStream in = resource.open()) {
 					parse(map, FileUtils.read(in));
 				} catch (Exception ex) {

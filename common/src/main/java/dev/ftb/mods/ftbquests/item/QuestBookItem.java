@@ -1,8 +1,8 @@
 package dev.ftb.mods.ftbquests.item;
 
 import dev.ftb.mods.ftblibrary.core.ItemFTBL;
-import dev.ftb.mods.ftbquests.FTBQuests;
 import dev.ftb.mods.ftbquests.client.ClientQuestFile;
+import dev.ftb.mods.ftbquests.client.FTBQuestsClient;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.ChatFormatting;
@@ -24,14 +24,14 @@ import java.util.List;
  */
 public class QuestBookItem extends Item {
 	public QuestBookItem() {
-		super(new Properties().stacksTo(1).tab(FTBQuests.ITEM_GROUP));
+		super(FTBQuestsItems.defaultProps().stacksTo(1));
 		((ItemFTBL) this).setCraftingRemainingItemFTBL(this);
 	}
 
 	@Override
 	public InteractionResultHolder<ItemStack> use(Level world, Player player, InteractionHand hand) {
 		if (world.isClientSide()) {
-			FTBQuests.PROXY.openGui();
+			FTBQuestsClient.openGui();
 		}
 
 		return new InteractionResultHolder<>(InteractionResult.SUCCESS, player.getItemInHand(hand));
@@ -40,7 +40,7 @@ public class QuestBookItem extends Item {
 	@Override
 	@Environment(EnvType.CLIENT)
 	public void appendHoverText(ItemStack stack, @Nullable Level worldIn, List<Component> tooltip, TooltipFlag flagIn) {
-		if (ClientQuestFile.exists() && ClientQuestFile.INSTANCE.disableGui && !ClientQuestFile.INSTANCE.canEdit()) {
+		if (ClientQuestFile.exists() && ClientQuestFile.INSTANCE.isDisableGui() && !ClientQuestFile.INSTANCE.canEdit()) {
 			tooltip.add(Component.translatable("item.ftbquests.book.disabled").withStyle(ChatFormatting.RED));
 		} else {
 			tooltip.add(Component.translatable("item.ftbquests.book.tooltip").withStyle(ChatFormatting.GRAY));

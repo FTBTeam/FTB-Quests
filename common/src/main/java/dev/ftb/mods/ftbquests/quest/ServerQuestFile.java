@@ -7,6 +7,7 @@ import dev.ftb.mods.ftblibrary.snbt.SNBT;
 import dev.ftb.mods.ftblibrary.snbt.SNBTCompoundTag;
 import dev.ftb.mods.ftbquests.FTBQuests;
 import dev.ftb.mods.ftbquests.events.QuestProgressEventData;
+import dev.ftb.mods.ftbquests.integration.PermissionsHelper;
 import dev.ftb.mods.ftbquests.net.*;
 import dev.ftb.mods.ftbquests.quest.reward.RewardType;
 import dev.ftb.mods.ftbquests.quest.reward.RewardTypes;
@@ -15,12 +16,12 @@ import dev.ftb.mods.ftbquests.quest.task.TaskType;
 import dev.ftb.mods.ftbquests.quest.task.TaskTypes;
 import dev.ftb.mods.ftbquests.util.FTBQuestsInventoryListener;
 import dev.ftb.mods.ftbquests.util.FileUtils;
-import dev.ftb.mods.ftbteams.FTBTeamsAPI;
+import dev.ftb.mods.ftbteams.api.FTBTeamsAPI;
+import dev.ftb.mods.ftbteams.api.event.PlayerChangedTeamEvent;
+import dev.ftb.mods.ftbteams.api.event.PlayerLoggedInAfterTeamEvent;
+import dev.ftb.mods.ftbteams.api.event.TeamCreatedEvent;
 import dev.ftb.mods.ftbteams.data.PartyTeam;
 import dev.ftb.mods.ftbteams.data.PlayerTeam;
-import dev.ftb.mods.ftbteams.event.PlayerChangedTeamEvent;
-import dev.ftb.mods.ftbteams.event.PlayerLoggedInAfterTeamEvent;
-import dev.ftb.mods.ftbteams.event.TeamCreatedEvent;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
@@ -33,10 +34,7 @@ import java.util.Date;
 import java.util.UUID;
 import java.util.stream.Stream;
 
-/**
- * @author LatvianModder
- */
-public class ServerQuestFile extends QuestFile {
+public class ServerQuestFile extends BaseQuestFile {
 	public static final LevelResource FTBQUESTS_DATA = new LevelResource("ftbquests");
 
 	public static ServerQuestFile INSTANCE;
@@ -55,8 +53,8 @@ public class ServerQuestFile extends QuestFile {
 		int taskTypeId = 0;
 
 		for (TaskType type : TaskTypes.TYPES.values()) {
-			type.intId = ++taskTypeId;
-			taskTypeIds.put(type.intId, type);
+			type.internalId = ++taskTypeId;
+			taskTypeIds.put(type.internalId, type);
 		}
 
 		int rewardTypeId = 0;
@@ -87,8 +85,7 @@ public class ServerQuestFile extends QuestFile {
 					if (nbt != null) {
 						try {
 							UUID uuid = UUIDTypeAdapter.fromString(nbt.getString("uuid"));
-							TeamData data = new TeamData(uuid);
-							data.file = this;
+							TeamData data = new TeamData(uuid, this);
 							addData(data, true);
 							data.deserializeNBT(nbt);
 						} catch (Exception ex) {
@@ -122,23 +119,19 @@ public class ServerQuestFile extends QuestFile {
 		QuestObjectBase object = getBase(id);
 
 		if (object != null) {
-			String file = object.getPath();
-
 			object.deleteChildren();
 			object.deleteSelf();
 			refreshIDMap();
-			save();
+			markDirty();
 
-			if (file != null) {
-				FileUtils.delete(getFolder().resolve(file).toFile());
-			}
+			getPath().ifPresent(path -> FileUtils.delete(getFolder().resolve(path).toFile()));
 		}
 
 		new DeleteObjectResponseMessage(id).sendToAll(server);
 	}
 
 	@Override
-	public void save() {
+	public void markDirty() {
 		shouldSave = true;
 	}
 
@@ -148,7 +141,7 @@ public class ServerQuestFile extends QuestFile {
 			shouldSave = false;
 		}
 
-		getAllData().forEach(TeamData::saveIfChanged);
+		getAllTeamData().forEach(TeamData::saveIfChanged);
 	}
 
 	public void unload() {
@@ -172,68 +165,54 @@ public class ServerQuestFile extends QuestFile {
 
 	public void playerLoggedIn(PlayerLoggedInAfterTeamEvent event) {
 		ServerPlayer player = event.getPlayer();
-		TeamData data = getData(event.getTeam());
+		TeamData data = getOrCreateTeamData(event.getTeam());
 
+		// Sync the quest book data
+		// - client will respond to this with a RequestTeamData message
+		// - server will only then send a SyncTeamData message to the client
 		new SyncQuestsMessage(this).sendTo(player);
 
-		for (TeamData teamData : teamDataMap.values()) {
-			new SyncTeamDataMessage(teamData, teamData == data).sendTo(player);
-		}
+		new SyncEditorPermissionMessage(PermissionsHelper.hasEditorPermission(player, false)).sendTo(player);
 
 		player.inventoryMenu.addSlotListener(new FTBQuestsInventoryListener(player));
 
 		if (!data.isLocked()) {
-			withPlayerContext(player, () -> {
-				for (ChapterGroup group : chapterGroups) {
-					for (Chapter chapter : group.chapters) {
-						for (Quest quest : chapter.quests) {
-							if (!data.isCompleted(quest) && quest.isCompletedRaw(data)) {
-								// Handles possible situation where quest book has been modified to remove a task from a quest
-								// It can leave a player having completed all the other tasks, but unable to complete the quest
-								//   since quests are normally marked completed when the last task in that quest is completed
-								// https://github.com/FTBBeta/Beta-Testing-Issues/issues/755
-								quest.onCompleted(new QuestProgressEventData<>(new Date(), data, quest, data.getOnlineMembers(), Collections.singletonList(player)));
-							}
-
-							data.checkAutoCompletion(quest);
-
-							if (data.canStartTasks(quest)) {
-								for (Task task : quest.tasks) {
-									if (task.checkOnLogin()) {
-										task.submitTask(data, player);
-									}
-								}
-							}
-						}
-					}
+			withPlayerContext(player, () -> forAllQuests(quest -> {
+				if (!data.isCompleted(quest) && quest.isCompletedRaw(data)) {
+					// Handles possible situation where quest book has been modified to remove a task from a quest
+					// It can leave a player having completed all the other tasks, but unable to complete the quest
+					//   since quests are normally marked completed when the last task in that quest is completed
+					// https://github.com/FTBBeta/Beta-Testing-Issues/issues/755
+					quest.onCompleted(new QuestProgressEventData<>(new Date(), data, quest, data.getOnlineMembers(), Collections.singletonList(player)));
 				}
-			});
+
+				data.checkAutoCompletion(quest);
+
+				if (data.canStartTasks(quest)) {
+					quest.getTasks().stream().filter(Task::checkOnLogin).forEach(task -> task.submitTask(data, player));
+				}
+			}));
 		}
 	}
 
 	public void teamCreated(TeamCreatedEvent event) {
 		UUID id = event.getTeam().getId();
-		TeamData data = teamDataMap.get(id);
 
-		if (data == null) {
-			data = new TeamData(id);
-			data.file = this;
-			data.markDirty();
-		}
+		TeamData data = teamDataMap.computeIfAbsent(id, k -> {
+			TeamData newTeamData = new TeamData(id, this);
+			newTeamData.markDirty();
+			return newTeamData;
+		});
 
-		String displayName = event.getTeam().getDisplayName();
-
-		if (!data.name.equals(displayName)) {
-			data.name = displayName;
-			data.markDirty();
-		}
+		data.setName(event.getTeam().getShortName());
 
 		addData(data, false);
 
 		if (event.getTeam() instanceof PartyTeam) {
-			PlayerTeam pt = event.getTeam().manager.getInternalPlayerTeam(event.getCreator().getUUID());
-			TeamData oldTeamData = getData(pt);
-			data.copyData(oldTeamData);
+			FTBTeamsAPI.api().getManager().getPlayerTeamForPlayerID(event.getCreator().getUUID()).ifPresent(playerTeam -> {
+				TeamData oldTeamData = getOrCreateTeamData(playerTeam);
+				data.copyData(oldTeamData);
+			});
 		}
 
 		TeamDataUpdate self = new TeamDataUpdate(data);
@@ -243,8 +222,8 @@ public class ServerQuestFile extends QuestFile {
 
 	public void playerChangedTeam(PlayerChangedTeamEvent event) {
 		if (event.getPreviousTeam().isPresent()) {
-			TeamData oldTeamData = getData(event.getPreviousTeam().get());
-			TeamData newTeamData = getData(event.getTeam());
+			TeamData oldTeamData = getOrCreateTeamData(event.getPreviousTeam().get());
+			TeamData newTeamData = getOrCreateTeamData(event.getTeam());
 
 			if (event.getPreviousTeam().get() instanceof PlayerTeam && event.getTeam() instanceof PartyTeam && !((PartyTeam) event.getTeam()).isOwner(event.getPlayerId())) {
 				newTeamData.mergeData(oldTeamData);
@@ -257,6 +236,19 @@ public class ServerQuestFile extends QuestFile {
 
 	@Override
 	public boolean isPlayerOnTeam(Player player, TeamData teamData) {
-		return FTBTeamsAPI.getPlayerTeamID(player.getUUID()).equals(teamData.uuid);
+		return FTBTeamsAPI.api().getManager().getTeamForPlayerID(player.getUUID())
+				.map(team -> team.getTeamId().equals(teamData.getTeamId()))
+				.orElse(false);
+	}
+
+	@Override
+	public boolean moveChapterGroup(long id, boolean movingUp) {
+		if (super.moveChapterGroup(id, movingUp)) {
+			markDirty();
+			clearCachedData();
+			new MoveChapterGroupResponseMessage(id, movingUp).sendToAll(server);
+			return true;
+		}
+		return false;
 	}
 }

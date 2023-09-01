@@ -1,17 +1,16 @@
 package dev.ftb.mods.ftbquests.block;
 
 import dev.architectury.injectables.annotations.ExpectPlatform;
-import dev.ftb.mods.ftbquests.FTBQuests;
 import dev.ftb.mods.ftbquests.block.entity.ITaskScreen;
 import dev.ftb.mods.ftbquests.block.entity.TaskScreenAuxBlockEntity;
 import dev.ftb.mods.ftbquests.block.entity.TaskScreenBlockEntity;
+import dev.ftb.mods.ftbquests.client.FTBQuestsClient;
 import dev.ftb.mods.ftbquests.item.ScreenBlockItem;
 import dev.ftb.mods.ftbquests.net.TaskScreenConfigRequest;
-import dev.ftb.mods.ftbquests.quest.QuestFile;
+import dev.ftb.mods.ftbquests.quest.BaseQuestFile;
 import dev.ftb.mods.ftbquests.quest.ServerQuestFile;
 import dev.ftb.mods.ftbquests.quest.task.Task;
-import dev.ftb.mods.ftbteams.FTBTeamsAPI;
-import dev.ftb.mods.ftbteams.data.Team;
+import dev.ftb.mods.ftbteams.api.FTBTeamsAPI;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -38,19 +37,19 @@ import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.DirectionProperty;
-import net.minecraft.world.level.material.Material;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.BlockHitResult;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
+import java.util.Objects;
 
 public class TaskScreenBlock extends BaseEntityBlock {
     public static final DirectionProperty FACING = HorizontalDirectionalBlock.FACING;
     private final int size;
 
     protected TaskScreenBlock(int size) {
-        super(Properties.of(Material.METAL, DyeColor.BLACK).strength(0.3f));
+        super(Properties.of().mapColor(DyeColor.BLACK).strength(0.3f));
         this.size = size;
 
         registerDefaultState(getStateDefinition().any().setValue(FACING, Direction.NORTH));
@@ -113,7 +112,7 @@ public class TaskScreenBlock extends BaseEntityBlock {
 
         if (level.getBlockEntity(blockPos) instanceof TaskScreenBlockEntity coreScreen) {
             if (livingEntity instanceof ServerPlayer sp) {
-                coreScreen.setTeamId(ServerQuestFile.INSTANCE.getData(sp).uuid);
+                coreScreen.setTeamId(ServerQuestFile.INSTANCE.getOrCreateTeamData(sp).getTeamId());
             }
 
             Direction facing = blockState.getValue(FACING);
@@ -146,7 +145,7 @@ public class TaskScreenBlock extends BaseEntityBlock {
 
     @Override
     public float getDestroyProgress(BlockState blockState, Player player, BlockGetter blockGetter, BlockPos blockPos) {
-        if (player.level.getBlockEntity(blockPos) instanceof ITaskScreen taskScreen && taskScreen.isIndestructible()) {
+        if (player.level().getBlockEntity(blockPos) instanceof ITaskScreen taskScreen && taskScreen.isIndestructible()) {
             return 0f;
         }
         return super.getDestroyProgress(blockState, player, blockGetter, blockPos);
@@ -170,14 +169,15 @@ public class TaskScreenBlock extends BaseEntityBlock {
         super.appendHoverText(itemStack, blockGetter, list, tooltipFlag);
 
         if (itemStack.getTag() != null && itemStack.getTag().contains("BlockEntityTag", Tag.TAG_COMPOUND)) {
-            CompoundTag subTag = itemStack.getTagElement("BlockEntityTag");
-            QuestFile questFile = FTBQuests.PROXY.getQuestFile(true);
+            CompoundTag subTag = Objects.requireNonNull(itemStack.getTagElement("BlockEntityTag"));
+            BaseQuestFile questFile = FTBQuestsClient.getClientQuestFile();
             if (questFile != null) {
                 Task task = questFile.getTask(subTag.getLong("TaskID"));
                 if (task != null) {
-                    list.add(Component.translatable("ftbquests.chapter").append(": ").append(task.quest.chapter.getTitle().copy().withStyle(ChatFormatting.YELLOW)));
-                    list.add(Component.translatable("ftbquests.quest").append(": ").append(task.quest.getTitle().copy().withStyle(ChatFormatting.YELLOW)));
-                    list.add(Component.translatable("ftbquests.task").append(": ").append(task.getTitle().copy().withStyle(ChatFormatting.YELLOW)));
+                    list.add(Component.translatable("ftbquests.chapter").append(": ")
+                            .append(task.getQuest().getChapter().getTitle().copy().withStyle(ChatFormatting.YELLOW)));
+                    list.add(Component.translatable("ftbquests.quest").append(": ").append(task.getQuest().getMutableTitle().withStyle(ChatFormatting.YELLOW)));
+                    list.add(Component.translatable("ftbquests.task").append(": ").append(task.getMutableTitle().withStyle(ChatFormatting.YELLOW)));
                 }
             }
         }
@@ -190,8 +190,9 @@ public class TaskScreenBlock extends BaseEntityBlock {
         }
 
         // ...or in the same team as the owner of the screen
-        Team team = FTBTeamsAPI.getManager().getTeamByID(screen.getTeamId());
-        return team != null && team.isMember(player.getUUID());
+        return FTBTeamsAPI.api().getManager().getTeamByID(screen.getTeamId())
+                .map(team -> team.getRankForPlayer(player.getUUID()).isMemberOrBetter())
+                .orElse(false);
     }
 
     /**

@@ -13,13 +13,25 @@ public enum DependencyRequirement {
 
 	public static final NameMap<DependencyRequirement> NAME_MAP = NameMap.of(ALL_COMPLETED, values()).id(v -> v.id).baseNameKey("ftbquests.quest.dependency_requirement").create();
 
-	public final String id;
-	public final boolean one;
-	public final boolean completed;
+	private final String id;
+	private final boolean needOne;
+	private final boolean completed;
 
-	DependencyRequirement(String s, boolean o, boolean c) {
-		id = s;
-		one = o;
-		completed = c;
+	DependencyRequirement(String id, boolean needOne, boolean completed) {
+		this.id = id;
+		this.needOne = needOne;
+		this.completed = completed;
+	}
+
+	public String getId() {
+		return id;
+	}
+
+	public boolean needOnlyOne() {
+		return needOne;
+	}
+
+	public boolean needCompletion() {
+		return completed;
 	}
 }

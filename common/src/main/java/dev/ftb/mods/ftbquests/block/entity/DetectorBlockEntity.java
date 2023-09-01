@@ -13,12 +13,9 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.AABB;
 
-/**
- * @author LatvianModder
- */
 public class DetectorBlockEntity extends BlockEntity {
-	public long object = 0L;
-	public int radius = 8;
+	private long objectId = 0L;
+	private int radius = 8;
 
 	public DetectorBlockEntity(BlockPos blockPos, BlockState blockState) {
 		super(FTBQuestsBlockEntities.DETECTOR.get(), blockPos, blockState);
@@ -28,46 +25,32 @@ public class DetectorBlockEntity extends BlockEntity {
 	public void load(CompoundTag tag) {
 		super.load(tag);
 
-		object = QuestObjectBase.parseCodeString(tag.getString("Object"));
-
-		if (object == 0L) {
-			object = tag.getLong("object");
-		}
-
+		objectId = QuestObjectBase.parseCodeString(tag.getString("Object"));
 		radius = tag.getInt("Radius");
 	}
 
 	@Override
 	public void saveAdditional(CompoundTag tag) {
-		tag.putString("Object", QuestObjectBase.getCodeString(object));
+		tag.putString("Object", QuestObjectBase.getCodeString(objectId));
 		tag.putInt("Radius", radius);
 	}
 
-	public void update(String s) {
-		object = ServerQuestFile.INSTANCE.getID(s);
+	public void update(String idStr) {
+		objectId = ServerQuestFile.INSTANCE.getID(idStr);
 	}
 
-	private static boolean isReal(ServerPlayer p) {
-		return !PlayerHooks.isFake(p);
+	private static boolean isRealPlayer(ServerPlayer player) {
+		return !PlayerHooks.isFake(player);
 	}
 
-	public void powered(Level level, BlockPos p) {
-		QuestObjectBase o = ServerQuestFile.INSTANCE.getBase(object);
-
-		if (o == null) {
-			return;
-		}
-
-		ProgressChange change = new ProgressChange(ServerQuestFile.INSTANCE);
-		change.origin = o;
-		change.reset = false;
-		change.notifications = true;
-
-		for (ServerPlayer player : level.getEntitiesOfClass(ServerPlayer.class, new AABB(p.getX() - radius, p.getY() - radius, p.getZ() - radius, p.getX() + 1D + radius, p.getY() + 1D + radius, p.getZ() + 1D + radius), DetectorBlockEntity::isReal)) {
-			TeamData data = ServerQuestFile.INSTANCE.getData(player);
-
-			change.player = player.getUUID();
-			o.forceProgressRaw(data, change);
+	public void onPowered(Level level, BlockPos pos) {
+		QuestObjectBase qo = ServerQuestFile.INSTANCE.getBase(objectId);
+		if (qo != null) {
+			AABB box = new AABB(pos).inflate(radius);
+			for (ServerPlayer player : level.getEntitiesOfClass(ServerPlayer.class, box, DetectorBlockEntity::isRealPlayer)) {
+				TeamData data = ServerQuestFile.INSTANCE.getOrCreateTeamData(player);
+				qo.forceProgressRaw(data, new ProgressChange(ServerQuestFile.INSTANCE, qo, player.getUUID()).setReset(false).withNotifications());
+			}
 		}
 	}
 }

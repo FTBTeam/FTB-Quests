@@ -1,14 +1,12 @@
 package dev.ftb.mods.ftbquests.item;
 
-import dev.ftb.mods.ftbquests.FTBQuests;
 import dev.ftb.mods.ftbquests.client.ClientQuestFile;
-import dev.ftb.mods.ftbquests.gui.RewardNotificationsScreen;
+import dev.ftb.mods.ftbquests.client.gui.RewardNotificationsScreen;
 import dev.ftb.mods.ftbquests.quest.loot.LootCrate;
 import dev.ftb.mods.ftbquests.quest.loot.WeightedReward;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.ChatFormatting;
-import net.minecraft.core.NonNullList;
 import net.minecraft.core.particles.ItemParticleOption;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.chat.Component;
@@ -19,7 +17,10 @@ import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.InteractionResultHolder;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.item.*;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Rarity;
+import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
@@ -31,7 +32,7 @@ import java.util.List;
  */
 public class LootCrateItem extends Item {
 	public LootCrateItem() {
-		super(new Properties().tab(FTBQuests.ITEM_GROUP));
+		super(FTBQuestsItems.defaultProps());
 	}
 
 	@Nullable
@@ -49,14 +50,14 @@ public class LootCrateItem extends Item {
 		LootCrate crate = getCrate(stack);
 
 		if (crate == null) {
-			return new InteractionResultHolder<>(InteractionResult.SUCCESS, stack);
+			return new InteractionResultHolder<>(InteractionResult.FAIL, stack);
 		}
 
-		int size = player.isCrouching() ? stack.getCount() : 1;
+		int nItems = player.isCrouching() ? stack.getCount() : 1;
 
 		if (!world.isClientSide) {
-			for (WeightedReward reward : crate.table.generateWeightedRandomRewards(player.getRandom(), crate.table.lootSize * size, true)) {
-				reward.reward.claim((ServerPlayer) player, true);
+			for (WeightedReward wr : crate.getTable().generateWeightedRandomRewards(player.getRandom(), nItems, true)) {
+				wr.getReward().claim((ServerPlayer) player, true);
 			}
 
 			world.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.ITEM_BREAK, SoundSource.PLAYERS, 0.8F, 0.8F + world.random.nextFloat() * 0.4F);
@@ -76,34 +77,25 @@ public class LootCrateItem extends Item {
 			}
 		}
 
-		stack.shrink(size);
+		stack.shrink(nItems);
 		return new InteractionResultHolder<>(InteractionResult.SUCCESS, stack);
 	}
 
 	@Override
 	public boolean isFoil(ItemStack stack) {
 		LootCrate crate = getCrate(stack);
-		return crate != null && crate.glow;
+		return crate != null && crate.isGlow();
 	}
 
 	@Override
 	public Component getName(ItemStack stack) {
 		LootCrate crate = getCrate(stack);
-		return crate != null && !crate.itemName.isEmpty() ? Component.translatable(crate.itemName) : super.getName(stack);
+		return crate != null && !crate.getItemName().isEmpty() ? Component.translatable(crate.getItemName()) : super.getName(stack);
 	}
 
 	@Override
 	public Rarity getRarity(ItemStack stack) {
 		return Rarity.UNCOMMON;
-	}
-
-	@Override
-	public void fillItemCategory(CreativeModeTab tab, NonNullList<ItemStack> items) {
-		if (allowedIn(tab)) {
-			for (LootCrate lootCrate : LootCrate.LOOT_CRATES.values()) {
-				items.add(lootCrate.createStack());
-			}
-		}
 	}
 
 	@Override
@@ -119,9 +111,9 @@ public class LootCrateItem extends Item {
 		LootCrate crate = getCrate(stack);
 
 		if (crate != null) {
-			if (crate.itemName.isEmpty()) {
+			if (crate.getItemName().isEmpty()) {
 				tooltip.add(Component.empty());
-				tooltip.add(crate.table.getMutableTitle().withStyle(ChatFormatting.GRAY));
+				tooltip.add(crate.getTable().getMutableTitle().withStyle(ChatFormatting.GRAY));
 			}
 		} else if (stack.hasTag() && stack.getTag().contains("type")) {
 			tooltip.add(Component.empty());

@@ -3,12 +3,9 @@ package dev.ftb.mods.ftbquests.net;
 import dev.architectury.networking.NetworkManager;
 import dev.architectury.networking.simple.BaseS2CMessage;
 import dev.architectury.networking.simple.MessageType;
-import dev.ftb.mods.ftbquests.FTBQuests;
+import dev.ftb.mods.ftbquests.client.FTBQuestsNetClient;
 import net.minecraft.network.FriendlyByteBuf;
 
-/**
- * @author LatvianModder
- */
 public class ChangeChapterGroupResponseMessage extends BaseS2CMessage {
 	private final long id;
 	private final long group;
@@ -36,6 +33,6 @@ public class ChangeChapterGroupResponseMessage extends BaseS2CMessage {
 
 	@Override
 	public void handle(NetworkManager.PacketContext context) {
-		FTBQuests.NET_PROXY.changeChapterGroup(id, group);
+		FTBQuestsNetClient.changeChapterGroup(id, group);
 	}
 }

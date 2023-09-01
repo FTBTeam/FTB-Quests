@@ -13,12 +13,11 @@ import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
-import net.minecraft.world.level.material.Material;
 import org.jetbrains.annotations.Nullable;
 
 public class DetectorBlock extends BaseEntityBlock {
 	public DetectorBlock() {
-		super(BlockBehaviour.Properties.of(Material.STONE).strength(0.3F));
+		super(BlockBehaviour.Properties.of().strength(0.3F));
 		registerDefaultState(stateDefinition.any().setValue(BlockStateProperties.POWERED, false));
 	}
 
@@ -35,17 +34,14 @@ public class DetectorBlock extends BaseEntityBlock {
 
 	@Override
 	public void neighborChanged(BlockState blockState, Level level, BlockPos blockPos, Block block, BlockPos blockPos2, boolean bl) {
-		if (!level.isClientSide) {
-			boolean bl2 = blockState.getValue(BlockStateProperties.POWERED);
+		if (!level.isClientSide()) {
+			boolean wasPowered = blockState.getValue(BlockStateProperties.POWERED);
 
-			if (bl2 != level.hasNeighborSignal(blockPos)) {
-				level.setBlock(blockPos, blockState.setValue(BlockStateProperties.POWERED, !bl2), 2);
-
-				if (!bl2) {
-					BlockEntity blockEntity = level.getBlockEntity(blockPos);
-
-					if (blockEntity instanceof DetectorBlockEntity) {
-						((DetectorBlockEntity) blockEntity).powered(level, blockPos);
+			if (wasPowered != level.hasNeighborSignal(blockPos)) {
+				level.setBlock(blockPos, blockState.setValue(BlockStateProperties.POWERED, !wasPowered), Block.UPDATE_CLIENTS);
+				if (!wasPowered) {
+					if (level.getBlockEntity(blockPos) instanceof DetectorBlockEntity dbe) {
+						dbe.onPowered(level, blockPos);
 					}
 				}
 			}
@@ -56,12 +52,8 @@ public class DetectorBlock extends BaseEntityBlock {
 	public void setPlacedBy(Level level, BlockPos pos, BlockState state, @Nullable LivingEntity entity, ItemStack stack) {
 		super.setPlacedBy(level, pos, state, entity, stack);
 
-		if (!level.isClientSide() && stack.hasCustomHoverName()) {
-			BlockEntity blockEntity = level.getBlockEntity(pos);
-
-			if (blockEntity instanceof DetectorBlockEntity) {
-				((DetectorBlockEntity) blockEntity).update(stack.getHoverName().getString());
-			}
+		if (!level.isClientSide() && stack.hasCustomHoverName() && level.getBlockEntity(pos) instanceof DetectorBlockEntity dbe) {
+			dbe.update(stack.getHoverName().getString());
 		}
 	}
 

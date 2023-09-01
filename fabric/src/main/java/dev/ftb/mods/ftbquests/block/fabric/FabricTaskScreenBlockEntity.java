@@ -46,14 +46,14 @@ public class FabricTaskScreenBlockEntity extends TaskScreenBlockEntity {
 
         @Override
         protected long getCapacity(ItemVariant variant) {
-            return getTask() instanceof ItemTask t ? t.count : 0L;
+            return getTask() instanceof ItemTask t ? t.getMaxProgress() : 0L;
         }
 
         @Override
         public long insert(ItemVariant insertedVariant, long maxAmount, TransactionContext transaction) {
             TeamData data = getCachedTeamData();
             ItemStack stack = insertedVariant.toStack();
-            if (getTask() instanceof ItemTask task && data.canStartTasks(task.quest)) {
+            if (getTask() instanceof ItemTask task && data.canStartTasks(task.getQuest())) {
                 // task.insert() handles testing the item is valid and the task isn't already completed
                 ItemStack res = task.insert(data, stack, true);
                 int nAdded = stack.getCount() - res.getCount();
@@ -69,9 +69,9 @@ public class FabricTaskScreenBlockEntity extends TaskScreenBlockEntity {
 
         @Override
         public long extract(ItemVariant extractedVariant, long maxAmount, TransactionContext transaction) {
-            if (!isInputOnly() && getTask() instanceof ItemTask task && !ItemFiltersAPI.isFilter(task.item)) {
+            if (!isInputOnly() && getTask() instanceof ItemTask task && !ItemFiltersAPI.isFilter(task.getItemStack())) {
                 TeamData data = getCachedTeamData();
-                if (data != null && data.canStartTasks(task.quest) && !data.isCompleted(task)) {
+                if (data != null && data.canStartTasks(task.getQuest()) && !data.isCompleted(task)) {
                     int itemsRemoved = (int) Math.min(data.getProgress(task), maxAmount);
                     updateSnapshots(transaction);
                     transaction.addCloseCallback((transaction1, result) -> {
@@ -90,7 +90,7 @@ public class FabricTaskScreenBlockEntity extends TaskScreenBlockEntity {
 
         @Override
         public ItemVariant getResource() {
-            return getTask() instanceof ItemTask t ? ItemVariant.of(t.item) : getBlankVariant();
+            return getTask() instanceof ItemTask t ? ItemVariant.of(t.getItemStack()) : getBlankVariant();
         }
     }
 
@@ -102,14 +102,14 @@ public class FabricTaskScreenBlockEntity extends TaskScreenBlockEntity {
 
         @Override
         protected long getCapacity(FluidVariant variant) {
-            return getTask() instanceof FluidTask t ? t.amount : 0L;
+            return getTask() instanceof FluidTask t ? t.getMaxProgress() : 0L;
         }
 
         @Override
         public long insert(FluidVariant insertedVariant, long maxAmount, TransactionContext transaction) {
             if (getTask() instanceof FluidTask task) {
                 TeamData data = getCachedTeamData();
-                if (data != null && data.canStartTasks(task.quest) && !data.isCompleted(task)) {
+                if (data != null && data.canStartTasks(task.getQuest()) && !data.isCompleted(task)) {
                     updateSnapshots(transaction);
                     long space = task.getMaxProgress() - data.getProgress(task);
                     long toAdd = Math.min(maxAmount, space);
@@ -126,7 +126,7 @@ public class FabricTaskScreenBlockEntity extends TaskScreenBlockEntity {
         public long extract(FluidVariant extractedVariant, long maxAmount, TransactionContext transaction) {
             if (getTask() instanceof FluidTask task) {
                 TeamData data = getCachedTeamData();
-                if (data != null && data.canStartTasks(task.quest) && !data.isCompleted(task)) {
+                if (data != null && data.canStartTasks(task.getQuest()) && !data.isCompleted(task)) {
                     long toTake = Math.min(maxAmount, data.getProgress(task));
                     updateSnapshots(transaction);
                     transaction.addCloseCallback((transaction1, result) -> {
@@ -145,7 +145,7 @@ public class FabricTaskScreenBlockEntity extends TaskScreenBlockEntity {
 
         @Override
         public FluidVariant getResource() {
-            return getTask() instanceof FluidTask t ? FluidVariant.of(t.fluid, t.fluidNBT) : getBlankVariant();
+            return getTask() instanceof FluidTask t ? FluidVariant.of(t.getFluid(), t.getFluidNBT()) : getBlankVariant();
         }
     }
 
@@ -154,9 +154,9 @@ public class FabricTaskScreenBlockEntity extends TaskScreenBlockEntity {
         public long insert(long maxAmount, TransactionContext transaction) {
             if (getTask() instanceof EnergyTask task) {
                 TeamData data = getCachedTeamData();
-                if (data != null && data.canStartTasks(task.quest) && !data.isCompleted(task)) {
+                if (data != null && data.canStartTasks(task.getQuest()) && !data.isCompleted(task)) {
                     long space = task.getMaxProgress() - data.getProgress(task);
-                    long toAdd = Math.min(task.maxInput, Math.min(maxAmount, space));
+                    long toAdd = Math.min(task.getMaxInput(), Math.min(maxAmount, space));
                     transaction.addCloseCallback((transaction1, result) -> {
                         if (result.wasCommitted()) data.addProgress(task, toAdd);
                     });
@@ -183,7 +183,7 @@ public class FabricTaskScreenBlockEntity extends TaskScreenBlockEntity {
 
         @Override
         public long getCapacity() {
-            return getTask() instanceof EnergyTask t ? t.value : 0L;
+            return getTask() instanceof EnergyTask t ? t.getValue() : 0L;
         }
     }
 }

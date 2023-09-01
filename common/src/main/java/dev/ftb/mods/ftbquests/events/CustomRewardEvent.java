@@ -11,14 +11,15 @@ import net.minecraft.server.level.ServerPlayer;
  */
 public class CustomRewardEvent {
 	public static final Event<EventActor<CustomRewardEvent>> EVENT = EventFactory.createEventActorLoop();
+
 	private final CustomReward reward;
 	private final ServerPlayer player;
 	private final boolean notify;
 
-	public CustomRewardEvent(CustomReward r, ServerPlayer p, boolean n) {
-		reward = r;
-		player = p;
-		notify = n;
+	public CustomRewardEvent(CustomReward reward, ServerPlayer player, boolean notify) {
+		this.reward = reward;
+		this.player = player;
+		this.notify = notify;
 	}
 
 	public CustomReward getReward() {

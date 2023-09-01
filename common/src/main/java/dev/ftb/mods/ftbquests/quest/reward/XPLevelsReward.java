@@ -13,19 +13,16 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.server.level.ServerPlayer;
 
-/**
- * @author LatvianModder
- */
 public class XPLevelsReward extends Reward {
-	public int xpLevels;
+	private int xpLevels;
 
-	public XPLevelsReward(Quest quest, int x) {
-		super(quest);
+	public XPLevelsReward(long id, Quest quest, int x) {
+		super(id, quest);
 		xpLevels = x;
 	}
 
-	public XPLevelsReward(Quest quest) {
-		this(quest, 5);
+	public XPLevelsReward(long id, Quest quest) {
+		this(id, quest, 5);
 	}
 
 	@Override
@@ -59,8 +56,8 @@ public class XPLevelsReward extends Reward {
 
 	@Override
 	@Environment(EnvType.CLIENT)
-	public void getConfig(ConfigGroup config) {
-		super.getConfig(config);
+	public void fillConfigGroup(ConfigGroup config) {
+		super.fillConfigGroup(config);
 		config.addInt("xp_levels", xpLevels, v -> xpLevels = v, 1, 1, Integer.MAX_VALUE).setNameKey("ftbquests.reward.ftbquests.xp_levels");
 	}
 
@@ -69,7 +66,7 @@ public class XPLevelsReward extends Reward {
 		player.giveExperienceLevels(xpLevels);
 
 		if (notify) {
-			new DisplayRewardToastMessage(id, Component.translatable("ftbquests.reward.ftbquests.xp_levels").append(": ").append(Component.literal("+" + xpLevels).withStyle(ChatFormatting.GREEN)), Color4I.EMPTY).sendTo(player);
+			new DisplayRewardToastMessage(id, Component.translatable("ftbquests.reward.ftbquests.xp_levels").append(": ").append(Component.literal("+" + xpLevels).withStyle(ChatFormatting.GREEN)), Color4I.empty()).sendTo(player);
 		}
 	}
 

@@ -4,12 +4,9 @@ import dev.ftb.mods.ftbquests.events.CustomRewardEvent;
 import dev.ftb.mods.ftbquests.quest.Quest;
 import net.minecraft.server.level.ServerPlayer;
 
-/**
- * @author LatvianModder
- */
 public class CustomReward extends Reward {
-	public CustomReward(Quest quest) {
-		super(quest);
+	public CustomReward(long id, Quest quest) {
+		super(id, quest);
 	}
 
 	@Override

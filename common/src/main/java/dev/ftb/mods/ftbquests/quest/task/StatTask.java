@@ -6,7 +6,7 @@ import dev.ftb.mods.ftbquests.quest.Quest;
 import dev.ftb.mods.ftbquests.quest.TeamData;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.core.Registry;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.Component;
@@ -23,11 +23,11 @@ import java.util.List;
  * @author LatvianModder
  */
 public class StatTask extends Task {
-	public ResourceLocation stat;
-	public int value = 1;
+	private ResourceLocation stat;
+	private int value = 1;
 
-	public StatTask(Quest quest) {
-		super(quest);
+	public StatTask(long id, Quest quest) {
+		super(id, quest);
 		stat = Stats.MOB_KILLS;
 	}
 
@@ -81,8 +81,8 @@ public class StatTask extends Task {
 
 	@Override
 	@Environment(EnvType.CLIENT)
-	public void getConfig(ConfigGroup config) {
-		super.getConfig(config);
+	public void fillConfigGroup(ConfigGroup config) {
+		super.fillConfigGroup(config);
 
 		List<ResourceLocation> list = new ArrayList<>();
 		Stats.CUSTOM.iterator().forEachRemaining(s -> list.add(s.getValue()));
@@ -107,11 +107,11 @@ public class StatTask extends Task {
 			return;
 		}
 
-		ResourceLocation statId = Registry.CUSTOM_STAT.get(stat);
+		ResourceLocation statId = BuiltInRegistries.CUSTOM_STAT.get(stat);
 
 		// workaround for a bug where mods might register a modded stat in the vanilla namespace
 		//  https://github.com/FTBTeam/FTB-Mods-Issues/issues/724
-		if (statId == null) statId = Registry.CUSTOM_STAT.get(new ResourceLocation(stat.getPath()));
+		if (statId == null) statId = BuiltInRegistries.CUSTOM_STAT.get(new ResourceLocation(stat.getPath()));
 
 		if (statId != null) {
 			// could be null, if someone brought an FTB Quests save from a different world and the stat's missing here

@@ -2,9 +2,6 @@ package dev.ftb.mods.ftbquests.quest;
 
 import dev.ftb.mods.ftblibrary.config.NameMap;
 
-/**
- * @author LatvianModder
- */
 public enum ChangeProgress {
 	RESET("reset", true),
 	COMPLETE("complete", false);
@@ -14,9 +11,9 @@ public enum ChangeProgress {
 	public final String id;
 	public final boolean reset, complete;
 
-	ChangeProgress(String n, boolean r) {
-		id = n;
-		reset = r;
-		complete = !r;
+	ChangeProgress(String id, boolean reset) {
+		this.id = id;
+		this.reset = reset;
+		complete = !reset;
 	}
 }

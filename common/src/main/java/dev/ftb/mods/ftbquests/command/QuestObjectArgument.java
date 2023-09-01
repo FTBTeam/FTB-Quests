@@ -10,7 +10,7 @@ import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 import dev.ftb.mods.ftbquests.client.ClientQuestFile;
-import dev.ftb.mods.ftbquests.quest.QuestFile;
+import dev.ftb.mods.ftbquests.quest.BaseQuestFile;
 import dev.ftb.mods.ftbquests.quest.QuestObjectBase;
 import dev.ftb.mods.ftbquests.quest.ServerQuestFile;
 import net.minecraft.commands.SharedSuggestionProvider;
@@ -40,11 +40,12 @@ public class QuestObjectArgument implements ArgumentType<QuestObjectBase> {
 	@Override
 	public QuestObjectBase parse(StringReader reader) throws CommandSyntaxException {
 		String id = reader.readString();
-		QuestFile file = findQuestFile();
+		BaseQuestFile file = findQuestFile();
 		if (file != null) {
 			if (id.startsWith("#")) {
+				String val = id.substring(1);
 				for (QuestObjectBase object : file.getAllObjects()) {
-					if (object.hasTag(id.substring(1))) {
+					if (object.hasTag(val)) {
 						return object;
 					}
 				}
@@ -67,12 +68,12 @@ public class QuestObjectArgument implements ArgumentType<QuestObjectBase> {
 
 	@Override
 	public <S> CompletableFuture<Suggestions> listSuggestions(CommandContext<S> context, SuggestionsBuilder builder) {
-		QuestFile file = findQuestFile();
+		BaseQuestFile file = findQuestFile();
 		if (file != null) {
 			return SharedSuggestionProvider.suggest(
 					file.getAllObjects()
 							.stream()
-							.map(QuestFile::getCodeString),
+							.map(BaseQuestFile::getCodeString),
 					builder
 			);
 		}
@@ -89,7 +90,7 @@ public class QuestObjectArgument implements ArgumentType<QuestObjectBase> {
 	}
 
 	@Nullable
-	private static QuestFile findQuestFile() {
+	private static BaseQuestFile findQuestFile() {
 		if (!QuestObjectBase.isNull(ServerQuestFile.INSTANCE)) {
 			return ServerQuestFile.INSTANCE;
 		} else if (!QuestObjectBase.isNull(ClientQuestFile.INSTANCE)) {

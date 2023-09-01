@@ -1,12 +1,16 @@
 package dev.ftb.mods.ftbquests.quest.theme.property;
 
 import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.*;
+import com.mojang.blaze3d.vertex.BufferBuilder;
+import com.mojang.blaze3d.vertex.DefaultVertexFormat;
+import com.mojang.blaze3d.vertex.Tesselator;
+import com.mojang.blaze3d.vertex.VertexFormat;
 import com.mojang.datafixers.util.Either;
-import com.mojang.math.Matrix4f;
 import dev.ftb.mods.ftblibrary.icon.Color4I;
 import dev.ftb.mods.ftblibrary.icon.Icon;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.renderer.GameRenderer;
+import org.joml.Matrix4f;
 
 /**
  * @author LatvianModder
@@ -41,9 +45,8 @@ public interface ThemeProperties {
 	IconProperty CHECK_ICON = new IconProperty("check_icon", new CheckIcon(ThemeProperties.SYMBOL_OUT, ThemeProperties.SYMBOL_IN));
 	IconProperty ADD_ICON = new IconProperty("add_icon", new Icon() {
 		@Override
-		public void draw(PoseStack matrixStack, int x, int y, int w, int h) {
-			RenderSystem.disableTexture();
-			Matrix4f m = matrixStack.last().pose();
+		public void draw(GuiGraphics graphics, int x, int y, int w, int h) {
+			Matrix4f m = graphics.pose().last().pose();
 			Tesselator tesselator = Tesselator.getInstance();
 			BufferBuilder buffer = tesselator.getBuilder();
 
@@ -88,7 +91,6 @@ public interface ThemeProperties {
 			buffer.vertex(m, x + dw * 13, y + dh * 7, 0).color(r, g, b, a).endVertex();
 
 			tesselator.end();
-			RenderSystem.enableTexture();
 		}
 
 		public int hashCode() {
@@ -112,6 +114,7 @@ public interface ThemeProperties {
 	IconProperty LINK_ICON = new IconProperty("link_icon");
 	IconProperty SAVE_ICON = new IconProperty("save_icon");
 	IconProperty SETTINGS_ICON = new IconProperty("settings_icon");
+	IconProperty PREFS_ICON = new IconProperty("prefs_icon");
 	IconProperty CLOSE_ICON = new IconProperty("close_icon");
 	IconProperty EMERGENCY_ITEMS_ICON = new IconProperty("emergency_items_icon");
 	IconProperty GUIDE_ICON = new IconProperty("guide_icon");
@@ -170,9 +173,8 @@ public interface ThemeProperties {
 		}
 
 		@Override
-		public void draw(PoseStack matrixStack, int x, int y, int w, int h) {
-			RenderSystem.disableTexture();
-			Matrix4f m = matrixStack.last().pose();
+		public void draw(GuiGraphics graphics, int x, int y, int w, int h) {
+			Matrix4f m = graphics.pose().last().pose();
 			Tesselator tesselator = Tesselator.getInstance();
 			BufferBuilder buffer = tesselator.getBuilder();
 
@@ -216,7 +218,6 @@ public interface ThemeProperties {
 			buffer.vertex(m, x + dw * 13, y + dh * 1 + dh, 0).color(r, g, b, a).endVertex();
 
 			tesselator.end();
-			RenderSystem.enableTexture();
 		}
 
 		public int hashCode() {

@@ -2,7 +2,7 @@ package dev.ftb.mods.ftbquests.quest.reward;
 
 import dev.ftb.mods.ftblibrary.ui.Button;
 import dev.ftb.mods.ftblibrary.util.TooltipList;
-import dev.ftb.mods.ftbquests.gui.SelectChoiceRewardScreen;
+import dev.ftb.mods.ftbquests.client.gui.SelectChoiceRewardScreen;
 import dev.ftb.mods.ftbquests.quest.Quest;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -15,12 +15,9 @@ import org.jetbrains.annotations.Nullable;
 import java.util.List;
 import java.util.UUID;
 
-/**
- * @author LatvianModder
- */
 public class ChoiceReward extends RandomReward {
-	public ChoiceReward(Quest quest) {
-		super(quest);
+	public ChoiceReward(long id, Quest quest) {
+		super(id, quest);
 	}
 
 	@Override

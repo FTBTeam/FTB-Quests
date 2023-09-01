@@ -17,15 +17,12 @@ import net.minecraft.network.chat.ComponentContents;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 
-/**
- * @author LatvianModder
- */
 public class AdvancementReward extends Reward {
-	public ResourceLocation advancement;
-	public String criterion;
+	private ResourceLocation advancement;
+	private String criterion;
 
-	public AdvancementReward(Quest quest) {
-		super(quest);
+	public AdvancementReward(long id, Quest quest) {
+		super(id, quest);
 		advancement = new ResourceLocation("minecraft:story/root");
 		criterion = "";
 	}
@@ -65,8 +62,8 @@ public class AdvancementReward extends Reward {
 
 	@Override
 	@Environment(EnvType.CLIENT)
-	public void getConfig(ConfigGroup config) {
-		super.getConfig(config);
+	public void fillConfigGroup(ConfigGroup config) {
+		super.fillConfigGroup(config);
 
 		if (KnownServerRegistries.client != null && !KnownServerRegistries.client.advancements.isEmpty()) {
 			config.addEnum("advancement", advancement, v -> advancement = v, NameMap.of(KnownServerRegistries.client.advancements.keySet().iterator().next(), KnownServerRegistries.client.advancements.keySet().toArray(new ResourceLocation[0]))

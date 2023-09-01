@@ -21,8 +21,8 @@ import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.BooleanProperty;
-import net.minecraft.world.level.material.Material;
-import net.minecraft.world.level.material.MaterialColor;
+import net.minecraft.world.level.material.MapColor;
+import net.minecraft.world.level.material.PushReaction;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
@@ -32,7 +32,9 @@ public class QuestBarrierBlock extends BaseEntityBlock {
 	public static final BooleanProperty OPEN = BooleanProperty.create("open");
 
 	protected QuestBarrierBlock() {
-		super(Properties.of(Material.BARRIER, MaterialColor.COLOR_LIGHT_BLUE)
+		super(Properties.of()
+				.mapColor(MapColor.COLOR_LIGHT_BLUE)
+				.pushReaction(PushReaction.BLOCK)
 				.noOcclusion()
 				.isViewBlocking((blockState, blockGetter, blockPos) -> false)
 				.isSuffocating((blockState, blockGetter, blockPos) -> false)
@@ -91,10 +93,8 @@ public class QuestBarrierBlock extends BaseEntityBlock {
 	public void setPlacedBy(Level level, BlockPos pos, BlockState state, @Nullable LivingEntity entity, ItemStack stack) {
 		super.setPlacedBy(level, pos, state, entity, stack);
 
-		if (!level.isClientSide() && stack.hasCustomHoverName()) {
-			if (level.getBlockEntity(pos) instanceof BarrierBlockEntity barrier) {
-				barrier.update(stack.getHoverName().getString());
-			}
+		if (!level.isClientSide() && stack.hasCustomHoverName() && level.getBlockEntity(pos) instanceof BarrierBlockEntity barrier) {
+			barrier.update(stack.getHoverName().getString());
 		}
 	}
 

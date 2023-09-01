@@ -1,6 +1,6 @@
 package dev.ftb.mods.ftbquests.quest.task;
 
-import dev.architectury.registry.registries.Registries;
+import dev.architectury.registry.registries.RegistrarManager;
 import dev.ftb.mods.ftblibrary.config.ConfigGroup;
 import dev.ftb.mods.ftblibrary.config.NameMap;
 import dev.ftb.mods.ftblibrary.icon.Icon;
@@ -10,7 +10,8 @@ import dev.ftb.mods.ftbquests.quest.Quest;
 import dev.ftb.mods.ftbquests.quest.TeamData;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.core.Registry;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.Component;
@@ -23,16 +24,14 @@ import net.minecraft.world.item.SpawnEggItem;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * @author LatvianModder
- */
 public class KillTask extends Task {
-	public static final ResourceLocation ZOMBIE = new ResourceLocation("minecraft:zombie");
-	public ResourceLocation entity = ZOMBIE;
-	public long value = 100L;
+	private static final ResourceLocation ZOMBIE = new ResourceLocation("minecraft:zombie");
 
-	public KillTask(Quest quest) {
-		super(quest);
+	private ResourceLocation entity = ZOMBIE;
+	private long value = 100L;
+
+	public KillTask(long id, Quest quest) {
+		super(id, quest);
 	}
 
 	@Override
@@ -75,14 +74,14 @@ public class KillTask extends Task {
 
 	@Override
 	@Environment(EnvType.CLIENT)
-	public void getConfig(ConfigGroup config) {
-		super.getConfig(config);
-		List<ResourceLocation> ids = new ArrayList<>(Registry.ENTITY_TYPE.keySet());
+	public void fillConfigGroup(ConfigGroup config) {
+		super.fillConfigGroup(config);
+		List<ResourceLocation> ids = new ArrayList<>(BuiltInRegistries.ENTITY_TYPE.keySet());
 
 		config.addEnum("entity", entity, v -> entity = v, NameMap.of(ZOMBIE, ids)
 				.nameKey(v -> "entity." + v.getNamespace() + "." + v.getPath())
 				.icon(v -> {
-					SpawnEggItem item = SpawnEggItem.byId(Registry.ENTITY_TYPE.get(v));
+					SpawnEggItem item = SpawnEggItem.byId(BuiltInRegistries.ENTITY_TYPE.get(v));
 					return ItemIcon.getItemIcon(item != null ? item : Items.SPAWNER);
 				})
 				.create(), ZOMBIE);
@@ -99,7 +98,7 @@ public class KillTask extends Task {
 	@Override
 	@Environment(EnvType.CLIENT)
 	public Icon getAltIcon() {
-		SpawnEggItem item = SpawnEggItem.byId(Registry.ENTITY_TYPE.get(entity));
+		SpawnEggItem item = SpawnEggItem.byId(BuiltInRegistries.ENTITY_TYPE.get(entity));
 		return ItemIcon.getItemIcon(item != null ? item : Items.SPAWNER);
 	}
 
@@ -109,7 +108,7 @@ public class KillTask extends Task {
 	}
 
 	public void kill(TeamData teamData, LivingEntity e) {
-		if (!teamData.isCompleted(this) && entity.equals(Registries.getId(e.getType(), Registry.ENTITY_TYPE_REGISTRY))) {
+		if (!teamData.isCompleted(this) && entity.equals(RegistrarManager.getId(e.getType(), Registries.ENTITY_TYPE))) {
 			teamData.addProgress(this, 1L);
 		}
 	}

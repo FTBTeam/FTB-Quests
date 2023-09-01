@@ -14,15 +14,12 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 
-/**
- * @author LatvianModder
- */
 public class XPTask extends Task implements ISingleLongValueTask {
-	public long value = 1L;
-	public boolean points = false;
+	private long value = 1L;
+	private boolean points = false;
 
-	public XPTask(Quest quest) {
-		super(quest);
+	public XPTask(long id, Quest quest) {
+		super(id, quest);
 	}
 
 	@Override
@@ -80,8 +77,8 @@ public class XPTask extends Task implements ISingleLongValueTask {
 
 	@Override
 	@Environment(EnvType.CLIENT)
-	public void getConfig(ConfigGroup config) {
-		super.getConfig(config);
+	public void fillConfigGroup(ConfigGroup config) {
+		super.fillConfigGroup(config);
 		config.addLong("value", value, v -> value = v, 1L, 1L, Long.MAX_VALUE);
 		config.addBool("points", points, v -> points = v, false);
 	}
