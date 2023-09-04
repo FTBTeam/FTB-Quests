@@ -41,6 +41,7 @@ import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import org.apache.commons.lang3.mutable.MutableInt;
 import org.jetbrains.annotations.NotNull;
@@ -713,19 +714,22 @@ public abstract class BaseQuestFile extends QuestObject implements QuestFile {
 	}
 
 	public void updateLootCrates() {
-		LootCrate.LOOT_CRATES.clear();
+		Set<String> prevCrateNames = new HashSet<>(LootCrate.LOOT_CRATES.keySet());
+		Collection<ItemStack> oldStacks = LootCrate.allCrateStacks();
 
+		LootCrate.LOOT_CRATES.clear();
 		for (RewardTable table : rewardTables) {
 			if (table.getLootCrate() != null) {
 				LootCrate.LOOT_CRATES.put(table.getLootCrate().getStringID(), table.getLootCrate());
 			}
 		}
 
-		if (!isServerSide()) {
+		if (!isServerSide() && !prevCrateNames.equals(LootCrate.LOOT_CRATES.keySet())) {
 			FTBQuestsClient.rebuildCreativeTabs();
+			FTBQuests.getRecipeModHelper().updateItemsDynamic(oldStacks, LootCrate.allCrateStacks());
 		}
 
-		FTBQuests.LOGGER.debug("Updated " + LootCrate.LOOT_CRATES.size() + " loot crates");
+		FTBQuests.LOGGER.debug("Updated loot crates (was {}, now {})", prevCrateNames.size(), LootCrate.LOOT_CRATES.size());
 	}
 
 	public void markDirty() {

@@ -10,6 +10,7 @@ import net.minecraft.nbt.StringTag;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.world.item.ItemStack;
 
+import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.regex.Matcher;
@@ -141,6 +142,9 @@ public final class LootCrate {
 		return stack;
 	}
 
+	public static Collection<ItemStack> allCrateStacks() {
+		return LOOT_CRATES.values().stream().map(LootCrate::createStack).toList();
+	}
 
 	private enum Defaults {
 		COMMON("common", 0x92999A, 350, 10, 0, false),
