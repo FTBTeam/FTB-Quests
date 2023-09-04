@@ -53,6 +53,8 @@ import static dev.ftb.mods.ftbquests.client.TaskScreenRenderer.*;
 public class FTBQuestsClientEventHandler {
 	private static final ResourceLocation QUESTS_BUTTON = new ResourceLocation(FTBQuestsAPI.MOD_ID, "quests");
 
+	static boolean creativeTabRebuildPending = false;
+
 	private List<ObservationTask> observationTasks = null;
 	private ObservationTask currentlyObserving = null;
 	private long currentlyObservingTicks = 0L;
@@ -74,6 +76,7 @@ public class FTBQuestsClientEventHandler {
 		CustomClickEvent.EVENT.register(this::onCustomClick);
 		ClientTickEvent.CLIENT_PRE.register(this::onClientTick);
 		ClientGuiEvent.RENDER_HUD.register(this::onScreenRender);
+		ClientPlayerEvent.CLIENT_PLAYER_JOIN.register(this::onPlayerLogin);
 		ClientPlayerEvent.CLIENT_PLAYER_QUIT.register(this::onPlayerLogout);
 	}
 
@@ -190,6 +193,13 @@ public class FTBQuestsClientEventHandler {
 			} else {
 				currentlyObservingTicks = 0L;
 			}
+		}
+	}
+
+	private void onPlayerLogin(LocalPlayer localPlayer) {
+		if (creativeTabRebuildPending) {
+			FTBQuestsClient.rebuildCreativeTabs();
+			creativeTabRebuildPending = false;
 		}
 	}
 

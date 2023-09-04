@@ -3,6 +3,9 @@ package dev.ftb.mods.ftbquests.integration;
 import dev.ftb.mods.ftbquests.quest.QuestObjectBase;
 import net.minecraft.world.item.ItemStack;
 
+import java.util.Collection;
+import java.util.Collections;
+
 public interface RecipeModHelper {
     void refreshAll(Components component);
 
@@ -12,6 +15,14 @@ public interface RecipeModHelper {
 
     default boolean isRecipeModAvailable() {
         return false;
+    }
+
+    /**
+     * For supporting dynamic addition & removal of loot crates at runtime, based on reward table settings
+     * @param toRemove items to remove
+     * @param toAdd items to add
+     */
+    default void updateItemsDynamic(Collection<ItemStack> toRemove, Collection<ItemStack> toAdd) {
     }
 
     String getHelperName();
