@@ -129,7 +129,7 @@ public abstract class Reward extends QuestObjectBase {
 				.setNameKey("ftbquests.reward.exclude_from_claim_all")
 				.setCanEdit(!isClaimAllHardcoded());
 		config.addBool("ignore_reward_blocking", ignoreRewardBlocking(), v -> ignoreRewardBlocking = v, ignoreRewardBlocking)
-				.setNameKey("ftbquests.quest.ignore_reward_blocking")
+				.setNameKey("ftbquests.quest.misc.ignore_reward_blocking")
 				.setCanEdit(!isIgnoreRewardBlockingHardcoded());
 	}
 
