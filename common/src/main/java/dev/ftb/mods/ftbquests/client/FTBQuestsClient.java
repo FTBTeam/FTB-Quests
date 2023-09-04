@@ -11,6 +11,7 @@ import dev.ftb.mods.ftblibrary.config.ui.EditConfigScreen;
 import dev.ftb.mods.ftblibrary.config.ui.SelectFluidScreen;
 import dev.ftb.mods.ftblibrary.config.ui.SelectItemStackScreen;
 import dev.ftb.mods.ftblibrary.ui.input.MouseButton;
+import dev.ftb.mods.ftbquests.FTBQuests;
 import dev.ftb.mods.ftbquests.api.FTBQuestsAPI;
 import dev.ftb.mods.ftbquests.block.FTBQuestsBlocks;
 import dev.ftb.mods.ftbquests.block.entity.TaskScreenBlockEntity;
@@ -269,12 +270,21 @@ public class FTBQuestsClient {
 	 */
 	public static void rebuildCreativeTabs() {
 		LocalPlayer player = Minecraft.getInstance().player;
-		CreativeModeTab.ItemDisplayParameters params = new CreativeModeTab.ItemDisplayParameters(
-				player.connection.enabledFeatures(),
-				player.canUseGameMasterBlocks(),
-				player.level().registryAccess()
-		);
-		FTBQuestsItems.CREATIVE_TAB.get().buildContents(params);
-		CreativeModeTabs.searchTab().buildContents(params);
+		if (player == null) {
+			// It's possible for the client player to still be null here, since quest book sync can be processed
+			// before the player is fully logged in to the client. In that case, we'll just mark the creative tabs
+			// as rebuild-needed and do it when the player logs in
+			FTBQuests.LOGGER.debug("deferring creative tab rebuild, client player still null");
+			FTBQuestsClientEventHandler.creativeTabRebuildPending = true;
+		} else {
+			FTBQuests.LOGGER.debug("rebuilding creative tabs now");
+			CreativeModeTab.ItemDisplayParameters params = new CreativeModeTab.ItemDisplayParameters(
+					player.connection.enabledFeatures(),
+					player.canUseGameMasterBlocks(),
+					player.level().registryAccess()
+			);
+			FTBQuestsItems.CREATIVE_TAB.get().buildContents(params);
+			CreativeModeTabs.searchTab().buildContents(params);
+		}
 	}
 }

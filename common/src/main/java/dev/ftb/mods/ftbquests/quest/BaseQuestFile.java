@@ -713,19 +713,20 @@ public abstract class BaseQuestFile extends QuestObject implements QuestFile {
 	}
 
 	public void updateLootCrates() {
-		LootCrate.LOOT_CRATES.clear();
+		Set<String> prevCrateNames = new HashSet<>(LootCrate.LOOT_CRATES.keySet());
 
+		LootCrate.LOOT_CRATES.clear();
 		for (RewardTable table : rewardTables) {
 			if (table.getLootCrate() != null) {
 				LootCrate.LOOT_CRATES.put(table.getLootCrate().getStringID(), table.getLootCrate());
 			}
 		}
 
-		if (!isServerSide()) {
+		if (!isServerSide() && !prevCrateNames.equals(LootCrate.LOOT_CRATES.keySet())) {
 			FTBQuestsClient.rebuildCreativeTabs();
 		}
 
-		FTBQuests.LOGGER.debug("Updated " + LootCrate.LOOT_CRATES.size() + " loot crates");
+		FTBQuests.LOGGER.debug("Updated loot crates (was {}, now {})", prevCrateNames.size(), LootCrate.LOOT_CRATES.size());
 	}
 
 	public void markDirty() {
