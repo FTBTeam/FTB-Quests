@@ -143,7 +143,7 @@ public class TaskButton extends Button {
 		}
 
 		if (task.isOptionalForProgression()) {
-			list.add(Component.translatable("ftbquests.quest.optional").withStyle(ChatFormatting.GRAY));
+			list.add(Component.translatable("ftbquests.quest.misc.optional").withStyle(ChatFormatting.GRAY));
 		}
 
 		task.addMouseOverText(list, questScreen.file.selfTeamData);
