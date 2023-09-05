@@ -52,6 +52,7 @@
 	"item.ftbquests.lootcrate": "Loot Crate",
 	"item.ftbquests.lootcrate.tooltip_1": "Right-click to open",
 	"item.ftbquests.lootcrate.tooltip_2": "Sneak-right-click to open all in hand",
+	"item.ftbquests.lootcrate.missing": "ERROR: unknown loot crate '%s'!",
 	"item.ftbquests.custom_icon": "Custom Icon",
 	"item.ftbquests.custom_icon.tooltip": "Right-click on 'Icon' in editor to open custom image selector",
 	"ftbquests.rarity.common": "Common",

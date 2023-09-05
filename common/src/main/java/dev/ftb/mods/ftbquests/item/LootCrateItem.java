@@ -101,23 +101,22 @@ public class LootCrateItem extends Item {
 	@Override
 	@Environment(EnvType.CLIENT)
 	public void appendHoverText(ItemStack stack, @Nullable Level world, List<Component> tooltip, TooltipFlag flag) {
-		tooltip.add(Component.translatable("item.ftbquests.lootcrate.tooltip_1").withStyle(ChatFormatting.GRAY));
-		tooltip.add(Component.translatable("item.ftbquests.lootcrate.tooltip_2").withStyle(ChatFormatting.GRAY));
-
 		if (world == null || !ClientQuestFile.exists()) {
 			return;
 		}
 
 		LootCrate crate = getCrate(stack);
-
 		if (crate != null) {
 			if (crate.getItemName().isEmpty()) {
+				// if crate doesn't have an item name, show the reward table's name in the tooltip
+				tooltip.add(crate.getTable().getMutableTitle().withStyle(ChatFormatting.YELLOW));
 				tooltip.add(Component.empty());
-				tooltip.add(crate.getTable().getMutableTitle().withStyle(ChatFormatting.GRAY));
 			}
-		} else if (stack.hasTag() && stack.getTag().contains("type")) {
-			tooltip.add(Component.empty());
-			tooltip.add(Component.literal(stack.getTag().getString("type")).withStyle(ChatFormatting.GRAY));
+			tooltip.add(Component.translatable("item.ftbquests.lootcrate.tooltip_1").withStyle(ChatFormatting.GRAY));
+			tooltip.add(Component.translatable("item.ftbquests.lootcrate.tooltip_2").withStyle(ChatFormatting.GRAY));
+		} else {
+			String name = stack.hasTag() ? stack.getTag().getString("type") : "";
+			tooltip.add(Component.translatable("item.ftbquests.lootcrate.missing", name).withStyle(ChatFormatting.RED));
 		}
 	}
 }
