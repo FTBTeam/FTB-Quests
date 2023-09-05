@@ -322,7 +322,7 @@ public class QuestButton extends Button implements QuestPositionableButton {
 		}
 
 		if (quest.isOptional()) {
-			list.add(Component.literal("[").withStyle(ChatFormatting.GRAY).append(Component.translatable("ftbquests.quest.optional")).append("]"));
+			list.add(Component.literal("[").withStyle(ChatFormatting.GRAY).append(Component.translatable("ftbquests.quest.misc.optional")).append("]"));
 		}
 		if (quest.canBeRepeated()) {
 			list.add(Component.translatable("ftbquests.quest.misc.can_repeat").withStyle(ChatFormatting.GRAY));
