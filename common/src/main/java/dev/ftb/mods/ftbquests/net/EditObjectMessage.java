@@ -29,7 +29,6 @@ public class EditObjectMessage extends BaseC2SMessage {
 		o.writeData(nbt);
 		FTBQuests.getRecipeModHelper().refreshRecipes(o);
 		ClientQuestFile.INSTANCE.clearCachedData();
-		o.editedFromGUI();
 	}
 
 	@Override

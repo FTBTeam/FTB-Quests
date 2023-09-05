@@ -37,6 +37,8 @@ public class SyncQuestsMessage extends BaseS2CMessage {
 	public void handle(NetworkManager.PacketContext context) {
 		ClientQuestFile.syncFromServer(file);
 
+		ClientQuestFile.INSTANCE.updateLootCrates();
+
 		new RequestTeamDataMessage().sendToServer();
 	}
 }
