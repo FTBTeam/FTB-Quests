@@ -362,7 +362,7 @@ public class ChapterPanel extends Panel {
 
 		@Override
 		public void onClicked(MouseButton button) {
-			if (chapterPanel.questScreen.file.canEdit() || !chapter.getQuests().isEmpty()) {
+			if (chapterPanel.questScreen.file.canEdit() || chapter.hasAnyVisibleChildren()) {
 				playClickSound();
 
 				if (chapterPanel.questScreen.selectedChapter != chapter) {
@@ -404,7 +404,7 @@ public class ChapterPanel extends Panel {
 
 			GuiHelper.setupDrawing();
 
-			if (chapter.getQuests().isEmpty()) {
+			if (!chapter.hasAnyVisibleChildren()) {
 				ThemeProperties.CLOSE_ICON.get().draw(graphics, x + w - 12, y + 3, 8, 8);
 			} else if (chapterPanel.questScreen.file.selfTeamData.hasUnclaimedRewards(Minecraft.getInstance().player.getUUID(), chapter)) {
 				ThemeProperties.ALERT_ICON.get().draw(graphics, x + w - 12, y + 3, 8, 8);
@@ -424,7 +424,8 @@ public class ChapterPanel extends Panel {
 		public int getActualWidth(QuestScreen screen) {
 			int extra = chapter.getGroup().isDefaultGroup() ? 0 : 7;
 
-			if (chapter.getQuests().isEmpty() || chapterPanel.questScreen.file.selfTeamData.hasUnclaimedRewards(Minecraft.getInstance().player.getUUID(), chapter)) {
+			if (!chapter.hasAnyVisibleChildren() || chapterPanel.questScreen.file.selfTeamData.hasUnclaimedRewards(Minecraft.getInstance().player.getUUID(), chapter)) {
+				// space for the "X" marker
 				extra += 16;
 			}
 

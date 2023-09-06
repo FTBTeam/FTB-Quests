@@ -53,6 +53,11 @@ public class QuestLink extends QuestObject implements Movable {
     }
 
     @Override
+    public boolean isVisible(TeamData data) {
+        return getQuest().map(q -> q.isVisible(data)).orElse(false);
+    }
+
+    @Override
     public int getRelativeProgressFromChildren(TeamData data) {
         return 0;
     }
@@ -213,4 +218,5 @@ public class QuestLink extends QuestObject implements Movable {
     public boolean linksTo(Quest quest) {
         return linkId == quest.id;
     }
+
 }

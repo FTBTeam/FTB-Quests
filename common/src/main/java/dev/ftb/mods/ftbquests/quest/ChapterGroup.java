@@ -12,6 +12,7 @@ import net.minecraft.network.chat.Component;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * @author LatvianModder
@@ -42,7 +43,7 @@ public class ChapterGroup extends QuestObject {
 		chapters.add(chapter);
 		chapter.setGroup(this);
 	}
-	
+
 	public void removeChapter(Chapter chapter) {
 		chapters.remove(chapter);
 	}
@@ -165,19 +166,9 @@ public class ChapterGroup extends QuestObject {
 	}
 
 	public List<Chapter> getVisibleChapters(TeamData data) {
-		if (file.canEdit()) {
-			return chapters;
-		}
-
-		List<Chapter> list = new ArrayList<>();
-
-		for (Chapter chapter : chapters) {
-			if (!chapter.getQuests().isEmpty() && chapter.isVisible(data)) {
-				list.add(chapter);
-			}
-		}
-
-		return list;
+		return file.canEdit() ? chapters : chapters.stream()
+						.filter(chapter -> chapter.hasAnyVisibleChildren() && chapter.isVisible(data))
+						.toList();
 	}
 
 	@Nullable
