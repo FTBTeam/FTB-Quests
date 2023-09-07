@@ -125,7 +125,7 @@ public final class Quest extends QuestObject implements Movable {
 
 	@Override
 	public boolean isOptionalForProgression() {
-		return isOptional();
+		return optional;
 	}
 
 	@Override
