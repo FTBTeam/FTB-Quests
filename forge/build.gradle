@@ -86,7 +86,7 @@ if (ENV.CURSEFORGE_KEY) {
 		apiKey = ENV.CURSEFORGE_KEY
 		project {
 			id = project.curseforge_id_forge
-			releaseType = project.curseforge_type
+			releaseType = ftbPublishing.relType
 			addGameVersion "Forge"
 			addGameVersion project.minecraft_version
 			addGameVersion "Java 17"
@@ -97,7 +97,7 @@ if (ENV.CURSEFORGE_KEY) {
 				requiredDependency 'ftb-teams-forge'
 				requiredDependency 'item-filters'
 			}
-			changelog = getGitChangelog
+			changelog = ENV.CHANGELOG  // expected to exist if ENV.CURSEFORGE_KEY does
 			changelogType = 'markdown'
 		}
 	}

@@ -123,8 +123,6 @@ public class RewardTablesScreen extends ButtonListBaseScreen {
 				title = table.getTitle();
 			}
 
-			FTBQuestsClient.rebuildCreativeTabs();
-
 			new EditObjectMessage(table).sendToServer();
 		}
 
