@@ -4,6 +4,16 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2001.1.3]
+
+### Fixed
+* A few internal clientside performance fixes around network sync and refresh, nothing player visible
+* Fixed a couple of translation keys
+* Cleaned up Loot Crate item tooltips a little
+* Fixed optional quests not correctly counting as optional for chapter completion purposes
+* Fixed chapters with only quests links being considered empty
+  * Showed the red "X" mark in edit mode and hidden entirely outside edit mode
+
 ## [2001.1.2]
 
 ### Fixed

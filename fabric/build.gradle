@@ -77,18 +77,19 @@ if (ENV.CURSEFORGE_KEY) {
 		apiKey = ENV.CURSEFORGE_KEY
 		project {
 			id = project.curseforge_id_fabric
-			releaseType = project.curseforge_type
+			releaseType = ftbPublishing.relType
 			addGameVersion "Fabric"
 			addGameVersion "Java 17"
 			addGameVersion project.minecraft_version
-			mainArtifact(remapJar.archivePath)
+			mainArtifact(remapJar.archiveFile)
 			relations {
 				requiredDependency 'architectury-api'
 				requiredDependency 'fabric-api'
 				requiredDependency 'ftb-library-fabric'
 				requiredDependency 'ftb-teams-fabric'
+				requiredDependency 'item-filters'
 			}
-			changelog = getGitChangelog
+			changelog = ENV.CHANGELOG  // expected to exist if ENV.CURSEFORGE_KEY does
 			changelogType = 'markdown'
 		}
 	}

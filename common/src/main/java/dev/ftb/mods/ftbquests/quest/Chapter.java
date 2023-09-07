@@ -424,7 +424,9 @@ public final class Chapter extends QuestObject {
 
 	@Override
 	public boolean isVisible(TeamData data) {
-		return !alwaysInvisible && quests.stream().anyMatch(quest -> quest.isVisible(data));
+		return !alwaysInvisible
+				&& quests.isEmpty() || quests.stream().anyMatch(quest -> quest.isVisible(data))
+				&& questLinks.isEmpty() || questLinks.stream().anyMatch(link -> link.isVisible(data));
 	}
 
 	@Override
@@ -517,5 +519,9 @@ public final class Chapter extends QuestObject {
 
 	public double getDefaultQuestSize() {
 		return defaultQuestSize;
+	}
+
+	public boolean hasAnyVisibleChildren() {
+		return !quests.isEmpty() || !questLinks.isEmpty();
 	}
 }
