@@ -71,7 +71,7 @@ public class ClientQuestFile extends BaseQuestFile {
 
 	@Override
 	public boolean canEdit() {
-		return hasEditorPermission() && selfTeamData.getCanEdit(Minecraft.getInstance().player);
+		return Minecraft.getInstance().player != null && hasEditorPermission() && selfTeamData.getCanEdit(Minecraft.getInstance().player);
 	}
 
 	@Override
