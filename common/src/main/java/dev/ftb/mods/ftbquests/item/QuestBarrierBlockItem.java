@@ -22,11 +22,13 @@ public class QuestBarrierBlockItem extends BlockItem {
 	@Override
 	@Environment(EnvType.CLIENT)
 	public void appendHoverText(ItemStack stack, @Nullable Level level, List<Component> tooltip, TooltipFlag flag) {
-		tooltip.add(Component.translatable("item.ftbquests.barrier.nogui").withStyle(ChatFormatting.DARK_GRAY, ChatFormatting.ITALIC));
-		if (ClientQuestFile.exists() && !ClientQuestFile.INSTANCE.canEdit()) {
-			tooltip.add(Component.translatable("item.ftbquests.barrier.disabled").withStyle(ChatFormatting.RED));
-		} else {
-			tooltip.add(Component.translatable("item.ftbquests.barrier.config").withStyle(ChatFormatting.GRAY));
+		if (level != null) {
+			tooltip.add(Component.translatable("item.ftbquests.barrier.nogui").withStyle(ChatFormatting.DARK_GRAY, ChatFormatting.ITALIC));
+			if (ClientQuestFile.exists() && !ClientQuestFile.INSTANCE.canEdit()) {
+				tooltip.add(Component.translatable("item.ftbquests.barrier.disabled").withStyle(ChatFormatting.RED));
+			} else {
+				tooltip.add(Component.translatable("item.ftbquests.barrier.config").withStyle(ChatFormatting.GRAY));
+			}
 		}
 	}
 }
