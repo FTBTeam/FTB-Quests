@@ -8,9 +8,7 @@ import dev.ftb.mods.ftbquests.gui.CustomToast;
 import dev.ftb.mods.ftbquests.gui.quests.QuestScreen;
 import dev.ftb.mods.ftbquests.integration.FTBQuestsJEIHelper;
 import dev.ftb.mods.ftbquests.net.DeleteObjectMessage;
-import dev.ftb.mods.ftbquests.quest.Movable;
-import dev.ftb.mods.ftbquests.quest.QuestFile;
-import dev.ftb.mods.ftbquests.quest.TeamData;
+import dev.ftb.mods.ftbquests.quest.*;
 import dev.ftb.mods.ftbquests.quest.theme.QuestTheme;
 import dev.ftb.mods.ftbquests.util.TextUtils;
 import dev.ftb.mods.ftbteams.data.ClientTeamManager;
@@ -150,5 +148,24 @@ public class ClientQuestFile extends QuestFile {
 	@Override
 	public TeamData getData(Entity player) {
 		return player == Minecraft.getInstance().player ? self : getData(Objects.requireNonNull(ClientTeamManager.INSTANCE.getKnownPlayer(player.getUUID()), "Non-null team required!").teamId);
+	}
+
+	public static void openBookToQuestObject(long id) {
+		if (exists()) {
+			ClientQuestFile file = ClientQuestFile.INSTANCE;
+			if (file.questScreen == null) {
+				ClientQuestFile.INSTANCE.openQuestGui();
+			}
+			if (file.questScreen != null) {
+				if (id != 0L) {
+					QuestObject qo = file.get(id);
+					if (qo != null) {
+						file.questScreen.open(qo, true);
+					}
+				} else {
+					file.questScreen.openGui();
+				}
+			}
+		}
 	}
 }
