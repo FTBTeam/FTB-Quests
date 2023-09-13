@@ -6,6 +6,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [2001.1.4]
 
+### Added
+* Command rewards now have a "Silent" boolean property; when true, any command output (success or failure) is suppressed
+* Added a `/ftbquests open_book <id>` command to open the book to a specific quest, quest link, chapter or task
+
 ### Fixed
 * Fixed client crash while logging in under certain circumstances (related to tooltip generation for Quest Barrier block item)
 
