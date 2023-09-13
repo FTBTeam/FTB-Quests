@@ -6,6 +6,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [1902.5.5]
 
+### Added
+* Command rewards now have a "Silent" boolean property; when true, any command output (success or failure) is suppressed
+* Added a `/ftbquests open_book <id>` command to open the book to a specific quest, quest link, chapter or task
+
 ### Fixed
 * Fixed optional quests not being properly excluded from the chapter completion count
 
