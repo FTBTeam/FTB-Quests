@@ -11,6 +11,7 @@ import dev.ftb.mods.ftblibrary.config.Tristate;
 import dev.ftb.mods.ftbquests.FTBQuests;
 import dev.ftb.mods.ftbquests.integration.PermissionsHelper;
 import dev.ftb.mods.ftbquests.net.CreateObjectResponseMessage;
+import dev.ftb.mods.ftbquests.net.OpenQuestBookMessage;
 import dev.ftb.mods.ftbquests.net.SyncEditorPermissionMessage;
 import dev.ftb.mods.ftbquests.net.SyncQuestsMessage;
 import dev.ftb.mods.ftbquests.quest.*;
@@ -18,6 +19,7 @@ import dev.ftb.mods.ftbquests.quest.loot.RewardTable;
 import dev.ftb.mods.ftbquests.quest.loot.WeightedReward;
 import dev.ftb.mods.ftbquests.quest.reward.ItemReward;
 import dev.ftb.mods.ftbquests.quest.task.ItemTask;
+import dev.ftb.mods.ftbquests.quest.task.Task;
 import dev.ftb.mods.ftbquests.util.ProgressChange;
 import net.minecraft.ChatFormatting;
 import net.minecraft.Util;
@@ -153,6 +155,11 @@ public class FTBQuestsCommands {
 								)
 						)
 				)
+				.then(Commands.literal("open_book")
+						.executes(c -> openQuest(c.getSource().getPlayerOrException(), null))
+						.then(Commands.argument("quest_object", QuestObjectArgument.questObject(qob -> qob instanceof QuestObject))
+								.executes(c -> openQuest(c.getSource().getPlayerOrException(), c.getArgument("quest_object", QuestObjectBase.class))))
+				)
 		);
 	}
 
@@ -160,6 +167,34 @@ public class FTBQuestsCommands {
 		//noinspection DataFlowIssue
 		return stack.hasPermission(2)
 				|| stack.isPlayer() && PermissionsHelper.hasEditorPermission(stack.getPlayer(), false);
+	}
+
+	private static int openQuest(ServerPlayer player, QuestObjectBase qob) {
+		if (qob == null) {
+			// just open the book to wherever it last was
+			new OpenQuestBookMessage(0L).sendTo(player);
+		} else if (qob instanceof QuestObject quest) {
+			if (canSeeQuestObject(player, quest)) {
+				new OpenQuestBookMessage(quest.id).sendTo(player);
+			}
+		}
+		return 1;
+	}
+
+	private static boolean canSeeQuestObject(ServerPlayer player, QuestObject qo) {
+		if (qo instanceof Chapter) {
+			return true;
+		}
+		TeamData data = TeamData.get(player);
+		Quest quest = null;
+		if (qo instanceof QuestLink link) {
+			quest = link.getQuest().orElse(null);
+		} else if (qo instanceof Task task) {
+			quest = task.getQuest();
+		} else if (qo instanceof Quest q) {
+			quest = q;
+		}
+		return quest != null && (data.getCanEdit(player) || !quest.hideDetailsUntilStartable() || data.canStartTasks(quest));
 	}
 
 	private static int exportRewards(CommandSourceStack source, RewardTable table, BlockPos pos) throws CommandSyntaxException {
