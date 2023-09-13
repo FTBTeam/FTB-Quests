@@ -381,6 +381,7 @@
 	"ftbquests.reward.ftbquests.xp_levels": "XP Levels",
 	"ftbquests.reward.ftbquests.command": "Command",
 	"ftbquests.reward.ftbquests.command.player": "Run as Player",
+	"ftbquests.reward.ftbquests.command.silent": "Silent",
 	"ftbquests.reward.ftbquests.advancement": "Advancement",
 	"ftbquests.reward.ftbquests.advancement.criterion": "Criterion",
 	"ftbquests.reward.ftbquests.advancement.criterion.tooltip": "Optional, set if you want only one criterion to be granted",

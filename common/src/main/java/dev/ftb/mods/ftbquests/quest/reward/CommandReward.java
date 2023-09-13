@@ -6,6 +6,7 @@ import dev.ftb.mods.ftbquests.quest.Quest;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.ChatFormatting;
+import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.FriendlyByteBuf;
@@ -23,6 +24,7 @@ import java.util.Map;
 public class CommandReward extends Reward {
 	public String command;
 	public boolean playerCommand;
+	public boolean silent;
 
 	public CommandReward(Quest quest) {
 		super(quest);
@@ -38,7 +40,8 @@ public class CommandReward extends Reward {
 	public void writeData(CompoundTag nbt) {
 		super.writeData(nbt);
 		nbt.putString("command", command);
-		nbt.putBoolean("player_command", playerCommand);
+		if (playerCommand) nbt.putBoolean("player_command", true);
+		if (silent) nbt.putBoolean("silent", true);
 	}
 
 	@Override
@@ -46,6 +49,7 @@ public class CommandReward extends Reward {
 		super.readData(nbt);
 		command = nbt.getString("command");
 		playerCommand = nbt.getBoolean("player_command");
+		silent = nbt.getBoolean("silent");
 	}
 
 	@Override
@@ -53,6 +57,7 @@ public class CommandReward extends Reward {
 		super.writeNetData(buffer);
 		buffer.writeUtf(command, Short.MAX_VALUE);
 		buffer.writeBoolean(playerCommand);
+		buffer.writeBoolean(silent);
 	}
 
 	@Override
@@ -60,6 +65,7 @@ public class CommandReward extends Reward {
 		super.readNetData(buffer);
 		command = buffer.readUtf(Short.MAX_VALUE);
 		playerCommand = buffer.readBoolean();
+		silent = buffer.readBoolean();
 	}
 
 	@Override
@@ -68,6 +74,7 @@ public class CommandReward extends Reward {
 		super.getConfig(config);
 		config.addString("command", command, v -> command = v, "/say Hi, @team!").setNameKey("ftbquests.reward.ftbquests.command");
 		config.addBool("player", playerCommand, v -> playerCommand = v, false);
+		config.addBool("silent", silent, v -> silent = v, false);
 	}
 
 	@Override
@@ -96,7 +103,12 @@ public class CommandReward extends Reward {
 			}
 		}
 
-		player.server.getCommands().performCommand(playerCommand ? player.createCommandSourceStack() : player.server.createCommandSourceStack(), s);
+		CommandSourceStack stack = playerCommand ? player.createCommandSourceStack() : player.server.createCommandSourceStack();
+		if (silent) {
+			stack = stack.withSuppressedOutput();
+		}
+
+		player.server.getCommands().performCommand(stack, s);
 	}
 
 	@Override
