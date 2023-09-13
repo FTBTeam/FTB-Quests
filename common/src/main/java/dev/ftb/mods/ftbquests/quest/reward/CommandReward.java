@@ -19,6 +19,7 @@ import java.util.Map;
 public class CommandReward extends Reward {
 	private String command;
 	private boolean elevatePerms;
+	private boolean silent;
 
 	public CommandReward(long id, Quest quest) {
 		super(id, quest);
@@ -37,6 +38,7 @@ public class CommandReward extends Reward {
 		if (elevatePerms) {
 			nbt.putBoolean("elevate_perms", true);
 		}
+		if (silent) nbt.putBoolean("silent", true);
 	}
 
 	@Override
@@ -44,6 +46,7 @@ public class CommandReward extends Reward {
 		super.readData(nbt);
 		command = nbt.getString("command");
 		elevatePerms = nbt.getBoolean("elevate_perms");
+		silent = nbt.getBoolean("silent");
 	}
 
 	@Override
@@ -51,6 +54,7 @@ public class CommandReward extends Reward {
 		super.writeNetData(buffer);
 		buffer.writeUtf(command, Short.MAX_VALUE);
 		buffer.writeBoolean(elevatePerms);
+		buffer.writeBoolean(silent);
 	}
 
 	@Override
@@ -58,6 +62,7 @@ public class CommandReward extends Reward {
 		super.readNetData(buffer);
 		command = buffer.readUtf(Short.MAX_VALUE);
 		elevatePerms = buffer.readBoolean();
+		silent = buffer.readBoolean();
 	}
 
 	@Override
@@ -66,6 +71,7 @@ public class CommandReward extends Reward {
 		super.fillConfigGroup(config);
 		config.addString("command", command, v -> command = v, "/say Hi, @team!").setNameKey("ftbquests.reward.ftbquests.command");
 		config.addBool("elevate", elevatePerms, v -> elevatePerms = v, false);
+		config.addBool("silent", silent, v -> silent = v, false);
 	}
 
 	@Override
@@ -93,7 +99,8 @@ public class CommandReward extends Reward {
 
 		CommandSourceStack source = player.createCommandSourceStack();
 		if (elevatePerms) source = source.withPermission(2);
-
+		if (silent) source = source.withSuppressedOutput();
+		
 		player.server.getCommands().performPrefixedCommand(source, cmd);
 	}
 

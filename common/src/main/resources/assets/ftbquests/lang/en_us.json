@@ -416,6 +416,7 @@
 	"ftbquests.reward.ftbquests.command": "Command",
 	"ftbquests.reward.ftbquests.command.elevate": "Run with Elevated Permission",
 	"ftbquests.reward.ftbquests.command.elevate.tooltip": "Run the command as if the player had permission level 2",
+	"ftbquests.reward.ftbquests.command.silent": "Silent",
 	"ftbquests.reward.ftbquests.advancement": "Advancement",
 	"ftbquests.reward.ftbquests.advancement.criterion": "Criterion",
 	"ftbquests.reward.ftbquests.advancement.criterion.tooltip": "Optional, set if you want only one criterion to be granted",
