@@ -9,6 +9,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 * Command rewards now have a "Silent" boolean property; when true, any command output (success or failure) is suppressed
 * Added a `/ftbquests open_book <id>` command to open the book to a specific quest, quest link, chapter or task
+* When moving images on the quest screen, scaled-up images are always treated as if they were size 1.0
+  * Otherwise, scaled images have a huge snap jump, making them difficult to position neatly
+  * Note also that holding Shift while moving images and quests disables grid snap completely 
+* Added "Pause SSP Game" option to "Edit File" config screen (default false)
+  * Game will pause when in quest screen in single-player mode (although not while in edit mode config screens)
 
 ### Fixed
 * Fixed client crash while logging in under certain circumstances (related to tooltip generation for Quest Barrier block item)
