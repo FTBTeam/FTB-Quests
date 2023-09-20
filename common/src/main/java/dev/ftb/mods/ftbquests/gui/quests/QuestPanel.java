@@ -299,8 +299,9 @@ public class QuestPanel extends Panel {
 				questY = qy;
 			} else {
 				// grid-snapping size is based on the smallest selected item
+				//   although images always act as if they were size 1
 				double minSize = questScreen.selectedObjects.stream()
-						.map(Movable::getWidth)
+						.map(m -> m instanceof ChapterImage ? 1d : m.getWidth())
 						.min(Double::compare)
 						.orElse(1d);
 				double snap = 1D / (questScreen.file.gridScale * minSize);

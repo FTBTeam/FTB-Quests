@@ -124,6 +124,11 @@ public final class Quest extends QuestObject implements Movable {
 	}
 
 	@Override
+	public boolean isOptionalForProgression() {
+		return optional;
+	}
+
+	@Override
 	public void writeData(CompoundTag nbt) {
 		super.writeData(nbt);
 		nbt.putDouble("x", x);
