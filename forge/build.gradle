@@ -27,6 +27,13 @@ repositories {
 			includeGroup "mezz.jei"
 			// includeGroup "team.chisel.ctm"
 		}
+
+	}
+	maven {
+		url "https://cursemaven.com"
+		content {
+			includeGroup "curse.maven"
+		}
 	}
 }
 
@@ -50,6 +57,8 @@ dependencies {
 
 	common(project(path: ":common", configuration: "namedElements")) { transitive false }
 	shadowCommon(project(path: ":common", configuration: "transformProductionForge")) { transitive false }
+
+	modLocalRuntime("curse.maven:chiselsandbits-231095:4119191")
 }
 
 processResources {
@@ -130,7 +139,7 @@ publishing {
 	repositories {
 		if (ENV.FTB_MAVEN_TOKEN) {
 			maven {
-				url "https://maven.ftb.dev/release"
+				url "https://maven.ftb.dev/releases"
 				credentials {
 					username = "ftb"
 					password = "${ENV.FTB_MAVEN_TOKEN}"
@@ -140,7 +149,7 @@ publishing {
 
 		if (ENV.SAPS_TOKEN) {
 			maven {
-				url "https://maven.saps.dev/minecraft"
+				url "https://maven.saps.dev/releases"
 				credentials {
 					username = "ftb"
 					password = "${ENV.SAPS_TOKEN}"

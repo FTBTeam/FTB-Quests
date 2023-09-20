@@ -20,6 +20,7 @@ import org.jetbrains.annotations.Nullable;
 import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
+import java.util.function.Predicate;
 
 public class QuestObjectArgument implements ArgumentType<QuestObjectBase> {
 
@@ -37,6 +38,16 @@ public class QuestObjectArgument implements ArgumentType<QuestObjectBase> {
 	public static final DynamicCommandExceptionType INVALID_ID = new DynamicCommandExceptionType(
 			(id) -> new TranslatableComponent("commands.ftbquests.command.error.invalid_id", id));
 
+	private final Predicate<QuestObjectBase> filter;
+
+	public QuestObjectArgument() {
+		this(qo -> true);
+	}
+
+	public QuestObjectArgument(Predicate<QuestObjectBase> filter) {
+		this.filter = filter;
+	}
+
 	@Override
 	public QuestObjectBase parse(StringReader reader) throws CommandSyntaxException {
 		String id = reader.readString();
@@ -44,7 +55,7 @@ public class QuestObjectArgument implements ArgumentType<QuestObjectBase> {
 		if (file != null) {
 			if (id.startsWith("#")) {
 				for (QuestObjectBase object : file.getAllObjects()) {
-					if (object.hasTag(id.substring(1))) {
+					if (object.hasTag(id.substring(1)) && filter.test(object)) {
 						return object;
 					}
 				}
@@ -53,7 +64,7 @@ public class QuestObjectArgument implements ArgumentType<QuestObjectBase> {
 				try {
 					long num = file.getID(id);
 					QuestObjectBase object = file.getBase(num);
-					if (object == null) {
+					if (object == null || !filter.test(object)) {
 						throw NO_OBJECT.createWithContext(reader, id);
 					}
 					return object;
@@ -72,6 +83,7 @@ public class QuestObjectArgument implements ArgumentType<QuestObjectBase> {
 			return SharedSuggestionProvider.suggest(
 					file.getAllObjects()
 							.stream()
+							.filter(filter)
 							.map(QuestFile::getCodeString),
 					builder
 			);
@@ -86,6 +98,10 @@ public class QuestObjectArgument implements ArgumentType<QuestObjectBase> {
 
 	public static QuestObjectArgument questObject() {
 		return new QuestObjectArgument();
+	}
+
+	public static QuestObjectArgument questObject(Predicate<QuestObjectBase> filter) {
+		return new QuestObjectArgument(filter);
 	}
 
 	@Nullable

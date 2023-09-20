@@ -61,6 +61,7 @@ public interface FTBQuestsNetHandler {
 	MessageType SYNC_REWARD_BLOCKING = NET.registerS2C("sync_reward_blocking", SyncRewardBlockingMessage::new);
 	MessageType COPY_QUEST = NET.registerC2S("copy_quest", CopyQuestMessage::new);
 	MessageType COPY_CHAPTER_IMAGE = NET.registerC2S("copy_chapter_image", CopyChapterImageMessage::new);
+	MessageType OPEN_QUEST_BOOK = NET.registerS2C("open_quest_book", OpenQuestBookMessage::new);
 
 	static void init() {
 	}

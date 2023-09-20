@@ -43,16 +43,14 @@ public class ClaimChoiceRewardMessage extends BaseC2SMessage {
 	public void handle(NetworkManager.PacketContext context) {
 		Reward reward = ServerQuestFile.INSTANCE.getReward(id);
 
-		if (reward instanceof ChoiceReward) {
-			ServerPlayer player = (ServerPlayer) context.getPlayer();
-			ChoiceReward r = (ChoiceReward) reward;
-			TeamData data = TeamData.get(player);
-			RewardTable table = r.getTable();
+		if (reward instanceof ChoiceReward choiceReward && context.getPlayer() instanceof ServerPlayer serverPlayer) {
+			TeamData data = TeamData.get(serverPlayer);
+			RewardTable table = choiceReward.getTable();
 
 			if (table != null && data.isCompleted(reward.quest)) {
 				if (index >= 0 && index < table.rewards.size()) {
-					table.rewards.get(index).reward.claim(player, true);
-					data.claimReward(player, reward, true);
+					table.rewards.get(index).reward.claim(serverPlayer, true);
+					data.claimReward(serverPlayer, reward, true);
 				}
 			}
 		}
