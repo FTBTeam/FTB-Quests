@@ -65,6 +65,7 @@ public interface FTBQuestsNetHandler {
 	MessageType SYNC_STRUCTURES_RESPONSE = NET.registerS2C("sync_structures_response", SyncStructuresResponseMessage::new);
 	MessageType REQUEST_TEAM_DATA = NET.registerC2S("request_team_data", RequestTeamDataMessage::new);
 	MessageType SYNC_EDITOR_PERMISSION = NET.registerS2C("sync_editor_permission", SyncEditorPermissionMessage::new);
+	MessageType OPEN_QUEST_BOOK = NET.registerS2C("open_quest_book", OpenQuestBookMessage::new);
 
 	static void init() {
 	}

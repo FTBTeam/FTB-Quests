@@ -1037,6 +1037,7 @@ public abstract class BaseQuestFile extends QuestObject implements QuestFile {
 		config.addString("lock_message", lockMessage, v -> lockMessage = v, "");
 		config.addEnum("progression_mode", progressionMode, v -> progressionMode = v, ProgressionMode.NAME_MAP_NO_DEFAULT);
 		config.addInt("detection_delay", detectionDelay, v -> detectionDelay = v, 20, 0, 200);
+		config.addBool("pause_game", pauseGame, v -> pauseGame = v, false);
 
 		ConfigGroup defaultsGroup = config.getOrCreateSubgroup("defaults");
 		defaultsGroup.addBool("reward_team", defaultPerTeamReward, v -> defaultPerTeamReward = v, false);

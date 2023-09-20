@@ -10,6 +10,7 @@ import dev.ftb.mods.ftbquests.client.gui.quests.QuestScreen;
 import dev.ftb.mods.ftbquests.net.DeleteObjectMessage;
 import dev.ftb.mods.ftbquests.quest.BaseQuestFile;
 import dev.ftb.mods.ftbquests.quest.Quest;
+import dev.ftb.mods.ftbquests.quest.QuestObject;
 import dev.ftb.mods.ftbquests.quest.TeamData;
 import dev.ftb.mods.ftbquests.quest.task.StructureTask;
 import dev.ftb.mods.ftbquests.quest.theme.QuestTheme;
@@ -193,5 +194,24 @@ public class ClientQuestFile extends BaseQuestFile {
 
 	public boolean hasEditorPermission() {
 		return editorPermission;
+	}
+
+	public static void openBookToQuestObject(long id) {
+		if (exists()) {
+			ClientQuestFile file = ClientQuestFile.INSTANCE;
+			if (file.questScreen == null) {
+				ClientQuestFile.INSTANCE.openQuestGui();
+			}
+			if (file.questScreen != null) {
+				if (id != 0L) {
+					QuestObject qo = file.get(id);
+					if (qo != null) {
+						file.questScreen.open(qo, true);
+					}
+				} else {
+					file.questScreen.openGui();
+				}
+			}
+		}
 	}
 }
