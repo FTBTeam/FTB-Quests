@@ -9,6 +9,7 @@ import dev.ftb.mods.ftblibrary.ui.misc.CompactGridLayout;
 import dev.ftb.mods.ftblibrary.util.TooltipList;
 import dev.ftb.mods.ftblibrary.util.client.PositionedIngredient;
 import dev.ftb.mods.ftbquests.FTBQuests;
+import dev.ftb.mods.ftbquests.client.ClientQuestFile;
 import dev.ftb.mods.ftbquests.client.gui.FTBQuestsTheme;
 import dev.ftb.mods.ftbquests.net.SubmitTaskMessage;
 import dev.ftb.mods.ftbquests.quest.task.ItemTask;
@@ -126,6 +127,11 @@ public class ValidItemsScreen extends BaseScreen {
 			return true;
 		}
 		return false;
+	}
+
+	@Override
+	public boolean doesGuiPauseGame() {
+		return ClientQuestFile.exists() && ClientQuestFile.INSTANCE.isPauseGame();
 	}
 
 	@Override
