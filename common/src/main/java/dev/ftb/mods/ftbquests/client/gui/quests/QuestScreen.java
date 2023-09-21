@@ -571,10 +571,11 @@ public class QuestScreen extends BaseScreen {
 			}
 		} else if (object instanceof QuestLink link) {
 			link.getQuest().ifPresent(quest -> {
+				selectChapter(link.getChapter());
 				viewQuestPanel.hidePanel = false;
 				viewQuest(quest);
 				if (focus) {
-					questPanel.scrollTo(quest.getX() + 0.5D, quest.getY() + 0.5D);
+					questPanel.scrollTo(link.getX() + 0.5D, link.getY() + 0.5D);
 				}
 			});
 		} else if (object instanceof Task task) {
