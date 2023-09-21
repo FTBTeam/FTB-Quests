@@ -58,9 +58,9 @@ public class FTBQuestsNetClient {
 		object.editedFromGUI();
 		FTBQuests.getRecipeModHelper().refreshRecipes(object);
 
-		if (object instanceof Chapter chapter) {
+		if (object instanceof QuestObject qo) {
 			ClientQuestFile.INSTANCE.getQuestScreen()
-					.ifPresent(questScreen -> questScreen.selectChapter(chapter));
+					.ifPresent(questScreen -> questScreen.open(qo, true));
 		}
 
 		QuestObjectUpdateListener listener = ClientUtils.getCurrentGuiAs(QuestObjectUpdateListener.class);

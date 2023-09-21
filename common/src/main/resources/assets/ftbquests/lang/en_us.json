@@ -216,6 +216,7 @@
 	"ftbquests.gui.line": "Add Text Line",
 	"ftbquests.gui.image": "Add Image",
 	"ftbquests.gui.edit": "Edit",
+	"ftbquests.gui.edit_quest_props": "Quest Properties",
 	"ftbquests.gui.undo": "Undo",
 	"ftbquests.gui.edit_linked_quest": "Edit Linked Quest",
 	"ftbquests.gui.edit_file": "Edit File",
