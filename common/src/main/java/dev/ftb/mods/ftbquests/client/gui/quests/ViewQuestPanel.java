@@ -566,6 +566,8 @@ public class ViewQuestPanel extends Panel {
 				editDescLine0(-1, null);
 			} else if (key.is(GLFW.GLFW_KEY_I)) {
 				editDescLine0(-1, new ImageComponent());
+			} else if (key.is(GLFW.GLFW_KEY_Q)) {
+				quest.onEditButtonClicked(questScreen);
 			}
 		}
 
@@ -652,6 +654,12 @@ public class ViewQuestPanel extends Panel {
 		contextMenu.add(new ContextMenuItem(Component.translatable("ftbquests.gui.image").append(hotkey("I")),
 				Icons.ART,
 				() -> editDescLine0(-1, new ImageComponent())));
+
+		contextMenu.add(ContextMenuItem.SEPARATOR);
+
+		contextMenu.add(new ContextMenuItem(Component.translatable("ftbquests.gui.edit_quest_props").append(hotkey("Q")),
+				Icons.SETTINGS,
+				() -> quest.onEditButtonClicked(questScreen)));
 
 		getGui().openContextMenu(contextMenu);
 	}

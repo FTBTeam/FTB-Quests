@@ -3,6 +3,7 @@ package dev.ftb.mods.ftbquests;
 import dev.architectury.utils.Env;
 import dev.architectury.utils.EnvExecutor;
 import dev.ftb.mods.ftbquests.api.FTBQuestsAPI;
+import dev.ftb.mods.ftbquests.client.FTBQClientProxy;
 import dev.ftb.mods.ftbquests.client.FTBQuestsClient;
 import dev.ftb.mods.ftbquests.integration.RecipeModHelper;
 import dev.ftb.mods.ftbquests.net.FTBQuestsNetHandler;
@@ -18,6 +19,8 @@ public class FTBQuests {
 
 	public static FTBQuests instance;
 
+	public static IQuestProxy PROXY;
+
 	private static RecipeModHelper recipeModHelper;
 	private static final RecipeModHelper NO_OP_HELPER = new RecipeModHelper.NoOp();
 
@@ -28,6 +31,8 @@ public class FTBQuests {
 		RewardTypes.init();
 		FTBQuestsNetHandler.init();
 		FTBQuestsEventHandler.INSTANCE.init();
+
+		PROXY = EnvExecutor.getEnvSpecific(() -> FTBQClientProxy::new, () -> FTBQServerProxy::new);
 
 		EnvExecutor.runInEnv(Env.CLIENT, () -> FTBQuestsClient::init);
 	}

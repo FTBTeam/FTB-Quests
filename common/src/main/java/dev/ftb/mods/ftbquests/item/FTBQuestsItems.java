@@ -4,9 +4,9 @@ import dev.architectury.registry.CreativeTabRegistry;
 import dev.architectury.registry.registries.DeferredRegister;
 import dev.architectury.registry.registries.RegistrarManager;
 import dev.architectury.registry.registries.RegistrySupplier;
+import dev.ftb.mods.ftbquests.FTBQuests;
 import dev.ftb.mods.ftbquests.api.FTBQuestsAPI;
 import dev.ftb.mods.ftbquests.block.FTBQuestsBlocks;
-import dev.ftb.mods.ftbquests.client.ClientQuestFile;
 import dev.ftb.mods.ftbquests.item.ScreenBlockItem.ScreenSize;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
@@ -82,13 +82,7 @@ public class FTBQuestsItems {
 					// base items, always present
 					output.acceptAll(BASE_ITEMS.stream().map(item -> new ItemStack(item.get())).toList());
 					// dynamically add loot crates based on current reward tables
-					if (ClientQuestFile.exists()) {
-						ClientQuestFile.INSTANCE.getRewardTables().forEach(table -> {
-							if (table.getLootCrate() != null) {
-								output.accept(table.getLootCrate().createStack());
-							}
-						});
-					}
+					FTBQuests.PROXY.getKnownLootCrates().forEach(crate -> output.accept(crate.createStack()));
 				})
 		);
 	}
