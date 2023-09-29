@@ -10,6 +10,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 * The quest view panel is now opened automatically when a new quest is created via the GUI
   * Makes it easy to quickly edit title/subtitle/etc. via the "Edit" dropdown button in the view panel
 
+### Fixed
+* Server crash while building creative mode tabs (with specific mod combinations)
+
 ## [2001.1.4]
 
 ### Added
