@@ -1,17 +1,12 @@
 package dev.ftb.mods.ftbquests.item;
 
-import dev.architectury.platform.Platform;
 import dev.architectury.registry.CreativeTabRegistry;
 import dev.architectury.registry.registries.DeferredRegister;
 import dev.architectury.registry.registries.RegistrarManager;
 import dev.architectury.registry.registries.RegistrySupplier;
-import dev.architectury.utils.Env;
 import dev.ftb.mods.ftbquests.FTBQuests;
 import dev.ftb.mods.ftbquests.api.FTBQuestsAPI;
-import dev.ftb.mods.ftbquests.api.QuestFile;
 import dev.ftb.mods.ftbquests.block.FTBQuestsBlocks;
-import dev.ftb.mods.ftbquests.client.ClientQuestFile;
-import dev.ftb.mods.ftbquests.client.FTBQuestsClient;
 import dev.ftb.mods.ftbquests.item.ScreenBlockItem.ScreenSize;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
