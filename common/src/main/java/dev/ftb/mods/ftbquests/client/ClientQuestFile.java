@@ -65,7 +65,7 @@ public class ClientQuestFile extends QuestFile {
 
 	@Override
 	public boolean canEdit() {
-		return self.getCanEdit(Minecraft.getInstance().player);
+		return Minecraft.getInstance().player != null && self.getCanEdit(Minecraft.getInstance().player);
 	}
 
 	@Override
