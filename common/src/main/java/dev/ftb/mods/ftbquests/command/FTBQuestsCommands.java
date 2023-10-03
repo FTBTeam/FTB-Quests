@@ -303,7 +303,7 @@ public class FTBQuestsCommands {
 			questObject.forceProgress(ServerQuestFile.INSTANCE.getOrCreateTeamData(player), progressChange);
 		}
 
-		source.sendSuccess(() -> Component.translatable("commands.ftbquests.change_progress.text"), true);
+		source.sendSuccess(() -> Component.translatable("commands.ftbquests.change_progress.text"), false);
 		return Command.SINGLE_SUCCESS;
 	}
 
