@@ -96,6 +96,7 @@ if (ENV.CURSEFORGE_KEY) {
 				requiredDependency 'ftb-library-forge'
 				requiredDependency 'ftb-teams-forge'
 				requiredDependency 'item-filters'
+				optionalDependency 'ftb-xmod-compat'
 			}
 			changelog = ENV.CHANGELOG  // expected to exist if ENV.CURSEFORGE_KEY does
 			changelogType = 'markdown'
