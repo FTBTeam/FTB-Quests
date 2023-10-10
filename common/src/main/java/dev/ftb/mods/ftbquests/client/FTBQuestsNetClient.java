@@ -13,6 +13,7 @@ import dev.ftb.mods.ftbquests.quest.*;
 import dev.ftb.mods.ftbquests.quest.reward.Reward;
 import dev.ftb.mods.ftbquests.quest.task.Task;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
@@ -50,7 +51,7 @@ public class FTBQuestsNetClient {
 		}
 	}
 
-	public static void createObject(long id, long parent, QuestObjectType type, CompoundTag nbt, @Nullable CompoundTag extra) {
+	public static void createObject(long id, long parent, QuestObjectType type, CompoundTag nbt, @Nullable CompoundTag extra, UUID creator) {
 		QuestObjectBase object = ClientQuestFile.INSTANCE.create(id, type, parent, extra == null ? new CompoundTag() : extra);
 		object.readData(nbt);
 		object.onCreated();
@@ -58,7 +59,8 @@ public class FTBQuestsNetClient {
 		object.editedFromGUI();
 		FTBQuests.getRecipeModHelper().refreshRecipes(object);
 
-		if (object instanceof QuestObject qo) {
+		LocalPlayer player = Minecraft.getInstance().player;
+		if (object instanceof QuestObject qo && player != null && creator.equals(player.getUUID())) {
 			ClientQuestFile.INSTANCE.getQuestScreen()
 					.ifPresent(questScreen -> questScreen.open(qo, true));
 		}
