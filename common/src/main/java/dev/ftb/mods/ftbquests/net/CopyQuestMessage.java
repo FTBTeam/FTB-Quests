@@ -21,7 +21,7 @@ public class CopyQuestMessage extends BaseC2SMessage {
     private final long chapterId;
     private final double qx;
     private final double qy;
-    private final boolean copyDeps;
+    private boolean copyDeps;
 
     public CopyQuestMessage(Quest toCopy, Chapter chapter, double qx, double qy, boolean copyDeps) {
         id = toCopy.id;
@@ -37,6 +37,10 @@ public class CopyQuestMessage extends BaseC2SMessage {
         this.qx = buf.readDouble();
         this.qy = buf.readDouble();
         this.copyDeps = buf.readBoolean();
+    }
+
+    public void setCopyDeps(boolean newCopyDeps) {
+        this.copyDeps = newCopyDeps;
     }
 
     @Override

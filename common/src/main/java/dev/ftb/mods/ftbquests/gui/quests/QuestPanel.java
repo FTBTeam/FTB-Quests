@@ -513,7 +513,7 @@ public class QuestPanel extends Panel {
 		}).openGui();
 	}
 
-	private void copyAndCreateTask(Task task, double qx, double qy) {
+	public void copyAndCreateTask(Task task, double qx, double qy) {
 		Task task2 = TaskType.createTask(new Quest(questScreen.selectedChapter), task.getType().id.toString());
 		if (task2 != null) {
 			CompoundTag tag = new CompoundTag();

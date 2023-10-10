@@ -5,6 +5,7 @@ import dev.ftb.mods.ftblibrary.config.ConfigGroup;
 import dev.ftb.mods.ftblibrary.config.ConfigValue;
 import dev.ftb.mods.ftblibrary.config.ConfigWithVariants;
 import dev.ftb.mods.ftblibrary.icon.Color4I;
+import dev.ftb.mods.ftblibrary.icon.Icon;
 import dev.ftb.mods.ftblibrary.icon.Icons;
 import dev.ftb.mods.ftblibrary.math.MathUtils;
 import dev.ftb.mods.ftblibrary.ui.*;
@@ -15,9 +16,12 @@ import dev.ftb.mods.ftblibrary.util.TooltipList;
 import dev.ftb.mods.ftbquests.FTBQuests;
 import dev.ftb.mods.ftbquests.client.ClientQuestFile;
 import dev.ftb.mods.ftbquests.client.FTBQuestsClient;
+import dev.ftb.mods.ftbquests.gui.CustomToast;
 import dev.ftb.mods.ftbquests.gui.FTBQuestsTheme;
 import dev.ftb.mods.ftbquests.gui.SelectQuestObjectScreen;
 import dev.ftb.mods.ftbquests.net.ChangeProgressMessage;
+import dev.ftb.mods.ftbquests.net.CopyQuestMessage;
+import dev.ftb.mods.ftbquests.net.CreateObjectMessage;
 import dev.ftb.mods.ftbquests.net.EditObjectMessage;
 import dev.ftb.mods.ftbquests.quest.*;
 import dev.ftb.mods.ftbquests.quest.reward.RandomReward;
@@ -31,12 +35,14 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.toasts.SystemToast;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.renderer.Rect2i;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.util.Mth;
 import org.jetbrains.annotations.Nullable;
 import org.lwjgl.glfw.GLFW;
 
+import java.lang.reflect.Array;
 import java.text.DateFormat;
 import java.util.*;
 
@@ -378,6 +384,65 @@ public class QuestScreen extends BaseScreen {
 				}
 				case GLFW.GLFW_KEY_RIGHT -> {
 					return moveSelectedQuests(step, 0D);
+				}
+				case GLFW.GLFW_KEY_C -> {
+					Collection<Quest> quests = ClientQuestFile.INSTANCE.questScreen.getSelectedQuests();
+					String toastTitleKey = "ftbquests.quest.copied";;
+					Component toastDesc;
+					Icon icon = Icons.INFO;
+
+					if (quests.size() > 1) {
+						toastTitleKey = "ftbquests.gui.error";
+						toastDesc = Component.translatable("ftbquests.quest.cannot_copy_many");
+						Minecraft.getInstance().getToasts().addToast(new CustomToast(Component.translatable(toastTitleKey), Icons.BARRIER, toastDesc));
+						return false;
+					}
+					for (Quest q : quests) {
+						String qId = q.getCodeString();
+						String qTitle = q.getTitle().getString();
+						toastDesc = Component.literal(qTitle);
+
+						setClipboardString(qId);
+						Minecraft.getInstance().getToasts().addToast(new CustomToast(Component.translatable(toastTitleKey), icon, toastDesc));
+					}
+
+					return true;
+				}
+
+				case GLFW.GLFW_KEY_V -> {
+					double minSize = selectedObjects.stream()
+							.map(m -> m instanceof ChapterImage ? 1d : m.getWidth())
+							.min(Double::compare)
+							.orElse(1d);
+					double snap = 1D / (file.gridScale * minSize);
+					double qx = Mth.floor(questPanel.questX * snap + 0.5D) / snap;
+					double qy = Mth.floor(questPanel.questY * snap + 0.5D) / snap;
+					String clip = getClipboardString();
+					Chapter chapter = ClientQuestFile.INSTANCE.questScreen.selectedChapter;
+					if (!clip.isEmpty()) {
+						try {
+							long questId = Long.valueOf(clip, 16);
+							QuestObject qo = FTBQuests.PROXY.getQuestFile(true).get(questId);
+
+							if (qo instanceof Quest quest) {
+								CopyQuestMessage message = new CopyQuestMessage(quest, chapter, qx, qy, false);
+								if (key.modifiers.shift()) {
+									message.setCopyDeps(false);
+								} else if (key.modifiers.alt()) {
+									QuestLink link = new QuestLink(chapter, questId);
+									link.setPosition(qx, qy);
+									new CreateObjectMessage(link, new CompoundTag()).sendToServer();
+								} else {
+									message.setCopyDeps(true);
+								}
+								message.sendToServer();
+							} else if (qo instanceof Task task) {
+								questPanel.copyAndCreateTask(task, qx, qy);
+							}
+
+						} catch (NumberFormatException ignored) { }
+						return true;
+					}
 				}
 			}
 		}

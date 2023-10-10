@@ -145,6 +145,8 @@
 	"ftbquests.quest": "Quest",
 	"ftbquests.quests": "Quests",
 	"ftbquests.quest.completed": "Quest completed!",
+	"ftbquests.quest.copied": "Copied quest:",
+	"ftbquests.quest.cannot_copy_many": "Copying many quests is not implemented!",
 	"ftbquests.quest.subtitle": "Subtitle",
 	"ftbquests.quest.description": "Description",
 	"ftbquests.quest.x": "X",
