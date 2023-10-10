@@ -11,6 +11,7 @@ import dev.ftb.mods.ftbquests.quest.task.TaskType;
 import dev.ftb.mods.ftbquests.util.NetUtils;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.server.level.ServerPlayer;
 
 public class CreateTaskAtMessage extends BaseC2SMessage {
 	private final long chapterId;
@@ -51,7 +52,7 @@ public class CreateTaskAtMessage extends BaseC2SMessage {
 
 	@Override
 	public void handle(NetworkManager.PacketContext context) {
-		if (NetUtils.canEdit(context)) {
+		if (NetUtils.canEdit(context) && context.getPlayer() instanceof ServerPlayer sp) {
 			ServerQuestFile file = ServerQuestFile.INSTANCE;
 			Chapter ch = file.getChapter(chapterId);
 
@@ -60,14 +61,14 @@ public class CreateTaskAtMessage extends BaseC2SMessage {
 				quest.setX(x);
 				quest.setY(y);
 				quest.onCreated();
-				new CreateObjectResponseMessage(quest, null).sendToAll(context.getPlayer().getServer());
+				new CreateObjectResponseMessage(quest, null).sendToAll(sp.getServer());
 
 				Task task = type.createTask(file.newID(), quest);
 				task.readData(nbt);
 				task.onCreated();
 				CompoundTag extra = new CompoundTag();
 				extra.putString("type", type.getTypeForNBT());
-				new CreateObjectResponseMessage(task, extra).sendToAll(context.getPlayer().getServer());
+				new CreateObjectResponseMessage(task, extra, sp.getUUID()).sendToAll(sp.getServer());
 
 				file.refreshIDMap();
 				file.clearCachedData();
