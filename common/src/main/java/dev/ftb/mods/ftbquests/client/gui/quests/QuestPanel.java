@@ -42,8 +42,8 @@ public class QuestPanel extends Panel {
 	private static final ImageIcon DEFAULT_DEPENDENCY_LINE_TEXTURE = (ImageIcon) Icon.getIcon(FTBQuestsAPI.MOD_ID + ":textures/gui/dependency.png");
 
 	private final QuestScreen questScreen;
-	private double questX = 0;
-	private double questY = 0;
+	protected double questX = 0;
+	protected double questY = 0;
 	double centerQuestX = 0;
 	double centerQuestY = 0;
 	QuestButton mouseOverQuest = null;
@@ -544,7 +544,7 @@ public class QuestPanel extends Panel {
 		}).openGui();
 	}
 
-	private void copyAndCreateTask(Task task, double qx, double qy) {
+	public void copyAndCreateTask(Task task, double qx, double qy) {
 		Task newTask = QuestObjectBase.copy(task, () -> TaskType.createTask(0L, new Quest(0L, questScreen.selectedChapter), task.getType().getTypeId().toString()));
 		if (newTask != null) {
 			new CreateTaskAtMessage(questScreen.selectedChapter, qx, qy, newTask).sendToServer();
@@ -591,7 +591,6 @@ public class QuestPanel extends Panel {
 			questScreen.addZoom(key.is(GLFW.GLFW_KEY_MINUS) ? -1D : 1D);
 			return true;
 		}
-
 		return super.keyPressed(key);
 	}
 
