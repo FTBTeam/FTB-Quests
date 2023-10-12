@@ -544,7 +544,7 @@ public class QuestPanel extends Panel {
 		}).openGui();
 	}
 
-	public void copyAndCreateTask(Task task, double qx, double qy) {
+	private void copyAndCreateTask(Task task, double qx, double qy) {
 		Task newTask = QuestObjectBase.copy(task, () -> TaskType.createTask(0L, new Quest(0L, questScreen.selectedChapter), task.getType().getTypeId().toString()));
 		if (newTask != null) {
 			new CreateTaskAtMessage(questScreen.selectedChapter, qx, qy, newTask).sendToServer();
