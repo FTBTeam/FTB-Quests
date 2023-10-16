@@ -233,8 +233,8 @@ public final class Chapter extends QuestObject {
 		int flags = 0;
 		flags = Bits.setFlag(flags, 0x01, alwaysInvisible);
 		flags = Bits.setFlag(flags, 0x02, defaultHideDependencyLines);
-		flags = Bits.setFlag(flags, 0x08, hideQuestDetailsUntilStartable);
-		flags = Bits.setFlag(flags, 0x04, hideQuestUntilDepsVisible);
+		flags = Bits.setFlag(flags, 0x04, hideQuestDetailsUntilStartable);
+		flags = Bits.setFlag(flags, 0x08, hideQuestUntilDepsVisible);
 		flags = Bits.setFlag(flags, 0x10, defaultRepeatable);
 		flags = Bits.setFlag(flags, 0x20, consumeItems != Tristate.DEFAULT);
 		flags = Bits.setFlag(flags, 0x40, consumeItems == Tristate.TRUE);
