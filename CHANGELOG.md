@@ -8,6 +8,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 * Fixed "Hide Quest Details Until Startable" and "Hide Quests Until Dependencies Visible" chapter properties getting switched during server -> client sync
+* Cleaned up stale kubjes support files (kubejs.classfilter.txt / kubejs.plugins.txt) - they're in FTB XMod Compat now
+* Fixed creating a quest in multiplayer causing the quest view panel to open for all admin players
+  * Now only opens for the player who created the quest
 
 ## [2001.1.6]
 
