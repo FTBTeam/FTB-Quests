@@ -1,1 +1,0 @@
-dev.ftb.mods.ftbquests.integration.kubejs.KubeJSIntegration

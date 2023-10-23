@@ -9,6 +9,9 @@ import dev.ftb.mods.ftbquests.quest.ServerQuestFile;
 import dev.ftb.mods.ftbquests.util.NetUtils;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.TickTask;
+import net.minecraft.server.level.ServerPlayer;
 import org.jetbrains.annotations.Nullable;
 
 /**
@@ -50,7 +53,7 @@ public class CreateObjectMessage extends BaseC2SMessage {
 
 	@Override
 	public void handle(NetworkManager.PacketContext context) {
-		if (NetUtils.canEdit(context)) {
+		if (NetUtils.canEdit(context) && context.getPlayer() instanceof ServerPlayer sp) {
 			QuestObjectBase object = ServerQuestFile.INSTANCE.create(ServerQuestFile.INSTANCE.newID(), type, parent, extra == null ? new CompoundTag() : extra);
 			object.readData(nbt);
 			object.onCreated();
@@ -58,7 +61,7 @@ public class CreateObjectMessage extends BaseC2SMessage {
 			object.getQuestFile().clearCachedData();
 			object.getQuestFile().markDirty();
 
-			new CreateObjectResponseMessage(object, extra).sendToAll(context.getPlayer().getServer());
+			new CreateObjectResponseMessage(object, extra, sp.getUUID()).sendToAll(sp.getServer());
 		}
 	}
 }
