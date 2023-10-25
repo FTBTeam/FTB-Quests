@@ -6,6 +6,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [2001.1.7]
 
+### Added
+* Added new editor mode hotkeys for copying & pasting selected quest (thanks @adamico)
+  * Ctrl-C copies the selected quest, if any. Note: currently requires exactly one quest to be selected, copying multiples is not supported at this time.
+  * Ctrl-V pastes the copied quest
+  * Ctrl-Shift-V pastes the copied quest without dependencies
+  * Ctrl-Alt-V pastes the copied quest as a quest link
+* Added new editor mode hotkey Delete to delete selected quests
+  * Shift-Delete can also be used, to delete selected quests with no confirmation - beware
+
 ### Fixed
 * Fixed "Hide Quest Details Until Startable" and "Hide Quests Until Dependencies Visible" chapter properties getting switched during server -> client sync
 * Cleaned up stale kubjes support files (kubejs.classfilter.txt / kubejs.plugins.txt) - they're in FTB XMod Compat now
