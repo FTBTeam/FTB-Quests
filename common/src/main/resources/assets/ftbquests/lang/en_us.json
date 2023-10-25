@@ -502,5 +502,6 @@
 	"commands.ftbquests.export_rewards_to_chest.usage": "/ftbquests export_rewards_to_chest <reward_table>",
 	"commands.ftbquests.export_rewards_to_chest.text": "Exported %s / %s items from '%s'",
 	"ftbquests.ui.old_scroll_wheel": "Old-style Scroll Wheel Behavior",
-	"ftbquests.ui.old_scroll_wheel.tooltip": "When false, scroll wheel scrolls up & down; hold Shift to pan, Ctrl to zoom\nWhen true, scroll wheel only zooms (1.19 and earlier behavior)"
+	"ftbquests.ui.old_scroll_wheel.tooltip": "When false, scroll wheel scrolls up & down; hold Shift to pan, Ctrl to zoom\nWhen true, scroll wheel only zooms (1.19 and earlier behavior)",
+	"ftbquests.objects": "%d object(s)"
 }
