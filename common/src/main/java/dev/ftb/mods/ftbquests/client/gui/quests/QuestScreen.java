@@ -14,9 +14,12 @@ import dev.ftb.mods.ftblibrary.util.client.ClientUtils;
 import dev.ftb.mods.ftbquests.api.FTBQuestsAPI;
 import dev.ftb.mods.ftbquests.client.ClientQuestFile;
 import dev.ftb.mods.ftbquests.client.FTBQuestsClient;
+import dev.ftb.mods.ftbquests.client.gui.CustomToast;
 import dev.ftb.mods.ftbquests.client.gui.FTBQuestsTheme;
 import dev.ftb.mods.ftbquests.client.gui.SelectQuestObjectScreen;
 import dev.ftb.mods.ftbquests.net.ChangeProgressMessage;
+import dev.ftb.mods.ftbquests.net.CopyQuestMessage;
+import dev.ftb.mods.ftbquests.net.CreateObjectMessage;
 import dev.ftb.mods.ftbquests.net.EditObjectMessage;
 import dev.ftb.mods.ftbquests.quest.*;
 import dev.ftb.mods.ftbquests.quest.reward.RandomReward;
@@ -31,6 +34,7 @@ import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.toasts.SystemToast;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.renderer.Rect2i;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.util.Mth;
@@ -175,10 +179,6 @@ public class QuestScreen extends BaseScreen {
 		}
 	}
 
-	public void addObjectMenuItems(List<ContextMenuItem> contextMenu, Runnable gui, QuestObjectBase object) {
-		addObjectMenuItems(contextMenu, gui, object, object instanceof Movable m ? m : null);
-	}
-
 	/**
 	 * Add any relevant context menu entries for the given quest object
 	 *
@@ -198,12 +198,10 @@ public class QuestScreen extends BaseScreen {
 		);
 
 		if (object instanceof QuestLink link) {
-			link.getQuest().ifPresent(quest -> {
-				contextMenu.add(new ContextMenuItem(Component.translatable("ftbquests.gui.edit_linked_quest"),
-						ThemeProperties.EDIT_ICON.get(),
-						() -> quest.onEditButtonClicked(gui))
-				);
-			});
+			link.getQuest().ifPresent(quest -> contextMenu.add(new ContextMenuItem(Component.translatable("ftbquests.gui.edit_linked_quest"),
+					ThemeProperties.EDIT_ICON.get(),
+					() -> quest.onEditButtonClicked(gui))
+			));
 		}
 
 		if (!subGroup.getValues().isEmpty()) {
@@ -318,6 +316,67 @@ public class QuestScreen extends BaseScreen {
 		return true;
 	}
 
+	private boolean copySelectedQuests() {
+		Collection<Quest> quests = getSelectedQuests();
+
+		if (quests.size() > 1) {
+			Minecraft.getInstance().getToasts().addToast(new CustomToast(Component.translatable("ftbquests.gui.error"), Icons.BARRIER, Component.translatable("ftbquests.quest.cannot_copy_many")));
+			return false;
+		}
+		for (Quest q : quests) {
+			setClipboardString(q.getCodeString());
+			Minecraft.getInstance().getToasts().addToast(new CustomToast(Component.translatable("ftbquests.quest.copied"), Icons.INFO, Component.literal(q.getTitle().getString())));
+		}
+
+		return true;
+	}
+
+	private boolean pasteSelectedQuests(boolean withDeps) {
+		String clip = getClipboardString();
+		if (clip.isEmpty()) return false;
+
+		Quest quest = file.getQuest(Long.valueOf(clip, 16));
+		if (quest == null) return false;
+
+		double snap = 1D / file.getGridScale();
+		double qx = Mth.floor(questPanel.questX * snap + 0.5D) / snap;
+		double qy = Mth.floor(questPanel.questY * snap + 0.5D) / snap;
+
+		new CopyQuestMessage(quest, selectedChapter, qx, qy, withDeps).sendToServer();
+		return true;
+	}
+
+	private boolean pasteSelectedQuestLinks() {
+		String clip = getClipboardString();
+		if (clip.isEmpty()) return false;
+
+        long questId = Long.valueOf(clip, 16);
+		if (file.getQuest(Long.valueOf(clip, 16)) == null) return false;
+
+		double snap = 1D / file.getGridScale();
+		double qx = Mth.floor(questPanel.questX * snap + 0.5D) / snap;
+		double qy = Mth.floor(questPanel.questY * snap + 0.5D) / snap;
+
+		QuestLink link = new QuestLink(0L, selectedChapter, questId);
+		link.setPosition(qx, qy);
+		new CreateObjectMessage(link, new CompoundTag(), false).sendToServer();
+		return true;
+	}
+
+	void deleteSelectedObjects() {
+		selectedObjects.forEach(movable -> {
+			if (movable instanceof Quest q) {
+				file.deleteObject(q.id);
+			} else if (movable instanceof QuestLink ql) {
+				file.deleteObject(ql.id);
+			} else if (movable instanceof ChapterImage img) {
+				img.getChapter().removeImage(img);
+				new EditObjectMessage(img.getChapter()).sendToServer();
+			}
+		});
+		selectedObjects.clear();
+	}
+
 	@Override
 	public boolean keyPressed(Key key) {
 		if (key.esc()) {
@@ -380,13 +439,28 @@ public class QuestScreen extends BaseScreen {
 			return true;
 		}
 
-		if (key.modifiers.control() && selectedChapter != null && file.canEdit()) {
+		if (!file.canEdit()) {
+			return false;
+		}
+
+		// all edit-mode keybinds handled below here
+
+		if (key.is(GLFW.GLFW_KEY_DELETE) && !selectedObjects.isEmpty()) {
+			if (!isShiftKeyDown()) {
+				Component title = Component.translatable("delete_item", Component.translatable("ftbquests.objects", selectedObjects.size()));
+				getGui().openYesNo(title, Component.empty(), this::deleteSelectedObjects);
+			} else {
+				deleteSelectedObjects();
+			}
+		} else if (key.modifiers.control()) {
 			double step = key.modifiers.shift() ? 0.1D : 0.5D;
 
 			switch (key.keyCode) {
 				case GLFW.GLFW_KEY_A -> {
-					selectedObjects.addAll(selectedChapter.getQuests());
-					selectedObjects.addAll(selectedChapter.getQuestLinks());
+					if (selectedChapter != null) {
+						selectedObjects.addAll(selectedChapter.getQuests());
+						selectedObjects.addAll(selectedChapter.getQuestLinks());
+					}
 					return true;
 				}
 				case GLFW.GLFW_KEY_D -> {
@@ -404,6 +478,16 @@ public class QuestScreen extends BaseScreen {
 				}
 				case GLFW.GLFW_KEY_RIGHT -> {
 					return moveSelectedQuests(step, 0D);
+				}
+				case GLFW.GLFW_KEY_C -> {
+					return copySelectedQuests();
+				}
+				case GLFW.GLFW_KEY_V -> {
+					if (key.modifiers.alt()) {
+						return pasteSelectedQuestLinks();
+					} else {
+						return pasteSelectedQuests(!key.modifiers.shift());
+					}
 				}
 			}
 		}
