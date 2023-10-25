@@ -179,10 +179,6 @@ public class QuestScreen extends BaseScreen {
 		}
 	}
 
-	public void addObjectMenuItems(List<ContextMenuItem> contextMenu, Runnable gui, QuestObjectBase object) {
-		addObjectMenuItems(contextMenu, gui, object, object instanceof Movable m ? m : null);
-	}
-
 	/**
 	 * Add any relevant context menu entries for the given quest object
 	 *
@@ -363,8 +359,22 @@ public class QuestScreen extends BaseScreen {
 
 		QuestLink link = new QuestLink(0L, selectedChapter, questId);
 		link.setPosition(qx, qy);
-		new CreateObjectMessage(link, new CompoundTag()).sendToServer();
+		new CreateObjectMessage(link, new CompoundTag(), false).sendToServer();
 		return true;
+	}
+
+	void deleteSelectedObjects() {
+		selectedObjects.forEach(movable -> {
+			if (movable instanceof Quest q) {
+				file.deleteObject(q.id);
+			} else if (movable instanceof QuestLink ql) {
+				file.deleteObject(ql.id);
+			} else if (movable instanceof ChapterImage img) {
+				img.getChapter().removeImage(img);
+				new EditObjectMessage(img.getChapter()).sendToServer();
+			}
+		});
+		selectedObjects.clear();
 	}
 
 	@Override
@@ -429,13 +439,28 @@ public class QuestScreen extends BaseScreen {
 			return true;
 		}
 
-		if (key.modifiers.control() && selectedChapter != null && file.canEdit()) {
+		if (!file.canEdit()) {
+			return false;
+		}
+
+		// all edit-mode keybinds handled below here
+
+		if (key.is(GLFW.GLFW_KEY_DELETE) && !selectedObjects.isEmpty()) {
+			if (!isShiftKeyDown()) {
+				Component title = Component.translatable("delete_item", Component.translatable("ftbquests.objects", selectedObjects.size()));
+				getGui().openYesNo(title, Component.empty(), this::deleteSelectedObjects);
+			} else {
+				deleteSelectedObjects();
+			}
+		} else if (key.modifiers.control()) {
 			double step = key.modifiers.shift() ? 0.1D : 0.5D;
 
 			switch (key.keyCode) {
 				case GLFW.GLFW_KEY_A -> {
-					selectedObjects.addAll(selectedChapter.getQuests());
-					selectedObjects.addAll(selectedChapter.getQuestLinks());
+					if (selectedChapter != null) {
+						selectedObjects.addAll(selectedChapter.getQuests());
+						selectedObjects.addAll(selectedChapter.getQuestLinks());
+					}
 					return true;
 				}
 				case GLFW.GLFW_KEY_D -> {

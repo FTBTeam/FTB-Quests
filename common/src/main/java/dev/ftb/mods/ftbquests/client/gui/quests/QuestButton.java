@@ -161,7 +161,7 @@ public class QuestButton extends Button implements QuestPositionableButton {
 							this::bulkChangeSize));
 					contextMenu.add(new ContextMenuItem(Component.translatable("selectServer.delete"),
 							ThemeProperties.DELETE_ICON.get(quest),
-							this::deleteSelectedObjects)
+							questScreen::deleteSelectedObjects)
 							.setYesNoText(Component.translatable("delete_item", Component.translatable("ftbquests.quests").append(" [" + questScreen.selectedObjects.size() + "]"))));
 				}
 
@@ -246,20 +246,6 @@ public class QuestButton extends Button implements QuestPositionableButton {
 		}
 
 		getGui().openContextMenu(contextMenu2);
-	}
-
-	private void deleteSelectedObjects() {
-		questScreen.selectedObjects.forEach(movable -> {
-			if (movable instanceof Quest q) {
-				questScreen.file.deleteObject(q.id);
-			} else if (movable instanceof QuestLink ql) {
-				questScreen.file.deleteObject(ql.id);
-			} else if (movable instanceof ChapterImage img) {
-				img.getChapter().removeImage(img);
-				new EditObjectMessage(img.getChapter()).sendToServer();
-			}
-		});
-		questScreen.selectedObjects.clear();
 	}
 
 	private void editDependency(Quest quest, QuestObject object, boolean add) {
