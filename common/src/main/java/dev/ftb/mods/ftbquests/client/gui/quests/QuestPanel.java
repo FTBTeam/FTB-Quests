@@ -42,8 +42,8 @@ public class QuestPanel extends Panel {
 	private static final ImageIcon DEFAULT_DEPENDENCY_LINE_TEXTURE = (ImageIcon) Icon.getIcon(FTBQuestsAPI.MOD_ID + ":textures/gui/dependency.png");
 
 	private final QuestScreen questScreen;
-	private double questX = 0;
-	private double questY = 0;
+	protected double questX = 0;
+	protected double questY = 0;
 	double centerQuestX = 0;
 	double centerQuestY = 0;
 	QuestButton mouseOverQuest = null;
@@ -591,7 +591,6 @@ public class QuestPanel extends Panel {
 			questScreen.addZoom(key.is(GLFW.GLFW_KEY_MINUS) ? -1D : 1D);
 			return true;
 		}
-
 		return super.keyPressed(key);
 	}
 
