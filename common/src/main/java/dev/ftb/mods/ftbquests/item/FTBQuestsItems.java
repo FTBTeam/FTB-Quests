@@ -18,11 +18,6 @@ import java.util.function.Supplier;
 public class FTBQuestsItems {
 	public static final DeferredRegister<Item> ITEMS = DeferredRegister.create(FTBQuests.MOD_ID, Registry.ITEM_REGISTRY);
 
-	public static final RegistrySupplier<Item> BOOK = ITEMS.register("book", QuestBookItem::new);
-	public static final RegistrySupplier<Item> LOOTCRATE = ITEMS.register("lootcrate", LootCrateItem::new);
-	public static final RegistrySupplier<Item> MISSING_ITEM = ITEMS.register("missing_item", MissingItem::new);
-	public static final RegistrySupplier<Item> CUSTOM_ICON = ITEMS.register("custom_icon", CustomIconItem::new);
-
 	private static RegistrySupplier<Item> blockItem(String id, Supplier<Block> b) {
 		return ITEMS.register(id, () -> new BlockItem(b.get(), new Item.Properties().tab(FTBQuests.ITEM_GROUP)));
 	}
@@ -31,8 +26,14 @@ public class FTBQuestsItems {
 		return ITEMS.register(id, bi);
 	}
 
-	public static final RegistrySupplier<Item> BARRIER = ITEMS.register("barrier", QuestBarrierBlockItem::new);
-	public static final RegistrySupplier<Item> STAGE_BARRIER = ITEMS.register("stage_barrier", StageBarrierBlockItem::new);
+	public static final RegistrySupplier<Item> BOOK = ITEMS.register("book", QuestBookItem::new);
+	public static final RegistrySupplier<Item> LOOTCRATE = ITEMS.register("lootcrate", LootCrateItem::new);
+	public static final RegistrySupplier<Item> MISSING_ITEM = ITEMS.register("missing_item", MissingItem::new);
+	public static final RegistrySupplier<Item> CUSTOM_ICON = ITEMS.register("custom_icon", CustomIconItem::new);
+	public static final RegistrySupplier<Item> TASK_SCREEN_CONFIGURATOR = ITEMS.register("task_screen_configurator", TaskScreenConfiguratorItem::new);
+
+	public static final RegistrySupplier<Item> BARRIER = blockItemFor("barrier", QuestBarrierBlockItem::new);
+	public static final RegistrySupplier<Item> STAGE_BARRIER = blockItemFor("stage_barrier", StageBarrierBlockItem::new);
 	public static final RegistrySupplier<Item> DETECTOR = blockItem("detector", FTBQuestsBlocks.DETECTOR);
 	public static final RegistrySupplier<Item> LOOT_CRATE_OPENER = blockItem("loot_crate_opener", FTBQuestsBlocks.LOOT_CRATE_OPENER);
 
@@ -44,7 +45,6 @@ public class FTBQuestsItems {
 			() -> new ScreenBlockItem(FTBQuestsBlocks.TASK_SCREEN_5.get(), ScreenSize.FIVE_X_FIVE));
 	public static final RegistrySupplier<Item> TASK_SCREEN_7 = blockItemFor("screen_7",
 			() -> new ScreenBlockItem(FTBQuestsBlocks.TASK_SCREEN_7.get(), ScreenSize.SEVEN_X_SEVEN));
-
 
 	public static void register() {
 		ITEMS.register();

@@ -54,6 +54,8 @@
 	"item.ftbquests.lootcrate.tooltip_2": "Sneak-right-click to open all in hand",
 	"item.ftbquests.custom_icon": "Custom Icon",
 	"item.ftbquests.custom_icon.tooltip": "Right-click on 'Icon' in editor to open custom image selector",
+	"item.ftbquests.task_screen_configurator": "Task Screen Configurator",
+	"item.ftbquests.task_screen_configurator.tooltip": "Sneak + Right-Click a Task Screen block to bind",
 	"ftbquests.rarity.common": "Common",
 	"ftbquests.rarity.uncommon": "Uncommon",
 	"ftbquests.rarity.rare": "Rare",
@@ -479,5 +481,11 @@
 	"commands.ftbquests.weigh_from_emc.invalid_id": "Invalid Reward Table ID!",
 	"commands.ftbquests.weigh_from_emc.text": "Changed item reward weight based on EMC in %s",
 	"commands.ftbquests.export_rewards_to_chest.usage": "/ftbquests export_rewards_to_chest <reward_table>",
-	"commands.ftbquests.export_rewards_to_chest.text": "Exported %s / %s items from '%s'"
+	"commands.ftbquests.export_rewards_to_chest.text": "Exported %s / %s items from '%s'",
+	"ftbquests.ui.old_scroll_wheel": "Old-style Scroll Wheel Behavior",
+	"ftbquests.ui.old_scroll_wheel.tooltip": "When false, scroll wheel scrolls up & down; hold Shift to pan, Ctrl to zoom\nWhen true, scroll wheel only zooms (1.19 and earlier behavior)",
+	"ftbquests.objects": "%d object(s)",
+	"ftbquests.message.configurator_bound": "Configurator Bound: %s",
+	"ftbquests.message.task_screen_inaccessible": "Task Screen is not accessible from here!",
+	"ftbquests.message.missing_task_screen": "Task Screen is missing!"
 }
