@@ -4,6 +4,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1902.5.7]
+
+### Added
+* Added a new Task Screen Configurator item, which can be used to remote-configure a Task Screen
+  * Sneak + right-click a Task Screen with the configurator to bind it
+  * Right-click the configurator to configure the Task Screen
+  * Limitation: Task Screen must be currently loaded and in same dimension as player
+
 ## [1902.5.6]
 
 ### Fixed
