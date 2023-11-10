@@ -1,0 +1,19 @@
+{
+	"type": "minecraft:crafting_shaped",
+	"group": "ftbquests:screen",
+	"result": {
+		"item": "ftbquests:task_screen_configurator"
+	},
+	"pattern": [
+		" S",
+		"T "
+	],
+	"key": {
+		"S": {
+			"item": "ftbquests:screen_1"
+		},
+		"T": {
+			"item": "minecraft:stick"
+		}
+	}
+}

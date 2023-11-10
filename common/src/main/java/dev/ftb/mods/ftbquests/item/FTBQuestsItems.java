@@ -33,6 +33,7 @@ public class FTBQuestsItems {
 
 	public static final RegistrySupplier<Item> BOOK = ITEMS.register("book", QuestBookItem::new);
 	public static final RegistrySupplier<Item> LOOTCRATE = ITEMS.register("lootcrate", LootCrateItem::new);
+	public static final RegistrySupplier<Item> TASK_SCREEN_CONFIGURATOR = ITEMS.register("task_screen_configurator", TaskScreenConfiguratorItem::new);
 
 	public static final RegistrySupplier<Item> MISSING_ITEM = ITEMS.register("missing_item", MissingItem::new);
 	public static final RegistrySupplier<Item> CUSTOM_ICON = ITEMS.register("custom_icon", CustomIconItem::new);
@@ -60,7 +61,8 @@ public class FTBQuestsItems {
 			TASK_SCREEN_1,
 			TASK_SCREEN_3,
 			TASK_SCREEN_5,
-			TASK_SCREEN_7
+			TASK_SCREEN_7,
+			TASK_SCREEN_CONFIGURATOR
 	);
 
 	public static void register() {
