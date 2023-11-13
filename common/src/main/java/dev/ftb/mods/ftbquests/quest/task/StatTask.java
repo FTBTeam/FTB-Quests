@@ -103,7 +103,7 @@ public class StatTask extends Task {
 
 	@Override
 	public void submitTask(TeamData teamData, ServerPlayer player, ItemStack craftedItem) {
-		if (teamData.isCompleted(this)) {
+		if (teamData.isCompleted(this) || !checkTaskSequence(teamData)) {
 			return;
 		}
 

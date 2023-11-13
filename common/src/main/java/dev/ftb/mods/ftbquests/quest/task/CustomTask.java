@@ -88,7 +88,7 @@ public class CustomTask extends Task {
 
 	@Override
 	public void submitTask(TeamData teamData, ServerPlayer player, ItemStack craftedItem) {
-		if (check != null && !teamData.isCompleted(this)) {
+		if (check != null && checkTaskSequence(teamData) && !teamData.isCompleted(this)) {
 			check.check(new Data(this, teamData), player);
 		}
 	}

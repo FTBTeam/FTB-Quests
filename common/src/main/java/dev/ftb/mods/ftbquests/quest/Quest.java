@@ -66,6 +66,7 @@ public final class Quest extends QuestObject implements Movable {
 	private Tristate canRepeat;
 	private boolean invisible;  // invisible to players (not the same as hidden!)
 	private int invisibleUntilTasks;  // invisible until at least X number of tasks have been completed
+	private Tristate requireSequentialTasks;
 
 	private Component cachedSubtitle = null;
 	private List<Component> cachedDescription = null;
@@ -104,6 +105,7 @@ public final class Quest extends QuestObject implements Movable {
 		ignoreRewardBlocking = false;
 		progressionMode = ProgressionMode.DEFAULT;
 		dependantIDs = new HashSet<>();
+		requireSequentialTasks = Tristate.DEFAULT;
 	}
 
 	@Override
@@ -126,7 +128,7 @@ public final class Quest extends QuestObject implements Movable {
 		return chapter.id;
 	}
 
-	public Collection<Task> getTasks() {
+	public List<Task> getTasks() {
 		return Collections.unmodifiableList(tasks);
 	}
 
@@ -197,6 +199,10 @@ public final class Quest extends QuestObject implements Movable {
 	@Override
 	public boolean isOptionalForProgression() {
 		return isOptional();
+	}
+
+	public boolean getRequireSequentialTasks() {
+		return requireSequentialTasks.get(chapter.isRequireSequentialTasks());
 	}
 
 	@Override
@@ -285,6 +291,7 @@ public final class Quest extends QuestObject implements Movable {
 		}
 
 		hideDetailsUntilStartable.write(nbt, "hide_details_until_startable");
+		requireSequentialTasks.write(nbt, "require_sequential_tasks");
 	}
 
 	@Override
@@ -346,6 +353,7 @@ public final class Quest extends QuestObject implements Movable {
 		ignoreRewardBlocking = nbt.getBoolean("ignore_reward_blocking");
 		progressionMode = ProgressionMode.NAME_MAP.get(nbt.getString("progression_mode"));
 		hideDetailsUntilStartable = Tristate.read(nbt, "hide_details_until_startable");
+		requireSequentialTasks = Tristate.read(nbt, "require_sequential_tasks");
 	}
 
 	@Override
@@ -368,6 +376,8 @@ public final class Quest extends QuestObject implements Movable {
 		flags = Bits.setFlag(flags, 0x1000, hideDetailsUntilStartable == Tristate.TRUE);
 		flags = Bits.setFlag(flags, 0x2000, canRepeat != Tristate.DEFAULT);
 		flags = Bits.setFlag(flags, 0x4000, canRepeat == Tristate.TRUE);
+		flags = Bits.setFlag(flags, 0x8000, requireSequentialTasks != Tristate.DEFAULT);
+		flags = Bits.setFlag(flags, 0x10000, requireSequentialTasks == Tristate.TRUE);
 		buffer.writeVarInt(flags);
 
 		hideUntilDepsVisible.write(buffer);
@@ -433,7 +443,6 @@ public final class Quest extends QuestObject implements Movable {
 		}
 
 		guidePage = Bits.getFlag(flags, 0x08) ? buffer.readUtf(Short.MAX_VALUE) : "";
-		//customClick = Bits.getFlag(flags, 32) ? data.readString() : "";
 
 		minRequiredDependencies = buffer.readVarInt();
 		dependencyRequirement = DependencyRequirement.NAME_MAP.read(buffer);
@@ -457,6 +466,7 @@ public final class Quest extends QuestObject implements Movable {
 		optional = Bits.getFlag(flags, 0x100);
 		invisibleUntilTasks = Bits.getFlag(flags, 0x400) ? buffer.readVarInt() : 0;
 		hideDetailsUntilStartable = Bits.getFlag(flags, 0x800) ? Bits.getFlag(flags, 0x1000) ? Tristate.TRUE : Tristate.FALSE : Tristate.DEFAULT;
+		requireSequentialTasks = Bits.getFlag(flags, 0x8000) ? Bits.getFlag(flags, 0x10000) ? Tristate.TRUE : Tristate.FALSE : Tristate.DEFAULT;
 
 		progressionMode = ProgressionMode.NAME_MAP.read(buffer);
 	}
@@ -656,6 +666,7 @@ public final class Quest extends QuestObject implements Movable {
 		misc.addBool("optional", optional, v -> optional = v, false);
 		misc.addBool("ignore_reward_blocking", ignoreRewardBlocking, v -> ignoreRewardBlocking = v, false);
 		misc.addEnum("progression_mode", progressionMode, v -> progressionMode = v, ProgressionMode.NAME_MAP);
+		misc.addTristate("require_sequential_tasks", requireSequentialTasks, v -> requireSequentialTasks = v);
 	}
 
 	public boolean shouldHideDependencyLines() {

@@ -43,6 +43,7 @@ public final class Chapter extends QuestObject {
 	private boolean hideQuestUntilDepsVisible;
 	private boolean defaultRepeatable;
 	private Tristate consumeItems;
+	private boolean requireSequentialTasks;
 
 	public Chapter(long id, BaseQuestFile file, ChapterGroup group) {
 		this(id, file, group, "");
@@ -67,6 +68,7 @@ public final class Chapter extends QuestObject {
 		hideQuestDetailsUntilStartable = false;
 		defaultRepeatable = false;
 		consumeItems = Tristate.DEFAULT;
+		requireSequentialTasks = false;
 	}
 
 	public void setDefaultQuestShape(String defaultQuestShape) {
@@ -106,6 +108,10 @@ public final class Chapter extends QuestObject {
 
 	public boolean isDefaultRepeatable() {
 		return defaultRepeatable;
+	}
+
+	public boolean isRequireSequentialTasks() {
+		return requireSequentialTasks;
 	}
 
 	public List<Quest> getQuests() {
@@ -174,6 +180,7 @@ public final class Chapter extends QuestObject {
 		if (hideQuestDetailsUntilStartable) nbt.putBoolean("hide_quest_details_until_startable", true);
 		if (hideQuestUntilDepsVisible) nbt.putBoolean("hide_quest_until_deps_visible", true);
 		if (defaultRepeatable) nbt.putBoolean("default_repeatable_quest", true);
+		if (requireSequentialTasks) nbt.putBoolean("require_sequential_tasks", true);
 	}
 
 	@Override
@@ -217,6 +224,7 @@ public final class Chapter extends QuestObject {
 		hideQuestDetailsUntilStartable = nbt.getBoolean("hide_quest_details_until_startable");
 		hideQuestUntilDepsVisible = nbt.getBoolean("hide_quest_until_deps_visible");
 		defaultRepeatable = nbt.getBoolean("default_repeatable_quest");
+		requireSequentialTasks = nbt.getBoolean("require_sequential_tasks");
 	}
 
 	@Override
@@ -238,6 +246,7 @@ public final class Chapter extends QuestObject {
 		flags = Bits.setFlag(flags, 0x10, defaultRepeatable);
 		flags = Bits.setFlag(flags, 0x20, consumeItems != Tristate.DEFAULT);
 		flags = Bits.setFlag(flags, 0x40, consumeItems == Tristate.TRUE);
+		flags = Bits.setFlag(flags, 0x80, requireSequentialTasks);
 		buffer.writeVarInt(flags);
 	}
 
@@ -263,6 +272,7 @@ public final class Chapter extends QuestObject {
 		hideQuestUntilDepsVisible = Bits.getFlag(flags, 0x08);
 		defaultRepeatable = Bits.getFlag(flags, 0x10);
 		consumeItems = Bits.getFlag(flags, 0x20) ? Bits.getFlag(flags, 0x40) ? Tristate.TRUE : Tristate.FALSE : Tristate.DEFAULT;
+		requireSequentialTasks = Bits.getFlag(flags, 0x80);
 	}
 
 	public int getIndex() {
@@ -420,6 +430,7 @@ public final class Chapter extends QuestObject {
 		misc.addEnum("progression_mode", progressionMode, v -> progressionMode = v, ProgressionMode.NAME_MAP);
 		misc.addBool("default_repeatable", defaultRepeatable, v -> defaultRepeatable = v, false);
 		misc.addTristate("consume_items", consumeItems, v -> consumeItems = v);
+		misc.addBool("require_sequential_tasks", requireSequentialTasks, v -> requireSequentialTasks = v, false);
 	}
 
 	@Override
