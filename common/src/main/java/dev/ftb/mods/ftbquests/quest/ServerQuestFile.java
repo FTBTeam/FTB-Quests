@@ -123,8 +123,7 @@ public class ServerQuestFile extends BaseQuestFile {
 			object.deleteSelf();
 			refreshIDMap();
 			markDirty();
-
-			getPath().ifPresent(path -> FileUtils.delete(getFolder().resolve(path).toFile()));
+			object.getPath().ifPresent(path -> FileUtils.delete(getFolder().resolve(path).toFile()));
 		}
 
 		new DeleteObjectResponseMessage(id).sendToAll(server);
