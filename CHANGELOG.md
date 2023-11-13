@@ -4,13 +4,23 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [2001.1.8]
+## [2001.2.0]
 
 ### Added
 * Added a new Task Screen Configurator item, which can be used to remote-configure a Task Screen
   * Sneak + right-click a Task Screen with the configurator to bind it
-  * Right-click the configurator to configure the Task Screen
+  * Right-click the configurator to configure the bound Task Screen
   * Limitation: Task Screen must be currently loaded and in same dimension as player
+* Added a new "Sequential Task Completion" quest setting (and chapter default)
+  * When true, tasks in the quest must be completed in the order they were added to the quest
+  * Later tasks won't even be shown (outside edit mode) in the quest view panel until previous tasks are completed
+* Added "Insert Link" button in the multiline quest editor
+  * This allows quest "hyperlinks" to be embedded in quest text; when clicked, the quest view jumps to the linked quest
+  * Prompts for a quest ID to link to when selected; ID's can be obtained by right-clicking any quest and selected "Copy ID"
+
+### Fixed
+* Item Reward icons in the quest view panel had no tooltip with default settings
+* Fixed chapter & chapter group deletions not persisting correctly (deleted chapters & groups reappeared after a server restart)
 
 ## [2001.1.7]
 
