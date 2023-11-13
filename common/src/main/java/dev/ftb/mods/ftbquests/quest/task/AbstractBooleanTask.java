@@ -24,7 +24,7 @@ public abstract class AbstractBooleanTask extends Task {
 
 	@Override
 	public void submitTask(TeamData teamData, ServerPlayer player, ItemStack craftedItem) {
-		if (!teamData.isCompleted(this) && canSubmit(teamData, player)) {
+		if (!teamData.isCompleted(this) && checkTaskSequence(teamData) && canSubmit(teamData, player)) {
 			teamData.setProgress(this, 1L);
 		}
 	}

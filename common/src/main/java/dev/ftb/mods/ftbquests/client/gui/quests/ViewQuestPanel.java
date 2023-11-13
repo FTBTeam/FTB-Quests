@@ -29,6 +29,7 @@ import dev.ftb.mods.ftbquests.quest.QuestObject;
 import dev.ftb.mods.ftbquests.quest.QuestObjectBase;
 import dev.ftb.mods.ftbquests.quest.reward.Reward;
 import dev.ftb.mods.ftbquests.quest.reward.RewardAutoClaim;
+import dev.ftb.mods.ftbquests.quest.task.Task;
 import dev.ftb.mods.ftbquests.quest.theme.QuestTheme;
 import dev.ftb.mods.ftbquests.quest.theme.property.ThemeProperties;
 import it.unimi.dsi.fastutil.longs.Long2IntMap;
@@ -167,10 +168,15 @@ public class ViewQuestPanel extends Panel {
 
 		int bsize = 18;
 
-		quest.getTasks().stream().map(task -> new TaskButton(panelTasks, task)).forEach(b -> {
-			panelTasks.add(b);
-			b.setSize(bsize, bsize);
-		});
+		boolean seq = quest.getRequireSequentialTasks();
+		for (Task task : quest.getTasks()) {
+			TaskButton taskButton = new TaskButton(panelTasks, task);
+			panelTasks.add(taskButton);
+			taskButton.setSize(bsize, bsize);
+			if (!canEdit && seq && !questScreen.file.selfTeamData.isCompleted(task)) {
+				break;
+			}
+		}
 
 		if (!canEdit && panelTasks.getWidgets().isEmpty()) {
 			DisabledButtonTextField noTasks = new DisabledButtonTextField(panelTasks, Component.translatable("ftbquests.gui.no_tasks"));

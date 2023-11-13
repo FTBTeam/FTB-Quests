@@ -288,6 +288,15 @@ public abstract class Task extends QuestObject {
 		submitTask(teamData, player, ItemStack.EMPTY);
 	}
 
+	protected final boolean checkTaskSequence(TeamData teamData) {
+		if (quest.getRequireSequentialTasks()) {
+			int idx = quest.getTasks().indexOf(this);
+			return idx >= 0 && (idx == 0 || teamData.isCompleted(quest.getTasks().get(idx - 1)));
+		} else {
+			return true;
+		}
+	}
+
 	public boolean checkOnLogin() {
 		return !consumesResources();
 	}
