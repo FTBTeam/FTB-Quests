@@ -2,6 +2,7 @@ package dev.ftb.mods.ftbquests.client.gui;
 
 import com.mojang.blaze3d.platform.InputConstants;
 import dev.ftb.mods.ftblibrary.config.*;
+import dev.ftb.mods.ftblibrary.config.ui.EditConfigFromStringScreen;
 import dev.ftb.mods.ftblibrary.config.ui.EditConfigScreen;
 import dev.ftb.mods.ftblibrary.icon.Color4I;
 import dev.ftb.mods.ftblibrary.icon.Icon;
@@ -14,8 +15,11 @@ import dev.ftb.mods.ftblibrary.ui.misc.NordColors;
 import dev.ftb.mods.ftblibrary.util.TooltipList;
 import dev.ftb.mods.ftblibrary.util.client.ImageComponent;
 import dev.ftb.mods.ftbquests.api.FTBQuestsAPI;
+import dev.ftb.mods.ftbquests.client.FTBQuestsClient;
+import dev.ftb.mods.ftbquests.client.gui.quests.QuestScreen;
 import dev.ftb.mods.ftbquests.client.gui.quests.ViewQuestPanel;
 import dev.ftb.mods.ftbquests.quest.Quest;
+import dev.ftb.mods.ftbquests.quest.QuestObject;
 import joptsimple.internal.Strings;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
@@ -31,6 +35,7 @@ import java.util.regex.Pattern;
 public class MultilineTextEditorScreen extends BaseScreen {
 	private static final Pattern STRIP_FORMATTING_PATTERN = Pattern.compile("(?i)&[0-9A-FK-OR]");
 	private static final int MAX_UNDO = 10;
+	protected static final String LINK_TEXT_TEMPLATE = "{ \"text\": \"%s\", \"underlined\": \"true\", \"clickEvent\": { \"action\": \"change_page\", \"value\": \"%016X\" } }";
 
 	private final Component title;
 	private final ListConfig<String, StringConfig> config;
@@ -41,6 +46,7 @@ public class MultilineTextEditorScreen extends BaseScreen {
 	private final MultilineTextBox textBox;
 	private final PanelScrollBar scrollBar;
 	private long ticksOpen = 0;  // ticks since opening (not creation), reset when gui returned to from image selector
+	private final String initialText;
 
 	private long lastChange = 0L;
 	private final Deque<HistoryElement> redoStack = new ArrayDeque<>();
@@ -53,7 +59,8 @@ public class MultilineTextEditorScreen extends BaseScreen {
 			InputConstants.KEY_R, this::resetFormatting,
 			InputConstants.KEY_P, () -> insertAtEndOfLine("\n" + Quest.PAGEBREAK_CODE),
 			InputConstants.KEY_M, this::openImageSelector,
-			InputConstants.KEY_Z, this::undoLast
+			InputConstants.KEY_Z, this::undoLast,
+			InputConstants.KEY_L, this::openLinkInsert
 	);
 
 	public MultilineTextEditorScreen(Component title, ListConfig<String, StringConfig> config, ConfigCallback callback) {
@@ -75,6 +82,8 @@ public class MultilineTextEditorScreen extends BaseScreen {
 
 		scrollBar = new PanelScrollBar(outerPanel, ScrollBar.Plane.VERTICAL, textBoxPanel);
 		scrollBar.setScrollStep(getTheme().getFontHeight());
+
+		initialText = textBox.getText();
 	}
 
 	private void onValueChanged(String newValue) {
@@ -139,8 +148,6 @@ public class MultilineTextEditorScreen extends BaseScreen {
 		} else if (key.enter() && Screen.hasShiftDown()) {
 			saveAndExit();
 			return true;
-		} else if (executeHotkey(key.keyCode, true)) {
-			return true;
 		} else if (textBox.isFocused()) {
 			textBox.keyPressed(key);
 			return true;
@@ -149,13 +156,17 @@ public class MultilineTextEditorScreen extends BaseScreen {
 		return false;
 	}
 
-	private boolean executeHotkey(int keycode, boolean checkModifier) {
+	@Override
+	public void keyReleased(Key key) {
+		// need to do this on keyReleased() so keypress doesn't pass through to any opened sub-screen
+		executeHotkey(key.keyCode, true);
+	}
+
+	private void executeHotkey(int keycode, boolean checkModifier) {
 		if (hotKeys.containsKey(keycode) && (!checkModifier || isHotKeyModifierPressed(keycode))) {
 			hotKeys.get(keycode).run();
 			textBox.setFocused(true);
-			return true;
 		}
-		return false;
 	}
 
 	@Override
@@ -182,6 +193,63 @@ public class MultilineTextEditorScreen extends BaseScreen {
 		return FTBQuestsTheme.INSTANCE;
 	}
 
+	private void openLinkInsert() {
+		StringConfig c = new StringConfig(null);
+		EditConfigFromStringScreen.open(c, "", "", Component.literal("Enter Quest ID"), accepted -> {
+			int pos = textBox.cursorPos();
+			if (accepted) {
+				try {
+					long questId = Long.valueOf(c.getValue(), 16);
+					QuestObject qo = FTBQuestsClient.getClientQuestFile().get(questId);
+					if (qo != null) {
+						doLinkInsertion(questId);
+					} else {
+						errorToPlayer("Unknown quest object id: %s", c.getValue());
+					}
+					run();
+				} catch (NumberFormatException e) {
+					errorToPlayer("Invalid quest object id: %s (%s)", c.getValue(), e.getMessage());
+				}
+			}
+			run();
+			textBox.seekCursor(Whence.ABSOLUTE, pos);
+		});
+	}
+
+	private void doLinkInsertion(long questID) {
+		if (textBox.hasSelection()) {
+			String text = textBox.getSelectedText();
+			if (!text.contains("\n")) {
+				// a selection which doesn't extend over multiple lines; replace the selection in a smart way
+				MultilineTextBox.StringExtents lineExtents = textBox.getLineView();
+				MultilineTextBox.StringExtents selectionExtents = textBox.getSelected();
+
+				List<String> parts = new ArrayList<>();
+				parts.add(textBox.getText().substring(lineExtents.start(), selectionExtents.start()));
+				parts.add(textBox.getText().substring(selectionExtents.start(), selectionExtents.end()));
+				parts.add(textBox.getText().substring(selectionExtents.end(), lineExtents.end()));
+
+				StringBuilder builder = new StringBuilder("[ ");
+				if (!parts.get(0).isEmpty()) builder.append("\"").append(parts.get(0)).append("\", ");
+				builder.append(String.format(LINK_TEXT_TEMPLATE, parts.get(1), questID)).append(", ");
+				if (!parts.get(2).isEmpty()) builder.append("\"").append(parts.get(2)).append("\"");
+				builder.append(" ]");
+
+				textBox.selectCurrentLine();
+				textBox.insertText(builder.toString());
+
+				return;
+			}
+		}
+
+		// no selection; just insert a new line
+		insertAtEndOfLine(String.format("\n" + LINK_TEXT_TEMPLATE, "EDIT HERE", questID));
+	}
+
+	private void errorToPlayer(String msg, Object... args) {
+		QuestScreen.displayError(Component.literal(String.format(msg, args)).withStyle(ChatFormatting.RED));
+	}
+
 	private void openImageSelector() {
 		int cursor = textBox.cursorPos();
 
@@ -204,7 +272,11 @@ public class MultilineTextEditorScreen extends BaseScreen {
 	}
 
 	private void cancel() {
-		callback.save(false);
+		if (!textBox.getText().equals(initialText)) {
+			getGui().openYesNo(Component.translatable("ftbquests.gui.confirm_esc"), Component.empty(), () -> callback.save(false));
+		} else {
+			callback.save(false);
+		}
 	}
 
 	private void saveAndExit() {
@@ -279,6 +351,7 @@ public class MultilineTextEditorScreen extends BaseScreen {
 		public TextBoxPanel(Panel outerPanel) {
 			super(outerPanel);
 		}
+		private int cursorPos;
 
 		@Override
 		public void addWidgets() {
@@ -286,10 +359,17 @@ public class MultilineTextEditorScreen extends BaseScreen {
 		}
 
 		@Override
+		public void refreshWidgets() {
+			cursorPos = textBox.cursorPos();
+
+			super.refreshWidgets();
+		}
+
+		@Override
 		public void alignWidgets() {
 			textBox.setWidth(width - 3);  // also forces height recalculation based on contents
 			setScrollY(0);
-			textBox.seekCursor(Whence.ABSOLUTE, 0);
+			textBox.seekCursor(Whence.ABSOLUTE, cursorPos);
 		}
 
 		@Override
@@ -310,6 +390,7 @@ public class MultilineTextEditorScreen extends BaseScreen {
 		private final ToolbarButton pageBreakButton;
 		private final ToolbarButton imageButton;
 		private final ToolbarButton undoButton;
+		private final ToolbarButton linkButton;
 
 		public ToolbarPanel(Panel outerPanel) {
 			super(outerPanel);
@@ -335,6 +416,9 @@ public class MultilineTextEditorScreen extends BaseScreen {
 					.withTooltip(hotkey("Alt + S"));
 			colorButton = new ToolbarButton(this, Component.empty(), Icons.COLOR_RGB,
 					this::openColorContextMenu);
+			linkButton = new ToolbarButton(this, Component.literal("L"),
+					() -> executeHotkey(InputConstants.KEY_L, false))
+					.withTooltip(Component.translatable("ftbquests.gui.insert_link"), hotkey("Alt + L"));
 			resetButton = new ToolbarButton(this, Component.literal("r"),
 					() -> executeHotkey(InputConstants.KEY_R, false))
 					.withTooltip(Component.translatable("ftbquests.gui.clear_formatting"), hotkey("Alt + R"));
@@ -382,6 +466,7 @@ public class MultilineTextEditorScreen extends BaseScreen {
 					underlineButton,
 					strikethroughButton,
 					colorButton,
+					linkButton,
 					resetButton,
 					pageBreakButton,
 					imageButton,
@@ -398,10 +483,11 @@ public class MultilineTextEditorScreen extends BaseScreen {
 			underlineButton.setPosAndSize(59, 1, 16, 16);
 			strikethroughButton.setPosAndSize(75, 1, 16, 16);
 			colorButton.setPosAndSize(91, 1, 16, 16);
-			resetButton.setPosAndSize(107, 1, 16, 16);
-			pageBreakButton.setPosAndSize(133, 1, 16, 16);
-			imageButton.setPosAndSize(149, 1, 16, 16);
-			undoButton.setPosAndSize(175, 1, 16, 16);
+			linkButton.setPosAndSize(107, 1, 16, 16);
+			resetButton.setPosAndSize(123, 1, 16, 16);
+			pageBreakButton.setPosAndSize(149, 1, 16, 16);
+			imageButton.setPosAndSize(165, 1, 16, 16);
+			undoButton.setPosAndSize(191, 1, 16, 16);
 
 			cancelButton.setPosAndSize(width - 17, 1, 16, 16);
 		}
