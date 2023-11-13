@@ -33,6 +33,7 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.item.ItemStack;
 
 import java.util.EnumSet;
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
@@ -290,8 +291,9 @@ public abstract class Task extends QuestObject {
 
 	protected final boolean checkTaskSequence(TeamData teamData) {
 		if (quest.getRequireSequentialTasks()) {
-			int idx = quest.getTasks().indexOf(this);
-			return idx >= 0 && (idx == 0 || teamData.isCompleted(quest.getTasks().get(idx - 1)));
+			List<Task> tasks = quest.getTasksAsList();
+			int idx = tasks.indexOf(this);
+			return idx >= 0 && (idx == 0 || teamData.isCompleted(tasks.get(idx - 1)));
 		} else {
 			return true;
 		}

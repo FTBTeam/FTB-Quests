@@ -128,7 +128,11 @@ public final class Quest extends QuestObject implements Movable {
 		return chapter.id;
 	}
 
-	public List<Task> getTasks() {
+	public Collection<Task> getTasks() {
+		return Collections.unmodifiableList(tasks);
+	}
+
+	public List<Task> getTasksAsList() {
 		return Collections.unmodifiableList(tasks);
 	}
 
