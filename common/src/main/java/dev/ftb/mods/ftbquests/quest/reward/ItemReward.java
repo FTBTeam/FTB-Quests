@@ -171,12 +171,6 @@ public class ItemReward extends Reward {
 
 	@Override
 	@Environment(EnvType.CLIENT)
-	public boolean addTitleInMouseOverText() {
-		return !getTitle().getString().equals(getAltTitle().getString());
-	}
-
-	@Override
-	@Environment(EnvType.CLIENT)
 	public Optional<PositionedIngredient> getIngredient(Widget widget) {
 		return PositionedIngredient.of(item, widget, true);
 	}
