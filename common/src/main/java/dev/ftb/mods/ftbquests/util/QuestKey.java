@@ -1,6 +1,6 @@
 package dev.ftb.mods.ftbquests.util;
 
-import com.mojang.util.UUIDTypeAdapter;
+import com.mojang.util.UndashedUuid;
 import dev.ftb.mods.ftbquests.quest.QuestObjectBase;
 import net.minecraft.network.FriendlyByteBuf;
 import org.jetbrains.annotations.NotNull;
@@ -21,7 +21,7 @@ public final class QuestKey implements Comparable<QuestKey> {
 	}
 
 	public static QuestKey of(String string) {
-		return of(UUIDTypeAdapter.fromString(string.substring(0, 32)), QuestObjectBase.parseCodeString(string.substring(33)));
+		return of(UndashedUuid.fromString(string.substring(0, 32)), QuestObjectBase.parseCodeString(string.substring(33)));
 	}
 
 	private QuestKey(UUID uuid, long id) {
@@ -35,7 +35,7 @@ public final class QuestKey implements Comparable<QuestKey> {
 
 	@Override
 	public String toString() {
-		return UUIDTypeAdapter.fromUUID(uuid) + ":" + QuestObjectBase.getCodeString(id);
+		return UndashedUuid.toString(uuid) + ":" + QuestObjectBase.getCodeString(id);
 	}
 
 	@Override

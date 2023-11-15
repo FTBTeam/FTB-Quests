@@ -10,7 +10,7 @@ import dev.ftb.mods.ftbquests.quest.TeamData;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.ChatFormatting;
-import net.minecraft.advancements.Advancement;
+import net.minecraft.advancements.AdvancementHolder;
 import net.minecraft.advancements.AdvancementProgress;
 import net.minecraft.advancements.CriterionProgress;
 import net.minecraft.nbt.CompoundTag;
@@ -113,13 +113,12 @@ public class AdvancementTask extends AbstractBooleanTask {
 
 	@Override
 	public boolean canSubmit(TeamData teamData, ServerPlayer player) {
-		Advancement a = player.server.getAdvancements().getAdvancement(advancement);
-
-		if (a == null) {
+		AdvancementHolder advancementHolder = player.server.getAdvancements().get(advancement);
+		if (advancementHolder == null) {
 			return false;
 		}
 
-		AdvancementProgress progress = player.getAdvancements().getOrStartProgress(a);
+		AdvancementProgress progress = player.getAdvancements().getOrStartProgress(advancementHolder);
 
 		if (criterion.isEmpty()) {
 			return progress.isDone();

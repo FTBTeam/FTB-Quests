@@ -1,6 +1,6 @@
 package dev.ftb.mods.ftbquests.quest;
 
-import com.mojang.util.UUIDTypeAdapter;
+import com.mojang.util.UndashedUuid;
 import dev.architectury.platform.Platform;
 import dev.architectury.utils.Env;
 import dev.ftb.mods.ftblibrary.snbt.SNBT;
@@ -84,7 +84,7 @@ public class ServerQuestFile extends BaseQuestFile {
 
 					if (nbt != null) {
 						try {
-							UUID uuid = UUIDTypeAdapter.fromString(nbt.getString("uuid"));
+							UUID uuid = UndashedUuid.fromString(nbt.getString("uuid"));
 							TeamData data = new TeamData(uuid, this);
 							addData(data, true);
 							data.deserializeNBT(nbt);
