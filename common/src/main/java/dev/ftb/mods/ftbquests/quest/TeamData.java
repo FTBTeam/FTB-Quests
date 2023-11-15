@@ -1,6 +1,6 @@
 package dev.ftb.mods.ftbquests.quest;
 
-import com.mojang.util.UUIDTypeAdapter;
+import com.mojang.util.UndashedUuid;
 import dev.ftb.mods.ftblibrary.snbt.SNBT;
 import dev.ftb.mods.ftblibrary.snbt.SNBTCompoundTag;
 import dev.ftb.mods.ftbquests.FTBQuests;
@@ -309,7 +309,7 @@ public class TeamData {
 	public SNBTCompoundTag serializeNBT() {
 		SNBTCompoundTag nbt = new SNBTCompoundTag();
 		nbt.putInt("version", VERSION);
-		nbt.putString("uuid", UUIDTypeAdapter.fromUUID(teamId));
+		nbt.putString("uuid", UndashedUuid.toString(teamId));
 		nbt.putString("name", name);
 		nbt.putBoolean("lock", locked);
 		nbt.putBoolean("rewards_blocked", rewardsBlocked);
@@ -345,7 +345,7 @@ public class TeamData {
 		CompoundTag ppdTag = new CompoundTag();
 		perPlayerData.forEach((id, ppd) -> {
 			if (!ppd.hasDefaultValues()) {
-				ppdTag.put(UUIDTypeAdapter.fromUUID(id), ppd.writeNBT());
+				ppdTag.put(UndashedUuid.toString(id), ppd.writeNBT());
 			}
 		});
 		nbt.put("player_data", ppdTag);
@@ -391,7 +391,7 @@ public class TeamData {
 		CompoundTag ppdTag = nbt.getCompound("player_data");
 		for (String key : ppdTag.getAllKeys()) {
 			try {
-				UUID id = UUIDTypeAdapter.fromString(key);
+				UUID id = UndashedUuid.fromString(key);
 				perPlayerData.put(id, PerPlayerData.fromNBT(ppdTag.getCompound(key), file));
 			} catch (IllegalArgumentException e) {
 				FTBQuests.LOGGER.error("ignoring invalid player ID {} while loading per-player data for team {}", key, teamId);

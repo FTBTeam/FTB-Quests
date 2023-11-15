@@ -24,3 +24,4 @@ eclipse
 run
 .architectury-transformer/
 **/extra-mods-*
+.DS_Store
