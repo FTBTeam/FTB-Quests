@@ -20,6 +20,7 @@ import dev.ftb.mods.ftbquests.client.gui.quests.QuestScreen;
 import dev.ftb.mods.ftbquests.client.gui.quests.ViewQuestPanel;
 import dev.ftb.mods.ftbquests.quest.Quest;
 import dev.ftb.mods.ftbquests.quest.QuestObject;
+import dev.ftb.mods.ftbquests.quest.QuestObjectBase;
 import joptsimple.internal.Strings;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
@@ -198,18 +199,14 @@ public class MultilineTextEditorScreen extends BaseScreen {
 		EditConfigFromStringScreen.open(c, "", "", Component.literal("Enter Quest ID"), accepted -> {
 			int pos = textBox.cursorPos();
 			if (accepted) {
-				try {
-					long questId = Long.valueOf(c.getValue(), 16);
+				QuestObjectBase.parseHexId(c.getValue()).ifPresentOrElse(questId -> {
 					QuestObject qo = FTBQuestsClient.getClientQuestFile().get(questId);
 					if (qo != null) {
 						doLinkInsertion(questId);
 					} else {
 						errorToPlayer("Unknown quest object id: %s", c.getValue());
 					}
-					run();
-				} catch (NumberFormatException e) {
-					errorToPlayer("Invalid quest object id: %s (%s)", c.getValue(), e.getMessage());
-				}
+				}, () -> errorToPlayer("Invalid quest object id: %s", c.getValue()));
 			}
 			run();
 			textBox.seekCursor(Whence.ABSOLUTE, pos);

@@ -484,8 +484,7 @@ public class QuestPanel extends Panel {
 			String clip = getClipboardString();
 			MutableBoolean addedSeparator = new MutableBoolean(false);
 			if (!clip.isEmpty()) {
-				try {
-					long questId = Long.valueOf(clip, 16);
+				QuestObjectBase.parseHexId(clip).ifPresent(questId -> {
 					QuestObject qo = questScreen.file.get(questId);
 					if (qo instanceof Quest quest) {
 						contextMenu.add(ContextMenuItem.SEPARATOR);
@@ -510,8 +509,7 @@ public class QuestPanel extends Panel {
 						addedSeparator.setTrue();
 						contextMenu.add(new AddTaskButton.PasteTaskMenuItem(task, () -> copyAndCreateTask(task, qx, qy)));
 					}
-				} catch (NumberFormatException ignored) {
-				}
+				});
 			}
 			ChapterImageButton.getClipboard().ifPresent(clipImg -> {
 				if (!addedSeparator.getValue()) contextMenu.add(ContextMenuItem.SEPARATOR);
