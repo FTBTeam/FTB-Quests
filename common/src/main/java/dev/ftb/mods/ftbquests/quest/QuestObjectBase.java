@@ -100,6 +100,14 @@ public abstract class QuestObjectBase {
 		}
 	}
 
+	public static Optional<Long> parseHexId(String id) {
+		try {
+			return Optional.of(Long.parseLong(id, 16));
+		} catch (NumberFormatException e) {
+			return Optional.empty();
+		}
+	}
+
 	public static Optional<String> titleToID(String s) {
 		s = s.replace(' ', '_').replaceAll("\\W", "").toLowerCase().trim();
 
