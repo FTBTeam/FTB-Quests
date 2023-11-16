@@ -2,6 +2,7 @@ package dev.ftb.mods.ftbquests.quest.theme;
 
 import dev.ftb.mods.ftbquests.FTBQuests;
 import dev.ftb.mods.ftbquests.api.FTBQuestsAPI;
+import dev.ftb.mods.ftbquests.quest.QuestObjectBase;
 import dev.ftb.mods.ftbquests.quest.QuestObjectType;
 import dev.ftb.mods.ftbquests.quest.QuestShape;
 import dev.ftb.mods.ftbquests.quest.theme.property.ThemeProperties;
@@ -149,12 +150,8 @@ public class ThemeLoader implements ResourceManagerReloadListener {
 		} else if (sel.startsWith("#")) {
 			String s = sel.substring(1);
 			return s.isEmpty() ? null : new TagSelector(s);
-		}
-
-		try {
-			return new IDSelector(Long.valueOf(sel, 16));
-		} catch (Exception ex) {
-			return null;
+		} else {
+			return QuestObjectBase.parseHexId(sel).map(IDSelector::new).orElse(null);
 		}
 	}
 }

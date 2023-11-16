@@ -50,14 +50,12 @@ public class AddTaskButton extends Button {
 
 		String clip = getClipboardString();
 		if (!clip.isEmpty()) {
-			try {
-				long taskId = Long.valueOf(clip, 16);
+			QuestObjectBase.parseHexId(clip).ifPresent(taskId -> {
 				if (FTBQuestsAPI.api().getQuestFile(true).get(taskId) instanceof Task task) {
 					contextMenu.add(ContextMenuItem.SEPARATOR);
 					contextMenu.add(new PasteTaskMenuItem(task, () -> copyAndCreateTask(task)));
 				}
-			} catch (NumberFormatException ignored) {
-			}
+			});
 		}
 
 		getGui().openContextMenu(contextMenu);

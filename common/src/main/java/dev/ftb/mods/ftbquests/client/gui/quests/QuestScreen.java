@@ -335,32 +335,35 @@ public class QuestScreen extends BaseScreen {
 		String clip = getClipboardString();
 		if (clip.isEmpty()) return false;
 
-		Quest quest = file.getQuest(Long.valueOf(clip, 16));
-		if (quest == null) return false;
+		return QuestObjectBase.parseHexId(clip).map(id -> {
+			Quest quest = file.getQuest(id);
+			if (quest == null) return false;
 
-		double snap = 1D / file.getGridScale();
-		double qx = Mth.floor(questPanel.questX * snap + 0.5D) / snap;
-		double qy = Mth.floor(questPanel.questY * snap + 0.5D) / snap;
+			double snap = 1D / file.getGridScale();
+			double qx = Mth.floor(questPanel.questX * snap + 0.5D) / snap;
+			double qy = Mth.floor(questPanel.questY * snap + 0.5D) / snap;
 
-		new CopyQuestMessage(quest, selectedChapter, qx, qy, withDeps).sendToServer();
-		return true;
+			new CopyQuestMessage(quest, selectedChapter, qx, qy, withDeps).sendToServer();
+			return true;
+		}).orElse(false);
 	}
 
 	private boolean pasteSelectedQuestLinks() {
 		String clip = getClipboardString();
 		if (clip.isEmpty()) return false;
 
-        long questId = Long.valueOf(clip, 16);
-		if (file.getQuest(Long.valueOf(clip, 16)) == null) return false;
+		return QuestObjectBase.parseHexId(clip).map(id -> {
+			if (file.getQuest(id) == null) return false;
 
-		double snap = 1D / file.getGridScale();
-		double qx = Mth.floor(questPanel.questX * snap + 0.5D) / snap;
-		double qy = Mth.floor(questPanel.questY * snap + 0.5D) / snap;
+			double snap = 1D / file.getGridScale();
+			double qx = Mth.floor(questPanel.questX * snap + 0.5D) / snap;
+			double qy = Mth.floor(questPanel.questY * snap + 0.5D) / snap;
 
-		QuestLink link = new QuestLink(0L, selectedChapter, questId);
-		link.setPosition(qx, qy);
-		new CreateObjectMessage(link, new CompoundTag(), false).sendToServer();
-		return true;
+			QuestLink link = new QuestLink(0L, selectedChapter, id);
+			link.setPosition(qx, qy);
+			new CreateObjectMessage(link, new CompoundTag(), false).sendToServer();
+			return true;
+		}).orElse(false);
 	}
 
 	void deleteSelectedObjects() {
