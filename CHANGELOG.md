@@ -21,6 +21,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 * Item Reward icons in the quest view panel had no tooltip with default settings
 * Fixed chapter & chapter group deletions not persisting correctly (deleted chapters & groups reappeared after a server restart)
+* Fixed crash when pasting quests with invalid quest ID data in the clipboard
 
 ## [2001.1.7]
 

@@ -862,17 +862,14 @@ public class ViewQuestPanel extends Panel {
 			if (clickEvent == null) return false;
 
 			if (clickEvent.getAction() == ClickEvent.Action.CHANGE_PAGE) {
-				try {
-					long questId = Long.valueOf(clickEvent.getValue(), 16);
+				QuestObjectBase.parseHexId(clickEvent.getValue()).ifPresentOrElse(questId -> {
 					QuestObject qo = quest.getQuestFile().get(questId);
 					if (qo != null) {
 						questScreen.open(qo, false);
 					} else {
 						errorToPlayer("Unknown quest object id: %s", clickEvent.getValue());
 					}
-				} catch (NumberFormatException e) {
-					errorToPlayer("Invalid quest object id: %s (%s)",clickEvent.getValue(), e.getMessage());
-				}
+				}, () -> errorToPlayer("Invalid quest object id: %s", clickEvent.getValue()));
 				return true;
 			} else if (clickEvent.getAction() == ClickEvent.Action.OPEN_URL) {
 				try {
