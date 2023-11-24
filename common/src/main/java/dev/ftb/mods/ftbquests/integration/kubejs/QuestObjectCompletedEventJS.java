@@ -10,6 +10,7 @@ import dev.latvian.mods.kubejs.player.ServerPlayerJS;
 import dev.latvian.mods.kubejs.server.ServerEventJS;
 import dev.latvian.mods.kubejs.server.ServerJS;
 import net.fabricmc.loader.impl.util.ExceptionUtil;
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.jetbrains.annotations.Nullable;
 
 /**
@@ -56,7 +57,7 @@ public class QuestObjectCompletedEventJS extends ServerEventJS {
 			try {
 				throw new Exception();
 			} catch (Exception e) {
-				e.printStackTrace();
+				FTBQuests.LOGGER.error(ExceptionUtils.getStackTrace(e));
 			}
 		}
 
