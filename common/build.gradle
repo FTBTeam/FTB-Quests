@@ -5,7 +5,6 @@ dependencies {
 
 	modApi("dev.ftb.mods:ftb-library:${rootProject.ftb_library_version}") { transitive false }
 	modApi "dev.ftb.mods:ftb-teams:${rootProject.ftb_teams_version}"
-	modApi "dev.latvian.mods:item-filters:${rootProject.itemfilters_version}"
 }
 
 architectury {
