@@ -1,14 +1,24 @@
 package dev.ftb.mods.ftbquests;
 
+import dev.architectury.registry.ReloadListenerRegistry;
 import dev.architectury.utils.Env;
 import dev.architectury.utils.EnvExecutor;
+import dev.architectury.utils.GameInstance;
 import dev.ftb.mods.ftbquests.api.FTBQuestsAPI;
 import dev.ftb.mods.ftbquests.client.FTBQClientProxy;
 import dev.ftb.mods.ftbquests.client.FTBQuestsClient;
 import dev.ftb.mods.ftbquests.integration.RecipeModHelper;
+import dev.ftb.mods.ftbquests.integration.item_filtering.DisplayStacksCache;
+import dev.ftb.mods.ftbquests.net.ClearDisplayCacheMessage;
 import dev.ftb.mods.ftbquests.net.FTBQuestsNetHandler;
 import dev.ftb.mods.ftbquests.quest.reward.RewardTypes;
 import dev.ftb.mods.ftbquests.quest.task.TaskTypes;
+import net.minecraft.gametest.framework.GameTestServer;
+import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.server.packs.PackType;
+import net.minecraft.server.packs.resources.ResourceManager;
+import net.minecraft.server.packs.resources.ResourceManagerReloadListener;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -34,6 +44,8 @@ public class FTBQuests {
 
 		PROXY = EnvExecutor.getEnvSpecific(() -> FTBQClientProxy::new, () -> FTBQServerProxy::new);
 
+		ReloadListenerRegistry.register(PackType.SERVER_DATA, new TagReloadListener());
+
 		EnvExecutor.runInEnv(Env.CLIENT, () -> FTBQuestsClient::init);
 	}
 
@@ -49,5 +61,12 @@ public class FTBQuests {
 	}
 
 	public void setup() {
+	}
+
+	private static class TagReloadListener implements ResourceManagerReloadListener {
+		@Override
+		public void onResourceManagerReload(ResourceManager resourceManager) {
+			ClearDisplayCacheMessage.clearForAll(GameInstance.getServer());
+		}
 	}
 }

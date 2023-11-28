@@ -34,6 +34,7 @@ import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.core.RegistryAccess;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.StringTag;
 import net.minecraft.server.packs.PackType;
@@ -51,6 +52,7 @@ import net.minecraft.world.phys.BlockHitResult;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.function.Consumer;
 
 public class FTBQuestsClient {
@@ -286,5 +288,9 @@ public class FTBQuestsClient {
 			FTBQuestsItems.CREATIVE_TAB.get().buildContents(params);
 			CreativeModeTabs.searchTab().buildContents(params);
 		}
+	}
+
+	public static Optional<RegistryAccess> registryAccess() {
+		return Minecraft.getInstance().level == null ? Optional.empty() : Optional.of(Minecraft.getInstance().level.registryAccess());
 	}
 }

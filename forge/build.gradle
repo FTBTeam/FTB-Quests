@@ -29,7 +29,6 @@ dependencies {
 
 	modApi("dev.ftb.mods:ftb-library-forge:${rootProject.ftb_library_version}") { transitive false }
 	modApi("dev.ftb.mods:ftb-teams-forge:${rootProject.ftb_teams_version}") { transitive false }
-	modApi "dev.latvian.mods:item-filters-forge:${rootProject.itemfilters_version}"
 
 	common(project(path: ":common", configuration: "namedElements")) { transitive false }
 	shadowCommon(project(path: ":common", configuration: "transformProductionForge")) { transitive false }

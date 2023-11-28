@@ -10,10 +10,7 @@ import dev.architectury.registry.registries.RegistrarManager;
 import dev.ftb.mods.ftblibrary.config.Tristate;
 import dev.ftb.mods.ftbquests.FTBQuests;
 import dev.ftb.mods.ftbquests.integration.PermissionsHelper;
-import dev.ftb.mods.ftbquests.net.CreateObjectResponseMessage;
-import dev.ftb.mods.ftbquests.net.OpenQuestBookMessage;
-import dev.ftb.mods.ftbquests.net.SyncEditorPermissionMessage;
-import dev.ftb.mods.ftbquests.net.SyncQuestsMessage;
+import dev.ftb.mods.ftbquests.net.*;
 import dev.ftb.mods.ftbquests.quest.*;
 import dev.ftb.mods.ftbquests.quest.loot.RewardTable;
 import dev.ftb.mods.ftbquests.quest.loot.WeightedReward;
@@ -159,6 +156,10 @@ public class FTBQuestsCommands {
 						.executes(c -> openQuest(c.getSource().getPlayerOrException(), null))
 						.then(Commands.argument("quest_object", QuestObjectArgument.questObject(qob -> qob instanceof QuestObject))
 								.executes(c -> openQuest(c.getSource().getPlayerOrException(), c.getArgument("quest_object", QuestObjectBase.class))))
+				)
+				.then(Commands.literal("clear_item_display_cache")
+						.requires(FTBQuestsCommands::hasEditorPermission)
+						.executes(c -> clearDisplayCache(c.getSource()))
 				)
 		);
 	}
@@ -419,6 +420,12 @@ public class FTBQuestsCommands {
 
 		source.sendSuccess(() -> Component.translatable("commands.ftbquests.command.feedback.rewards_blocked", data, data.areRewardsBlocked()), false);
 
+		return 1;
+	}
+
+	private static int clearDisplayCache(CommandSourceStack source) {
+		ClearDisplayCacheMessage.clearForAll(source.getServer());
+		source.sendSuccess(() -> Component.translatable("commands.ftbquests.command.feedback.clear_display_cache"), false);
 		return 1;
 	}
 }

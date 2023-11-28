@@ -9,26 +9,31 @@ import dev.ftb.mods.ftblibrary.math.Bits;
 import dev.ftb.mods.ftblibrary.ui.Button;
 import dev.ftb.mods.ftblibrary.util.TooltipList;
 import dev.ftb.mods.ftbquests.FTBQuests;
+import dev.ftb.mods.ftbquests.api.FTBQuestsTags;
 import dev.ftb.mods.ftbquests.client.FTBQuestsClient;
 import dev.ftb.mods.ftbquests.client.gui.CustomToast;
 import dev.ftb.mods.ftbquests.client.gui.quests.ValidItemsScreen;
+import dev.ftb.mods.ftbquests.integration.item_filtering.ItemMatchingSystem;
 import dev.ftb.mods.ftbquests.item.FTBQuestsItems;
 import dev.ftb.mods.ftbquests.item.MissingItem;
 import dev.ftb.mods.ftbquests.net.FTBQuestsNetHandler;
 import dev.ftb.mods.ftbquests.quest.Quest;
 import dev.ftb.mods.ftbquests.quest.TeamData;
 import dev.ftb.mods.ftbquests.util.NBTUtils;
-import dev.latvian.mods.itemfilters.api.IItemFilter;
-import dev.latvian.mods.itemfilters.api.ItemFiltersAPI;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
+import net.minecraft.core.Holder;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.tags.TagKey;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
 
@@ -37,6 +42,11 @@ import java.util.List;
 import java.util.function.Predicate;
 
 public class ItemTask extends Task implements Predicate<ItemStack> {
+	@Deprecated(forRemoval = true)
+	// this will disappear in 1.20.2+
+	public static final TagKey<Item> CHECK_NBT_ITEM_FILTERS
+			= TagKey.create(Registries.ITEM, new ResourceLocation("itemfilters", "check_nbt"));
+
 	private ItemStack itemStack;
 	private long count;
 	private Tristate consumeItems;
@@ -149,9 +159,7 @@ public class ItemTask extends Task implements Predicate<ItemStack> {
 	}
 
 	public List<ItemStack> getValidDisplayItems() {
-		List<ItemStack> list = new ArrayList<>();
-		ItemFiltersAPI.getDisplayItemStacks(itemStack, list);
-		return list;
+		return ItemMatchingSystem.INSTANCE.getAllMatchingStacks(itemStack);
 	}
 
 	@Override
@@ -192,28 +200,21 @@ public class ItemTask extends Task implements Predicate<ItemStack> {
 			return true;
 		}
 
-		IItemFilter f = ItemFiltersAPI.getFilter(itemStack);
-		return f != null ? f.filter(itemStack, stack) : areItemStacksEqual(itemStack, stack);
-	}
-
-	private boolean areItemStacksEqual(ItemStack stackA, ItemStack stackB) {
-		if (stackA == stackB) {
-			return true;
-		} else if (stackA.getItem() != stackB.getItem()) {
-			return false;
-		} else if (!stackA.hasTag() && !stackB.hasTag()) {
-			return true;
-		} else {
-			return !shouldMatchNBT() || NBTUtils.compareNbt(stackA.getTag(), stackB.getTag(), weakNBTmatch, true);
-		}
+		return ItemMatchingSystem.INSTANCE.doesItemMatch(itemStack, stack, shouldMatchNBT(), weakNBTmatch);
 	}
 
 	private boolean shouldMatchNBT() {
 		return switch (matchNBT) {
 			case TRUE -> true;
 			case FALSE -> false;
-			case DEFAULT -> itemStack.getItem().builtInRegistryHolder().is(ItemFiltersAPI.CHECK_NBT_ITEM_TAG);
+			case DEFAULT -> hasNBTCheckTag();
 		};
+	}
+
+	private boolean hasNBTCheckTag() {
+		Holder.Reference<Item> itemReference = itemStack.getItem().builtInRegistryHolder();
+		return itemReference.is(FTBQuestsTags.Items.CHECK_NBT)
+				|| itemReference.is(CHECK_NBT_ITEM_FILTERS);  // TODO ditch in 1.20.2+
 	}
 
 	@Override
@@ -267,7 +268,8 @@ public class ItemTask extends Task implements Predicate<ItemStack> {
 			list.add(getTitle());
 		} else {
 			// use item's tooltip, but include a count with the item name (e.g. "3 x Stick") if appropriate
-			List<Component> lines = itemStack.getTooltipLines(FTBQuestsClient.getClientPlayer(), advanced ? TooltipFlag.Default.ADVANCED : TooltipFlag.Default.NORMAL);
+			ItemStack stack = getIcon() instanceof ItemIcon i ? i.getStack() : itemStack;
+			List<Component> lines = stack.getTooltipLines(FTBQuestsClient.getClientPlayer(), advanced ? TooltipFlag.Default.ADVANCED : TooltipFlag.Default.NORMAL);
 			if (!lines.isEmpty()) {
 				lines.set(0, getTitle());
 			} else {
