@@ -10,23 +10,21 @@ import dev.ftb.mods.ftblibrary.ui.input.MouseButton;
 import dev.ftb.mods.ftblibrary.ui.misc.ButtonListBaseScreen;
 import dev.ftb.mods.ftblibrary.util.TooltipList;
 import dev.ftb.mods.ftblibrary.util.client.PositionedIngredient;
+import dev.ftb.mods.ftbquests.api.ItemFilterAdapter;
 import dev.ftb.mods.ftbquests.client.gui.ContextMenuBuilder;
+import dev.ftb.mods.ftbquests.integration.item_filtering.ItemMatchingSystem;
 import dev.ftb.mods.ftbquests.net.EditObjectMessage;
 import dev.ftb.mods.ftbquests.quest.task.ItemTask;
 import dev.ftb.mods.ftbquests.quest.task.Task;
 import dev.ftb.mods.ftbquests.quest.theme.property.ThemeProperties;
-import dev.latvian.mods.itemfilters.api.IStringValueFilter;
-import dev.latvian.mods.itemfilters.api.ItemFiltersAPI;
-import dev.latvian.mods.itemfilters.api.ItemFiltersItems;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.ComponentContents;
 import net.minecraft.network.chat.MutableComponent;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.TagKey;
-import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Item;
 
 import java.util.List;
 import java.util.Optional;
@@ -66,19 +64,22 @@ public class TaskButton extends Button {
 			ContextMenuBuilder builder = ContextMenuBuilder.create(task, questScreen);
 
 			if (task instanceof ItemTask itemTask) {
-				var tags = itemTask.getItemStack().getItem().builtInRegistryHolder().tags().map(TagKey::location).toList();
-				if (!tags.isEmpty() && !ItemFiltersAPI.isFilter(itemTask.getItemStack())) {
-					builder.insertAtTop(List.of(new ContextMenuItem(Component.translatable("ftbquests.task.ftbquests.item.convert_tag"),
-							ThemeProperties.RELOAD_ICON.get(),
-							() -> {
-								ItemStack tagFilter = new ItemStack(ItemFiltersItems.TAG.get());
-								if (tags.size() == 1) {
-									convertToSingleTag(itemTask, tags, tagFilter);
-								} else {
-									new TagSelectionScreen(tags, tagFilter, itemTask).openGui();
-								}
-							})
-					));
+				var tags = itemTask.getItemStack().getItem().builtInRegistryHolder().tags().toList();
+				if (!tags.isEmpty() && !ItemMatchingSystem.INSTANCE.isItemFilter(itemTask.getItemStack())) {
+					for (ItemFilterAdapter adapter : ItemMatchingSystem.INSTANCE.adapters()) {
+						if (adapter.hasItemTagFilter()) {
+							builder.insertAtTop(List.of(new ContextMenuItem(Component.translatable("ftbquests.task.ftbquests.item.convert_tag", adapter.getName()),
+									ThemeProperties.RELOAD_ICON.get(),
+									() -> {
+										if (tags.size() == 1) {
+											setTagFilterAndSave(itemTask, adapter, tags.get(0));
+										} else {
+											new TagSelectionScreen(tags, itemTask, adapter).openGui();
+										}
+									})
+							));
+						}
+					}
 				}
 			}
 			if (task.getIcon() instanceof ItemIcon itemIcon) {
@@ -97,13 +98,11 @@ public class TaskButton extends Button {
 		}
 	}
 
-	private static void convertToSingleTag(ItemTask itemTask, List<ResourceLocation> tags, ItemStack tagFilter) {
-		String tag = tags.iterator().next().toString();
-		((IStringValueFilter) tagFilter.getItem()).setValue(tagFilter, tag);
-		itemTask.setStackAndCount(tagFilter, 1);
+	private void setTagFilterAndSave(ItemTask itemTask, ItemFilterAdapter adapter, TagKey<Item> tag) {
+		itemTask.setStackAndCount(adapter.makeTagFilterStack(tag), itemTask.getItemStack().getCount());
 
 		if (itemTask.getRawTitle().isEmpty()) {
-			itemTask.setRawTitle("Any #" + tag);
+			itemTask.setRawTitle("Any #" + tag.location());
 		}
 
 		new EditObjectMessage(itemTask).sendToServer();
@@ -137,7 +136,6 @@ public class TaskButton extends Button {
 					} else {
 						list.add(Component.literal(s).withStyle(ChatFormatting.DARK_GREEN).append(Component.literal(" [" + task.getRelativeProgressFromChildren(questScreen.file.selfTeamData) + "%]").withStyle(ChatFormatting.DARK_GRAY)));
 					}
-
 				}
 			}
 		}
@@ -196,34 +194,26 @@ public class TaskButton extends Button {
 	}
 
 	private class TagSelectionScreen extends ButtonListBaseScreen {
-		private final List<ResourceLocation> tags;
-		private final ItemStack tagFilter;
+		private final List<TagKey<Item>> tags;
 		private final ItemTask itemTask;
+		private final ItemFilterAdapter adapter;
 
-		public TagSelectionScreen(List<ResourceLocation> tags, ItemStack tagFilter, ItemTask itemTask) {
-			this.tags = tags;
-			this.tagFilter = tagFilter;
+		public TagSelectionScreen(List<TagKey<Item>> tags, ItemTask itemTask, ItemFilterAdapter adapter) {
 			this.itemTask = itemTask;
+			this.tags = tags;
+			this.adapter = adapter;
 		}
 
 		@Override
 		public void addButtons(Panel panel) {
-			for (ResourceLocation tag : tags) {
-				panel.add(new SimpleTextButton(panel, Component.literal(tag.toString()), Color4I.empty()) {
-					@Override
-					public void onClicked(MouseButton button) {
-						questScreen.openGui();
-						((IStringValueFilter) tagFilter.getItem()).setValue(tagFilter, tag.toString());
-						itemTask.setStackAndCount(tagFilter, 1);
+            tags.forEach(tag -> panel.add(new SimpleTextButton(panel, Component.literal(tag.location().toString()), Color4I.empty()) {
+                @Override
+                public void onClicked(MouseButton button) {
+                    questScreen.openGui();
 
-						if (itemTask.getRawTitle().isEmpty()) {
-							itemTask.setRawTitle("Any #" + tag);
-						}
-
-						new EditObjectMessage(itemTask).sendToServer();
-					}
-				});
-			}
+					setTagFilterAndSave(itemTask, adapter, tag);
+                }
+            }));
 		}
 	}
 }
