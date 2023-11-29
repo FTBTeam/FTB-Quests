@@ -8,7 +8,10 @@ import dev.ftb.mods.ftblibrary.ui.input.MouseButton;
 import dev.ftb.mods.ftblibrary.util.TooltipList;
 import dev.ftb.mods.ftblibrary.util.client.PositionedIngredient;
 import dev.ftb.mods.ftbquests.client.ClientQuestFile;
+import dev.ftb.mods.ftbquests.client.FTBQClientProxy;
+import dev.ftb.mods.ftbquests.client.FTBQuestsClient;
 import dev.ftb.mods.ftbquests.client.gui.ContextMenuBuilder;
+import dev.ftb.mods.ftbquests.quest.reward.ItemReward;
 import dev.ftb.mods.ftbquests.quest.reward.Reward;
 import dev.ftb.mods.ftbquests.quest.theme.property.ThemeProperties;
 import net.minecraft.ChatFormatting;
@@ -16,6 +19,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.TooltipFlag;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -46,7 +50,13 @@ public class RewardButton extends Button {
 		questScreen.addInfoTooltip(list, reward);
 
 		if (reward.addTitleInMouseOverText()) {
-			list.add(getTitle());
+			if (reward instanceof ItemReward itemReward) {
+				TooltipFlag.Default flag = Minecraft.getInstance().options.advancedItemTooltips ? TooltipFlag.ADVANCED : TooltipFlag.NORMAL;
+				itemReward.getItem().getTooltipLines(FTBQuestsClient.getClientPlayer(), flag)
+						.forEach(list::add);
+			} else {
+				list.add(getTitle());
+			}
 		}
 
 		if (reward.isTeamReward() || questScreen.file.selfTeamData.isRewardBlocked(reward)) {
