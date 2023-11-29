@@ -137,7 +137,7 @@ public class QuestScreen extends BaseScreen {
 
 	@Override
 	public void onClosed() {
-		file.setPersistedScreenInfo(new PersistedData(this));
+		file.setPersistedScreenInfo(getPersistedScreenData());
 		super.onClosed();
 	}
 
@@ -463,6 +463,7 @@ public class QuestScreen extends BaseScreen {
 					if (selectedChapter != null) {
 						selectedObjects.addAll(selectedChapter.getQuests());
 						selectedObjects.addAll(selectedChapter.getQuestLinks());
+						selectedObjects.addAll(selectedChapter.getImages());
 					}
 					return true;
 				}
@@ -623,7 +624,7 @@ public class QuestScreen extends BaseScreen {
 		if (!Screen.hasControlDown()) selectedObjects.clear();
 
 		questPanel.getWidgets().forEach(w -> {
-			if (w instanceof QuestButton qb && rect.contains((int) (w.getX() - scrollX), (int) (w.getY() - scrollY))) {
+			if (w instanceof QuestPositionableButton qb && rect.contains((int) (w.getX() - scrollX), (int) (w.getY() - scrollY))) {
 				toggleSelected(qb.moveAndDeleteFocus());
 			}
 		});
@@ -736,7 +737,7 @@ public class QuestScreen extends BaseScreen {
 	}
 
 	public PersistedData getPersistedScreenData() {
-		return new PersistedData(this);
+		return pendingPersistedData != null ? pendingPersistedData : new PersistedData(this);
 	}
 
 	private void restorePersistedScreenData(BaseQuestFile file, PersistedData persistedData) {
@@ -777,7 +778,7 @@ public class QuestScreen extends BaseScreen {
 			scrollX = questScreen.questPanel.centerQuestX;
 			scrollY = questScreen.questPanel.centerQuestY;
 			selectedChapter = questScreen.selectedChapter == null ? 0L : questScreen.selectedChapter.id;
-			selectedQuests = questScreen.selectedObjects.stream().map(Movable::getMovableID).toList();
+			selectedQuests = questScreen.selectedObjects.stream().map(Movable::getMovableID).filter(id -> id != 0).toList();
 			chaptersExpanded = questScreen.chapterPanel.expanded;
 		}
 	}

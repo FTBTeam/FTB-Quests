@@ -122,6 +122,10 @@ public final class Chapter extends QuestObject {
 		return Collections.unmodifiableList(questLinks);
 	}
 
+	public List<ChapterImage> getImages() {
+		return Collections.unmodifiableList(images);
+	}
+
 	public void addQuest(Quest quest) {
 		quests.add(quest);
 	}
@@ -506,10 +510,6 @@ public final class Chapter extends QuestObject {
 
 	public void removeImage(ChapterImage image) {
 		images.remove(image);
-	}
-
-	public Stream<ChapterImage> images() {
-		return images.stream();
 	}
 
 	public void addQuestLink(QuestLink link) {

@@ -13,6 +13,7 @@ import dev.ftb.mods.ftblibrary.util.TooltipList;
 import dev.ftb.mods.ftbquests.api.FTBQuestsAPI;
 import dev.ftb.mods.ftbquests.net.EditObjectMessage;
 import dev.ftb.mods.ftbquests.quest.ChapterImage;
+import dev.ftb.mods.ftbquests.quest.Movable;
 import dev.ftb.mods.ftbquests.quest.theme.property.ThemeProperties;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.gui.GuiGraphics;
@@ -158,7 +159,7 @@ public class ChapterImageButton extends Button implements QuestPositionableButto
 			image = image.withColor(chapterImage.getColor().withAlpha(chapterImage.getAlpha()));
 		}
 
-		GuiHelper.setupDrawing();
+//		GuiHelper.setupDrawing();
 		PoseStack poseStack = graphics.pose();
 		poseStack.pushPose();
 
@@ -167,11 +168,19 @@ public class ChapterImageButton extends Button implements QuestPositionableButto
 			poseStack.mulPose(Axis.ZP.rotationDegrees((float) chapterImage.getRotation()));
 			poseStack.scale(w, h, 1);
 			image.draw(graphics, 0, 0, 1, 1);
+			if (questScreen.selectedObjects.contains(moveAndDeleteFocus())) {
+				Color4I col = Color4I.WHITE.withAlpha((int) (128D + Math.sin(System.currentTimeMillis() * 0.003D) * 50D));
+				col.draw(graphics, 0, 0, 1, 1);
+			}
 		} else {
 			poseStack.translate((int) (x + w / 2D), (int) (y + h / 2D), 0);
 			poseStack.mulPose(Axis.ZP.rotationDegrees((float) chapterImage.getRotation()));
 			poseStack.scale(w / 2F, h / 2F, 1);
 			image.draw(graphics, -1, -1, 2, 2);
+			if (questScreen.selectedObjects.contains(moveAndDeleteFocus())) {
+				Color4I col = Color4I.WHITE.withAlpha((int) (128D + Math.sin(System.currentTimeMillis() * 0.003D) * 50D));
+				col.draw(graphics, -1, -1, 2, 2);
+			}
 		}
 
 		poseStack.popPose();
@@ -185,5 +194,10 @@ public class ChapterImageButton extends Button implements QuestPositionableButto
 	@Override
 	public int compareTo(@NotNull ChapterImageButton o) {
 		return Integer.compare(chapterImage.getOrder(), o.chapterImage.getOrder());
+	}
+
+	@Override
+	public Movable moveAndDeleteFocus() {
+		return chapterImage;
 	}
 }
