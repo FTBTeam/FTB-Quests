@@ -4,6 +4,16 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2001.2.1]
+
+### Added
+* Images can now be multiply-selected and moved in the editor GUI, same as quest and quest link buttons
+  * Ctrl-A now selects all images in the chapter in addition to quests and quest links
+
+### Fixed
+* When a reward is a simple item reward, the reward button tooltip shows proper tooltip data now (e.g. including enchanted book tooltips etc.)
+* Fixed flawed implementation of the Task Screen item/fluid/energy handlers on Fabric
+
 ## [2001.2.0]
 
 ### Added
