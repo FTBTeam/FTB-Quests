@@ -367,6 +367,7 @@ public class ChapterPanel extends Panel {
 
 				if (chapterPanel.questScreen.selectedChapter != chapter) {
 					chapterPanel.questScreen.open(chapter, false);
+					chapter.getAutofocus().ifPresent(chapterPanel.questScreen::scrollTo);
 				}
 			}
 
