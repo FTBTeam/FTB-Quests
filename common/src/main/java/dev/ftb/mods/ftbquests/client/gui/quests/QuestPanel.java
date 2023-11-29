@@ -112,7 +112,7 @@ public class QuestPanel extends Panel {
 			return;
 		}
 
-		questScreen.selectedChapter.images()
+		questScreen.selectedChapter.getImages().stream()
 				.filter(image -> questScreen.file.canEdit() || image.shouldShowImage(questScreen.file.selfTeamData))
 				.sorted(Comparator.comparingInt(ChapterImage::getOrder))
 				.forEach(image -> add(new ChapterImageButton(this, image)));
@@ -409,7 +409,9 @@ public class QuestPanel extends Panel {
 		String cStr = String.format("Center: [%.2f, %.2f]", centerQuestX, centerQuestY);
 		theme.drawString(graphics, cStr, statusWidth * 2 - theme.getStringWidth(cStr) - 6, 0, Theme.SHADOW);
 
-		int total = questScreen.selectedChapter.getQuests().size() + questScreen.selectedChapter.getQuestLinks().size();
+		int total = questScreen.selectedChapter.getQuests().size()
+				+ questScreen.selectedChapter.getQuestLinks().size()
+				+ questScreen.selectedChapter.getImages().size();
 		String sStr = String.format("Selected: %d / %d", questScreen.selectedObjects.size(), total);
 		theme.drawString(graphics, sStr, statusWidth / 2, 0, Theme.SHADOW);
 

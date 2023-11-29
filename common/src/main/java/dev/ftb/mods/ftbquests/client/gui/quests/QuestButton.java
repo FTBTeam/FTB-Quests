@@ -448,6 +448,7 @@ public class QuestButton extends Button implements QuestPositionableButton {
 	 * The focus object as a Movable (which will definitely be the case, so the cast is safe)
 	 * @return a Movable; can be used for moving the button, and also deleting the quest object
 	 */
+	@Override
 	public Movable moveAndDeleteFocus() {
 		return (Movable) theQuestObject();
 	}
