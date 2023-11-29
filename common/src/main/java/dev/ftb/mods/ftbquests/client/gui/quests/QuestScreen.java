@@ -150,6 +150,10 @@ public class QuestScreen extends BaseScreen {
 		}
 	}
 
+	public void scrollTo(Movable movable) {
+		questPanel.scrollTo(movable.getX(), movable.getY());
+	}
+
 	public void viewQuest(Quest quest) {
 		viewQuestPanel.setViewedQuest(quest);
 	}
@@ -248,11 +252,27 @@ public class QuestScreen extends BaseScreen {
 				new Component[] {
 						Component.literal(QuestObjectBase.getCodeString(object))
 				};
+		if (selectedChapter != null) {
+			if (selectedChapter.isAutofocus(object.id)) {
+				contextMenu.add(new ContextMenuItem(Component.translatable("ftbquest.gui.clear_autofocused"),
+						Icons.MARKER,
+						() -> setAutofocusedId(0L)));
+			} else if (object instanceof Quest || object instanceof QuestLink) {
+				contextMenu.add(new ContextMenuItem(Component.translatable("ftbquest.gui.set_autofocused"),
+						Icons.MARKER,
+						() -> setAutofocusedId(object.id)));
+			}
+		}
 		contextMenu.add(new TooltipContextMenuItem(Component.translatable("ftbquests.gui.copy_id"),
 				ThemeProperties.WIKI_ICON.get(),
 				() -> setClipboardString(object.getCodeString()),
 				tooltip)
 		);
+	}
+
+	private void setAutofocusedId(long id) {
+		selectedChapter.setAutofocus(id);
+		new EditObjectMessage(selectedChapter).sendToServer();
 	}
 
 	private List<ContextMenuItem> scanForConfigEntries(List<ContextMenuItem> res, QuestObjectBase object, ConfigGroup g) {
@@ -400,12 +420,14 @@ public class QuestScreen extends BaseScreen {
 			return true;
 		}
 
+		List<Chapter> visibleChapters = file.getVisibleChapters(file.selfTeamData);
+
 		if (key.is(GLFW.GLFW_KEY_TAB)) {
 			if (selectedChapter != null && file.getVisibleChapters(file.selfTeamData).size() > 1) {
-				List<Chapter> visibleChapters = file.getVisibleChapters(file.selfTeamData);
 
 				if (!visibleChapters.isEmpty()) {
 					selectChapter(visibleChapters.get(MathUtils.mod(visibleChapters.indexOf(selectedChapter) + (isShiftKeyDown() ? -1 : 1), visibleChapters.size())));
+					selectedChapter.getAutofocus().ifPresent(this::scrollTo);
 				}
 			}
 
@@ -435,8 +457,9 @@ public class QuestScreen extends BaseScreen {
 		if (key.keyCode >= GLFW.GLFW_KEY_1 && key.keyCode <= GLFW.GLFW_KEY_9) {
 			int i = key.keyCode - GLFW.GLFW_KEY_1;
 
-			if (i < file.getVisibleChapters(file.selfTeamData).size()) {
-				selectChapter(file.getVisibleChapters(file.selfTeamData).get(i));
+			if (i < visibleChapters.size()) {
+				selectChapter(visibleChapters.get(i));
+				selectedChapter.getAutofocus().ifPresent(this::scrollTo);
 			}
 
 			return true;
