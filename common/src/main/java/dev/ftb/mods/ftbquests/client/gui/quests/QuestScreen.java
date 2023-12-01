@@ -137,7 +137,7 @@ public class QuestScreen extends BaseScreen {
 
 	@Override
 	public void onClosed() {
-		file.setPersistedScreenInfo(new PersistedData(this));
+		file.setPersistedScreenInfo(getPersistedScreenData());
 		super.onClosed();
 	}
 
@@ -148,6 +148,10 @@ public class QuestScreen extends BaseScreen {
 			questPanel.refreshWidgets();
 			questPanel.resetScroll();
 		}
+	}
+
+	public void scrollTo(Movable movable) {
+		questPanel.scrollTo(movable.getX(), movable.getY());
 	}
 
 	public void viewQuest(Quest quest) {
@@ -248,11 +252,27 @@ public class QuestScreen extends BaseScreen {
 				new Component[] {
 						Component.literal(QuestObjectBase.getCodeString(object))
 				};
+		if (selectedChapter != null) {
+			if (selectedChapter.isAutofocus(object.id)) {
+				contextMenu.add(new ContextMenuItem(Component.translatable("ftbquest.gui.clear_autofocused"),
+						Icons.MARKER,
+						() -> setAutofocusedId(0L)));
+			} else if (object instanceof Quest || object instanceof QuestLink) {
+				contextMenu.add(new ContextMenuItem(Component.translatable("ftbquest.gui.set_autofocused"),
+						Icons.MARKER,
+						() -> setAutofocusedId(object.id)));
+			}
+		}
 		contextMenu.add(new TooltipContextMenuItem(Component.translatable("ftbquests.gui.copy_id"),
 				ThemeProperties.WIKI_ICON.get(),
 				() -> setClipboardString(object.getCodeString()),
 				tooltip)
 		);
+	}
+
+	private void setAutofocusedId(long id) {
+		selectedChapter.setAutofocus(id);
+		new EditObjectMessage(selectedChapter).sendToServer();
 	}
 
 	private List<ContextMenuItem> scanForConfigEntries(List<ContextMenuItem> res, QuestObjectBase object, ConfigGroup g) {
@@ -400,12 +420,14 @@ public class QuestScreen extends BaseScreen {
 			return true;
 		}
 
+		List<Chapter> visibleChapters = file.getVisibleChapters(file.selfTeamData);
+
 		if (key.is(GLFW.GLFW_KEY_TAB)) {
 			if (selectedChapter != null && file.getVisibleChapters(file.selfTeamData).size() > 1) {
-				List<Chapter> visibleChapters = file.getVisibleChapters(file.selfTeamData);
 
 				if (!visibleChapters.isEmpty()) {
 					selectChapter(visibleChapters.get(MathUtils.mod(visibleChapters.indexOf(selectedChapter) + (isShiftKeyDown() ? -1 : 1), visibleChapters.size())));
+					selectedChapter.getAutofocus().ifPresent(this::scrollTo);
 				}
 			}
 
@@ -435,8 +457,9 @@ public class QuestScreen extends BaseScreen {
 		if (key.keyCode >= GLFW.GLFW_KEY_1 && key.keyCode <= GLFW.GLFW_KEY_9) {
 			int i = key.keyCode - GLFW.GLFW_KEY_1;
 
-			if (i < file.getVisibleChapters(file.selfTeamData).size()) {
-				selectChapter(file.getVisibleChapters(file.selfTeamData).get(i));
+			if (i < visibleChapters.size()) {
+				selectChapter(visibleChapters.get(i));
+				selectedChapter.getAutofocus().ifPresent(this::scrollTo);
 			}
 
 			return true;
@@ -463,6 +486,7 @@ public class QuestScreen extends BaseScreen {
 					if (selectedChapter != null) {
 						selectedObjects.addAll(selectedChapter.getQuests());
 						selectedObjects.addAll(selectedChapter.getQuestLinks());
+						selectedObjects.addAll(selectedChapter.getImages());
 					}
 					return true;
 				}
@@ -623,7 +647,7 @@ public class QuestScreen extends BaseScreen {
 		if (!Screen.hasControlDown()) selectedObjects.clear();
 
 		questPanel.getWidgets().forEach(w -> {
-			if (w instanceof QuestButton qb && rect.contains((int) (w.getX() - scrollX), (int) (w.getY() - scrollY))) {
+			if (w instanceof QuestPositionableButton qb && rect.contains((int) (w.getX() - scrollX), (int) (w.getY() - scrollY))) {
 				toggleSelected(qb.moveAndDeleteFocus());
 			}
 		});
@@ -736,7 +760,7 @@ public class QuestScreen extends BaseScreen {
 	}
 
 	public PersistedData getPersistedScreenData() {
-		return new PersistedData(this);
+		return pendingPersistedData != null ? pendingPersistedData : new PersistedData(this);
 	}
 
 	private void restorePersistedScreenData(BaseQuestFile file, PersistedData persistedData) {
@@ -777,7 +801,7 @@ public class QuestScreen extends BaseScreen {
 			scrollX = questScreen.questPanel.centerQuestX;
 			scrollY = questScreen.questPanel.centerQuestY;
 			selectedChapter = questScreen.selectedChapter == null ? 0L : questScreen.selectedChapter.id;
-			selectedQuests = questScreen.selectedObjects.stream().map(Movable::getMovableID).toList();
+			selectedQuests = questScreen.selectedObjects.stream().map(Movable::getMovableID).filter(id -> id != 0).toList();
 			chaptersExpanded = questScreen.chapterPanel.expanded;
 		}
 	}
