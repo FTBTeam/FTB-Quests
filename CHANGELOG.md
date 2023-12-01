@@ -13,6 +13,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 * When a reward is a simple item reward, the reward button tooltip shows proper tooltip data now (e.g. including enchanted book tooltips etc.)
 * Fixed flawed implementation of the Task Screen item/fluid/energy handlers on Fabric
+* Fixed occasional client-side crash related to the Observation task (possibly triggered by dimension changing) - thanks @RaphaelT7
 
 ## [2001.2.0]
 
