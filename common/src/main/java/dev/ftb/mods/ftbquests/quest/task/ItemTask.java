@@ -25,11 +25,14 @@ import net.fabricmc.api.Environment;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.Holder;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
@@ -39,6 +42,11 @@ import java.util.List;
 import java.util.function.Predicate;
 
 public class ItemTask extends Task implements Predicate<ItemStack> {
+	@Deprecated(forRemoval = true)
+	// this will disappear in 1.20.2+
+	public static final TagKey<Item> CHECK_NBT_ITEM_FILTERS
+			= TagKey.create(Registries.ITEM, new ResourceLocation("itemfilters", "check_nbt"));
+
 	private ItemStack itemStack;
 	private long count;
 	private Tristate consumeItems;
@@ -206,7 +214,7 @@ public class ItemTask extends Task implements Predicate<ItemStack> {
 	private boolean hasNBTCheckTag() {
 		Holder.Reference<Item> itemReference = itemStack.getItem().builtInRegistryHolder();
 		return itemReference.is(FTBQuestsTags.Items.CHECK_NBT)
-				|| itemReference.is(FTBQuestsTags.Items.CHECK_NBT_ITEM_FILTERS);
+				|| itemReference.is(CHECK_NBT_ITEM_FILTERS);  // TODO ditch in 1.20.2+
 	}
 
 	@Override

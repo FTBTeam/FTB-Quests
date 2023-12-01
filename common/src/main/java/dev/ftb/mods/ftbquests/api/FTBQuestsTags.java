@@ -15,10 +15,5 @@ public class FTBQuestsTags {
     public static class Items {
         public static final TagKey<Item> CHECK_NBT
                 = TagKey.create(Registries.ITEM, FTBQuestsAPI.rl("match_nbt"));
-
-        @Deprecated
-        // this will disappear in 1.20.2+
-        public static final TagKey<Item> CHECK_NBT_ITEM_FILTERS
-                = TagKey.create(Registries.ITEM, new ResourceLocation("itemfilters", "check_nbt"));
     }
 }
