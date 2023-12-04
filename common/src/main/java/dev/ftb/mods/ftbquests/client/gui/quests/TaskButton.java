@@ -65,18 +65,20 @@ public class TaskButton extends Button {
 
 			if (task instanceof ItemTask itemTask) {
 				var tags = itemTask.getItemStack().getItem().builtInRegistryHolder().tags().toList();
-				for (ItemFilterAdapter adapter : ItemMatchingSystem.INSTANCE.adapters()) {
-					if (adapter.hasItemTagFilter()) {
-						builder.insertAtTop(List.of(new ContextMenuItem(Component.translatable("ftbquests.task.ftbquests.item.convert_tag", adapter.getName()),
-								ThemeProperties.RELOAD_ICON.get(),
-								() -> {
-									if (tags.size() == 1) {
-										setTagFilterAndSave(itemTask, adapter, tags.get(0));
-									} else {
-										new TagSelectionScreen(tags, itemTask, adapter).openGui();
-									}
-								})
-						));
+				if (!tags.isEmpty() && !ItemMatchingSystem.INSTANCE.isItemFilter(itemTask.getItemStack())) {
+					for (ItemFilterAdapter adapter : ItemMatchingSystem.INSTANCE.adapters()) {
+						if (adapter.hasItemTagFilter()) {
+							builder.insertAtTop(List.of(new ContextMenuItem(Component.translatable("ftbquests.task.ftbquests.item.convert_tag", adapter.getName()),
+									ThemeProperties.RELOAD_ICON.get(),
+									() -> {
+										if (tags.size() == 1) {
+											setTagFilterAndSave(itemTask, adapter, tags.get(0));
+										} else {
+											new TagSelectionScreen(tags, itemTask, adapter).openGui();
+										}
+									})
+							));
+						}
 					}
 				}
 			}
