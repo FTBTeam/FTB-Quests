@@ -7,7 +7,7 @@ license = "All Rights Reserved"
 modId = "ftbquests"
 version = "${version}"
 displayName = "FTB Quests"
-authors = "LatvianModder"
+authors = "FTB Team"
 description = '''
 Lets you easily create and play with quests
 '''
