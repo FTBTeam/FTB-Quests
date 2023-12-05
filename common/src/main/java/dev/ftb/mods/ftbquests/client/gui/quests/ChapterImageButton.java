@@ -17,6 +17,7 @@ import dev.ftb.mods.ftbquests.quest.Movable;
 import dev.ftb.mods.ftbquests.quest.theme.property.ThemeProperties;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
 import org.jetbrains.annotations.NotNull;
 
@@ -51,28 +52,16 @@ public class ChapterImageButton extends Button implements QuestPositionableButto
 	}
 
 	@Override
-	public boolean mousePressed(MouseButton button) {
-		if (isMouseOver()) {
-			if (!chapterImage.getClick().isEmpty() || questScreen.file.canEdit() && !button.isLeft()) {
-				onClicked(button);
-				return true;
-			}
-		}
-
-		return false;
-	}
-
-	@Override
 	public boolean checkMouseOver(int mouseX, int mouseY) {
-		if (questScreen.questPanel.mouseOverQuest != null || questScreen.movingObjects || questScreen.viewQuestPanel.isMouseOver() || questScreen.chapterPanel.isMouseOver()) {
-			return false;
-		}
+        if (questScreen.questPanel.mouseOverQuest != null
+				|| questScreen.movingObjects
+				|| questScreen.viewQuestPanel.isMouseOver()
+				|| questScreen.chapterPanel.isMouseOver()
+				|| chapterImage.getClick().isEmpty() && !questScreen.file.canEdit()) {
+            return false;
+        }
 
-		if (chapterImage.getClick().isEmpty() && !questScreen.file.canEdit()) {
-			return false;
-		}
-
-		return super.checkMouseOver(mouseX, mouseY);
+        return super.checkMouseOver(mouseX, mouseY);
 	}
 
 	@Override
@@ -124,7 +113,9 @@ public class ChapterImageButton extends Button implements QuestPositionableButto
 
 			getGui().openContextMenu(contextMenu);
 		} else if (button.isLeft()) {
-			if (!chapterImage.getClick().isEmpty()) {
+			if (Screen.hasControlDown() && questScreen.file.canEdit()) {
+				questScreen.toggleSelected(chapterImage);
+			} else if (!chapterImage.getClick().isEmpty()) {
 				playClickSound();
 				handleClick(chapterImage.getClick());
 			}
