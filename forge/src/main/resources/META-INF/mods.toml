@@ -7,7 +7,7 @@ license = "All Rights Reserved"
 modId = "ftbquests"
 version = "${version}"
 displayName = "FTB Quests"
-authors = "LatvianModder"
+authors = "FTB Team"
 description = '''
 Lets you easily create and play with quests
 '''
@@ -42,7 +42,7 @@ side = "BOTH"
 
 [[dependencies.ftbquests]]
 modId = "itemfilters"
-mandatory = true
+mandatory = false
 versionRange = "[2001.1.0-build.55,)"
 ordering = "AFTER"
 side = "BOTH"

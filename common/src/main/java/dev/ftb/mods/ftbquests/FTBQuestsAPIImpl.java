@@ -1,7 +1,9 @@
 package dev.ftb.mods.ftbquests;
 
 import dev.ftb.mods.ftbquests.api.FTBQuestsAPI;
+import dev.ftb.mods.ftbquests.api.ItemFilterAdapter;
 import dev.ftb.mods.ftbquests.client.FTBQuestsClient;
+import dev.ftb.mods.ftbquests.integration.item_filtering.ItemMatchingSystem;
 import dev.ftb.mods.ftbquests.quest.BaseQuestFile;
 import dev.ftb.mods.ftbquests.quest.ServerQuestFile;
 
@@ -15,5 +17,10 @@ public enum FTBQuestsAPIImpl implements FTBQuestsAPI.API {
         return isClient ?
                 Objects.requireNonNull(FTBQuestsClient.getClientQuestFile()) :
                 ServerQuestFile.INSTANCE;
+    }
+
+    @Override
+    public void registerFilterAdapter(ItemFilterAdapter adapter) {
+        ItemMatchingSystem.INSTANCE.registerFilterAdapter(adapter);
     }
 }
