@@ -4,6 +4,32 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2001.3.0]
+
+### Changed
+* Reworked support for external item filtering mods significantly
+  * Added FTB Quests API (see `ItemFilterAdapter` class) to allow for registration of external item filtering mods
+  * Support for item filtering mods is now handled via FTB XMod Compat (version 2001.2.0+), which uses the above API
+  * The Item Filters mod is now an optional dependency
+  * The newly-released FTB Filter System mod is now also an optional dependency
+
+### Fixed
+* Control-left-clicking an image now correctly toggles its selected status
+
+## [2001.2.1]
+
+### Added
+* Images can now be multiply-selected and moved in the editor GUI, same as quest and quest link buttons
+  * Ctrl-A now selects all images in the chapter in addition to quests and quest links
+* A per-chapter autofocused quest can optionally be defined
+  * When switching to this chapter (either by clicking it in the chapter panel, or via the Tab and number keys), the view will center on the autofocused quest
+  * Autofocused quest can be defined either in the chapter properties screen, or by right-clicking any quest and selecting the "Autofocused" option  
+
+### Fixed
+* When a reward is a simple item reward, the reward button tooltip shows proper tooltip data now (e.g. including enchanted book tooltips etc.)
+* Fixed flawed implementation of the Task Screen item/fluid/energy handlers on Fabric
+* Fixed occasional client-side crash related to the Observation task (possibly triggered by dimension changing) - thanks @RaphaelT7
+
 ## [2001.2.0]
 
 ### Added
