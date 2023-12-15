@@ -1,5 +1,6 @@
 package dev.ftb.mods.ftbquests.block;
 
+import com.mojang.serialization.MapCodec;
 import dev.ftb.mods.ftbquests.block.entity.DetectorBlockEntity;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.LivingEntity;
@@ -16,8 +17,12 @@ import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import org.jetbrains.annotations.Nullable;
 
 public class DetectorBlock extends BaseEntityBlock {
-	public DetectorBlock() {
-		super(BlockBehaviour.Properties.of().strength(0.3F));
+	private static final MapCodec<DetectorBlock> CODEC = simpleCodec(DetectorBlock::new);
+	public static final Properties PROPS = Properties.of().strength(0.3F);
+
+	public DetectorBlock(BlockBehaviour.Properties props) {
+		super(props);
+
 		registerDefaultState(stateDefinition.any().setValue(BlockStateProperties.POWERED, false));
 	}
 
@@ -25,6 +30,11 @@ public class DetectorBlock extends BaseEntityBlock {
 	@Override
 	public BlockEntity newBlockEntity(BlockPos blockPos, BlockState blockState) {
 		return new DetectorBlockEntity(blockPos, blockState);
+	}
+
+	@Override
+	protected MapCodec<DetectorBlock> codec() {
+		return CODEC;
 	}
 
 	@Override

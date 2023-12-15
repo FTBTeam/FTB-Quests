@@ -259,11 +259,11 @@ public class MultilineTextEditorScreen extends BaseScreen {
 			}
 		});
 
-		group.add("image", new ImageConfig(), component.image.toString(), v -> component.image = Icon.getIcon(v), "");
-		group.addInt("width", component.width, v -> component.width = v, 0, 1, 1000);
-		group.addInt("height", component.height, v -> component.height = v, 0, 1, 1000);
-		group.addInt("align", component.align, v -> component.align = v, 0, 1, 2);
-		group.addBool("fit", component.fit, v -> component.fit = v, false);
+		group.add("image", new ImageConfig(), component.imageStr(), v -> component.setImage(Icon.getIcon(v)), "");
+		group.addInt("width", component.getWidth(), component::setWidth, 0, 1, 1000);
+		group.addInt("height", component.getHeight(), component::setHeight, 0, 1, 1000);
+		group.addEnum("align", component.getAlign(), component::setAlign, ImageComponent.ImageAlign.NAME_MAP, ImageComponent.ImageAlign.CENTER);
+		group.addBool("fit", component.isFit(), component::setFit, false);
 
 		new EditConfigScreen(group).openGui();
 	}

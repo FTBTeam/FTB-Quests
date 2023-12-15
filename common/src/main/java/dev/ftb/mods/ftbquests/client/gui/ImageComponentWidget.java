@@ -25,7 +25,7 @@ public class ImageComponentWidget extends Widget {
 		this.index = index;
 
 		mutableComponent = MutableComponent.create(this.component);
-		setSize(this.component.width, this.component.height);
+		setSize(this.component.getWidth(), this.component.getHeight());
 	}
 
 	public void addMouseOverText(TooltipList list) {
@@ -35,7 +35,7 @@ public class ImageComponentWidget extends Widget {
 	}
 
 	public void draw(GuiGraphics graphics, Theme theme, int x, int y, int w, int h) {
-		component.image.draw(graphics, x, y, w, h);
+		component.getImage().draw(graphics, x, y, w, h);
 	}
 
 	public ImageComponent getComponent() {

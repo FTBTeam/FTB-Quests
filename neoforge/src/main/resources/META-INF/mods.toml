@@ -1,0 +1,48 @@
+modLoader = "javafml"
+loaderVersion = "[${neoforgeloaderversion},)"
+issueTrackerURL = "https://github.com/FTBTeam/FTB-Mods-Issues/issues"
+license = "All Rights Reserved"
+
+[[mods]]
+modId = "ftbquests"
+version = "${version}"
+displayName = "FTB Quests"
+authors = "FTB Team"
+description = '''
+Lets you easily create and play with quests
+'''
+
+[[dependencies.ftbquests]]
+modId = "neoforge"
+mandatory = true
+versionRange = "[${neoforgeversion},)"
+ordering = "NONE"
+side = "BOTH"
+
+[[dependencies.ftbquests]]
+modId = "minecraft"
+mandatory = true
+versionRange = "[${mcversion},)"
+ordering = "NONE"
+side = "BOTH"
+
+[[dependencies.ftbquests]]
+modId = "architectury"
+mandatory = true
+versionRange = "[${archversion},)"
+ordering = "NONE"
+side = "BOTH"
+
+[[dependencies.ftbquests]]
+modId = "ftblibrary"
+mandatory = true
+versionRange = "[${ftblibraryversion},)"
+ordering = "AFTER"
+side = "BOTH"
+
+[[dependencies.ftbquests]]
+modId = "ftbteams"
+mandatory = true
+versionRange = "[${ftbteamsversion},)"
+ordering = "AFTER"
+side = "BOTH"

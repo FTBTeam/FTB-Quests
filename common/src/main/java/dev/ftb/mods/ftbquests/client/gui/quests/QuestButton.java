@@ -25,7 +25,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.ComponentContents;
+import net.minecraft.network.chat.contents.PlainTextContents;
 import net.minecraft.world.entity.player.Player;
 
 import java.util.ArrayList;
@@ -303,7 +303,7 @@ public class QuestButton extends Button implements QuestPositionableButton {
 
 		Component description = quest.getSubtitle();
 
-		if (description.getContents() != ComponentContents.EMPTY) {
+		if (description.getContents() != PlainTextContents.EMPTY) {
 			list.add(Component.literal("").append(description).withStyle(ChatFormatting.GRAY));
 		}
 

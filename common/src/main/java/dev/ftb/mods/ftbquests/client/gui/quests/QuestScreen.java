@@ -31,7 +31,6 @@ import dev.ftb.mods.ftbquests.util.ConfigQuestObject;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.client.gui.components.toasts.SystemToast;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.renderer.Rect2i;
 import net.minecraft.nbt.CompoundTag;
@@ -323,7 +322,8 @@ public class QuestScreen extends BaseScreen {
 	}
 
 	public static void displayError(Component error) {
-		Minecraft.getInstance().getToasts().addToast(new SystemToast(SystemToast.SystemToastIds.TUTORIAL_HINT, Component.translatable("ftbquests.gui.error"), error));
+//		Minecraft.getInstance().getToasts().addToast(new SystemToast(SystemToast.SystemToastIds.TUTORIAL_HINT, Component.translatable("ftbquests.gui.error"), error));
+		Minecraft.getInstance().getToasts().addToast(new CustomToast(Component.translatable("ftbquests.gui.error"), Icons.BARRIER, error));
 	}
 
 	private boolean moveSelectedQuests(double x, double y) {
