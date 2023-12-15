@@ -3,7 +3,6 @@ package dev.ftb.mods.ftbquests.client.gui;
 import com.mojang.blaze3d.platform.InputConstants;
 import dev.ftb.mods.ftblibrary.config.*;
 import dev.ftb.mods.ftblibrary.config.ui.EditConfigFromStringScreen;
-import dev.ftb.mods.ftblibrary.config.ui.EditConfigScreen;
 import dev.ftb.mods.ftblibrary.icon.Color4I;
 import dev.ftb.mods.ftblibrary.icon.Icon;
 import dev.ftb.mods.ftblibrary.icon.Icons;
@@ -259,13 +258,7 @@ public class MultilineTextEditorScreen extends BaseScreen {
 			}
 		});
 
-		group.add("image", new ImageConfig(), component.imageStr(), v -> component.setImage(Icon.getIcon(v)), "");
-		group.addInt("width", component.getWidth(), component::setWidth, 0, 1, 1000);
-		group.addInt("height", component.getHeight(), component::setHeight, 0, 1, 1000);
-		group.addEnum("align", component.getAlign(), component::setAlign, ImageComponent.ImageAlign.NAME_MAP, ImageComponent.ImageAlign.CENTER);
-		group.addBool("fit", component.isFit(), component::setFit, false);
-
-		new EditConfigScreen(group).openGui();
+		ImageComponentWidget.openImageEditorScreen(component, group);
 	}
 
 	private void cancel() {
