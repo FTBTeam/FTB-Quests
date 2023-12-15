@@ -13,7 +13,7 @@ import net.minecraft.advancements.AdvancementHolder;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.ComponentContents;
+import net.minecraft.network.chat.contents.PlainTextContents;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 
@@ -97,7 +97,7 @@ public class AdvancementReward extends Reward {
 	public Component getAltTitle() {
 		KnownServerRegistries.AdvancementInfo info = KnownServerRegistries.client == null ? null : KnownServerRegistries.client.advancements.get(advancement);
 
-		if (info != null && info.name.getContents() != ComponentContents.EMPTY) {
+		if (info != null && info.name.getContents() != PlainTextContents.EMPTY) {
 			return Component.translatable("ftbquests.reward.ftbquests.advancement").append(": ").append(info.name.copy().withStyle(ChatFormatting.YELLOW));
 		}
 

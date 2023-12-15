@@ -41,6 +41,7 @@ import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.ConfirmLinkScreen;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.*;
+import net.minecraft.network.chat.contents.PlainTextContents;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
 import net.minecraft.world.item.Items;
@@ -333,7 +334,7 @@ public class ViewQuestPanel extends Panel {
 
 		Component subtitle = quest.getSubtitle();
 
-		if (subtitle.getContents() == ComponentContents.EMPTY && canEdit) {
+		if (subtitle.getContents() == PlainTextContents.EMPTY && canEdit) {
 			subtitle = Component.literal("[No Subtitle]");
 		}
 
@@ -354,7 +355,7 @@ public class ViewQuestPanel extends Panel {
 				addDescriptionText(canEdit, subtitle);
 			}
 			if (!quest.getGuidePage().isEmpty()) {
-				if (subtitle.getContents() != ComponentContents.EMPTY) {
+				if (subtitle.getContents() != PlainTextContents.EMPTY) {
 					panelText.add(new VerticalSpaceWidget(panelText, 7));
 				}
 				panelText.add(new OpenInGuideButton(panelText, quest));
@@ -388,7 +389,7 @@ public class ViewQuestPanel extends Panel {
 
 	private void addDescriptionText(boolean canEdit, Component subtitle) {
 		Pair<Integer,Integer> pageSpan = pageIndices.get(getCurrentPage());
-		if (subtitle.getContents() != ComponentContents.EMPTY) {
+		if (subtitle.getContents() != PlainTextContents.EMPTY) {
 			panelText.add(new VerticalSpaceWidget(panelText, 7));
 		}
 
@@ -399,12 +400,12 @@ public class ViewQuestPanel extends Panel {
 			if (img != null) {
 				ImageComponentWidget cw = new ImageComponentWidget(this, panelText, img, i);
 
-				if (cw.getComponent().fit) {
+				if (cw.getComponent().isFit()) {
 					double scale = panelText.width / (double) cw.width;
 					cw.setSize((int) (cw.width * scale), (int) (cw.height * scale));
-				} else if (cw.getComponent().align == 1) {
+				} else if (cw.getComponent().getAlign() == ImageComponent.ImageAlign.CENTER) {
 					cw.setX((panelText.width - cw.width) / 2);
-				} else if (cw.getComponent().align == 2) {
+				} else if (cw.getComponent().getAlign() == ImageComponent.ImageAlign.RIGHT) {
 					cw.setX(panelText.width - cw.width);
 				} else {
 					cw.setX(0);
@@ -732,11 +733,11 @@ public class ViewQuestPanel extends Panel {
 		});
 		//task.getConfig(task.createSubGroup(group));
 
-		group.add("image", new ImageConfig(), component.image.toString(), v -> component.image = Icon.getIcon(v), "");
-		group.addInt("width", component.width, v -> component.width = v, 0, 1, 1000);
-		group.addInt("height", component.height, v -> component.height = v, 0, 1, 1000);
-		group.addInt("align", component.align, v -> component.align = v, 0, 1, 2);
-		group.addBool("fit", component.fit, v -> component.fit = v, false);
+		group.add("image", new ImageConfig(), component.imageStr(), v -> component.setImage(Icon.getIcon(v)), "");
+		group.addInt("width", component.getWidth(), component::setWidth, 0, 1, 1000);
+		group.addInt("height", component.getHeight(), component::setHeight, 0, 1, 1000);
+		group.addEnum("align", component.getAlign(), component::setAlign, ImageComponent.ImageAlign.NAME_MAP, ImageComponent.ImageAlign.CENTER);
+		group.addBool("fit", component.isFit(), component::setFit, false);
 
 		new EditConfigScreen(group).openGui();
 	}

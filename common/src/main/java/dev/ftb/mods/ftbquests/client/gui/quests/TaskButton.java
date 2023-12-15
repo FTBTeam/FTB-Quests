@@ -21,8 +21,8 @@ import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.ComponentContents;
 import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.network.chat.contents.PlainTextContents;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.Item;
 
@@ -182,7 +182,7 @@ public class TaskButton extends Button {
 		} else {
 			MutableComponent s = task.getButtonText();
 
-			if (s.getContents() != ComponentContents.EMPTY) {
+			if (s.getContents() != PlainTextContents.EMPTY) {
 				poseStack.pushPose();
 				poseStack.translate(x + 19F - theme.getStringWidth(s) / 2F, y + 15F, 200F);
 				poseStack.scale(0.5F, 0.5F, 1F);

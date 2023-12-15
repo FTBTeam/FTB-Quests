@@ -10,7 +10,7 @@ import net.minecraft.ChatFormatting;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.ComponentContents;
+import net.minecraft.network.chat.contents.PlainTextContents;
 import org.apache.commons.lang3.tuple.Pair;
 
 import java.util.ArrayList;
@@ -133,7 +133,7 @@ public class KeyReferenceScreen extends BaseScreen {
             int widestL = 0, widestR = 0;
             int h = 0;
             for (var entry : data) {
-                boolean header = entry.getRight().getContents().equals(ComponentContents.EMPTY);
+                boolean header = entry.getRight().getContents().equals(PlainTextContents.EMPTY);
                 widestL = Math.max(widestL, theme.getStringWidth(entry.getLeft()));
                 widestR = Math.max(widestR, theme.getStringWidth(entry.getRight()));
                 h += theme.getFontHeight() + (header ? 3 : 1);
@@ -150,7 +150,7 @@ public class KeyReferenceScreen extends BaseScreen {
             int yPos = y;
 
             for (var entry : data) {
-                boolean header = entry.getRight().getContents().equals(ComponentContents.EMPTY);
+                boolean header = entry.getRight().getContents().equals(PlainTextContents.EMPTY);
                 int xOff = header ? widestL + 10 : widestL - theme.getStringWidth(entry.getLeft()) - 2;
                 theme.drawString(graphics, entry.getLeft(), x + xOff, yPos);
                 theme.drawString(graphics, entry.getRight(), x + widestL + 10, yPos);
