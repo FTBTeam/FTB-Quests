@@ -14,35 +14,35 @@ Lets you easily create and play with quests
 
 [[dependencies.ftbquests]]
 modId = "neoforge"
-mandatory = true
+type = "required"
 versionRange = "[${neoforgeversion},)"
 ordering = "NONE"
 side = "BOTH"
 
 [[dependencies.ftbquests]]
 modId = "minecraft"
-mandatory = true
+type = "required"
 versionRange = "[${mcversion},)"
 ordering = "NONE"
 side = "BOTH"
 
 [[dependencies.ftbquests]]
 modId = "architectury"
-mandatory = true
+type = "required"
 versionRange = "[${archversion},)"
 ordering = "NONE"
 side = "BOTH"
 
 [[dependencies.ftbquests]]
 modId = "ftblibrary"
-mandatory = true
+type = "required"
 versionRange = "[${ftblibraryversion},)"
 ordering = "AFTER"
 side = "BOTH"
 
 [[dependencies.ftbquests]]
 modId = "ftbteams"
-mandatory = true
+type = "required"
 versionRange = "[${ftbteamsversion},)"
 ordering = "AFTER"
 side = "BOTH"
