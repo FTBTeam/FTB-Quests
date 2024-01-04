@@ -10,6 +10,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 * Added back support for the `{p}` expansion in command rewards
   * Although `@p` and `@s` are the recommended ways to get the player name, `{p}` is once more supported as a workaround for mods/plugins which don't properly use vanilla command parsing
 
+### Fixed
+* A quest in the first chapter set as Autofocused (feature added in 2001.2.1) wasn't being autofocused on initial opening of the quest book
+
 ## [2001.3.0]
 
 ### Changed
