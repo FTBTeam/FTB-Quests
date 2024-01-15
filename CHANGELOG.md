@@ -12,6 +12,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 * A quest in the first chapter set as Autofocused (feature added in 2001.2.1) wasn't being autofocused on initial opening of the quest book
+* Hopefully mitigate a large amount of server lag (only noticeable in very big quest books) when an item is crafted (or manually smelted)
 
 ## [2001.3.0]
 
