@@ -355,4 +355,8 @@ public class ItemTask extends Task implements Predicate<ItemStack> {
 	public boolean isTaskScreenOnly() {
 		return taskScreenOnly;
 	}
+
+	public boolean isOnlyFromCrafting() {
+		return onlyFromCrafting.get(false);
+	}
 }
