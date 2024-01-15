@@ -11,6 +11,8 @@ import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.ContainerListener;
 import net.minecraft.world.item.ItemStack;
 
+import java.util.List;
+
 /**
  * @author LatvianModder
  */
@@ -28,28 +30,32 @@ public class FTBQuestsInventoryListener implements ContainerListener {
 			return;
 		}
 
-		FTBTeamsAPI.api().getManager().getTeamForPlayer(player).ifPresent(team -> {
-			TeamData data = file.getNullableTeamData(team.getId());
-			if (data != null && !data.isLocked()) {
-				file.withPlayerContext(player, () -> {
-					for (Task task : file.getSubmitTasks()) {
-						if (task.id != sourceTask && data.canStartTasks(task.getQuest())) {
-							task.submitTask(data, player, craftedItem);
-						}
-					}
-				});
-			}
-		});
-	}
+		List<Task> tasksToCheck = craftedItem.isEmpty() ? file.getSubmitTasks() : file.getCraftingTasks();
+
+        if (!tasksToCheck.isEmpty()) {
+            FTBTeamsAPI.api().getManager().getTeamForPlayer(player).ifPresent(team -> {
+                TeamData data = file.getNullableTeamData(team.getId());
+                if (data != null && !data.isLocked()) {
+                    file.withPlayerContext(player, () -> {
+                        for (Task task : tasksToCheck) {
+                            if (task.id != sourceTask && data.canStartTasks(task.getQuest())) {
+                                task.submitTask(data, player, craftedItem);
+                            }
+                        }
+                    });
+                }
+            });
+        }
+    }
 
 	@Override
 	public void dataChanged(AbstractContainerMenu abstractContainerMenu, int i, int j) {
 	}
 
 	@Override
-	public void slotChanged(AbstractContainerMenu container, int index, ItemStack stack) {
-		if (!stack.isEmpty() && container.getSlot(index).container == player.getInventory()) {
-			int slotNum = container.getSlot(index).getContainerSlot();
+	public void slotChanged(AbstractContainerMenu menu, int index, ItemStack stack) {
+		if (!stack.isEmpty() && menu.getSlot(index).container == player.getInventory()) {
+			int slotNum = menu.getSlot(index).getContainerSlot();
 			if (slotNum >= 0 && slotNum < player.getInventory().items.size()) {
 				// Only checking for items in the main inventory & hotbar
 				// Armor slots can contain items with rapidly changing NBT (especially powered modded armor)
