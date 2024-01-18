@@ -27,7 +27,6 @@ import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.Mth;
-import org.apache.commons.lang3.mutable.MutableBoolean;
 import org.jetbrains.annotations.Nullable;
 import org.joml.Matrix4f;
 import org.lwjgl.glfw.GLFW;
@@ -484,13 +483,11 @@ public class QuestPanel extends Panel {
 			contextMenu.add(new ContextMenuItem(Component.translatable("ftbquests.chapter.image"), Icons.ART, () -> showImageCreationScreen(qx, qy)));
 
 			String clip = getClipboardString();
-			MutableBoolean addedSeparator = new MutableBoolean(false);
-			if (!clip.isEmpty()) {
+			if (!ChapterImage.isImageInClipboard()) {
 				QuestObjectBase.parseHexId(clip).ifPresent(questId -> {
 					QuestObject qo = questScreen.file.get(questId);
+					contextMenu.add(ContextMenuItem.SEPARATOR);
 					if (qo instanceof Quest quest) {
-						contextMenu.add(ContextMenuItem.SEPARATOR);
-						addedSeparator.setTrue();
 						contextMenu.add(new PasteQuestMenuItem(quest, Component.translatable("ftbquests.gui.paste"),
 								Icons.ADD,
 								() -> new CopyQuestMessage(quest, questScreen.selectedChapter, qx, qy, true).sendToServer()));
@@ -507,19 +504,18 @@ public class QuestPanel extends Panel {
 									new CreateObjectMessage(link, new CompoundTag()).sendToServer();
 								}));
 					} else if (qo instanceof Task task) {
-						contextMenu.add(ContextMenuItem.SEPARATOR);
-						addedSeparator.setTrue();
 						contextMenu.add(new AddTaskButton.PasteTaskMenuItem(task, () -> copyAndCreateTask(task, qx, qy)));
 					}
 				});
+			} else {
+				ChapterImageButton.getClipboardImage().ifPresent(clipImg -> {
+					contextMenu.add(ContextMenuItem.SEPARATOR);
+					contextMenu.add(new TooltipContextMenuItem(Component.translatable("ftbquests.gui.paste_image"),
+							Icons.ADD,
+							() -> new CopyChapterImageMessage(clipImg, questScreen.selectedChapter, qx, qy).sendToServer(),
+							Component.literal(clipImg.getImage().toString()).withStyle(ChatFormatting.GRAY)));
+				});
 			}
-			ChapterImageButton.getClipboard().ifPresent(clipImg -> {
-				if (!addedSeparator.getValue()) contextMenu.add(ContextMenuItem.SEPARATOR);
-				contextMenu.add(new TooltipContextMenuItem(Component.translatable("ftbquests.gui.paste_image"),
-						Icons.ADD,
-						() -> new CopyChapterImageMessage(clipImg, questScreen.selectedChapter, qx, qy).sendToServer(),
-						Component.literal(clipImg.getImage().toString()).withStyle(ChatFormatting.GRAY)));
-			});
 
 			questScreen.openContextMenu(contextMenu);
 			return true;

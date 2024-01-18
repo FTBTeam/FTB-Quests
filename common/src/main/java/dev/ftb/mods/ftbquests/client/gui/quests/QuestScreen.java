@@ -1,5 +1,6 @@
 package dev.ftb.mods.ftbquests.client.gui.quests;
 
+import com.mojang.datafixers.util.Pair;
 import dev.ftb.mods.ftblibrary.config.ConfigGroup;
 import dev.ftb.mods.ftblibrary.config.ConfigValue;
 import dev.ftb.mods.ftblibrary.config.ConfigWithVariants;
@@ -17,10 +18,7 @@ import dev.ftb.mods.ftbquests.client.FTBQuestsClient;
 import dev.ftb.mods.ftbquests.client.gui.CustomToast;
 import dev.ftb.mods.ftbquests.client.gui.FTBQuestsTheme;
 import dev.ftb.mods.ftbquests.client.gui.SelectQuestObjectScreen;
-import dev.ftb.mods.ftbquests.net.ChangeProgressMessage;
-import dev.ftb.mods.ftbquests.net.CopyQuestMessage;
-import dev.ftb.mods.ftbquests.net.CreateObjectMessage;
-import dev.ftb.mods.ftbquests.net.EditObjectMessage;
+import dev.ftb.mods.ftbquests.net.*;
 import dev.ftb.mods.ftbquests.quest.*;
 import dev.ftb.mods.ftbquests.quest.reward.RandomReward;
 import dev.ftb.mods.ftbquests.quest.reward.Reward;
@@ -336,34 +334,51 @@ public class QuestScreen extends BaseScreen {
 		return true;
 	}
 
-	private boolean copySelectedQuests() {
-		Collection<Quest> quests = getSelectedQuests();
+	private boolean copyObjectsToClipboard() {
+		Movable toCopy = null;
 
-		if (quests.size() > 1) {
-			Minecraft.getInstance().getToasts().addToast(new CustomToast(Component.translatable("ftbquests.gui.error"), Icons.BARRIER, Component.translatable("ftbquests.quest.cannot_copy_many")));
-			return false;
-		}
-		for (Quest q : quests) {
-			setClipboardString(q.getCodeString());
-			Minecraft.getInstance().getToasts().addToast(new CustomToast(Component.translatable("ftbquests.quest.copied"), Icons.INFO, Component.literal(q.getTitle().getString())));
+		if (selectedObjects.size() > 1) {
+			displayError(Component.translatable("ftbquests.quest.cannot_copy_many"));
+		} else if (selectedObjects.isEmpty()) {
+			// no objects selected: copy hovered object if there is one
+			toCopy = questPanel.getWidgets().stream()
+					.filter(w -> w instanceof QuestPositionableButton && w.isMouseOver())
+					.map(w -> ((QuestPositionableButton) w).moveAndDeleteFocus())
+					.findFirst()
+					.orElse(null);
+		} else {
+			// one object selected
+			toCopy = selectedObjects.get(0);
 		}
 
-		return true;
+		if (toCopy != null) {
+			toCopy.copyToClipboard();
+			Minecraft.getInstance().getToasts().addToast(new CustomToast(Component.translatable("ftbquests.quest.copied"),
+					Icons.INFO, Component.literal(toCopy.getTitle().getString())));
+			return true;
+		}
+
+		return false;
+    }
+
+	private boolean pasteSelectedQuest(boolean withDeps) {
+		if (ChapterImage.isImageInClipboard()) {
+			return pasteSelectedImage();
+		} else {
+			return QuestObjectBase.parseHexId(getClipboardString()).map(id -> {
+				Quest quest = file.getQuest(id);
+				if (quest == null) return false;
+				Pair<Double, Double> qxy = getSnappedXY();
+				new CopyQuestMessage(quest, selectedChapter, qxy.getFirst(), qxy.getSecond(), withDeps).sendToServer();
+				return true;
+			}).orElse(false);
+		}
 	}
 
-	private boolean pasteSelectedQuests(boolean withDeps) {
-		String clip = getClipboardString();
-		if (clip.isEmpty()) return false;
-
-		return QuestObjectBase.parseHexId(clip).map(id -> {
-			Quest quest = file.getQuest(id);
-			if (quest == null) return false;
-
-			double snap = 1D / file.getGridScale();
-			double qx = Mth.floor(questPanel.questX * snap + 0.5D) / snap;
-			double qy = Mth.floor(questPanel.questY * snap + 0.5D) / snap;
-
-			new CopyQuestMessage(quest, selectedChapter, qx, qy, withDeps).sendToServer();
+	private boolean pasteSelectedImage() {
+		return ChapterImageButton.getClipboardImage().map(clipImg -> {
+			Pair<Double,Double> qxy = getSnappedXY();
+			new CopyChapterImageMessage(clipImg, selectedChapter, qxy.getFirst(), qxy.getSecond()).sendToServer();
 			return true;
 		}).orElse(false);
 	}
@@ -374,16 +389,19 @@ public class QuestScreen extends BaseScreen {
 
 		return QuestObjectBase.parseHexId(clip).map(id -> {
 			if (file.getQuest(id) == null) return false;
-
-			double snap = 1D / file.getGridScale();
-			double qx = Mth.floor(questPanel.questX * snap + 0.5D) / snap;
-			double qy = Mth.floor(questPanel.questY * snap + 0.5D) / snap;
-
+			Pair<Double,Double> qxy = getSnappedXY();
 			QuestLink link = new QuestLink(0L, selectedChapter, id);
-			link.setPosition(qx, qy);
+			link.setPosition(qxy.getFirst(), qxy.getSecond());
 			new CreateObjectMessage(link, new CompoundTag(), false).sendToServer();
 			return true;
 		}).orElse(false);
+	}
+
+	private Pair<Double,Double> getSnappedXY() {
+		double snap = 1D / file.getGridScale();
+		double qx = Mth.floor(questPanel.questX * snap + 0.5D) / snap;
+		double qy = Mth.floor(questPanel.questY * snap + 0.5D) / snap;
+		return Pair.of(qx,qy);
 	}
 
 	void deleteSelectedObjects() {
@@ -507,13 +525,13 @@ public class QuestScreen extends BaseScreen {
 					return moveSelectedQuests(step, 0D);
 				}
 				case GLFW.GLFW_KEY_C -> {
-					return copySelectedQuests();
+					return copyObjectsToClipboard();
 				}
 				case GLFW.GLFW_KEY_V -> {
 					if (key.modifiers.alt()) {
 						return pasteSelectedQuestLinks();
 					} else {
-						return pasteSelectedQuests(!key.modifiers.shift());
+						return pasteSelectedQuest(!key.modifiers.shift());
 					}
 				}
 			}

@@ -8,6 +8,7 @@ import dev.ftb.mods.ftblibrary.config.StringConfig;
 import dev.ftb.mods.ftblibrary.icon.Color4I;
 import dev.ftb.mods.ftblibrary.icon.Icon;
 import dev.ftb.mods.ftblibrary.math.PixelBuffer;
+import dev.ftb.mods.ftblibrary.ui.Widget;
 import dev.ftb.mods.ftblibrary.util.TooltipList;
 import dev.ftb.mods.ftbquests.net.EditObjectMessage;
 import dev.ftb.mods.ftbquests.util.ConfigQuestObject;
@@ -20,15 +21,21 @@ import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.StringTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.chat.Component;
 import net.minecraft.util.Mth;
 
+import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Predicate;
 import java.util.regex.Pattern;
 
 public final class ChapterImage implements Movable {
+	// magic string which goes in the clipboard if an image has been copied
+	public static final String FTBQ_IMAGE = "<ftbq-image>";
+
 	private static final Pattern COLOR_PATTERN = Pattern.compile("^#[a-fA-F0-9]{6}$");
+	public static WeakReference<ChapterImage> clipboard = new WeakReference<>(null);
 
 	private Chapter chapter;
 	private double x, y;
@@ -303,6 +310,17 @@ public final class ChapterImage implements Movable {
 				.draw(graphics, 0, 0, 1, 1);
 	}
 
+	@Override
+	public void copyToClipboard() {
+		clipboard = new WeakReference<>(this);
+		Widget.setClipboardString(ChapterImage.FTBQ_IMAGE);
+	}
+
+	@Override
+	public Component getTitle() {
+		return Component.literal(image.toString());
+	}
+
 	public boolean isAspectRatioOff() {
 		return image.hasPixelBuffer() && !Mth.equal(getAspectRatio(), width / height);
 	}
@@ -340,5 +358,9 @@ public final class ChapterImage implements Movable {
 
 	public boolean shouldShowImage(TeamData teamData) {
 		return !editorsOnly && (dependency == null || teamData.isCompleted(dependency));
+	}
+
+	public static boolean isImageInClipboard() {
+		return Widget.getClipboardString().equals(FTBQ_IMAGE);
 	}
 }
