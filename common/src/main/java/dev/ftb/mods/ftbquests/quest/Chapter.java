@@ -34,7 +34,7 @@ public final class Chapter extends QuestObject {
 	private final List<Quest> quests;
 	private final List<QuestLink> questLinks;
 	private final List<String> rawSubtitle;
-	boolean alwaysInvisible;
+	private boolean alwaysInvisible;
 	private String defaultQuestShape;
 	private double defaultQuestSize;
 	private final List<ChapterImage> images;
@@ -453,8 +453,8 @@ public final class Chapter extends QuestObject {
 	@Override
 	public boolean isVisible(TeamData data) {
 		return !alwaysInvisible
-				&& quests.isEmpty() || quests.stream().anyMatch(quest -> quest.isVisible(data))
-				&& questLinks.isEmpty() || questLinks.stream().anyMatch(link -> link.isVisible(data));
+				&& (quests.isEmpty() || quests.stream().anyMatch(quest -> quest.isVisible(data)))
+				&& (questLinks.isEmpty() || questLinks.stream().anyMatch(link -> link.isVisible(data)));
 	}
 
 	@Override
