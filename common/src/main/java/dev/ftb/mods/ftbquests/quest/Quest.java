@@ -9,6 +9,7 @@ import dev.ftb.mods.ftblibrary.snbt.SNBTCompoundTag;
 import dev.ftb.mods.ftblibrary.ui.input.MouseButton;
 import dev.ftb.mods.ftblibrary.util.client.ClientUtils;
 import dev.ftb.mods.ftbquests.FTBQuests;
+import dev.ftb.mods.ftbquests.client.FTBQuestsClient;
 import dev.ftb.mods.ftbquests.client.gui.MultilineTextEditorScreen;
 import dev.ftb.mods.ftbquests.client.gui.quests.QuestScreen;
 import dev.ftb.mods.ftbquests.events.ObjectCompletedEvent;
@@ -874,6 +875,11 @@ public final class Quest extends QuestObject implements Movable {
 				chapter = newChapter;
 			}
 		}
+	}
+
+	@Override
+	public void copyToClipboard() {
+		FTBQuestsClient.copyToClipboard(this);
 	}
 
 	public boolean isProgressionIgnored() {

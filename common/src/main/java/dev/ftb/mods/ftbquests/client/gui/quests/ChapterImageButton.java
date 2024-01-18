@@ -27,8 +27,6 @@ import java.util.List;
 import java.util.Optional;
 
 public class ChapterImageButton extends Button implements QuestPositionableButton, Comparable<ChapterImageButton> {
-	private static WeakReference<ChapterImage> clipboard = new WeakReference<>(null);
-
 	private final QuestScreen questScreen;
 	private final ChapterImage chapterImage;
 
@@ -39,13 +37,13 @@ public class ChapterImageButton extends Button implements QuestPositionableButto
 		chapterImage = i;
 	}
 
-	public static Optional<ChapterImage> getClipboard() {
-		ChapterImage img = clipboard.get();
+	public static Optional<ChapterImage> getClipboardImage() {
+		ChapterImage img = ChapterImage.clipboard.get();
 		if (img != null) {
 			if (img.getChapter().isValid()) {
 				return Optional.of(img);
 			} else {
-				clipboard = new WeakReference<>(null);
+				ChapterImage.clipboard = new WeakReference<>(null);
 			}
 		}
 		return Optional.empty();
@@ -81,18 +79,15 @@ public class ChapterImageButton extends Button implements QuestPositionableButto
 				new EditConfigScreen(group).openGui();
 			}));
 
-			contextMenu.add(new ContextMenuItem(Component.translatable("gui.move"), ThemeProperties.MOVE_UP_ICON.get(chapterImage.getChapter()), () -> {
-				questScreen.initiateMoving(chapterImage);
-			}) {
+			contextMenu.add(new ContextMenuItem(Component.translatable("gui.move"), ThemeProperties.MOVE_UP_ICON.get(chapterImage.getChapter()),
+					() -> questScreen.initiateMoving(chapterImage)) {
 				@Override
 				public void addMouseOverText(TooltipList list) {
 					list.add(Component.translatable("ftbquests.gui.move_tooltip").withStyle(ChatFormatting.DARK_GRAY));
 				}
 			});
 
-			contextMenu.add(new ContextMenuItem(Component.translatable("gui.copy"), Icons.INFO, () -> {
-				clipboard = new WeakReference<>(chapterImage);
-			}) {
+			contextMenu.add(new ContextMenuItem(Component.translatable("gui.copy"), Icons.INFO, chapterImage::copyToClipboard) {
 				@Override
 				public void addMouseOverText(TooltipList list) {
 					list.add(Component.literal(chapterImage.getImage().toString()).withStyle(ChatFormatting.DARK_GRAY));
