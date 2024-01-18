@@ -634,7 +634,7 @@ public class TeamData {
 		Collection<ServerPlayer> onlineMembers = getOnlineMembers();
 		Collection<ServerPlayer> notifiedPlayers;
 
-		if (!task.getQuest().getChapter().alwaysInvisible && QuestObjectBase.shouldSendNotifications()) {
+		if (!task.getQuest().getChapter().isAlwaysInvisible() && QuestObjectBase.shouldSendNotifications()) {
 			notifiedPlayers = onlineMembers;
 		} else {
 			notifiedPlayers = List.of();
