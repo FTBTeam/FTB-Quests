@@ -10,6 +10,7 @@ import dev.ftb.mods.ftblibrary.config.ui.EditConfigFromStringScreen;
 import dev.ftb.mods.ftblibrary.config.ui.EditConfigScreen;
 import dev.ftb.mods.ftblibrary.config.ui.SelectFluidScreen;
 import dev.ftb.mods.ftblibrary.config.ui.SelectItemStackScreen;
+import dev.ftb.mods.ftblibrary.ui.Widget;
 import dev.ftb.mods.ftblibrary.ui.input.MouseButton;
 import dev.ftb.mods.ftbquests.FTBQuests;
 import dev.ftb.mods.ftbquests.api.FTBQuestsAPI;
@@ -18,6 +19,8 @@ import dev.ftb.mods.ftbquests.block.entity.TaskScreenBlockEntity;
 import dev.ftb.mods.ftbquests.item.FTBQuestsItems;
 import dev.ftb.mods.ftbquests.net.SetCustomImageMessage;
 import dev.ftb.mods.ftbquests.quest.BaseQuestFile;
+import dev.ftb.mods.ftbquests.quest.Quest;
+import dev.ftb.mods.ftbquests.quest.QuestObjectBase;
 import dev.ftb.mods.ftbquests.quest.TeamData;
 import dev.ftb.mods.ftbquests.quest.reward.ItemReward;
 import dev.ftb.mods.ftbquests.quest.reward.RewardTypes;
@@ -292,5 +295,9 @@ public class FTBQuestsClient {
 
 	public static Optional<RegistryAccess> registryAccess() {
 		return Minecraft.getInstance().level == null ? Optional.empty() : Optional.of(Minecraft.getInstance().level.registryAccess());
+	}
+
+	public static void copyToClipboard(QuestObjectBase qo) {
+		Widget.setClipboardString(qo.getCodeString());
 	}
 }
