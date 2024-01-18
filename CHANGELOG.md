@@ -9,10 +9,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 * Added back support for the `{p}` expansion in command rewards
   * Although `@p` and `@s` are the recommended ways to get the player name, `{p}` is once more supported as a workaround for mods/plugins which don't properly use vanilla command parsing
+* Improved copy/paste keyboard behaviour a little
+  * Ctrl-C to copy now also works on images
+  * If no quests/images are selected, Ctrl-C will work to copy the hovered quest/image
 
 ### Fixed
 * A quest in the first chapter set as Autofocused (feature added in 2001.2.1) wasn't being autofocused on initial opening of the quest book
 * Hopefully mitigate a large amount of server lag (only noticeable in very big quest books) when an item is crafted (or manually smelted)
+* Fixed the "Always Invisible" chapter property not being correctly observed when not in edit mode
 
 ## [2001.3.0]
 
