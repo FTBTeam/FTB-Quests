@@ -2,7 +2,7 @@ name: Java CI - Build on Push
 
 on:
   push:
-    branches: [ main, dev, "1.*" ]
+    branches: [ main, dev, "1.**" ]
   workflow_dispatch:
     inputs:
       skip_maven_publish:
