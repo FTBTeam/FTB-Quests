@@ -582,7 +582,9 @@ public class QuestScreen extends BaseScreen {
 
 		if (selectedChapter == null) {
 			selectChapter(file.getFirstVisibleChapter(file.selfTeamData));
-			selectedChapter.getAutofocus().ifPresent(this::scrollTo);
+			if (selectedChapter != null) {
+				selectedChapter.getAutofocus().ifPresent(this::scrollTo);
+			}
 		}
 
 		super.tick();
