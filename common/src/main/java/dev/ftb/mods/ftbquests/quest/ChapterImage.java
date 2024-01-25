@@ -112,7 +112,7 @@ public final class ChapterImage implements Movable {
 	}
 
 	public void addHoverText(TooltipList list) {
-		hover.forEach(list::string);
+		hover.forEach(list::translate);
 	}
 
 	public CompoundTag writeData(CompoundTag nbt) {
