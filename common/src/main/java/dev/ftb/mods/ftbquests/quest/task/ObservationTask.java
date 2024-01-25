@@ -119,6 +119,11 @@ public class ObservationTask extends BooleanTask {
 			BlockInWorld blockInWorld = new BlockInWorld(player.level, blockResult.getBlockPos(), false);
 
 			BlockState state = blockInWorld.getState();
+			//noinspection ConstantValue
+			if (state == null) {
+				// shouldn't normally occur, but potential race condition when switching dimensions?
+				return false;
+			}
 			Block block = state.getBlock();
 			BlockEntity blockEntity = blockInWorld.getEntity();
 
