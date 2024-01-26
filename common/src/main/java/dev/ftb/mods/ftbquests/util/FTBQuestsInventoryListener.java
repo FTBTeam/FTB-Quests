@@ -11,6 +11,8 @@ import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.ContainerListener;
 import net.minecraft.world.item.ItemStack;
 
+import java.util.List;
+
 /**
  * @author LatvianModder
  */
@@ -34,13 +36,17 @@ public class FTBQuestsInventoryListener implements ContainerListener {
 			return;
 		}
 
-		file.withPlayerContext(player, () -> {
-			for (Task task : file.getSubmitTasks()) {
-				if (task.id != sourceTask && data.canStartTasks(task.quest)) {
-					task.submitTask(data, player, craftedItem);
+		List<Task> tasksToCheck = craftedItem.isEmpty() ? file.getSubmitTasks() : file.getCraftingTasks();
+
+		if (!tasksToCheck.isEmpty()) {
+			file.withPlayerContext(player, () -> {
+				for (Task task : tasksToCheck) {
+					if (task.id != sourceTask && data.canStartTasks(task.quest)) {
+						task.submitTask(data, player, craftedItem);
+					}
 				}
-			}
-		});
+			});
+		}
 	}
 
 	@Override

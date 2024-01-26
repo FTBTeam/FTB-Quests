@@ -17,10 +17,7 @@ import dev.ftb.mods.ftbquests.quest.loot.EntityWeight;
 import dev.ftb.mods.ftbquests.quest.loot.LootCrate;
 import dev.ftb.mods.ftbquests.quest.loot.RewardTable;
 import dev.ftb.mods.ftbquests.quest.reward.*;
-import dev.ftb.mods.ftbquests.quest.task.CustomTask;
-import dev.ftb.mods.ftbquests.quest.task.Task;
-import dev.ftb.mods.ftbquests.quest.task.TaskType;
-import dev.ftb.mods.ftbquests.quest.task.TaskTypes;
+import dev.ftb.mods.ftbquests.quest.task.*;
 import dev.ftb.mods.ftbquests.quest.theme.property.ThemeProperties;
 import dev.ftb.mods.ftbquests.util.NetUtils;
 import dev.ftb.mods.ftbteams.FTBTeamsAPI;
@@ -81,6 +78,7 @@ public abstract class QuestFile extends QuestObject {
 
 	private List<Task> allTasks;
 	private List<Task> submitTasks;
+	private List<Task> craftingTasks;
 
 	public QuestFile() {
 		id = 1;
@@ -1111,6 +1109,7 @@ public abstract class QuestFile extends QuestObject {
 
 		allTasks = null;
 		submitTasks = null;
+		craftingTasks = null;
 
 		for (ChapterGroup group : chapterGroups) {
 			group.clearCachedData();
@@ -1272,6 +1271,13 @@ public abstract class QuestFile extends QuestObject {
 		}
 
 		return submitTasks;
+	}
+
+	public List<Task> getCraftingTasks() {
+		if (craftingTasks == null) {
+			craftingTasks = getAllTasks().stream().filter(task -> task instanceof ItemTask i && i.onlyFromCrafting.get(false)).toList();
+		}
+		return craftingTasks;
 	}
 
 	public List<Chapter> getVisibleChapters(TeamData data) {
