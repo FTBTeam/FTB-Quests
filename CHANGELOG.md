@@ -4,6 +4,16 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2001.3.3]
+
+### Added
+* Tooltips for images (the "Hover Text" image property) now support using translation keys
+  * Literal text still works, as before
+
+### Fixed
+* Mitigate performance hit for calculating displayable items when item filters (either FTB Filter System or Item Filter) are in use
+  * There is an unavoidable client-side performance cost here which can be noticeable when opening a large quest book with many filters, but this should reduce it somewhat
+
 ## [2001.3.2]
 
 ### Fixed
