@@ -11,6 +11,7 @@ import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.ComponentContents;
+import net.minecraft.util.FormattedCharSequence;
 import org.apache.commons.lang3.tuple.Pair;
 
 import java.util.ArrayList;
@@ -41,7 +42,7 @@ public class KeyReferenceScreen extends BaseScreen {
 
     @Override
     public boolean onInit() {
-        return setSizeProportional(0.7f, 0.8f);
+        return setSizeProportional(0.75f, 0.8f);
     }
 
     @Override
@@ -111,7 +112,8 @@ public class KeyReferenceScreen extends BaseScreen {
         public void alignWidgets() {
             align(WidgetLayout.VERTICAL);
 
-            textWidget.setPos(2, 2);
+            textWidget.setPos(4, 2);
+            textWidget.setWidth(width);
         }
 
         @Override
@@ -123,25 +125,45 @@ public class KeyReferenceScreen extends BaseScreen {
     private static class TwoColumnList extends Widget {
         private final int widestL;
         private final List<Pair<Component, Component>> data;
+        private final List<Pair<Component, FormattedCharSequence>> reflowed = new ArrayList<>();
 
         public TwoColumnList(Panel p, List<Pair<Component, Component>> data) {
             super(p);
 
-            Theme theme = getGui().getTheme();
-
             this.data = data;
-            int widestL = 0, widestR = 0;
+            this.widestL = data.stream()
+                    .map(e -> getGui().getTheme().getStringWidth(e.getLeft()))
+                    .max(Integer::compareTo)
+                    .orElse(0);
+        }
+
+        @Override
+        public void setWidth(int v) {
+            super.setWidth(v);
+
+            reflowText();
+        }
+
+        private void reflowText() {
+            Theme theme = getGui().getTheme();
             int h = 0;
+            int maxWidth = getParent().getWidth() - GUTTER_SIZE * 2;
+            reflowed.clear();
             for (var entry : data) {
-                boolean header = entry.getRight().getContents().equals(ComponentContents.EMPTY);
-                widestL = Math.max(widestL, theme.getStringWidth(entry.getLeft()));
-                widestR = Math.max(widestR, theme.getStringWidth(entry.getRight()));
-                h += theme.getFontHeight() + (header ? 3 : 1);
+                if (entry.getRight().getContents().equals(ComponentContents.EMPTY)) {
+                    // header line
+                    reflowed.add(Pair.of(entry.getLeft(), null));
+                    h += theme.getFontHeight() + 3;
+                } else {
+                    var l = theme.getFont().split(entry.getRight(), maxWidth - 10 - widestL);
+                    reflowed.add(Pair.of(entry.getLeft(), l.get(0)));
+                    for (int i = 1; i < l.size(); i++) {
+                        reflowed.add(Pair.of(Component.empty(), l.get(i)));
+                    }
+                    h += (theme.getFontHeight() + 1) * l.size();
+                }
             }
 
-            this.widestL = widestL;
-
-            width = widestL + 10 + widestR;
             height = h;
         }
 
@@ -149,11 +171,14 @@ public class KeyReferenceScreen extends BaseScreen {
         public void draw(GuiGraphics graphics, Theme theme, int x, int y, int w, int h) {
             int yPos = y;
 
-            for (var entry : data) {
-                boolean header = entry.getRight().getContents().equals(ComponentContents.EMPTY);
-                int xOff = header ? widestL + 10 : widestL - theme.getStringWidth(entry.getLeft()) - 2;
+            for (var entry : reflowed) {
+                boolean header = entry.getRight() == null;
+                int leftWidth = theme.getStringWidth(entry.getLeft());
+                int xOff = header ? (width - leftWidth) / 2 : widestL - leftWidth - 2;
                 theme.drawString(graphics, entry.getLeft(), x + xOff, yPos);
-                theme.drawString(graphics, entry.getRight(), x + widestL + 10, yPos);
+                if (!header) {
+                    theme.drawString(graphics, entry.getRight(), x + widestL + 10, yPos);
+                }
                 yPos += theme.getFontHeight() + (header ? 3 : 1);
             }
         }
