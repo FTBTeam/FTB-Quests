@@ -229,30 +229,23 @@ public class QuestPanel extends Panel {
 		for (Widget widget : widgets) {
 			if (widget.shouldDraw() && widget instanceof QuestButton qb && !qb.quest.shouldHideDependencyLines()) {
 				for (QuestButton button : qb.getDependencies()) {
-					int r, g, b, a, a2;
-					if (button.quest == selectedQuest || button.isMouseOver()) {
-						Color4I c = ThemeProperties.DEPENDENCY_LINE_REQUIRED_FOR_COLOR.get(questScreen.selectedChapter);
-						r = c.redi();
-						g = c.greeni();
-						b = c.bluei();
-						if (qb.shouldDraw()) {
-							a = a2 = c.alphai();
-						} else {
-							a = c.alphai() / 4 * 3;
-							a2 = 30;
-							toOutline.add(qb);
+					if (button.shouldDraw()) {
+						if (button.quest == selectedQuest || button.isMouseOver()) {
+							Color4I c = ThemeProperties.DEPENDENCY_LINE_REQUIRED_FOR_COLOR.get(questScreen.selectedChapter);
+							int a, a2;
+							if (qb.shouldDraw()) {
+								a = a2 = c.alphai();
+							} else {
+								a = c.alphai() / 4 * 3;
+								a2 = 30;
+								toOutline.add(qb);
+							}
+							renderConnection(widget, button, graphics.pose(), buffer, lineWidth, c.redi(), c.greeni(), c.bluei(), a2, a, ms, tesselator);
+						} else if (qb.quest == selectedQuest || qb.isMouseOver()) {
+							Color4I c = ThemeProperties.DEPENDENCY_LINE_REQUIRES_COLOR.get(questScreen.selectedChapter);
+							renderConnection(widget, button, graphics.pose(), buffer, lineWidth, c.redi(), c.greeni(), c.bluei(), c.alphai(), c.alphai(), ms, tesselator);
 						}
-					} else if (qb.quest == selectedQuest || qb.isMouseOver()) {
-						Color4I c = ThemeProperties.DEPENDENCY_LINE_REQUIRES_COLOR.get(questScreen.selectedChapter);
-						r = c.redi();
-						g = c.greeni();
-						b = c.bluei();
-						a = c.alphai();
-						a2 = a;
-					} else {
-						continue;
 					}
-					renderConnection(widget, button, graphics.pose(), buffer, lineWidth, r, g, b, a2, a, ms, tesselator);
 				}
 			}
 
