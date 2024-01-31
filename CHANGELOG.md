@@ -13,6 +13,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 * Mitigate performance hit for calculating displayable items when item filters (either FTB Filter System or Item Filter) are in use
   * There is an unavoidable client-side performance cost here which can be noticeable when opening a large quest book with many filters, but this should reduce it somewhat
+* Fixed connection lines sometimes being rendered to invisible quest dependencies
 
 ## [2001.3.2]
 
