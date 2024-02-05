@@ -17,11 +17,11 @@ import dev.ftb.mods.ftbquests.quest.task.TaskTypes;
 import dev.ftb.mods.ftbquests.util.FTBQuestsInventoryListener;
 import dev.ftb.mods.ftbquests.util.FileUtils;
 import dev.ftb.mods.ftbteams.api.FTBTeamsAPI;
+import dev.ftb.mods.ftbteams.api.Team;
 import dev.ftb.mods.ftbteams.api.event.PlayerChangedTeamEvent;
 import dev.ftb.mods.ftbteams.api.event.PlayerLoggedInAfterTeamEvent;
 import dev.ftb.mods.ftbteams.api.event.TeamCreatedEvent;
 import dev.ftb.mods.ftbteams.data.PartyTeam;
-import dev.ftb.mods.ftbteams.data.PlayerTeam;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
@@ -220,17 +220,23 @@ public class ServerQuestFile extends BaseQuestFile {
 	}
 
 	public void playerChangedTeam(PlayerChangedTeamEvent event) {
-		if (event.getPreviousTeam().isPresent()) {
-			TeamData oldTeamData = getOrCreateTeamData(event.getPreviousTeam().get());
-			TeamData newTeamData = getOrCreateTeamData(event.getTeam());
+		event.getPreviousTeam().ifPresent(prevTeam -> {
+			Team curTeam = event.getTeam();
+			TeamData oldTeamData = getOrCreateTeamData(prevTeam);
+			TeamData newTeamData = getOrCreateTeamData(curTeam);
 
-			if (event.getPreviousTeam().get() instanceof PlayerTeam && event.getTeam() instanceof PartyTeam && !((PartyTeam) event.getTeam()).isOwner(event.getPlayerId())) {
+			if (prevTeam.isPlayerTeam() && curTeam.isPartyTeam() && !curTeam.getOwner().equals(event.getPlayerId())) {
+				// player is joining an existing party team; merge all of their progress data into the party
 				newTeamData.mergeData(oldTeamData);
+			} else if (prevTeam.isPartyTeam() && curTeam.isPlayerTeam()) {
+				// player is leaving an existing party team; they get their old progress back
+				// EXCEPT any rewards they've already claimed stay claimed! no claiming the reward again
+				newTeamData.mergeClaimedRewards(oldTeamData);
 			}
 
 			new TeamDataChangedMessage(new TeamDataUpdate(oldTeamData), new TeamDataUpdate(newTeamData)).sendToAll(server);
-			new SyncTeamDataMessage(newTeamData, true).sendTo(event.getTeam().getOnlineMembers());
-		}
+			new SyncTeamDataMessage(newTeamData, true).sendTo(curTeam.getOnlineMembers());
+		});
 	}
 
 	@Override
