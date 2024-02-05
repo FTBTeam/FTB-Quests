@@ -2,31 +2,29 @@ package dev.ftb.mods.ftbquests.util;
 
 import com.mojang.util.UndashedUuid;
 import dev.ftb.mods.ftbquests.quest.QuestObjectBase;
+import dev.ftb.mods.ftbquests.quest.reward.Reward;
+import net.minecraft.Util;
 import net.minecraft.network.FriendlyByteBuf;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.Objects;
 import java.util.UUID;
 
-public final class QuestKey implements Comparable<QuestKey> {
-	private final UUID uuid;
-	private final long id;
+public record QuestKey(UUID uuid, long id) implements Comparable<QuestKey> {
 
-	public static QuestKey of(UUID uuid, long reward) {
-		return new QuestKey(uuid, reward);
+	public static QuestKey create(UUID uuid, long questObjectId) {
+		return new QuestKey(uuid, questObjectId);
 	}
 
-	public static QuestKey of(FriendlyByteBuf buf) {
-		return of(buf.readUUID(), buf.readLong());
+	public static QuestKey forReward(UUID uuid, Reward reward) {
+		return create(reward.isTeamReward() ? Util.NIL_UUID : uuid, reward.id);
 	}
 
-	public static QuestKey of(String string) {
-		return of(UndashedUuid.fromString(string.substring(0, 32)), QuestObjectBase.parseCodeString(string.substring(33)));
+	public static QuestKey fromNetwork(FriendlyByteBuf buf) {
+		return create(buf.readUUID(), buf.readLong());
 	}
 
-	private QuestKey(UUID uuid, long id) {
-		this.uuid = uuid;
-		this.id = id;
+	public static QuestKey fromString(String string) {
+		return create(UndashedUuid.fromString(string.substring(0, 32)), QuestObjectBase.parseCodeString(string.substring(33)));
 	}
 
 	public long getId() {
@@ -39,29 +37,12 @@ public final class QuestKey implements Comparable<QuestKey> {
 	}
 
 	@Override
-	public boolean equals(Object o) {
-		if (this == o) {
-			return true;
-		}
-		if (o == null || getClass() != o.getClass()) {
-			return false;
-		}
-		QuestKey claimKey = (QuestKey) o;
-		return id == claimKey.id && Objects.equals(uuid, claimKey.uuid);
-	}
-
-	@Override
-	public int hashCode() {
-		return Objects.hash(uuid, id);
-	}
-
-	@Override
 	public int compareTo(@NotNull QuestKey key) {
 		int i = uuid.compareTo(key.uuid);
 		return i == 0 ? Long.compareUnsigned(id, key.id) : i;
 	}
 
-	public void write(FriendlyByteBuf buf) {
+	public void toNetwork(FriendlyByteBuf buf) {
 		buf.writeUUID(uuid);
 		buf.writeLong(id);
 	}
