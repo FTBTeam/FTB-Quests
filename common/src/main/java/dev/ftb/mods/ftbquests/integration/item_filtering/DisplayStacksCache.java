@@ -1,5 +1,6 @@
 package dev.ftb.mods.ftbquests.integration.item_filtering;
 
+import com.google.common.collect.ImmutableList;
 import dev.ftb.mods.ftbquests.api.ItemFilterAdapter;
 import dev.ftb.mods.ftbquests.api.event.CustomFilterDisplayItemsEvent;
 import dev.ftb.mods.ftbquests.client.FTBQuestsClient;
@@ -10,19 +11,17 @@ import net.minecraft.world.item.CreativeModeTabs;
 import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
-import java.util.stream.Collectors;
 
 public class DisplayStacksCache {
     private static final int MAX_CACHE_SIZE = 1024;
     private static final Object2ObjectLinkedOpenHashMap<CacheKey, List<ItemStack>> cache = new Object2ObjectLinkedOpenHashMap<>(MAX_CACHE_SIZE);
+    private static List<ItemStack> extraCache = null;
 
     @NotNull
     public static List<ItemStack> getCachedDisplayStacks(ItemStack filterStack, ItemFilterAdapter adapter) {
-        CacheKey key = new CacheKey(filterStack);
+        CacheKey key = CacheKey.of(filterStack);
 
         List<ItemStack> result = cache.getAndMoveToFirst(key);
         if (result == null) {
@@ -37,42 +36,42 @@ public class DisplayStacksCache {
     }
 
     private static List<ItemStack> computeMatchingStacks(ItemFilterAdapter.Matcher matcher) {
-        FTBQuestsClient.registryAccess().ifPresent(ra -> CreativeModeTabs.tryRebuildTabContents(FeatureFlags.DEFAULT_FLAGS, true, ra));
+        if (CreativeModeTabs.searchTab().getSearchTabDisplayItems().isEmpty()) {
+            FTBQuestsClient.registryAccess().ifPresent(ra -> CreativeModeTabs.tryRebuildTabContents(FeatureFlags.DEFAULT_FLAGS, true, ra));
+        }
 
-        List<ItemStack> res = CreativeModeTabs.searchTab().getSearchTabDisplayItems().stream()
+        ImmutableList.Builder<ItemStack> builder = ImmutableList.builder();
+
+        CreativeModeTabs.searchTab().getSearchTabDisplayItems().stream()
                 .filter(matcher)
-                .collect(Collectors.toCollection(ArrayList::new));
+                .forEach(builder::add);
 
-        List<ItemStack> extra = new ArrayList<>();
-        CustomFilterDisplayItemsEvent.ADD_ITEMSTACK.invoker()
-                .accept(new CustomFilterDisplayItemsEvent(extra::add));
-        res.addAll(extra.stream().filter(matcher).toList());
+        getExtraDisplayCache().stream()
+                .filter(matcher)
+                .forEach(builder::add);
 
-        return Collections.unmodifiableList(res);
+        return builder.build();
     }
 
     public static void clear() {
         cache.clear();
+        extraCache = null;
     }
 
-    private static class CacheKey {
-        private final int key;
-
-        private CacheKey(ItemStack filterStack) {
-            key = Objects.hash(BuiltInRegistries.ITEM.getId(filterStack.getItem()), filterStack.hasTag() ? filterStack.getTag().hashCode() : 0);
+    @NotNull
+    private static List<ItemStack> getExtraDisplayCache() {
+        if (extraCache == null) {
+            ImmutableList.Builder<ItemStack> builder = ImmutableList.builder();
+            CustomFilterDisplayItemsEvent.ADD_ITEMSTACK.invoker()
+                    .accept(new CustomFilterDisplayItemsEvent(builder::add));
+            extraCache = builder.build();
         }
+        return extraCache;
+    }
 
-        @Override
-        public boolean equals(Object o) {
-            if (this == o) return true;
-            if (o == null || getClass() != o.getClass()) return false;
-            CacheKey cacheKey = (CacheKey) o;
-            return key == cacheKey.key;
-        }
-
-        @Override
-        public int hashCode() {
-            return key;
+    private record CacheKey(int key) {
+        static CacheKey of(ItemStack filterStack) {
+            return new CacheKey(Objects.hash(BuiltInRegistries.ITEM.getId(filterStack.getItem()), filterStack.hasTag() ? filterStack.getTag().hashCode() : 0));
         }
     }
 }

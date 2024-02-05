@@ -4,6 +4,20 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2001.3.3]
+
+### Added
+* Tooltips for images (the "Hover Text" image property) now support using translation keys
+  * Literal text still works, as before
+
+### Fixed
+* Mitigate performance hit for calculating displayable items when item filters (either FTB Filter System or Item Filter) are in use
+  * There is an unavoidable client-side performance cost here which can be noticeable when opening a large quest book with many filters, but this should reduce it somewhat
+* Fixed connection lines sometimes being rendered to invisible quest dependencies
+* When a player leaves a party team, their claimed-reward data is now copied back to their own team
+  * Although all quest progress is reset when a player leaves a party (to the point where they joined the party), claimed-reward data should be preserved so that rewards can't be claimed more than once by a player
+* Fixed some text formatting in the key reference popup panel (text wasn't always wrapping correctly)
+
 ## [2001.3.2]
 
 ### Fixed
