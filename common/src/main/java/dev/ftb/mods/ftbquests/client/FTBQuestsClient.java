@@ -19,7 +19,6 @@ import dev.ftb.mods.ftbquests.block.entity.TaskScreenBlockEntity;
 import dev.ftb.mods.ftbquests.item.FTBQuestsItems;
 import dev.ftb.mods.ftbquests.net.SetCustomImageMessage;
 import dev.ftb.mods.ftbquests.quest.BaseQuestFile;
-import dev.ftb.mods.ftbquests.quest.Quest;
 import dev.ftb.mods.ftbquests.quest.QuestObjectBase;
 import dev.ftb.mods.ftbquests.quest.TeamData;
 import dev.ftb.mods.ftbquests.quest.reward.ItemReward;
@@ -62,10 +61,13 @@ public class FTBQuestsClient {
 	public static KeyMapping KEY_QUESTS;
 
 	public static void init() {
+		FTBQuestsClientConfig.init();
+
 		ClientLifecycleEvent.CLIENT_SETUP.register(FTBQuestsClient::onClientSetup);
 		ReloadListenerRegistry.register(PackType.CLIENT_RESOURCES, new QuestFileCacheReloader());
 		ReloadListenerRegistry.register(PackType.CLIENT_RESOURCES, new ThemeLoader());
 		KeyMappingRegistry.register(KEY_QUESTS = new KeyMapping("key.ftbquests.quests", InputConstants.Type.KEYSYM, -1, "key.categories.ftbquests"));
+
 		new FTBQuestsClientEventHandler().init();
 	}
 
