@@ -28,7 +28,12 @@ public interface FTBQuestsClientConfig {
             Minecraft.getInstance().setScreen(screen);
         });
         CONFIG.createClientConfig(group);
-        EditConfigScreen gui = new EditConfigScreen(group);
+        EditConfigScreen gui = new EditConfigScreen(group) {
+            @Override
+            public boolean doesGuiPauseGame() {
+                return screen.isPauseScreen();
+            }
+        };
 
         gui.openGui();
     }
