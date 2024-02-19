@@ -369,7 +369,7 @@ public class QuestButton extends Button implements QuestPositionableButton {
 		PoseStack poseStack = graphics.pose();
 
 		if (!icon.isEmpty()) {
-			float s = w * 2F / 3F;
+			float s = w * (2F / 3F) * (float) quest.getIconScale();
 			poseStack.pushPose();
 			poseStack.translate(x + (w - s) / 2D, y + (h - s) / 2D, 0);
 			poseStack.scale(s, s, 1F);
