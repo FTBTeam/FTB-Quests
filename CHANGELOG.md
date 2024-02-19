@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 * Fixed client-side config (from "User Preferences" button) not getting properly persisted
+* User Preferences screen SSP pause behaviour now follows main screen's pause behaviour
 
 ## [2001.3.3]
 
