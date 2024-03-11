@@ -10,6 +10,7 @@ import dev.ftb.mods.ftblibrary.snbt.SNBTCompoundTag;
 import dev.ftb.mods.ftblibrary.ui.BaseScreen;
 import dev.ftb.mods.ftblibrary.util.TooltipList;
 import dev.ftb.mods.ftblibrary.util.client.ClientUtils;
+import dev.ftb.mods.ftbquests.client.ClientQuestFile;
 import dev.ftb.mods.ftbquests.client.FTBQuestsClient;
 import dev.ftb.mods.ftbquests.client.gui.EditRewardTableScreen;
 import dev.ftb.mods.ftbquests.client.gui.RewardTablesScreen;
@@ -375,14 +376,14 @@ public final class RewardTable extends QuestObjectBase {
 	@Override
 	@Environment(EnvType.CLIENT)
 	public void onEditButtonClicked(Runnable gui) {
-		new EditRewardTableScreen(this, () -> {
-			new EditObjectMessage(this).sendToServer();
+		new EditRewardTableScreen(gui, this, editedReward -> {
+			new EditObjectMessage(editedReward).sendToServer();
 			clearCachedData();
 		}).openGui();
 	}
 
 	public void addMouseOverText(TooltipList list, boolean includeWeight, boolean includeEmpty) {
-		if (!hideTooltip) {
+		if (ClientQuestFile.INSTANCE.canEdit() || !hideTooltip) {
 			float totalWeight = getTotalWeight(includeEmpty);
 
 			if (includeWeight && includeEmpty && emptyWeight > 0) {

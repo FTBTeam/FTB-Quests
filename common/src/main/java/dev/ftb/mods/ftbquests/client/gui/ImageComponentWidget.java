@@ -45,7 +45,7 @@ public class ImageComponentWidget extends Widget {
 	@Override
 	public boolean mouseDoubleClicked(MouseButton button) {
 		if (isMouseOver() && viewQuestPanel.canEdit()) {
-			viewQuestPanel.editDescLine(index, false, component);
+			viewQuestPanel.editDescLine(this, index, false, component);
 			return true;
 		}
 
@@ -55,7 +55,7 @@ public class ImageComponentWidget extends Widget {
 	@Override
 	public boolean mousePressed(MouseButton button) {
 		if (isMouseOver() && viewQuestPanel.canEdit() && button.isRight()) {
-			viewQuestPanel.editDescLine(index, true, component);
+			viewQuestPanel.editDescLine(this, index, true, component);
 			return true;
 		}
 

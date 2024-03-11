@@ -1,8 +1,10 @@
 package dev.ftb.mods.ftbquests.client.gui.quests;
 
-import dev.ftb.mods.ftblibrary.icon.Color4I;
 import dev.ftb.mods.ftblibrary.icon.Icons;
-import dev.ftb.mods.ftblibrary.ui.*;
+import dev.ftb.mods.ftblibrary.ui.ContextMenuItem;
+import dev.ftb.mods.ftblibrary.ui.Panel;
+import dev.ftb.mods.ftblibrary.ui.ScreenWrapper;
+import dev.ftb.mods.ftblibrary.ui.WidgetLayout;
 import dev.ftb.mods.ftblibrary.ui.input.MouseButton;
 import dev.ftb.mods.ftbquests.client.ClientQuestFile;
 import dev.ftb.mods.ftbquests.client.FTBQuestsClient;
@@ -106,26 +108,26 @@ public class OtherButtonsPanelBottom extends OtherButtonsPanel {
 
 			List<ContextMenuItem> contextMenu = new ArrayList<>();
 			contextMenu.add(new ContextMenuItem(Component.translatable("ftbquests.gui.edit_file"), ThemeProperties.SETTINGS_ICON.get(),
-					() -> questScreen.file.onEditButtonClicked(this)));
+					b -> questScreen.file.onEditButtonClicked(this)));
 
 			contextMenu.add(new ContextMenuItem(Component.translatable("ftbquests.gui.reset_progress"), ThemeProperties.RELOAD_ICON.get(),
-					() -> ChangeProgressMessage.sendToServer(questScreen.file.selfTeamData, questScreen.file, progressChange -> progressChange.setReset(true)))
+					b -> ChangeProgressMessage.sendToServer(questScreen.file.selfTeamData, questScreen.file, progressChange -> progressChange.setReset(true)))
 					.setYesNoText(Component.translatable("ftbquests.gui.reset_progress_q")));
 			contextMenu.add(new ContextMenuItem(Component.translatable("ftbquests.gui.complete_instantly"), ThemeProperties.CHECK_ICON.get(),
-					() -> ChangeProgressMessage.sendToServer(questScreen.file.selfTeamData, questScreen.file, progressChange -> progressChange.setReset(false)))
+					b -> ChangeProgressMessage.sendToServer(questScreen.file.selfTeamData, questScreen.file, progressChange -> progressChange.setReset(false)))
 					.setYesNoText(Component.translatable("ftbquests.gui.complete_instantly_q")));
 
 			contextMenu.add(new ContextMenuItem(Component.translatable("ftbquests.reward_tables"), ThemeProperties.REWARD_TABLE_ICON.get(),
-					() -> new RewardTablesScreen(questScreen).openGui()));
+					b -> new RewardTablesScreen(questScreen).openGui()));
 			contextMenu.add(new ContextMenuItem(Component.translatable("ftbquests.gui.save_on_server"), ThemeProperties.SAVE_ICON.get(),
-					() -> new ForceSaveMessage().sendToServer()));
+					b -> new ForceSaveMessage().sendToServer()));
 			contextMenu.add(new ContextMenuItem(Component.translatable("ftbquests.gui.save_as_file"), ThemeProperties.DOWNLOAD_ICON.get(),
-					this::saveLocally));
+					b -> saveLocally()));
 
 			contextMenu.add(new ContextMenuItem(Component.translatable("ftbquests.gui.reload_theme"), ThemeProperties.RELOAD_ICON.get(),
-					this::reload_theme));
+					b -> reload_theme()));
 			contextMenu.add(new ContextMenuItem(Component.translatable("ftbquests.gui.wiki"), Icons.INFO,
-					() -> handleClick("https://help.ftb.team/mods")));
+					b -> handleClick("https://help.ftb.team/mods")));
 
 			questScreen.openContextMenu(contextMenu);
 		}

@@ -6,6 +6,7 @@ import dev.ftb.mods.ftblibrary.icon.Icon;
 import dev.ftb.mods.ftblibrary.icon.IconAnimation;
 import dev.ftb.mods.ftblibrary.math.Bits;
 import dev.ftb.mods.ftblibrary.snbt.SNBTCompoundTag;
+import dev.ftb.mods.ftblibrary.ui.Widget;
 import dev.ftb.mods.ftblibrary.ui.input.MouseButton;
 import dev.ftb.mods.ftblibrary.util.client.ClientUtils;
 import dev.ftb.mods.ftbquests.FTBQuests;
@@ -650,7 +651,7 @@ public final class Quest extends QuestObject implements Movable {
 		StringConfig descType = new StringConfig();
 		config.add("description", new ListConfig<String, StringConfig>(descType) {
 			@Override
-			public void onClicked(MouseButton button, ConfigCallback callback) {
+			public void onClicked(Widget clicked, MouseButton button, ConfigCallback callback) {
 				new MultilineTextEditorScreen(Component.translatable("ftbquests.gui.edit_description"), this, callback).openGui();
 			}
 		}, rawDescription, (t) -> {
