@@ -143,6 +143,7 @@ public interface ThemeProperties {
 	ColorProperty QUEST_LOCKED_COLOR = new ColorProperty("quest_locked_color");
 	IconProperty DEPENDENCY_LINE_TEXTURE = new IconProperty("dependency_line_texture");
 	ColorProperty DEPENDENCY_LINE_COMPLETED_COLOR = new ColorProperty("dependency_line_completed_color");
+	ColorProperty DEPENDENCY_LINE_UNCOMPLETED_COLOR = new ColorProperty("dependency_line_uncompleted_color");
 	ColorProperty DEPENDENCY_LINE_REQUIRES_COLOR = new ColorProperty("dependency_line_requires_color");
 	ColorProperty DEPENDENCY_LINE_REQUIRED_FOR_COLOR = new ColorProperty("dependency_line_required_for_color");
 	DoubleProperty DEPENDENCY_LINE_SELECTED_SPEED = new DoubleProperty("dependency_line_selected_speed", 0D, 1000D);
