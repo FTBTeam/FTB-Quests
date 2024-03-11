@@ -2,9 +2,11 @@ package dev.ftb.mods.ftbquests.client.gui.quests;
 
 import com.mojang.datafixers.util.Pair;
 import dev.ftb.mods.ftblibrary.config.ConfigGroup;
+import dev.ftb.mods.ftblibrary.config.ImageResourceConfig;
 import dev.ftb.mods.ftblibrary.config.ListConfig;
 import dev.ftb.mods.ftblibrary.config.StringConfig;
-import dev.ftb.mods.ftblibrary.config.ui.EditConfigFromStringScreen;
+import dev.ftb.mods.ftblibrary.config.ui.EditConfigScreen;
+import dev.ftb.mods.ftblibrary.config.ui.EditStringConfigOverlay;
 import dev.ftb.mods.ftblibrary.icon.Color4I;
 import dev.ftb.mods.ftblibrary.icon.Icon;
 import dev.ftb.mods.ftblibrary.icon.Icons;
@@ -44,20 +46,20 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.TooltipFlag;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.lwjgl.glfw.GLFW;
 
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.*;
-import java.util.function.Consumer;
+import java.util.function.BiConsumer;
 
-public class ViewQuestPanel extends Panel {
+public class ViewQuestPanel extends ModalPanel {
 	public static final Icon PAGEBREAK_ICON = Icon.getIcon(new ResourceLocation(FTBQuestsAPI.MOD_ID, "textures/gui/pagebreak.png"));
 
 	private final QuestScreen questScreen;
 	private Quest quest = null;
-	boolean hidePanel = false;
 	private Icon icon = Color4I.empty();
 	private Button buttonOpenDependencies;
 	private BlankPanel panelContent;
@@ -68,33 +70,35 @@ public class ViewQuestPanel extends Panel {
 	private final Long2IntMap currentPages = new Long2IntOpenHashMap();
 	private long lastScrollTime = 0L;
 
-	public ViewQuestPanel(QuestScreen g) {
-		super(g);
-		questScreen = g;
+	public ViewQuestPanel(QuestScreen questScreen) {
+		super(questScreen);
+		this.questScreen = questScreen;
 		setPosAndSize(-1, -1, 0, 0);
 		setOnlyRenderWidgetsInside(true);
 		setOnlyInteractWithWidgetsInside(true);
+		setExtraZlevel(300); // ensure we render above any quest button icons (item icons in particular)
 	}
 
-	public boolean viewingQuest() {
-		return quest != null;
+	@Override
+	public void onClosed() {
+		quest = null;
+		updateMouseOver(getMouseX(), getMouseY());
 	}
 
-	public boolean viewingQuest(Quest quest) {
-		return this.quest == quest;
+	@Override
+	public boolean checkMouseOver(int mouseX, int mouseY) {
+		return quest != null && super.checkMouseOver(mouseX, mouseY);
 	}
 
 	public Quest getViewedQuest() {
 		return quest;
 	}
 
-	public boolean setViewedQuest(Quest newQuest) {
+	public void setViewedQuest(Quest newQuest) {
 		if (quest != newQuest) {
 			quest = newQuest;
 			refreshWidgets();
-			return true;
 		}
-		return false;
 	}
 
 	public boolean canEdit() {
@@ -130,7 +134,7 @@ public class ViewQuestPanel extends Panel {
 	public void addWidgets() {
 		setPosAndSize(-1, -1, 1, 1);
 
-		if (quest == null || hidePanel) {
+		if (quest == null) {
 			return;
 		}
 
@@ -144,7 +148,7 @@ public class ViewQuestPanel extends Panel {
 
 		boolean canEdit = questScreen.file.canEdit();
 
-		titleField = new QuestDescriptionField(this, canEdit, b -> editTitle())
+		titleField = new QuestDescriptionField(this, canEdit, (b, clickedW) -> editTitle())
 				.addFlags(Theme.CENTERED)
 				.setMinWidth(150).setMaxWidth(500).setSpacing(9)
 				.setText(quest.getTitle().copy().withStyle(Style.EMPTY.withColor(TextColor.fromRgb(ThemeProperties.QUEST_VIEW_TITLE.get().rgb()))));
@@ -337,7 +341,7 @@ public class ViewQuestPanel extends Panel {
 		}
 
 		if (!subtitle.equals(Component.empty())) {
-			panelText.add(new QuestDescriptionField(panelText, canEdit, b -> editSubtitle())
+			panelText.add(new QuestDescriptionField(panelText, canEdit, (b, clickedW) -> editSubtitle())
 					.addFlags(Theme.CENTERED)
 					.setMinWidth(panelText.width).setMaxWidth(panelText.width)
 					.setSpacing(9)
@@ -412,7 +416,7 @@ public class ViewQuestPanel extends Panel {
 				panelText.add(cw);
 			} else {
 				final int line = i;
-				TextField field = new QuestDescriptionField(panelText, canEdit, context -> editDescLine(line, context, null))
+				TextField field = new QuestDescriptionField(panelText, canEdit, (context, clickedW) -> editDescLine(clickedW, line, context, null))
 						.setMaxWidth(panelText.width).setSpacing(9).setText(component);
 				field.setWidth(panelText.width);
 				panelText.add(field);
@@ -426,7 +430,7 @@ public class ViewQuestPanel extends Panel {
 		panelText.add(new VerticalSpaceWidget(panelText, 3));
 
 		Panel buttonPanel = new BlankPanel(panelText);
-		buttonPanel.setSize(panelText.width, 14);
+		buttonPanel.setSize(panelText.width, 15);
 		panelText.add(buttonPanel);
 
 		int currentPage = getCurrentPage();
@@ -435,22 +439,7 @@ public class ViewQuestPanel extends Panel {
 		int labelWidth = questScreen.getTheme().getStringWidth(page);
 
 		if (currentPage > 0) {
-			SimpleTextButton prevPage = new SimpleTextButton(buttonPanel, Component.empty(), ThemeProperties.LEFT_ARROW.get()) {
-				@Override
-				public void onClicked(MouseButton mouseButton) {
-					setCurrentPage(Math.max(0, currentPage - 1));
-					refreshWidgets();
-				}
-
-				@Override
-				public void addMouseOverText(TooltipList list) {
-					list.add(Component.literal("[Page Up]").withStyle(ChatFormatting.DARK_GRAY));
-					list.add(Component.literal("[Mousewheel Up]").withStyle(ChatFormatting.DARK_GRAY));
-				}
-			};
-			prevPage.setX(panelText.width - 43 - labelWidth);
-			prevPage.setSize(16, 14);
-			buttonPanel.add(prevPage);
+			buttonPanel.add(makePrevPageButton(buttonPanel, currentPage, labelWidth));
 		}
 		if (pageIndices.size() > 1) {
 			TextField pageLabel = new TextField(buttonPanel);
@@ -459,22 +448,7 @@ public class ViewQuestPanel extends Panel {
 			buttonPanel.add(pageLabel);
 		}
 		if (currentPage < pageIndices.size() - 1) {
-			SimpleTextButton nextPage = new SimpleTextButton(buttonPanel, Component.empty(), ThemeProperties.RIGHT_ARROW.get()) {
-				@Override
-				public void onClicked(MouseButton mouseButton) {
-					setCurrentPage(Math.min(pageIndices.size() + 1, currentPage + 1));
-					refreshWidgets();
-				}
-
-				@Override
-				public void addMouseOverText(TooltipList list) {
-					list.add(Component.literal("[Page Down]").withStyle(ChatFormatting.DARK_GRAY));
-					list.add(Component.literal("[Mousewheel Down]").withStyle(ChatFormatting.DARK_GRAY));
-				}
-			};
-			nextPage.setSize(16, 14);
-			nextPage.setX(panelText.width - 5 - nextPage.width);
-			buttonPanel.add(nextPage);
+			buttonPanel.add(makeNextPageButton(buttonPanel, currentPage));
 		}
 
 		if (canEdit) {
@@ -489,6 +463,44 @@ public class ViewQuestPanel extends Panel {
 			edit.setHeight(14);
 			buttonPanel.add(edit);
 		}
+	}
+
+	@NotNull
+	private SimpleTextButton makeNextPageButton(Panel buttonPanel, int currentPage) {
+		SimpleTextButton nextPage = new SimpleTextButton(buttonPanel, Component.empty(), ThemeProperties.RIGHT_ARROW.get()) {
+			@Override
+			public void onClicked(MouseButton mouseButton) {
+				setCurrentPage(Math.min(pageIndices.size() + 1, currentPage + 1));
+				refreshWidgets();
+			}
+
+			@Override
+			public void addMouseOverText(TooltipList list) {
+				list.add(Component.literal("[Page Down]").withStyle(ChatFormatting.DARK_GRAY));
+				list.add(Component.literal("[Mousewheel Down]").withStyle(ChatFormatting.DARK_GRAY));
+			}
+		};
+		nextPage.setPosAndSize(panelText.width - 21, nextPage.getPosY(), 16, 14);
+		return nextPage;
+	}
+
+	@NotNull
+	private SimpleTextButton makePrevPageButton(Panel buttonPanel, int currentPage, int labelWidth) {
+		SimpleTextButton prevPage = new SimpleTextButton(buttonPanel, Component.empty(), ThemeProperties.LEFT_ARROW.get()) {
+			@Override
+			public void onClicked(MouseButton mouseButton) {
+				setCurrentPage(Math.max(0, currentPage - 1));
+				refreshWidgets();
+			}
+
+			@Override
+			public void addMouseOverText(TooltipList list) {
+				list.add(Component.literal("[Page Up]").withStyle(ChatFormatting.DARK_GRAY));
+				list.add(Component.literal("[Mousewheel Up]").withStyle(ChatFormatting.DARK_GRAY));
+			}
+		};
+		prevPage.setPosAndSize(panelText.width - 43 - labelWidth, prevPage.getPosY(), 16, 14);
+		return prevPage;
 	}
 
 	private ImageComponent findImageComponent(Component c) {
@@ -539,7 +551,7 @@ public class ViewQuestPanel extends Panel {
 					Component suffix = Component.literal(" [").append(object.getQuestChapter().getTitle()).append("]").withStyle(ChatFormatting.GRAY);
 					title.append(suffix);
 				}
-				contextMenu.add(new ContextMenuItem(title, Color4I.empty(), () -> questScreen.open(object, true)));
+				contextMenu.add(new ContextMenuItem(title, Color4I.empty(), button -> questScreen.open(object, true)));
 			} else {
 				hidden++;
 			}
@@ -559,7 +571,7 @@ public class ViewQuestPanel extends Panel {
 	public void keyReleased(Key key) {
 		// released rather than pressed; if we used pressed, keypress would be picked up by the next screen
 
-		if (hidePanel || quest == null) return;
+		if (/*hidePanel ||*/ quest == null) return;
 
 		if (questScreen.file.canEdit()) {
 			if (key.is(GLFW.GLFW_KEY_S)) {
@@ -571,9 +583,9 @@ public class ViewQuestPanel extends Panel {
 			} else if (key.is(GLFW.GLFW_KEY_P)) {
 				addPageBreak();
 			} else if (key.is(GLFW.GLFW_KEY_L)) {
-				editDescLine0(-1, null);
+				editDescLine0(this, -1, null);
 			} else if (key.is(GLFW.GLFW_KEY_I)) {
-				editDescLine0(-1, new ImageComponent());
+				editDescLine0(this, -1, new ImageComponent());
 			} else if (key.is(GLFW.GLFW_KEY_Q)) {
 				quest.onEditButtonClicked(questScreen);
 			}
@@ -603,27 +615,29 @@ public class ViewQuestPanel extends Panel {
 		}
 
 		final var qo1 = qo;
-		EditConfigFromStringScreen.open(c, qo1.getRawTitle(), "", Component.translatable(titleKey), accepted -> {
+		c.setValue(qo1.getRawTitle());
+		EditStringConfigOverlay<String> overlay = new EditStringConfigOverlay<>(getGui(), c, accepted -> {
 			if (accepted) {
 				qo1.setRawTitle(c.getValue());
 				new EditObjectMessage(qo1).sendToServer();
 			}
-
-			openGui();
-		});
+		}, Component.translatable("ftbquests.title.tooltip")).atPosition(titleField.getX(), titleField.getY() - 14);
+		overlay.setWidth(Math.max(150, overlay.getWidth()));
+		getGui().pushModalPanel(overlay);
 	}
 
 	private void editSubtitle() {
 		StringConfig c = new StringConfig(null);
-
-		EditConfigFromStringScreen.open(c, quest.getRawSubtitle(), "", Component.translatable("ftbquests.quest.subtitle"), accepted -> {
+		c.setValue(quest.getRawSubtitle());
+		EditStringConfigOverlay<String> overlay = new EditStringConfigOverlay<>(getGui(), c, accepted -> {
 			if (accepted) {
 				quest.setRawSubtitle(c.getValue());
 				new EditObjectMessage(quest).sendToServer();
 			}
-
-			openGui();
-		});
+		}, Component.translatable("ftbquests.chapter.subtitle"));
+		overlay.setWidth(Mth.clamp(overlay.getWidth(), 150, getScreen().getGuiScaledWidth() - 20));
+		overlay.setPos(panelText.getX() + (panelText.width - overlay.width) / 2, panelText.getY() - 14);
+		getGui().pushModalPanel(overlay);
 	}
 
 	private void editDescription() {
@@ -643,31 +657,31 @@ public class ViewQuestPanel extends Panel {
 
 		contextMenu.add(new ContextMenuItem(Component.translatable("ftbquests.title").append(hotkey("T")),
 				Icons.NOTES,
-				this::editTitle));
+				b -> editTitle()));
 		contextMenu.add(new ContextMenuItem(Component.translatable("ftbquests.quest.subtitle").append(hotkey("S")),
 				Icons.NOTES,
-				this::editSubtitle));
+				b -> editSubtitle()));
 		contextMenu.add(new ContextMenuItem(Component.translatable("ftbquests.quest.description").append(hotkey("D")),
 				Icons.NOTES,
-				this::editDescription));
+				b -> editDescription()));
 
 		contextMenu.add(ContextMenuItem.SEPARATOR);
 
 		contextMenu.add(new ContextMenuItem(Component.translatable("ftbquests.gui.line").append(hotkey("L")),
 				Icons.NOTES,
-				() -> editDescLine0(-1, null)));
+				b -> editDescLine0(this, -1, null)));
 		contextMenu.add(new ContextMenuItem(Component.translatable("ftbquests.gui.page_break").append(hotkey("P")),
 				PAGEBREAK_ICON,
-				this::addPageBreak));
+				b -> addPageBreak()));
 		contextMenu.add(new ContextMenuItem(Component.translatable("ftbquests.gui.image").append(hotkey("I")),
 				Icons.ART,
-				() -> editDescLine0(-1, new ImageComponent())));
+				b -> editDescLine0(this, -1, new ImageComponent())));
 
 		contextMenu.add(ContextMenuItem.SEPARATOR);
 
 		contextMenu.add(new ContextMenuItem(Component.translatable("ftbquests.gui.edit_quest_props").append(hotkey("Q")),
 				Icons.SETTINGS,
-				() -> quest.onEditButtonClicked(questScreen)));
+				b -> quest.onEditButtonClicked(questScreen)));
 
 		getGui().openContextMenu(contextMenu);
 	}
@@ -683,43 +697,32 @@ public class ViewQuestPanel extends Panel {
 		refreshWidgets();
 	}
 
-	private void editDescLine0(int line, @Nullable Object type) {
-		if (type instanceof ImageComponent) {
-			editImage(line, (ImageComponent) type);
-			return;
-		}
+	private void editDescLine0(Widget clickedWidget, int line, @Nullable Object type) {
+		if (type instanceof ImageComponent img) {
+			editImage(line, img);
+		} else {
+			var rawDesc = quest.getRawDescription();
 
-		StringConfig c = new StringConfig(null);
-
-		var rawDesc = quest.getRawDescription();
-
-		int l = line + 1;
-		int s = rawDesc.size();
-		if (l == 0) {
-			// adding a new line
-			l = rawDesc.size() + 1;
-			s++;
-		}
-		Component title = Component.translatable("ftbquests.quest.description").append(String.format(": %d/%d", l, s));
-
-		EditConfigFromStringScreen.open(c, line == -1 ? "" : rawDesc.get(line), "", title, accepted -> {
-			if (accepted) {
-				if (line == -1) {
-					appendToPage(rawDesc, List.of(c.getValue()), getCurrentPage());
-				} else {
-					rawDesc.set(line, c.getValue());
+			StringConfig c = new StringConfig(null);
+			c.setValue(line == -1 ? "" : rawDesc.get(line));
+			EditStringConfigOverlay<String> overlay = new EditStringConfigOverlay<>(getGui(), c, accepted -> {
+				if (accepted) {
+					if (line == -1) {
+						appendToPage(rawDesc, List.of(c.getValue()), getCurrentPage());
+					} else {
+						rawDesc.set(line, c.getValue());
+					}
+					new EditObjectMessage(quest).sendToServer();
+					refreshWidgets();
 				}
-
-				new EditObjectMessage(quest).sendToServer();
-				refreshWidgets();
-			}
-
-			openGui();
-		});
+			}).atPosition(clickedWidget.getX(), clickedWidget.getY());
+			overlay.setWidth(Mth.clamp(overlay.getWidth(), 150, getScreen().getGuiScaledWidth() - clickedWidget.getX() - 20));
+			getGui().pushModalPanel(overlay);
+		}
 	}
 
 	private void editImage(int line, ImageComponent component) {
-		ConfigGroup group = new ConfigGroup(FTBQuestsAPI.MOD_ID, accepted -> {
+		ConfigGroup group = new ConfigGroup(FTBQuestsAPI.MOD_ID + ".chapter.image", accepted -> {
 			openGui();
 			if (accepted) {
 				if (line == -1) {
@@ -733,7 +736,14 @@ public class ViewQuestPanel extends Panel {
 			}
 		});
 
-		ImageComponentWidget.openImageEditorScreen(component, group);
+		group.add("image", new ImageResourceConfig(), ImageResourceConfig.getResourceLocation(component.getImage()),
+				v -> component.setImage(Icon.getIcon(v)), ImageResourceConfig.NONE);
+		group.addInt("width", component.getWidth(), component::setWidth, 0, 1, 1000);
+		group.addInt("height", component.getHeight(), component::setHeight, 0, 1, 1000);
+		group.addEnum("align", component.getAlign(), component::setAlign, ImageComponent.ImageAlign.NAME_MAP, ImageComponent.ImageAlign.CENTER);
+		group.addBool("fit", component.isFit(), component::setFit, false);
+
+		new EditConfigScreen(group).openGui();
 	}
 
 	private void appendToPage(List<String> list, List<String> toAdd, int pageNumber) {
@@ -750,11 +760,11 @@ public class ViewQuestPanel extends Panel {
 		}
 	}
 
-	public void editDescLine(int line, boolean context, @Nullable Object type) {
+	public void editDescLine(Widget clickedWidget, int line, boolean context, @Nullable Object type) {
 		if (context) {
 			List<ContextMenuItem> contextMenu = new ArrayList<>();
-			contextMenu.add(new ContextMenuItem(Component.translatable("selectServer.edit"), ThemeProperties.EDIT_ICON.get(), () -> editDescLine0(line, type)));
-			contextMenu.add(new ContextMenuItem(Component.translatable("selectServer.delete"), ThemeProperties.DELETE_ICON.get(), () -> {
+			contextMenu.add(new ContextMenuItem(Component.translatable("selectServer.edit"), ThemeProperties.EDIT_ICON.get(), b -> editDescLine0(clickedWidget, line, type)));
+			contextMenu.add(new ContextMenuItem(Component.translatable("selectServer.delete"), ThemeProperties.DELETE_ICON.get(), b -> {
 				quest.getRawDescription().remove(line);
 				new EditObjectMessage(quest).sendToServer();
 				refreshWidgets();
@@ -762,33 +772,28 @@ public class ViewQuestPanel extends Panel {
 
 			getGui().openContextMenu(contextMenu);
 		} else {
-			editDescLine0(line, type);
+			editDescLine0(clickedWidget, line, type);
 		}
 	}
 
 	@Override
 	public void draw(GuiGraphics graphics, Theme theme, int x, int y, int w, int h) {
-		if (quest != null && !hidePanel) {
+		if (quest != null) {
 			QuestObjectBase prev = QuestTheme.currentObject;
 			QuestTheme.currentObject = quest;
-			graphics.pose().pushPose();
-			graphics.pose().translate(0, 0, 500);
 			super.draw(graphics, theme, x, y, w, h);
-			graphics.pose().popPose();
 			QuestTheme.currentObject = prev;
 		}
 	}
 
 	@Override
 	public void drawBackground(GuiGraphics graphics, Theme theme, int x, int y, int w, int h) {
-		Color4I borderColor = ThemeProperties.QUEST_VIEW_BORDER.get();
-		Color4I.DARK_GRAY.withAlpha(120).draw(graphics, questScreen.getX(), questScreen.getY(), questScreen.width, questScreen.height);
-		Icon background = ThemeProperties.QUEST_VIEW_BACKGROUND.get();
-		background.draw(graphics, x, y, w, h);
+		ThemeProperties.QUEST_VIEW_BACKGROUND.get().draw(graphics, x, y, w, h);
+
 		if (titleField != null && panelContent != null) {
 			int iconSize = Math.min(16, titleField.height + 2);
 			icon.draw(graphics, x + 4, y + 4, iconSize, iconSize);
-			borderColor.draw(graphics, x + 1, panelContent.getY(), w - 2, 1);
+			ThemeProperties.QUEST_VIEW_BORDER.get().draw(graphics, x + 1, panelContent.getY(), w - 2, 1);
 		}
 	}
 
@@ -825,9 +830,9 @@ public class ViewQuestPanel extends Panel {
 
 	private class QuestDescriptionField extends TextField {
 		private final boolean canEdit;
-		private final Consumer<Boolean> editCallback;
+		private final BiConsumer<Boolean,Widget> editCallback;
 
-		QuestDescriptionField(Panel panel, boolean canEdit, Consumer<Boolean> editCallback) {
+		QuestDescriptionField(Panel panel, boolean canEdit, BiConsumer<Boolean,Widget> editCallback) {
 			super(panel);
 			this.canEdit = canEdit;
 			this.editCallback = editCallback;
@@ -837,7 +842,7 @@ public class ViewQuestPanel extends Panel {
 		public boolean mousePressed(MouseButton button) {
 			if (isMouseOver()) {
 				if (canEdit && button.isRight()) {
-					editCallback.accept(true);
+					editCallback.accept(true, this);
 					return true;
 				} else if (button.isLeft() && Minecraft.getInstance().screen != null) {
 					Optional<Style> style = getComponentStyleAt(questScreen.getTheme(), getMouseX(), getMouseY());
@@ -900,7 +905,7 @@ public class ViewQuestPanel extends Panel {
 		@Override
 		public boolean mouseDoubleClicked(MouseButton button) {
 			if (isMouseOver() && canEdit) {
-				editCallback.accept(false);
+				editCallback.accept(false, this);
 				return true;
 			}
 
@@ -984,7 +989,7 @@ public class ViewQuestPanel extends Panel {
 			for (QuestLink link : links) {
 				link.getQuest().ifPresent(quest -> {
 					Component title = quest.getTitle().copy().append(": ").append(link.getChapter().getTitle().copy().withStyle(ChatFormatting.YELLOW));
-					items.add(new ContextMenuItem(title, quest.getIcon(), () -> gotoLink(link)));
+					items.add(new ContextMenuItem(title, quest.getIcon(), b -> gotoLink(link)));
 				});
 			}
 			if (!items.isEmpty()) {

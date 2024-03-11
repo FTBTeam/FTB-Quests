@@ -2,7 +2,7 @@ package dev.ftb.mods.ftbquests.client.gui.quests;
 
 import com.mojang.blaze3d.systems.RenderSystem;
 import dev.ftb.mods.ftblibrary.config.StringConfig;
-import dev.ftb.mods.ftblibrary.config.ui.EditConfigFromStringScreen;
+import dev.ftb.mods.ftblibrary.config.ui.EditStringConfigOverlay;
 import dev.ftb.mods.ftblibrary.icon.Color4I;
 import dev.ftb.mods.ftblibrary.icon.Icon;
 import dev.ftb.mods.ftblibrary.icon.Icons;
@@ -38,6 +38,7 @@ import java.util.regex.Pattern;
 public class ChapterPanel extends Panel {
 	public static final Icon ARROW_COLLAPSED = Icon.getIcon("ftbquests:textures/gui/arrow_collapsed.png");
 	public static final Icon ARROW_EXPANDED = Icon.getIcon("ftbquests:textures/gui/arrow_expanded.png");
+	public static final int Z_LEVEL = 300;
 
 	private final QuestScreen questScreen;
 	boolean expanded = isPinned();
@@ -49,7 +50,7 @@ public class ChapterPanel extends Panel {
 
 	@Override
 	public boolean checkMouseOver(int mouseX, int mouseY) {
-		if (questScreen.viewQuestPanel.viewingQuest()) {
+		if (questScreen.isViewingQuest()) {
 			return false;
 		}
 
@@ -134,7 +135,7 @@ public class ChapterPanel extends Panel {
 	@Override
 	public void draw(GuiGraphics graphics, Theme theme, int x, int y, int w, int h) {
 		graphics.pose().pushPose();
-		graphics.pose().translate(0, 0, 600);
+		graphics.pose().translate(0, 0, Z_LEVEL);
 		RenderSystem.enableDepthTest();
 		super.draw(graphics, theme, x, y, w, h);
 		graphics.pose().popPose();
@@ -186,9 +187,9 @@ public class ChapterPanel extends Panel {
 				playClickSound();
 
 				List<ContextMenuItem> contextMenu = new ArrayList<>();
-				contextMenu.add(new ContextMenuItem(Component.translatable("ftbquests.chapter"), ThemeProperties.ADD_ICON.get(), () -> {
+				contextMenu.add(new ContextMenuItem(Component.translatable("ftbquests.chapter"), ThemeProperties.ADD_ICON.get(), b -> {
 					StringConfig c = new StringConfig(Pattern.compile("^.+$"));
-					EditConfigFromStringScreen.open(c, "", "", accepted -> {
+					EditStringConfigOverlay<String> overlay = new EditStringConfigOverlay<>(parent, c, accepted -> {
 						chapterPanel.questScreen.openGui();
 
 						if (accepted && !c.getValue().isEmpty()) {
@@ -200,13 +201,15 @@ public class ChapterPanel extends Panel {
 						}
 
 						run();
-					});
+					}, b.getTitle()).atMousePosition();
+					overlay.setWidth(150);
+					overlay.setExtraZlevel(Z_LEVEL + 10);
+					getGui().pushModalPanel(overlay);
 				}));
 
-				contextMenu.add(new ContextMenuItem(Component.translatable("ftbquests.chapter_group"), ThemeProperties.ADD_ICON.get(), () -> {
-					playClickSound();
+				contextMenu.add(new ContextMenuItem(Component.translatable("ftbquests.chapter_group"), ThemeProperties.ADD_ICON.get(), b -> {
 					StringConfig c = new StringConfig(Pattern.compile("^.+$"));
-					EditConfigFromStringScreen.open(c, "", "", accepted -> {
+					EditStringConfigOverlay<String> overlay = new EditStringConfigOverlay<>(parent, c, accepted -> {
 						chapterPanel.questScreen.openGui();
 
 						if (accepted) {
@@ -214,7 +217,10 @@ public class ChapterPanel extends Panel {
 							group.setRawTitle(c.getValue());
 							new CreateObjectMessage(group, null).sendToServer();
 						}
-					});
+					}, b.getTitle()).atMousePosition();
+					overlay.setWidth(150);
+					overlay.setExtraZlevel(Z_LEVEL + 10);
+					getGui().pushModalPanel(overlay);
 				}));
 
 				chapterPanel.questScreen.openContextMenu(contextMenu);
@@ -280,7 +286,7 @@ public class ChapterPanel extends Panel {
 				playClickSound();
 
 				StringConfig c = new StringConfig(Pattern.compile("^.+$"));
-				EditConfigFromStringScreen.open(c, "", "", accepted -> {
+				EditStringConfigOverlay<String> overlay = new EditStringConfigOverlay<>(parent, c, accepted -> {
 					chapterPanel.questScreen.openGui();
 
 					if (accepted && !c.getValue().isEmpty()) {
@@ -292,7 +298,10 @@ public class ChapterPanel extends Panel {
 					}
 
 					run();
-				});
+				}, Component.translatable("ftbquests.chapter")).atMousePosition();
+				overlay.setWidth(150);
+				overlay.setExtraZlevel(Z_LEVEL + 10);
+				getGui().pushModalPanel(overlay);
 
 				return;
 			}
@@ -300,11 +309,11 @@ public class ChapterPanel extends Panel {
 			if (chapterPanel.questScreen.file.canEdit() && button.isRight() && !group.isDefaultGroup()) {
 				ContextMenuBuilder.create(group, chapterPanel.questScreen).insertAtTop(List.of(
 						new ContextMenuItem(Component.translatable("gui.move"), ThemeProperties.MOVE_UP_ICON.get(),
-								() -> new MoveChapterGroupMessage(group.id, true).sendToServer())
+								b -> new MoveChapterGroupMessage(group.id, true).sendToServer())
 								.setEnabled(!group.isFirstGroup())
 								.setCloseMenu(false),
 						new ContextMenuItem(Component.translatable("gui.move"), ThemeProperties.MOVE_DOWN_ICON.get(),
-								() -> new MoveChapterGroupMessage(group.id, false).sendToServer())
+								b -> new MoveChapterGroupMessage(group.id, false).sendToServer())
 								.setEnabled(!group.isLastGroup())
 								.setCloseMenu(false)
 				)).openContextMenu(chapterPanel.questScreen);
@@ -374,13 +383,13 @@ public class ChapterPanel extends Panel {
 			if (chapterPanel.questScreen.file.canEdit() && button.isRight()) {
 				ContextMenuBuilder.create(chapter, chapterPanel.questScreen).insertAtTop(List.of(
 						new ContextMenuItem(Component.translatable("gui.move"), ThemeProperties.MOVE_UP_ICON.get(),
-								() -> new MoveChapterMessage(chapter.id, true).sendToServer())
+								b -> new MoveChapterMessage(chapter.id, true).sendToServer())
 								.setEnabled(chapter.getIndex() > 0).setCloseMenu(false),
 						new ContextMenuItem(Component.translatable("gui.move"), ThemeProperties.MOVE_DOWN_ICON.get(),
-								() -> new MoveChapterMessage(chapter.id, false).sendToServer())
+								b -> new MoveChapterMessage(chapter.id, false).sendToServer())
 								.setEnabled(chapter.getIndex() < chapter.getGroup().getChapters().size() - 1).setCloseMenu(false),
 						new ContextMenuItem(Component.translatable("ftbquests.gui.change_group"), Icons.COLOR_RGB,
-								() -> new ChangeChapterGroupScreen(chapter, chapterPanel.questScreen).openGui())
+								b -> new ChangeChapterGroupScreen(chapter, chapterPanel.questScreen).openGui())
 				)).openContextMenu(chapterPanel.questScreen);
 			}
 		}

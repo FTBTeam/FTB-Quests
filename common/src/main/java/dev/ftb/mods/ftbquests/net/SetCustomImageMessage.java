@@ -3,9 +3,11 @@ package dev.ftb.mods.ftbquests.net;
 import dev.architectury.networking.NetworkManager;
 import dev.architectury.networking.simple.BaseC2SMessage;
 import dev.architectury.networking.simple.MessageType;
+import dev.ftb.mods.ftblibrary.config.ImageResourceConfig;
 import dev.ftb.mods.ftbquests.item.CustomIconItem;
 import net.minecraft.nbt.StringTag;
 import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.InteractionHand;
 
 /**
@@ -13,14 +15,14 @@ import net.minecraft.world.InteractionHand;
  */
 public class SetCustomImageMessage extends BaseC2SMessage {
 	private final InteractionHand hand;
-	private final String texture;
+	private final ResourceLocation texture;
 
 	SetCustomImageMessage(FriendlyByteBuf buffer) {
 		hand = buffer.readBoolean() ? InteractionHand.MAIN_HAND : InteractionHand.OFF_HAND;
-		texture = buffer.readUtf(Short.MAX_VALUE);
+		texture = buffer.readResourceLocation();
 	}
 
-	public SetCustomImageMessage(InteractionHand h, String t) {
+	public SetCustomImageMessage(InteractionHand h, ResourceLocation t) {
 		hand = h;
 		texture = t;
 	}
@@ -33,16 +35,16 @@ public class SetCustomImageMessage extends BaseC2SMessage {
 	@Override
 	public void write(FriendlyByteBuf buffer) {
 		buffer.writeBoolean(hand == InteractionHand.MAIN_HAND);
-		buffer.writeUtf(texture, Short.MAX_VALUE);
+		buffer.writeResourceLocation(texture);
 	}
 
 	@Override
 	public void handle(NetworkManager.PacketContext context) {
 		if (context.getPlayer().getItemInHand(hand).getItem() instanceof CustomIconItem) {
-			if (texture.isEmpty()) {
+			if (texture.equals(ImageResourceConfig.NONE)) {
 				context.getPlayer().getItemInHand(hand).removeTagKey("Icon");
 			} else {
-				context.getPlayer().getItemInHand(hand).addTagElement("Icon", StringTag.valueOf(texture));
+				context.getPlayer().getItemInHand(hand).addTagElement("Icon", StringTag.valueOf(texture.toString()));
 			}
 		}
 	}
