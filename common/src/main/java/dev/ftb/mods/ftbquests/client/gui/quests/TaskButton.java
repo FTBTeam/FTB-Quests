@@ -7,7 +7,7 @@ import dev.ftb.mods.ftblibrary.icon.Icons;
 import dev.ftb.mods.ftblibrary.icon.ItemIcon;
 import dev.ftb.mods.ftblibrary.ui.*;
 import dev.ftb.mods.ftblibrary.ui.input.MouseButton;
-import dev.ftb.mods.ftblibrary.ui.misc.ButtonListBaseScreen;
+import dev.ftb.mods.ftblibrary.ui.misc.AbstractButtonListScreen;
 import dev.ftb.mods.ftblibrary.util.TooltipList;
 import dev.ftb.mods.ftblibrary.util.client.PositionedIngredient;
 import dev.ftb.mods.ftbquests.api.ItemFilterAdapter;
@@ -26,6 +26,7 @@ import net.minecraft.network.chat.contents.PlainTextContents;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.Item;
 
+import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 
@@ -70,7 +71,7 @@ public class TaskButton extends Button {
 						if (adapter.hasItemTagFilter()) {
 							builder.insertAtTop(List.of(new ContextMenuItem(Component.translatable("ftbquests.task.ftbquests.item.convert_tag", adapter.getName()),
 									ThemeProperties.RELOAD_ICON.get(),
-									() -> {
+									b -> {
 										if (tags.size() == 1) {
 											setTagFilterAndSave(itemTask, adapter, tags.get(0));
 										} else {
@@ -85,7 +86,7 @@ public class TaskButton extends Button {
 			if (task.getIcon() instanceof ItemIcon itemIcon) {
 				builder.insertAtTop(List.of(new ContextMenuItem(Component.translatable("ftbquests.gui.use_as_quest_icon"),
 								ThemeProperties.EDIT_ICON.get(),
-								() -> {
+								b -> {
 									task.getQuest().setRawIcon(itemIcon.getStack().copy());
 									task.getQuest().clearCachedData();
 									new EditObjectMessage(task.getQuest()).sendToServer();
@@ -193,7 +194,7 @@ public class TaskButton extends Button {
 		}
 	}
 
-	private class TagSelectionScreen extends ButtonListBaseScreen {
+	private class TagSelectionScreen extends AbstractButtonListScreen {
 		private final List<TagKey<Item>> tags;
 		private final ItemTask itemTask;
 		private final ItemFilterAdapter adapter;
@@ -202,18 +203,62 @@ public class TaskButton extends Button {
 			this.itemTask = itemTask;
 			this.tags = tags;
 			this.adapter = adapter;
+
+			setTitle(Component.translatable("ftbquests.task.ftbquests.item.select_tag"));
+			showBottomPanel(false);
+			showCloseButton(true);
 		}
 
 		@Override
 		public void addButtons(Panel panel) {
-            tags.forEach(tag -> panel.add(new SimpleTextButton(panel, Component.literal(tag.location().toString()), Color4I.empty()) {
-                @Override
-                public void onClicked(MouseButton button) {
-                    questScreen.openGui();
+			tags.stream()
+					.sorted(Comparator.comparing(itemTagKey -> itemTagKey.location().toString()))
+					.forEach(tag -> panel.add(new TagSelectionButton(panel, tag)));
+		}
 
-					setTagFilterAndSave(itemTask, adapter, tag);
-                }
-            }));
+		@Override
+		public boolean onInit() {
+			int titleW = getTheme().getStringWidth(getTitle());
+			int w = tags.stream()
+					.map(t -> getTheme().getStringWidth(t.location().toString()))
+					.max(Comparator.naturalOrder())
+					.orElse(100);
+			setSize(Math.max(titleW, w) + 20, getScreen().getGuiScaledHeight() * 3 / 4);
+
+			return true;
+		}
+
+		@Override
+		protected void doCancel() {
+			questScreen.openGui();
+		}
+
+		@Override
+		protected void doAccept() {
+			questScreen.openGui();
+		}
+
+		private class TagSelectionButton extends SimpleTextButton {
+			private final TagKey<Item> tag;
+
+			public TagSelectionButton(Panel panel, TagKey<Item> tag) {
+				super(panel, Component.literal(tag.location().toString()), Color4I.empty());
+				this.tag = tag;
+			}
+
+			@Override
+			public void onClicked(MouseButton button) {
+				questScreen.openGui();
+				setTagFilterAndSave(itemTask, adapter, tag);
+			}
+
+			@Override
+			public void drawBackground(GuiGraphics graphics, Theme theme, int x, int y, int w, int h) {
+				if (isMouseOver) {
+					Color4I.WHITE.withAlpha(30).draw(graphics, x, y, w, h);
+				}
+				Color4I.GRAY.withAlpha(40).draw(graphics, x, y + h, w, 1);
+			}
 		}
 	}
 }

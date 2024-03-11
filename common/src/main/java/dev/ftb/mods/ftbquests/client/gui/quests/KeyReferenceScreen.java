@@ -1,6 +1,5 @@
 package dev.ftb.mods.ftbquests.client.gui.quests;
 
-import dev.ftb.mods.ftblibrary.config.ui.EditConfigScreen;
 import dev.ftb.mods.ftblibrary.icon.Color4I;
 import dev.ftb.mods.ftblibrary.icon.Icons;
 import dev.ftb.mods.ftblibrary.ui.*;
@@ -46,7 +45,7 @@ public class KeyReferenceScreen extends BaseScreen {
 
     @Override
     public Theme getTheme() {
-        return super.getTheme();
+        return NordTheme.THEME;
     }
 
     @Override

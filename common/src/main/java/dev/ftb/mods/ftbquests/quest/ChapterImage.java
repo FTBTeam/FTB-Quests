@@ -3,7 +3,7 @@ package dev.ftb.mods.ftbquests.quest;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Axis;
 import dev.ftb.mods.ftblibrary.config.ConfigGroup;
-import dev.ftb.mods.ftblibrary.config.ImageConfig;
+import dev.ftb.mods.ftblibrary.config.ImageResourceConfig;
 import dev.ftb.mods.ftblibrary.config.StringConfig;
 import dev.ftb.mods.ftblibrary.icon.Color4I;
 import dev.ftb.mods.ftblibrary.icon.Icon;
@@ -22,6 +22,7 @@ import net.minecraft.nbt.StringTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
 
 import java.lang.ref.WeakReference;
@@ -216,7 +217,7 @@ public final class ChapterImage implements Movable {
 		config.addDouble("width", width, v -> width = v, 1, 0, Double.POSITIVE_INFINITY);
 		config.addDouble("height", height, v -> height = v, 1, 0, Double.POSITIVE_INFINITY);
 		config.addDouble("rotation", rotation, v -> rotation = v, 0, -180, 180);
-		config.add("image", new ImageConfig(), image instanceof Color4I ? "" : image.toString(), v -> setImage(Icon.getIcon(v)), "minecraft:textures/gui/presets/isles.png");
+		config.add("image", new ImageResourceConfig(), ImageResourceConfig.getResourceLocation(image), v -> setImage(Icon.getIcon(v)), new ResourceLocation("minecraft:textures/gui/presets/isles.png"));
 		config.addString("color", color.toString(), v -> color = Color4I.fromString(v), "#FFFFFF", COLOR_PATTERN);
 		config.addInt("order", order, v -> order = v, 0, Integer.MIN_VALUE, Integer.MAX_VALUE);
 		config.addInt("alpha", alpha, v -> alpha = v, 255, 0, 255);

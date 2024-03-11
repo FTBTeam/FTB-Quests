@@ -67,7 +67,7 @@ public class ChapterImageButton extends Button implements QuestPositionableButto
 		if (questScreen.file.canEdit() && button.isRight()) {
 			List<ContextMenuItem> contextMenu = new ArrayList<>();
 
-			contextMenu.add(new ContextMenuItem(Component.translatable("selectServer.edit"), ThemeProperties.EDIT_ICON.get(), () -> {
+			contextMenu.add(new ContextMenuItem(Component.translatable("selectServer.edit"), ThemeProperties.EDIT_ICON.get(), b -> {
 				String name = chapterImage.getImage() instanceof Color4I ? chapterImage.getColor().toString() : chapterImage.getImage().toString();
 				ConfigGroup group = new ConfigGroup(FTBQuestsAPI.MOD_ID, accepted -> {
 					if (accepted) {
@@ -80,14 +80,14 @@ public class ChapterImageButton extends Button implements QuestPositionableButto
 			}));
 
 			contextMenu.add(new ContextMenuItem(Component.translatable("gui.move"), ThemeProperties.MOVE_UP_ICON.get(chapterImage.getChapter()),
-					() -> questScreen.initiateMoving(chapterImage)) {
+					b -> questScreen.initiateMoving(chapterImage)) {
 				@Override
 				public void addMouseOverText(TooltipList list) {
 					list.add(Component.translatable("ftbquests.gui.move_tooltip").withStyle(ChatFormatting.DARK_GRAY));
 				}
 			});
 
-			contextMenu.add(new ContextMenuItem(Component.translatable("gui.copy"), Icons.INFO, chapterImage::copyToClipboard) {
+			contextMenu.add(new ContextMenuItem(Component.translatable("gui.copy"), Icons.INFO, b -> chapterImage.copyToClipboard()) {
 				@Override
 				public void addMouseOverText(TooltipList list) {
 					list.add(Component.literal(chapterImage.getImage().toString()).withStyle(ChatFormatting.DARK_GRAY));
@@ -96,12 +96,12 @@ public class ChapterImageButton extends Button implements QuestPositionableButto
 
 			if (chapterImage.isAspectRatioOff()) {
 				contextMenu.add(new ContextMenuItem(Component.translatable("ftbquests.gui.fix_aspect_ratio_w"), Icons.ART,
-						() -> chapterImage.fixupAspectRatio(true)));
+						b -> chapterImage.fixupAspectRatio(true)));
 				contextMenu.add(new ContextMenuItem(Component.translatable("ftbquests.gui.fix_aspect_ratio_h"), Icons.ART,
-						() -> chapterImage.fixupAspectRatio(false)));
+						b -> chapterImage.fixupAspectRatio(false)));
 			}
 
-			contextMenu.add(new ContextMenuItem(Component.translatable("selectServer.delete"), ThemeProperties.DELETE_ICON.get(), () -> {
+			contextMenu.add(new ContextMenuItem(Component.translatable("selectServer.delete"), ThemeProperties.DELETE_ICON.get(), b -> {
 				chapterImage.getChapter().removeImage(chapterImage);
 				new EditObjectMessage(chapterImage.getChapter()).sendToServer();
 			}).setYesNoText(Component.translatable("delete_item", chapterImage.getImage().toString())));

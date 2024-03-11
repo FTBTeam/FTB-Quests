@@ -2,7 +2,7 @@ package dev.ftb.mods.ftbquests.client.gui;
 
 import com.mojang.blaze3d.platform.InputConstants;
 import dev.ftb.mods.ftblibrary.config.*;
-import dev.ftb.mods.ftblibrary.config.ui.EditConfigFromStringScreen;
+import dev.ftb.mods.ftblibrary.config.ui.EditConfigScreen;
 import dev.ftb.mods.ftblibrary.icon.Color4I;
 import dev.ftb.mods.ftblibrary.icon.Icon;
 import dev.ftb.mods.ftblibrary.icon.Icons;
@@ -14,12 +14,12 @@ import dev.ftb.mods.ftblibrary.ui.misc.NordColors;
 import dev.ftb.mods.ftblibrary.util.TooltipList;
 import dev.ftb.mods.ftblibrary.util.client.ImageComponent;
 import dev.ftb.mods.ftbquests.api.FTBQuestsAPI;
-import dev.ftb.mods.ftbquests.client.FTBQuestsClient;
 import dev.ftb.mods.ftbquests.client.gui.quests.QuestScreen;
 import dev.ftb.mods.ftbquests.client.gui.quests.ViewQuestPanel;
 import dev.ftb.mods.ftbquests.quest.Quest;
 import dev.ftb.mods.ftbquests.quest.QuestObject;
-import dev.ftb.mods.ftbquests.quest.QuestObjectBase;
+import dev.ftb.mods.ftbquests.quest.QuestObjectType;
+import dev.ftb.mods.ftbquests.util.ConfigQuestObject;
 import joptsimple.internal.Strings;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
@@ -194,22 +194,15 @@ public class MultilineTextEditorScreen extends BaseScreen {
 	}
 
 	private void openLinkInsert() {
-		StringConfig c = new StringConfig(null);
-		EditConfigFromStringScreen.open(c, "", "", Component.literal("Enter Quest ID"), accepted -> {
+		ConfigQuestObject<QuestObject> config = new ConfigQuestObject<>(QuestObjectType.QUEST.or(QuestObjectType.QUEST_LINK));
+		new SelectQuestObjectScreen<>(config, accepted -> {
 			int pos = textBox.cursorPos();
 			if (accepted) {
-				QuestObjectBase.parseHexId(c.getValue()).ifPresentOrElse(questId -> {
-					QuestObject qo = FTBQuestsClient.getClientQuestFile().get(questId);
-					if (qo != null) {
-						doLinkInsertion(questId);
-					} else {
-						errorToPlayer("Unknown quest object id: %s", c.getValue());
-					}
-				}, () -> errorToPlayer("Invalid quest object id: %s", c.getValue()));
+				doLinkInsertion(config.getValue().id);
 			}
 			run();
 			textBox.seekCursor(Whence.ABSOLUTE, pos);
-		});
+		}).openGui();
 	}
 
 	private void doLinkInsertion(long questID) {
@@ -258,7 +251,14 @@ public class MultilineTextEditorScreen extends BaseScreen {
 			}
 		});
 
-		ImageComponentWidget.openImageEditorScreen(component, group);
+		group.add("image", new ImageResourceConfig(), ImageResourceConfig.getResourceLocation(component.getImage()),
+				v -> component.setImage(Icon.getIcon(v)), ImageResourceConfig.NONE);
+		group.addInt("width", component.getWidth(), component::setWidth, 0, 1, 1000);
+		group.addInt("height", component.getHeight(), component::setHeight, 0, 1, 1000);
+		group.addEnum("align", component.getAlign(), component::setAlign, ImageComponent.ImageAlign.NAME_MAP, ImageComponent.ImageAlign.CENTER);
+		group.addBool("fit", component.isFit(), component::setFit, false);
+
+		new EditConfigScreen(group).openGui();
 	}
 
 	private void cancel() {
@@ -432,7 +432,7 @@ public class MultilineTextEditorScreen extends BaseScreen {
 
 			for (ChatFormatting cf : ChatFormatting.values()) {
 				if (cf.getColor() != null) {
-					items.add(new ContextMenuItem(Component.empty(), Color4I.rgb(cf.getColor()), () -> insertFormatting(cf)));
+					items.add(new ContextMenuItem(Component.empty(), Color4I.rgb(cf.getColor()), b -> insertFormatting(cf)));
 				}
 			}
 			ContextMenu cMenu = new ContextMenu(MultilineTextEditorScreen.this, items);

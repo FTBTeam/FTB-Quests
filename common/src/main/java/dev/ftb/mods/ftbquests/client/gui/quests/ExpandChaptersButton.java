@@ -23,7 +23,7 @@ public class ExpandChaptersButton extends Widget {
 	public void updateMouseOver(int mouseX, int mouseY) {
 		super.updateMouseOver(mouseX, mouseY);
 
-		if (!questScreen.chapterPanel.expanded && isMouseOver() && !questScreen.viewQuestPanel.viewingQuest()) {
+		if (!questScreen.chapterPanel.expanded && isMouseOver() && !questScreen.isViewingQuest()) {
 			questScreen.chapterPanel.setExpanded(true);
 		}
 	}

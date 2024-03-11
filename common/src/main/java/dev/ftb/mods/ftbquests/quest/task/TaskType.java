@@ -1,11 +1,9 @@
 package dev.ftb.mods.ftbquests.quest.task;
 
-import dev.ftb.mods.ftblibrary.config.ConfigGroup;
-import dev.ftb.mods.ftblibrary.config.LongConfig;
-import dev.ftb.mods.ftblibrary.config.ui.EditConfigFromStringScreen;
-import dev.ftb.mods.ftblibrary.config.ui.EditConfigScreen;
 import dev.ftb.mods.ftblibrary.icon.Icon;
+import dev.ftb.mods.ftblibrary.ui.Panel;
 import dev.ftb.mods.ftbquests.api.FTBQuestsAPI;
+import dev.ftb.mods.ftbquests.client.GuiProviders;
 import dev.ftb.mods.ftbquests.quest.Quest;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -30,30 +28,7 @@ public final class TaskType {
 		this.iconSupplier = iconSupplier;
 
 		displayName = null;
-		guiProvider = (gui, quest, callback) -> {
-			Task task = TaskType.this.provider.create(0L, quest);
-
-			if (task instanceof ISingleLongValueTask slvTask) {
-				LongConfig c = new LongConfig(slvTask.getMinConfigValue(), slvTask.getMaxConfigValue());
-
-				EditConfigFromStringScreen.open(c, slvTask.getDefaultConfigValue(), slvTask.getDefaultConfigValue(), accepted -> {
-					if (accepted) {
-						slvTask.setValue(c.getValue());
-						callback.accept(task);
-					}
-					gui.run();
-				});
-			} else {
-				ConfigGroup group = new ConfigGroup(FTBQuestsAPI.MOD_ID, accepted -> {
-					if (accepted) {
-						callback.accept(task);
-					}
-					gui.run();
-				});
-				task.fillConfigGroup(task.createSubGroup(group));
-				new EditConfigScreen(group).openGui();
-			}
-		};
+		guiProvider = GuiProviders.defaultTaskGuiProvider(provider);
 	}
 
 	public ResourceLocation getTypeId() {
@@ -119,7 +94,7 @@ public final class TaskType {
 	@FunctionalInterface
 	public interface GuiProvider {
 		@Environment(EnvType.CLIENT)
-		void openCreationGui(Runnable gui, Quest quest, Consumer<Task> callback);
+		void openCreationGui(Panel panel, Quest quest, Consumer<Task> callback);
 	}
 
 }
