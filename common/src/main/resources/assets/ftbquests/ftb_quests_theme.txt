@@ -65,6 +65,7 @@ quest_not_started_color:            #96FFFFFF
 quest_locked_color:                 #FF999999
 dependency_line_texture:            ftbquests:textures/gui/dependency.png
 dependency_line_completed_color:    #64DC64
+dependency_line_uncompleted_color:  #B4CCA3A3
 dependency_line_requires_color:     #00C8C8
 dependency_line_required_for_color: #C8C800
 dependency_line_selected_speed:     1.0
