@@ -199,24 +199,15 @@ public class QuestPanel extends Panel {
 			if (widget.shouldDraw() && widget instanceof QuestButton qb && !qb.quest.shouldHideDependencyLines()) {
 				boolean unavailable = !questScreen.file.selfTeamData.canStartTasks(qb.quest);
 				boolean complete = !unavailable && questScreen.file.selfTeamData.isCompleted(qb.quest);
+				Color4I c = complete ?
+						ThemeProperties.DEPENDENCY_LINE_COMPLETED_COLOR.get(questScreen.selectedChapter) :
+						ThemeProperties.DEPENDENCY_LINE_UNCOMPLETED_COLOR.get(questScreen.selectedChapter);
 
 				for (QuestButton button : qb.getDependencies()) {
 					if (button.shouldDraw() && button.quest != selectedQuest && qb.quest != selectedQuest && !button.quest.shouldHideDependentLines()) {
-						int r, g, b, a;
-						if (complete) {
-							Color4I c = ThemeProperties.DEPENDENCY_LINE_COMPLETED_COLOR.get(questScreen.selectedChapter);
-							r = c.redi();
-							g = c.greeni();
-							b = c.bluei();
-							a = c.alphai();
-						} else {
-							Color4I c = Color4I.hsb(button.quest.id / 1000F, 0.2F, unavailable ? 0.3F : 0.8F);
-							r = c.redi();
-							g = c.greeni();
-							b = c.bluei();
-							a = 180;
-						}
-						renderConnection(widget, button, graphics.pose(), buffer, lineWidth, r, g, b, a, a, mu, tesselator);
+						renderConnection(widget, button, graphics.pose(), buffer, lineWidth,
+								c.redi(), c.greeni(), c.bluei(), c.alphai(), c.alphai(),
+								mu, tesselator);
 					}
 				}
 			}

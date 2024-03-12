@@ -30,5 +30,6 @@
 		"ftbteams": ">=2001.1.4-build.1"
 	},
 	"breaks": {
+		"ftblibrary": ">=2001.2.0"
 	}
 }

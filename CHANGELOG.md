@@ -4,6 +4,19 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2001.3.4]
+
+### Added
+* The color of dependency lines for uncompleted quests is now themable
+  * Use the "dependency_line_uncompleted_color" setting in ftb_quests_theme.txt (a resource pack file)
+  * Default is #B4CCA3A3, which is the same as the previous color (a washed-out red tint)
+* Added "Icon Scaling" property for quests (default: 1.0)
+  * Allows the quest icon to be scaled separately from the overall quest button size, which can be useful for a good appearance with some button shapes
+
+### Fixed
+* Fixed client-side config (from "User Preferences" button) not getting properly persisted
+* User Preferences screen SSP pause behaviour now follows main screen's pause behaviour
+
 ## [2001.3.3]
 
 ### Added
