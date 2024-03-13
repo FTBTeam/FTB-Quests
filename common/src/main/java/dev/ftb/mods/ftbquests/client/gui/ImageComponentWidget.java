@@ -1,7 +1,6 @@
 package dev.ftb.mods.ftbquests.client.gui;
 
 import dev.ftb.mods.ftblibrary.config.ConfigGroup;
-import dev.ftb.mods.ftblibrary.config.ImageConfig;
 import dev.ftb.mods.ftblibrary.config.ui.EditConfigScreen;
 import dev.ftb.mods.ftblibrary.icon.Icon;
 import dev.ftb.mods.ftblibrary.ui.Panel;
@@ -64,21 +63,6 @@ public class ImageComponentWidget extends Widget {
 		}
 
 		return false;
-	}
-
-	public static void openImageEditorScreen(ImageComponent component, ConfigGroup group) {
-		group.add("image", new ImageConfig(), component.imageStr(), v -> component.setImage(Icon.getIcon(v)), "")
-				.setNameKey("ftbquests.gui.image");
-		group.addInt("width", component.getWidth(), component::setWidth, 0, 1, 1000)
-				.setNameKey("ftbquests.gui.image.width");
-		group.addInt("height", component.getHeight(), component::setHeight, 0, 1, 1000)
-				.setNameKey("ftbquests.gui.image.height");
-		group.addEnum("align", component.getAlign(), component::setAlign, ImageComponent.ImageAlign.NAME_MAP, ImageComponent.ImageAlign.CENTER)
-				.setNameKey("ftbquests.gui.image.align");
-		group.addBool("fit", component.isFit(), component::setFit, false)
-				.setNameKey("ftbquests.gui.image.fit");
-
-		new EditConfigScreen(group).openGui();
 	}
 }
 
