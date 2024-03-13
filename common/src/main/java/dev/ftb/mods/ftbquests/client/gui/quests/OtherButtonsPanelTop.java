@@ -79,7 +79,7 @@ public class OtherButtonsPanelTop extends OtherButtonsPanel {
 
 	private static class KeyReferenceButton extends TabButton {
 		public KeyReferenceButton(Panel panel) {
-			super(panel, Component.translatable("ftbquests.gui.key_reference"), Icons.INFO_GRAY);
+			super(panel, Component.translatable("ftblibrary.gui.key_reference"), Icons.INFO_GRAY);
 		}
 
 		@Override
