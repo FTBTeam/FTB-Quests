@@ -4,6 +4,58 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+# [2004.2.0]
+
+### Changed
+* Ported to Minecraft 1.20.4. Supported on Forge, NeoForge and Fabric.
+
+# [2001.3.4]
+
+### Added
+* The color of dependency lines for uncompleted quests is now themable
+  * Use the "dependency_line_uncompleted_color" setting in ftb_quests_theme.txt (a resource pack file)
+  * Default is #B4CCA3A3, which is the same as the previous color (a washed-out red tint)
+* Added "Icon Scaling" property for quests (default: 1.0)
+  * Allows the quest icon to be scaled separately from the overall quest button size, which can be useful for a good appearance with some button shapes
+
+### Fixed
+* Fixed client-side config (from "User Preferences" button) not getting properly persisted
+* User Preferences screen SSP pause behaviour now follows main screen's pause behaviour
+
+## [2001.3.3]
+
+### Added
+* Tooltips for images (the "Hover Text" image property) now support using translation keys
+  * Literal text still works, as before
+
+### Fixed
+* Mitigate performance hit for calculating displayable items when item filters (either FTB Filter System or Item Filter) are in use
+  * There is an unavoidable client-side performance cost here which can be noticeable when opening a large quest book with many filters, but this should reduce it somewhat
+* Fixed connection lines sometimes being rendered to invisible quest dependencies
+* When a player leaves a party team, their claimed-reward data is now copied back to their own team
+  * Although all quest progress is reset when a player leaves a party (to the point where they joined the party), claimed-reward data should be preserved so that rewards can't be claimed more than once by a player
+* Fixed some text formatting in the key reference popup panel (text wasn't always wrapping correctly)
+
+## [2001.3.2]
+
+### Fixed
+* Fix NPE when opening on empty quest book
+
+## [2001.3.1]
+
+### Added
+* Added back support for the `{p}` expansion in command rewards
+  * Although `@p` and `@s` are the recommended ways to get the player name, `{p}` is once more supported as a workaround for mods/plugins which don't properly use vanilla command parsing
+* Improved copy/paste keyboard behaviour a little
+  * Ctrl-C to copy now also works on images
+  * If no quests/images are selected, Ctrl-C will work to copy the hovered quest/image
+
+### Fixed
+* A quest in the first chapter set as Autofocused (feature added in 2001.2.1) wasn't being autofocused on initial opening of the quest book
+* Hopefully mitigate a large amount of server lag (only noticeable in very big quest books) when an item is crafted (or manually smelted)
+* Fixed the "Always Invisible" chapter property not being correctly observed when not in edit mode
+* Fixed toggling editor mode not working in an SSP world which has been opened to LAN to enable cheats
+
 ## [2001.3.0]
 
 ### Changed
