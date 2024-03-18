@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 * Fixed crash under some circumstances (not always reproducible) when opening the Key Reference panel
+* Fixed images rendering over and hiding quest dependency lines (bug introduced in last release)
 
 ## [2001.3.4]
 
