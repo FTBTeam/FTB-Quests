@@ -122,7 +122,7 @@ public final class LootCrate {
 	public void fillConfigGroup(ConfigGroup config) {
 		config.addString("id", stringID, v -> stringID = v, "", Pattern.compile("[a-z0-9_]+"));
 		config.addString("item_name", itemName, v -> itemName = v, "");
-		config.addString("color", color.toString(), v -> color = Color4I.fromString(v), "#FFFFFF", Pattern.compile("^#[a-fA-F0-9]{6}$"));
+		config.addColor("color", color, v -> color = v, Color4I.WHITE);
 		config.addBool("glow", glow, v -> glow = v, true);
 
 		ConfigGroup d = config.getOrCreateSubgroup("drops");

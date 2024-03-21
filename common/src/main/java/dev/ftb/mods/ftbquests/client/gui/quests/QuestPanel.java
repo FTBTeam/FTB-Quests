@@ -162,13 +162,6 @@ public class QuestPanel extends Panel {
 			return;
 		}
 
-		GuiHelper.setupDrawing();
-
-		widgets.stream()
-				.filter(o -> o instanceof ChapterImageButton)
-				.sorted(Comparator.comparing(o -> ((ChapterImageButton) o)))
-				.forEach(o -> o.draw(graphics, theme, o.getX(), o.getY(), o.width, o.height));
-
 		Tesselator tesselator = Tesselator.getInstance();
 		BufferBuilder buffer = tesselator.getBuilder();
 
