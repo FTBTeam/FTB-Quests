@@ -15,6 +15,7 @@ import dev.ftb.mods.ftbquests.util.ConfigQuestObject;
 import dev.ftb.mods.ftbquests.util.NetUtils;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.Util;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
@@ -29,13 +30,11 @@ import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Predicate;
-import java.util.regex.Pattern;
 
 public final class ChapterImage implements Movable {
 	// magic string which goes in the clipboard if an image has been copied
 	public static final String FTBQ_IMAGE = "<ftbq-image>";
 
-	private static final Pattern COLOR_PATTERN = Pattern.compile("^#[a-fA-F0-9]{6}$");
 	public static WeakReference<ChapterImage> clipboard = new WeakReference<>(null);
 
 	private Chapter chapter;
@@ -123,30 +122,16 @@ public final class ChapterImage implements Movable {
 		nbt.putDouble("height", height);
 		nbt.putDouble("rotation", rotation);
 		nbt.putString("image", image.toString());
-		if (!color.equals(Color4I.WHITE)) {
-			nbt.putInt("color", color.rgb());
+		if (!color.equals(Color4I.WHITE)) nbt.putInt("color", color.rgb());
+		if (alpha != 255) nbt.putInt("alpha", alpha);
+		if (order != 0) nbt.putInt("order", order);
+		if (!hover.isEmpty()) {
+			nbt.put("hover", Util.make(new ListTag(), l -> hover.forEach(s -> l.add(StringTag.valueOf(s)))));
 		}
-		if (alpha != 255) {
-			nbt.putInt("alpha", alpha);
-		}
-		if (order != 0) {
-			nbt.putInt("order", order);
-		}
-
-		ListTag hoverTag = new ListTag();
-
-		for (String s : hover) {
-			hoverTag.add(StringTag.valueOf(s));
-		}
-
-		nbt.put("hover", hoverTag);
-		nbt.putString("click", click);
-		nbt.putBoolean("dev", editorsOnly);
-		nbt.putBoolean("corner", alignToCorner);
-
-		if (dependency != null) {
-			nbt.putString("dependency", dependency.getCodeString());
-		}
+		if (!click.isEmpty()) nbt.putString("click", click);
+		if (editorsOnly) nbt.putBoolean("dev", true);
+		if (alignToCorner) nbt.putBoolean("corner", true);
+		if (dependency != null) nbt.putString("dependency", dependency.getCodeString());
 
 		return nbt;
 	}
@@ -164,7 +149,6 @@ public final class ChapterImage implements Movable {
 
 		hover.clear();
 		ListTag hoverTag = nbt.getList("hover", Tag.TAG_STRING);
-
 		for (int i = 0; i < hoverTag.size(); i++) {
 			hover.add(hoverTag.getString(i));
 		}
@@ -217,8 +201,9 @@ public final class ChapterImage implements Movable {
 		config.addDouble("width", width, v -> width = v, 1, 0, Double.POSITIVE_INFINITY);
 		config.addDouble("height", height, v -> height = v, 1, 0, Double.POSITIVE_INFINITY);
 		config.addDouble("rotation", rotation, v -> rotation = v, 0, -180, 180);
-		config.add("image", new ImageResourceConfig(), ImageResourceConfig.getResourceLocation(image), v -> setImage(Icon.getIcon(v)), new ResourceLocation("minecraft:textures/gui/presets/isles.png"));
-		config.addString("color", color.toString(), v -> color = Color4I.fromString(v), "#FFFFFF", COLOR_PATTERN);
+		config.add("image", new ImageResourceConfig(), ImageResourceConfig.getResourceLocation(image),
+				v -> setImage(Icon.getIcon(v)), new ResourceLocation("minecraft:textures/gui/presets/isles.png"));
+		config.addColor("color", color, v -> color = v, Color4I.WHITE);
 		config.addInt("order", order, v -> order = v, 0, Integer.MIN_VALUE, Integer.MAX_VALUE);
 		config.addInt("alpha", alpha, v -> alpha = v, 255, 0, 255);
 		config.addList("hover", hover, new StringConfig(), "");
