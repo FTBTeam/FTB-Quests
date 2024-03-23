@@ -68,6 +68,9 @@ public class ChapterImageButton extends Button implements QuestPositionableButto
 		if (questScreen.file.canEdit() && button.isRight()) {
 			List<ContextMenuItem> contextMenu = new ArrayList<>();
 
+			contextMenu.add(ContextMenuItem.title(Component.literal("\"").append(chapterImage.getTitle()).append(Component.literal("\""))));
+			contextMenu.add(ContextMenuItem.SEPARATOR);
+
 			contextMenu.add(new ContextMenuItem(Component.translatable("selectServer.edit"), ThemeProperties.EDIT_ICON.get(), b -> {
 				String name = chapterImage.getImage() instanceof Color4I ? chapterImage.getColor().toString() : chapterImage.getImage().toString();
 				ConfigGroup group = new ConfigGroup(FTBQuestsAPI.MOD_ID, accepted -> {
