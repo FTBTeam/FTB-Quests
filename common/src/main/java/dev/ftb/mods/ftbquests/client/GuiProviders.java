@@ -114,7 +114,7 @@ public class GuiProviders {
             new SelectFluidScreen(c, accepted -> {
                 gui.run();
                 if (accepted) {
-                    FluidTask fluidTask = new FluidTask(0L, quest).setFluid(c.getValue().getFluid());
+                    FluidTask fluidTask = new FluidTask(0L, quest).setFluid(c.getValue());
                     callback.accept(fluidTask);
                 }
             }).openGui();
