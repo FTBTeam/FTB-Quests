@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 * Ported to Minecraft 1.20.4. Supported on Forge, NeoForge and Fabric.
+* Some GUI enhancements in a few places.
 
 # [2001.3.4]
 
