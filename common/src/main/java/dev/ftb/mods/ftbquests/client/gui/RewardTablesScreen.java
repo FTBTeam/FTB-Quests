@@ -25,6 +25,7 @@ import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.Items;
 import org.apache.commons.lang3.mutable.MutableInt;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -62,6 +63,7 @@ public class RewardTablesScreen extends AbstractButtonListScreen {
 						refreshWidgets();
 					}
 				}).atPosition(posX, posY + height);
+				panel.setExtraZlevel(300);  // might to render over an item icon button
 				getGui().pushModalPanel(panel);
 			}
 		};
@@ -135,20 +137,13 @@ public class RewardTablesScreen extends AbstractButtonListScreen {
 	}
 
 	private class CustomTopPanel extends TopPanel {
-		private final TextField titleLabel = new TextField(this).setText(getTitle());
-
 		@Override
 		public void addWidgets() {
-			titleLabel.addFlags(Theme.CENTERED_V);
-			add(titleLabel);
-
 			add(addButton);
 		}
 
 		@Override
 		public void alignWidgets() {
-			titleLabel.setPosAndSize(4, 0, titleLabel.width, height);
-
 			addButton.setPosAndSize(width - addButton.width - 2, 1, addButton.width, 20);
 		}
 
@@ -179,20 +174,22 @@ public class RewardTablesScreen extends AbstractButtonListScreen {
 			playClickSound();
 
 			if (button.isLeft()) {
-				editRewardTable();
+				if (getMouseX() > getX() + width - 13) {
+					deleteRewardTable();
+				} else if (getMouseX() > getX() + width - 26) {
+					toggleLootCrate();
+				} else {
+					editRewardTable();
+				}
 				return;
 			}
-
-			boolean hasLootCrate = table.getLootCrate() != null;
-			Component lCrate = Component.translatable("ftbquests.reward_table." +
-					(hasLootCrate ? "disable_loot_crate" : "enable_loot_crate"));
 
 			List<ContextMenuItem> menu = List.of(
 					new ContextMenuItem(Component.translatable("ftbquests.gui.edit"), ItemIcon.getItemIcon(Items.FEATHER),
 							b -> editRewardTable()),
 					new ContextMenuItem(Component.translatable("gui.remove"), Icons.BIN,
 							b -> deleteRewardTable()),
-					new ContextMenuItem(lCrate, ItemIcon.getItemIcon(FTBQuestsItems.LOOTCRATE.get()),
+					new ContextMenuItem(getLootCrateText(), ItemIcon.getItemIcon(FTBQuestsItems.LOOTCRATE.get()),
 							b -> toggleLootCrate())
 			);
 			getGui().openContextMenu(menu);
@@ -202,6 +199,8 @@ public class RewardTablesScreen extends AbstractButtonListScreen {
 		public void drawBackground(GuiGraphics graphics, Theme theme, int x, int y, int w, int h) {
 			if (isMouseOver) {
 				Color4I.WHITE.withAlpha(30).draw(graphics, x, y, w, h);
+				ItemIcon.getItemIcon(FTBQuestsItems.LOOTCRATE.get()).draw(graphics, x + w - 26, y + 2, 12, 12);
+				Icons.BIN.draw(graphics, x + w - 13, y + 2, 12, 12);
 			}
 			Color4I.GRAY.withAlpha(40).draw(graphics, x, y + h, w, 1);
 		}
@@ -241,13 +240,25 @@ public class RewardTablesScreen extends AbstractButtonListScreen {
 		public void addMouseOverText(TooltipList list) {
 			super.addMouseOverText(list);
 
-			MutableInt usedIn = new MutableInt(0);
-			ClientQuestFile.INSTANCE.forAllQuests(quest -> quest.getRewards().stream()
-					.filter(reward -> reward instanceof RandomReward rr && rr.getTable() != null && rr.getTable().id == table.id)
-					.forEach(reward -> usedIn.increment()));
-			list.add(Component.translatable("ftbquests.reward_table.used_in", usedIn));
+			if (getMouseX() > getX() + width - 13) {
+				list.add(Component.translatable("gui.remove"));
+			} else if (getMouseX() > getX() + width - 26) {
+				list.add(getLootCrateText());
+			} else {
+				MutableInt usedIn = new MutableInt(0);
+				ClientQuestFile.INSTANCE.forAllQuests(quest -> quest.getRewards().stream()
+						.filter(reward -> reward instanceof RandomReward rr && rr.getTable() != null && rr.getTable().id == table.id)
+						.forEach(reward -> usedIn.increment()));
+				list.add(Component.translatable("ftbquests.reward_table.used_in", usedIn));
 
-			table.addMouseOverText(list, true, true);
+				table.addMouseOverText(list, true, true);
+			}
+		}
+
+		@NotNull
+		private Component getLootCrateText() {
+            return Component.translatable("ftbquests.reward_table." +
+					(table.getLootCrate() != null ? "disable_loot_crate" : "enable_loot_crate"));
 		}
 	}
 }
