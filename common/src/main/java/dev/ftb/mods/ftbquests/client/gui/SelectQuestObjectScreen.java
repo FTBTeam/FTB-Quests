@@ -2,12 +2,13 @@ package dev.ftb.mods.ftbquests.client.gui;
 
 import dev.ftb.mods.ftblibrary.config.ConfigCallback;
 import dev.ftb.mods.ftblibrary.icon.Color4I;
+import dev.ftb.mods.ftblibrary.ui.GuiHelper;
 import dev.ftb.mods.ftblibrary.ui.Panel;
 import dev.ftb.mods.ftblibrary.ui.SimpleTextButton;
 import dev.ftb.mods.ftblibrary.ui.Theme;
 import dev.ftb.mods.ftblibrary.ui.input.Key;
 import dev.ftb.mods.ftblibrary.ui.input.MouseButton;
-import dev.ftb.mods.ftblibrary.ui.misc.ButtonListBaseScreen;
+import dev.ftb.mods.ftblibrary.ui.misc.AbstractButtonListScreen;
 import dev.ftb.mods.ftblibrary.util.TooltipList;
 import dev.ftb.mods.ftbquests.client.ClientQuestFile;
 import dev.ftb.mods.ftbquests.quest.*;
@@ -16,43 +17,45 @@ import dev.ftb.mods.ftbquests.quest.reward.Reward;
 import dev.ftb.mods.ftbquests.quest.task.Task;
 import dev.ftb.mods.ftbquests.util.ConfigQuestObject;
 import net.minecraft.ChatFormatting;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.network.chat.Component;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class SelectQuestObjectScreen<T extends QuestObjectBase> extends ButtonListBaseScreen {
+public class SelectQuestObjectScreen<T extends QuestObjectBase> extends AbstractButtonListScreen {
 	private final ConfigQuestObject<T> config;
 	private final ConfigCallback callback;
 
 	public SelectQuestObjectScreen(ConfigQuestObject<T> config, ConfigCallback callback) {
 		setTitle(Component.translatable("ftbquests.gui.select_quest_object"));
 		setHasSearchBox(true);
+		showBottomPanel(false);
+		showCloseButton(true);
 		focus();
 		setBorder(1, 1, 1);
+
 		this.config = config;
 		this.callback = callback;
-	}
-
-	@Override
-	public boolean keyPressed(Key key) {
-		if (key.esc()) {
-			onBack();
-			return true;
-		} else {
-			return super.keyPressed(key);
-		}
 	}
 
 	@Override
 	public boolean onClosedByKey(Key key) {
 		if (super.onClosedByKey(key)) {
 			callback.save(false);
-			return false;
+			return true;
 		}
 
 		return false;
+	}
+
+	@Override
+	public void drawBackground(GuiGraphics graphics, Theme theme, int x, int y, int w, int h) {
+		super.drawBackground(graphics, theme, x, y, w, h);
+
+		GuiHelper.drawHollowRect(graphics, mainPanel.getX() - 1, mainPanel.getY() - 1, mainPanel.width + 2, mainPanel.height + 2,
+				Color4I.DARK_GRAY.withAlpha(40), false);
 	}
 
 	@Override
@@ -81,8 +84,13 @@ public class SelectQuestObjectScreen<T extends QuestObjectBase> extends ButtonLi
 	}
 
 	@Override
-	public Theme getTheme() {
-		return FTBQuestsTheme.INSTANCE;
+	protected void doCancel() {
+		callback.save(false);
+	}
+
+	@Override
+	protected void doAccept() {
+		callback.save(true);
 	}
 
 	private class QuestObjectButton extends SimpleTextButton {
@@ -140,6 +148,14 @@ public class SelectQuestObjectScreen<T extends QuestObjectBase> extends ButtonLi
 					list.add(Component.literal("  ").append(reward.getMutableTitle().withStyle(QuestObjectType.REWARD.getColor())));
 				}
 			}
+		}
+
+		@Override
+		public void drawBackground(GuiGraphics graphics, Theme theme, int x, int y, int w, int h) {
+			if (isMouseOver) {
+				Color4I.WHITE.withAlpha(30).draw(graphics, x, y, w, h);
+			}
+			Color4I.GRAY.withAlpha(40).draw(graphics, x, y + h, w, 1);
 		}
 
 		@Override

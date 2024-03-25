@@ -1,5 +1,5 @@
 modLoader = "javafml"
-loaderVersion = "[39,)"
+loaderVersion = "[${forgeloaderversion},)"
 issueTrackerURL = "https://github.com/FTBTeam/FTB-Mods-Issues/issues"
 license = "All Rights Reserved"
 
@@ -7,7 +7,7 @@ license = "All Rights Reserved"
 modId = "ftbquests"
 version = "${version}"
 displayName = "FTB Quests"
-authors = "LatvianModder"
+authors = "FTB Team"
 description = '''
 Lets you easily create and play with quests
 '''
@@ -15,34 +15,34 @@ Lets you easily create and play with quests
 [[dependencies.ftbquests]]
 modId = "minecraft"
 mandatory = true
-versionRange = "[1.20.1,)"
+versionRange = "[${mcversion},)"
 ordering = "NONE"
 side = "BOTH"
 
 [[dependencies.ftbquests]]
+modId="forge"
+mandatory=true
+versionRange="[${forgeversion},)"
+ordering="NONE"
+side="BOTH"
+
+[[dependencies.ftbquests]]
 modId = "architectury"
 mandatory = true
-versionRange = "[9.0.8,)"
+versionRange = "[${archversion},)"
 ordering = "NONE"
 side = "BOTH"
 
 [[dependencies.ftbquests]]
 modId = "ftblibrary"
 mandatory = true
-versionRange = "[2001.1.4,)"
+versionRange = "[${ftblibraryversion},)"
 ordering = "AFTER"
 side = "BOTH"
 
 [[dependencies.ftbquests]]
 modId = "ftbteams"
 mandatory = true
-versionRange = "[2001.1.4,)"
-ordering = "AFTER"
-side = "BOTH"
-
-[[dependencies.ftbquests]]
-modId = "itemfilters"
-mandatory = true
-versionRange = "[2001.1.0-build.55,)"
+versionRange = "[${ftbteamsversion},)"
 ordering = "AFTER"
 side = "BOTH"

@@ -1,5 +1,6 @@
 package dev.ftb.mods.ftbquests.block;
 
+import com.mojang.serialization.MapCodec;
 import dev.architectury.hooks.level.entity.EntityHooks;
 import dev.ftb.mods.ftbquests.block.entity.BarrierBlockEntity;
 import dev.ftb.mods.ftbquests.block.entity.QuestBarrierBlockEntity;
@@ -29,19 +30,22 @@ import net.minecraft.world.phys.shapes.VoxelShape;
 import org.jetbrains.annotations.Nullable;
 
 public class QuestBarrierBlock extends BaseEntityBlock {
+	private static final MapCodec<QuestBarrierBlock> CODEC = simpleCodec(QuestBarrierBlock::new);
+
 	public static final BooleanProperty OPEN = BooleanProperty.create("open");
 
-	protected QuestBarrierBlock() {
-		super(Properties.of()
-				.mapColor(MapColor.COLOR_LIGHT_BLUE)
-				.pushReaction(PushReaction.BLOCK)
-				.noOcclusion()
-				.isViewBlocking((blockState, blockGetter, blockPos) -> false)
-				.isSuffocating((blockState, blockGetter, blockPos) -> false)
-				.strength(-1, 6000000F)
-				.lightLevel(blockState -> 3)
-				.emissiveRendering((blockState, blockGetter, blockPos) -> true)
-		);
+	public static final Properties PROPS = Properties.of()
+			.mapColor(MapColor.COLOR_LIGHT_BLUE)
+			.pushReaction(PushReaction.BLOCK)
+			.noOcclusion()
+			.isViewBlocking((blockState, blockGetter, blockPos) -> false)
+			.isSuffocating((blockState, blockGetter, blockPos) -> false)
+			.strength(-1, 6000000F)
+			.lightLevel(blockState -> 3)
+			.emissiveRendering((blockState, blockGetter, blockPos) -> true);
+
+	protected QuestBarrierBlock(Properties props) {
+		super(props);
 
 		registerDefaultState(defaultBlockState().setValue(OPEN, false));
 	}
@@ -49,6 +53,11 @@ public class QuestBarrierBlock extends BaseEntityBlock {
 	@Override
 	protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder) {
 		builder.add(OPEN);
+	}
+
+	@Override
+	protected MapCodec<? extends QuestBarrierBlock> codec() {
+		return CODEC;
 	}
 
 	@Override

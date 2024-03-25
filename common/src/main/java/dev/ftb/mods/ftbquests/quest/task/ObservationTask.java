@@ -132,6 +132,10 @@ public class ObservationTask extends AbstractBooleanTask {
 			BlockInWorld blockInWorld = new BlockInWorld(player.level(), blockResult.getBlockPos(), false);
 
 			BlockState state = blockInWorld.getState();
+			if (state == null) {
+				return false;
+			}
+
 			Block block = state.getBlock();
 			BlockEntity blockEntity = blockInWorld.getEntity();
 

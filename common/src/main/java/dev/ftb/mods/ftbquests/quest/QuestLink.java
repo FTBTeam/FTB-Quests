@@ -3,6 +3,7 @@ package dev.ftb.mods.ftbquests.quest;
 import dev.ftb.mods.ftblibrary.config.ConfigGroup;
 import dev.ftb.mods.ftblibrary.icon.Icon;
 import dev.ftb.mods.ftblibrary.util.client.ClientUtils;
+import dev.ftb.mods.ftbquests.client.FTBQuestsClient;
 import dev.ftb.mods.ftbquests.client.gui.quests.QuestScreen;
 import dev.ftb.mods.ftbquests.net.MoveMovableMessage;
 import net.fabricmc.api.EnvType;
@@ -213,6 +214,11 @@ public class QuestLink extends QuestObject implements Movable {
                 chapter = newChapter;
             }
         }
+    }
+
+    @Override
+    public void copyToClipboard() {
+        FTBQuestsClient.copyToClipboard(this);
     }
 
     public boolean linksTo(Quest quest) {

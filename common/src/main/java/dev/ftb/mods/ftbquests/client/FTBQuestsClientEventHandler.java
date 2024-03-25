@@ -6,6 +6,7 @@ import dev.architectury.event.events.client.ClientGuiEvent;
 import dev.architectury.event.events.client.ClientLifecycleEvent;
 import dev.architectury.event.events.client.ClientPlayerEvent;
 import dev.architectury.event.events.client.ClientTickEvent;
+import dev.architectury.injectables.annotations.ExpectPlatform;
 import dev.architectury.registry.client.rendering.BlockEntityRendererRegistry;
 import dev.architectury.registry.client.rendering.ColorHandlerRegistry;
 import dev.ftb.mods.ftblibrary.icon.Color4I;
@@ -14,6 +15,7 @@ import dev.ftb.mods.ftblibrary.ui.CustomClickEvent;
 import dev.ftb.mods.ftblibrary.ui.GuiHelper;
 import dev.ftb.mods.ftbquests.api.FTBQuestsAPI;
 import dev.ftb.mods.ftbquests.block.entity.FTBQuestsBlockEntities;
+import dev.ftb.mods.ftbquests.block.entity.TaskScreenBlockEntity;
 import dev.ftb.mods.ftbquests.events.ClearFileCacheEvent;
 import dev.ftb.mods.ftbquests.item.FTBQuestsItems;
 import dev.ftb.mods.ftbquests.item.LootCrateItem;
@@ -31,6 +33,7 @@ import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.player.LocalPlayer;
+import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
 import net.minecraft.client.renderer.texture.TextureAtlas;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.network.chat.Component;
@@ -81,7 +84,7 @@ public class FTBQuestsClientEventHandler {
 	}
 
 	// Note: Architectury doesn't have a texture stitch post event anymore,
-	// so this is handled by the Forge event, and a mixin on Fabric
+	// so this is handled by the Forge/NeoForge events, and a mixin on Fabric
 	public static void onTextureStitchPost(TextureAtlas textureAtlas) {
 		if (textureAtlas.location().equals(InventoryMenu.BLOCK_ATLAS)) {
 			inputOnlySprite = textureAtlas.getSprite(INPUT_ONLY_TEXTURE);
@@ -94,7 +97,12 @@ public class FTBQuestsClientEventHandler {
 	}
 
 	private void registerBERs(Minecraft minecraft) {
-		BlockEntityRendererRegistry.register(FTBQuestsBlockEntities.CORE_TASK_SCREEN.get(), TaskScreenRenderer::new);
+		BlockEntityRendererRegistry.register(FTBQuestsBlockEntities.CORE_TASK_SCREEN.get(), taskScreenRenderer());
+	}
+
+	@ExpectPlatform
+	public static BlockEntityRendererProvider<TaskScreenBlockEntity> taskScreenRenderer() {
+		throw new AssertionError();
 	}
 
 	private void registerItemColors(Minecraft minecraft) {

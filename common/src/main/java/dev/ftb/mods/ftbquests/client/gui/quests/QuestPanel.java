@@ -3,7 +3,8 @@ package dev.ftb.mods.ftbquests.client.gui.quests;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.*;
 import com.mojang.math.Axis;
-import dev.ftb.mods.ftblibrary.config.ImageConfig;
+import dev.ftb.mods.ftblibrary.config.ImageResourceConfig;
+import dev.ftb.mods.ftblibrary.config.ui.SelectImageResourceScreen;
 import dev.ftb.mods.ftblibrary.icon.Color4I;
 import dev.ftb.mods.ftblibrary.icon.Icon;
 import dev.ftb.mods.ftblibrary.icon.Icons;
@@ -12,7 +13,6 @@ import dev.ftb.mods.ftblibrary.math.MathUtils;
 import dev.ftb.mods.ftblibrary.ui.*;
 import dev.ftb.mods.ftblibrary.ui.input.Key;
 import dev.ftb.mods.ftblibrary.ui.input.MouseButton;
-import dev.ftb.mods.ftblibrary.ui.misc.SelectImagePreScreen;
 import dev.ftb.mods.ftbquests.api.FTBQuestsAPI;
 import dev.ftb.mods.ftbquests.client.FTBQuestsClientConfig;
 import dev.ftb.mods.ftbquests.net.*;
@@ -27,7 +27,6 @@ import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.Mth;
-import org.apache.commons.lang3.mutable.MutableBoolean;
 import org.jetbrains.annotations.Nullable;
 import org.joml.Matrix4f;
 import org.lwjgl.glfw.GLFW;
@@ -112,7 +111,7 @@ public class QuestPanel extends Panel {
 			return;
 		}
 
-		questScreen.selectedChapter.images()
+		questScreen.selectedChapter.getImages().stream()
 				.filter(image -> questScreen.file.canEdit() || image.shouldShowImage(questScreen.file.selfTeamData))
 				.sorted(Comparator.comparingInt(ChapterImage::getOrder))
 				.forEach(image -> add(new ChapterImageButton(this, image)));
@@ -163,13 +162,6 @@ public class QuestPanel extends Panel {
 			return;
 		}
 
-		GuiHelper.setupDrawing();
-
-		widgets.stream()
-				.filter(o -> o instanceof ChapterImageButton)
-				.sorted(Comparator.comparing(o -> ((ChapterImageButton) o)))
-				.forEach(o -> o.draw(graphics, theme, o.getX(), o.getY(), o.width, o.height));
-
 		Tesselator tesselator = Tesselator.getInstance();
 		BufferBuilder buffer = tesselator.getBuilder();
 
@@ -200,24 +192,15 @@ public class QuestPanel extends Panel {
 			if (widget.shouldDraw() && widget instanceof QuestButton qb && !qb.quest.shouldHideDependencyLines()) {
 				boolean unavailable = !questScreen.file.selfTeamData.canStartTasks(qb.quest);
 				boolean complete = !unavailable && questScreen.file.selfTeamData.isCompleted(qb.quest);
+				Color4I c = complete ?
+						ThemeProperties.DEPENDENCY_LINE_COMPLETED_COLOR.get(questScreen.selectedChapter) :
+						ThemeProperties.DEPENDENCY_LINE_UNCOMPLETED_COLOR.get(questScreen.selectedChapter);
 
 				for (QuestButton button : qb.getDependencies()) {
 					if (button.shouldDraw() && button.quest != selectedQuest && qb.quest != selectedQuest && !button.quest.shouldHideDependentLines()) {
-						int r, g, b, a;
-						if (complete) {
-							Color4I c = ThemeProperties.DEPENDENCY_LINE_COMPLETED_COLOR.get(questScreen.selectedChapter);
-							r = c.redi();
-							g = c.greeni();
-							b = c.bluei();
-							a = c.alphai();
-						} else {
-							Color4I c = Color4I.hsb(button.quest.id / 1000F, 0.2F, unavailable ? 0.3F : 0.8F);
-							r = c.redi();
-							g = c.greeni();
-							b = c.bluei();
-							a = 180;
-						}
-						renderConnection(widget, button, graphics.pose(), buffer, lineWidth, r, g, b, a, a, mu, tesselator);
+						renderConnection(widget, button, graphics.pose(), buffer, lineWidth,
+								c.redi(), c.greeni(), c.bluei(), c.alphai(), c.alphai(),
+								mu, tesselator);
 					}
 				}
 			}
@@ -230,30 +213,23 @@ public class QuestPanel extends Panel {
 		for (Widget widget : widgets) {
 			if (widget.shouldDraw() && widget instanceof QuestButton qb && !qb.quest.shouldHideDependencyLines()) {
 				for (QuestButton button : qb.getDependencies()) {
-					int r, g, b, a, a2;
-					if (button.quest == selectedQuest || button.isMouseOver()) {
-						Color4I c = ThemeProperties.DEPENDENCY_LINE_REQUIRED_FOR_COLOR.get(questScreen.selectedChapter);
-						r = c.redi();
-						g = c.greeni();
-						b = c.bluei();
-						if (qb.shouldDraw()) {
-							a = a2 = c.alphai();
-						} else {
-							a = c.alphai() / 4 * 3;
-							a2 = 30;
-							toOutline.add(qb);
+					if (button.shouldDraw()) {
+						if (button.quest == selectedQuest || button.isMouseOver()) {
+							Color4I c = ThemeProperties.DEPENDENCY_LINE_REQUIRED_FOR_COLOR.get(questScreen.selectedChapter);
+							int a, a2;
+							if (qb.shouldDraw()) {
+								a = a2 = c.alphai();
+							} else {
+								a = c.alphai() / 4 * 3;
+								a2 = 30;
+								toOutline.add(qb);
+							}
+							renderConnection(widget, button, graphics.pose(), buffer, lineWidth, c.redi(), c.greeni(), c.bluei(), a2, a, ms, tesselator);
+						} else if (qb.quest == selectedQuest || qb.isMouseOver()) {
+							Color4I c = ThemeProperties.DEPENDENCY_LINE_REQUIRES_COLOR.get(questScreen.selectedChapter);
+							renderConnection(widget, button, graphics.pose(), buffer, lineWidth, c.redi(), c.greeni(), c.bluei(), c.alphai(), c.alphai(), ms, tesselator);
 						}
-					} else if (qb.quest == selectedQuest || qb.isMouseOver()) {
-						Color4I c = ThemeProperties.DEPENDENCY_LINE_REQUIRES_COLOR.get(questScreen.selectedChapter);
-						r = c.redi();
-						g = c.greeni();
-						b = c.bluei();
-						a = c.alphai();
-						a2 = a;
-					} else {
-						continue;
 					}
-					renderConnection(widget, button, graphics.pose(), buffer, lineWidth, r, g, b, a2, a, ms, tesselator);
 				}
 			}
 
@@ -352,7 +328,7 @@ public class QuestPanel extends Panel {
 						poseStack.popPose();
 					}
 
-					if (QuestScreen.grid && !questScreen.viewQuestPanel.viewingQuest()) {
+					if (QuestScreen.grid && !questScreen.isViewingQuest()) {
 						double boxX = ominX / dx * questScreen.scrollWidth + px;
 						double boxY = ominY / dy * questScreen.scrollHeight + py;
 						double boxW = omaxX / dx * questScreen.scrollWidth + px - boxX;
@@ -363,7 +339,7 @@ public class QuestPanel extends Panel {
 						GuiHelper.drawHollowRect(graphics, (int) boxX, (int) boxY, (int) boxW, (int) boxH, Color4I.WHITE.withAlpha(30), false);
 						poseStack.popPose();
 					}
-				} else if (!questScreen.viewQuestPanel.viewingQuest() || !questScreen.viewQuestPanel.isMouseOver()) {
+				} else if (!questScreen.isViewingQuest() || !questScreen.viewQuestPanel.isMouseOver()) {
 					//int z = treeGui.getZoom();
 					double sx = (questX - questMinX) / dx * questScreen.scrollWidth + px;
 					double sy = (questY - questMinY) / dy * questScreen.scrollHeight + py;
@@ -378,7 +354,7 @@ public class QuestPanel extends Panel {
 					//RenderSystem.defaultAlphaFunc();
 					poseStack.popPose();
 
-					if (QuestScreen.grid && !questScreen.viewQuestPanel.viewingQuest()) {
+					if (QuestScreen.grid && !questScreen.isViewingQuest()) {
 						poseStack.pushPose();
 						poseStack.translate(0, 0, 1000);
 						Color4I.WHITE.draw(graphics, (int) sx, (int) sy, 1, 1);
@@ -409,7 +385,9 @@ public class QuestPanel extends Panel {
 		String cStr = String.format("Center: [%.2f, %.2f]", centerQuestX, centerQuestY);
 		theme.drawString(graphics, cStr, statusWidth * 2 - theme.getStringWidth(cStr) - 6, 0, Theme.SHADOW);
 
-		int total = questScreen.selectedChapter.getQuests().size() + questScreen.selectedChapter.getQuestLinks().size();
+		int total = questScreen.selectedChapter.getQuests().size()
+				+ questScreen.selectedChapter.getQuestLinks().size()
+				+ questScreen.selectedChapter.getImages().size();
 		String sStr = String.format("Selected: %d / %d", questScreen.selectedObjects.size(), total);
 		theme.drawString(graphics, sStr, statusWidth / 2, 0, Theme.SHADOW);
 
@@ -451,12 +429,12 @@ public class QuestPanel extends Panel {
 			return true;
 		}
 
-		if (!questScreen.viewQuestPanel.hidePanel && questScreen.isViewingQuest()) {
+		if (/*!questScreen.viewQuestPanel.hidePanel &&*/ questScreen.isViewingQuest()) {
 			questScreen.closeQuest();
 			return true;
 		}
 
-		if ((button.isLeft() || button.isMiddle() && questScreen.file.canEdit()) && isMouseOver() && (questScreen.viewQuestPanel.hidePanel || !questScreen.isViewingQuest())) {
+		if ((button.isLeft() || button.isMiddle() && questScreen.file.canEdit()) && isMouseOver() && (/*questScreen.viewQuestPanel.hidePanel ||*/ !questScreen.isViewingQuest())) {
 			questScreen.prevMouseX = getMouseX();
 			questScreen.prevMouseY = getMouseY();
 			questScreen.grabbed = button;
@@ -470,7 +448,7 @@ public class QuestPanel extends Panel {
 			double qy = questY;
 
 			for (TaskType type : TaskTypes.TYPES.values()) {
-				contextMenu.add(new ContextMenuItem(type.getDisplayName(), type.getIconSupplier(), () -> {
+				contextMenu.add(new ContextMenuItem(type.getDisplayName(), type.getIconSupplier(), b -> {
 					playClickSound();
 					type.getGuiProvider().openCreationGui(this, new Quest(0L, questScreen.selectedChapter),
 							task -> new CreateTaskAtMessage(questScreen.selectedChapter, qx, qy, task)
@@ -479,47 +457,42 @@ public class QuestPanel extends Panel {
 				}));
 			}
 
-			contextMenu.add(new ContextMenuItem(Component.translatable("ftbquests.chapter.image"), Icons.ART, () -> showImageCreationScreen(qx, qy)));
+			contextMenu.add(new ContextMenuItem(Component.translatable("ftbquests.chapter.image"), Icons.ART, b -> showImageCreationScreen(qx, qy)));
 
 			String clip = getClipboardString();
-			MutableBoolean addedSeparator = new MutableBoolean(false);
-			if (!clip.isEmpty()) {
-				try {
-					long questId = Long.valueOf(clip, 16);
+			if (!ChapterImage.isImageInClipboard()) {
+				QuestObjectBase.parseHexId(clip).ifPresent(questId -> {
 					QuestObject qo = questScreen.file.get(questId);
+					contextMenu.add(ContextMenuItem.SEPARATOR);
 					if (qo instanceof Quest quest) {
-						contextMenu.add(ContextMenuItem.SEPARATOR);
-						addedSeparator.setTrue();
 						contextMenu.add(new PasteQuestMenuItem(quest, Component.translatable("ftbquests.gui.paste"),
 								Icons.ADD,
-								() -> new CopyQuestMessage(quest, questScreen.selectedChapter, qx, qy, true).sendToServer()));
+								b -> new CopyQuestMessage(quest, questScreen.selectedChapter, qx, qy, true).sendToServer()));
 						if (quest.hasDependencies()) {
 							contextMenu.add(new PasteQuestMenuItem(quest, Component.translatable("ftbquests.gui.paste_no_deps"),
 									Icons.ADD_GRAY.withTint(Color4I.rgb(0x008000)),
-									() -> new CopyQuestMessage(quest, questScreen.selectedChapter, qx, qy, false).sendToServer()));
+									b -> new CopyQuestMessage(quest, questScreen.selectedChapter, qx, qy, false).sendToServer()));
 						}
 						contextMenu.add(new PasteQuestMenuItem(quest, Component.translatable("ftbquests.gui.paste_link"),
 								Icons.ADD_GRAY.withTint(Color4I.rgb(0x8080C0)),
-								() -> {
+								b -> {
 									QuestLink link = new QuestLink(0L, questScreen.selectedChapter, quest.id);
 									link.setPosition(qx, qy);
 									new CreateObjectMessage(link, new CompoundTag()).sendToServer();
 								}));
 					} else if (qo instanceof Task task) {
-						contextMenu.add(ContextMenuItem.SEPARATOR);
-						addedSeparator.setTrue();
-						contextMenu.add(new AddTaskButton.PasteTaskMenuItem(task, () -> copyAndCreateTask(task, qx, qy)));
+						contextMenu.add(new AddTaskButton.PasteTaskMenuItem(task, b -> copyAndCreateTask(task, qx, qy)));
 					}
-				} catch (NumberFormatException ignored) {
-				}
+				});
+			} else {
+				ChapterImageButton.getClipboardImage().ifPresent(clipImg -> {
+					contextMenu.add(ContextMenuItem.SEPARATOR);
+					contextMenu.add(new TooltipContextMenuItem(Component.translatable("ftbquests.gui.paste_image"),
+							Icons.ADD,
+							b -> new CopyChapterImageMessage(clipImg, questScreen.selectedChapter, qx, qy).sendToServer(),
+							Component.literal(clipImg.getImage().toString()).withStyle(ChatFormatting.GRAY)));
+				});
 			}
-			ChapterImageButton.getClipboard().ifPresent(clipImg -> {
-				if (!addedSeparator.getValue()) contextMenu.add(ContextMenuItem.SEPARATOR);
-				contextMenu.add(new TooltipContextMenuItem(Component.translatable("ftbquests.gui.paste_image"),
-						Icons.ADD,
-						() -> new CopyChapterImageMessage(clipImg, questScreen.selectedChapter, qx, qy).sendToServer(),
-						Component.literal(clipImg.getImage().toString()).withStyle(ChatFormatting.GRAY)));
-			});
 
 			questScreen.openContextMenu(contextMenu);
 			return true;
@@ -529,8 +502,8 @@ public class QuestPanel extends Panel {
 	}
 
 	private void showImageCreationScreen(double qx, double qy) {
-		ImageConfig imageConfig = new ImageConfig();
-		new SelectImagePreScreen(imageConfig, accepted -> {
+		ImageResourceConfig imageConfig = new ImageResourceConfig();
+		new SelectImageResourceScreen(imageConfig, accepted -> {
 			if (accepted) {
 				playClickSound();
 				ChapterImage image = new ChapterImage(questScreen.selectedChapter)
@@ -615,7 +588,7 @@ public class QuestPanel extends Panel {
 	}
 
 	private static class PasteQuestMenuItem extends TooltipContextMenuItem {
-		public PasteQuestMenuItem(Quest quest, Component title, Icon icon, @Nullable Runnable callback) {
+		public PasteQuestMenuItem(Quest quest, Component title, Icon icon, @Nullable Consumer<Button> callback) {
 			super(title, icon, callback,
 					Component.literal("\"").append(quest.getTitle()).append("\""),
 					Component.literal(QuestObjectBase.getCodeString(quest.id)).withStyle(ChatFormatting.DARK_GRAY)

@@ -29,7 +29,6 @@ dependencies {
 
 	modApi("dev.ftb.mods:ftb-library-forge:${rootProject.ftb_library_version}") { transitive false }
 	modApi("dev.ftb.mods:ftb-teams-forge:${rootProject.ftb_teams_version}") { transitive false }
-	modApi "dev.latvian.mods:item-filters-forge:${rootProject.itemfilters_version}"
 
 	common(project(path: ":common", configuration: "namedElements")) { transitive false }
 	shadowCommon(project(path: ":common", configuration: "transformProductionForge")) { transitive false }
@@ -41,7 +40,13 @@ processResources {
 	inputs.property "version", project.version
 
 	filesMatching("META-INF/mods.toml") {
-		expand "version": project.version
+		expand "version": project.version,
+				"archversion": project.architectury_version,
+				"forgeversion": project.forge_version,
+				"forgeloaderversion": project.forge_loader_version,
+				"mcversion": project.minecraft_version,
+				"ftblibraryversion": project.ftb_library_version,
+				"ftbteamsversion": project.ftb_teams_version
 	}
 }
 
@@ -95,7 +100,6 @@ if (ENV.CURSEFORGE_KEY) {
 				requiredDependency 'architectury-api'
 				requiredDependency 'ftb-library-forge'
 				requiredDependency 'ftb-teams-forge'
-				requiredDependency 'item-filters'
 				optionalDependency 'ftb-xmod-compat'
 			}
 			changelog = ENV.CHANGELOG  // expected to exist if ENV.CURSEFORGE_KEY does

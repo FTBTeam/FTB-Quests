@@ -1,5 +1,8 @@
 package dev.ftb.mods.ftbquests.client.gui;
 
+import dev.ftb.mods.ftblibrary.config.ConfigGroup;
+import dev.ftb.mods.ftblibrary.config.ui.EditConfigScreen;
+import dev.ftb.mods.ftblibrary.icon.Icon;
 import dev.ftb.mods.ftblibrary.ui.Panel;
 import dev.ftb.mods.ftblibrary.ui.Theme;
 import dev.ftb.mods.ftblibrary.ui.Widget;
@@ -25,7 +28,7 @@ public class ImageComponentWidget extends Widget {
 		this.index = index;
 
 		mutableComponent = MutableComponent.create(this.component);
-		setSize(this.component.width, this.component.height);
+		setSize(this.component.getWidth(), this.component.getHeight());
 	}
 
 	public void addMouseOverText(TooltipList list) {
@@ -35,7 +38,7 @@ public class ImageComponentWidget extends Widget {
 	}
 
 	public void draw(GuiGraphics graphics, Theme theme, int x, int y, int w, int h) {
-		component.image.draw(graphics, x, y, w, h);
+		component.getImage().draw(graphics, x, y, w, h);
 	}
 
 	public ImageComponent getComponent() {
@@ -45,7 +48,7 @@ public class ImageComponentWidget extends Widget {
 	@Override
 	public boolean mouseDoubleClicked(MouseButton button) {
 		if (isMouseOver() && viewQuestPanel.canEdit()) {
-			viewQuestPanel.editDescLine(index, false, component);
+			viewQuestPanel.editDescLine(this, index, false, component);
 			return true;
 		}
 
@@ -55,7 +58,7 @@ public class ImageComponentWidget extends Widget {
 	@Override
 	public boolean mousePressed(MouseButton button) {
 		if (isMouseOver() && viewQuestPanel.canEdit() && button.isRight()) {
-			viewQuestPanel.editDescLine(index, true, component);
+			viewQuestPanel.editDescLine(this, index, true, component);
 			return true;
 		}
 

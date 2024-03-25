@@ -79,7 +79,7 @@ public class OtherButtonsPanelTop extends OtherButtonsPanel {
 
 	private static class KeyReferenceButton extends TabButton {
 		public KeyReferenceButton(Panel panel) {
-			super(panel, Component.translatable("ftbquests.gui.key_reference"), Icons.INFO_GRAY);
+			super(panel, Component.translatable("ftblibrary.gui.key_reference"), Icons.INFO_GRAY);
 		}
 
 		@Override
@@ -87,9 +87,9 @@ public class OtherButtonsPanelTop extends OtherButtonsPanel {
 			playClickSound();
 
 			if (ClientQuestFile.INSTANCE.canEdit()) {
-				new KeyReferenceScreen("ftbquests.gui.key_reference.player", "ftbquests.gui.key_reference.editor").openGui();
+				new QuestKeyReferenceScreen("ftbquests.gui.key_reference.player", "ftbquests.gui.key_reference.editor").openGui();
 			} else {
-				new KeyReferenceScreen("ftbquests.gui.key_reference.player").openGui();
+				new QuestKeyReferenceScreen("ftbquests.gui.key_reference.player").openGui();
 			}
 		}
 	}

@@ -3,7 +3,7 @@ package dev.ftb.mods.ftbquests.forge;
 import dev.architectury.platform.forge.EventBuses;
 import dev.ftb.mods.ftblibrary.icon.Icon;
 import dev.ftb.mods.ftbquests.FTBQuests;
-import dev.ftb.mods.ftbquests.FTBQuestsTags;
+import dev.ftb.mods.ftbquests.api.FTBQuestsTags;
 import dev.ftb.mods.ftbquests.api.FTBQuestsAPI;
 import dev.ftb.mods.ftbquests.command.ChangeProgressArgument;
 import dev.ftb.mods.ftbquests.command.QuestObjectArgument;
@@ -25,7 +25,6 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.GameRules;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.common.util.FakePlayer;
 import net.minecraftforge.event.entity.living.LivingDropsEvent;
 import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.fml.DistExecutor;
@@ -82,7 +81,8 @@ public class FTBQuestsForge {
 			return;
 		}
 
-		if (player instanceof FakePlayer || player.level().getGameRules().getBoolean(GameRules.RULE_KEEPINVENTORY)) {
+		// FakePlayers no longer exist in forge? Cool, moving on. There used to be a player instanceof FakePlayer check here.
+		if (player.level().getGameRules().getBoolean(GameRules.RULE_KEEPINVENTORY)) {
 			return;
 		}
 

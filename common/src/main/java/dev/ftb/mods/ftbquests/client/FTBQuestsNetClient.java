@@ -168,6 +168,7 @@ public class FTBQuestsNetClient {
 
 	public static void syncEditingMode(UUID teamId, boolean editingMode) {
 		if (ClientQuestFile.INSTANCE.getOrCreateTeamData(teamId).setCanEdit(Minecraft.getInstance().player, editingMode)) {
+			setEditorPermission(editingMode);
 			ClientQuestFile.INSTANCE.refreshGui();
 		}
 	}
@@ -220,30 +221,14 @@ public class FTBQuestsNetClient {
 		TeamData teamData = ClientQuestFile.INSTANCE.getOrCreateTeamData(teamId);
 		teamData.setStarted(id, time);
 
-		QuestScreen gui = ClientUtils.getCurrentGuiAs(QuestScreen.class);
-
-		if (gui != null) {
-			gui.refreshChapterPanel();
-
-			if (gui.viewQuestPanel != null) {
-				gui.viewQuestPanel.refreshWidgets();
-			}
-		}
+		refreshQuestScreenIfOpen();
 	}
 
 	public static void objectCompleted(UUID teamId, long id, @Nullable Date time) {
 		TeamData teamData = ClientQuestFile.INSTANCE.getOrCreateTeamData(teamId);
 		teamData.setCompleted(id, time);
 
-		QuestScreen gui = ClientUtils.getCurrentGuiAs(QuestScreen.class);
-
-		if (gui != null) {
-			gui.refreshChapterPanel();
-
-			if (gui.viewQuestPanel != null) {
-				gui.viewQuestPanel.refreshWidgets();
-			}
-		}
+		refreshQuestScreenIfOpen();
 
 		FTBQuests.getRecipeModHelper().refreshRecipes(ClientQuestFile.INSTANCE.get(id));
 	}
@@ -256,23 +241,20 @@ public class FTBQuestsNetClient {
 
 	public static void resetReward(UUID teamId, UUID player, long rewardId) {
 		Reward reward = ClientQuestFile.INSTANCE.getReward(rewardId);
+        if (reward != null) {
+            TeamData teamData = ClientQuestFile.INSTANCE.getOrCreateTeamData(teamId);
 
-		if (reward == null) {
-			return;
-		}
+            if (teamData.resetReward(player, reward)) {
+                refreshQuestScreenIfOpen();
+            }
+        }
+    }
 
-		TeamData teamData = ClientQuestFile.INSTANCE.getOrCreateTeamData(teamId);
-
-		if (teamData.resetReward(player, reward)) {
-			QuestScreen gui = ClientUtils.getCurrentGuiAs(QuestScreen.class);
-
-			if (gui != null) {
-				gui.refreshChapterPanel();
-
-				if (gui.viewQuestPanel != null) {
-					gui.viewQuestPanel.refreshWidgets();
-				}
-			}
+	private static void refreshQuestScreenIfOpen() {
+		QuestScreen gui = ClientUtils.getCurrentGuiAs(QuestScreen.class);
+		if (gui != null) {
+			gui.refreshChapterPanel();
+			gui.refreshViewQuestPanel();
 		}
 	}
 

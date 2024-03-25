@@ -6,9 +6,11 @@ import dev.ftb.mods.ftblibrary.icon.Icon;
 import dev.ftb.mods.ftblibrary.icon.IconAnimation;
 import dev.ftb.mods.ftblibrary.math.Bits;
 import dev.ftb.mods.ftblibrary.snbt.SNBTCompoundTag;
+import dev.ftb.mods.ftblibrary.ui.Widget;
 import dev.ftb.mods.ftblibrary.ui.input.MouseButton;
 import dev.ftb.mods.ftblibrary.util.client.ClientUtils;
 import dev.ftb.mods.ftbquests.FTBQuests;
+import dev.ftb.mods.ftbquests.client.FTBQuestsClient;
 import dev.ftb.mods.ftbquests.client.gui.MultilineTextEditorScreen;
 import dev.ftb.mods.ftbquests.client.gui.quests.QuestScreen;
 import dev.ftb.mods.ftbquests.events.ObjectCompletedEvent;
@@ -67,6 +69,7 @@ public final class Quest extends QuestObject implements Movable {
 	private boolean invisible;  // invisible to players (not the same as hidden!)
 	private int invisibleUntilTasks;  // invisible until at least X number of tasks have been completed
 	private Tristate requireSequentialTasks;
+	private double iconScale;
 
 	private Component cachedSubtitle = null;
 	private List<Component> cachedDescription = null;
@@ -106,6 +109,7 @@ public final class Quest extends QuestObject implements Movable {
 		progressionMode = ProgressionMode.DEFAULT;
 		dependantIDs = new HashSet<>();
 		requireSequentialTasks = Tristate.DEFAULT;
+		iconScale = 1d;
 	}
 
 	@Override
@@ -200,6 +204,10 @@ public final class Quest extends QuestObject implements Movable {
 		return rawDescription;
 	}
 
+	public double getIconScale() {
+		return iconScale;
+	}
+
 	@Override
 	public boolean isOptionalForProgression() {
 		return isOptional();
@@ -267,6 +275,10 @@ public final class Quest extends QuestObject implements Movable {
 
 		if (size != 0D) {
 			nbt.putDouble("size", size);
+		}
+
+		if (iconScale != 1d) {
+			nbt.putDouble("icon_scale", iconScale);
 		}
 
 		if (optional) {
@@ -349,6 +361,7 @@ public final class Quest extends QuestObject implements Movable {
 		dependencyRequirement = DependencyRequirement.NAME_MAP.get(nbt.getString("dependency_requirement"));
 		hideTextUntilComplete = Tristate.read(nbt, "hide_text_until_complete");
 		size = nbt.getDouble("size");
+		iconScale = nbt.contains("icon_scale", Tag.TAG_DOUBLE) ? nbt.getDouble("icon_scale") : 1f;
 		optional = nbt.getBoolean("optional");
 		minWidth = nbt.getInt("min_width");
 		canRepeat = Tristate.read(nbt, "can_repeat");
@@ -382,6 +395,7 @@ public final class Quest extends QuestObject implements Movable {
 		flags = Bits.setFlag(flags, 0x4000, canRepeat == Tristate.TRUE);
 		flags = Bits.setFlag(flags, 0x8000, requireSequentialTasks != Tristate.DEFAULT);
 		flags = Bits.setFlag(flags, 0x10000, requireSequentialTasks == Tristate.TRUE);
+		flags = Bits.setFlag(flags, 0x20000, iconScale != 1f);
 		buffer.writeVarInt(flags);
 
 		hideUntilDepsVisible.write(buffer);
@@ -414,6 +428,10 @@ public final class Quest extends QuestObject implements Movable {
 
 		if (size != 0D) {
 			buffer.writeDouble(size);
+		}
+
+		if (iconScale != 1D) {
+			buffer.writeDouble(iconScale);
 		}
 
 		if (minWidth > 0) {
@@ -462,6 +480,7 @@ public final class Quest extends QuestObject implements Movable {
 		}
 
 		size = Bits.getFlag(flags, 0x04) ? buffer.readDouble() : 0D;
+		iconScale = Bits.getFlag(flags, 0x20000) ? buffer.readDouble() : 1D;
 		minWidth = Bits.getFlag(flags, 0x200) ? buffer.readVarInt() : 0;
 		ignoreRewardBlocking = Bits.getFlag(flags, 0x10);
 		hideDependentLines = Bits.getFlag(flags, 0x20);
@@ -632,7 +651,7 @@ public final class Quest extends QuestObject implements Movable {
 		StringConfig descType = new StringConfig();
 		config.add("description", new ListConfig<String, StringConfig>(descType) {
 			@Override
-			public void onClicked(MouseButton button, ConfigCallback callback) {
+			public void onClicked(Widget clicked, MouseButton button, ConfigCallback callback) {
 				new MultilineTextEditorScreen(Component.translatable("ftbquests.gui.edit_description"), this, callback).openGui();
 			}
 		}, rawDescription, (t) -> {
@@ -646,6 +665,7 @@ public final class Quest extends QuestObject implements Movable {
 		appearance.addDouble("x", x, v -> x = v, 0, Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY);
 		appearance.addDouble("y", y, v -> y = v, 0, Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY);
 		appearance.addInt("min_width", minWidth, v -> minWidth = v, 0, 0, 3000);
+		appearance.addDouble("icon_scale", iconScale, v -> iconScale = v, 1f, 0.1, 2.0);
 
 		ConfigGroup visibility = config.getOrCreateSubgroup("visibility");
 		visibility.addTristate("hide", hideUntilDepsVisible, v -> hideUntilDepsVisible = v);
@@ -874,6 +894,11 @@ public final class Quest extends QuestObject implements Movable {
 				chapter = newChapter;
 			}
 		}
+	}
+
+	@Override
+	public void copyToClipboard() {
+		FTBQuestsClient.copyToClipboard(this);
 	}
 
 	public boolean isProgressionIgnored() {
