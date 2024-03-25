@@ -22,9 +22,11 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 
 import java.util.*;
-import java.util.stream.Stream;
+import java.util.regex.Pattern;
 
 public final class Chapter extends QuestObject {
+	private static final Pattern HEX_STRING = Pattern.compile("^([a-fA-F0-9]+)?$");
+
 	public final BaseQuestFile file;
 
 	private ChapterGroup group;
@@ -32,7 +34,7 @@ public final class Chapter extends QuestObject {
 	private final List<Quest> quests;
 	private final List<QuestLink> questLinks;
 	private final List<String> rawSubtitle;
-	boolean alwaysInvisible;
+	private boolean alwaysInvisible;
 	private String defaultQuestShape;
 	private double defaultQuestSize;
 	private final List<ChapterImage> images;
@@ -44,6 +46,7 @@ public final class Chapter extends QuestObject {
 	private boolean defaultRepeatable;
 	private Tristate consumeItems;
 	private boolean requireSequentialTasks;
+	private String autoFocusId;
 
 	public Chapter(long id, BaseQuestFile file, ChapterGroup group) {
 		this(id, file, group, "");
@@ -69,6 +72,7 @@ public final class Chapter extends QuestObject {
 		defaultRepeatable = false;
 		consumeItems = Tristate.DEFAULT;
 		requireSequentialTasks = false;
+		autoFocusId = "";
 	}
 
 	public void setDefaultQuestShape(String defaultQuestShape) {
@@ -120,6 +124,10 @@ public final class Chapter extends QuestObject {
 
 	public List<QuestLink> getQuestLinks() {
 		return Collections.unmodifiableList(questLinks);
+	}
+
+	public List<ChapterImage> getImages() {
+		return Collections.unmodifiableList(images);
 	}
 
 	public void addQuest(Quest quest) {
@@ -181,6 +189,8 @@ public final class Chapter extends QuestObject {
 		if (hideQuestUntilDepsVisible) nbt.putBoolean("hide_quest_until_deps_visible", true);
 		if (defaultRepeatable) nbt.putBoolean("default_repeatable_quest", true);
 		if (requireSequentialTasks) nbt.putBoolean("require_sequential_tasks", true);
+
+		if (!autoFocusId.isEmpty()) nbt.putString("autofocus_id", autoFocusId);
 	}
 
 	@Override
@@ -225,6 +235,7 @@ public final class Chapter extends QuestObject {
 		hideQuestUntilDepsVisible = nbt.getBoolean("hide_quest_until_deps_visible");
 		defaultRepeatable = nbt.getBoolean("default_repeatable_quest");
 		requireSequentialTasks = nbt.getBoolean("require_sequential_tasks");
+		autoFocusId = nbt.getString("autofocus_id");
 	}
 
 	@Override
@@ -247,7 +258,10 @@ public final class Chapter extends QuestObject {
 		flags = Bits.setFlag(flags, 0x20, consumeItems != Tristate.DEFAULT);
 		flags = Bits.setFlag(flags, 0x40, consumeItems == Tristate.TRUE);
 		flags = Bits.setFlag(flags, 0x80, requireSequentialTasks);
+		flags = Bits.setFlag(flags, 0x100, !autoFocusId.isEmpty());
 		buffer.writeVarInt(flags);
+
+		if (!autoFocusId.isEmpty()) buffer.writeLong(QuestObjectBase.parseHexId(autoFocusId).orElse(0L));
 	}
 
 	@Override
@@ -273,6 +287,8 @@ public final class Chapter extends QuestObject {
 		defaultRepeatable = Bits.getFlag(flags, 0x10);
 		consumeItems = Bits.getFlag(flags, 0x20) ? Bits.getFlag(flags, 0x40) ? Tristate.TRUE : Tristate.FALSE : Tristate.DEFAULT;
 		requireSequentialTasks = Bits.getFlag(flags, 0x80);
+
+		autoFocusId = Bits.getFlag(flags, 0x100) ? QuestObjectBase.getCodeString(buffer.readLong()) : "";
 	}
 
 	public int getIndex() {
@@ -427,6 +443,7 @@ public final class Chapter extends QuestObject {
 		visibility.addBool("hide_quest_until_deps_visible", hideQuestUntilDepsVisible, v -> hideQuestUntilDepsVisible = v, false);
 
 		ConfigGroup misc = config.getOrCreateSubgroup("misc").setNameKey("ftbquests.quest.misc");
+		misc.addString("autofocus_id", autoFocusId, v -> autoFocusId = v, "", HEX_STRING);
 		misc.addEnum("progression_mode", progressionMode, v -> progressionMode = v, ProgressionMode.NAME_MAP);
 		misc.addBool("default_repeatable", defaultRepeatable, v -> defaultRepeatable = v, false);
 		misc.addTristate("consume_items", consumeItems, v -> consumeItems = v);
@@ -436,8 +453,8 @@ public final class Chapter extends QuestObject {
 	@Override
 	public boolean isVisible(TeamData data) {
 		return !alwaysInvisible
-				&& quests.isEmpty() || quests.stream().anyMatch(quest -> quest.isVisible(data))
-				&& questLinks.isEmpty() || questLinks.stream().anyMatch(link -> link.isVisible(data));
+				&& (quests.isEmpty() || quests.stream().anyMatch(quest -> quest.isVisible(data)))
+				&& (questLinks.isEmpty() || questLinks.stream().anyMatch(link -> link.isVisible(data)));
 	}
 
 	@Override
@@ -508,10 +525,6 @@ public final class Chapter extends QuestObject {
 		images.remove(image);
 	}
 
-	public Stream<ChapterImage> images() {
-		return images.stream();
-	}
-
 	public void addQuestLink(QuestLink link) {
 		questLinks.add(link);
 	}
@@ -534,5 +547,24 @@ public final class Chapter extends QuestObject {
 
 	public boolean hasAnyVisibleChildren() {
 		return !quests.isEmpty() || !questLinks.isEmpty();
+	}
+
+	public Optional<Movable> getAutofocus() {
+		if (autoFocusId != null && !autoFocusId.isEmpty()) {
+			return QuestObjectBase.parseHexId(autoFocusId)
+					.flatMap(id -> file.get(id) instanceof Movable m && m.getChapter() == this ?
+							Optional.of(m) :
+							Optional.empty()
+					);
+		}
+		return Optional.empty();
+	}
+
+	public void setAutofocus(long id) {
+		autoFocusId = id == 0L ? "" : QuestObjectBase.getCodeString(id);
+	}
+
+	public boolean isAutofocus(long id) {
+		return id == getAutofocus().map(Movable::getMovableID).orElse(0L);
 	}
 }

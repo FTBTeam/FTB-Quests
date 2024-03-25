@@ -32,9 +32,9 @@ public class AddRewardButton extends Button {
 		List<ContextMenuItem> contextMenu = new ArrayList<>();
 
 		for (RewardType type : RewardTypes.TYPES.values()) {
-			contextMenu.add(new ContextMenuItem(type.getDisplayName(), type.getIconSupplier(), () -> {
+			contextMenu.add(new ContextMenuItem(type.getDisplayName(), type.getIconSupplier(), b -> {
 				playClickSound();
-				type.getGuiProvider().openCreationGui(this, quest, reward -> {
+				type.getGuiProvider().openCreationGui(parent, quest, reward -> {
 					CompoundTag extra = new CompoundTag();
 					extra.putString("type", type.getTypeForNBT());
 					new CreateObjectMessage(reward, extra).sendToServer();

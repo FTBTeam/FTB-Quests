@@ -1,6 +1,6 @@
 package dev.ftb.mods.ftbquests.quest;
 
-import com.mojang.util.UUIDTypeAdapter;
+import com.mojang.util.UndashedUuid;
 import dev.ftb.mods.ftblibrary.snbt.SNBT;
 import dev.ftb.mods.ftblibrary.snbt.SNBTCompoundTag;
 import dev.ftb.mods.ftbquests.FTBQuests;
@@ -206,7 +206,7 @@ public class TeamData {
 	}
 
 	public Optional<Date> getRewardClaimTime(UUID player, Reward reward) {
-		QuestKey key = QuestKey.of(reward.isTeamReward() ? Util.NIL_UUID : player, reward.id);
+		QuestKey key = QuestKey.forReward(player, reward);
 		long t = claimedRewards.getLong(key);
 		return t == 0L ? Optional.empty() : Optional.of(new Date(t));
 	}
@@ -244,7 +244,7 @@ public class TeamData {
 			unclaimedRewardsCache.defaultReturnValue(BOOL_UNKNOWN);
 		}
 
-		QuestKey key = QuestKey.of(player, object.id);
+		QuestKey key = QuestKey.create(player, object.id);
 		byte b = unclaimedRewardsCache.getByte(key);
 
 		if (b == BOOL_UNKNOWN) {
@@ -260,7 +260,7 @@ public class TeamData {
 			return false;
 		}
 
-		QuestKey key = QuestKey.of(reward.isTeamReward() ? Util.NIL_UUID : player, reward.id);
+		QuestKey key = QuestKey.forReward(player, reward);
 
 		if (!claimedRewards.containsKey(key)) {
 			claimedRewards.put(key, date);
@@ -287,7 +287,7 @@ public class TeamData {
 	}
 
 	public boolean resetReward(UUID player, Reward reward) {
-		if (!locked && claimedRewards.removeLong(QuestKey.of(reward.isTeamReward() ? Util.NIL_UUID : player, reward.id)) != 0L) {
+		if (!locked && claimedRewards.removeLong(QuestKey.forReward(player, reward)) != 0L) {
 			clearCachedProgress();
 			markDirty();
 
@@ -309,7 +309,7 @@ public class TeamData {
 	public SNBTCompoundTag serializeNBT() {
 		SNBTCompoundTag nbt = new SNBTCompoundTag();
 		nbt.putInt("version", VERSION);
-		nbt.putString("uuid", UUIDTypeAdapter.fromUUID(teamId));
+		nbt.putString("uuid", UndashedUuid.toString(teamId));
 		nbt.putString("name", name);
 		nbt.putBoolean("lock", locked);
 		nbt.putBoolean("rewards_blocked", rewardsBlocked);
@@ -345,7 +345,7 @@ public class TeamData {
 		CompoundTag ppdTag = new CompoundTag();
 		perPlayerData.forEach((id, ppd) -> {
 			if (!ppd.hasDefaultValues()) {
-				ppdTag.put(UUIDTypeAdapter.fromUUID(id), ppd.writeNBT());
+				ppdTag.put(UndashedUuid.toString(id), ppd.writeNBT());
 			}
 		});
 		nbt.put("player_data", ppdTag);
@@ -370,7 +370,7 @@ public class TeamData {
 
 		CompoundTag claimedRewardsNBT = nbt.getCompound("claimed_rewards");
 		for (String s : claimedRewardsNBT.getAllKeys()) {
-			claimedRewards.put(QuestKey.of(s), claimedRewardsNBT.getLong(s));
+			claimedRewards.put(QuestKey.fromString(s), claimedRewardsNBT.getLong(s));
 		}
 
 		CompoundTag taskProgressNBT = nbt.getCompound("task_progress");
@@ -391,7 +391,7 @@ public class TeamData {
 		CompoundTag ppdTag = nbt.getCompound("player_data");
 		for (String key : ppdTag.getAllKeys()) {
 			try {
-				UUID id = UUIDTypeAdapter.fromString(key);
+				UUID id = UndashedUuid.fromString(key);
 				perPlayerData.put(id, PerPlayerData.fromNBT(ppdTag.getCompound(key), file));
 			} catch (IllegalArgumentException e) {
 				FTBQuests.LOGGER.error("ignoring invalid player ID {} while loading per-player data for team {}", key, teamId);
@@ -430,7 +430,7 @@ public class TeamData {
 		if (self) {
 			buffer.writeVarInt(claimedRewards.size());
 			for (Object2LongMap.Entry<QuestKey> entry : claimedRewards.object2LongEntrySet()) {
-				entry.getKey().write(buffer);
+				entry.getKey().toNetwork(buffer);
 				buffer.writeVarLong(now - entry.getLongValue());
 			}
 
@@ -475,7 +475,7 @@ public class TeamData {
 		if (self) {
 			int claimedRewardCount = buffer.readVarInt();
 			for (int i = 0; i < claimedRewardCount; i++) {
-				QuestKey key = QuestKey.of(buffer);
+				QuestKey key = QuestKey.fromNetwork(buffer);
 				claimedRewards.put(key, now - buffer.readVarLong());
 			}
 
@@ -634,7 +634,7 @@ public class TeamData {
 		Collection<ServerPlayer> onlineMembers = getOnlineMembers();
 		Collection<ServerPlayer> notifiedPlayers;
 
-		if (!task.getQuest().getChapter().alwaysInvisible && QuestObjectBase.shouldSendNotifications()) {
+		if (!task.getQuest().getChapter().isAlwaysInvisible() && QuestObjectBase.shouldSendNotifications()) {
 			notifiedPlayers = onlineMembers;
 		} else {
 			notifiedPlayers = List.of();
@@ -678,6 +678,7 @@ public class TeamData {
 	}
 
 	public void mergeData(TeamData from) {
+		// used when joining an existing party team
 		from.taskProgress.forEach((id, data) -> taskProgress.mergeLong(id, data, Long::max));
 
 		from.started.forEach((id, data) -> started.mergeLong(id, data, (oldVal, newVal) -> oldVal));
@@ -685,6 +686,15 @@ public class TeamData {
 		from.claimedRewards.forEach((id, data) -> claimedRewards.mergeLong(id, data, (oldVal, newVal) -> oldVal));
 
 		from.perPlayerData.forEach((id, data) -> perPlayerData.merge(id, data, (oldVal, newVal) -> oldVal));
+	}
+
+	public void mergeClaimedRewards(TeamData from) {
+		// used when leaving a party team - copy claimed-reward data from to player team
+		from.claimedRewards.forEach((questKey, data) -> {
+			if (questKey.uuid().equals(teamId)) {
+				claimedRewards.put(questKey, data.longValue());
+			}
+		});
 	}
 
 	public void copyData(TeamData from) {

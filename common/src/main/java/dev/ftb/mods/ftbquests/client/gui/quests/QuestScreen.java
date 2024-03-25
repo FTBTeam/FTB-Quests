@@ -1,5 +1,6 @@
 package dev.ftb.mods.ftbquests.client.gui.quests;
 
+import com.mojang.datafixers.util.Pair;
 import dev.ftb.mods.ftblibrary.config.ConfigGroup;
 import dev.ftb.mods.ftblibrary.config.ConfigValue;
 import dev.ftb.mods.ftblibrary.config.ConfigWithVariants;
@@ -17,10 +18,7 @@ import dev.ftb.mods.ftbquests.client.FTBQuestsClient;
 import dev.ftb.mods.ftbquests.client.gui.CustomToast;
 import dev.ftb.mods.ftbquests.client.gui.FTBQuestsTheme;
 import dev.ftb.mods.ftbquests.client.gui.SelectQuestObjectScreen;
-import dev.ftb.mods.ftbquests.net.ChangeProgressMessage;
-import dev.ftb.mods.ftbquests.net.CopyQuestMessage;
-import dev.ftb.mods.ftbquests.net.CreateObjectMessage;
-import dev.ftb.mods.ftbquests.net.EditObjectMessage;
+import dev.ftb.mods.ftbquests.net.*;
 import dev.ftb.mods.ftbquests.quest.*;
 import dev.ftb.mods.ftbquests.quest.reward.RandomReward;
 import dev.ftb.mods.ftbquests.quest.reward.Reward;
@@ -31,7 +29,6 @@ import dev.ftb.mods.ftbquests.util.ConfigQuestObject;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.client.gui.components.toasts.SystemToast;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.renderer.Rect2i;
 import net.minecraft.nbt.CompoundTag;
@@ -118,7 +115,6 @@ public class QuestScreen extends BaseScreen {
 		add(expandChaptersButton);
 		add(otherButtonsBottomPanel);
 		add(otherButtonsTopPanel);
-		add(viewQuestPanel);
 	}
 
 	@Override
@@ -137,7 +133,7 @@ public class QuestScreen extends BaseScreen {
 
 	@Override
 	public void onClosed() {
-		file.setPersistedScreenInfo(new PersistedData(this));
+		file.setPersistedScreenInfo(getPersistedScreenData());
 		super.onClosed();
 	}
 
@@ -150,8 +146,21 @@ public class QuestScreen extends BaseScreen {
 		}
 	}
 
+	public void scrollTo(Movable movable) {
+		questPanel.scrollTo(movable.getX(), movable.getY());
+	}
+
 	public void viewQuest(Quest quest) {
-		viewQuestPanel.setViewedQuest(quest);
+		Quest current = viewQuestPanel.getViewedQuest();
+		if (current != quest) {
+			viewQuestPanel.setViewedQuest(quest);
+			if (current == null) {
+				pushModalPanel(viewQuestPanel);
+			} else if (quest == null) {
+				closeModalPanel(viewQuestPanel);
+			}
+			viewQuestPanel.updateMouseOver(getMouseX(), getMouseY());
+		}
 	}
 
 	@Override
@@ -164,13 +173,11 @@ public class QuestScreen extends BaseScreen {
 	}
 
 	public void closeQuest() {
-		if (viewQuestPanel.setViewedQuest(null)) {
-			viewQuestPanel.hidePanel = false;
-		}
+		viewQuest(null);
 	}
 
 	public void toggleSelected(Movable movable) {
-		viewQuestPanel.setViewedQuest(null);
+		viewQuest(null);
 
 		if (selectedObjects.contains(movable)) {
 			selectedObjects.remove(movable);
@@ -194,27 +201,27 @@ public class QuestScreen extends BaseScreen {
 
 		contextMenu.add(new ContextMenuItem(Component.translatable("selectServer.edit"),
 				ThemeProperties.EDIT_ICON.get(),
-				() -> object.onEditButtonClicked(gui))
+				b -> object.onEditButtonClicked(gui))
 		);
 
 		if (object instanceof QuestLink link) {
 			link.getQuest().ifPresent(quest -> contextMenu.add(new ContextMenuItem(Component.translatable("ftbquests.gui.edit_linked_quest"),
 					ThemeProperties.EDIT_ICON.get(),
-					() -> quest.onEditButtonClicked(gui))
+					b -> quest.onEditButtonClicked(gui))
 			));
 		}
 
 		if (!subGroup.getValues().isEmpty()) {
 			contextMenu.add(new ContextMenuItem(Component.translatable("ftbquests.gui.copy_id.quick_properties"),
 					Icons.SETTINGS,
-					() -> openPropertiesSubMenu(object, subGroup))
+					b -> openPropertiesSubMenu(object, subGroup))
 			);
 		}
 
 		if (object instanceof RandomReward rr && !QuestObjectBase.isNull(rr.getTable())) {
 			contextMenu.add(new ContextMenuItem(Component.translatable("ftbquests.reward_table.edit"),
 					ThemeProperties.EDIT_ICON.get(),
-					() -> rr.getTable().onEditButtonClicked(gui))
+					b -> rr.getTable().onEditButtonClicked(gui))
 			);
 		}
 
@@ -223,7 +230,7 @@ public class QuestScreen extends BaseScreen {
 		if (delObject != null) {
 			ContextMenuItem delete = new ContextMenuItem(Component.translatable("selectServer.delete"),
 					ThemeProperties.DELETE_ICON.get(),
-					() -> ClientQuestFile.INSTANCE.deleteObject(delId));
+					b -> ClientQuestFile.INSTANCE.deleteObject(delId));
 			if (!isShiftKeyDown()) {
 				delete.setYesNoText(Component.translatable("delete_item", delObject.getTitle()));
 			}
@@ -232,12 +239,12 @@ public class QuestScreen extends BaseScreen {
 
 		contextMenu.add(new ContextMenuItem(Component.translatable("ftbquests.gui.reset_progress"),
 				ThemeProperties.RELOAD_ICON.get(),
-				() -> ChangeProgressMessage.sendToServer(file.selfTeamData, object, progressChange -> progressChange.setReset(true))
+				b -> ChangeProgressMessage.sendToServer(file.selfTeamData, object, progressChange -> progressChange.setReset(true))
 		).setYesNoText(Component.translatable("ftbquests.gui.reset_progress_q")));
 
 		contextMenu.add(new ContextMenuItem(Component.translatable("ftbquests.gui.complete_instantly"),
 				ThemeProperties.CHECK_ICON.get(),
-				() -> ChangeProgressMessage.sendToServer(file.selfTeamData, object, progressChange -> progressChange.setReset(false))
+				b -> ChangeProgressMessage.sendToServer(file.selfTeamData, object, progressChange -> progressChange.setReset(false))
 		).setYesNoText(Component.translatable("ftbquests.gui.complete_instantly_q")));
 
 		Component[] tooltip = object instanceof Quest ?
@@ -248,11 +255,27 @@ public class QuestScreen extends BaseScreen {
 				new Component[] {
 						Component.literal(QuestObjectBase.getCodeString(object))
 				};
+		if (selectedChapter != null) {
+			if (selectedChapter.isAutofocus(object.id)) {
+				contextMenu.add(new ContextMenuItem(Component.translatable("ftbquest.gui.clear_autofocused"),
+						Icons.MARKER,
+						b -> setAutofocusedId(0L)));
+			} else if (object instanceof Quest || object instanceof QuestLink) {
+				contextMenu.add(new ContextMenuItem(Component.translatable("ftbquest.gui.set_autofocused"),
+						Icons.MARKER,
+						b -> setAutofocusedId(object.id)));
+			}
+		}
 		contextMenu.add(new TooltipContextMenuItem(Component.translatable("ftbquests.gui.copy_id"),
 				ThemeProperties.WIKI_ICON.get(),
-				() -> setClipboardString(object.getCodeString()),
+				b -> setClipboardString(object.getCodeString()),
 				tooltip)
 		);
+	}
+
+	private void setAutofocusedId(long id) {
+		selectedChapter.setAutofocus(id);
+		new EditObjectMessage(selectedChapter).sendToServer();
 	}
 
 	private List<ContextMenuItem> scanForConfigEntries(List<ContextMenuItem> res, QuestObjectBase object, ConfigGroup g) {
@@ -270,8 +293,8 @@ public class QuestScreen extends BaseScreen {
 					}
 
 					@Override
-					public void onClicked(Panel panel, MouseButton button) {
-						value.onClicked(button, accepted -> {
+					public void onClicked(Button button, Panel panel, MouseButton mouseButton) {
+						value.onClicked(button, mouseButton, accepted -> {
 							if (accepted) {
 								value.applyValue();
 								new EditObjectMessage(object).sendToServer();
@@ -303,7 +326,8 @@ public class QuestScreen extends BaseScreen {
 	}
 
 	public static void displayError(Component error) {
-		Minecraft.getInstance().getToasts().addToast(new SystemToast(SystemToast.SystemToastIds.TUTORIAL_HINT, Component.translatable("ftbquests.gui.error"), error));
+//		Minecraft.getInstance().getToasts().addToast(new SystemToast(SystemToast.SystemToastIds.TUTORIAL_HINT, Component.translatable("ftbquests.gui.error"), error));
+		Minecraft.getInstance().getToasts().addToast(new CustomToast(Component.translatable("ftbquests.gui.error"), Icons.BARRIER, error));
 	}
 
 	private boolean moveSelectedQuests(double x, double y) {
@@ -316,51 +340,74 @@ public class QuestScreen extends BaseScreen {
 		return true;
 	}
 
-	private boolean copySelectedQuests() {
-		Collection<Quest> quests = getSelectedQuests();
+	private boolean copyObjectsToClipboard() {
+		Movable toCopy = null;
 
-		if (quests.size() > 1) {
-			Minecraft.getInstance().getToasts().addToast(new CustomToast(Component.translatable("ftbquests.gui.error"), Icons.BARRIER, Component.translatable("ftbquests.quest.cannot_copy_many")));
-			return false;
-		}
-		for (Quest q : quests) {
-			setClipboardString(q.getCodeString());
-			Minecraft.getInstance().getToasts().addToast(new CustomToast(Component.translatable("ftbquests.quest.copied"), Icons.INFO, Component.literal(q.getTitle().getString())));
+		if (selectedObjects.size() > 1) {
+			displayError(Component.translatable("ftbquests.quest.cannot_copy_many"));
+		} else if (selectedObjects.isEmpty()) {
+			// no objects selected: copy hovered object if there is one
+			toCopy = questPanel.getWidgets().stream()
+					.filter(w -> w instanceof QuestPositionableButton && w.isMouseOver())
+					.map(w -> ((QuestPositionableButton) w).moveAndDeleteFocus())
+					.findFirst()
+					.orElse(null);
+		} else {
+			// one object selected
+			toCopy = selectedObjects.get(0);
 		}
 
-		return true;
+		if (toCopy != null) {
+			toCopy.copyToClipboard();
+			Minecraft.getInstance().getToasts().addToast(new CustomToast(Component.translatable("ftbquests.quest.copied"),
+					Icons.INFO, Component.literal(toCopy.getTitle().getString())));
+			return true;
+		}
+
+		return false;
+    }
+
+	private boolean pasteSelectedQuest(boolean withDeps) {
+		if (ChapterImage.isImageInClipboard()) {
+			return pasteSelectedImage();
+		} else {
+			return QuestObjectBase.parseHexId(getClipboardString()).map(id -> {
+				Quest quest = file.getQuest(id);
+				if (quest == null) return false;
+				Pair<Double, Double> qxy = getSnappedXY();
+				new CopyQuestMessage(quest, selectedChapter, qxy.getFirst(), qxy.getSecond(), withDeps).sendToServer();
+				return true;
+			}).orElse(false);
+		}
 	}
 
-	private boolean pasteSelectedQuests(boolean withDeps) {
-		String clip = getClipboardString();
-		if (clip.isEmpty()) return false;
-
-		Quest quest = file.getQuest(Long.valueOf(clip, 16));
-		if (quest == null) return false;
-
-		double snap = 1D / file.getGridScale();
-		double qx = Mth.floor(questPanel.questX * snap + 0.5D) / snap;
-		double qy = Mth.floor(questPanel.questY * snap + 0.5D) / snap;
-
-		new CopyQuestMessage(quest, selectedChapter, qx, qy, withDeps).sendToServer();
-		return true;
+	private boolean pasteSelectedImage() {
+		return ChapterImageButton.getClipboardImage().map(clipImg -> {
+			Pair<Double,Double> qxy = getSnappedXY();
+			new CopyChapterImageMessage(clipImg, selectedChapter, qxy.getFirst(), qxy.getSecond()).sendToServer();
+			return true;
+		}).orElse(false);
 	}
 
 	private boolean pasteSelectedQuestLinks() {
 		String clip = getClipboardString();
 		if (clip.isEmpty()) return false;
 
-        long questId = Long.valueOf(clip, 16);
-		if (file.getQuest(Long.valueOf(clip, 16)) == null) return false;
+		return QuestObjectBase.parseHexId(clip).map(id -> {
+			if (file.getQuest(id) == null) return false;
+			Pair<Double,Double> qxy = getSnappedXY();
+			QuestLink link = new QuestLink(0L, selectedChapter, id);
+			link.setPosition(qxy.getFirst(), qxy.getSecond());
+			new CreateObjectMessage(link, new CompoundTag(), false).sendToServer();
+			return true;
+		}).orElse(false);
+	}
 
+	private Pair<Double,Double> getSnappedXY() {
 		double snap = 1D / file.getGridScale();
 		double qx = Mth.floor(questPanel.questX * snap + 0.5D) / snap;
 		double qy = Mth.floor(questPanel.questY * snap + 0.5D) / snap;
-
-		QuestLink link = new QuestLink(0L, selectedChapter, questId);
-		link.setPosition(qx, qy);
-		new CreateObjectMessage(link, new CompoundTag(), false).sendToServer();
-		return true;
+		return Pair.of(qx,qy);
 	}
 
 	void deleteSelectedObjects() {
@@ -379,17 +426,6 @@ public class QuestScreen extends BaseScreen {
 
 	@Override
 	public boolean keyPressed(Key key) {
-		if (key.esc()) {
-			// checking for open context menu first is important
-			if (getContextMenu().isPresent()) {
-				closeContextMenu();
-				return true;
-			} else if (isViewingQuest()) {
-				closeQuest();
-				return true;
-			}
-		}
-
 		if (super.keyPressed(key)) {
 			return true;
 		} else if (FTBQuestsClient.KEY_QUESTS.matches(key.keyCode, key.scanCode)) {
@@ -397,12 +433,14 @@ public class QuestScreen extends BaseScreen {
 			return true;
 		}
 
+		List<Chapter> visibleChapters = file.getVisibleChapters(file.selfTeamData);
+
 		if (key.is(GLFW.GLFW_KEY_TAB)) {
 			if (selectedChapter != null && file.getVisibleChapters(file.selfTeamData).size() > 1) {
-				List<Chapter> visibleChapters = file.getVisibleChapters(file.selfTeamData);
 
 				if (!visibleChapters.isEmpty()) {
 					selectChapter(visibleChapters.get(MathUtils.mod(visibleChapters.indexOf(selectedChapter) + (isShiftKeyDown() ? -1 : 1), visibleChapters.size())));
+					selectedChapter.getAutofocus().ifPresent(this::scrollTo);
 				}
 			}
 
@@ -432,8 +470,9 @@ public class QuestScreen extends BaseScreen {
 		if (key.keyCode >= GLFW.GLFW_KEY_1 && key.keyCode <= GLFW.GLFW_KEY_9) {
 			int i = key.keyCode - GLFW.GLFW_KEY_1;
 
-			if (i < file.getVisibleChapters(file.selfTeamData).size()) {
-				selectChapter(file.getVisibleChapters(file.selfTeamData).get(i));
+			if (i < visibleChapters.size()) {
+				selectChapter(visibleChapters.get(i));
+				selectedChapter.getAutofocus().ifPresent(this::scrollTo);
 			}
 
 			return true;
@@ -460,6 +499,7 @@ public class QuestScreen extends BaseScreen {
 					if (selectedChapter != null) {
 						selectedObjects.addAll(selectedChapter.getQuests());
 						selectedObjects.addAll(selectedChapter.getQuestLinks());
+						selectedObjects.addAll(selectedChapter.getImages());
 					}
 					return true;
 				}
@@ -480,13 +520,13 @@ public class QuestScreen extends BaseScreen {
 					return moveSelectedQuests(step, 0D);
 				}
 				case GLFW.GLFW_KEY_C -> {
-					return copySelectedQuests();
+					return copyObjectsToClipboard();
 				}
 				case GLFW.GLFW_KEY_V -> {
 					if (key.modifiers.alt()) {
 						return pasteSelectedQuestLinks();
 					} else {
-						return pasteSelectedQuests(!key.modifiers.shift());
+						return pasteSelectedQuest(!key.modifiers.shift());
 					}
 				}
 			}
@@ -497,31 +537,24 @@ public class QuestScreen extends BaseScreen {
 
 	private void openQuestSelectionGUI() {
 		ConfigQuestObject<QuestObject> c = new ConfigQuestObject<>(QuestObjectType.CHAPTER.or(QuestObjectType.QUEST).or(QuestObjectType.QUEST_LINK));
-		SelectQuestObjectScreen<?> gui = new SelectQuestObjectScreen<>(c, accepted -> {
+		new SelectQuestObjectScreen<>(c, accepted -> {
 			if (accepted) {
 				if (c.getValue() instanceof Chapter chapter) {
 					selectChapter(chapter);
 				} else if (c.getValue() instanceof Quest quest) {
 					zoom = 20;
 					selectChapter(quest.getChapter());
-					viewQuestPanel.hidePanel = false;
 					questPanel.scrollTo(quest.getX(), quest.getY());
 					viewQuest(quest);
 				} else if (c.getValue() instanceof QuestLink link) {
 					zoom = 20;
 					selectChapter(link.getChapter());
-					viewQuestPanel.hidePanel = false;
 					questPanel.scrollTo(link.getX(), link.getY());
 					link.getQuest().ifPresent(this::viewQuest);
 				}
 			}
-
 			QuestScreen.this.openGui();
-		});
-
-		gui.focus();
-		gui.setTitle(Component.translatable("gui.search_box"));
-		gui.openGui();
+		}).openGui();
 	}
 
 	@Override
@@ -537,6 +570,9 @@ public class QuestScreen extends BaseScreen {
 
 		if (selectedChapter == null) {
 			selectChapter(file.getFirstVisibleChapter(file.selfTeamData));
+			if (selectedChapter != null) {
+				selectedChapter.getAutofocus().ifPresent(this::scrollTo);
+			}
 		}
 
 		super.tick();
@@ -620,7 +656,7 @@ public class QuestScreen extends BaseScreen {
 		if (!Screen.hasControlDown()) selectedObjects.clear();
 
 		questPanel.getWidgets().forEach(w -> {
-			if (w instanceof QuestButton qb && rect.contains((int) (w.getX() - scrollX), (int) (w.getY() - scrollY))) {
+			if (w instanceof QuestPositionableButton qb && rect.contains((int) (w.getX() - scrollX), (int) (w.getY() - scrollY))) {
 				toggleSelected(qb.moveAndDeleteFocus());
 			}
 		});
@@ -648,7 +684,6 @@ public class QuestScreen extends BaseScreen {
 			selectChapter(chapter);
 		} else if (object instanceof Quest quest) {
 			selectChapter(quest.getChapter());
-			viewQuestPanel.hidePanel = false;
 			viewQuest(quest);
 			if (focus) {
 				questPanel.scrollTo(quest.getX() + 0.5D, quest.getY() + 0.5D);
@@ -656,7 +691,6 @@ public class QuestScreen extends BaseScreen {
 		} else if (object instanceof QuestLink link) {
 			link.getQuest().ifPresent(quest -> {
 				selectChapter(link.getChapter());
-				viewQuestPanel.hidePanel = false;
 				viewQuest(quest);
 				if (focus) {
 					questPanel.scrollTo(link.getX() + 0.5D, link.getY() + 0.5D);
@@ -664,7 +698,6 @@ public class QuestScreen extends BaseScreen {
 			});
 		} else if (object instanceof Task task) {
 			selectChapter(task.getQuest().getChapter());
-			viewQuestPanel.hidePanel = false;
 			viewQuest(task.getQuest());
 		}
 
@@ -688,13 +721,9 @@ public class QuestScreen extends BaseScreen {
 
 	@Override
 	public void addMouseOverText(TooltipList list) {
-		list.zOffset = 950;
-		list.zOffsetItemTooltip = 500;
+//		list.zOffset = 950;
+//		list.zOffsetItemTooltip = 500;
 		super.addMouseOverText(list);
-		//float hue = (float) ((System.currentTimeMillis() * 0.0001D) % 1D);
-		//int rgb = Color4I.hsb(hue, 0.8F, 1F).rgba();
-		//list.borderColorStart = rgb;
-		//list.borderColorEnd = rgb;
 	}
 
 	public void addInfoTooltip(TooltipList list, QuestObjectBase object) {
@@ -733,7 +762,7 @@ public class QuestScreen extends BaseScreen {
 	}
 
 	public PersistedData getPersistedScreenData() {
-		return new PersistedData(this);
+		return pendingPersistedData != null ? pendingPersistedData : new PersistedData(this);
 	}
 
 	private void restorePersistedScreenData(BaseQuestFile file, PersistedData persistedData) {
@@ -774,7 +803,7 @@ public class QuestScreen extends BaseScreen {
 			scrollX = questScreen.questPanel.centerQuestX;
 			scrollY = questScreen.questPanel.centerQuestY;
 			selectedChapter = questScreen.selectedChapter == null ? 0L : questScreen.selectedChapter.id;
-			selectedQuests = questScreen.selectedObjects.stream().map(Movable::getMovableID).toList();
+			selectedQuests = questScreen.selectedObjects.stream().map(Movable::getMovableID).filter(id -> id != 0).toList();
 			chaptersExpanded = questScreen.chapterPanel.expanded;
 		}
 	}

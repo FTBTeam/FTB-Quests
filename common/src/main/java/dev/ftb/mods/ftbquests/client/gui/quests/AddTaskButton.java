@@ -22,6 +22,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Consumer;
 
 public class AddTaskButton extends Button {
 	private final Quest quest;
@@ -38,9 +39,9 @@ public class AddTaskButton extends Button {
 		List<ContextMenuItem> contextMenu = new ArrayList<>();
 
 		for (TaskType type : TaskTypes.TYPES.values()) {
-			contextMenu.add(new ContextMenuItem(type.getDisplayName(), type.getIconSupplier(), () -> {
+			contextMenu.add(new ContextMenuItem(type.getDisplayName(), type.getIconSupplier(), b -> {
 				playClickSound();
-				type.getGuiProvider().openCreationGui(this, quest, task -> {
+				type.getGuiProvider().openCreationGui(this.parent, quest, task -> {
 					CompoundTag extra = new CompoundTag();
 					extra.putString("type", type.getTypeForNBT());
 					new CreateObjectMessage(task, extra).sendToServer();
@@ -50,14 +51,12 @@ public class AddTaskButton extends Button {
 
 		String clip = getClipboardString();
 		if (!clip.isEmpty()) {
-			try {
-				long taskId = Long.valueOf(clip, 16);
+			QuestObjectBase.parseHexId(clip).ifPresent(taskId -> {
 				if (FTBQuestsAPI.api().getQuestFile(true).get(taskId) instanceof Task task) {
 					contextMenu.add(ContextMenuItem.SEPARATOR);
-					contextMenu.add(new PasteTaskMenuItem(task, () -> copyAndCreateTask(task)));
+					contextMenu.add(new PasteTaskMenuItem(task, b -> copyAndCreateTask(task)));
 				}
-			} catch (NumberFormatException ignored) {
-			}
+			});
 		}
 
 		getGui().openContextMenu(contextMenu);
@@ -80,7 +79,7 @@ public class AddTaskButton extends Button {
 	}
 
 	public static class PasteTaskMenuItem extends TooltipContextMenuItem {
-		public PasteTaskMenuItem(Task task, @Nullable Runnable callback) {
+		public PasteTaskMenuItem(Task task, @Nullable Consumer<Button> callback) {
 			super(Component.translatable("ftbquests.gui.paste_task"), Icons.ADD, callback,
 					Component.literal("\"").append(task.getTitle()).append("\""),
 					Component.literal(QuestObjectBase.getCodeString(task.id)).withStyle(ChatFormatting.DARK_GRAY)

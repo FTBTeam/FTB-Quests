@@ -1,14 +1,10 @@
 package dev.ftb.mods.ftbquests.quest.reward;
 
-import dev.ftb.mods.ftblibrary.config.ConfigGroup;
-import dev.ftb.mods.ftblibrary.config.ui.EditConfigScreen;
 import dev.ftb.mods.ftblibrary.icon.Icon;
+import dev.ftb.mods.ftblibrary.ui.Panel;
 import dev.ftb.mods.ftbquests.api.FTBQuestsAPI;
-import dev.ftb.mods.ftbquests.client.gui.SelectQuestObjectScreen;
+import dev.ftb.mods.ftbquests.client.GuiProviders;
 import dev.ftb.mods.ftbquests.quest.Quest;
-import dev.ftb.mods.ftbquests.quest.QuestObjectType;
-import dev.ftb.mods.ftbquests.quest.loot.RewardTable;
-import dev.ftb.mods.ftbquests.util.ConfigQuestObject;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.network.chat.Component;
@@ -18,9 +14,6 @@ import org.jetbrains.annotations.Nullable;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
-/**
- * @author LatvianModder
- */
 public final class RewardType {
 	private final ResourceLocation typeId;
 	private final Provider provider;
@@ -36,32 +29,7 @@ public final class RewardType {
 		this.iconSupplier = iconSupplier;
 
 		displayName = null;
-		guiProvider = (gui, quest, callback) -> {
-			Reward reward = this.provider.create(0L, quest);
-
-			if (reward instanceof RandomReward randomReward) {
-				ConfigQuestObject<RewardTable> config = new ConfigQuestObject<>(QuestObjectType.REWARD_TABLE);
-				SelectQuestObjectScreen<?> s = new SelectQuestObjectScreen<>(config, accepted -> {
-					if (accepted) {
-						randomReward.setTable(config.getValue());
-						callback.accept(reward);
-					}
-					gui.run();
-				});
-				s.setTitle(Component.translatable("ftbquests.gui.select_reward_table"));
-				s.setHasSearchBox(true);
-				s.openGui();
-			} else {
-				ConfigGroup group = new ConfigGroup(FTBQuestsAPI.MOD_ID, accepted -> {
-					if (accepted) {
-						callback.accept(reward);
-					}
-					gui.run();
-				});
-				reward.fillConfigGroup(reward.createSubGroup(group));
-				new EditConfigScreen(group).openGui();
-			}
-		};
+		guiProvider = GuiProviders.defaultRewardGuiProvider(provider);
 	}
 
 	@Nullable
@@ -74,12 +42,8 @@ public final class RewardType {
 
 		RewardType type = RewardTypes.TYPES.get(new ResourceLocation(typeId));
 
-		if (type == null) {
-			return null;
-		}
-
-		return type.provider.create(id, quest);
-	}
+        return type == null ? null : type.provider.create(id, quest);
+    }
 
 	public ResourceLocation getTypeId() {
 		return typeId;
@@ -137,6 +101,6 @@ public final class RewardType {
 	@FunctionalInterface
 	public interface GuiProvider {
 		@Environment(EnvType.CLIENT)
-		void openCreationGui(Runnable gui, Quest quest, Consumer<Reward> callback);
+		void openCreationGui(Panel panel, Quest quest, Consumer<Reward> callback);
 	}
 }

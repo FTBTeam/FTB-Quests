@@ -51,5 +51,7 @@ public class FTBQuestsAPI {
 
     public interface API {
         BaseQuestFile getQuestFile(boolean isClient);
+
+        void registerFilterAdapter(ItemFilterAdapter adapter);
     }
 }

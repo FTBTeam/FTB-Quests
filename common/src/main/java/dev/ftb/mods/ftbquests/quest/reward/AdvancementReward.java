@@ -9,11 +9,11 @@ import dev.ftb.mods.ftbquests.quest.Quest;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.ChatFormatting;
-import net.minecraft.advancements.Advancement;
+import net.minecraft.advancements.AdvancementHolder;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.ComponentContents;
+import net.minecraft.network.chat.contents.PlainTextContents;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 
@@ -79,15 +79,15 @@ public class AdvancementReward extends Reward {
 
 	@Override
 	public void claim(ServerPlayer player, boolean notify) {
-		Advancement a = player.server.getAdvancements().getAdvancement(advancement);
+		AdvancementHolder advancementHolder = player.server.getAdvancements().get(advancement);
 
-		if (a != null) {
+		if (advancementHolder != null) {
 			if (criterion.isEmpty()) {
-				for (String s : a.getCriteria().keySet()) {
-					player.getAdvancements().award(a, s);
+				for (String s : advancementHolder.value().criteria().keySet()) {
+					player.getAdvancements().award(advancementHolder, s);
 				}
 			} else {
-				player.getAdvancements().award(a, criterion);
+				player.getAdvancements().award(advancementHolder, criterion);
 			}
 		}
 	}
@@ -97,7 +97,7 @@ public class AdvancementReward extends Reward {
 	public Component getAltTitle() {
 		KnownServerRegistries.AdvancementInfo info = KnownServerRegistries.client == null ? null : KnownServerRegistries.client.advancements.get(advancement);
 
-		if (info != null && info.name.getContents() != ComponentContents.EMPTY) {
+		if (info != null && info.name.getContents() != PlainTextContents.EMPTY) {
 			return Component.translatable("ftbquests.reward.ftbquests.advancement").append(": ").append(info.name.copy().withStyle(ChatFormatting.YELLOW));
 		}
 

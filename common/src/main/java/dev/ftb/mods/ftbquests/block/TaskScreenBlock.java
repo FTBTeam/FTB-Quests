@@ -1,5 +1,8 @@
 package dev.ftb.mods.ftbquests.block;
 
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.MapCodec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
 import dev.architectury.injectables.annotations.ExpectPlatform;
 import dev.ftb.mods.ftbquests.block.entity.ITaskScreen;
 import dev.ftb.mods.ftbquests.block.entity.TaskScreenAuxBlockEntity;
@@ -45,11 +48,19 @@ import java.util.List;
 import java.util.Objects;
 
 public class TaskScreenBlock extends BaseEntityBlock {
+    private static final MapCodec<TaskScreenBlock> CODEC = RecordCodecBuilder.mapCodec(instance ->
+            instance.group(propertiesCodec())
+                    .and(Codec.INT.fieldOf("size").forGetter(TaskScreenBlock::getSize))
+                    .apply(instance, TaskScreenBlock::new)
+    );
+
     public static final DirectionProperty FACING = HorizontalDirectionalBlock.FACING;
+    public static final Properties PROPS = Properties.of().mapColor(DyeColor.BLACK).strength(0.3f);
+
     private final int size;
 
-    protected TaskScreenBlock(int size) {
-        super(Properties.of().mapColor(DyeColor.BLACK).strength(0.3f));
+    protected TaskScreenBlock(Properties props, int size) {
+        super(props);
         this.size = size;
 
         registerDefaultState(getStateDefinition().any().setValue(FACING, Direction.NORTH));
@@ -80,6 +91,11 @@ public class TaskScreenBlock extends BaseEntityBlock {
     @ExpectPlatform
     public static BlockEntityType.BlockEntitySupplier<TaskScreenAuxBlockEntity> blockEntityAuxProvider() {
         throw new AssertionError();
+    }
+
+    @Override
+    protected MapCodec<? extends TaskScreenBlock> codec() {
+        return CODEC;
     }
 
     @Override
@@ -203,7 +219,7 @@ public class TaskScreenBlock extends BaseEntityBlock {
      * @return the bounding box containing all blocks of the multiblock
      */
     public static AABB getMultiblockBounds(BlockPos corePos, int size, Direction facing) {
-        if (size == 1) return new AABB(corePos, corePos);
+        if (size == 1) return new AABB(corePos);
 
         int size2 = size / 2;
         facing = facing.getCounterClockWise();
@@ -215,8 +231,10 @@ public class TaskScreenBlock extends BaseEntityBlock {
     }
 
     public static class Aux extends TaskScreenBlock {
-        protected Aux() {
-            super(0);
+        private static final MapCodec<Aux> CODEC = simpleCodec(Aux::new);
+
+        protected Aux(Properties props) {
+            super(props, 0);
         }
 
         @Override
@@ -224,5 +242,9 @@ public class TaskScreenBlock extends BaseEntityBlock {
             return blockEntityAuxProvider().create(blockPos, blockState);
         }
 
+        @Override
+        protected MapCodec<Aux> codec() {
+            return CODEC;
+        }
     }
 }

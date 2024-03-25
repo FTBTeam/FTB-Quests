@@ -27,13 +27,14 @@ import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.world.item.ItemStack;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 import java.util.function.Supplier;
 import java.util.regex.Pattern;
 
-public abstract class QuestObjectBase {
+public abstract class QuestObjectBase implements Comparable<QuestObjectBase> {
 	private static final Pattern TAG_PATTERN = Pattern.compile("^[a-z0-9_]*$");
 	private static Tristate sendNotifications = Tristate.DEFAULT;
 
@@ -97,6 +98,14 @@ public abstract class QuestObjectBase {
 			return Long.parseLong(id.charAt(0) == '#' ? id.substring(1) : id, 16);
 		} catch (Exception ex) {
 			return 0L;
+		}
+	}
+
+	public static Optional<Long> parseHexId(String id) {
+		try {
+			return Optional.of(Long.parseLong(id, 16));
+		} catch (NumberFormatException e) {
+			return Optional.empty();
 		}
 	}
 
@@ -366,5 +375,13 @@ public abstract class QuestObjectBase {
 		orig.writeData(tag);
 		copied.readData(tag);
 		return copied;
+	}
+
+	@Override
+	public int compareTo(@NotNull QuestObjectBase other) {
+		int typeCmp = Integer.compare(getObjectType().ordinal(), other.getObjectType().ordinal());
+		return typeCmp == 0 ?
+				getTitle().getString().toLowerCase().compareTo(other.getTitle().getString().toLowerCase()) :
+				typeCmp;
 	}
 }
