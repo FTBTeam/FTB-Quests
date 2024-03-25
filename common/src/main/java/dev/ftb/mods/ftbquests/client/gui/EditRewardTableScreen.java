@@ -135,7 +135,10 @@ public class EditRewardTableScreen extends AbstractButtonListScreen {
 		@Override
 		public void onClicked(MouseButton button) {
 			playClickSound();
-			ConfigGroup group = new ConfigGroup(FTBQuestsAPI.MOD_ID, accepted -> run()) {
+			ConfigGroup group = new ConfigGroup(FTBQuestsAPI.MOD_ID, accepted -> {
+				editedTable.clearCachedData();
+				run();
+			}) {
 				@Override
 				public Component getName() {
 					return editedTable.getTitle();
