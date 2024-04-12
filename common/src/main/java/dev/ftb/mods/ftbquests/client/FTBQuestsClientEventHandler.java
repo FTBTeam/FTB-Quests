@@ -293,17 +293,29 @@ public class FTBQuestsClientEventHandler {
 			for (FormattedCharSequence s : pinnedQuestText) {
 				width = Math.max(width, (int) mc.font.getSplitter().stringWidth(s));
 			}
+			width += 8;
+			int height = mc.font.lineHeight * pinnedQuestText.size() + 8;
 
 			float scale = ThemeProperties.PINNED_QUEST_SIZE.get(file).floatValue();
 
+			int insetX = FTBQuestsClientConfig.PINNED_QUESTS_INSET_X.get();
+			int insetY = FTBQuestsClientConfig.PINNED_QUESTS_INSET_Y.get();
+			var pos = FTBQuestsClientConfig.PINNED_QUESTS_POS.get().getPanelPos(
+					mc.getWindow().getGuiScaledWidth(), mc.getWindow().getGuiScaledHeight(),
+					(int) (width * scale), (int) (height * scale),
+					insetX, insetY
+			);
+
 			graphics.pose().pushPose();
-			graphics.pose().translate(mc.getWindow().getGuiScaledWidth() - width * scale - 8D, cy - pinnedQuestText.size() * 4.5D * scale, 100);
+			graphics.pose().translate(pos.x(), pos.y(), 100);
 			graphics.pose().scale(scale, scale, 1F);
 
-			Color4I.BLACK.withAlpha(100).draw(graphics, 0, 0, width + 8, pinnedQuestText.size() * 9 + 8);
+			GuiHelper.drawHollowRect(graphics, 0, 0, width, height, Color4I.BLACK.withAlpha(100), false);
+			Color4I.BLACK.withAlpha(100).draw(graphics, 0, 0, width, height);
 
+			graphics.pose().translate(4, 4, 0);
 			for (int i = 0; i < pinnedQuestText.size(); i++) {
-				graphics.drawString(mc.font, pinnedQuestText.get(i), 4, i * mc.font.lineHeight + 4, 0xFFFFFFFF);
+				graphics.drawString(mc.font, pinnedQuestText.get(i), 0, i * mc.font.lineHeight, 0xFFFFFFFF);
 			}
 
 			graphics.pose().popPose();
