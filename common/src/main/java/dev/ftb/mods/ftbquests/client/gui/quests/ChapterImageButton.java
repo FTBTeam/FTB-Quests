@@ -26,7 +26,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-public class ChapterImageButton extends Button implements QuestPositionableButton, Comparable<ChapterImageButton> {
+public class ChapterImageButton extends Button implements QuestPositionableButton {
 	private final QuestScreen questScreen;
 	private final ChapterImage chapterImage;
 
@@ -35,6 +35,7 @@ public class ChapterImageButton extends Button implements QuestPositionableButto
 		questScreen = (QuestScreen) panel.getGui();
 		setSize(20, 20);
 		chapterImage = i;
+		setDrawLayer(DrawLayer.BACKGROUND); // draw *before* connection lines & quest widgets
 	}
 
 	public static Optional<ChapterImage> getClipboardImage() {
@@ -178,8 +179,10 @@ public class ChapterImageButton extends Button implements QuestPositionableButto
 	}
 
 	@Override
-	public int compareTo(@NotNull ChapterImageButton o) {
-		return Integer.compare(chapterImage.getOrder(), o.chapterImage.getOrder());
+	public int compareTo(@NotNull Widget o) {
+		return o instanceof ChapterImageButton cb2 ?
+				Integer.compare(chapterImage.getOrder(), cb2.chapterImage.getOrder()) :
+				0;
 	}
 
 	@Override
