@@ -3,7 +3,10 @@ package dev.ftb.mods.ftbquests.client;
 import dev.ftb.mods.ftblibrary.config.ConfigGroup;
 import dev.ftb.mods.ftblibrary.config.ui.EditConfigScreen;
 import dev.ftb.mods.ftblibrary.snbt.config.BooleanValue;
+import dev.ftb.mods.ftblibrary.snbt.config.EnumValue;
+import dev.ftb.mods.ftblibrary.snbt.config.IntValue;
 import dev.ftb.mods.ftblibrary.snbt.config.SNBTConfig;
+import dev.ftb.mods.ftblibrary.util.PanelPositioning;
 import dev.ftb.mods.ftbquests.api.FTBQuestsAPI;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.Screen;
@@ -17,6 +20,9 @@ public interface FTBQuestsClientConfig {
 
     SNBTConfig UI = CONFIG.addGroup("ui", 0);
     BooleanValue OLD_SCROLL_WHEEL = UI.addBoolean("old_scroll_wheel", false);
+    EnumValue<PanelPositioning> PINNED_QUESTS_POS = UI.addEnum("pinned_quests_pos", PanelPositioning.NAME_MAP, PanelPositioning.RIGHT);
+    IntValue PINNED_QUESTS_INSET_X = UI.addInt("pinned_quests_inset_x", 2);
+    IntValue PINNED_QUESTS_INSET_Y = UI.addInt("pinned_quests_inset_y", 2);
 
     // TODO migrate chapter-pinned and pinned-quests data out of per-player team data into here
 
