@@ -20,7 +20,6 @@ import it.unimi.dsi.fastutil.objects.Object2ByteOpenHashMap;
 import it.unimi.dsi.fastutil.objects.Object2LongMap;
 import it.unimi.dsi.fastutil.objects.Object2LongOpenHashMap;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
-import net.minecraft.Util;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.StringTag;
@@ -631,6 +630,10 @@ public class TeamData {
 	}
 
 	public void markTaskCompleted(Task task) {
+		if (isCompleted(task)) {
+			return;
+		}
+
 		Collection<ServerPlayer> onlineMembers = getOnlineMembers();
 		Collection<ServerPlayer> notifiedPlayers;
 
