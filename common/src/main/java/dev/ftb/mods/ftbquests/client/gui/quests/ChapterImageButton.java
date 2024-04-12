@@ -130,12 +130,6 @@ public class ChapterImageButton extends Button implements QuestPositionableButto
 	}
 
 	@Override
-	public boolean shouldDraw() {
-		// return false here, we'll handle rendering the images ourselves in QuestPanel#drawOffsetBackground
-		return false;
-	}
-
-	@Override
 	public void draw(GuiGraphics graphics, Theme theme, int x, int y, int w, int h) {
 		Icon image = chapterImage.getImage();
 
