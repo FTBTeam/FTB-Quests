@@ -19,6 +19,7 @@ import dev.ftb.mods.ftbquests.util.ProgressChange;
 import dev.ftb.mods.ftbquests.util.TextUtils;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.ChatFormatting;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.StringTag;
@@ -352,7 +353,13 @@ public abstract class QuestObjectBase implements Comparable<QuestObjectBase> {
 			if (accepted && validateEditedConfig()) {
 				new EditObjectMessage(this).sendToServer();
 			}
-		});
+		}) {
+			@Override
+			public Component getName() {
+				MutableComponent c = getObjectType().getDescription().copy().withStyle(ChatFormatting.YELLOW);
+				return Component.empty().append(c).append(": ").append(getTitle());
+			}
+		};
 		fillConfigGroup(createSubGroup(group));
 
 		new EditConfigScreen(group).openGui();
