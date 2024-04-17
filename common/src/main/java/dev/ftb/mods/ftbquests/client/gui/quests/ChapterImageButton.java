@@ -26,7 +26,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-public class ChapterImageButton extends Button implements QuestPositionableButton, Comparable<ChapterImageButton> {
+public class ChapterImageButton extends Button implements QuestPositionableButton {
 	private final QuestScreen questScreen;
 	private final ChapterImage chapterImage;
 
@@ -35,6 +35,7 @@ public class ChapterImageButton extends Button implements QuestPositionableButto
 		questScreen = (QuestScreen) panel.getGui();
 		setSize(20, 20);
 		chapterImage = i;
+		setDrawLayer(DrawLayer.BACKGROUND); // draw *before* connection lines & quest widgets
 	}
 
 	public static Optional<ChapterImage> getClipboardImage() {
@@ -67,7 +68,7 @@ public class ChapterImageButton extends Button implements QuestPositionableButto
 		if (questScreen.file.canEdit() && button.isRight()) {
 			List<ContextMenuItem> contextMenu = new ArrayList<>();
 
-			contextMenu.add(new ContextMenuItem(Component.translatable("selectServer.edit"), ThemeProperties.EDIT_ICON.get(), () -> {
+			contextMenu.add(new ContextMenuItem(Component.translatable("selectServer.edit"), ThemeProperties.EDIT_ICON.get(), b -> {
 				String name = chapterImage.getImage() instanceof Color4I ? chapterImage.getColor().toString() : chapterImage.getImage().toString();
 				ConfigGroup group = new ConfigGroup(FTBQuestsAPI.MOD_ID, accepted -> {
 					if (accepted) {
@@ -80,14 +81,14 @@ public class ChapterImageButton extends Button implements QuestPositionableButto
 			}));
 
 			contextMenu.add(new ContextMenuItem(Component.translatable("gui.move"), ThemeProperties.MOVE_UP_ICON.get(chapterImage.getChapter()),
-					() -> questScreen.initiateMoving(chapterImage)) {
+					b -> questScreen.initiateMoving(chapterImage)) {
 				@Override
 				public void addMouseOverText(TooltipList list) {
 					list.add(Component.translatable("ftbquests.gui.move_tooltip").withStyle(ChatFormatting.DARK_GRAY));
 				}
 			});
 
-			contextMenu.add(new ContextMenuItem(Component.translatable("gui.copy"), Icons.INFO, chapterImage::copyToClipboard) {
+			contextMenu.add(new ContextMenuItem(Component.translatable("gui.copy"), Icons.INFO, b -> chapterImage.copyToClipboard()) {
 				@Override
 				public void addMouseOverText(TooltipList list) {
 					list.add(Component.literal(chapterImage.getImage().toString()).withStyle(ChatFormatting.DARK_GRAY));
@@ -96,12 +97,12 @@ public class ChapterImageButton extends Button implements QuestPositionableButto
 
 			if (chapterImage.isAspectRatioOff()) {
 				contextMenu.add(new ContextMenuItem(Component.translatable("ftbquests.gui.fix_aspect_ratio_w"), Icons.ART,
-						() -> chapterImage.fixupAspectRatio(true)));
+						b -> chapterImage.fixupAspectRatio(true)));
 				contextMenu.add(new ContextMenuItem(Component.translatable("ftbquests.gui.fix_aspect_ratio_h"), Icons.ART,
-						() -> chapterImage.fixupAspectRatio(false)));
+						b -> chapterImage.fixupAspectRatio(false)));
 			}
 
-			contextMenu.add(new ContextMenuItem(Component.translatable("selectServer.delete"), ThemeProperties.DELETE_ICON.get(), () -> {
+			contextMenu.add(new ContextMenuItem(Component.translatable("selectServer.delete"), ThemeProperties.DELETE_ICON.get(), b -> {
 				chapterImage.getChapter().removeImage(chapterImage);
 				new EditObjectMessage(chapterImage.getChapter()).sendToServer();
 			}).setYesNoText(Component.translatable("delete_item", chapterImage.getImage().toString())));
@@ -126,12 +127,6 @@ public class ChapterImageButton extends Button implements QuestPositionableButto
 	@Override
 	public void addMouseOverText(TooltipList list) {
 		chapterImage.addHoverText(list);
-	}
-
-	@Override
-	public boolean shouldDraw() {
-		// return false here, we'll handle rendering the images ourselves in QuestPanel#drawOffsetBackground
-		return false;
 	}
 
 	@Override
@@ -178,8 +173,10 @@ public class ChapterImageButton extends Button implements QuestPositionableButto
 	}
 
 	@Override
-	public int compareTo(@NotNull ChapterImageButton o) {
-		return Integer.compare(chapterImage.getOrder(), o.chapterImage.getOrder());
+	public int compareTo(@NotNull Widget o) {
+		return o instanceof ChapterImageButton cb2 ?
+				Integer.compare(chapterImage.getOrder(), cb2.chapterImage.getOrder()) :
+				0;
 	}
 
 	@Override

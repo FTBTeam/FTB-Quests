@@ -19,6 +19,7 @@ import dev.ftb.mods.ftbquests.util.ProgressChange;
 import dev.ftb.mods.ftbquests.util.TextUtils;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.ChatFormatting;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.StringTag;
@@ -27,13 +28,14 @@ import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.world.item.ItemStack;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 import java.util.function.Supplier;
 import java.util.regex.Pattern;
 
-public abstract class QuestObjectBase {
+public abstract class QuestObjectBase implements Comparable<QuestObjectBase> {
 	private static final Pattern TAG_PATTERN = Pattern.compile("^[a-z0-9_]*$");
 	private static Tristate sendNotifications = Tristate.DEFAULT;
 
@@ -351,7 +353,13 @@ public abstract class QuestObjectBase {
 			if (accepted && validateEditedConfig()) {
 				new EditObjectMessage(this).sendToServer();
 			}
-		});
+		}) {
+			@Override
+			public Component getName() {
+				MutableComponent c = getObjectType().getDescription().copy().withStyle(ChatFormatting.YELLOW);
+				return Component.empty().append(c).append(": ").append(getTitle());
+			}
+		};
 		fillConfigGroup(createSubGroup(group));
 
 		new EditConfigScreen(group).openGui();
@@ -374,5 +382,13 @@ public abstract class QuestObjectBase {
 		orig.writeData(tag);
 		copied.readData(tag);
 		return copied;
+	}
+
+	@Override
+	public int compareTo(@NotNull QuestObjectBase other) {
+		int typeCmp = Integer.compare(getObjectType().ordinal(), other.getObjectType().ordinal());
+		return typeCmp == 0 ?
+				getTitle().getString().toLowerCase().compareTo(other.getTitle().getString().toLowerCase()) :
+				typeCmp;
 	}
 }

@@ -45,6 +45,10 @@ public enum QuestObjectType implements Predicate<QuestObjectBase> {
 		return (object == null ? NULL : object.getObjectType()) == this;
 	}
 
+	public Component getDescription() {
+		return Component.translatable(translationKey);
+	}
+
 	public Component getCompletedMessage() {
 		return Component.translatable(translationKey + ".completed");
 	}

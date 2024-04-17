@@ -1384,6 +1384,10 @@ public abstract class BaseQuestFile extends QuestObject implements QuestFile {
 		return filename;
 	}
 
+	public List<ChapterGroup> getChapterGroups() {
+		return Collections.unmodifiableList(chapterGroups);
+	}
+
 	public void forAllChapterGroups(Consumer<ChapterGroup> consumer) {
 		chapterGroups.forEach(consumer);
 	}
