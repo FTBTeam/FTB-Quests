@@ -73,7 +73,7 @@ public class MultilineTextEditorScreen extends BaseScreen {
 		textBoxPanel = new TextBoxPanel(outerPanel);
 
 		textBox = new MultilineTextBox(textBoxPanel);
-		textBox.setText(Strings.join(config.getValue(), "\n"));
+		textBox.setText(String.join("\n", config.getValue()));
 		textBox.setFocused(true);
 		textBox.setValueListener(this::onValueChanged);
 		textBox.seekCursor(Whence.ABSOLUTE, 0);
