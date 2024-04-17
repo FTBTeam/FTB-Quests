@@ -429,12 +429,12 @@ public class QuestPanel extends Panel {
 			return true;
 		}
 
-		if (/*!questScreen.viewQuestPanel.hidePanel &&*/ questScreen.isViewingQuest()) {
+		if (questScreen.isViewingQuest()) {
 			questScreen.closeQuest();
 			return true;
 		}
 
-		if ((button.isLeft() || button.isMiddle() && questScreen.file.canEdit()) && isMouseOver() && (/*questScreen.viewQuestPanel.hidePanel ||*/ !questScreen.isViewingQuest())) {
+		if ((button.isLeft() || button.isMiddle() && questScreen.file.canEdit()) && isMouseOver() && !questScreen.isViewingQuest()) {
 			questScreen.prevMouseX = getMouseX();
 			questScreen.prevMouseY = getMouseY();
 			questScreen.grabbed = button;

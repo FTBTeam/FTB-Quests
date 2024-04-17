@@ -567,7 +567,7 @@ public class ViewQuestPanel extends ModalPanel {
 	public void keyReleased(Key key) {
 		// released rather than pressed; if we used pressed, keypress would be picked up by the next screen
 
-		if (/*hidePanel ||*/ quest == null) return;
+		if (quest == null) return;
 
 		if (questScreen.file.canEdit()) {
 			if (key.is(GLFW.GLFW_KEY_S)) {
