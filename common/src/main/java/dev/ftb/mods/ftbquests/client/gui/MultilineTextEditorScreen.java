@@ -20,7 +20,6 @@ import dev.ftb.mods.ftbquests.quest.Quest;
 import dev.ftb.mods.ftbquests.quest.QuestObject;
 import dev.ftb.mods.ftbquests.quest.QuestObjectType;
 import dev.ftb.mods.ftbquests.util.ConfigQuestObject;
-import joptsimple.internal.Strings;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
@@ -73,7 +72,7 @@ public class MultilineTextEditorScreen extends BaseScreen {
 		textBoxPanel = new TextBoxPanel(outerPanel);
 
 		textBox = new MultilineTextBox(textBoxPanel);
-		textBox.setText(Strings.join(config.getValue(), "\n"));
+		textBox.setText(String.join("\n", config.getValue()));
 		textBox.setFocused(true);
 		textBox.setValueListener(this::onValueChanged);
 		textBox.seekCursor(Whence.ABSOLUTE, 0);
