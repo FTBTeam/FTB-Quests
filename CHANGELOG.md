@@ -4,6 +4,15 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2001.4.1]
+
+### Fixed
+* Fixed popup textfield for Checkbox task creation not rendering (more precisely, rendering off-screen...)
+* Requires FTB Library 2001.2.1, which also contains several GUI-related fixes
+  * Fixed client crash when double-clicking some long text lines for editing in the view quest panel
+  * Fixed keypresses getting ignored after popup textfields (e.g. creating Checkbox tasks) are dismissed
+  * Fixed popup textfields rendering partially offscreen under some circumstances
+
 ## [2001.4.0]
 
 ### Changed

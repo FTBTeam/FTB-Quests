@@ -1,7 +1,10 @@
 package dev.ftb.mods.ftbquests.client;
 
 import dev.ftb.mods.ftblibrary.config.*;
-import dev.ftb.mods.ftblibrary.config.ui.*;
+import dev.ftb.mods.ftblibrary.config.ui.EditConfigScreen;
+import dev.ftb.mods.ftblibrary.config.ui.EditStringConfigOverlay;
+import dev.ftb.mods.ftblibrary.config.ui.SelectFluidScreen;
+import dev.ftb.mods.ftblibrary.config.ui.SelectItemStackScreen;
 import dev.ftb.mods.ftbquests.api.FTBQuestsAPI;
 import dev.ftb.mods.ftbquests.client.gui.SelectQuestObjectScreen;
 import dev.ftb.mods.ftbquests.quest.QuestObjectType;
@@ -37,6 +40,7 @@ public class GuiProviders {
                 s.setHasSearchBox(true);
                 s.openGui();
             } else {
+
                 ConfigGroup group = new ConfigGroup(FTBQuestsAPI.MOD_ID, accepted -> {
                     if (accepted) {
                         callback.accept(reward);
@@ -67,14 +71,7 @@ public class GuiProviders {
                 overlay.setExtraZlevel(300);
                 panel.getGui().pushModalPanel(overlay);
             } else {
-                ConfigGroup group = new ConfigGroup(FTBQuestsAPI.MOD_ID, accepted -> {
-                    if (accepted) {
-                        callback.accept(task);
-                    }
-                    panel.run();
-                });
-                task.fillConfigGroup(task.createSubGroup(group));
-                new EditConfigScreen(group).openGui();
+                openSetupGui(panel.getGui(), callback, task);
             }
         };
     }
@@ -96,15 +93,16 @@ public class GuiProviders {
             StringConfig c = new StringConfig(null);
             c.setValue("");
 
-            EditStringConfigOverlay<String> overlay = new EditStringConfigOverlay<>(panel, c, accepted -> {
+            EditStringConfigOverlay<String> overlay = new EditStringConfigOverlay<>(panel.getGui(), c, accepted -> {
                 if (accepted) {
                     CheckmarkTask checkmarkTask = new CheckmarkTask(0L, quest);
                     checkmarkTask.setRawTitle(c.getValue());
                     callback.accept(checkmarkTask);
                 }
                 panel.run();
-            }, TaskTypes.CHECKMARK.getDisplayName())
-                    .atPosition(panel.width / 3, panel.height + 5);
+            }, TaskTypes.CHECKMARK.getDisplayName()).atMousePosition();
+            overlay.setWidth(150);
+            overlay.setExtraZlevel(300);
             panel.getGui().pushModalPanel(overlay);
         });
 

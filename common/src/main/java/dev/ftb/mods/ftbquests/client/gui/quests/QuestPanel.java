@@ -376,7 +376,7 @@ public class QuestPanel extends Panel {
 		Color4I.DARK_GRAY.draw(graphics, statusX, height - 9, statusWidth, 1);
 		statPanelBg.draw(graphics, statusX, height - 9, statusWidth, 10);
 
-		poseStack.translate(statusX, height - 6, 600);
+		poseStack.translate(statusX, height - 6, 250);
 		poseStack.scale(0.5f, 0.5f, 0.5f);
 
 		String curStr = String.format("Cursor: [%+.2f, %+.2f]", questX, questY);
