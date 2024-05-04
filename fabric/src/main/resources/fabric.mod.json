@@ -28,8 +28,5 @@
 		"architectury": ">=9.0.8",
 		"ftblibrary": ">=2001.2.1",
 		"ftbteams": ">=2001.1.4-build.1"
-	},
-	"breaks": {
-		"ftblibrary": ">=2001.2.0"
 	}
 }
