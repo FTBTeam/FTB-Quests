@@ -273,48 +273,66 @@ public class FTBQuestsClientEventHandler {
 			return;
 		}
 
-		ClientQuestFile file = ClientQuestFile.INSTANCE;
-
-		Minecraft mc = Minecraft.getInstance();
-		int cy = mc.getWindow().getGuiScaledHeight() / 2;
-
 		if (currentlyObserving != null) {
-			int cx = mc.getWindow().getGuiScaledWidth() / 2;
-			MutableComponent cot = currentlyObserving.getMutableTitle().withStyle(ChatFormatting.YELLOW, ChatFormatting.UNDERLINE);
-			int sw = mc.font.width(cot);
-			int bw = Math.max(sw, 100);
-			Color4I.DARK_GRAY.withAlpha(130).draw(graphics, cx - bw / 2 - 3, cy - 63, bw + 6, 29);
-			GuiHelper.drawHollowRect(graphics, cx - bw / 2 - 3, cy - 63, bw + 6, 29, Color4I.DARK_GRAY, false);
-
-			graphics.drawString(mc.font, cot, cx - sw / 2, cy - 60, 0xFFFFFF);
-			double completed = (currentlyObservingTicks + tickDelta) / (double) currentlyObserving.getTimer();
-
-			GuiHelper.drawHollowRect(graphics, cx - bw / 2, cy - 49, bw, 12, Color4I.DARK_GRAY, false);
-			Color4I.LIGHT_BLUE.withAlpha(130).draw(graphics, cx - bw / 2 + 1, cy - 48, (int) ((bw - 2D) * completed), 10);
-
-			String cop = (currentlyObservingTicks * 100L / currentlyObserving.getTimer()) + "%";
-			graphics.drawString(mc.font, cop, cx - mc.font.width(cop) / 2, cy - 47, 0xFFFFFF);
+			renderCurrentlyObserving(Minecraft.getInstance(), graphics, tickDelta);
 		}
 
 		if (!pinnedQuestText.isEmpty()) {
-			int width = 0;
-			for (FormattedCharSequence s : pinnedQuestText) {
-				width = Math.max(width, (int) mc.font.getSplitter().stringWidth(s));
-			}
-
-			float scale = ThemeProperties.PINNED_QUEST_SIZE.get(file).floatValue();
-
-			graphics.pose().pushPose();
-			graphics.pose().translate(mc.getWindow().getGuiScaledWidth() - width * scale - 8D, cy - pinnedQuestText.size() * 4.5D * scale, 100);
-			graphics.pose().scale(scale, scale, 1F);
-
-			Color4I.BLACK.withAlpha(100).draw(graphics, 0, 0, width + 8, pinnedQuestText.size() * 9 + 8);
-
-			for (int i = 0; i < pinnedQuestText.size(); i++) {
-				graphics.drawString(mc.font, pinnedQuestText.get(i), 4, i * mc.font.lineHeight + 4, 0xFFFFFFFF);
-			}
-
-			graphics.pose().popPose();
+			renderPinnedQuestPanel(Minecraft.getInstance(), graphics);
 		}
+	}
+
+	private void renderCurrentlyObserving(Minecraft mc, GuiGraphics graphics, float tickDelta) {
+		int cx = mc.getWindow().getGuiScaledWidth() / 2;
+		int cy = mc.getWindow().getGuiScaledHeight() / 2;
+
+		MutableComponent txt = currentlyObserving.getMutableTitle().withStyle(ChatFormatting.YELLOW, ChatFormatting.UNDERLINE);
+		int txtWidth = mc.font.width(txt);
+		int boxWidth = Math.max(txtWidth, 100);
+
+		Color4I.DARK_GRAY.withAlpha(130).draw(graphics, cx - boxWidth / 2 - 3, cy - 63, boxWidth + 6, 29);
+		GuiHelper.drawHollowRect(graphics, cx - boxWidth / 2 - 3, cy - 63, boxWidth + 6, 29, Color4I.DARK_GRAY, false);
+
+		graphics.drawString(mc.font, txt, cx - txtWidth / 2, cy - 60, 0xFFFFFF);
+		double completed = (currentlyObservingTicks + tickDelta) / (double) currentlyObserving.getTimer();
+
+		GuiHelper.drawHollowRect(graphics, cx - boxWidth / 2, cy - 49, boxWidth, 12, Color4I.DARK_GRAY, false);
+		Color4I.LIGHT_BLUE.withAlpha(130).draw(graphics, cx - boxWidth / 2 + 1, cy - 48, (int) ((boxWidth - 2D) * completed), 10);
+
+		String pctTxt = (currentlyObservingTicks * 100L / currentlyObserving.getTimer()) + "%";
+		graphics.drawString(mc.font, pctTxt, cx - mc.font.width(pctTxt) / 2, cy - 47, 0xFFFFFF);
+	}
+
+	private void renderPinnedQuestPanel(Minecraft mc, GuiGraphics graphics) {
+		int width = 0;
+		for (FormattedCharSequence s : pinnedQuestText) {
+			width = Math.max(width, (int) mc.font.getSplitter().stringWidth(s));
+		}
+		width += 8;
+		int height = mc.font.lineHeight * pinnedQuestText.size() + 8;
+
+		float scale = ThemeProperties.PINNED_QUEST_SIZE.get(ClientQuestFile.INSTANCE).floatValue();
+
+		int insetX = FTBQuestsClientConfig.PINNED_QUESTS_INSET_X.get();
+		int insetY = FTBQuestsClientConfig.PINNED_QUESTS_INSET_Y.get();
+		var pos = FTBQuestsClientConfig.PINNED_QUESTS_POS.get().getPanelPos(
+				mc.getWindow().getGuiScaledWidth(), mc.getWindow().getGuiScaledHeight(),
+				(int) (width * scale), (int) (height * scale),
+				insetX, insetY
+		);
+
+		graphics.pose().pushPose();
+		graphics.pose().translate(pos.x(), pos.y(), 100);
+		graphics.pose().scale(scale, scale, 1F);
+
+		GuiHelper.drawHollowRect(graphics, 0, 0, width, height, Color4I.BLACK.withAlpha(100), false);
+		Color4I.BLACK.withAlpha(100).draw(graphics, 0, 0, width, height);
+
+		graphics.pose().translate(4, 4, 0);
+		for (int i = 0; i < pinnedQuestText.size(); i++) {
+			graphics.drawString(mc.font, pinnedQuestText.get(i), 0, i * mc.font.lineHeight, 0xFFFFFFFF);
+		}
+
+		graphics.pose().popPose();
 	}
 }

@@ -67,14 +67,7 @@ public class GuiProviders {
                 overlay.setExtraZlevel(300);
                 panel.getGui().pushModalPanel(overlay);
             } else {
-                ConfigGroup group = new ConfigGroup(FTBQuestsAPI.MOD_ID, accepted -> {
-                    if (accepted) {
-                        callback.accept(task);
-                    }
-                    panel.run();
-                });
-                task.fillConfigGroup(task.createSubGroup(group));
-                new EditConfigScreen(group).openGui();
+                openSetupGui(panel.getGui(), callback, task);
             }
         };
     }
@@ -96,15 +89,15 @@ public class GuiProviders {
             StringConfig c = new StringConfig(null);
             c.setValue("");
 
-            EditStringConfigOverlay<String> overlay = new EditStringConfigOverlay<>(panel, c, accepted -> {
+            EditStringConfigOverlay<String> overlay = new EditStringConfigOverlay<>(panel.getGui(), c, accepted -> {
                 if (accepted) {
                     CheckmarkTask checkmarkTask = new CheckmarkTask(0L, quest);
                     checkmarkTask.setRawTitle(c.getValue());
                     callback.accept(checkmarkTask);
                 }
                 panel.run();
-            }, TaskTypes.CHECKMARK.getDisplayName())
-                    .atPosition(panel.width / 3, panel.height + 5);
+            }, TaskTypes.CHECKMARK.getDisplayName()).atMousePosition();
+            overlay.setExtraZlevel(300);
             panel.getGui().pushModalPanel(overlay);
         });
 
