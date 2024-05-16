@@ -2,7 +2,9 @@ package dev.ftb.mods.ftbquests.quest;
 
 import dev.ftb.mods.ftblibrary.config.NameMap;
 import net.minecraft.ChatFormatting;
+import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.codec.StreamCodec;
 
 import java.util.function.Predicate;
 
@@ -19,6 +21,18 @@ public enum QuestObjectType implements Predicate<QuestObjectBase> {
 	;
 
 	public static final NameMap<QuestObjectType> NAME_MAP = NameMap.of(NULL, values()).id(v -> v.id).nameKey(v -> v.translationKey).create();
+	public static StreamCodec<FriendlyByteBuf, QuestObjectType> STREAM_CODEC = new StreamCodec<>() {
+        @Override
+        public QuestObjectType decode(FriendlyByteBuf buf) {
+            return NAME_MAP.read(buf);
+        }
+
+        @Override
+        public void encode(FriendlyByteBuf buf, QuestObjectType type) {
+			NAME_MAP.write(buf, type);
+        }
+    };
+
 	public static final Predicate<QuestObjectBase> ALL_PROGRESSING = object -> object instanceof QuestObject;
 	public static final Predicate<QuestObjectBase> ALL_PROGRESSING_OR_NULL = object -> object == null || object instanceof QuestObject;
 

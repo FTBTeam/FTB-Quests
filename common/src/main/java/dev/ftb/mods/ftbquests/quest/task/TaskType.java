@@ -7,6 +7,8 @@ import dev.ftb.mods.ftbquests.client.GuiProviders;
 import dev.ftb.mods.ftbquests.quest.Quest;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.Util;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import org.jetbrains.annotations.Nullable;
@@ -58,6 +60,10 @@ public final class TaskType {
 
 	public String getTypeForNBT() {
 		return typeId.getNamespace().equals(FTBQuestsAPI.MOD_ID) ? typeId.getPath() : typeId.toString();
+	}
+
+	public CompoundTag makeExtraNBT() {
+		return Util.make(new CompoundTag(), t -> t.putString("type", getTypeForNBT()));
 	}
 
 	public TaskType setDisplayName(Component name) {

@@ -1,10 +1,12 @@
 package dev.ftb.mods.ftbquests.quest;
 
 import com.mojang.util.UndashedUuid;
+import dev.architectury.networking.NetworkManager;
 import dev.architectury.platform.Platform;
 import dev.architectury.utils.Env;
 import dev.ftb.mods.ftblibrary.snbt.SNBT;
 import dev.ftb.mods.ftblibrary.snbt.SNBTCompoundTag;
+import dev.ftb.mods.ftblibrary.util.NetworkHelper;
 import dev.ftb.mods.ftbquests.FTBQuests;
 import dev.ftb.mods.ftbquests.events.QuestProgressEventData;
 import dev.ftb.mods.ftbquests.integration.PermissionsHelper;
@@ -22,6 +24,7 @@ import dev.ftb.mods.ftbteams.api.event.PlayerChangedTeamEvent;
 import dev.ftb.mods.ftbteams.api.event.PlayerLoggedInAfterTeamEvent;
 import dev.ftb.mods.ftbteams.api.event.TeamCreatedEvent;
 import dev.ftb.mods.ftbteams.data.PartyTeam;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
@@ -71,7 +74,7 @@ public class ServerQuestFile extends BaseQuestFile {
 		if (Files.exists(folder)) {
 			FTBQuests.LOGGER.info("Loading quests from " + folder);
 			isLoading = true;
-			readDataFull(folder);
+			readDataFull(folder, server.registryAccess());
 			isLoading = false;
 		}
 
@@ -105,6 +108,11 @@ public class ServerQuestFile extends BaseQuestFile {
 	}
 
 	@Override
+	public HolderLookup.Provider holderLookup() {
+		return server.registryAccess();
+	}
+
+	@Override
 	public boolean isLoading() {
 		return isLoading;
 	}
@@ -126,7 +134,7 @@ public class ServerQuestFile extends BaseQuestFile {
 			object.getPath().ifPresent(path -> FileUtils.delete(getFolder().resolve(path).toFile()));
 		}
 
-		new DeleteObjectResponseMessage(id).sendToAll(server);
+		NetworkHelper.sendToAll(server, new DeleteObjectResponseMessage(id));
 	}
 
 	@Override
@@ -136,7 +144,7 @@ public class ServerQuestFile extends BaseQuestFile {
 
 	public void saveNow() {
 		if (shouldSave) {
-			writeDataFull(getFolder());
+			writeDataFull(getFolder(), server.registryAccess());
 			shouldSave = false;
 		}
 
@@ -169,9 +177,9 @@ public class ServerQuestFile extends BaseQuestFile {
 		// Sync the quest book data
 		// - client will respond to this with a RequestTeamData message
 		// - server will only then send a SyncTeamData message to the client
-		new SyncQuestsMessage(this).sendTo(player);
+		NetworkManager.sendToPlayer(player, new SyncQuestsMessage(this));
 
-		new SyncEditorPermissionMessage(PermissionsHelper.hasEditorPermission(player, false)).sendTo(player);
+		NetworkManager.sendToPlayer(player, new SyncEditorPermissionMessage(PermissionsHelper.hasEditorPermission(player, false)));
 
 		player.inventoryMenu.addSlotListener(new FTBQuestsInventoryListener(player));
 
@@ -214,9 +222,7 @@ public class ServerQuestFile extends BaseQuestFile {
 			});
 		}
 
-		TeamDataUpdate self = new TeamDataUpdate(data);
-
-		new CreateOtherTeamDataMessage(self).sendToAll(server);
+		NetworkHelper.sendToAll(server, new CreateOtherTeamDataMessage(TeamDataUpdate.forTeamData(data)));
 	}
 
 	public void playerChangedTeam(PlayerChangedTeamEvent event) {
@@ -234,8 +240,8 @@ public class ServerQuestFile extends BaseQuestFile {
 				newTeamData.mergeClaimedRewards(oldTeamData);
 			}
 
-			new TeamDataChangedMessage(new TeamDataUpdate(oldTeamData), new TeamDataUpdate(newTeamData)).sendToAll(server);
-			new SyncTeamDataMessage(newTeamData, true).sendTo(curTeam.getOnlineMembers());
+			NetworkHelper.sendToAll(server, new TeamDataChangedMessage(TeamDataUpdate.forTeamData(oldTeamData), TeamDataUpdate.forTeamData(newTeamData)));
+			NetworkManager.sendToPlayers(curTeam.getOnlineMembers(), new SyncTeamDataMessage(newTeamData));
 		});
 	}
 
@@ -251,9 +257,10 @@ public class ServerQuestFile extends BaseQuestFile {
 		if (super.moveChapterGroup(id, movingUp)) {
 			markDirty();
 			clearCachedData();
-			new MoveChapterGroupResponseMessage(id, movingUp).sendToAll(server);
+			NetworkHelper.sendToAll(server, new MoveChapterGroupResponseMessage(id, movingUp));
 			return true;
 		}
 		return false;
 	}
+
 }

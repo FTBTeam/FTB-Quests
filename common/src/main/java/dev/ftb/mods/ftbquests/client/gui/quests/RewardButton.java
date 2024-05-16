@@ -8,7 +8,6 @@ import dev.ftb.mods.ftblibrary.ui.input.MouseButton;
 import dev.ftb.mods.ftblibrary.util.TooltipList;
 import dev.ftb.mods.ftblibrary.util.client.PositionedIngredient;
 import dev.ftb.mods.ftbquests.client.ClientQuestFile;
-import dev.ftb.mods.ftbquests.client.FTBQClientProxy;
 import dev.ftb.mods.ftbquests.client.FTBQuestsClient;
 import dev.ftb.mods.ftbquests.client.gui.ContextMenuBuilder;
 import dev.ftb.mods.ftbquests.quest.reward.ItemReward;
@@ -18,6 +17,7 @@ import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.network.chat.Component;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
 
@@ -52,7 +52,7 @@ public class RewardButton extends Button {
 		if (reward.addTitleInMouseOverText()) {
 			if (reward instanceof ItemReward itemReward) {
 				TooltipFlag.Default flag = Minecraft.getInstance().options.advancedItemTooltips ? TooltipFlag.ADVANCED : TooltipFlag.NORMAL;
-				itemReward.getItem().getTooltipLines(FTBQuestsClient.getClientPlayer(), flag)
+				itemReward.getItem().getTooltipLines(Item.TooltipContext.of(FTBQuestsClient.getClientLevel()), FTBQuestsClient.getClientPlayer(), flag)
 						.forEach(list::add);
 			} else {
 				list.add(getTitle());

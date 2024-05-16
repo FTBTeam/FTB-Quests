@@ -1,35 +1,30 @@
 package dev.ftb.mods.ftbquests.net;
 
 import dev.architectury.networking.NetworkManager;
-import dev.architectury.networking.simple.BaseC2SMessage;
-import dev.architectury.networking.simple.MessageType;
+import dev.ftb.mods.ftbquests.api.FTBQuestsAPI;
 import dev.ftb.mods.ftbquests.quest.TeamData;
 import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.server.level.ServerPlayer;
 
-public class RequestTeamDataMessage extends BaseC2SMessage {
-    public RequestTeamDataMessage(FriendlyByteBuf buf) {
-    }
+public record RequestTeamDataMessage() implements CustomPacketPayload {
+    public static final Type<RequestTeamDataMessage> TYPE = new Type<>(FTBQuestsAPI.rl("request_team_data_message"));
 
-    public RequestTeamDataMessage() {
-    }
+    public static final RequestTeamDataMessage INSTANCE = new RequestTeamDataMessage();
 
-    @Override
-    public MessageType getType() {
-        return FTBQuestsNetHandler.REQUEST_TEAM_DATA;
-    }
+    public static final StreamCodec<FriendlyByteBuf, RequestTeamDataMessage> STREAM_CODEC = StreamCodec.unit(INSTANCE);
 
     @Override
-    public void write(FriendlyByteBuf buf) {
+    public Type<RequestTeamDataMessage> type() {
+        return TYPE;
     }
 
-    @Override
-    public void handle(NetworkManager.PacketContext context) {
-        if (context.getPlayer() instanceof ServerPlayer serverPlayer) {
-            TeamData data = TeamData.get(serverPlayer);
-            if (data != null) {
-                new SyncTeamDataMessage(data, true).sendTo(serverPlayer);
+    public static void handle(RequestTeamDataMessage message, NetworkManager.PacketContext context) {
+        context.queue(() -> {
+            if (context.getPlayer() instanceof ServerPlayer serverPlayer) {
+                NetworkManager.sendToPlayer(serverPlayer, new SyncTeamDataMessage(TeamData.get(serverPlayer)));
             }
-        }
+        });
     }
 }

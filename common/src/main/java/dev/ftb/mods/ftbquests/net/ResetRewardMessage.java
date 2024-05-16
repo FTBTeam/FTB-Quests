@@ -1,47 +1,32 @@
 package dev.ftb.mods.ftbquests.net;
 
 import dev.architectury.networking.NetworkManager;
-import dev.architectury.networking.simple.BaseS2CMessage;
-import dev.architectury.networking.simple.MessageType;
+import dev.ftb.mods.ftbquests.api.FTBQuestsAPI;
 import dev.ftb.mods.ftbquests.client.FTBQuestsNetClient;
+import net.minecraft.core.UUIDUtil;
 import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.codec.ByteBufCodecs;
+import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 
 import java.util.UUID;
 
-/**
- * @author LatvianModder
- */
-public class ResetRewardMessage extends BaseS2CMessage {
-	private final UUID team;
-	private final UUID player;
-	private final long id;
+public record ResetRewardMessage(UUID teamId, UUID playerId, long id) implements CustomPacketPayload {
+	public static final Type<ResetRewardMessage> TYPE = new Type<>(FTBQuestsAPI.rl("reset_reward_message"));
 
-	ResetRewardMessage(FriendlyByteBuf buffer) {
-		team = buffer.readUUID();
-		player = buffer.readUUID();
-		id = buffer.readLong();
-	}
-
-	public ResetRewardMessage(UUID t, UUID p, long i) {
-		team = t;
-		player = p;
-		id = i;
-	}
+	public static final StreamCodec<FriendlyByteBuf, ResetRewardMessage> STREAM_CODEC = StreamCodec.composite(
+			UUIDUtil.STREAM_CODEC, ResetRewardMessage::teamId,
+			UUIDUtil.STREAM_CODEC, ResetRewardMessage::playerId,
+			ByteBufCodecs.VAR_LONG, ResetRewardMessage::id,
+			ResetRewardMessage::new
+	);
 
 	@Override
-	public MessageType getType() {
-		return FTBQuestsNetHandler.RESET_REWARD;
+	public Type<ResetRewardMessage> type() {
+		return TYPE;
 	}
 
-	@Override
-	public void write(FriendlyByteBuf buffer) {
-		buffer.writeUUID(team);
-		buffer.writeUUID(player);
-		buffer.writeLong(id);
-	}
-
-	@Override
-	public void handle(NetworkManager.PacketContext context) {
-		FTBQuestsNetClient.resetReward(team, player, id);
+	public static void handle(ResetRewardMessage message, NetworkManager.PacketContext context) {
+		context.queue(() -> FTBQuestsNetClient.resetReward(message.teamId, message.playerId, message.id));
 	}
 }

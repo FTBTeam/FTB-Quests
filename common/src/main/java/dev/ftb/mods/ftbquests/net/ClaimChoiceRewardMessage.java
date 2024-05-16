@@ -1,58 +1,47 @@
 package dev.ftb.mods.ftbquests.net;
 
 import dev.architectury.networking.NetworkManager;
-import dev.architectury.networking.simple.BaseC2SMessage;
-import dev.architectury.networking.simple.MessageType;
+import dev.ftb.mods.ftbquests.api.FTBQuestsAPI;
 import dev.ftb.mods.ftbquests.quest.ServerQuestFile;
 import dev.ftb.mods.ftbquests.quest.TeamData;
 import dev.ftb.mods.ftbquests.quest.loot.RewardTable;
 import dev.ftb.mods.ftbquests.quest.reward.ChoiceReward;
 import dev.ftb.mods.ftbquests.quest.reward.Reward;
 import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.codec.ByteBufCodecs;
+import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.server.level.ServerPlayer;
 
-/**
- * @author LatvianModder
- */
-public class ClaimChoiceRewardMessage extends BaseC2SMessage {
-	private final long id;
-	private final int index;
+public record ClaimChoiceRewardMessage(long id, int index) implements CustomPacketPayload {
+	public static final Type<ClaimChoiceRewardMessage> TYPE = new Type<>(FTBQuestsAPI.rl("claim_choice_reward_message"));
 
-	public ClaimChoiceRewardMessage(long i, int idx) {
-		id = i;
-		index = idx;
-	}
+	public static final StreamCodec<FriendlyByteBuf, ClaimChoiceRewardMessage> STREAM_CODEC = StreamCodec.composite(
+			ByteBufCodecs.VAR_LONG, ClaimChoiceRewardMessage::id,
+			ByteBufCodecs.VAR_INT, ClaimChoiceRewardMessage::index,
+			ClaimChoiceRewardMessage::new
+	);
 
 	@Override
-	public MessageType getType() {
-		return FTBQuestsNetHandler.CLAIM_CHOICE_REWARD;
+	public Type<ClaimChoiceRewardMessage> type() {
+		return TYPE;
 	}
 
-	ClaimChoiceRewardMessage(FriendlyByteBuf buffer) {
-		id = buffer.readLong();
-		index = buffer.readVarInt();
-	}
+	public static void handle(ClaimChoiceRewardMessage message, NetworkManager.PacketContext context) {
+		context.queue(() -> {
+			Reward reward = ServerQuestFile.INSTANCE.getReward(message.id);
 
-	@Override
-	public void write(FriendlyByteBuf buffer) {
-		buffer.writeLong(id);
-		buffer.writeVarInt(index);
-	}
+			if (reward instanceof ChoiceReward choiceReward && context.getPlayer() instanceof ServerPlayer serverPlayer) {
+				TeamData data = TeamData.get(serverPlayer);
+				RewardTable table = choiceReward.getTable();
 
-	@Override
-	public void handle(NetworkManager.PacketContext context) {
-		Reward reward = ServerQuestFile.INSTANCE.getReward(id);
-
-		if (reward instanceof ChoiceReward choiceReward && context.getPlayer() instanceof ServerPlayer serverPlayer) {
-			TeamData data = TeamData.get(serverPlayer);
-			RewardTable table = choiceReward.getTable();
-
-			if (table != null && data.isCompleted(reward.getQuest())) {
-				if (index >= 0 && index < table.getWeightedRewards().size()) {
-					table.getWeightedRewards().get(index).getReward().claim(serverPlayer, true);
-					data.claimReward(serverPlayer, reward, true);
+				if (table != null && data.isCompleted(reward.getQuest())) {
+					if (message.index >= 0 && message.index < table.getWeightedRewards().size()) {
+						table.getWeightedRewards().get(message.index).getReward().claim(serverPlayer, true);
+						data.claimReward(serverPlayer, reward, true);
+					}
 				}
 			}
-		}
+		});
 	}
 }

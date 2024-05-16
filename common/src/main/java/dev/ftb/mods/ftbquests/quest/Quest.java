@@ -1,6 +1,7 @@
 package dev.ftb.mods.ftbquests.quest;
 
 import com.mojang.datafixers.util.Pair;
+import dev.architectury.networking.NetworkManager;
 import dev.ftb.mods.ftblibrary.config.*;
 import dev.ftb.mods.ftblibrary.icon.Icon;
 import dev.ftb.mods.ftblibrary.icon.IconAnimation;
@@ -31,11 +32,12 @@ import it.unimi.dsi.fastutil.longs.LongOpenHashSet;
 import it.unimi.dsi.fastutil.longs.LongSet;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.StringTag;
 import net.minecraft.nbt.Tag;
-import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 
 import java.util.*;
@@ -218,8 +220,8 @@ public final class Quest extends QuestObject implements Movable {
 	}
 
 	@Override
-	public void writeData(CompoundTag nbt) {
-		super.writeData(nbt);
+	public void writeData(CompoundTag nbt, HolderLookup.Provider provider) {
+		super.writeData(nbt, provider);
 		nbt.putDouble("x", x);
 		nbt.putDouble("y", y);
 
@@ -311,8 +313,8 @@ public final class Quest extends QuestObject implements Movable {
 	}
 
 	@Override
-	public void readData(CompoundTag nbt) {
-		super.readData(nbt);
+	public void readData(CompoundTag nbt, HolderLookup.Provider provider) {
+		super.readData(nbt, provider);
 		rawSubtitle = nbt.getString("subtitle");
 		x = nbt.getDouble("x");
 		y = nbt.getDouble("y");
@@ -374,7 +376,7 @@ public final class Quest extends QuestObject implements Movable {
 	}
 
 	@Override
-	public void writeNetData(FriendlyByteBuf buffer) {
+	public void writeNetData(RegistryFriendlyByteBuf buffer) {
 		super.writeNetData(buffer);
 		int flags = 0;
 		flags = Bits.setFlag(flags, 0x01, !rawSubtitle.isEmpty());
@@ -446,7 +448,7 @@ public final class Quest extends QuestObject implements Movable {
 	}
 
 	@Override
-	public void readNetData(FriendlyByteBuf buffer) {
+	public void readNetData(RegistryFriendlyByteBuf buffer) {
 		super.readNetData(buffer);
 		int flags = buffer.readVarInt();
 		hideUntilDepsVisible = Tristate.read(buffer);
@@ -581,7 +583,7 @@ public final class Quest extends QuestObject implements Movable {
 	@Environment(EnvType.CLIENT)
 	public Component getAltTitle() {
 		if (!tasks.isEmpty()) {
-			return tasks.get(0).getTitle();
+			return tasks.getFirst().getTitle();
 		}
 
 		return Component.translatable("ftbquests.unnamed");
@@ -734,8 +736,8 @@ public final class Quest extends QuestObject implements Movable {
 
 	@Override
 	@Environment(EnvType.CLIENT)
-	public void move(Chapter to, double x, double y) {
-		new MoveMovableMessage(this, to.id, x, y).sendToServer();
+	public void initiateMoveClientSide(Chapter to, double x, double y) {
+		NetworkManager.sendToServer(new MoveMovableMessage(id, to.id, x, y));
 	}
 
 	@Override
@@ -775,7 +777,7 @@ public final class Quest extends QuestObject implements Movable {
 	@Environment(EnvType.CLIENT)
 	public Component getSubtitle() {
 		if (cachedSubtitle == null) {
-			cachedSubtitle = TextUtils.parseRawText(rawSubtitle);
+			cachedSubtitle = TextUtils.parseRawText(rawSubtitle, holderLookup());
 		}
 		return cachedSubtitle;
 	}
@@ -783,7 +785,7 @@ public final class Quest extends QuestObject implements Movable {
 	@Environment(EnvType.CLIENT)
 	public List<Component> getDescription() {
 		if (cachedDescription == null) {
-			cachedDescription = rawDescription.stream().map(TextUtils::parseRawText).toList();
+			cachedDescription = rawDescription.stream().map(str -> TextUtils.parseRawText(str, holderLookup())).toList();
 		}
 		return cachedDescription;
 	}
@@ -918,7 +920,7 @@ public final class Quest extends QuestObject implements Movable {
 
 	public void checkRepeatable(TeamData data, UUID player) {
 		if (canBeRepeated() && rewards.stream().allMatch(r -> data.isRewardClaimed(player, r))) {
-			forceProgress(data, new ProgressChange(data.getFile(), this, player));
+			forceProgress(data, new ProgressChange(this, player));
 		}
 	}
 
@@ -949,27 +951,27 @@ public final class Quest extends QuestObject implements Movable {
 		return ignoreRewardBlocking;
 	}
 
-	public void writeTasks(CompoundTag tag) {
+	public void writeTasks(CompoundTag tag, HolderLookup.Provider provider) {
 		ListTag t = new ListTag();
 		for (Task task : tasks) {
 			TaskType type = task.getType();
 			SNBTCompoundTag nbt3 = new SNBTCompoundTag();
 			nbt3.putString("id", task.getCodeString());
 			nbt3.putString("type", type.getTypeForNBT());
-			task.writeData(nbt3);
+			task.writeData(nbt3, provider);
 			t.add(nbt3);
 		}
 		tag.put("tasks", t);
 	}
 
-	public void writeRewards(CompoundTag tag) {
+	public void writeRewards(CompoundTag tag, HolderLookup.Provider provider) {
 		ListTag r = new ListTag();
 		for (Reward reward : rewards) {
 			RewardType type = reward.getType();
 			SNBTCompoundTag nbt3 = new SNBTCompoundTag();
 			nbt3.putString("id", reward.getCodeString());
 			nbt3.putString("type", type.getTypeForNBT());
-			reward.writeData(nbt3);
+			reward.writeData(nbt3, provider);
 			r.add(nbt3);
 		}
 		tag.put("rewards", r);

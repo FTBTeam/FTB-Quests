@@ -7,6 +7,7 @@ import dev.architectury.event.events.client.ClientLifecycleEvent;
 import dev.architectury.event.events.client.ClientPlayerEvent;
 import dev.architectury.event.events.client.ClientTickEvent;
 import dev.architectury.injectables.annotations.ExpectPlatform;
+import dev.architectury.networking.NetworkManager;
 import dev.architectury.registry.client.rendering.BlockEntityRendererRegistry;
 import dev.architectury.registry.client.rendering.ColorHandlerRegistry;
 import dev.ftb.mods.ftblibrary.icon.Color4I;
@@ -14,10 +15,8 @@ import dev.ftb.mods.ftblibrary.sidebar.SidebarButtonCreatedEvent;
 import dev.ftb.mods.ftblibrary.ui.CustomClickEvent;
 import dev.ftb.mods.ftblibrary.ui.GuiHelper;
 import dev.ftb.mods.ftbquests.api.FTBQuestsAPI;
-import dev.ftb.mods.ftbquests.block.entity.FTBQuestsBlockEntities;
 import dev.ftb.mods.ftbquests.block.entity.TaskScreenBlockEntity;
 import dev.ftb.mods.ftbquests.events.ClearFileCacheEvent;
-import dev.ftb.mods.ftbquests.item.FTBQuestsItems;
 import dev.ftb.mods.ftbquests.item.LootCrateItem;
 import dev.ftb.mods.ftbquests.net.SubmitTaskMessage;
 import dev.ftb.mods.ftbquests.quest.BaseQuestFile;
@@ -28,6 +27,8 @@ import dev.ftb.mods.ftbquests.quest.task.ObservationTask;
 import dev.ftb.mods.ftbquests.quest.task.StructureTask;
 import dev.ftb.mods.ftbquests.quest.task.Task;
 import dev.ftb.mods.ftbquests.quest.theme.property.ThemeProperties;
+import dev.ftb.mods.ftbquests.registry.ModBlockEntityTypes;
+import dev.ftb.mods.ftbquests.registry.ModItems;
 import it.unimi.dsi.fastutil.longs.LongSet;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
@@ -97,7 +98,7 @@ public class FTBQuestsClientEventHandler {
 	}
 
 	private void registerBERs(Minecraft minecraft) {
-		BlockEntityRendererRegistry.register(FTBQuestsBlockEntities.CORE_TASK_SCREEN.get(), taskScreenRenderer());
+		BlockEntityRendererRegistry.register(ModBlockEntityTypes.CORE_TASK_SCREEN.get(), taskScreenRenderer());
 	}
 
 	@ExpectPlatform
@@ -109,7 +110,7 @@ public class FTBQuestsClientEventHandler {
 		ColorHandlerRegistry.registerItemColors((stack, tintIndex) -> {
 			LootCrate crate = LootCrateItem.getCrate(stack);
 			return crate == null ? 0xFFFFFFFF : (0xFF000000 | crate.getColor().rgb());
-		}, FTBQuestsItems.LOOTCRATE.get());
+		}, ModItems.LOOTCRATE.get());
 	}
 
 	private void onSidebarButtonCreated(SidebarButtonCreatedEvent event) {
@@ -193,7 +194,7 @@ public class FTBQuestsClientEventHandler {
 				}
 
 				if (currentlyObservingTicks >= currentlyObserving.getTimer()) {
-					new SubmitTaskMessage(currentlyObserving.id).sendToServer();
+					NetworkManager.sendToServer(new SubmitTaskMessage(currentlyObserving.id));
 					selfTeamData.addProgress(currentlyObserving, 1L);
 					currentlyObserving = null;
 					currentlyObservingTicks = 0L;

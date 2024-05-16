@@ -1,5 +1,6 @@
 package dev.ftb.mods.ftbquests.quest;
 
+import dev.architectury.networking.NetworkManager;
 import dev.ftb.mods.ftblibrary.config.ConfigGroup;
 import dev.ftb.mods.ftblibrary.icon.Icon;
 import dev.ftb.mods.ftblibrary.util.client.ClientUtils;
@@ -8,8 +9,9 @@ import dev.ftb.mods.ftbquests.client.gui.quests.QuestScreen;
 import dev.ftb.mods.ftbquests.net.MoveMovableMessage;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 
 import java.util.Optional;
@@ -104,8 +106,8 @@ public class QuestLink extends QuestObject implements Movable {
     }
 
     @Override
-    public void writeData(CompoundTag nbt) {
-        super.writeData(nbt);
+    public void writeData(CompoundTag nbt, HolderLookup.Provider provider) {
+        super.writeData(nbt, provider);
 
         nbt.putString("linked_quest", getCodeString(linkId));
         nbt.putDouble("x", x);
@@ -119,8 +121,8 @@ public class QuestLink extends QuestObject implements Movable {
     }
 
     @Override
-    public void readData(CompoundTag nbt) {
-        super.readData(nbt);
+    public void readData(CompoundTag nbt, HolderLookup.Provider provider) {
+        super.readData(nbt, provider);
 
         linkId = Long.parseLong(nbt.getString("linked_quest"), 16);
         x = nbt.getDouble("x");
@@ -133,7 +135,7 @@ public class QuestLink extends QuestObject implements Movable {
     }
 
     @Override
-    public void writeNetData(FriendlyByteBuf buffer) {
+    public void writeNetData(RegistryFriendlyByteBuf buffer) {
         super.writeNetData(buffer);
 
         buffer.writeLong(linkId);
@@ -144,7 +146,7 @@ public class QuestLink extends QuestObject implements Movable {
     }
 
     @Override
-    public void readNetData(FriendlyByteBuf buffer) {
+    public void readNetData(RegistryFriendlyByteBuf buffer) {
         super.readNetData(buffer);
 
         linkId = buffer.readLong();
@@ -195,8 +197,8 @@ public class QuestLink extends QuestObject implements Movable {
     }
 
     @Override
-    public void move(Chapter to, double x, double y) {
-        new MoveMovableMessage(this, to.id, x, y).sendToServer();
+    public void initiateMoveClientSide(Chapter to, double x, double y) {
+        NetworkManager.sendToServer(new MoveMovableMessage(id, to.id, x, y));
     }
 
     @Override

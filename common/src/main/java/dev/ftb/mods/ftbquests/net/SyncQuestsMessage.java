@@ -1,44 +1,33 @@
 package dev.ftb.mods.ftbquests.net;
 
 import dev.architectury.networking.NetworkManager;
-import dev.architectury.networking.simple.BaseS2CMessage;
-import dev.architectury.networking.simple.MessageType;
+import dev.ftb.mods.ftbquests.api.FTBQuestsAPI;
 import dev.ftb.mods.ftbquests.client.ClientQuestFile;
-import dev.ftb.mods.ftbquests.client.FTBQuestsClient;
 import dev.ftb.mods.ftbquests.quest.BaseQuestFile;
-import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 
-/**
- * @author LatvianModder
- */
-public class SyncQuestsMessage extends BaseS2CMessage {
-	private final BaseQuestFile file;
+public record SyncQuestsMessage(BaseQuestFile file) implements CustomPacketPayload {
+	public static final Type<SyncQuestsMessage> TYPE = new Type<>(FTBQuestsAPI.rl("sync_quests_message"));
 
-	SyncQuestsMessage(FriendlyByteBuf buffer) {
-		file = FTBQuestsClient.createClientQuestFile();
-		file.readNetDataFull(buffer);
-	}
-
-	public SyncQuestsMessage(BaseQuestFile f) {
-		file = f;
-	}
+	public static final StreamCodec<RegistryFriendlyByteBuf, SyncQuestsMessage> STREAM_CODEC = StreamCodec.composite(
+			BaseQuestFile.STREAM_CODEC, SyncQuestsMessage::file,
+			SyncQuestsMessage::new
+	);
 
 	@Override
-	public MessageType getType() {
-		return FTBQuestsNetHandler.SYNC_QUESTS;
+	public Type<SyncQuestsMessage> type() {
+		return TYPE;
 	}
 
-	@Override
-	public void write(FriendlyByteBuf buffer) {
-		file.writeNetDataFull(buffer);
-	}
+	public static void handle(SyncQuestsMessage message, NetworkManager.PacketContext context) {
+		context.queue(() -> {
+			ClientQuestFile.syncFromServer(message.file);
 
-	@Override
-	public void handle(NetworkManager.PacketContext context) {
-		ClientQuestFile.syncFromServer(file);
+			ClientQuestFile.INSTANCE.updateLootCrates();
 
-		ClientQuestFile.INSTANCE.updateLootCrates();
-
-		new RequestTeamDataMessage().sendToServer();
+			NetworkManager.sendToServer(RequestTeamDataMessage.INSTANCE);
+		});
 	}
 }

@@ -1,44 +1,38 @@
 package dev.ftb.mods.ftbquests.net;
 
 import dev.architectury.networking.NetworkManager;
-import dev.architectury.networking.simple.BaseC2SMessage;
-import dev.architectury.networking.simple.MessageType;
+import dev.ftb.mods.ftblibrary.util.NetworkHelper;
+import dev.ftb.mods.ftbquests.api.FTBQuestsAPI;
 import dev.ftb.mods.ftbquests.quest.Chapter;
 import dev.ftb.mods.ftbquests.quest.ChapterImage;
-import dev.ftb.mods.ftbquests.quest.ServerQuestFile;
 import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 
-public class CopyChapterImageMessage extends BaseC2SMessage {
-    private final ChapterImage img;
-    private final long chapterId;
+public record CopyChapterImageMessage(ChapterImage img) implements CustomPacketPayload {
+    public static final Type<CopyChapterImageMessage> TYPE = new Type<>(FTBQuestsAPI.rl("copy_chapter_image_message"));
+
+    public static final StreamCodec<FriendlyByteBuf, CopyChapterImageMessage> STREAM_CODEC = StreamCodec.composite(
+            ChapterImage.STREAM_CODEC, CopyChapterImageMessage::img,
+            CopyChapterImageMessage::new
+    );
 
     public CopyChapterImageMessage(ChapterImage toCopy, Chapter chapter, double newX, double newY) {
-        img = toCopy.copy(chapter, newX, newY);
-        this.chapterId = chapter.id;
-    }
-
-    public CopyChapterImageMessage(FriendlyByteBuf buf) {
-        chapterId = buf.readLong();
-        img = new ChapterImage(ServerQuestFile.INSTANCE.getChapter(chapterId));
-        img.readNetData(buf);
+        this(toCopy.copy(chapter, newX, newY));
     }
 
     @Override
-    public MessageType getType() {
-        return FTBQuestsNetHandler.COPY_CHAPTER_IMAGE;
+    public Type<CopyChapterImageMessage> type() {
+        return TYPE;
     }
 
-    @Override
-    public void write(FriendlyByteBuf buf) {
-        buf.writeLong(chapterId);
-        img.writeNetData(buf);
+    public static void handle(CopyChapterImageMessage message, NetworkManager.PacketContext context) {
+        context.queue(() -> {
+            Chapter chapter = message.img.getChapter();
+            chapter.addImage(message.img);
+            chapter.file.markDirty();
+            NetworkHelper.sendToAll(context.getPlayer().getServer(), new EditObjectResponseMessage(chapter));
+        });
     }
 
-    @Override
-    public void handle(NetworkManager.PacketContext context) {
-        Chapter chapter = img.getChapter();
-        chapter.addImage(img);
-        chapter.file.markDirty();
-        new EditObjectResponseMessage(chapter).sendToAll(context.getPlayer().getServer());
-    }
 }

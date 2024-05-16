@@ -1,5 +1,6 @@
 package dev.ftb.mods.ftbquests.client.gui.quests;
 
+import dev.architectury.networking.NetworkManager;
 import dev.ftb.mods.ftblibrary.ui.Button;
 import dev.ftb.mods.ftblibrary.ui.ContextMenuItem;
 import dev.ftb.mods.ftblibrary.ui.Panel;
@@ -11,7 +12,6 @@ import dev.ftb.mods.ftbquests.quest.reward.RewardType;
 import dev.ftb.mods.ftbquests.quest.reward.RewardTypes;
 import dev.ftb.mods.ftbquests.quest.theme.property.ThemeProperties;
 import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 
 import java.util.ArrayList;
@@ -34,11 +34,9 @@ public class AddRewardButton extends Button {
 		for (RewardType type : RewardTypes.TYPES.values()) {
 			contextMenu.add(new ContextMenuItem(type.getDisplayName(), type.getIconSupplier(), b -> {
 				playClickSound();
-				type.getGuiProvider().openCreationGui(parent, quest, reward -> {
-					CompoundTag extra = new CompoundTag();
-					extra.putString("type", type.getTypeForNBT());
-					new CreateObjectMessage(reward, extra).sendToServer();
-				});
+				type.getGuiProvider().openCreationGui(parent, quest, reward ->
+						NetworkManager.sendToServer(CreateObjectMessage.create(reward, type.makeExtraNBT()))
+				);
 			}));
 		}
 

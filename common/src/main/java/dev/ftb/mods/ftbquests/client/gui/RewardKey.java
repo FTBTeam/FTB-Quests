@@ -29,7 +29,7 @@ public class RewardKey {
 	}
 
 	public int hashCode() {
-		return stack.isEmpty() ? Objects.hash(title, icon) : Objects.hash(stack.getItem(), stack.getTag());
+		return stack.isEmpty() ? Objects.hash(title, icon) : ItemStack.hashItemAndComponents(stack);
 	}
 
 	public boolean equals(Object o) {
@@ -37,7 +37,7 @@ public class RewardKey {
 			return true;
 		} else if (o instanceof RewardKey key) {
 			if (!stack.isEmpty()) {
-				return stack.getItem() == key.stack.getItem() && Objects.equals(stack.getTag(), key.stack.getTag());
+				return ItemStack.isSameItemSameComponents(stack, key.stack);
 			} else {
 				return title.equals(key.title) && icon.equals(key.icon);
 			}

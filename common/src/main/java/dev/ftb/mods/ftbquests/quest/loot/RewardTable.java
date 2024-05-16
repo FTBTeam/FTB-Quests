@@ -1,5 +1,6 @@
 package dev.ftb.mods.ftbquests.quest.loot;
 
+import dev.architectury.networking.NetworkManager;
 import dev.ftb.mods.ftblibrary.config.ConfigGroup;
 import dev.ftb.mods.ftblibrary.icon.Icon;
 import dev.ftb.mods.ftblibrary.icon.IconAnimation;
@@ -25,10 +26,11 @@ import dev.ftb.mods.ftbquests.quest.reward.RewardTypes;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.ChatFormatting;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.Tag;
-import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.RandomSource;
@@ -135,8 +137,8 @@ public final class RewardTable extends QuestObjectBase {
 	}
 
 	@Override
-	public void writeData(CompoundTag nbt) {
-		super.writeData(nbt);
+	public void writeData(CompoundTag nbt, HolderLookup.Provider provider) {
+		super.writeData(nbt, provider);
 
 		if (emptyWeight > 0f) {
 			nbt.putFloat("empty_weight", emptyWeight);
@@ -156,7 +158,7 @@ public final class RewardTable extends QuestObjectBase {
 
 		for (WeightedReward wr : weightedRewards) {
 			SNBTCompoundTag nbt1 = new SNBTCompoundTag();
-			wr.getReward().writeData(nbt1);
+			wr.getReward().writeData(nbt1, provider);
 
 			if (wr.getReward().getType() != RewardTypes.ITEM) {
 				nbt1.putString("type", wr.getReward().getType().getTypeForNBT());
@@ -185,8 +187,8 @@ public final class RewardTable extends QuestObjectBase {
 	}
 
 	@Override
-	public void readData(CompoundTag nbt) {
-		super.readData(nbt);
+	public void readData(CompoundTag nbt, HolderLookup.Provider provider) {
+		super.readData(nbt, provider);
 		emptyWeight = nbt.getFloat("empty_weight");
 		lootSize = nbt.getInt("loot_size");
 		hideTooltip = nbt.getBoolean("hide_tooltip");
@@ -200,7 +202,7 @@ public final class RewardTable extends QuestObjectBase {
 			Reward reward = RewardType.createReward(0L, fakeQuest, nbt1.getString("type"));
 
 			if (reward != null) {
-				reward.readData(nbt1);
+				reward.readData(nbt1, provider);
 				weightedRewards.add(new WeightedReward(reward, nbt1.contains("weight") ? nbt1.getFloat("weight") : 1));
 			}
 		}
@@ -216,7 +218,7 @@ public final class RewardTable extends QuestObjectBase {
 	}
 
 	@Override
-	public void writeNetData(FriendlyByteBuf buffer) {
+	public void writeNetData(RegistryFriendlyByteBuf buffer) {
 		super.writeNetData(buffer);
 		buffer.writeUtf(filename, Short.MAX_VALUE);
 		buffer.writeFloat(emptyWeight);
@@ -245,7 +247,7 @@ public final class RewardTable extends QuestObjectBase {
 	}
 
 	@Override
-	public void readNetData(FriendlyByteBuf buffer) {
+	public void readNetData(RegistryFriendlyByteBuf buffer) {
 		super.readNetData(buffer);
 		filename = buffer.readUtf(Short.MAX_VALUE);
 		emptyWeight = buffer.readFloat();
@@ -377,7 +379,7 @@ public final class RewardTable extends QuestObjectBase {
 	@Environment(EnvType.CLIENT)
 	public void onEditButtonClicked(Runnable gui) {
 		new EditRewardTableScreen(gui, this, editedReward -> {
-			new EditObjectMessage(editedReward).sendToServer();
+			NetworkManager.sendToServer(EditObjectMessage.forQuestObject(editedReward));
 			clearCachedData();
 		}).openGui();
 	}

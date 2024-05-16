@@ -1,6 +1,7 @@
 package dev.ftb.mods.ftbquests.client.gui.quests;
 
 import com.mojang.datafixers.util.Pair;
+import dev.architectury.networking.NetworkManager;
 import dev.ftb.mods.ftblibrary.config.ConfigGroup;
 import dev.ftb.mods.ftblibrary.config.ConfigValue;
 import dev.ftb.mods.ftblibrary.config.ConfigWithVariants;
@@ -31,7 +32,6 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.renderer.Rect2i;
-import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.util.Mth;
@@ -275,7 +275,7 @@ public class QuestScreen extends BaseScreen {
 
 	private void setAutofocusedId(long id) {
 		selectedChapter.setAutofocus(id);
-		new EditObjectMessage(selectedChapter).sendToServer();
+		NetworkManager.sendToServer(EditObjectMessage.forQuestObject(selectedChapter));
 	}
 
 	private List<ContextMenuItem> scanForConfigEntries(List<ContextMenuItem> res, QuestObjectBase object, ConfigGroup g) {
@@ -297,7 +297,7 @@ public class QuestScreen extends BaseScreen {
 						value.onClicked(button, mouseButton, accepted -> {
 							if (accepted) {
 								value.applyValue();
-								new EditObjectMessage(object).sendToServer();
+								NetworkManager.sendToServer(EditObjectMessage.forQuestObject(object));
 							}
 						});
 					}
@@ -333,7 +333,7 @@ public class QuestScreen extends BaseScreen {
 	private boolean moveSelectedQuests(double x, double y) {
 		for (Movable movable : selectedObjects) {
 			if (movable.getChapter() == selectedChapter) {
-				movable.move(selectedChapter, movable.getX() + x, movable.getY() + y);
+				movable.initiateMoveClientSide(selectedChapter, movable.getX() + x, movable.getY() + y);
 			}
 		}
 
@@ -354,7 +354,7 @@ public class QuestScreen extends BaseScreen {
 					.orElse(null);
 		} else {
 			// one object selected
-			toCopy = selectedObjects.get(0);
+			toCopy = selectedObjects.getFirst();
 		}
 
 		if (toCopy != null) {
@@ -375,7 +375,7 @@ public class QuestScreen extends BaseScreen {
 				Quest quest = file.getQuest(id);
 				if (quest == null) return false;
 				Pair<Double, Double> qxy = getSnappedXY();
-				new CopyQuestMessage(quest, selectedChapter, qxy.getFirst(), qxy.getSecond(), withDeps).sendToServer();
+				NetworkManager.sendToServer(new CopyQuestMessage(quest.id, selectedChapter.id, qxy.getFirst(), qxy.getSecond(), withDeps));
 				return true;
 			}).orElse(false);
 		}
@@ -384,7 +384,7 @@ public class QuestScreen extends BaseScreen {
 	private boolean pasteSelectedImage() {
 		return ChapterImageButton.getClipboardImage().map(clipImg -> {
 			Pair<Double,Double> qxy = getSnappedXY();
-			new CopyChapterImageMessage(clipImg, selectedChapter, qxy.getFirst(), qxy.getSecond()).sendToServer();
+			NetworkManager.sendToServer(new CopyChapterImageMessage(clipImg, selectedChapter, qxy.getFirst(), qxy.getSecond()));
 			return true;
 		}).orElse(false);
 	}
@@ -398,7 +398,7 @@ public class QuestScreen extends BaseScreen {
 			Pair<Double,Double> qxy = getSnappedXY();
 			QuestLink link = new QuestLink(0L, selectedChapter, id);
 			link.setPosition(qxy.getFirst(), qxy.getSecond());
-			new CreateObjectMessage(link, new CompoundTag(), false).sendToServer();
+			NetworkManager.sendToServer(CreateObjectMessage.create(link, null, false));
 			return true;
 		}).orElse(false);
 	}
@@ -418,7 +418,7 @@ public class QuestScreen extends BaseScreen {
 				file.deleteObject(ql.id);
 			} else if (movable instanceof ChapterImage img) {
 				img.getChapter().removeImage(img);
-				new EditObjectMessage(img.getChapter()).sendToServer();
+				NetworkManager.sendToServer(EditObjectMessage.forQuestObject(img.getChapter()));
 			}
 		});
 		selectedObjects.clear();

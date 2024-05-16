@@ -1,34 +1,27 @@
 package dev.ftb.mods.ftbquests.net;
 
 import dev.architectury.networking.NetworkManager;
-import dev.architectury.networking.simple.BaseS2CMessage;
-import dev.architectury.networking.simple.MessageType;
+import dev.ftb.mods.ftbquests.api.FTBQuestsAPI;
 import dev.ftb.mods.ftbquests.client.FTBQuestsNetClient;
 import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.codec.ByteBufCodecs;
+import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 
-public class ToggleChapterPinnedResponseMessage extends BaseS2CMessage {
-    private final boolean pinned;
+public record ToggleChapterPinnedResponseMessage(boolean pinned) implements CustomPacketPayload {
+    public static final Type<ToggleChapterPinnedResponseMessage> TYPE = new Type<>(FTBQuestsAPI.rl("toggle_chapter_pinned_response_message"));
 
-    public ToggleChapterPinnedResponseMessage(boolean pinned) {
-        this.pinned = pinned;
-    }
-
-    ToggleChapterPinnedResponseMessage(FriendlyByteBuf buffer) {
-        pinned = buffer.readBoolean();
-    }
-
-    @Override
-    public MessageType getType() {
-        return FTBQuestsNetHandler.TOGGLE_CHAPTER_PINNED_RESPONSE;
-    }
+    public static final StreamCodec<FriendlyByteBuf, ToggleChapterPinnedResponseMessage> STREAM_CODEC = StreamCodec.composite(
+            ByteBufCodecs.BOOL, ToggleChapterPinnedResponseMessage::pinned,
+            ToggleChapterPinnedResponseMessage::new
+    );
 
     @Override
-    public void write(FriendlyByteBuf buf) {
-        buf.writeBoolean(pinned);
+    public Type<ToggleChapterPinnedResponseMessage> type() {
+        return TYPE;
     }
 
-    @Override
-    public void handle(NetworkManager.PacketContext context) {
-        FTBQuestsNetClient.toggleChapterPinned(pinned);
+    public static void handle(ToggleChapterPinnedResponseMessage message, NetworkManager.PacketContext context) {
+        context.queue(() -> FTBQuestsNetClient.toggleChapterPinned(message.pinned));
     }
 }

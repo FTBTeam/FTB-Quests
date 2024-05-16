@@ -1,37 +1,26 @@
 package dev.ftb.mods.ftbquests.net;
 
 import dev.architectury.networking.NetworkManager;
-import dev.architectury.networking.simple.BaseS2CMessage;
-import dev.architectury.networking.simple.MessageType;
+import dev.ftb.mods.ftbquests.api.FTBQuestsAPI;
 import dev.ftb.mods.ftbquests.client.FTBQuestsNetClient;
 import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 
-/**
- * @author LatvianModder
- */
-public class CreateOtherTeamDataMessage extends BaseS2CMessage {
-	private final TeamDataUpdate dataUpdate;
+public record CreateOtherTeamDataMessage(TeamDataUpdate dataUpdate) implements CustomPacketPayload {
+    public static final Type<CreateOtherTeamDataMessage> TYPE = new Type<>(FTBQuestsAPI.rl("create_other_team_data_message"));
 
-	CreateOtherTeamDataMessage(FriendlyByteBuf buffer) {
-		dataUpdate = new TeamDataUpdate(buffer);
-	}
-
-	public CreateOtherTeamDataMessage(TeamDataUpdate update) {
-		dataUpdate = update;
-	}
+    public static final StreamCodec<FriendlyByteBuf, CreateOtherTeamDataMessage> STREAM_CODEC = StreamCodec.composite(
+	    TeamDataUpdate.STREAM_CODEC, CreateOtherTeamDataMessage::dataUpdate,
+	    CreateOtherTeamDataMessage::new
+    );
 
 	@Override
-	public MessageType getType() {
-		return FTBQuestsNetHandler.CREATE_OTHER_TEAM_DATA;
+    public Type<CreateOtherTeamDataMessage> type() {
+        return TYPE;
 	}
 
-	@Override
-	public void write(FriendlyByteBuf buffer) {
-		dataUpdate.write(buffer);
-	}
-
-	@Override
-	public void handle(NetworkManager.PacketContext context) {
-		FTBQuestsNetClient.createOtherTeamData(dataUpdate);
+    public static void handle(CreateOtherTeamDataMessage message, NetworkManager.PacketContext context) {
+		context.queue(() -> FTBQuestsNetClient.createOtherTeamData(message.dataUpdate));
 	}
 }

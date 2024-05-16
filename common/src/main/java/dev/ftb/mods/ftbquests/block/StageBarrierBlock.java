@@ -10,7 +10,7 @@ import org.jetbrains.annotations.Nullable;
 public class StageBarrierBlock extends QuestBarrierBlock {
 	private static final MapCodec<StageBarrierBlock> CODEC = simpleCodec(StageBarrierBlock::new);
 
-	protected StageBarrierBlock(Properties props) {
+	public StageBarrierBlock(Properties props) {
 		super(props);
 	}
 

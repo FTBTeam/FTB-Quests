@@ -1,19 +1,20 @@
 package dev.ftb.mods.ftbquests.quest.reward;
 
 import dev.architectury.hooks.item.ItemStackHooks;
+import dev.architectury.networking.NetworkManager;
 import dev.ftb.mods.ftblibrary.config.ConfigGroup;
 import dev.ftb.mods.ftblibrary.icon.Icon;
 import dev.ftb.mods.ftblibrary.icon.ItemIcon;
 import dev.ftb.mods.ftblibrary.ui.Widget;
 import dev.ftb.mods.ftblibrary.util.client.PositionedIngredient;
 import dev.ftb.mods.ftbquests.net.DisplayItemRewardToastMessage;
-import dev.ftb.mods.ftbquests.net.FTBQuestsNetHandler;
 import dev.ftb.mods.ftbquests.quest.Quest;
 import dev.ftb.mods.ftbquests.util.NBTUtils;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.server.level.ServerPlayer;
@@ -63,9 +64,9 @@ public class ItemReward extends Reward {
 	}
 
 	@Override
-	public void writeData(CompoundTag nbt) {
-		super.writeData(nbt);
-		NBTUtils.write(nbt, "item", item);
+	public void writeData(CompoundTag nbt, HolderLookup.Provider provider) {
+		super.writeData(nbt, provider);
+		NBTUtils.write(nbt, "item", item, provider);
 
 		if (count > 1) {
 			nbt.putInt("count", count);
@@ -79,9 +80,9 @@ public class ItemReward extends Reward {
 	}
 
 	@Override
-	public void readData(CompoundTag nbt) {
-		super.readData(nbt);
-		item = NBTUtils.read(nbt, "item");
+	public void readData(CompoundTag nbt, HolderLookup.Provider provider) {
+		super.readData(nbt, provider);
+		item = NBTUtils.read(nbt, "item", provider);
 
 		count = nbt.getInt("count");
 		if (count == 0) {
@@ -94,18 +95,20 @@ public class ItemReward extends Reward {
 	}
 
 	@Override
-	public void writeNetData(FriendlyByteBuf buffer) {
+	public void writeNetData(RegistryFriendlyByteBuf buffer) {
 		super.writeNetData(buffer);
-		FTBQuestsNetHandler.writeItemType(buffer, item);
+
+		ItemStack.OPTIONAL_STREAM_CODEC.encode(buffer, item);
 		buffer.writeVarInt(count);
 		buffer.writeVarInt(randomBonus);
 		buffer.writeBoolean(onlyOne);
 	}
 
 	@Override
-	public void readNetData(FriendlyByteBuf buffer) {
+	public void readNetData(RegistryFriendlyByteBuf buffer) {
 		super.readNetData(buffer);
-		item = FTBQuestsNetHandler.readItemType(buffer);
+
+		item = ItemStack.OPTIONAL_STREAM_CODEC.decode(buffer);
 		count = buffer.readVarInt();
 		randomBonus = buffer.readVarInt();
 		onlyOne = buffer.readBoolean();
@@ -136,7 +139,7 @@ public class ItemReward extends Reward {
 		}
 
 		if (notify) {
-			new DisplayItemRewardToastMessage(item, size).sendTo(player);
+			NetworkManager.sendToPlayer(player, new DisplayItemRewardToastMessage(item, size));
 		}
 	}
 

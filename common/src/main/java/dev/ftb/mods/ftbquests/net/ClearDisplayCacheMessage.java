@@ -1,34 +1,29 @@
 package dev.ftb.mods.ftbquests.net;
 
 import dev.architectury.networking.NetworkManager;
-import dev.architectury.networking.simple.BaseS2CMessage;
-import dev.architectury.networking.simple.MessageType;
 import dev.architectury.utils.Env;
-import dev.architectury.utils.GameInstance;
+import dev.ftb.mods.ftblibrary.util.NetworkHelper;
 import dev.ftb.mods.ftbquests.FTBQuests;
+import dev.ftb.mods.ftbquests.api.FTBQuestsAPI;
 import dev.ftb.mods.ftbquests.integration.item_filtering.DisplayStacksCache;
 import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.server.level.ServerPlayer;
 
-public class ClearDisplayCacheMessage extends BaseS2CMessage {
-    public ClearDisplayCacheMessage() {
-    }
+public class ClearDisplayCacheMessage implements CustomPacketPayload {
+    public static final Type<ClearDisplayCacheMessage> TYPE = new Type<>(FTBQuestsAPI.rl("clear_display_cache_message"));
 
-    public ClearDisplayCacheMessage(FriendlyByteBuf buf) {
-    }
+    private static final ClearDisplayCacheMessage INSTANCE = new ClearDisplayCacheMessage();
 
-    @Override
-    public MessageType getType() {
-        return FTBQuestsNetHandler.CLEAR_DISPLAY_CACHE;
-    }
+    public static final StreamCodec<FriendlyByteBuf, ClearDisplayCacheMessage> STREAM_CODEC = StreamCodec.unit(INSTANCE);
 
     @Override
-    public void write(FriendlyByteBuf buf) {
+    public Type<ClearDisplayCacheMessage> type() {
+        return TYPE;
     }
 
-    @Override
-    public void handle(NetworkManager.PacketContext context) {
+    public static void handle(ClearDisplayCacheMessage message, NetworkManager.PacketContext context) {
         if (context.getEnvironment() == Env.CLIENT) {
             context.queue(() -> {
                 DisplayStacksCache.clear();
@@ -40,9 +35,7 @@ public class ClearDisplayCacheMessage extends BaseS2CMessage {
     public static void clearForAll(MinecraftServer server) {
         if (server != null) {
             ClearDisplayCacheMessage msg = new ClearDisplayCacheMessage();
-            for (ServerPlayer player : server.getPlayerList().getPlayers()) {
-                msg.sendTo(player);
-            }
+            NetworkHelper.sendToAll(server, msg);
         }
     }
 }

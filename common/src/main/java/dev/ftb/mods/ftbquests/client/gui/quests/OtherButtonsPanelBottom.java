@@ -1,5 +1,6 @@
 package dev.ftb.mods.ftbquests.client.gui.quests;
 
+import dev.architectury.networking.NetworkManager;
 import dev.ftb.mods.ftblibrary.icon.Icons;
 import dev.ftb.mods.ftblibrary.ui.ContextMenuItem;
 import dev.ftb.mods.ftblibrary.ui.Panel;
@@ -73,7 +74,7 @@ public class OtherButtonsPanelBottom extends OtherButtonsPanel {
 				StructureTask.maybeRequestStructureSync();
 			}
 
-			new ToggleEditingModeMessage().sendToServer();
+			NetworkManager.sendToServer(ToggleEditingModeMessage.INSTANCE);
 		}
 	}
 
@@ -120,7 +121,7 @@ public class OtherButtonsPanelBottom extends OtherButtonsPanel {
 			contextMenu.add(new ContextMenuItem(Component.translatable("ftbquests.reward_tables"), ThemeProperties.REWARD_TABLE_ICON.get(),
 					b -> new RewardTablesScreen(questScreen).openGui()));
 			contextMenu.add(new ContextMenuItem(Component.translatable("ftbquests.gui.save_on_server"), ThemeProperties.SAVE_ICON.get(),
-					b -> new ForceSaveMessage().sendToServer()));
+					b -> NetworkManager.sendToServer(ForceSaveMessage.INSTANCE)));
 			contextMenu.add(new ContextMenuItem(Component.translatable("ftbquests.gui.save_as_file"), ThemeProperties.DOWNLOAD_ICON.get(),
 					b -> saveLocally()));
 
@@ -151,7 +152,7 @@ public class OtherButtonsPanelBottom extends OtherButtonsPanel {
 				appendNum(fileName, time.get(Calendar.MINUTE), '-');
 				appendNum(fileName, time.get(Calendar.SECOND), '\0');
 				File file = new File(Minecraft.getInstance().gameDirectory, fileName.toString()).getCanonicalFile();
-				ClientQuestFile.INSTANCE.writeDataFull(file.toPath());
+				ClientQuestFile.INSTANCE.writeDataFull(file.toPath(), ClientQuestFile.INSTANCE.holderLookup());
 				Component component = Component.translatable("ftbquests.gui.saved_as_file", "." + file.getPath().replace(Minecraft.getInstance().gameDirectory.getCanonicalFile().getAbsolutePath(), ""));
 				component.getStyle().withClickEvent(new ClickEvent(ClickEvent.Action.OPEN_FILE, file.getAbsolutePath()));
 				Minecraft.getInstance().player.sendSystemMessage(component);

@@ -1,9 +1,12 @@
 package dev.ftb.mods.ftbquests.item;
 
+import dev.ftb.mods.ftbquests.FTBQuests;
 import dev.ftb.mods.ftbquests.client.ClientQuestFile;
 import dev.ftb.mods.ftbquests.client.gui.RewardNotificationsScreen;
 import dev.ftb.mods.ftbquests.quest.loot.LootCrate;
 import dev.ftb.mods.ftbquests.quest.loot.WeightedReward;
+import dev.ftb.mods.ftbquests.registry.ModDataComponents;
+import dev.ftb.mods.ftbquests.registry.ModItems;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.ChatFormatting;
@@ -32,16 +35,17 @@ import java.util.List;
  */
 public class LootCrateItem extends Item {
 	public LootCrateItem() {
-		super(FTBQuestsItems.defaultProps());
+		super(ModItems.defaultProps()
+				.rarity(Rarity.UNCOMMON)
+				.component(ModDataComponents.LOOT_CRATE.get(), "")
+		);
 	}
 
 	@Nullable
 	public static LootCrate getCrate(ItemStack stack) {
-		if (stack.hasTag() && stack.getItem() instanceof LootCrateItem) {
-			return LootCrate.LOOT_CRATES.get(stack.getTag().getString("type"));
-		}
-
-		return null;
+		return FTBQuests.getComponent(stack, ModDataComponents.LOOT_CRATE)
+				.map(type -> LootCrate.LOOT_CRATES.get(type))
+				.orElse(null);
 	}
 
 	@Override
@@ -94,14 +98,9 @@ public class LootCrateItem extends Item {
 	}
 
 	@Override
-	public Rarity getRarity(ItemStack stack) {
-		return Rarity.UNCOMMON;
-	}
-
-	@Override
 	@Environment(EnvType.CLIENT)
-	public void appendHoverText(ItemStack stack, @Nullable Level world, List<Component> tooltip, TooltipFlag flag) {
-		if (world == null || !ClientQuestFile.exists()) {
+	public void appendHoverText(ItemStack stack, TooltipContext context, List<Component> tooltip, TooltipFlag flag) {
+		if (context.registries() == null || !ClientQuestFile.exists()) {
 			return;
 		}
 
@@ -115,7 +114,7 @@ public class LootCrateItem extends Item {
 			tooltip.add(Component.translatable("item.ftbquests.lootcrate.tooltip_1").withStyle(ChatFormatting.GRAY));
 			tooltip.add(Component.translatable("item.ftbquests.lootcrate.tooltip_2").withStyle(ChatFormatting.GRAY));
 		} else {
-			String name = stack.hasTag() ? stack.getTag().getString("type") : "";
+			String name = stack.getOrDefault(ModDataComponents.LOOT_CRATE.get(), "");
 			tooltip.add(Component.translatable("item.ftbquests.lootcrate.missing", name).withStyle(ChatFormatting.RED));
 		}
 	}

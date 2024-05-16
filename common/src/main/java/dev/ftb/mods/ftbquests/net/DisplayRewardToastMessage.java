@@ -1,48 +1,32 @@
 package dev.ftb.mods.ftbquests.net;
 
 import dev.architectury.networking.NetworkManager;
-import dev.architectury.networking.simple.BaseS2CMessage;
-import dev.architectury.networking.simple.MessageType;
 import dev.ftb.mods.ftblibrary.icon.Icon;
+import dev.ftb.mods.ftbquests.api.FTBQuestsAPI;
 import dev.ftb.mods.ftbquests.client.FTBQuestsNetClient;
-import dev.ftb.mods.ftbquests.util.NetUtils;
-import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.ComponentSerialization;
+import net.minecraft.network.codec.ByteBufCodecs;
+import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 
-/**
- * @author LatvianModder
- */
-public class DisplayRewardToastMessage extends BaseS2CMessage {
-	private final long id;
-	private final Component text;
-	private final Icon icon;
+public record DisplayRewardToastMessage(long id, Component text, Icon icon) implements CustomPacketPayload {
+	public static final Type<DisplayRewardToastMessage> TYPE = new Type<>(FTBQuestsAPI.rl("display_reward_toast_message"));
 
-	DisplayRewardToastMessage(FriendlyByteBuf buffer) {
-		id = buffer.readLong();
-		text = buffer.readComponent();
-		icon = NetUtils.readIcon(buffer);
-	}
-
-	public DisplayRewardToastMessage(long _id, Component t, Icon i) {
-		id = _id;
-		text = t;
-		icon = i;
-	}
+	public static final StreamCodec<RegistryFriendlyByteBuf, DisplayRewardToastMessage> STREAM_CODEC = StreamCodec.composite(
+			ByteBufCodecs.VAR_LONG, DisplayRewardToastMessage::id,
+			ComponentSerialization.STREAM_CODEC, DisplayRewardToastMessage::text,
+			Icon.STREAM_CODEC, DisplayRewardToastMessage::icon,
+			DisplayRewardToastMessage::new
+	);
 
 	@Override
-	public MessageType getType() {
-		return FTBQuestsNetHandler.DISPLAY_REWARD_TOAST;
+	public Type<DisplayRewardToastMessage> type() {
+		return TYPE;
 	}
 
-	@Override
-	public void write(FriendlyByteBuf buffer) {
-		buffer.writeLong(id);
-		buffer.writeComponent(text);
-		NetUtils.writeIcon(buffer, icon);
-	}
-
-	@Override
-	public void handle(NetworkManager.PacketContext context) {
-		FTBQuestsNetClient.displayRewardToast(id, text, icon);
+	public static void handle(DisplayRewardToastMessage message, NetworkManager.PacketContext context) {
+		context.queue(() -> FTBQuestsNetClient.displayRewardToast(message.id, message.text, message.icon));
 	}
 }

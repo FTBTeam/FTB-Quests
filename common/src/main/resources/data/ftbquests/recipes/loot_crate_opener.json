@@ -2,7 +2,7 @@
   "type": "minecraft:crafting_shaped",
   "group": "ftbquests:loot_crate_opener",
   "result": {
-    "item": "ftbquests:loot_crate_opener",
+    "id": "ftbquests:loot_crate_opener",
     "count": 1
   },
   "pattern": [

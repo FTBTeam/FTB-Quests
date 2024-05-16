@@ -1,22 +1,33 @@
 package dev.ftb.mods.ftbquests.block.entity;
 
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
+import dev.architectury.networking.NetworkManager;
 import dev.ftb.mods.ftblibrary.config.BooleanConfig;
 import dev.ftb.mods.ftblibrary.config.ConfigGroup;
 import dev.ftb.mods.ftblibrary.config.ItemStackConfig;
 import dev.ftb.mods.ftbquests.api.FTBQuestsAPI;
-import dev.ftb.mods.ftbquests.block.FTBQuestsBlocks;
 import dev.ftb.mods.ftbquests.block.TaskScreenBlock;
 import dev.ftb.mods.ftbquests.client.FTBQuestsClient;
-import dev.ftb.mods.ftbquests.net.TaskScreenConfigResponse;
+import dev.ftb.mods.ftbquests.net.TaskScreenConfigResponseMessage;
 import dev.ftb.mods.ftbquests.quest.BaseQuestFile;
 import dev.ftb.mods.ftbquests.quest.QuestObjectBase;
 import dev.ftb.mods.ftbquests.quest.TeamData;
 import dev.ftb.mods.ftbquests.quest.task.Task;
+import dev.ftb.mods.ftbquests.registry.ModBlockEntityTypes;
+import dev.ftb.mods.ftbquests.registry.ModBlocks;
+import dev.ftb.mods.ftbquests.registry.ModDataComponents;
 import dev.ftb.mods.ftbquests.util.ConfigQuestObject;
 import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.core.HolderLookup;
+import net.minecraft.core.component.DataComponentMap;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.NbtOps;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.codec.ByteBufCodecs;
+import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientGamePacketListener;
 import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
@@ -47,7 +58,7 @@ public class TaskScreenBlockEntity extends BlockEntity implements ITaskScreen {
     private TeamData cachedTeamData = null;
 
     public TaskScreenBlockEntity(BlockPos blockPos, BlockState blockState) {
-        super(FTBQuestsBlockEntities.CORE_TASK_SCREEN.get(), blockPos, blockState);
+        super(ModBlockEntityTypes.CORE_TASK_SCREEN.get(), blockPos, blockState);
     }
 
     public Task getTask() {
@@ -138,7 +149,7 @@ public class TaskScreenBlockEntity extends BlockEntity implements ITaskScreen {
     public void removeAllAuxScreens() {
         if (level != null && getBlockState().getBlock() instanceof TaskScreenBlock tsb) {
             BlockPos.betweenClosedStream(TaskScreenBlock.getMultiblockBounds(getBlockPos(), tsb.getSize(), getBlockState().getValue(FACING))).forEach(pos -> {
-                if (level.getBlockState(pos).getBlock() == FTBQuestsBlocks.AUX_SCREEN.get()) {
+                if (level.getBlockState(pos).getBlock() == ModBlocks.AUX_SCREEN.get()) {
                     level.removeBlock(pos, false);
                 }
             });
@@ -152,43 +163,61 @@ public class TaskScreenBlockEntity extends BlockEntity implements ITaskScreen {
     }
 
     @Override
-    public CompoundTag getUpdateTag() {
-        return saveWithoutMetadata();
+    public CompoundTag getUpdateTag(HolderLookup.Provider provider) {
+        return saveWithoutMetadata(provider);
     }
 
     @Override
-    public void load(CompoundTag compoundTag) {
-        super.load(compoundTag);
+    public void loadAdditional(CompoundTag compoundTag, HolderLookup.Provider provider) {
+        super.loadAdditional(compoundTag, provider);
 
         teamId = compoundTag.hasUUID("TeamID") ? compoundTag.getUUID("TeamID") : Util.NIL_UUID;
-        taskId = compoundTag.getLong("TaskID");
-        skin = compoundTag.contains("Skin") ? ItemStack.of(compoundTag.getCompound("Skin")) : ItemStack.EMPTY;
-        indestructible = compoundTag.getBoolean("Indestructible");
-        inputOnly = compoundTag.getBoolean("InputOnly");
-        inputModeIcon = compoundTag.contains("InputModeIcon") ? ItemStack.of(compoundTag.getCompound("InputModeIcon")) : ItemStack.EMPTY;
-        textShadow = compoundTag.getBoolean("TextShadow");
+
+        TaskScreenSaveData data = TaskScreenSaveData.CODEC.parse(NbtOps.INSTANCE, compoundTag.getCompound("savedData"))
+                .result().orElse(TaskScreenSaveData.DEFAULT);
+        applySavedData(data);
 
         task = null;
         fakeTextureUV = null;  // force recalc
     }
 
     @Override
-    protected void saveAdditional(CompoundTag compoundTag) {
-        super.saveAdditional(compoundTag);
+    protected void saveAdditional(CompoundTag compoundTag, HolderLookup.Provider provider) {
+        super.saveAdditional(compoundTag, provider);
 
         if (teamId != Util.NIL_UUID) compoundTag.putUUID("TeamID", teamId);
-        if (taskId != 0L) compoundTag.putLong("TaskID", taskId);
-        if (!skin.isEmpty()) compoundTag.put("Skin", skin.save(new CompoundTag()));
-        if (indestructible) compoundTag.putBoolean("Indestructible", true);
-        if (inputOnly) compoundTag.putBoolean("InputOnly", true);
-        if (!inputModeIcon.isEmpty()) compoundTag.put("InputModeIcon", inputModeIcon.save(new CompoundTag()));
-        if (textShadow) compoundTag.putBoolean("TextShadow", true);
+
+        TaskScreenSaveData.CODEC.encodeStart(NbtOps.INSTANCE, TaskScreenSaveData.fromBlockEntity(this))
+                .ifSuccess(tag -> compoundTag.put("savedData", tag));
+    }
+
+    @Override
+    protected void applyImplicitComponents(DataComponentInput dataComponentInput) {
+        super.applyImplicitComponents(dataComponentInput);
+
+        applySavedData(dataComponentInput.getOrDefault(ModDataComponents.TASK_SCREEN_SAVED.get(), TaskScreenSaveData.DEFAULT));
+    }
+
+    @Override
+    protected void collectImplicitComponents(DataComponentMap.Builder builder) {
+        super.collectImplicitComponents(builder);
+
+        builder.set(ModDataComponents.TASK_SCREEN_SAVED.get(), TaskScreenSaveData.fromBlockEntity(this));
+    }
+
+    private void applySavedData(TaskScreenSaveData data) {
+        taskId = data.taskId;
+        skin = data.skin;
+        indestructible = data.indestructible;
+        inputOnly = data.inputOnly;
+        inputModeIcon = data.inputModeIcon;
+        textShadow = data.textShadow;
     }
 
     public ConfigGroup fillConfigGroup(TeamData data) {
         ConfigGroup cg0 = new ConfigGroup("task_screen", accepted -> {
             if (accepted) {
-                new TaskScreenConfigResponse(this).sendToServer();
+                NetworkManager.sendToServer(new TaskScreenConfigResponseMessage(getBlockPos(), saveWithoutMetadata(getLevel().registryAccess())));
             }
         });
 
@@ -224,5 +253,34 @@ public class TaskScreenBlockEntity extends BlockEntity implements ITaskScreen {
             }
         }
         return fakeTextureUV;
+    }
+
+    public record TaskScreenSaveData(long taskId, ItemStack skin, boolean indestructible, boolean inputOnly, ItemStack inputModeIcon, boolean textShadow) {
+        public static TaskScreenSaveData DEFAULT = new TaskScreenSaveData(
+                0L, ItemStack.EMPTY, false, false, ItemStack.EMPTY, false
+        );
+
+        public static TaskScreenSaveData fromBlockEntity(TaskScreenBlockEntity b) {
+            return new TaskScreenSaveData(b.taskId, b.skin, b.indestructible, b.inputOnly, b.inputModeIcon, b.textShadow);
+        }
+
+        public static final Codec<TaskScreenSaveData> CODEC = RecordCodecBuilder.create(builder -> builder.group(
+                Codec.LONG.optionalFieldOf("taskId", 0L).forGetter(TaskScreenSaveData::taskId),
+                ItemStack.CODEC.optionalFieldOf("skin", ItemStack.EMPTY).forGetter(TaskScreenSaveData::skin),
+                Codec.BOOL.optionalFieldOf("indestructible", false).forGetter(TaskScreenSaveData::indestructible),
+                Codec.BOOL.optionalFieldOf("input_only", false).forGetter(TaskScreenSaveData::inputOnly),
+                ItemStack.CODEC.optionalFieldOf("skin", ItemStack.EMPTY).forGetter(TaskScreenSaveData::inputModeIcon),
+                Codec.BOOL.optionalFieldOf("input_only", false).forGetter(TaskScreenSaveData::textShadow)
+        ).apply(builder, TaskScreenSaveData::new));
+
+        public static StreamCodec<RegistryFriendlyByteBuf, TaskScreenSaveData> STREAM_CODEC = StreamCodec.composite(
+                ByteBufCodecs.VAR_LONG, TaskScreenSaveData::taskId,
+                ItemStack.OPTIONAL_STREAM_CODEC, TaskScreenSaveData::skin,
+                ByteBufCodecs.BOOL, TaskScreenSaveData::indestructible,
+                ByteBufCodecs.BOOL, TaskScreenSaveData::inputOnly,
+                ItemStack.OPTIONAL_STREAM_CODEC, TaskScreenSaveData::inputModeIcon,
+                ByteBufCodecs.BOOL, TaskScreenSaveData::textShadow,
+                TaskScreenSaveData::new
+        );
     }
 }

@@ -4,7 +4,6 @@ import dev.ftb.mods.ftbquests.quest.QuestObjectBase;
 import net.minecraft.world.item.ItemStack;
 
 import java.util.Collection;
-import java.util.Collections;
 
 public interface RecipeModHelper {
     void refreshAll(Components component);

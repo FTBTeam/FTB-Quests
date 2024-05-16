@@ -1,44 +1,31 @@
 package dev.ftb.mods.ftbquests.net;
 
 import dev.architectury.networking.NetworkManager;
-import dev.architectury.networking.simple.BaseS2CMessage;
-import dev.architectury.networking.simple.MessageType;
+import dev.ftb.mods.ftbquests.api.FTBQuestsAPI;
 import dev.ftb.mods.ftbquests.client.FTBQuestsNetClient;
-import dev.ftb.mods.ftbquests.quest.TeamData;
+import net.minecraft.core.UUIDUtil;
 import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.codec.ByteBufCodecs;
+import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 
 import java.util.UUID;
 
-/**
- * @author LatvianModder
- */
-public class UpdateTeamDataMessage extends BaseS2CMessage {
-	private final UUID team;
-	private final String name;
+public record UpdateTeamDataMessage(UUID teamId, String name) implements CustomPacketPayload {
+	public static final Type<UpdateTeamDataMessage> TYPE = new Type<>(FTBQuestsAPI.rl("update_team_data_message"));
 
-	UpdateTeamDataMessage(FriendlyByteBuf buffer) {
-		team = buffer.readUUID();
-		name = buffer.readUtf(Short.MAX_VALUE);
-	}
-
-	public UpdateTeamDataMessage(TeamData data) {
-		team = data.getTeamId();
-		name = data.getName();
-	}
+	public static final StreamCodec<FriendlyByteBuf, UpdateTeamDataMessage> STREAM_CODEC = StreamCodec.composite(
+			UUIDUtil.STREAM_CODEC, UpdateTeamDataMessage::teamId,
+			ByteBufCodecs.STRING_UTF8, UpdateTeamDataMessage::name,
+			UpdateTeamDataMessage::new
+	);
 
 	@Override
-	public MessageType getType() {
-		return FTBQuestsNetHandler.UPDATE_TEAM_DATA;
+	public Type<UpdateTeamDataMessage> type() {
+		return TYPE;
 	}
 
-	@Override
-	public void write(FriendlyByteBuf buffer) {
-		buffer.writeUUID(team);
-		buffer.writeUtf(name, Short.MAX_VALUE);
-	}
-
-	@Override
-	public void handle(NetworkManager.PacketContext context) {
-		FTBQuestsNetClient.updateTeamData(team, name);
+	public static void handle(UpdateTeamDataMessage message, NetworkManager.PacketContext context) {
+		context.queue(() -> FTBQuestsNetClient.updateTeamData(message.teamId, message.name));
 	}
 }

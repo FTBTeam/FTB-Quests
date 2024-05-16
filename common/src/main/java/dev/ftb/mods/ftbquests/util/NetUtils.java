@@ -12,9 +12,6 @@ import java.util.function.BiConsumer;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 
-/**
- * @author LatvianModder
- */
 public class NetUtils {
 	public static boolean canEdit(NetworkManager.PacketContext context) {
 		Player player = context.getPlayer();

@@ -11,8 +11,11 @@ import dev.ftb.mods.ftblibrary.util.client.PositionedIngredient;
 import dev.ftb.mods.ftbquests.api.FTBQuestsAPI;
 import dev.ftb.mods.ftbquests.quest.Quest;
 import dev.ftb.mods.ftbquests.quest.TeamData;
+import net.minecraft.core.HolderLookup;
+import net.minecraft.core.component.DataComponentMap;
+import net.minecraft.core.component.DataComponentPatch;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.resources.ResourceLocation;
@@ -41,8 +44,12 @@ public class FluidTask extends Task {
 		return this;
 	}
 
-	public CompoundTag getFluidNBT() {
-		return fluidStack.getTag();
+	public DataComponentMap getFluidDataComponents() {
+		return fluidStack.getComponents();
+	}
+
+	public DataComponentPatch getFluidDataComponentPatch() {
+		return fluidStack.getComponents().asPatch();
 	}
 
 	@Override
@@ -71,28 +78,28 @@ public class FluidTask extends Task {
 	}
 
 	@Override
-	public void writeData(CompoundTag nbt) {
-		super.writeData(nbt);
+	public void writeData(CompoundTag nbt, HolderLookup.Provider provider) {
+		super.writeData(nbt, provider);
 
-		fluidStack.write(nbt);
+		fluidStack.write(provider, nbt);
 	}
 
 	@Override
-	public void readData(CompoundTag nbt) {
-		super.readData(nbt);
+	public void readData(CompoundTag nbt, HolderLookup.Provider provider) {
+		super.readData(nbt, provider);
 
-		fluidStack = FluidStack.read(nbt);
+		fluidStack = FluidStack.read(provider, nbt).orElse(FluidStack.empty());
 	}
 
 	@Override
-	public void writeNetData(FriendlyByteBuf buffer) {
+	public void writeNetData(RegistryFriendlyByteBuf buffer) {
 		super.writeNetData(buffer);
 
 		fluidStack.write(buffer);
 	}
 
 	@Override
-	public void readNetData(FriendlyByteBuf buffer) {
+	public void readNetData(RegistryFriendlyByteBuf buffer) {
 		super.readNetData(buffer);
 
 		fluidStack = FluidStack.read(buffer);

@@ -1,10 +1,12 @@
 package dev.ftb.mods.ftbquests.quest;
 
 import com.mojang.util.UndashedUuid;
+import dev.architectury.networking.NetworkManager;
 import dev.ftb.mods.ftblibrary.snbt.SNBT;
 import dev.ftb.mods.ftblibrary.snbt.SNBTCompoundTag;
 import dev.ftb.mods.ftbquests.FTBQuests;
 import dev.ftb.mods.ftbquests.api.FTBQuestsAPI;
+import dev.ftb.mods.ftbquests.client.ClientQuestFile;
 import dev.ftb.mods.ftbquests.events.QuestProgressEventData;
 import dev.ftb.mods.ftbquests.net.*;
 import dev.ftb.mods.ftbquests.quest.reward.Reward;
@@ -26,9 +28,11 @@ import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.StringTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.nio.file.Path;
@@ -45,6 +49,19 @@ public class TeamData {
 
 	private static final Comparator<Long2LongMap.Entry> LONG2LONG_COMPARATOR = (e1, e2) -> Long.compareUnsigned(e1.getLongValue(), e2.getLongValue());
 	private static final Comparator<Object2LongMap.Entry<QuestKey>> OBJECT2LONG_COMPARATOR = (e1, e2) -> Long.compareUnsigned(e1.getLongValue(), e2.getLongValue());
+
+	public static final StreamCodec<FriendlyByteBuf,TeamData> STREAM_CODEC = new StreamCodec<>() {
+		@Override
+		public TeamData decode(FriendlyByteBuf buf) {
+			return Util.make(new TeamData(buf.readUUID(), ClientQuestFile.INSTANCE), d -> d.readNetData(buf));
+		}
+
+		@Override
+		public void encode(FriendlyByteBuf buf, TeamData data) {
+			buf.writeUUID(data.getTeamId());
+			data.write(buf);
+		}
+	};
 
 	private final UUID teamId;
 	private final BaseQuestFile file;
@@ -93,6 +110,7 @@ public class TeamData {
 		return file;
 	}
 
+	@NotNull
 	public static TeamData get(Player player) {
 		return FTBQuestsAPI.api().getQuestFile(player.getCommandSenderWorld().isClientSide()).getOrCreateTeamData(player);
 	}
@@ -146,7 +164,7 @@ public class TeamData {
 					markDirty();
 
 					if (file.isServerSide()) {
-						new ObjectStartedResetMessage(teamId, questId).sendTo(getOnlineMembers());
+						NetworkManager.sendToPlayers(getOnlineMembers(), new ObjectStartedResetMessage(teamId, questId));
 					}
 
 					return true;
@@ -157,7 +175,7 @@ public class TeamData {
 					markDirty();
 
 					if (file.isServerSide()) {
-						new ObjectStartedMessage(teamId, questId).sendTo(getOnlineMembers());
+						NetworkManager.sendToPlayers(getOnlineMembers(), new ObjectStartedMessage(teamId, questId));
 					}
 
 					return true;
@@ -184,7 +202,7 @@ public class TeamData {
 				markDirty();
 
 				if (file.isServerSide()) {
-					new ObjectCompletedResetMessage(teamId, id).sendTo(getOnlineMembers());
+					NetworkManager.sendToPlayers(getOnlineMembers(), new ObjectCompletedResetMessage(teamId, id));
 				}
 
 				return true;
@@ -195,7 +213,7 @@ public class TeamData {
 				markDirty();
 
 				if (file.isServerSide()) {
-					new ObjectCompletedMessage(teamId, id).sendTo(getOnlineMembers());
+					NetworkManager.sendToPlayers(getOnlineMembers(), new ObjectCompletedMessage(teamId, id));
 				}
 
 				return true;
@@ -227,7 +245,7 @@ public class TeamData {
 			clearCachedProgress();
 			markDirty();
 			if (file.isServerSide()) {
-				new SyncRewardBlockingMessage(teamId, rewardsBlocked).sendTo(getOnlineMembers());
+				NetworkManager.sendToPlayers(getOnlineMembers(), new SyncRewardBlockingMessage(teamId, rewardsBlocked));
 			}
 			return true;
 		}
@@ -268,7 +286,7 @@ public class TeamData {
 			markDirty();
 
 			if (file.isServerSide()) {
-				new ClaimRewardResponseMessage(teamId, player, reward.id).sendTo(getOnlineMembers());
+				NetworkManager.sendToPlayers(getOnlineMembers(), new ClaimRewardResponseMessage(teamId, player, reward.id));
 			}
 
 			reward.getQuest().checkRepeatable(this, player);
@@ -292,7 +310,7 @@ public class TeamData {
 			markDirty();
 
 			if (file.isServerSide()) {
-				new ResetRewardMessage(teamId, player, reward.id).sendTo(getOnlineMembers());
+				NetworkManager.sendToPlayers(getOnlineMembers(), new ResetRewardMessage(teamId, player, reward.id));
 			}
 
 			return true;
@@ -399,7 +417,7 @@ public class TeamData {
 		}
 	}
 
-	public void write(FriendlyByteBuf buffer, boolean self) {
+	private void write(FriendlyByteBuf buffer) {
 		buffer.writeUtf(name, Short.MAX_VALUE);
 		buffer.writeVarInt(taskProgress.size());
 
@@ -427,23 +445,21 @@ public class TeamData {
 		buffer.writeBoolean(locked);
 		buffer.writeBoolean(rewardsBlocked);
 
-		if (self) {
-			buffer.writeVarInt(claimedRewards.size());
-			for (Object2LongMap.Entry<QuestKey> entry : claimedRewards.object2LongEntrySet()) {
-				entry.getKey().toNetwork(buffer);
-				buffer.writeVarLong(now - entry.getLongValue());
-			}
-
-			buffer.writeVarInt(perPlayerData.size());
-			perPlayerData.forEach((id, ppd) -> {
-				buffer.writeUUID(id);
-				ppd.writeNet(buffer);
-			});
-
+		buffer.writeVarInt(claimedRewards.size());
+		for (Object2LongMap.Entry<QuestKey> entry : claimedRewards.object2LongEntrySet()) {
+			entry.getKey().toNetwork(buffer);
+			buffer.writeVarLong(now - entry.getLongValue());
 		}
+
+		buffer.writeVarInt(perPlayerData.size());
+		perPlayerData.forEach((id, ppd) -> {
+			buffer.writeUUID(id);
+			ppd.writeNet(buffer);
+		});
+
 	}
 
-	public void read(FriendlyByteBuf buffer, boolean self) {
+	private void readNetData(FriendlyByteBuf buffer) {
 		name = buffer.readUtf(Short.MAX_VALUE);
 
 		taskProgress.clear();
@@ -472,19 +488,16 @@ public class TeamData {
 		claimedRewards.clear();
 		perPlayerData.clear();
 
-		if (self) {
-			int claimedRewardCount = buffer.readVarInt();
-			for (int i = 0; i < claimedRewardCount; i++) {
-				QuestKey key = QuestKey.fromNetwork(buffer);
-				claimedRewards.put(key, now - buffer.readVarLong());
-			}
+		int claimedRewardCount = buffer.readVarInt();
+		for (int i = 0; i < claimedRewardCount; i++) {
+			QuestKey key = QuestKey.fromNetwork(buffer);
+			claimedRewards.put(key, now - buffer.readVarLong());
+		}
 
-			int ppdCount = buffer.readVarInt();
-			for (int i = 0; i < ppdCount; i++) {
-				UUID id = buffer.readUUID();
-				perPlayerData.put(id, PerPlayerData.fromNet(buffer));
-			}
-
+		int ppdCount = buffer.readVarInt();
+		for (int i = 0; i < ppdCount; i++) {
+			UUID id = buffer.readUUID();
+			perPlayerData.put(id, PerPlayerData.fromNet(buffer));
 		}
 	}
 
@@ -614,7 +627,7 @@ public class TeamData {
 				Date now = new Date();
 				Collection<ServerPlayer> onlineMembers = getOnlineMembers();
 
-				new UpdateTaskProgressMessage(this, task.id, progress).sendTo(onlineMembers);
+				NetworkManager.sendToPlayers(getOnlineMembers(), new UpdateTaskProgressMessage(this.getTeamId(), task.id, progress));
 
 				if (prevProgress == 0L) {
 					task.onStarted(new QuestProgressEventData<>(now, this, task, onlineMembers, Collections.emptyList()));
@@ -649,7 +662,7 @@ public class TeamData {
 		if (isCompleted(task.getQuest())) {
 			perPlayerData.values().forEach(data -> data.pinnedQuests.remove(task.getQuest().id));
 			markDirty();
-			new TogglePinnedResponseMessage(task.getQuest().id, false).sendTo(onlineMembers);
+			NetworkManager.sendToPlayers(getOnlineMembers(), new TogglePinnedResponseMessage(task.getQuest().id, false));
 		}
 	}
 
@@ -668,7 +681,7 @@ public class TeamData {
 			markDirty();
 
 			if (file.isServerSide()) {
-				new SyncLockMessage(teamId, locked).sendTo(getOnlineMembers());
+				NetworkManager.sendToPlayers(getOnlineMembers(), new SyncLockMessage(teamId, locked));
 			}
 
 			return true;
@@ -732,7 +745,7 @@ public class TeamData {
 				clearCachedProgress();
 				markDirty();
 				if (file.isServerSide() && player instanceof ServerPlayer sp) {
-					new SyncEditingModeMessage(teamId, newCanEdit).sendTo(sp);
+					NetworkManager.sendToPlayer(sp, new SyncEditingModeMessage(teamId, newCanEdit));
 				}
 				return true;
 			}

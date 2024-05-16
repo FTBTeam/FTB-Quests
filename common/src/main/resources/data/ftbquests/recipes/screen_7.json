@@ -2,7 +2,7 @@
   "type": "minecraft:crafting_shaped",
   "group": "ftbquests:screen",
   "result": {
-    "item": "ftbquests:screen_7"
+    "id": "ftbquests:screen_7"
   },
   "pattern": [
     "353",

@@ -1,6 +1,7 @@
 package dev.ftb.mods.ftbquests.client.gui.quests;
 
 import com.mojang.blaze3d.systems.RenderSystem;
+import dev.architectury.networking.NetworkManager;
 import dev.ftb.mods.ftblibrary.config.StringConfig;
 import dev.ftb.mods.ftblibrary.config.ui.EditStringConfigOverlay;
 import dev.ftb.mods.ftblibrary.icon.Color4I;
@@ -182,7 +183,7 @@ public class ChapterPanel extends Panel {
 		public void onClicked(MouseButton button) {
 			if (getMouseX() > getX() + width - 18) {
 				playClickSound();
-				new ToggleChapterPinnedMessage().sendToServer();
+				NetworkManager.sendToServer(ToggleChapterPinnedMessage.INSTANCE);
 			} else if (chapterPanel.questScreen.file.canEdit() && getMouseX() > getX() + width - 34) {
 				playClickSound();
 
@@ -197,7 +198,7 @@ public class ChapterPanel extends Panel {
 							chapter.setRawTitle(c.getValue());
 							CompoundTag extra = new CompoundTag();
 							extra.putLong("group", 0L);
-							new CreateObjectMessage(chapter, extra).sendToServer();
+							NetworkManager.sendToServer(CreateObjectMessage.create(chapter, extra));
 						}
 
 						run();
@@ -215,7 +216,7 @@ public class ChapterPanel extends Panel {
 						if (accepted) {
 							ChapterGroup group = new ChapterGroup(0L, ClientQuestFile.INSTANCE);
 							group.setRawTitle(c.getValue());
-							new CreateObjectMessage(group, null).sendToServer();
+							NetworkManager.sendToServer(CreateObjectMessage.create(group, null));
 						}
 					}, b.getTitle()).atMousePosition();
 					overlay.setWidth(150);
@@ -294,7 +295,7 @@ public class ChapterPanel extends Panel {
 						chapter.setRawTitle(c.getValue());
 						CompoundTag extra = new CompoundTag();
 						extra.putLong("group", group.id);
-						new CreateObjectMessage(chapter, extra).sendToServer();
+						NetworkManager.sendToServer(CreateObjectMessage.create(chapter, extra));
 					}
 
 					run();
@@ -309,11 +310,11 @@ public class ChapterPanel extends Panel {
 			if (chapterPanel.questScreen.file.canEdit() && button.isRight() && !group.isDefaultGroup()) {
 				ContextMenuBuilder.create(group, chapterPanel.questScreen).insertAtTop(List.of(
 						new ContextMenuItem(Component.translatable("gui.move"), ThemeProperties.MOVE_UP_ICON.get(),
-								b -> new MoveChapterGroupMessage(group.id, true).sendToServer())
+								b -> NetworkManager.sendToServer(new MoveChapterGroupMessage(group.id, true)))
 								.setEnabled(!group.isFirstGroup())
 								.setCloseMenu(false),
 						new ContextMenuItem(Component.translatable("gui.move"), ThemeProperties.MOVE_DOWN_ICON.get(),
-								b -> new MoveChapterGroupMessage(group.id, false).sendToServer())
+								b -> NetworkManager.sendToServer(new MoveChapterGroupMessage(group.id, false)))
 								.setEnabled(!group.isLastGroup())
 								.setCloseMenu(false)
 				)).openContextMenu(chapterPanel.questScreen);
@@ -365,7 +366,7 @@ public class ChapterPanel extends Panel {
 
 			chapter = c;
 			description = chapter.getRawSubtitle().stream()
-					.map(line -> TextUtils.parseRawText(line).copy().withStyle(ChatFormatting.GRAY))
+					.map(line -> TextUtils.parseRawText(line, chapter.holderLookup()).copy().withStyle(ChatFormatting.GRAY))
 					.toList();
 		}
 
@@ -383,10 +384,10 @@ public class ChapterPanel extends Panel {
 			if (chapterPanel.questScreen.file.canEdit() && button.isRight()) {
 				ContextMenuBuilder.create(chapter, chapterPanel.questScreen).insertAtTop(List.of(
 						new ContextMenuItem(Component.translatable("gui.move"), ThemeProperties.MOVE_UP_ICON.get(),
-								b -> new MoveChapterMessage(chapter.id, true).sendToServer())
+								b -> NetworkManager.sendToServer(new MoveChapterMessage(chapter.id, true)))
 								.setEnabled(chapter.getIndex() > 0).setCloseMenu(false),
 						new ContextMenuItem(Component.translatable("gui.move"), ThemeProperties.MOVE_DOWN_ICON.get(),
-								b -> new MoveChapterMessage(chapter.id, false).sendToServer())
+								b -> NetworkManager.sendToServer(new MoveChapterMessage(chapter.id, false)))
 								.setEnabled(chapter.getIndex() < chapter.getGroup().getChapters().size() - 1).setCloseMenu(false),
 						new ContextMenuItem(Component.translatable("ftbquests.gui.change_group"), Icons.COLOR_RGB,
 								b -> new ChangeChapterGroupScreen(chapter, chapterPanel.questScreen).openGui())

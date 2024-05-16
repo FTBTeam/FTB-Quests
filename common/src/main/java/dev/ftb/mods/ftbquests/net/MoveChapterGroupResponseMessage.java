@@ -1,41 +1,28 @@
 package dev.ftb.mods.ftbquests.net;
 
 import dev.architectury.networking.NetworkManager;
-import dev.architectury.networking.simple.BaseS2CMessage;
-import dev.architectury.networking.simple.MessageType;
+import dev.ftb.mods.ftbquests.api.FTBQuestsAPI;
 import dev.ftb.mods.ftbquests.client.FTBQuestsNetClient;
 import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.codec.ByteBufCodecs;
+import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 
-/**
- * @author LatvianModder
- */
-public class MoveChapterGroupResponseMessage extends BaseS2CMessage {
-	private final long id;
-	private final boolean up;
+public record MoveChapterGroupResponseMessage(long id, boolean movingUp) implements CustomPacketPayload {
+	public static final Type<MoveChapterGroupResponseMessage> TYPE = new Type<>(FTBQuestsAPI.rl("move_chapter_group_response_message"));
 
-	MoveChapterGroupResponseMessage(FriendlyByteBuf buffer) {
-		id = buffer.readLong();
-		up = buffer.readBoolean();
-	}
-
-	public MoveChapterGroupResponseMessage(long i, boolean u) {
-		id = i;
-		up = u;
-	}
+	public static final StreamCodec<FriendlyByteBuf, MoveChapterGroupResponseMessage> STREAM_CODEC = StreamCodec.composite(
+			ByteBufCodecs.VAR_LONG, MoveChapterGroupResponseMessage::id,
+			ByteBufCodecs.BOOL, MoveChapterGroupResponseMessage::movingUp,
+			MoveChapterGroupResponseMessage::new
+	);
 
 	@Override
-	public MessageType getType() {
-		return FTBQuestsNetHandler.MOVE_CHAPTER_GROUP_RESPONSE;
+	public Type<MoveChapterGroupResponseMessage> type() {
+		return TYPE;
 	}
 
-	@Override
-	public void write(FriendlyByteBuf buffer) {
-		buffer.writeLong(id);
-		buffer.writeBoolean(up);
-	}
-
-	@Override
-	public void handle(NetworkManager.PacketContext context) {
-		FTBQuestsNetClient.moveChapterGroup(id, up);
+	public static void handle(MoveChapterGroupResponseMessage message, NetworkManager.PacketContext context) {
+		context.queue(() -> FTBQuestsNetClient.moveChapterGroup(message.id, message.movingUp));
 	}
 }

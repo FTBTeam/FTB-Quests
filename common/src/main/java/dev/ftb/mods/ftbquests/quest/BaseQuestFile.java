@@ -7,6 +7,7 @@ import dev.ftb.mods.ftblibrary.icon.Icon;
 import dev.ftb.mods.ftblibrary.math.MathUtils;
 import dev.ftb.mods.ftblibrary.snbt.SNBT;
 import dev.ftb.mods.ftblibrary.snbt.SNBTCompoundTag;
+import dev.ftb.mods.ftblibrary.util.NetworkHelper;
 import dev.ftb.mods.ftbquests.FTBQuests;
 import dev.ftb.mods.ftbquests.api.QuestFile;
 import dev.ftb.mods.ftbquests.client.FTBQuestsClient;
@@ -14,7 +15,6 @@ import dev.ftb.mods.ftbquests.events.*;
 import dev.ftb.mods.ftbquests.integration.RecipeModHelper;
 import dev.ftb.mods.ftbquests.item.MissingItem;
 import dev.ftb.mods.ftbquests.net.DeleteObjectResponseMessage;
-import dev.ftb.mods.ftbquests.net.FTBQuestsNetHandler;
 import dev.ftb.mods.ftbquests.quest.loot.EntityWeight;
 import dev.ftb.mods.ftbquests.quest.loot.LootCrate;
 import dev.ftb.mods.ftbquests.quest.loot.RewardTable;
@@ -22,7 +22,6 @@ import dev.ftb.mods.ftbquests.quest.reward.*;
 import dev.ftb.mods.ftbquests.quest.task.*;
 import dev.ftb.mods.ftbquests.quest.theme.property.ThemeProperties;
 import dev.ftb.mods.ftbquests.util.FileUtils;
-import dev.ftb.mods.ftbquests.util.NetUtils;
 import dev.ftb.mods.ftbteams.api.FTBTeamsAPI;
 import dev.ftb.mods.ftbteams.api.Team;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
@@ -30,11 +29,15 @@ import it.unimi.dsi.fastutil.longs.Long2IntOpenHashMap;
 import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.Util;
 import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.*;
-import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.network.codec.ByteBufCodecs;
+import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
@@ -54,6 +57,18 @@ import java.util.stream.Stream;
 
 public abstract class BaseQuestFile extends QuestObject implements QuestFile {
 	public static int VERSION = 13;
+
+	public static final StreamCodec<RegistryFriendlyByteBuf,BaseQuestFile> STREAM_CODEC = new StreamCodec<>() {
+        @Override
+        public BaseQuestFile decode(RegistryFriendlyByteBuf buf) {
+			return Util.make(FTBQuestsClient.createClientQuestFile(), file -> file.readNetDataFull(buf));
+        }
+
+        @Override
+        public void encode(RegistryFriendlyByteBuf buf, BaseQuestFile file) {
+			file.writeNetDataFull(buf);
+        }
+    };
 
 	private final DefaultChapterGroup defaultChapterGroup;
 	final List<ChapterGroup> chapterGroups;
@@ -126,6 +141,8 @@ public abstract class BaseQuestFile extends QuestObject implements QuestFile {
 	}
 
 	public abstract Env getSide();
+
+	public abstract HolderLookup.Provider holderLookup();
 
 	public boolean isServerSide() {
 		return getSide() == Env.SERVER;
@@ -369,8 +386,8 @@ public abstract class BaseQuestFile extends QuestObject implements QuestFile {
 	}
 
 	@Override
-	public final void writeData(CompoundTag nbt) {
-		super.writeData(nbt);
+	public final void writeData(CompoundTag nbt, HolderLookup.Provider provider) {
+		super.writeData(nbt, provider);
 		nbt.putBoolean("default_reward_team", defaultPerTeamReward);
 		nbt.putBoolean("default_consume_items", defaultTeamConsumeItems);
 		nbt.putString("default_autoclaim_rewards", defaultRewardAutoClaim.id);
@@ -381,7 +398,7 @@ public abstract class BaseQuestFile extends QuestObject implements QuestFile {
 			ListTag list = new ListTag();
 
 			for (ItemStack stack : emergencyItems) {
-				list.add(MissingItem.writeItem(stack));
+				list.add(MissingItem.writeItem(stack, provider));
 			}
 
 			nbt.put("emergency_items", list);
@@ -402,8 +419,8 @@ public abstract class BaseQuestFile extends QuestObject implements QuestFile {
 	}
 
 	@Override
-	public final void readData(CompoundTag nbt) {
-		super.readData(nbt);
+	public final void readData(CompoundTag nbt, HolderLookup.Provider provider) {
+		super.readData(nbt, provider);
 		defaultPerTeamReward = nbt.getBoolean("default_reward_team");
 		defaultTeamConsumeItems = nbt.getBoolean("default_consume_items");
 		defaultRewardAutoClaim = RewardAutoClaim.NAME_MAP_NO_DEFAULT.get(nbt.getString("default_autoclaim_rewards"));
@@ -419,7 +436,7 @@ public abstract class BaseQuestFile extends QuestObject implements QuestFile {
 		ListTag emergencyItemsTag = nbt.getList("emergency_items", Tag.TAG_COMPOUND);
 
 		for (int i = 0; i < emergencyItemsTag.size(); i++) {
-			ItemStack stack = MissingItem.readItem(emergencyItemsTag.getCompound(i));
+			ItemStack stack = MissingItem.readItem(emergencyItemsTag.getCompound(i), provider);
 
 			if (!stack.isEmpty()) {
 				emergencyItems.add(stack);
@@ -443,7 +460,7 @@ public abstract class BaseQuestFile extends QuestObject implements QuestFile {
 		}
 	}
 
-	public final void writeDataFull(Path folder) {
+	public final void writeDataFull(Path folder, HolderLookup.Provider provider) {
 		boolean prev = false;
 		try {
 			// Sorting keys ensure consistent sort order in the saved quest file
@@ -453,7 +470,7 @@ public abstract class BaseQuestFile extends QuestObject implements QuestFile {
 
 			SNBTCompoundTag fileNBT = new SNBTCompoundTag();
 			fileNBT.putInt("version", VERSION);
-			writeData(fileNBT);
+			writeData(fileNBT, provider);
 			SNBT.write(folder.resolve("data.snbt"), fileNBT);
 
 			for (ChapterGroup group : chapterGroups) {
@@ -463,19 +480,19 @@ public abstract class BaseQuestFile extends QuestObject implements QuestFile {
 					chapterNBT.putString("id", chapter.getCodeString());
 					chapterNBT.putString("group", group.isDefaultGroup() ? "" : group.getCodeString());
 					chapterNBT.putInt("order_index", ci);
-					chapter.writeData(chapterNBT);
+					chapter.writeData(chapterNBT, provider);
 
 					ListTag questList = new ListTag();
 					for (Quest quest : chapter.getQuests()) {
 						if (quest.isValid()) {
 							SNBTCompoundTag questNBT = new SNBTCompoundTag();
-							quest.writeData(questNBT);
+							quest.writeData(questNBT, provider);
 							questNBT.putString("id", quest.getCodeString());
 							if (!quest.getTasks().isEmpty()) {
-								quest.writeTasks(questNBT);
+								quest.writeTasks(questNBT, provider);
 							}
 							if (!quest.getRewards().isEmpty()) {
-								quest.writeRewards(questNBT);
+								quest.writeRewards(questNBT, provider);
 							}
 							questList.add(questNBT);
 						}
@@ -486,7 +503,7 @@ public abstract class BaseQuestFile extends QuestObject implements QuestFile {
 					for (QuestLink link : chapter.getQuestLinks()) {
 						if (link.getQuest().isPresent()) {
 							SNBTCompoundTag linkNBT = new SNBTCompoundTag();
-							link.writeData(linkNBT);
+							link.writeData(linkNBT, provider);
 							linkNBT.putString("id", link.getCodeString());
 							linkList.add(linkNBT);
 						}
@@ -502,7 +519,7 @@ public abstract class BaseQuestFile extends QuestObject implements QuestFile {
 				SNBTCompoundTag tableNBT = new SNBTCompoundTag();
 				tableNBT.putString("id", table.getCodeString());
 				tableNBT.putInt("order_index", ri);
-				table.writeData(tableNBT);
+				table.writeData(tableNBT, provider);
 				SNBT.write(folder.resolve("reward_tables/" + table.getFilename() + ".snbt"), tableNBT);
 			}
 
@@ -513,7 +530,7 @@ public abstract class BaseQuestFile extends QuestObject implements QuestFile {
 					SNBTCompoundTag groupTag = new SNBTCompoundTag();
 					groupTag.singleLine();
 					groupTag.putString("id", group.getCodeString());
-					group.writeData(groupTag);
+					group.writeData(groupTag, provider);
 					chapterGroupTag.add(groupTag);
 				}
 			}
@@ -526,7 +543,7 @@ public abstract class BaseQuestFile extends QuestObject implements QuestFile {
 		}
 	}
 
-	public final void readDataFull(Path folder) {
+	public final void readDataFull(Path folder, HolderLookup.Provider provider) {
 		clearCachedData();
 		questObjectMap.clear();
 		defaultChapterGroup.clearChapters();
@@ -543,7 +560,7 @@ public abstract class BaseQuestFile extends QuestObject implements QuestFile {
 		if (fileNBT != null) {
 			fileVersion = fileNBT.getInt("version");
 			questObjectMap.put(1, this);
-			readData(fileNBT);
+			readData(fileNBT, provider);
 		}
 
 		Path groupsFile = folder.resolve("chapter_groups.snbt");
@@ -670,7 +687,7 @@ public abstract class BaseQuestFile extends QuestObject implements QuestFile {
 			CompoundTag data = dataCache.get(object.id);
 
 			if (data != null) {
-				object.readData(data);
+				object.readData(data, provider);
 			}
 		}
 
@@ -733,9 +750,9 @@ public abstract class BaseQuestFile extends QuestObject implements QuestFile {
 	}
 
 	@Override
-	public final void writeNetData(FriendlyByteBuf buffer) {
+	public final void writeNetData(RegistryFriendlyByteBuf buffer) {
 		super.writeNetData(buffer);
-		NetUtils.write(buffer, emergencyItems, FTBQuestsNetHandler::writeItemType);
+		ItemStack.OPTIONAL_STREAM_CODEC.apply(ByteBufCodecs.list()).encode(buffer, emergencyItems);
 		buffer.writeVarInt(emergencyItemsCooldown);
 		buffer.writeBoolean(defaultPerTeamReward);
 		buffer.writeBoolean(defaultTeamConsumeItems);
@@ -753,9 +770,10 @@ public abstract class BaseQuestFile extends QuestObject implements QuestFile {
 	}
 
 	@Override
-	public final void readNetData(FriendlyByteBuf buffer) {
+	public final void readNetData(RegistryFriendlyByteBuf buffer) {
 		super.readNetData(buffer);
-		NetUtils.read(buffer, emergencyItems, FTBQuestsNetHandler::readItemType);
+
+		emergencyItems.retainAll(ItemStack.OPTIONAL_STREAM_CODEC.apply(ByteBufCodecs.list()).decode(buffer));
 		emergencyItemsCooldown = buffer.readVarInt();
 		defaultPerTeamReward = buffer.readBoolean();
 		defaultTeamConsumeItems = buffer.readBoolean();
@@ -772,7 +790,7 @@ public abstract class BaseQuestFile extends QuestObject implements QuestFile {
 		detectionDelay = buffer.readVarInt();
 	}
 
-	public final void writeNetDataFull(FriendlyByteBuf buffer) {
+	public final void writeNetDataFull(RegistryFriendlyByteBuf buffer) {
 		int pos = buffer.writerIndex();
 
 		buffer.writeVarInt(TaskTypes.TYPES.size());
@@ -858,7 +876,7 @@ public abstract class BaseQuestFile extends QuestObject implements QuestFile {
 		FTBQuests.LOGGER.debug("Wrote " + (buffer.writerIndex() - pos) + " bytes, " + questObjectMap.size() + " objects");
 	}
 
-	public final void readNetDataFull(FriendlyByteBuf buffer) {
+	public final void readNetDataFull(RegistryFriendlyByteBuf buffer) {
 		int pos = buffer.readerIndex();
 
 		taskTypeIds.clear();
@@ -973,7 +991,7 @@ public abstract class BaseQuestFile extends QuestObject implements QuestFile {
 			}
 		}
 
-		FTBQuests.LOGGER.info("Read " + (buffer.readerIndex() - pos) + " bytes, " + questObjectMap.size() + " objects");
+        FTBQuests.LOGGER.info("Read {} bytes, {} objects", buffer.readerIndex() - pos, questObjectMap.size());
 	}
 
 	@Override
@@ -1100,15 +1118,22 @@ public abstract class BaseQuestFile extends QuestObject implements QuestFile {
 	}
 
 	public long getID(@Nullable Object obj) {
-		if (obj == null) {
-			return 0L;
-		} else if (obj instanceof Number n) {
-			return n.longValue();
-		} else if (obj instanceof NumericTag nt) {
-			return nt.getAsLong();
-		} else if (obj instanceof StringTag st) {
-			return getID(st.getAsString());
-		}
+        switch (obj) {
+            case null -> {
+                return 0L;
+            }
+            case Number n -> {
+                return n.longValue();
+            }
+            case NumericTag nt -> {
+                return nt.getAsLong();
+            }
+            case StringTag st -> {
+                return getID(st.getAsString());
+            }
+            default -> {
+            }
+        }
 
 		String idStr = obj.toString();
 		long id = parseCodeString(idStr);
@@ -1357,7 +1382,7 @@ public abstract class BaseQuestFile extends QuestObject implements QuestFile {
 				del.increment();
 				table.invalid = true;
 				FileUtils.delete(ServerQuestFile.INSTANCE.getFolder().resolve(table.getPath().orElseThrow()).toFile());
-				new DeleteObjectResponseMessage(table.id).sendToAll(source.getServer());
+				NetworkHelper.sendToAll(source.getServer(), new DeleteObjectResponseMessage(table.id));
 			}
 		}
 

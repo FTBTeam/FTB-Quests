@@ -1,6 +1,7 @@
 package dev.ftb.mods.ftbquests.client.gui.quests;
 
 import com.mojang.datafixers.util.Pair;
+import dev.architectury.networking.NetworkManager;
 import dev.ftb.mods.ftblibrary.config.ConfigGroup;
 import dev.ftb.mods.ftblibrary.config.ImageResourceConfig;
 import dev.ftb.mods.ftblibrary.config.ListConfig;
@@ -44,6 +45,7 @@ import net.minecraft.network.chat.*;
 import net.minecraft.network.chat.contents.PlainTextContents;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.TooltipFlag;
 import org.jetbrains.annotations.NotNull;
@@ -533,6 +535,10 @@ public class ViewQuestPanel extends ModalPanel {
 		}
 	}
 
+	private void syncQuestToServer() {
+		NetworkManager.sendToServer(EditObjectMessage.forQuestObject(quest));
+	}
+
 	private void showList(Collection<QuestObject> c, boolean dependencies) {
 		int hidden = 0;
 		List<ContextMenuItem> contextMenu = new ArrayList<>();
@@ -619,7 +625,7 @@ public class ViewQuestPanel extends ModalPanel {
 		EditStringConfigOverlay<String> overlay = new EditStringConfigOverlay<>(getGui(), c, accepted -> {
 			if (accepted) {
 				qo1.setRawTitle(c.getValue());
-				new EditObjectMessage(qo1).sendToServer();
+				NetworkManager.sendToServer(EditObjectMessage.forQuestObject(qo1));
 			}
 		}, Component.translatable("ftbquests.title.tooltip")).atPosition(titleField.getX(), titleField.getY() - 14);
 		overlay.setWidth(Math.max(150, overlay.getWidth()));
@@ -632,7 +638,7 @@ public class ViewQuestPanel extends ModalPanel {
 		EditStringConfigOverlay<String> overlay = new EditStringConfigOverlay<>(getGui(), c, accepted -> {
 			if (accepted) {
 				quest.setRawSubtitle(c.getValue());
-				new EditObjectMessage(quest).sendToServer();
+				syncQuestToServer();
 			}
 		}, Component.translatable("ftbquests.chapter.subtitle"));
 		overlay.setWidth(Mth.clamp(overlay.getWidth(), 150, getScreen().getGuiScaledWidth() - 20));
@@ -645,7 +651,7 @@ public class ViewQuestPanel extends ModalPanel {
 		lc.setValue(quest.getRawDescription());
 		new MultilineTextEditorScreen(Component.translatable("ftbquests.gui.edit_description"), lc, accepted -> {
 			if (accepted) {
-				new EditObjectMessage(quest).sendToServer();
+				syncQuestToServer();
 				refreshWidgets();
 			}
 			openGui();
@@ -692,7 +698,7 @@ public class ViewQuestPanel extends ModalPanel {
 
 	private void addPageBreak() {
 		appendToPage(quest.getRawDescription(), List.of(Quest.PAGEBREAK_CODE, "(new page placeholder text)"), getCurrentPage());
-		new EditObjectMessage(quest).sendToServer();
+		syncQuestToServer();
 		setCurrentPage(Math.min(pageIndices.size() - 1, getCurrentPage() + 1));
 		refreshWidgets();
 	}
@@ -712,7 +718,7 @@ public class ViewQuestPanel extends ModalPanel {
 					} else {
 						rawDesc.set(line, c.getValue());
 					}
-					new EditObjectMessage(quest).sendToServer();
+					syncQuestToServer();
 					refreshWidgets();
 				}
 			}).atPosition(clickedWidget.getX(), clickedWidget.getY());
@@ -730,7 +736,7 @@ public class ViewQuestPanel extends ModalPanel {
 				} else {
 					quest.getRawDescription().set(line, component.toString());
 				}
-				new EditObjectMessage(quest).sendToServer();
+				syncQuestToServer();
 
 				refreshWidgets();
 			}
@@ -766,7 +772,7 @@ public class ViewQuestPanel extends ModalPanel {
 			contextMenu.add(new ContextMenuItem(Component.translatable("selectServer.edit"), ThemeProperties.EDIT_ICON.get(), b -> editDescLine0(clickedWidget, line, type)));
 			contextMenu.add(new ContextMenuItem(Component.translatable("selectServer.delete"), ThemeProperties.DELETE_ICON.get(), b -> {
 				quest.getRawDescription().remove(line);
-				new EditObjectMessage(quest).sendToServer();
+				syncQuestToServer();
 				refreshWidgets();
 			}));
 
@@ -931,7 +937,7 @@ public class ViewQuestPanel extends ModalPanel {
 					Minecraft mc = Minecraft.getInstance();
 					TooltipFlag flag = mc.options.advancedItemTooltips ? TooltipFlag.Default.ADVANCED : TooltipFlag.Default.NORMAL;
 					if (stackInfo != null) {
-						stackInfo.getItemStack().getTooltipLines(mc.player, flag).forEach(list::add);
+						stackInfo.getItemStack().getTooltipLines(Item.TooltipContext.of(mc.level), mc.player, flag).forEach(list::add);
 					} else {
 						HoverEvent.EntityTooltipInfo entityInfo = hoverevent.getValue(HoverEvent.Action.SHOW_ENTITY);
 						if (entityInfo != null) {
@@ -1023,7 +1029,7 @@ public class ViewQuestPanel extends ModalPanel {
 		@Override
 		public void onClicked(MouseButton button) {
 			playClickSound();
-			new TogglePinnedMessage(quest.id).sendToServer();
+			NetworkManager.sendToServer(new TogglePinnedMessage(quest.id));
 		}
 	}
 

@@ -24,12 +24,9 @@ import java.util.Date;
 import java.util.UUID;
 
 public class FTBQuestsNetClient {
-	public static void syncTeamData(boolean self, TeamData data) {
+	public static void syncTeamData(TeamData data) {
 		ClientQuestFile.INSTANCE.addData(data, true);
-
-		if (self) {
-			ClientQuestFile.INSTANCE.selfTeamData = data;
-		}
+		ClientQuestFile.INSTANCE.selfTeamData = data;
 	}
 
 	public static void claimReward(UUID teamId, UUID player, long rewardId) {
@@ -51,9 +48,9 @@ public class FTBQuestsNetClient {
 		}
 	}
 
-	public static void createObject(long id, long parent, QuestObjectType type, CompoundTag nbt, @Nullable CompoundTag extra, UUID creator) {
-		QuestObjectBase object = ClientQuestFile.INSTANCE.create(id, type, parent, extra == null ? new CompoundTag() : extra);
-		object.readData(nbt);
+	public static void createObject(long id, long parent, QuestObjectType type, CompoundTag nbt, CompoundTag extra, UUID creator) {
+		QuestObjectBase object = ClientQuestFile.INSTANCE.create(id, type, parent, extra);
+		object.readData(nbt, FTBQuestsClient.holderLookup());
 		object.onCreated();
 		ClientQuestFile.INSTANCE.refreshIDMap();
 		object.editedFromGUI();
@@ -74,14 +71,14 @@ public class FTBQuestsNetClient {
 
 	public static void createOtherTeamData(TeamDataUpdate dataUpdate) {
 		if (ClientQuestFile.INSTANCE != null) {
-			TeamData data = new TeamData(dataUpdate.uuid, ClientQuestFile.INSTANCE, dataUpdate.name);
+			TeamData data = new TeamData(dataUpdate.uuid(), ClientQuestFile.INSTANCE, dataUpdate.name());
 			ClientQuestFile.INSTANCE.addData(data, true);
 		}
 	}
 
 	public static void teamDataChanged(TeamDataUpdate oldDataUpdate, TeamDataUpdate newDataUpdate) {
 		if (ClientQuestFile.INSTANCE != null) {
-			TeamData data = new TeamData(newDataUpdate.uuid, ClientQuestFile.INSTANCE, newDataUpdate.name);
+			TeamData data = new TeamData(newDataUpdate.uuid(), ClientQuestFile.INSTANCE, newDataUpdate.name());
 			ClientQuestFile.INSTANCE.addData(data, false);
 		}
 	}
@@ -121,7 +118,7 @@ public class FTBQuestsNetClient {
 			MutableComponent comp = count > 1 ?
 					Component.literal(count + "x ").append(stack.getHoverName()) :
 					stack.getHoverName().copy();
-			Minecraft.getInstance().getToasts().addToast(new RewardToast(comp.withStyle(stack.getRarity().color), icon));
+			Minecraft.getInstance().getToasts().addToast(new RewardToast(comp.withStyle(stack.getRarity().color()), icon));
 		}
 	}
 
@@ -138,7 +135,7 @@ public class FTBQuestsNetClient {
 		QuestObjectBase object = ClientQuestFile.INSTANCE.getBase(id);
 
 		if (object != null) {
-			object.readData(nbt);
+			object.readData(nbt, FTBQuestsClient.holderLookup());
 			object.editedFromGUI();
 			FTBQuests.getRecipeModHelper().refreshRecipes(object);
 		}

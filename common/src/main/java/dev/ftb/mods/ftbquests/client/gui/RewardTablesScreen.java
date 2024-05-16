@@ -1,18 +1,22 @@
 package dev.ftb.mods.ftbquests.client.gui;
 
+import dev.architectury.networking.NetworkManager;
 import dev.ftb.mods.ftblibrary.config.StringConfig;
 import dev.ftb.mods.ftblibrary.config.ui.EditStringConfigOverlay;
 import dev.ftb.mods.ftblibrary.icon.Color4I;
 import dev.ftb.mods.ftblibrary.icon.Icons;
 import dev.ftb.mods.ftblibrary.icon.ItemIcon;
-import dev.ftb.mods.ftblibrary.ui.*;
+import dev.ftb.mods.ftblibrary.ui.ContextMenuItem;
+import dev.ftb.mods.ftblibrary.ui.Panel;
+import dev.ftb.mods.ftblibrary.ui.SimpleTextButton;
+import dev.ftb.mods.ftblibrary.ui.Theme;
 import dev.ftb.mods.ftblibrary.ui.input.Key;
 import dev.ftb.mods.ftblibrary.ui.input.MouseButton;
 import dev.ftb.mods.ftblibrary.ui.misc.AbstractButtonListScreen;
 import dev.ftb.mods.ftblibrary.util.TooltipList;
 import dev.ftb.mods.ftbquests.client.ClientQuestFile;
+import dev.ftb.mods.ftbquests.client.FTBQuestsClient;
 import dev.ftb.mods.ftbquests.client.gui.quests.QuestScreen;
-import dev.ftb.mods.ftbquests.item.FTBQuestsItems;
 import dev.ftb.mods.ftbquests.net.CreateObjectMessage;
 import dev.ftb.mods.ftbquests.net.DeleteObjectMessage;
 import dev.ftb.mods.ftbquests.net.EditObjectMessage;
@@ -20,6 +24,7 @@ import dev.ftb.mods.ftbquests.quest.QuestObjectBase;
 import dev.ftb.mods.ftbquests.quest.loot.LootCrate;
 import dev.ftb.mods.ftbquests.quest.loot.RewardTable;
 import dev.ftb.mods.ftbquests.quest.reward.RandomReward;
+import dev.ftb.mods.ftbquests.registry.ModItems;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.network.chat.Component;
@@ -42,7 +47,9 @@ public class RewardTablesScreen extends AbstractButtonListScreen {
 
 		this.questScreen = questScreen;
 		this.rewardTablesCopy = ClientQuestFile.INSTANCE.getRewardTables().stream()
-				.map(t -> QuestObjectBase.copy(t, () -> new RewardTable(t.id, ClientQuestFile.INSTANCE)))
+				.map(table -> QuestObjectBase.copy(table,
+						() -> new RewardTable(table.id, ClientQuestFile.INSTANCE),
+						FTBQuestsClient.getClientLevel().registryAccess()))
 				.collect(Collectors.toCollection(ArrayList::new));
 
 		setTitle(Component.translatable("ftbquests.reward_tables"));
@@ -124,14 +131,14 @@ public class RewardTablesScreen extends AbstractButtonListScreen {
 		rewardTablesCopy.forEach(table -> {
 			if (table.id == 0) {
 				// newly-created
-				new CreateObjectMessage(table, null).sendToServer();
+				NetworkManager.sendToServer(CreateObjectMessage.create(table, null));
 			}
 			toRemove.remove(table.id);
 		});
 
-		toRemove.forEach(id -> new DeleteObjectMessage(id).sendToServer());
+		toRemove.forEach(id -> NetworkManager.sendToServer(new DeleteObjectMessage(id)));
 
-		editedTables.forEach(t -> new EditObjectMessage(t).sendToServer());
+		editedTables.forEach(table -> NetworkManager.sendToServer(EditObjectMessage.forQuestObject(table)));
 
 		questScreen.run();
 	}
@@ -189,7 +196,7 @@ public class RewardTablesScreen extends AbstractButtonListScreen {
 							b -> editRewardTable()),
 					new ContextMenuItem(Component.translatable("gui.remove"), Icons.BIN,
 							b -> deleteRewardTable()),
-					new ContextMenuItem(getLootCrateText(), ItemIcon.getItemIcon(FTBQuestsItems.LOOTCRATE.get()),
+					new ContextMenuItem(getLootCrateText(), ItemIcon.getItemIcon(ModItems.LOOTCRATE.get()),
 							b -> toggleLootCrate())
 			);
 			getGui().openContextMenu(menu);
@@ -199,7 +206,7 @@ public class RewardTablesScreen extends AbstractButtonListScreen {
 		public void drawBackground(GuiGraphics graphics, Theme theme, int x, int y, int w, int h) {
 			if (isMouseOver) {
 				Color4I.WHITE.withAlpha(30).draw(graphics, x, y, w, h);
-				ItemIcon.getItemIcon(FTBQuestsItems.LOOTCRATE.get()).draw(graphics, x + w - 26, y + 2, 12, 12);
+				ItemIcon.getItemIcon(ModItems.LOOTCRATE.get()).draw(graphics, x + w - 26, y + 2, 12, 12);
 				Icons.BIN.draw(graphics, x + w - 13, y + 2, 12, 12);
 			}
 			Color4I.GRAY.withAlpha(40).draw(graphics, x, y + h, w, 1);

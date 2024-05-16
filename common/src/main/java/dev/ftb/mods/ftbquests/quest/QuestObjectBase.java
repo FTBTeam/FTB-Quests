@@ -1,5 +1,6 @@
 package dev.ftb.mods.ftbquests.quest;
 
+import dev.architectury.networking.NetworkManager;
 import dev.ftb.mods.ftblibrary.config.ConfigGroup;
 import dev.ftb.mods.ftblibrary.config.StringConfig;
 import dev.ftb.mods.ftblibrary.config.Tristate;
@@ -19,11 +20,12 @@ import dev.ftb.mods.ftbquests.util.ProgressChange;
 import dev.ftb.mods.ftbquests.util.TextUtils;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.StringTag;
 import net.minecraft.nbt.Tag;
-import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.world.item.ItemStack;
@@ -182,12 +184,12 @@ public abstract class QuestObjectBase implements Comparable<QuestObjectBase> {
 		return 1L;
 	}
 
-	public void writeData(CompoundTag nbt) {
+	public void writeData(CompoundTag nbt, HolderLookup.Provider provider) {
 		if (!rawTitle.isEmpty()) {
 			nbt.putString("title", rawTitle);
 		}
 
-		NBTUtils.write(nbt, "icon", rawIcon);
+		NBTUtils.write(nbt, "icon", rawIcon, holderLookup());
 
 		if (!tags.isEmpty()) {
 			ListTag tagList = new ListTag();
@@ -200,9 +202,9 @@ public abstract class QuestObjectBase implements Comparable<QuestObjectBase> {
 		}
 	}
 
-	public void readData(CompoundTag nbt) {
+	public void readData(CompoundTag nbt, HolderLookup.Provider provider) {
 		rawTitle = nbt.getString("title");
-		rawIcon = NBTUtils.read(nbt, "icon");
+		rawIcon = NBTUtils.read(nbt, "icon", provider);
 
 		ListTag tagsList = nbt.getList("tags", Tag.TAG_STRING);
 
@@ -217,7 +219,7 @@ public abstract class QuestObjectBase implements Comparable<QuestObjectBase> {
 		}
 	}
 
-	public void writeNetData(FriendlyByteBuf buffer) {
+	public void writeNetData(RegistryFriendlyByteBuf buffer) {
 		int flags = 0;
 		flags = Bits.setFlag(flags, 1, !rawTitle.isEmpty());
 		flags = Bits.setFlag(flags, 2, !rawIcon.isEmpty());
@@ -230,7 +232,7 @@ public abstract class QuestObjectBase implements Comparable<QuestObjectBase> {
 		}
 
 		if (!rawIcon.isEmpty()) {
-			buffer.writeItem(rawIcon);
+			ItemStack.OPTIONAL_STREAM_CODEC.encode(buffer, rawIcon);
 		}
 
 		if (!tags.isEmpty()) {
@@ -238,10 +240,10 @@ public abstract class QuestObjectBase implements Comparable<QuestObjectBase> {
 		}
 	}
 
-	public void readNetData(FriendlyByteBuf buffer) {
+	public void readNetData(RegistryFriendlyByteBuf buffer) {
 		int flags = buffer.readVarInt();
 		rawTitle = Bits.getFlag(flags, 1) ? buffer.readUtf(Short.MAX_VALUE) : "";
-		rawIcon = Bits.getFlag(flags, 2) ? buffer.readItem() : ItemStack.EMPTY;
+		rawIcon = Bits.getFlag(flags, 2) ? ItemStack.OPTIONAL_STREAM_CODEC.decode(buffer) : ItemStack.EMPTY;
 		tags = new ArrayList<>(0);
 
 		if (Bits.getFlag(flags, 4)) {
@@ -283,7 +285,7 @@ public abstract class QuestObjectBase implements Comparable<QuestObjectBase> {
 		}
 
 		if (!rawTitle.isEmpty()) {
-			cachedTitle = TextUtils.parseRawText(rawTitle);
+			cachedTitle = TextUtils.parseRawText(rawTitle, holderLookup());
 		} else {
 			cachedTitle = getAltTitle();
 		}
@@ -350,7 +352,7 @@ public abstract class QuestObjectBase implements Comparable<QuestObjectBase> {
 		ConfigGroup group = new ConfigGroup(FTBQuestsAPI.MOD_ID, accepted -> {
 			gui.run();
 			if (accepted && validateEditedConfig()) {
-				new EditObjectMessage(this).sendToServer();
+				NetworkManager.sendToServer(EditObjectMessage.forQuestObject(this));
 			}
 		});
 		fillConfigGroup(createSubGroup(group));
@@ -366,14 +368,14 @@ public abstract class QuestObjectBase implements Comparable<QuestObjectBase> {
 		return EnumSet.noneOf(RecipeModHelper.Components.class);
 	}
 
-	public static <T extends QuestObjectBase> T copy(T orig, Supplier<T> factory) {
+	public static <T extends QuestObjectBase> T copy(T orig, Supplier<T> factory, HolderLookup.Provider provider) {
 		T copied = factory.get();
 		if (copied == null) {
 			return null;
 		}
 		CompoundTag tag = new CompoundTag();
-		orig.writeData(tag);
-		copied.readData(tag);
+		orig.writeData(tag, provider);
+		copied.readData(tag, provider);
 		return copied;
 	}
 
@@ -383,5 +385,9 @@ public abstract class QuestObjectBase implements Comparable<QuestObjectBase> {
 		return typeCmp == 0 ?
 				getTitle().getString().toLowerCase().compareTo(other.getTitle().getString().toLowerCase()) :
 				typeCmp;
+	}
+
+	public HolderLookup.Provider holderLookup() {
+		return getQuestFile().holderLookup();
 	}
 }
