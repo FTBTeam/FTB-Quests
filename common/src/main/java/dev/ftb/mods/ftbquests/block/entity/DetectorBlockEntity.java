@@ -4,8 +4,10 @@ import dev.architectury.hooks.level.entity.PlayerHooks;
 import dev.ftb.mods.ftbquests.quest.QuestObjectBase;
 import dev.ftb.mods.ftbquests.quest.ServerQuestFile;
 import dev.ftb.mods.ftbquests.quest.TeamData;
+import dev.ftb.mods.ftbquests.registry.ModBlockEntityTypes;
 import dev.ftb.mods.ftbquests.util.ProgressChange;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.level.Level;
@@ -18,19 +20,19 @@ public class DetectorBlockEntity extends BlockEntity {
 	private int radius = 8;
 
 	public DetectorBlockEntity(BlockPos blockPos, BlockState blockState) {
-		super(FTBQuestsBlockEntities.DETECTOR.get(), blockPos, blockState);
+		super(ModBlockEntityTypes.DETECTOR.get(), blockPos, blockState);
 	}
 
 	@Override
-	public void load(CompoundTag tag) {
-		super.load(tag);
+	public void loadAdditional(CompoundTag tag, HolderLookup.Provider provider) {
+		super.loadAdditional(tag, provider);
 
 		objectId = QuestObjectBase.parseCodeString(tag.getString("Object"));
 		radius = tag.getInt("Radius");
 	}
 
 	@Override
-	public void saveAdditional(CompoundTag tag) {
+	public void saveAdditional(CompoundTag tag, HolderLookup.Provider provider) {
 		tag.putString("Object", QuestObjectBase.getCodeString(objectId));
 		tag.putInt("Radius", radius);
 	}
@@ -49,7 +51,7 @@ public class DetectorBlockEntity extends BlockEntity {
 			AABB box = new AABB(pos).inflate(radius);
 			for (ServerPlayer player : level.getEntitiesOfClass(ServerPlayer.class, box, DetectorBlockEntity::isRealPlayer)) {
 				TeamData data = ServerQuestFile.INSTANCE.getOrCreateTeamData(player);
-				qo.forceProgressRaw(data, new ProgressChange(ServerQuestFile.INSTANCE, qo, player.getUUID()).setReset(false).withNotifications());
+				qo.forceProgressRaw(data, new ProgressChange(qo, player.getUUID()).setReset(false).withNotifications());
 			}
 		}
 	}

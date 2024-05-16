@@ -13,11 +13,12 @@ import dev.ftb.mods.ftbquests.events.QuestProgressEventData;
 import dev.ftb.mods.ftbquests.util.NetUtils;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.StringTag;
 import net.minecraft.nbt.Tag;
-import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 
@@ -139,9 +140,9 @@ public final class Chapter extends QuestObject {
 	}
 
 	@Override
-	public void writeData(CompoundTag nbt) {
+	public void writeData(CompoundTag nbt, HolderLookup.Provider provider) {
 		nbt.putString("filename", filename);
-		super.writeData(nbt);
+		super.writeData(nbt, provider);
 
 		if (!rawSubtitle.isEmpty()) {
 			ListTag list = new ListTag();
@@ -194,9 +195,9 @@ public final class Chapter extends QuestObject {
 	}
 
 	@Override
-	public void readData(CompoundTag nbt) {
+	public void readData(CompoundTag nbt, HolderLookup.Provider provider) {
 		filename = nbt.getString("filename");
-		super.readData(nbt);
+		super.readData(nbt, provider);
 		rawSubtitle.clear();
 
 		ListTag subtitleNBT = nbt.getList("subtitle", Tag.TAG_STRING);
@@ -239,7 +240,7 @@ public final class Chapter extends QuestObject {
 	}
 
 	@Override
-	public void writeNetData(FriendlyByteBuf buffer) {
+	public void writeNetData(RegistryFriendlyByteBuf buffer) {
 		super.writeNetData(buffer);
 		buffer.writeUtf(filename, Short.MAX_VALUE);
 		NetUtils.writeStrings(buffer, rawSubtitle);
@@ -265,7 +266,7 @@ public final class Chapter extends QuestObject {
 	}
 
 	@Override
-	public void readNetData(FriendlyByteBuf buffer) {
+	public void readNetData(RegistryFriendlyByteBuf buffer) {
 		super.readNetData(buffer);
 		filename = buffer.readUtf(Short.MAX_VALUE);
 		NetUtils.readStrings(buffer, rawSubtitle);

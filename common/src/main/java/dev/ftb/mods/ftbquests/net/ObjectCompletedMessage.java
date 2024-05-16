@@ -1,44 +1,32 @@
 package dev.ftb.mods.ftbquests.net;
 
 import dev.architectury.networking.NetworkManager;
-import dev.architectury.networking.simple.BaseS2CMessage;
-import dev.architectury.networking.simple.MessageType;
+import dev.ftb.mods.ftbquests.api.FTBQuestsAPI;
 import dev.ftb.mods.ftbquests.client.FTBQuestsNetClient;
+import net.minecraft.core.UUIDUtil;
 import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.codec.ByteBufCodecs;
+import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 
 import java.util.Date;
 import java.util.UUID;
 
-/**
- * @author LatvianModder
- */
-public class ObjectCompletedMessage extends BaseS2CMessage {
-	private final UUID team;
-	private final long id;
+public record ObjectCompletedMessage(UUID teamId, long id) implements CustomPacketPayload {
+	public static final Type<ObjectCompletedMessage> TYPE = new Type<>(FTBQuestsAPI.rl("object_completed_message"));
 
-	public ObjectCompletedMessage(FriendlyByteBuf buffer) {
-		team = buffer.readUUID();
-		id = buffer.readLong();
-	}
-
-	public ObjectCompletedMessage(UUID t, long i) {
-		team = t;
-		id = i;
-	}
+	public static final StreamCodec<FriendlyByteBuf, ObjectCompletedMessage> STREAM_CODEC = StreamCodec.composite(
+			UUIDUtil.STREAM_CODEC, ObjectCompletedMessage::teamId,
+			ByteBufCodecs.VAR_LONG, ObjectCompletedMessage::id,
+			ObjectCompletedMessage::new
+	);
 
 	@Override
-	public MessageType getType() {
-		return FTBQuestsNetHandler.OBJECT_COMPLETED;
+	public Type<ObjectCompletedMessage> type() {
+		return TYPE;
 	}
 
-	@Override
-	public void write(FriendlyByteBuf buffer) {
-		buffer.writeUUID(team);
-		buffer.writeLong(id);
-	}
-
-	@Override
-	public void handle(NetworkManager.PacketContext context) {
-		FTBQuestsNetClient.objectCompleted(team, id, new Date());
+	public static void handle(ObjectCompletedMessage message, NetworkManager.PacketContext context) {
+		context.queue(() -> FTBQuestsNetClient.objectCompleted(message.teamId, message.id, new Date()));
 	}
 }

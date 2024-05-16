@@ -2,7 +2,7 @@
 	"type": "minecraft:crafting_shaped",
 	"group": "ftbquests:screen",
 	"result": {
-		"item": "ftbquests:task_screen_configurator"
+		"id": "ftbquests:task_screen_configurator"
 	},
 	"pattern": [
 		" S",

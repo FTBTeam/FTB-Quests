@@ -1,34 +1,31 @@
 package dev.ftb.mods.ftbquests.net;
 
 import dev.architectury.networking.NetworkManager;
-import dev.architectury.networking.simple.BaseS2CMessage;
-import dev.architectury.networking.simple.MessageType;
+import dev.ftb.mods.ftbquests.api.FTBQuestsAPI;
 import dev.ftb.mods.ftbquests.client.ClientQuestFile;
 import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.codec.ByteBufCodecs;
+import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 
-public class OpenQuestBookMessage extends BaseS2CMessage {
-    private final long id;
+public record OpenQuestBookMessage(long id) implements CustomPacketPayload {
+    public static final Type<OpenQuestBookMessage> TYPE = new Type<>(FTBQuestsAPI.rl("open_quest_book_message"));
 
-    public OpenQuestBookMessage(long id) {
-        this.id = id;
-    }
+    public static final StreamCodec<FriendlyByteBuf, OpenQuestBookMessage> STREAM_CODEC = StreamCodec.composite(
+            ByteBufCodecs.VAR_LONG, OpenQuestBookMessage::id,
+            OpenQuestBookMessage::new
+    );
 
-    OpenQuestBookMessage(FriendlyByteBuf buf) {
-        id = buf.readLong();
-    }
-
-    @Override
-    public MessageType getType() {
-        return FTBQuestsNetHandler.OPEN_QUEST_BOOK;
-    }
-
-    @Override
-    public void write(FriendlyByteBuf buf) {
-        buf.writeLong(id);
+    public static OpenQuestBookMessage lastOpenedQuest() {
+        return new OpenQuestBookMessage(0L);
     }
 
     @Override
-    public void handle(NetworkManager.PacketContext context) {
-        ClientQuestFile.openBookToQuestObject(id);
+    public Type<OpenQuestBookMessage> type() {
+        return TYPE;
+    }
+
+    public static void handle(OpenQuestBookMessage message, NetworkManager.PacketContext context) {
+        context.queue(() -> ClientQuestFile.openBookToQuestObject(message.id));
     }
 }

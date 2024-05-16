@@ -9,24 +9,22 @@ import dev.ftb.mods.ftblibrary.math.Bits;
 import dev.ftb.mods.ftblibrary.ui.Button;
 import dev.ftb.mods.ftblibrary.util.TooltipList;
 import dev.ftb.mods.ftbquests.FTBQuests;
-import dev.ftb.mods.ftbquests.api.FTBQuestsTags;
 import dev.ftb.mods.ftbquests.client.FTBQuestsClient;
 import dev.ftb.mods.ftbquests.client.gui.CustomToast;
 import dev.ftb.mods.ftbquests.client.gui.quests.ValidItemsScreen;
 import dev.ftb.mods.ftbquests.integration.item_filtering.ItemMatchingSystem;
-import dev.ftb.mods.ftbquests.item.FTBQuestsItems;
+import dev.ftb.mods.ftbquests.integration.item_filtering.ItemMatchingSystem.ComponentMatchType;
 import dev.ftb.mods.ftbquests.item.MissingItem;
-import dev.ftb.mods.ftbquests.net.FTBQuestsNetHandler;
 import dev.ftb.mods.ftbquests.quest.Quest;
 import dev.ftb.mods.ftbquests.quest.TeamData;
-import dev.ftb.mods.ftbquests.util.NBTUtils;
+import dev.ftb.mods.ftbquests.registry.ModItems;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
-import net.minecraft.core.Holder;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.server.level.ServerPlayer;
@@ -43,8 +41,7 @@ public class ItemTask extends Task implements Predicate<ItemStack> {
 	private long count;
 	private Tristate consumeItems;
 	private Tristate onlyFromCrafting;
-	private Tristate matchNBT;
-	private boolean weakNBTmatch;
+	private ComponentMatchType matchComponents;
 	private boolean taskScreenOnly;
 
 	public ItemTask(long id, Quest quest) {
@@ -53,8 +50,7 @@ public class ItemTask extends Task implements Predicate<ItemStack> {
 		count = 1;
 		consumeItems = Tristate.DEFAULT;
 		onlyFromCrafting = Tristate.DEFAULT;
-		matchNBT = Tristate.DEFAULT;
-		weakNBTmatch = false;
+		matchComponents = ComponentMatchType.NONE;
 		taskScreenOnly = false;
 	}
 
@@ -83,9 +79,10 @@ public class ItemTask extends Task implements Predicate<ItemStack> {
 	}
 
 	@Override
-	public void writeData(CompoundTag nbt) {
-		super.writeData(nbt);
-		NBTUtils.write(nbt, "item", itemStack);
+	public void writeData(CompoundTag nbt, HolderLookup.Provider provider) {
+		super.writeData(nbt, provider);
+
+		nbt.put("item", itemStack.saveOptional(provider));
 
 		if (count > 1) {
 			nbt.putLong("count", count);
@@ -93,29 +90,28 @@ public class ItemTask extends Task implements Predicate<ItemStack> {
 
 		consumeItems.write(nbt, "consume_items");
 		onlyFromCrafting.write(nbt, "only_from_crafting");
-		matchNBT.write(nbt, "match_nbt");
-		if (weakNBTmatch) {
-			nbt.putBoolean("weak_nbt_match", true);
+		if (matchComponents != ComponentMatchType.NONE) {
+			nbt.putString("match_components", ComponentMatchType.NAME_MAP.getName(matchComponents));
 		}
+
 		if (taskScreenOnly) {
 			nbt.putBoolean("task_screen_only", true);
 		}
 	}
 
 	@Override
-	public void readData(CompoundTag nbt) {
-		super.readData(nbt);
-		itemStack = NBTUtils.read(nbt, "item");
+	public void readData(CompoundTag nbt, HolderLookup.Provider provider) {
+		super.readData(nbt, provider);
+		itemStack = ItemStack.parseOptional(provider, nbt.getCompound("item"));// NBTUtils.read(nbt, "item", provider);
 		count = Math.max(nbt.getLong("count"), 1L);
 		consumeItems = Tristate.read(nbt, "consume_items");
 		onlyFromCrafting = Tristate.read(nbt, "only_from_crafting");
-		matchNBT = Tristate.read(nbt, "match_nbt");
-		weakNBTmatch = nbt.getBoolean("weak_nbt_match");
+		matchComponents = ComponentMatchType.NAME_MAP.get(nbt.getString("match_components"));
 		taskScreenOnly = nbt.getBoolean("task_screen_only");
 	}
 
 	@Override
-	public void writeNetData(FriendlyByteBuf buffer) {
+	public void writeNetData(RegistryFriendlyByteBuf buffer) {
 		super.writeNetData(buffer);
 		int flags = 0;
 		flags = Bits.setFlag(flags, 0x01, count > 1L);
@@ -123,13 +119,12 @@ public class ItemTask extends Task implements Predicate<ItemStack> {
 		flags = Bits.setFlag(flags, 0x04, consumeItems == Tristate.TRUE);
 		flags = Bits.setFlag(flags, 0x08, onlyFromCrafting != Tristate.DEFAULT);
 		flags = Bits.setFlag(flags, 0x10, onlyFromCrafting == Tristate.TRUE);
-		flags = Bits.setFlag(flags, 0x20, matchNBT != Tristate.DEFAULT);
-		flags = Bits.setFlag(flags, 0x40, matchNBT == Tristate.TRUE);
-		flags = Bits.setFlag(flags, 0x80, weakNBTmatch);
+		flags = Bits.setFlag(flags, 0x20, matchComponents != ComponentMatchType.NONE);
+		flags = Bits.setFlag(flags, 0x40, matchComponents == ComponentMatchType.STRICT);
 		flags = Bits.setFlag(flags, 0x100, taskScreenOnly);
 		buffer.writeVarInt(flags);
 
-		FTBQuestsNetHandler.writeItemType(buffer, itemStack);
+		ItemStack.OPTIONAL_STREAM_CODEC.encode(buffer, itemStack);
 
 		if (count > 1L) {
 			buffer.writeVarLong(count);
@@ -137,16 +132,15 @@ public class ItemTask extends Task implements Predicate<ItemStack> {
 	}
 
 	@Override
-	public void readNetData(FriendlyByteBuf buffer) {
+	public void readNetData(RegistryFriendlyByteBuf buffer) {
 		super.readNetData(buffer);
 		int flags = buffer.readVarInt();
 
-		itemStack = FTBQuestsNetHandler.readItemType(buffer);
+		itemStack = ItemStack.OPTIONAL_STREAM_CODEC.decode(buffer);
 		count = Bits.getFlag(flags, 0x01) ? buffer.readVarLong() : 1L;
 		consumeItems = Bits.getFlag(flags, 0x02) ? Bits.getFlag(flags, 0x04) ? Tristate.TRUE : Tristate.FALSE : Tristate.DEFAULT;
 		onlyFromCrafting = Bits.getFlag(flags, 0x08) ? Bits.getFlag(flags, 0x10) ? Tristate.TRUE : Tristate.FALSE : Tristate.DEFAULT;
-		matchNBT = Bits.getFlag(flags, 0x20) ? Bits.getFlag(flags, 0x40) ? Tristate.TRUE : Tristate.FALSE : Tristate.DEFAULT;
-		weakNBTmatch = Bits.getFlag(flags, 0x80);
+		matchComponents = Bits.getFlag(flags, 0x20) ? Bits.getFlag(flags, 0x40) ? ComponentMatchType.STRICT : ComponentMatchType.FUZZY : ComponentMatchType.NONE;
 		taskScreenOnly = Bits.getFlag(flags, 0x100);
 	}
 
@@ -180,7 +174,7 @@ public class ItemTask extends Task implements Predicate<ItemStack> {
 		}
 
 		if (icons.isEmpty()) {
-			return ItemIcon.getItemIcon(FTBQuestsItems.MISSING_ITEM.get());
+			return ItemIcon.getItemIcon(ModItems.MISSING_ITEM.get());
 		}
 
 		return IconAnimation.fromList(icons, false);
@@ -192,20 +186,7 @@ public class ItemTask extends Task implements Predicate<ItemStack> {
 			return true;
 		}
 
-		return ItemMatchingSystem.INSTANCE.doesItemMatch(itemStack, stack, shouldMatchNBT(), weakNBTmatch);
-	}
-
-	private boolean shouldMatchNBT() {
-		return switch (matchNBT) {
-			case TRUE -> true;
-			case FALSE -> false;
-			case DEFAULT -> hasNBTCheckTag();
-		};
-	}
-
-	private boolean hasNBTCheckTag() {
-		Holder.Reference<Item> itemReference = itemStack.getItem().builtInRegistryHolder();
-		return itemReference.is(FTBQuestsTags.Items.CHECK_NBT);
+		return ItemMatchingSystem.INSTANCE.doesItemMatch(itemStack, stack, matchComponents);
 	}
 
 	@Override
@@ -216,8 +197,7 @@ public class ItemTask extends Task implements Predicate<ItemStack> {
 		config.addLong("count", count, v -> count = v, 1, 1, Long.MAX_VALUE);
 		config.addEnum("consume_items", consumeItems, v -> consumeItems = v, Tristate.NAME_MAP);
 		config.addEnum("only_from_crafting", onlyFromCrafting, v -> onlyFromCrafting = v, Tristate.NAME_MAP);
-		config.addEnum("match_nbt", matchNBT, v -> matchNBT = v, Tristate.NAME_MAP);
-		config.addBool("weak_nbt_match", weakNBTmatch, v -> weakNBTmatch = v, false);
+		config.addEnum("match_components", matchComponents, v -> matchComponents = v, ComponentMatchType.NAME_MAP);
 		config.addBool("task_screen_only", taskScreenOnly, v -> taskScreenOnly = v, false);
 	}
 
@@ -246,7 +226,7 @@ public class ItemTask extends Task implements Predicate<ItemStack> {
 		if (!consumesResources() && validItems.size() == 1 && FTBQuests.getRecipeModHelper().isRecipeModAvailable()) {
 			FTBQuests.getRecipeModHelper().showRecipes(validItems.get(0));
 		} else if (validItems.isEmpty()) {
-			Minecraft.getInstance().getToasts().addToast(new CustomToast(Component.literal("No valid items!"), ItemIcon.getItemIcon(FTBQuestsItems.MISSING_ITEM.get()), Component.literal("Report this bug to modpack author!")));
+			Minecraft.getInstance().getToasts().addToast(new CustomToast(Component.literal("No valid items!"), ItemIcon.getItemIcon(ModItems.MISSING_ITEM.get()), Component.literal("Report this bug to modpack author!")));
 		} else {
 			new ValidItemsScreen(this, validItems, canClick).openGui();
 		}
@@ -260,7 +240,11 @@ public class ItemTask extends Task implements Predicate<ItemStack> {
 		} else {
 			// use item's tooltip, but include a count with the item name (e.g. "3 x Stick") if appropriate
 			ItemStack stack = getIcon() instanceof ItemIcon i ? i.getStack() : itemStack;
-			List<Component> lines = stack.getTooltipLines(FTBQuestsClient.getClientPlayer(), advanced ? TooltipFlag.Default.ADVANCED : TooltipFlag.Default.NORMAL);
+			List<Component> lines = stack.getTooltipLines(Item.TooltipContext.of(
+					FTBQuestsClient.getClientLevel()),
+					FTBQuestsClient.getClientPlayer(),
+					advanced ? TooltipFlag.Default.ADVANCED : TooltipFlag.Default.NORMAL
+			);
 			if (!lines.isEmpty()) {
 				lines.set(0, getTitle());
 			} else {
@@ -350,4 +334,5 @@ public class ItemTask extends Task implements Predicate<ItemStack> {
 	public boolean isOnlyFromCrafting() {
 		return onlyFromCrafting.get(false);
 	}
+
 }

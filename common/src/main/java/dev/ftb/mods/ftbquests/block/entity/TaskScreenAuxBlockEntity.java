@@ -1,7 +1,9 @@
 package dev.ftb.mods.ftbquests.block.entity;
 
+import dev.ftb.mods.ftbquests.registry.ModBlockEntityTypes;
 import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtUtils;
 import net.minecraft.network.chat.Component;
@@ -21,7 +23,7 @@ public class TaskScreenAuxBlockEntity extends BlockEntity implements ITaskScreen
     private BlockPos corePosPending;  // non-null after NBT load & before querying/resolving
 
     public TaskScreenAuxBlockEntity(BlockPos blockPos, BlockState blockState) {
-        super(FTBQuestsBlockEntities.AUX_TASK_SCREEN.get(), blockPos, blockState);
+        super(ModBlockEntityTypes.AUX_TASK_SCREEN.get(), blockPos, blockState);
     }
 
     @Override
@@ -31,16 +33,18 @@ public class TaskScreenAuxBlockEntity extends BlockEntity implements ITaskScreen
 
     @Override
     public Optional<TaskScreenBlockEntity> getCoreScreen() {
-        if (corePosPending != null) {
+        if (corePosPending != null && level != null) {
             // first core screen query since loaded from NBT
-            TaskScreenBlockEntity core = level.getBlockEntity(corePosPending, FTBQuestsBlockEntities.CORE_TASK_SCREEN.get()).orElse(null);
-            if (core != null) {
-                coreScreen = new WeakReference<>(core);
-                corePosPending = null;
-            } else {
-                // something's gone wrong & the core no longer exists?
-                level.destroyBlock(getBlockPos(), false, null);
-            }
+            level.getBlockEntity(corePosPending, ModBlockEntityTypes.CORE_TASK_SCREEN.get()).ifPresentOrElse(
+                    core -> {
+                        coreScreen = new WeakReference<>(core);
+                        corePosPending = null;
+                    },
+                    () -> {
+                        // something's gone wrong & the core no longer exists?
+                        level.destroyBlock(getBlockPos(), false, null);
+                    }
+            );
         }
         return Optional.ofNullable(coreScreen.get());
     }
@@ -54,14 +58,14 @@ public class TaskScreenAuxBlockEntity extends BlockEntity implements ITaskScreen
     }
 
     @Override
-    public void load(CompoundTag compoundTag) {
-        super.load(compoundTag);
-        corePosPending = compoundTag.contains("CorePos") ? NbtUtils.readBlockPos(compoundTag.getCompound("CorePos")) : null;
+    public void loadAdditional(CompoundTag compoundTag, HolderLookup.Provider provider) {
+        super.loadAdditional(compoundTag, provider);
+        corePosPending = NbtUtils.readBlockPos(compoundTag, "CorePos").orElse(null);
     }
 
     @Override
-    protected void saveAdditional(CompoundTag compoundTag) {
-        super.saveAdditional(compoundTag);
+    protected void saveAdditional(CompoundTag compoundTag, HolderLookup.Provider provider) {
+        super.saveAdditional(compoundTag, provider);
 
         if (corePosPending != null) {
             compoundTag.put("CorePos", NbtUtils.writeBlockPos(corePosPending));

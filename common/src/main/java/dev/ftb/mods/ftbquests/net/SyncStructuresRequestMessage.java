@@ -1,31 +1,29 @@
 package dev.ftb.mods.ftbquests.net;
 
 import dev.architectury.networking.NetworkManager;
-import dev.architectury.networking.simple.BaseC2SMessage;
-import dev.architectury.networking.simple.MessageType;
+import dev.ftb.mods.ftbquests.api.FTBQuestsAPI;
 import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.server.level.ServerPlayer;
 
-public class SyncStructuresRequestMessage extends BaseC2SMessage {
-    public SyncStructuresRequestMessage() {
-    }
+public record SyncStructuresRequestMessage() implements CustomPacketPayload {
+    public static final Type<SyncStructuresRequestMessage> TYPE = new Type<>(FTBQuestsAPI.rl("sync_structures_request_message"));
 
-    public SyncStructuresRequestMessage(FriendlyByteBuf buf) {
-    }
+    public static final SyncStructuresRequestMessage INSTANCE = new SyncStructuresRequestMessage();
 
-    @Override
-    public MessageType getType() {
-        return FTBQuestsNetHandler.SYNC_STRUCTURES_REQUEST;
-    }
+    public static final StreamCodec<FriendlyByteBuf, SyncStructuresRequestMessage> STREAM_CODEC = StreamCodec.unit(INSTANCE);
 
     @Override
-    public void write(FriendlyByteBuf buf) {
+    public Type<SyncStructuresRequestMessage> type() {
+        return TYPE;
     }
 
-    @Override
-    public void handle(NetworkManager.PacketContext context) {
-        if (context.getPlayer() instanceof ServerPlayer sp && sp.getServer() != null) {
-            new SyncStructuresResponseMessage(sp.getServer()).sendTo(sp);
-        }
+    public static void handle(SyncStructuresRequestMessage message, NetworkManager.PacketContext context) {
+        context.queue(() -> {
+            if (context.getPlayer() instanceof ServerPlayer sp && sp.getServer() != null) {
+                NetworkManager.sendToPlayer(sp, SyncStructuresResponseMessage.create(sp.getServer()));
+            }
+        });
     }
 }

@@ -1,59 +1,57 @@
 package dev.ftb.mods.ftbquests.net;
 
 import dev.architectury.networking.NetworkManager;
-import dev.architectury.networking.simple.BaseC2SMessage;
-import dev.architectury.networking.simple.MessageType;
+import dev.ftb.mods.ftblibrary.util.NetworkHelper;
 import dev.ftb.mods.ftbquests.FTBQuests;
+import dev.ftb.mods.ftbquests.api.FTBQuestsAPI;
 import dev.ftb.mods.ftbquests.client.ClientQuestFile;
 import dev.ftb.mods.ftbquests.quest.QuestObjectBase;
 import dev.ftb.mods.ftbquests.quest.ServerQuestFile;
 import dev.ftb.mods.ftbquests.util.NetUtils;
+import net.minecraft.Util;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.codec.ByteBufCodecs;
+import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 
-/**
- * @author LatvianModder
- */
-public class EditObjectMessage extends BaseC2SMessage {
-	private final long id;
-	private final CompoundTag nbt;
+public record EditObjectMessage(long id, CompoundTag nbt) implements CustomPacketPayload {
+	public static final Type<EditObjectMessage> TYPE = new Type<>(FTBQuestsAPI.rl("edit_object_message"));
 
-	EditObjectMessage(FriendlyByteBuf buffer) {
-		id = buffer.readLong();
-		nbt = buffer.readNbt();
-	}
+	public static final StreamCodec<FriendlyByteBuf, EditObjectMessage> STREAM_CODEC = StreamCodec.composite(
+			ByteBufCodecs.VAR_LONG, EditObjectMessage::id,
+			ByteBufCodecs.COMPOUND_TAG, EditObjectMessage::nbt,
+			EditObjectMessage::new
+	);
 
-	public EditObjectMessage(QuestObjectBase o) {
-		id = o.id;
-		nbt = new CompoundTag();
-		o.writeData(nbt);
-		FTBQuests.getRecipeModHelper().refreshRecipes(o);
+	public static EditObjectMessage forQuestObject(QuestObjectBase qo) {
+		FTBQuests.getRecipeModHelper().refreshRecipes(qo);
 		ClientQuestFile.INSTANCE.clearCachedData();
+
+		return new EditObjectMessage(qo.id, Util.make(new CompoundTag(), nbt1 -> qo.writeData(nbt1, ClientQuestFile.INSTANCE.holderLookup())));
+	}
+
+	public static void sendToServer(QuestObjectBase qo) {
+		NetworkManager.sendToServer(forQuestObject(qo));
 	}
 
 	@Override
-	public MessageType getType() {
-		return FTBQuestsNetHandler.EDIT_OBJECT;
+	public Type<EditObjectMessage> type() {
+		return TYPE;
 	}
 
-	@Override
-	public void write(FriendlyByteBuf buffer) {
-		buffer.writeLong(id);
-		buffer.writeNbt(nbt);
-	}
-
-	@Override
-	public void handle(NetworkManager.PacketContext context) {
-		if (NetUtils.canEdit(context)) {
-			QuestObjectBase object = ServerQuestFile.INSTANCE.getBase(id);
-
-			if (object != null) {
-				object.readData(nbt);
-				object.editedFromGUIOnServer();
-				ServerQuestFile.INSTANCE.clearCachedData();
-				ServerQuestFile.INSTANCE.markDirty();
-				new EditObjectResponseMessage(object).sendToAll(context.getPlayer().getServer());
+	public static void handle(EditObjectMessage message, NetworkManager.PacketContext context) {
+		context.queue(() -> {
+			if (NetUtils.canEdit(context)) {
+				QuestObjectBase object = ServerQuestFile.INSTANCE.getBase(message.id);
+				if (object != null) {
+					object.readData(message.nbt, context.registryAccess());
+					object.editedFromGUIOnServer();
+					ServerQuestFile.INSTANCE.clearCachedData();
+					ServerQuestFile.INSTANCE.markDirty();
+					NetworkHelper.sendToAll(context.getPlayer().getServer(), new EditObjectResponseMessage(object));
+				}
 			}
-		}
+		});
 	}
 }

@@ -14,6 +14,7 @@ import dev.ftb.mods.ftblibrary.ui.misc.AbstractButtonListScreen;
 import dev.ftb.mods.ftblibrary.util.TooltipList;
 import dev.ftb.mods.ftblibrary.util.client.PositionedIngredient;
 import dev.ftb.mods.ftbquests.api.FTBQuestsAPI;
+import dev.ftb.mods.ftbquests.client.FTBQuestsClient;
 import dev.ftb.mods.ftbquests.quest.QuestObjectBase;
 import dev.ftb.mods.ftbquests.quest.loot.RewardTable;
 import dev.ftb.mods.ftbquests.quest.loot.WeightedReward;
@@ -40,7 +41,9 @@ public class EditRewardTableScreen extends AbstractButtonListScreen {
 		this.parentScreen = parentScreen;
 		this.callback = callback;
 
-		editedTable = QuestObjectBase.copy(originalTable, () ->  new RewardTable(originalTable.id, originalTable.getFile()));
+		editedTable = QuestObjectBase.copy(originalTable,
+				() ->  new RewardTable(originalTable.id, originalTable.getFile()),
+				FTBQuestsClient.holderLookup());
 
 		setBorder(1, 1, 1);
 	}

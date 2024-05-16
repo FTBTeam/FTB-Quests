@@ -75,7 +75,7 @@ public class ChapterImageButton extends Button implements QuestPositionableButto
 				String name = chapterImage.getImage() instanceof Color4I ? chapterImage.getColor().toString() : chapterImage.getImage().toString();
 				ConfigGroup group = new ConfigGroup(FTBQuestsAPI.MOD_ID, accepted -> {
 					if (accepted) {
-						new EditObjectMessage(chapterImage.getChapter()).sendToServer();
+						EditObjectMessage.sendToServer(chapterImage.getChapter());
 					}
 					run();
 				}).setNameKey("Img: " + name);
@@ -107,7 +107,7 @@ public class ChapterImageButton extends Button implements QuestPositionableButto
 
 			contextMenu.add(new ContextMenuItem(Component.translatable("selectServer.delete"), ThemeProperties.DELETE_ICON.get(), b -> {
 				chapterImage.getChapter().removeImage(chapterImage);
-				new EditObjectMessage(chapterImage.getChapter()).sendToServer();
+				EditObjectMessage.sendToServer(chapterImage.getChapter());
 			}).setYesNoText(Component.translatable("delete_item", chapterImage.getImage().toString())));
 
 			getGui().openContextMenu(contextMenu);

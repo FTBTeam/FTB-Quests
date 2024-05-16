@@ -4,17 +4,18 @@ import com.mojang.brigadier.CommandDispatcher;
 import dev.architectury.event.EventResult;
 import dev.architectury.event.events.common.*;
 import dev.architectury.hooks.level.entity.PlayerHooks;
-import dev.ftb.mods.ftbquests.block.FTBQuestsBlocks;
-import dev.ftb.mods.ftbquests.block.entity.FTBQuestsBlockEntities;
 import dev.ftb.mods.ftbquests.command.FTBQuestsCommands;
 import dev.ftb.mods.ftbquests.events.ClearFileCacheEvent;
-import dev.ftb.mods.ftbquests.item.FTBQuestsItems;
 import dev.ftb.mods.ftbquests.quest.BaseQuestFile;
 import dev.ftb.mods.ftbquests.quest.ServerQuestFile;
 import dev.ftb.mods.ftbquests.quest.TeamData;
 import dev.ftb.mods.ftbquests.quest.task.DimensionTask;
 import dev.ftb.mods.ftbquests.quest.task.KillTask;
 import dev.ftb.mods.ftbquests.quest.task.Task;
+import dev.ftb.mods.ftbquests.registry.ModBlockEntityTypes;
+import dev.ftb.mods.ftbquests.registry.ModBlocks;
+import dev.ftb.mods.ftbquests.registry.ModDataComponents;
+import dev.ftb.mods.ftbquests.registry.ModItems;
 import dev.ftb.mods.ftbquests.util.DeferredInventoryDetection;
 import dev.ftb.mods.ftbquests.util.FTBQuestsInventoryListener;
 import dev.ftb.mods.ftbteams.api.event.PlayerChangedTeamEvent;
@@ -52,9 +53,10 @@ public enum FTBQuestsEventHandler {
 		LifecycleEvent.SERVER_STARTED.register(this::serverStarted);
 		LifecycleEvent.SERVER_STOPPING.register(this::serverStopped);
 		LifecycleEvent.SERVER_LEVEL_SAVE.register(this::worldSaved);
-		FTBQuestsBlocks.register();
-		FTBQuestsItems.register();
-		FTBQuestsBlockEntities.register();
+		ModBlocks.register();
+		ModItems.register();
+		ModDataComponents.register();
+		ModBlockEntityTypes.register();
 		ClearFileCacheEvent.EVENT.register(this::fileCacheClear);
 		TeamEvent.PLAYER_LOGGED_IN.register(this::playerLoggedIn);
 		TeamEvent.CREATED.register(this::teamCreated);
@@ -195,7 +197,7 @@ public enum FTBQuestsEventHandler {
 		for (int i = 0; i < oldPlayer.getInventory().items.size(); i++) {
 			ItemStack stack = oldPlayer.getInventory().items.get(i);
 
-			if (stack.getItem() == FTBQuestsItems.BOOK.get() && newPlayer.addItem(stack)) {
+			if (stack.getItem() == ModItems.BOOK.get() && newPlayer.addItem(stack)) {
 				oldPlayer.getInventory().items.set(i, ItemStack.EMPTY);
 			}
 		}

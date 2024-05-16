@@ -1,5 +1,6 @@
 package dev.ftb.mods.ftbquests.client.gui;
 
+import dev.architectury.networking.NetworkManager;
 import dev.ftb.mods.ftblibrary.ui.Panel;
 import dev.ftb.mods.ftblibrary.ui.SimpleTextButton;
 import dev.ftb.mods.ftblibrary.ui.Theme;
@@ -50,7 +51,7 @@ public class SelectChoiceRewardScreen extends AbstractButtonListScreen {
 		closeGui();
 		if (choiceReward.getTable() != null) {
 			int idx = choiceReward.getTable().getWeightedRewards().indexOf(acceptedReward);
-			new ClaimChoiceRewardMessage(choiceReward.id, idx).sendToServer();
+			NetworkManager.sendToServer(new ClaimChoiceRewardMessage(choiceReward.id, idx));
 		}
 	}
 

@@ -7,8 +7,9 @@ import dev.ftb.mods.ftblibrary.config.ui.SelectImageResourceScreen;
 import dev.ftb.mods.ftblibrary.config.ui.SelectItemStackScreen;
 import dev.ftb.mods.ftblibrary.ui.Widget;
 import dev.ftb.mods.ftblibrary.ui.input.MouseButton;
-import dev.ftb.mods.ftbquests.item.FTBQuestsItems;
-import net.minecraft.nbt.StringTag;
+import dev.ftb.mods.ftbquests.item.CustomIconItem;
+import dev.ftb.mods.ftbquests.registry.ModItems;
+import net.minecraft.Util;
 import net.minecraft.world.item.ItemStack;
 
 public class ConfigIconItemStack extends ItemStackConfig {
@@ -24,9 +25,8 @@ public class ConfigIconItemStack extends ItemStackConfig {
 				new SelectImageResourceScreen(imageConfig, accepted -> {
 					if (accepted) {
 						if (!imageConfig.getValue().equals(ImageResourceConfig.NONE)) {
-							ItemStack stack = new ItemStack(FTBQuestsItems.CUSTOM_ICON.get());
-							stack.addTagElement("Icon", StringTag.valueOf(imageConfig.getValue().toString()));
-							setCurrentValue(stack);
+							setCurrentValue(Util.make(new ItemStack(ModItems.CUSTOM_ICON.get()),
+									s -> CustomIconItem.setIcon(s, imageConfig.getValue())));
 						} else {
 							setCurrentValue(ItemStack.EMPTY);
 						}

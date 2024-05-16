@@ -3,12 +3,17 @@ package dev.ftb.mods.ftbquests.block.entity;
 import dev.ftb.mods.ftbquests.item.LootCrateItem;
 import dev.ftb.mods.ftbquests.quest.loot.LootCrate;
 import dev.ftb.mods.ftbquests.quest.loot.WeightedReward;
+import dev.ftb.mods.ftbquests.registry.ModBlockEntityTypes;
+import dev.ftb.mods.ftbquests.registry.ModDataComponents;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.HolderLookup;
+import net.minecraft.core.component.DataComponentMap;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.component.ItemContainerContents;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 
@@ -22,18 +27,18 @@ public class LootCrateOpenerBlockEntity extends BlockEntity {
     private final Map<ItemEntry, Integer> outputs = new LinkedHashMap<>();
 
     public LootCrateOpenerBlockEntity(BlockPos blockPos, BlockState blockState) {
-        super(FTBQuestsBlockEntities.LOOT_CRATE_OPENER.get(), blockPos, blockState);
+        super(ModBlockEntityTypes.LOOT_CRATE_OPENER.get(), blockPos, blockState);
     }
 
     @Override
-    public void load(CompoundTag compoundTag) {
-        super.load(compoundTag);
+    public void loadAdditional(CompoundTag compoundTag, HolderLookup.Provider provider) {
+        super.loadAdditional(compoundTag, provider);
 
         outputs.clear();
         ListTag itemTag = compoundTag.getList("Items", Tag.TAG_COMPOUND);
         itemTag.forEach(el -> {
             if (el instanceof CompoundTag tag) {
-                ItemStack stack = ItemStack.of(tag.getCompound("item"));
+                ItemStack stack = ItemStack.parseOptional(provider, tag.getCompound("item"));
                 int amount = tag.getInt("amount");
                 outputs.put(new ItemEntry(stack), amount);
             }
@@ -43,19 +48,36 @@ public class LootCrateOpenerBlockEntity extends BlockEntity {
     }
 
     @Override
-    protected void saveAdditional(CompoundTag compoundTag) {
-        super.saveAdditional(compoundTag);
+    protected void saveAdditional(CompoundTag compoundTag, HolderLookup.Provider provider) {
+        super.saveAdditional(compoundTag, provider);
 
         ListTag itemTag = new ListTag();
         outputs.forEach((item, amount) -> {
             CompoundTag tag = new CompoundTag();
-            tag.put("item", item.stack.save(new CompoundTag()));
+            tag.put("item", item.stack.save(provider, new CompoundTag()));
             tag.putInt("amount", amount);
             itemTag.add(tag);
         });
         if (!itemTag.isEmpty()) compoundTag.put("Items", itemTag);
 
         if (owner != null) compoundTag.putUUID("Owner", owner);
+    }
+
+    @Override
+    protected void applyImplicitComponents(DataComponentInput dataComponentInput) {
+        super.applyImplicitComponents(dataComponentInput);
+
+        outputs.clear();
+        dataComponentInput.getOrDefault(ModDataComponents.LOOT_CRATE_ITEMS.get(), ItemContainerContents.EMPTY)
+                .stream().forEach(stack -> outputs.put(new ItemEntry(stack), stack.getCount()));
+    }
+
+    @Override
+    protected void collectImplicitComponents(DataComponentMap.Builder builder) {
+        super.collectImplicitComponents(builder);
+
+        builder.set(ModDataComponents.LOOT_CRATE_ITEMS.get(),
+                ItemContainerContents.fromItems(outputs.keySet().stream().map(ItemEntry::stack).toList()));
     }
 
     public UUID getOwner() {
@@ -71,7 +93,7 @@ public class LootCrateOpenerBlockEntity extends BlockEntity {
     }
 
     /**
-     * Allow using an itemstack as a key (keyed by item and tag if present, not amount)
+     * Allow using an itemstack as a key (keyed by item and any components, but not the count)
      *
      * @param stack the itemstack
      */
@@ -80,16 +102,12 @@ public class LootCrateOpenerBlockEntity extends BlockEntity {
         public boolean equals(Object o) {
             if (this == o) return true;
             if (o == null || getClass() != o.getClass()) return false;
-            ItemEntry itemEntry = (ItemEntry) o;
-            return stack.getItem() == itemEntry.stack.getItem()
-                    && (stack.getTag() == null || stack.getTag().equals(itemEntry.stack.getTag()));
+            return ItemStack.isSameItemSameComponents(stack, ((ItemEntry) o).stack);
         }
 
         @Override
         public int hashCode() {
-            return stack.getTag() != null ?
-                    Objects.hash(stack.getItem(), stack.getTag().hashCode()) :
-                    Objects.hash(stack.getItem());
+            return ItemStack.hashItemAndComponents(stack);
         }
     }
 

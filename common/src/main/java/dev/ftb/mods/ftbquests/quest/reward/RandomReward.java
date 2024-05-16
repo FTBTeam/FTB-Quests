@@ -14,8 +14,9 @@ import dev.ftb.mods.ftbquests.quest.loot.WeightedReward;
 import dev.ftb.mods.ftbquests.util.ConfigQuestObject;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.util.RandomSource;
@@ -41,23 +42,23 @@ public class RandomReward extends Reward {
 	}
 
 	@Override
-	public void writeData(CompoundTag nbt) {
-		super.writeData(nbt);
+	public void writeData(CompoundTag nbt, HolderLookup.Provider provider) {
+		super.writeData(nbt, provider);
 
 		if (getTable() != null) {
 			nbt.putLong("table_id", table.id);
 
 			if (table.id == -1L) {
 				SNBTCompoundTag tag = new SNBTCompoundTag();
-				table.writeData(tag);
+				table.writeData(tag, provider);
 				nbt.put("table_data", tag);
 			}
 		}
 	}
 
 	@Override
-	public void readData(CompoundTag nbt) {
-		super.readData(nbt);
+	public void readData(CompoundTag nbt, HolderLookup.Provider provider) {
+		super.readData(nbt, provider);
 		table = null;
 		BaseQuestFile file = getQuestFile();
 
@@ -68,7 +69,7 @@ public class RandomReward extends Reward {
 
 		if (table == null && nbt.contains("table_data")) {
 			table = new RewardTable(-1L, file);
-			table.readData(nbt.getCompound("table_data"));
+			table.readData(nbt.getCompound("table_data"), provider);
 			table.setRawTitle("Internal");
 		}
 	}
@@ -87,7 +88,7 @@ public class RandomReward extends Reward {
 	}
 
 	@Override
-	public void writeNetData(FriendlyByteBuf buffer) {
+	public void writeNetData(RegistryFriendlyByteBuf buffer) {
 		super.writeNetData(buffer);
 
 		RewardTable table = getTable();
@@ -99,7 +100,7 @@ public class RandomReward extends Reward {
 	}
 
 	@Override
-	public void readNetData(FriendlyByteBuf buffer) {
+	public void readNetData(RegistryFriendlyByteBuf buffer) {
 		super.readNetData(buffer);
 		BaseQuestFile file = getQuestFile();
 

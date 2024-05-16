@@ -1,6 +1,6 @@
 plugins {
 	id "architectury-plugin" version "3.4-SNAPSHOT"
-	id "dev.architectury.loom" version "1.5-SNAPSHOT" apply false
+	id "dev.architectury.loom" version "1.6-SNAPSHOT" apply false
 	id "com.matthewprenger.cursegradle" version "1.4.0" apply false
 }
 
@@ -19,6 +19,10 @@ subprojects {
 		minecraft "com.mojang:minecraft:${rootProject.minecraft_version}"
 		mappings loom.officialMojangMappings()
 	}
+
+	configurations.configureEach {
+		resolutionStrategy.cacheChangingModulesFor 0, 'seconds'
+	}
 }
 
 allprojects {
@@ -35,7 +39,7 @@ allprojects {
 	// needs to be done AFTER version is set
 	apply from: "https://raw.githubusercontent.com/FTBTeam/mods-meta/main/gradle/publishing.gradle"
 
-	sourceCompatibility = targetCompatibility = compileJava.sourceCompatibility = compileJava.targetCompatibility = 17
+	sourceCompatibility = targetCompatibility = compileJava.sourceCompatibility = compileJava.targetCompatibility = 21
 
 	compileJava {
 		options.encoding = "UTF-8"

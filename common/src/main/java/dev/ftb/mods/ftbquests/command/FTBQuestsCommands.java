@@ -6,8 +6,10 @@ import com.mojang.brigadier.arguments.BoolArgumentType;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
+import dev.architectury.networking.NetworkManager;
 import dev.architectury.registry.registries.RegistrarManager;
 import dev.ftb.mods.ftblibrary.config.Tristate;
+import dev.ftb.mods.ftblibrary.util.NetworkHelper;
 import dev.ftb.mods.ftbquests.FTBQuests;
 import dev.ftb.mods.ftbquests.integration.PermissionsHelper;
 import dev.ftb.mods.ftbquests.net.*;
@@ -172,11 +174,10 @@ public class FTBQuestsCommands {
 
 	private static int openQuest(ServerPlayer player, QuestObjectBase qob) {
 		if (qob == null) {
-			// just open the book to wherever it last was
-			new OpenQuestBookMessage(0L).sendTo(player);
+			NetworkManager.sendToPlayer(player, OpenQuestBookMessage.lastOpenedQuest());
 		} else if (qob instanceof QuestObject quest) {
 			if (canSeeQuestObject(player, quest)) {
-				new OpenQuestBookMessage(quest.id).sendTo(player);
+				NetworkManager.sendToPlayer(player, new OpenQuestBookMessage(quest.id));
 			}
 		}
 		return 1;
@@ -255,7 +256,7 @@ public class FTBQuestsCommands {
 
 		file.addRewardTable(table);
 
-		new CreateObjectResponseMessage(table, null).sendToAll(level.getServer());
+		NetworkHelper.sendToAll(level.getServer(), CreateObjectResponseMessage.create(table, null));
 
 		source.sendSuccess(() -> Component.translatable("commands.ftbquests.command.feedback.table_imported", name, table.getWeightedRewards().size()), false);
 
@@ -300,7 +301,7 @@ public class FTBQuestsCommands {
 
 	private static int changeProgress(CommandSourceStack source, Collection<ServerPlayer> players, boolean reset, QuestObjectBase questObject) {
 		for (ServerPlayer player : players) {
-			ProgressChange progressChange = new ProgressChange(ServerQuestFile.INSTANCE, questObject, player.getUUID()).setReset(reset);
+			ProgressChange progressChange = new ProgressChange(questObject, player.getUUID()).setReset(reset);
 			questObject.forceProgress(ServerQuestFile.INSTANCE.getOrCreateTeamData(player), progressChange);
 		}
 
@@ -330,7 +331,7 @@ public class FTBQuestsCommands {
 		chapter.setRawIcon(new ItemStack(Items.COMPASS));
 		chapter.setDefaultQuestShape("rsquare");
 
-		new CreateObjectResponseMessage(chapter, null).sendToAll(source.getServer());
+		NetworkHelper.sendToAll(source.getServer(), CreateObjectResponseMessage.create(chapter, null));
 
 		//noinspection DataFlowIssue
 		List<ItemStack> list = allItems.stream()
@@ -345,7 +346,7 @@ public class FTBQuestsCommands {
 
 		int col = 0;
 		int row = 0;
-		String modid = RegistrarManager.getId(list.get(0).getItem(), Registries.ITEM).getNamespace();
+		String modid = RegistrarManager.getId(list.getFirst().getItem(), Registries.ITEM).getNamespace();
 
 		for (ItemStack stack : list) {
 			ResourceLocation id = RegistrarManager.getId(stack.getItem(), Registries.ITEM);
@@ -362,17 +363,15 @@ public class FTBQuestsCommands {
 			quest.onCreated();
 			quest.setX(col);
 			quest.setY(row);
-			quest.setRawSubtitle(stack.save(new CompoundTag()).toString());
+			quest.setRawSubtitle(stack.save(source.registryAccess(), new CompoundTag()).toString());
 
-			new CreateObjectResponseMessage(quest, null).sendToAll(source.getServer());
+			NetworkHelper.sendToAll(source.getServer(), CreateObjectResponseMessage.create(quest, null));
 
 			ItemTask task = new ItemTask(chapter.file.newID(), quest);
 			task.onCreated();
 			task.setStackAndCount(stack, 1).setConsumeItems(Tristate.TRUE);
 
-			CompoundTag extra = new CompoundTag();
-			extra.putString("type", task.getType().getTypeForNBT());
-			new CreateObjectResponseMessage(task, extra).sendToAll(source.getServer());
+			NetworkHelper.sendToAll(source.getServer(), CreateObjectMessage.create(task, task.getType().makeExtraNBT()));
 
 			col++;
 		}
@@ -395,9 +394,9 @@ public class FTBQuestsCommands {
 		}
 
 		instance.load();
-		new SyncQuestsMessage(instance).sendToAll(source.getServer());
+		NetworkHelper.sendToAll(source.getServer(), new SyncQuestsMessage(instance));
 		source.getServer().getPlayerList().getPlayers()
-				.forEach(p -> new SyncEditorPermissionMessage(PermissionsHelper.hasEditorPermission(p, false)).sendTo(p));
+				.forEach(p -> NetworkManager.sendToPlayer(p, SyncEditorPermissionMessage.forPlayer(p)));
 
 		source.sendSuccess(() -> Component.translatable("commands.ftbquests.command.feedback.reloaded"), false);
 		UUID id = sender == null ? Util.NIL_UUID : sender.getUUID();

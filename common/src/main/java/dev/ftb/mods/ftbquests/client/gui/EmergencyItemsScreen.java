@@ -1,6 +1,7 @@
 package dev.ftb.mods.ftbquests.client.gui;
 
 import com.mojang.blaze3d.vertex.PoseStack;
+import dev.architectury.networking.NetworkManager;
 import dev.ftb.mods.ftblibrary.icon.Color4I;
 import dev.ftb.mods.ftblibrary.ui.*;
 import dev.ftb.mods.ftblibrary.ui.input.MouseButton;
@@ -43,7 +44,7 @@ public class EmergencyItemsScreen extends BaseScreen {
 			if (!done) {
 				done = true;
 				cancelButton.setTitle(Component.translatable("gui.close"));
-				new GetEmergencyItemsMessage().sendToServer();
+				NetworkManager.sendToServer(GetEmergencyItemsMessage.INSTANCE);
 			}
 
 			timeLeft = 0L;

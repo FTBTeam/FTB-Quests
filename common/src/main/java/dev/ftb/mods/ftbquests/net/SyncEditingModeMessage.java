@@ -1,43 +1,31 @@
 package dev.ftb.mods.ftbquests.net;
 
 import dev.architectury.networking.NetworkManager;
-import dev.architectury.networking.simple.BaseS2CMessage;
-import dev.architectury.networking.simple.MessageType;
+import dev.ftb.mods.ftbquests.api.FTBQuestsAPI;
 import dev.ftb.mods.ftbquests.client.FTBQuestsNetClient;
+import net.minecraft.core.UUIDUtil;
 import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.codec.ByteBufCodecs;
+import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 
 import java.util.UUID;
 
-/**
- * @author LatvianModder
- */
-public class SyncEditingModeMessage extends BaseS2CMessage {
-	private final UUID uuid;
-	private final boolean editingMode;
+public record SyncEditingModeMessage(UUID teamId, boolean editingMode) implements CustomPacketPayload {
+	public static final Type<SyncEditingModeMessage> TYPE = new Type<>(FTBQuestsAPI.rl("sync_editing_mode_message"));
 
-	public SyncEditingModeMessage(FriendlyByteBuf buffer) {
-		uuid = buffer.readUUID();
-		editingMode = buffer.readBoolean();
-	}
-
-	public SyncEditingModeMessage(UUID id, boolean e) {
-		uuid = id;
-		editingMode = e;
-	}
+	public static final StreamCodec<FriendlyByteBuf, SyncEditingModeMessage> STREAM_CODEC = StreamCodec.composite(
+			UUIDUtil.STREAM_CODEC, SyncEditingModeMessage::teamId,
+			ByteBufCodecs.BOOL, SyncEditingModeMessage::editingMode,
+			SyncEditingModeMessage::new
+	);
 
 	@Override
-	public MessageType getType() {
-		return FTBQuestsNetHandler.SYNC_EDITING_MODE;
+	public Type<SyncEditingModeMessage> type() {
+		return TYPE;
 	}
 
-	@Override
-	public void write(FriendlyByteBuf buffer) {
-		buffer.writeUUID(uuid);
-		buffer.writeBoolean(editingMode);
-	}
-
-	@Override
-	public void handle(NetworkManager.PacketContext context) {
-		FTBQuestsNetClient.syncEditingMode(uuid, editingMode);
+	public static void handle(SyncEditingModeMessage message, NetworkManager.PacketContext context) {
+		context.queue(() -> FTBQuestsNetClient.syncEditingMode(message.teamId, message.editingMode));
 	}
 }

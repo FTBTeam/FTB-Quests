@@ -1,5 +1,6 @@
 package dev.ftb.mods.ftbquests.client.gui;
 
+import dev.architectury.networking.NetworkManager;
 import dev.ftb.mods.ftblibrary.icon.Color4I;
 import dev.ftb.mods.ftblibrary.ui.Panel;
 import dev.ftb.mods.ftblibrary.ui.SimpleTextButton;
@@ -45,7 +46,7 @@ public class ChangeChapterGroupScreen extends AbstractButtonListScreen {
 	@Override
 	protected void doAccept() {
 		if (newGroup != null) {
-			new ChangeChapterGroupMessage(chapter.id, newGroup.id).sendToServer();
+			NetworkManager.sendToServer(new ChangeChapterGroupMessage(chapter.id, newGroup.id));
 		}
 		questScreen.open(chapter, false);
 	}

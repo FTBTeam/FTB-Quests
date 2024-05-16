@@ -2,6 +2,7 @@ package dev.ftb.mods.ftbquests.quest;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Axis;
+import dev.architectury.networking.NetworkManager;
 import dev.ftb.mods.ftblibrary.config.ConfigGroup;
 import dev.ftb.mods.ftblibrary.config.ImageResourceConfig;
 import dev.ftb.mods.ftblibrary.config.StringConfig;
@@ -23,6 +24,7 @@ import net.minecraft.nbt.StringTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
 
@@ -36,6 +38,22 @@ public final class ChapterImage implements Movable {
 	public static final String FTBQ_IMAGE = "<ftbq-image>";
 
 	public static WeakReference<ChapterImage> clipboard = new WeakReference<>(null);
+
+	public static StreamCodec<FriendlyByteBuf, ChapterImage> STREAM_CODEC = new StreamCodec<>() {
+        @Override
+        public ChapterImage decode(FriendlyByteBuf buf) {
+			long chapterId = buf.readLong();
+            ChapterImage img = new ChapterImage(ServerQuestFile.INSTANCE.getChapter(chapterId));
+            img.readNetData(buf);
+            return null;
+        }
+
+        @Override
+        public void encode(FriendlyByteBuf buf, ChapterImage chapterImage) {
+			buf.writeLong(chapterImage.getChapter().id);
+            chapterImage.writeNetData(buf);
+        }
+    };
 
 	private Chapter chapter;
 	private double x, y;
@@ -251,20 +269,19 @@ public final class ChapterImage implements Movable {
 	}
 
 	@Override
-	@Environment(EnvType.CLIENT)
-	public void move(Chapter to, double _x, double _y) {
+	public void initiateMoveClientSide(Chapter to, double _x, double _y) {
 		x = _x;
 		y = _y;
 
 		if (to != chapter) {
 			chapter.removeImage(this);
-			new EditObjectMessage(chapter).sendToServer();
+			NetworkManager.sendToServer(EditObjectMessage.forQuestObject(chapter));
 
 			chapter = to;
 			chapter.addImage(this);
 		}
 
-		new EditObjectMessage(chapter).sendToServer();
+		NetworkManager.sendToServer(EditObjectMessage.forQuestObject(chapter));
 	}
 
 	@Override
@@ -318,7 +335,7 @@ public final class ChapterImage implements Movable {
 			} else {
 				height = width / getAspectRatio();
 			}
-			new EditObjectMessage(chapter).sendToServer();
+			NetworkManager.sendToServer(EditObjectMessage.forQuestObject(chapter));
 		}
 	}
 

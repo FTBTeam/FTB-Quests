@@ -3,10 +3,10 @@ package dev.ftb.mods.ftbquests.quest.loot;
 import dev.ftb.mods.ftblibrary.config.ConfigGroup;
 import dev.ftb.mods.ftblibrary.config.NameMap;
 import dev.ftb.mods.ftblibrary.icon.Color4I;
-import dev.ftb.mods.ftbquests.item.FTBQuestsItems;
 import dev.ftb.mods.ftbquests.quest.QuestObjectBase;
+import dev.ftb.mods.ftbquests.registry.ModDataComponents;
+import dev.ftb.mods.ftbquests.registry.ModItems;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.StringTag;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.world.item.ItemStack;
 
@@ -137,8 +137,8 @@ public final class LootCrate {
 	}
 
 	public ItemStack createStack() {
-		ItemStack stack = new ItemStack(FTBQuestsItems.LOOTCRATE.get());
-		stack.addTagElement("type", StringTag.valueOf(getStringID()));
+		ItemStack stack = new ItemStack(ModItems.LOOTCRATE.get());
+		stack.set(ModDataComponents.LOOT_CRATE.get(), getStringID());
 		return stack;
 	}
 

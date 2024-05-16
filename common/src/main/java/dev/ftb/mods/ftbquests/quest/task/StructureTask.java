@@ -1,6 +1,7 @@
 package dev.ftb.mods.ftbquests.quest.task;
 
 import com.mojang.datafixers.util.Either;
+import dev.architectury.networking.NetworkManager;
 import dev.ftb.mods.ftblibrary.config.ConfigGroup;
 import dev.ftb.mods.ftblibrary.config.NameMap;
 import dev.ftb.mods.ftbquests.net.SyncStructuresRequestMessage;
@@ -9,9 +10,10 @@ import dev.ftb.mods.ftbquests.quest.TeamData;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.ChatFormatting;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.resources.ResourceKey;
@@ -19,6 +21,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.tags.TagKey;
+import net.minecraft.world.level.StructureManager;
 import net.minecraft.world.level.levelgen.structure.Structure;
 
 import java.util.ArrayList;
@@ -51,25 +54,25 @@ public class StructureTask extends AbstractBooleanTask {
 	}
 
 	@Override
-	public void writeData(CompoundTag nbt) {
-		super.writeData(nbt);
+	public void writeData(CompoundTag nbt, HolderLookup.Provider provider) {
+		super.writeData(nbt, provider);
 		nbt.putString("structure", getStructure());
 	}
 
 	@Override
-	public void readData(CompoundTag nbt) {
-		super.readData(nbt);
+	public void readData(CompoundTag nbt, HolderLookup.Provider provider) {
+		super.readData(nbt, provider);
 		setStructure(nbt.getString("structure"));
 	}
 
 	@Override
-	public void writeNetData(FriendlyByteBuf buffer) {
+	public void writeNetData(RegistryFriendlyByteBuf buffer) {
 		super.writeNetData(buffer);
 		buffer.writeUtf(getStructure());
 	}
 
 	@Override
-	public void readNetData(FriendlyByteBuf buffer) {
+	public void readNetData(RegistryFriendlyByteBuf buffer) {
 		super.readNetData(buffer);
 		setStructure(buffer.readUtf(1024));
 	}
@@ -109,9 +112,13 @@ public class StructureTask extends AbstractBooleanTask {
 		if (player.isSpectator()) return false;
 
 		ServerLevel level = (ServerLevel) player.level();
+		StructureManager mgr = level.structureManager();
 		return structure.map(
-				key -> level.structureManager().getStructureWithPieceAt(player.blockPosition(), key).isValid(),
-				tag -> level.structureManager().getStructureWithPieceAt(player.blockPosition(), tag).isValid()
+				key -> {
+					Structure structure = mgr.registryAccess().registryOrThrow(Registries.STRUCTURE).get(key);
+					return structure != null && mgr.getStructureWithPieceAt(player.blockPosition(), structure).isValid();
+				},
+				tag -> mgr.getStructureWithPieceAt(player.blockPosition(), tag).isValid()
 		);
 	}
 
@@ -130,7 +137,7 @@ public class StructureTask extends AbstractBooleanTask {
 
 	public static void maybeRequestStructureSync() {
 		if (KNOWN_STRUCTURES.isEmpty()) {
-			new SyncStructuresRequestMessage().sendToServer();
+			NetworkManager.sendToServer(SyncStructuresRequestMessage.INSTANCE);
 		}
 	}
 }

@@ -1,5 +1,6 @@
 package dev.ftb.mods.ftbquests.quest.task;
 
+import dev.architectury.networking.NetworkManager;
 import dev.ftb.mods.ftblibrary.config.ConfigGroup;
 import dev.ftb.mods.ftblibrary.icon.Icon;
 import dev.ftb.mods.ftblibrary.ui.Button;
@@ -24,8 +25,9 @@ import net.fabricmc.api.Environment;
 import net.minecraft.ChatFormatting;
 import net.minecraft.ResourceLocationException;
 import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.resources.ResourceLocation;
@@ -247,7 +249,7 @@ public abstract class Task extends QuestObject {
 	public void onButtonClicked(Button button, boolean canClick) {
 		if (canClick && autoSubmitOnPlayerTick() <= 0) {
 			button.playClickSound();
-			new SubmitTaskMessage(id).sendToServer();
+			NetworkManager.sendToServer(new SubmitTaskMessage(id));
 		}
 	}
 
@@ -304,27 +306,27 @@ public abstract class Task extends QuestObject {
 	}
 
 	@Override
-	public void writeData(CompoundTag nbt) {
-		super.writeData(nbt);
+	public void writeData(CompoundTag nbt, HolderLookup.Provider provider) {
+		super.writeData(nbt, provider);
 		if (optionalTask) nbt.putBoolean("optional_task", true);
 	}
 
 	@Override
-	public void readData(CompoundTag nbt) {
-		super.readData(nbt);
+	public void readData(CompoundTag nbt, HolderLookup.Provider provider) {
+		super.readData(nbt, provider);
 
 		optionalTask = nbt.getBoolean("optional_task");
 	}
 
 	@Override
-	public void writeNetData(FriendlyByteBuf buffer) {
+	public void writeNetData(RegistryFriendlyByteBuf buffer) {
 		super.writeNetData(buffer);
 
 		buffer.writeBoolean(optionalTask);
 	}
 
 	@Override
-	public void readNetData(FriendlyByteBuf buffer) {
+	public void readNetData(RegistryFriendlyByteBuf buffer) {
 		super.readNetData(buffer);
 
 		optionalTask = buffer.readBoolean();

@@ -1,5 +1,6 @@
 package dev.ftb.mods.ftbquests.client.gui.quests;
 
+import dev.architectury.networking.NetworkManager;
 import dev.architectury.platform.Platform;
 import dev.ftb.mods.ftblibrary.icon.Icons;
 import dev.ftb.mods.ftblibrary.ui.Panel;
@@ -73,7 +74,7 @@ public class OtherButtonsPanelTop extends OtherButtonsPanel {
 		@Override
 		public void onClicked(MouseButton button) {
 			playClickSound();
-			new TogglePinnedMessage(TeamData.AUTO_PIN_ID).sendToServer();
+			NetworkManager.sendToServer(new TogglePinnedMessage(TeamData.AUTO_PIN_ID));
 		}
 	}
 

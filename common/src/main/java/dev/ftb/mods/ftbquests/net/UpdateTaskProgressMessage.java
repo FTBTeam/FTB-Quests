@@ -1,48 +1,32 @@
 package dev.ftb.mods.ftbquests.net;
 
 import dev.architectury.networking.NetworkManager;
-import dev.architectury.networking.simple.BaseS2CMessage;
-import dev.architectury.networking.simple.MessageType;
+import dev.ftb.mods.ftbquests.api.FTBQuestsAPI;
 import dev.ftb.mods.ftbquests.client.FTBQuestsNetClient;
-import dev.ftb.mods.ftbquests.quest.TeamData;
+import net.minecraft.core.UUIDUtil;
 import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.codec.ByteBufCodecs;
+import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 
 import java.util.UUID;
 
-/**
- * @author LatvianModder
- */
-public class UpdateTaskProgressMessage extends BaseS2CMessage {
-	private final UUID teamId;
-	private final long task;
-	private final long progress;
+public record UpdateTaskProgressMessage(UUID teamId, long task, long progress) implements CustomPacketPayload {
+	public static final Type<UpdateTaskProgressMessage> TYPE = new Type<>(FTBQuestsAPI.rl("update_task_progress_message"));
 
-	public UpdateTaskProgressMessage(FriendlyByteBuf buffer) {
-		teamId = buffer.readUUID();
-		task = buffer.readLong();
-		progress = buffer.readVarLong();
-	}
-
-	public UpdateTaskProgressMessage(TeamData teamData, long task, long progress) {
-		teamId = teamData.getTeamId();
-		this.task = task;
-		this.progress = progress;
-	}
+	public static final StreamCodec<FriendlyByteBuf, UpdateTaskProgressMessage> STREAM_CODEC = StreamCodec.composite(
+			UUIDUtil.STREAM_CODEC, UpdateTaskProgressMessage::teamId,
+			ByteBufCodecs.VAR_LONG, UpdateTaskProgressMessage::task,
+			ByteBufCodecs.VAR_LONG, UpdateTaskProgressMessage::progress,
+			UpdateTaskProgressMessage::new
+	);
 
 	@Override
-	public MessageType getType() {
-		return FTBQuestsNetHandler.UPDATE_TASK_PROGRESS;
+	public Type<UpdateTaskProgressMessage> type() {
+		return TYPE;
 	}
 
-	@Override
-	public void write(FriendlyByteBuf buffer) {
-		buffer.writeUUID(teamId);
-		buffer.writeLong(task);
-		buffer.writeVarLong(progress);
-	}
-
-	@Override
-	public void handle(NetworkManager.PacketContext context) {
-		FTBQuestsNetClient.updateTaskProgress(teamId, task, progress);
+	public static void handle(UpdateTaskProgressMessage message, NetworkManager.PacketContext context) {
+		context.queue(() -> FTBQuestsNetClient.updateTaskProgress(message.teamId, message.task, message.progress));
 	}
 }

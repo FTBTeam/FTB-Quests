@@ -1,5 +1,6 @@
 package dev.ftb.mods.ftbquests.client.gui.quests;
 
+import dev.architectury.networking.NetworkManager;
 import dev.ftb.mods.ftblibrary.ui.GuiHelper;
 import dev.ftb.mods.ftblibrary.ui.Panel;
 import dev.ftb.mods.ftblibrary.ui.Theme;
@@ -23,7 +24,7 @@ public class CollectRewardsButton extends TabButton {
 		if (questScreen.file.selfTeamData.hasUnclaimedRewards(Minecraft.getInstance().player.getUUID(), questScreen.file)) {
 			playClickSound();
 			new RewardNotificationsScreen().openGui();
-			new ClaimAllRewardsMessage().sendToServer();
+			NetworkManager.sendToServer(ClaimAllRewardsMessage.INSTANCE);
 		}
 	}
 

@@ -31,8 +31,7 @@ public interface Movable {
 	 * @param x new X pos
 	 * @param y new Y pos
 	 */
-	@Environment(EnvType.CLIENT)
-	void move(Chapter to, double x, double y);
+	void initiateMoveClientSide(Chapter to, double x, double y);
 
 	/**
 	 * Called on both server and client to actually update the object's position; must also update any related objects,
