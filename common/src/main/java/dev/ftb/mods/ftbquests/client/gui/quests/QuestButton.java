@@ -12,7 +12,6 @@ import dev.ftb.mods.ftblibrary.ui.*;
 import dev.ftb.mods.ftblibrary.ui.input.MouseButton;
 import dev.ftb.mods.ftblibrary.util.TooltipList;
 import dev.ftb.mods.ftblibrary.util.client.PositionedIngredient;
-import dev.ftb.mods.ftbquests.client.FTBQuestsClient;
 import dev.ftb.mods.ftbquests.client.gui.ContextMenuBuilder;
 import dev.ftb.mods.ftbquests.net.CreateObjectMessage;
 import dev.ftb.mods.ftbquests.net.DeleteObjectMessage;
@@ -204,7 +203,6 @@ public class QuestButton extends Button implements QuestPositionableButton {
 			questScreen.movingObjects = false;
 
 			if (questScreen.getViewedQuest() != quest) {
-//				questScreen.viewQuestPanel.hidePanel = true;
 				questScreen.viewQuest(quest);
 			} else {
 				questScreen.closeQuest();
@@ -239,9 +237,7 @@ public class QuestButton extends Button implements QuestPositionableButton {
 			contextMenu2.add(new ContextMenuItem(type.getDisplayName(), type.getIconSupplier(), b -> {
 				playClickSound();
 				type.getGuiProvider().openCreationGui(parent, quest, reward -> questScreen.getSelectedQuests().forEach(quest -> {
-					Reward newReward = QuestObjectBase.copy(reward,
-							() -> type.createReward(0L, quest),
-							FTBQuestsClient.holderLookup());
+					Reward newReward = QuestObjectBase.copy(reward, () -> type.createReward(0L, quest));
 					if (newReward != null) {
 						CompoundTag extra = new CompoundTag();
 						extra.putString("type", type.getTypeForNBT());

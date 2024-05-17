@@ -577,7 +577,7 @@ public class ViewQuestPanel extends ModalPanel {
 	public void keyReleased(Key key) {
 		// released rather than pressed; if we used pressed, keypress would be picked up by the next screen
 
-		if (/*hidePanel ||*/ quest == null) return;
+		if (quest == null) return;
 
 		if (questScreen.file.canEdit()) {
 			if (key.is(GLFW.GLFW_KEY_S)) {
@@ -610,22 +610,17 @@ public class ViewQuestPanel extends ModalPanel {
 		StringConfig c = new StringConfig(null);
 
 		// pressing T while mousing over a task button allows editing the task title
-		QuestObject qo = quest;
-		String titleKey = "ftbquests.title";
-		for (Widget w : panelTasks.getWidgets()) {
-			if (w instanceof TaskButton b && b.isMouseOver()) {
-				qo = b.task;
-				titleKey = "ftbquests.task_title";
-				break;
-			}
-		}
+		QuestObject qo = panelTasks.getWidgets().stream()
+				.filter(w -> w instanceof TaskButton b && b.isMouseOver())
+				.map(w -> (TaskButton) w)
+				.findFirst()
+				.<QuestObject>map(b -> b.task).orElse(quest);
 
-		final var qo1 = qo;
-		c.setValue(qo1.getRawTitle());
+		c.setValue(qo.getRawTitle());
 		EditStringConfigOverlay<String> overlay = new EditStringConfigOverlay<>(getGui(), c, accepted -> {
 			if (accepted) {
-				qo1.setRawTitle(c.getValue());
-				NetworkManager.sendToServer(EditObjectMessage.forQuestObject(qo1));
+				qo.setRawTitle(c.getValue());
+				NetworkManager.sendToServer(EditObjectMessage.forQuestObject(qo));
 			}
 		}, Component.translatable("ftbquests.title.tooltip")).atPosition(titleField.getX(), titleField.getY() - 14);
 		overlay.setWidth(Math.max(150, overlay.getWidth()));

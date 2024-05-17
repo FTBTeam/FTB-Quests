@@ -105,6 +105,10 @@ public final class ChapterImage implements Movable {
 		return this;
 	}
 
+	public static ChapterImage fromNet(Chapter parent, FriendlyByteBuf buf) {
+		return Util.make(new ChapterImage(parent), img -> img.readNetData(buf));
+	}
+
 	public Color4I getColor() {
 		return color;
 	}

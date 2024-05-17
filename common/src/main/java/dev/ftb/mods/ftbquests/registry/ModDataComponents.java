@@ -8,7 +8,6 @@ import dev.ftb.mods.ftbquests.block.entity.TaskScreenBlockEntity.TaskScreenSaveD
 import net.minecraft.core.GlobalPos;
 import net.minecraft.core.component.DataComponentType;
 import net.minecraft.core.registries.Registries;
-import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.component.ItemContainerContents;
@@ -41,10 +40,10 @@ public class ModDataComponents {
             .networkSynchronized(GlobalPos.STREAM_CODEC)
             .build());
 
-    public static RegistrySupplier<DataComponentType<CompoundTag>> MISSING_ITEM
-            = COMPONENT_TYPES.register("missing_item", () -> new DataComponentType.Builder<CompoundTag>()
-            .persistent(CompoundTag.CODEC)
-            .networkSynchronized(ByteBufCodecs.COMPOUND_TAG)
+    public static RegistrySupplier<DataComponentType<String>> MISSING_ITEM_DESC
+            = COMPONENT_TYPES.register("missing_item", () -> new DataComponentType.Builder<String>()
+            .persistent(Codec.STRING)
+            .networkSynchronized(ByteBufCodecs.STRING_UTF8)
             .build());
 
     public static RegistrySupplier<DataComponentType<TaskScreenSaveData>> TASK_SCREEN_SAVED

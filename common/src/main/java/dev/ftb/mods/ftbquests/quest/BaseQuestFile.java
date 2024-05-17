@@ -13,7 +13,6 @@ import dev.ftb.mods.ftbquests.api.QuestFile;
 import dev.ftb.mods.ftbquests.client.FTBQuestsClient;
 import dev.ftb.mods.ftbquests.events.*;
 import dev.ftb.mods.ftbquests.integration.RecipeModHelper;
-import dev.ftb.mods.ftbquests.item.MissingItem;
 import dev.ftb.mods.ftbquests.net.DeleteObjectResponseMessage;
 import dev.ftb.mods.ftbquests.quest.loot.EntityWeight;
 import dev.ftb.mods.ftbquests.quest.loot.LootCrate;
@@ -395,13 +394,11 @@ public abstract class BaseQuestFile extends QuestObject implements QuestFile {
 		nbt.putBoolean("default_quest_disable_jei", defaultQuestDisableJEI);
 
 		if (!emergencyItems.isEmpty()) {
-			ListTag list = new ListTag();
-
-			for (ItemStack stack : emergencyItems) {
-				list.add(MissingItem.writeItem(stack, provider));
-			}
-
-			nbt.put("emergency_items", list);
+			nbt.put("emergency_items", Util.make(new ListTag(), l -> {
+				for (ItemStack stack : emergencyItems) {
+					l.add(stack.save(provider));
+				}
+			}));
 		}
 
 		nbt.putInt("emergency_items_cooldown", emergencyItemsCooldown);
@@ -434,13 +431,8 @@ public abstract class BaseQuestFile extends QuestObject implements QuestFile {
 		emergencyItems.clear();
 
 		ListTag emergencyItemsTag = nbt.getList("emergency_items", Tag.TAG_COMPOUND);
-
 		for (int i = 0; i < emergencyItemsTag.size(); i++) {
-			ItemStack stack = MissingItem.readItem(emergencyItemsTag.getCompound(i), provider);
-
-			if (!stack.isEmpty()) {
-				emergencyItems.add(stack);
-			}
+			emergencyItems.add(itemOrMissingFromNBT(emergencyItemsTag.getCompound(i), provider));
 		}
 
 		emergencyItemsCooldown = nbt.getInt("emergency_items_cooldown");

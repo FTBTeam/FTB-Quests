@@ -14,12 +14,14 @@ import dev.ftb.mods.ftbquests.integration.RecipeModHelper;
 import dev.ftb.mods.ftbquests.item.CustomIconItem;
 import dev.ftb.mods.ftbquests.net.EditObjectMessage;
 import dev.ftb.mods.ftbquests.quest.theme.property.ThemeProperties;
-import dev.ftb.mods.ftbquests.util.NBTUtils;
+import dev.ftb.mods.ftbquests.registry.ModDataComponents;
+import dev.ftb.mods.ftbquests.registry.ModItems;
 import dev.ftb.mods.ftbquests.util.NetUtils;
 import dev.ftb.mods.ftbquests.util.ProgressChange;
 import dev.ftb.mods.ftbquests.util.TextUtils;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.Util;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
@@ -73,6 +75,21 @@ public abstract class QuestObjectBase implements Comparable<QuestObjectBase> {
 
 	public static boolean shouldSendNotifications() {
 		return sendNotifications.get(true);
+	}
+
+	public static ItemStack itemOrMissingFromNBT(CompoundTag tag, HolderLookup.Provider provider) {
+		return tag.isEmpty() ?
+				ItemStack.EMPTY :
+				ItemStack.parse(provider, tag).orElse(createMissing(tag));
+	}
+
+	private static ItemStack createMissing(CompoundTag tag) {
+		String id = tag.getString("id");
+		int count = Math.max(1, tag.getInt("count"));
+		String text = count == 1 ? id : count + "x " + id;
+
+		return Util.make(new ItemStack(ModItems.MISSING_ITEM.get()),
+				stack -> stack.set(ModDataComponents.MISSING_ITEM_DESC.get(), text));
 	}
 
 	public final boolean isValid() {
@@ -188,23 +205,23 @@ public abstract class QuestObjectBase implements Comparable<QuestObjectBase> {
 		if (!rawTitle.isEmpty()) {
 			nbt.putString("title", rawTitle);
 		}
-
-		NBTUtils.write(nbt, "icon", rawIcon, holderLookup());
+		if (!rawIcon.isEmpty()) {
+			nbt.put("icon", rawIcon.save(holderLookup()));
+		}
 
 		if (!tags.isEmpty()) {
-			ListTag tagList = new ListTag();
-
-			for (String s : tags) {
-				tagList.add(StringTag.valueOf(s));
-			}
-
-			nbt.put("tags", tagList);
+			nbt.put("tags", Util.make(new ListTag(), l -> {
+				for (String s : tags) {
+					l.add(StringTag.valueOf(s));
+				}
+			}));
 		}
 	}
 
 	public void readData(CompoundTag nbt, HolderLookup.Provider provider) {
 		rawTitle = nbt.getString("title");
-		rawIcon = NBTUtils.read(nbt, "icon", provider);
+
+		rawIcon = itemOrMissingFromNBT(nbt.getCompound("icon"), provider);
 
 		ListTag tagsList = nbt.getList("tags", Tag.TAG_STRING);
 
@@ -368,14 +385,14 @@ public abstract class QuestObjectBase implements Comparable<QuestObjectBase> {
 		return EnumSet.noneOf(RecipeModHelper.Components.class);
 	}
 
-	public static <T extends QuestObjectBase> T copy(T orig, Supplier<T> factory, HolderLookup.Provider provider) {
+	public static <T extends QuestObjectBase> T copy(T orig, Supplier<T> factory) {
 		T copied = factory.get();
 		if (copied == null) {
 			return null;
 		}
 		CompoundTag tag = new CompoundTag();
-		orig.writeData(tag, provider);
-		copied.readData(tag, provider);
+		orig.writeData(tag, orig.holderLookup());
+		copied.readData(tag, orig.holderLookup());
 		return copied;
 	}
 

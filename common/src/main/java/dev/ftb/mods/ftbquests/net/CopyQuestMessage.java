@@ -3,7 +3,6 @@ package dev.ftb.mods.ftbquests.net;
 import dev.architectury.networking.NetworkManager;
 import dev.ftb.mods.ftblibrary.util.NetworkHelper;
 import dev.ftb.mods.ftbquests.api.FTBQuestsAPI;
-import dev.ftb.mods.ftbquests.client.FTBQuestsClient;
 import dev.ftb.mods.ftbquests.quest.*;
 import dev.ftb.mods.ftbquests.quest.reward.Reward;
 import dev.ftb.mods.ftbquests.quest.reward.RewardType;
@@ -40,9 +39,7 @@ public record CopyQuestMessage(long id, long chapterId, double qx, double qy, bo
             BaseQuestFile file = ServerQuestFile.INSTANCE;
             if (file.get(message.id) instanceof Quest toCopy && file.get(message.chapterId) instanceof Chapter chapter) {
                 // deep copy of the quest
-                Quest newQuest = Objects.requireNonNull(QuestObjectBase.copy(toCopy,
-                        () -> new Quest(file.newID(), chapter),
-                        FTBQuestsClient.holderLookup()));
+                Quest newQuest = Objects.requireNonNull(QuestObjectBase.copy(toCopy, () -> new Quest(file.newID(), chapter)));
                 if (!message.copyDeps) {
                     newQuest.clearDependencies();
                 }
@@ -53,16 +50,14 @@ public record CopyQuestMessage(long id, long chapterId, double qx, double qy, bo
                 // deep copy of all tasks and rewards
                 toCopy.getTasks().forEach(task -> {
                     Task newTask = QuestObjectBase.copy(task,
-                            () -> TaskType.createTask(file.newID(), newQuest, task.getType().getTypeForNBT()),
-                            FTBQuestsClient.holderLookup());
+                            () -> TaskType.createTask(file.newID(), newQuest, task.getType().getTypeForNBT()));
                     if (newTask != null) {
                         newTask.onCreated();
                     }
                 });
                 for (Reward reward : toCopy.getRewards()) {
                     Reward newReward = QuestObjectBase.copy(reward,
-                            () -> RewardType.createReward(file.newID(), newQuest, reward.getType().getTypeForNBT()),
-                            FTBQuestsClient.holderLookup());
+                            () -> RewardType.createReward(file.newID(), newQuest, reward.getType().getTypeForNBT()));
                     if (newReward != null) {
                         newReward.onCreated();
                     }
