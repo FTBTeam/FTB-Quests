@@ -15,7 +15,6 @@ import dev.ftb.mods.ftblibrary.ui.input.MouseButton;
 import dev.ftb.mods.ftblibrary.ui.misc.AbstractButtonListScreen;
 import dev.ftb.mods.ftblibrary.util.TooltipList;
 import dev.ftb.mods.ftbquests.client.ClientQuestFile;
-import dev.ftb.mods.ftbquests.client.FTBQuestsClient;
 import dev.ftb.mods.ftbquests.client.gui.quests.QuestScreen;
 import dev.ftb.mods.ftbquests.net.CreateObjectMessage;
 import dev.ftb.mods.ftbquests.net.DeleteObjectMessage;
@@ -48,8 +47,7 @@ public class RewardTablesScreen extends AbstractButtonListScreen {
 		this.questScreen = questScreen;
 		this.rewardTablesCopy = ClientQuestFile.INSTANCE.getRewardTables().stream()
 				.map(table -> QuestObjectBase.copy(table,
-						() -> new RewardTable(table.id, ClientQuestFile.INSTANCE),
-						FTBQuestsClient.getClientLevel().registryAccess()))
+						() -> new RewardTable(table.id, ClientQuestFile.INSTANCE)))
 				.collect(Collectors.toCollection(ArrayList::new));
 
 		setTitle(Component.translatable("ftbquests.reward_tables"));

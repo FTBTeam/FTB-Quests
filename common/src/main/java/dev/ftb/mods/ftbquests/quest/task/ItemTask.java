@@ -82,7 +82,7 @@ public class ItemTask extends Task implements Predicate<ItemStack> {
 	public void writeData(CompoundTag nbt, HolderLookup.Provider provider) {
 		super.writeData(nbt, provider);
 
-		nbt.put("item", itemStack.saveOptional(provider));
+		nbt.put("item", itemStack.save(provider));
 
 		if (count > 1) {
 			nbt.putLong("count", count);
@@ -102,7 +102,7 @@ public class ItemTask extends Task implements Predicate<ItemStack> {
 	@Override
 	public void readData(CompoundTag nbt, HolderLookup.Provider provider) {
 		super.readData(nbt, provider);
-		itemStack = ItemStack.parseOptional(provider, nbt.getCompound("item"));// NBTUtils.read(nbt, "item", provider);
+		itemStack = itemOrMissingFromNBT(nbt.getCompound("item"), provider);
 		count = Math.max(nbt.getLong("count"), 1L);
 		consumeItems = Tristate.read(nbt, "consume_items");
 		onlyFromCrafting = Tristate.read(nbt, "only_from_crafting");

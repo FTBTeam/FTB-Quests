@@ -270,7 +270,7 @@ public class TaskScreenBlockEntity extends BlockEntity implements ITaskScreen {
                 Codec.BOOL.optionalFieldOf("indestructible", false).forGetter(TaskScreenSaveData::indestructible),
                 Codec.BOOL.optionalFieldOf("input_only", false).forGetter(TaskScreenSaveData::inputOnly),
                 ItemStack.CODEC.optionalFieldOf("skin", ItemStack.EMPTY).forGetter(TaskScreenSaveData::inputModeIcon),
-                Codec.BOOL.optionalFieldOf("input_only", false).forGetter(TaskScreenSaveData::textShadow)
+                Codec.BOOL.optionalFieldOf("text_shadow", false).forGetter(TaskScreenSaveData::textShadow)
         ).apply(builder, TaskScreenSaveData::new));
 
         public static StreamCodec<RegistryFriendlyByteBuf, TaskScreenSaveData> STREAM_CODEC = StreamCodec.composite(

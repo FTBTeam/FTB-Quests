@@ -81,14 +81,14 @@ public class FluidTask extends Task {
 	public void writeData(CompoundTag nbt, HolderLookup.Provider provider) {
 		super.writeData(nbt, provider);
 
-		fluidStack.write(provider, nbt);
+		nbt.put("fluid", fluidStack.write(provider, new CompoundTag()));
 	}
 
 	@Override
 	public void readData(CompoundTag nbt, HolderLookup.Provider provider) {
 		super.readData(nbt, provider);
 
-		fluidStack = FluidStack.read(provider, nbt).orElse(FluidStack.empty());
+		fluidStack = FluidStack.read(provider, nbt.getCompound("fluid")).orElse(FluidStack.empty());
 	}
 
 	@Override

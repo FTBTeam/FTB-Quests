@@ -9,7 +9,6 @@ import dev.ftb.mods.ftblibrary.ui.Widget;
 import dev.ftb.mods.ftblibrary.util.client.PositionedIngredient;
 import dev.ftb.mods.ftbquests.net.DisplayItemRewardToastMessage;
 import dev.ftb.mods.ftbquests.quest.Quest;
-import dev.ftb.mods.ftbquests.util.NBTUtils;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.core.HolderLookup;
@@ -66,7 +65,10 @@ public class ItemReward extends Reward {
 	@Override
 	public void writeData(CompoundTag nbt, HolderLookup.Provider provider) {
 		super.writeData(nbt, provider);
-		NBTUtils.write(nbt, "item", item, provider);
+
+		if (!item.isEmpty()) {
+			nbt.put("item", item.save(provider));
+		}
 
 		if (count > 1) {
 			nbt.putInt("count", count);
@@ -82,7 +84,8 @@ public class ItemReward extends Reward {
 	@Override
 	public void readData(CompoundTag nbt, HolderLookup.Provider provider) {
 		super.readData(nbt, provider);
-		item = NBTUtils.read(nbt, "item", provider);
+
+		item = itemOrMissingFromNBT(nbt.getCompound("item"), provider);
 
 		count = nbt.getInt("count");
 		if (count == 0) {

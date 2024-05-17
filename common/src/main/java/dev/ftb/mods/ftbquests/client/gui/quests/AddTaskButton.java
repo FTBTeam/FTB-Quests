@@ -8,7 +8,6 @@ import dev.ftb.mods.ftblibrary.ui.Panel;
 import dev.ftb.mods.ftblibrary.ui.Theme;
 import dev.ftb.mods.ftblibrary.ui.input.MouseButton;
 import dev.ftb.mods.ftbquests.api.FTBQuestsAPI;
-import dev.ftb.mods.ftbquests.client.FTBQuestsClient;
 import dev.ftb.mods.ftbquests.net.CreateObjectMessage;
 import dev.ftb.mods.ftbquests.quest.Quest;
 import dev.ftb.mods.ftbquests.quest.QuestObjectBase;
@@ -62,8 +61,7 @@ public class AddTaskButton extends Button {
 
 	private void copyAndCreateTask(Task task) {
 		Task newTask = QuestObjectBase.copy(task,
-				() -> TaskType.createTask(0L, quest, task.getType().getTypeId().toString()),
-				FTBQuestsClient.holderLookup());
+				() -> TaskType.createTask(0L, quest, task.getType().getTypeId().toString()));
 		if (newTask != null) {
 			NetworkManager.sendToServer(CreateObjectMessage.create(newTask, newTask.getType().makeExtraNBT()));
 		}

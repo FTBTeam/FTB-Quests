@@ -19,10 +19,6 @@ subprojects {
 		minecraft "com.mojang:minecraft:${rootProject.minecraft_version}"
 		mappings loom.officialMojangMappings()
 	}
-
-	configurations.configureEach {
-		resolutionStrategy.cacheChangingModulesFor 0, 'seconds'
-	}
 }
 
 allprojects {

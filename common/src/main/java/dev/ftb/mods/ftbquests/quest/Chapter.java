@@ -246,7 +246,7 @@ public final class Chapter extends QuestObject {
 		NetUtils.writeStrings(buffer, rawSubtitle);
 		buffer.writeUtf(defaultQuestShape, Short.MAX_VALUE);
 		buffer.writeDouble(defaultQuestSize);
-		NetUtils.write(buffer, images, (d, img) -> img.writeNetData(d));
+		buffer.writeCollection(images, (buf, img) -> img.writeNetData(buf));
 		buffer.writeInt(defaultMinWidth);
 		ProgressionMode.NAME_MAP.write(buffer, progressionMode);
 
@@ -272,11 +272,7 @@ public final class Chapter extends QuestObject {
 		NetUtils.readStrings(buffer, rawSubtitle);
 		defaultQuestShape = buffer.readUtf(Short.MAX_VALUE);
 		defaultQuestSize = buffer.readDouble();
-		NetUtils.read(buffer, images, d -> {
-			ChapterImage image = new ChapterImage(this);
-			image.readNetData(d);
-			return image;
-		});
+		NetUtils.read(buffer, images, buf -> ChapterImage.fromNet(this, buf));
 		defaultMinWidth = buffer.readInt();
 		progressionMode = ProgressionMode.NAME_MAP.read(buffer);
 
