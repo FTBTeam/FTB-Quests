@@ -4,7 +4,6 @@ import dev.architectury.networking.NetworkManager;
 import dev.architectury.networking.simple.BaseS2CMessage;
 import dev.architectury.networking.simple.MessageType;
 import dev.architectury.utils.Env;
-import dev.architectury.utils.GameInstance;
 import dev.ftb.mods.ftbquests.FTBQuests;
 import dev.ftb.mods.ftbquests.integration.item_filtering.DisplayStacksCache;
 import net.minecraft.network.FriendlyByteBuf;

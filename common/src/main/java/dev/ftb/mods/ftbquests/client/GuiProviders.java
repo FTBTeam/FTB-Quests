@@ -182,14 +182,13 @@ public class GuiProviders {
             IntConfig c = new IntConfig(1, Integer.MAX_VALUE);
             c.setValue(100);
 
-            EditStringConfigOverlay<Integer> overlay = new EditStringConfigOverlay<>(panel, c, accepted -> {
+            EditStringConfigOverlay<Integer> overlay = new EditStringConfigOverlay<>(panel.getGui(), c, accepted -> {
                 if (accepted) {
                     callback.accept(new XPReward(0L, quest, c.getValue()));
                 }
 
                 panel.run();
-            }, RewardTypes.XP.getDisplayName())
-                    .atPosition(panel.width / 3, panel.height + 5);
+            }, RewardTypes.XP.getDisplayName()).atMousePosition();
             panel.getGui().pushModalPanel(overlay);
         });
 
@@ -197,13 +196,12 @@ public class GuiProviders {
             IntConfig c = new IntConfig(1, Integer.MAX_VALUE);
             c.setValue(5);
 
-            EditStringConfigOverlay<Integer> overlay = new EditStringConfigOverlay<>(panel, c, accepted -> {
+            EditStringConfigOverlay<Integer> overlay = new EditStringConfigOverlay<>(panel.getGui(), c, accepted -> {
                 if (accepted) {
                     callback.accept(new XPLevelsReward(0L, quest, c.getValue()));
                 }
                 panel.run();
-            }, RewardTypes.XP_LEVELS.getDisplayName())
-                    .atPosition(panel.width / 3, panel.height + 5);
+            }, RewardTypes.XP_LEVELS.getDisplayName()).atMousePosition();
             panel.getGui().pushModalPanel(overlay);
         });
     }
