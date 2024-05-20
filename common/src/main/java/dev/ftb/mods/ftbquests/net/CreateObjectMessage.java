@@ -10,8 +10,6 @@ import dev.ftb.mods.ftbquests.util.NetUtils;
 import net.minecraft.Util;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.server.MinecraftServer;
-import net.minecraft.server.TickTask;
 import net.minecraft.server.level.ServerPlayer;
 import org.jetbrains.annotations.Nullable;
 
