@@ -53,6 +53,11 @@ public class MissingItem extends Item {
 		SNBTCompoundTag tag = new SNBTCompoundTag();
 		stack.save(tag);
 
+		// kludge: vanilla saves the stack size as a byte, which means negative sizes for big stacks,
+		//   leading to the stack turning into an empty (air) stack
+		// https://github.com/FTBTeam/FTB-Mods-Issues/issues/1182
+		tag.putInt("Count", stack.getCount());
+
 		if (tag.size() == 2) {
 			tag.singleLine();
 		}
