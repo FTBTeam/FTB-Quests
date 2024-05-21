@@ -10,6 +10,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 * The pinned quests panel positioned can now be adjusted in client config (use "Player Preferences" button in lower right of screen)
 * A couple of other minor GUI fixes and improvements (mainly via FTB Library)
 
+### Fixed
+* Fixed issue where larger itemstack sizes when creating item tasks led to a "missing" (empty) item in the task
+* Fixed positioning of text entry popup when adding XP or XP Levels rewards to a quest
+  * Popup was being positioned off-screen depending on game resolution and quest screen scroll position
+
 # [2004.2.0]
 
 ### Changed
