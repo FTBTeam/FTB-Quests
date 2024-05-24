@@ -42,7 +42,8 @@ public class MissingItem extends Item {
 			return stack;
 		}
 
-		return ItemStack.of(tag);
+		// Kludge: see kludge comment below!
+        return ItemStack.of(tag).copyWithCount(tag.getInt("Count"));
 	}
 
 	public static CompoundTag writeItem(ItemStack stack) {
