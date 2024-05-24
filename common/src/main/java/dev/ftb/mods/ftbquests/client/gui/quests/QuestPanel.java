@@ -195,6 +195,10 @@ public class QuestPanel extends Panel {
 				Color4I c = complete ?
 						ThemeProperties.DEPENDENCY_LINE_COMPLETED_COLOR.get(questScreen.selectedChapter) :
 						ThemeProperties.DEPENDENCY_LINE_UNCOMPLETED_COLOR.get(questScreen.selectedChapter);
+				if (unavailable || qb.quest.getProgressionMode() == ProgressionMode.FLEXIBLE && !questScreen.file.selfTeamData.areDependenciesComplete(qb.quest)) {
+					// dim connection lines for unavailable quests
+					c = c.withAlpha(Math.max(30, c.alphai() / 2));
+				}
 
 				for (QuestButton button : qb.getDependencies()) {
 					if (button.shouldDraw() && button.quest != selectedQuest && qb.quest != selectedQuest && !button.quest.shouldHideDependentLines()) {
