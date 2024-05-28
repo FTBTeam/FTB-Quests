@@ -42,8 +42,12 @@ public class MissingItem extends Item {
 			return stack;
 		}
 
-		// Kludge: see kludge comment below!
-        return ItemStack.of(tag).copyWithCount(tag.getInt("Count"));
+		// Kludge: vanilla serializes the stack size as a byte, which breaks for a stack >127 items,
+		//   leading to the stack turning into an empty (air) stack
+		//   (note: using ItemStack#copyWithCount will *not* work here)
+		ItemStack stack = ItemStack.of(tag);
+		stack.setCount(tag.getInt("Count"));
+		return stack;
 	}
 
 	public static CompoundTag writeItem(ItemStack stack) {
@@ -54,9 +58,7 @@ public class MissingItem extends Item {
 		SNBTCompoundTag tag = new SNBTCompoundTag();
 		stack.save(tag);
 
-		// kludge: vanilla saves the stack size as a byte, which means negative sizes for big stacks,
-		//   leading to the stack turning into an empty (air) stack
-		// https://github.com/FTBTeam/FTB-Mods-Issues/issues/1182
+		// kludge: see above!
 		tag.putInt("Count", stack.getCount());
 
 		if (tag.size() == 2) {
