@@ -4,6 +4,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2001.4.5]
+
+### Fixed
+* _Actually_ fixed the issue that should have been fixed in 2001.4.4
+  * The previous fix worked for 50% of possible stack sizes, and the wrong 50% was used in testing...
+
 ## [2001.4.4]
 
 ### Fixed
