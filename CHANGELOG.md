@@ -14,6 +14,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 * Fixed issue where larger itemstack sizes when creating item tasks led to a "missing" (empty) item in the task
 * Fixed positioning of text entry popup when adding XP or XP Levels rewards to a quest
   * Popup was being positioned off-screen depending on game resolution and quest screen scroll position
+* Fixed quest description editor "insert link" action inserting invalid JSON
+  * Quoted `"underlined" : "true"` needs to be `"underlined": true`
 
 # [2004.2.0]
 
