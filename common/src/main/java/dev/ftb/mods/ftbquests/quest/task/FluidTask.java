@@ -4,13 +4,18 @@ import dev.architectury.fluid.FluidStack;
 import dev.ftb.mods.ftblibrary.config.ConfigGroup;
 import dev.ftb.mods.ftblibrary.icon.Color4I;
 import dev.ftb.mods.ftblibrary.icon.Icon;
+import dev.ftb.mods.ftblibrary.ui.Button;
 import dev.ftb.mods.ftblibrary.ui.Widget;
 import dev.ftb.mods.ftblibrary.util.StringUtils;
+import dev.ftb.mods.ftblibrary.util.TooltipList;
 import dev.ftb.mods.ftblibrary.util.client.ClientUtils;
 import dev.ftb.mods.ftblibrary.util.client.PositionedIngredient;
+import dev.ftb.mods.ftbquests.FTBQuests;
 import dev.ftb.mods.ftbquests.api.FTBQuestsAPI;
+import dev.ftb.mods.ftbquests.client.FTBQuestsClient;
 import dev.ftb.mods.ftbquests.quest.Quest;
 import dev.ftb.mods.ftbquests.quest.TeamData;
+import net.minecraft.ChatFormatting;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.Component;
@@ -68,6 +73,25 @@ public class FluidTask extends Task {
 	@Override
 	public boolean consumesResources() {
 		return true;
+	}
+
+	@Override
+	public void addMouseOverText(TooltipList list, TeamData teamData) {
+		super.addMouseOverText(list, teamData);
+
+		if (FTBQuests.getRecipeModHelper().isRecipeModAvailable()) {
+			list.blankLine();
+			list.add(Component.translatable("ftbquests.task.ftbquests.item.shift_click_recipe").withStyle(ChatFormatting.YELLOW, ChatFormatting.UNDERLINE));
+		}
+	}
+
+	@Override
+	public void onButtonClicked(Button button, boolean canClick) {
+		if (FTBQuestsClient.isShiftPressed() && FTBQuests.getRecipeModHelper().isRecipeModAvailable()) {
+			FTBQuests.getRecipeModHelper().showRecipes(fluidStack);
+		} else {
+			super.onButtonClicked(button, canClick);
+		}
 	}
 
 	@Override

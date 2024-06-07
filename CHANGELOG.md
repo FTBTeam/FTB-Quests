@@ -4,6 +4,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+# [2004.2.2]
+
+### Added
+* Fluids in fluid tasks can now be shift-clicked to show recipes for the fluid in JEI or REI
+  * Added a tooltip to fluid tasks when viewing quests to mention this
+
 # [2004.2.1]
 
 ### Added
