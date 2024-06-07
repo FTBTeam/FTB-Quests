@@ -20,6 +20,7 @@ import dev.ftb.mods.ftbquests.quest.TeamData;
 import dev.ftb.mods.ftbquests.quest.theme.ThemeLoader;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.block.model.BakedQuad;
@@ -162,5 +163,9 @@ public class FTBQuestsClient {
 
 	public static void copyToClipboard(QuestObjectBase qo) {
 		Widget.setClipboardString(qo.getCodeString());
+	}
+
+	public static boolean isShiftPressed() {
+		return Screen.hasShiftDown();
 	}
 }

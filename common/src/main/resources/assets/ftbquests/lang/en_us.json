@@ -331,6 +331,7 @@
 	"ftbquests.task.ftbquests.item.view_items": "Click to view valid items",
 	"ftbquests.task.ftbquests.item.valid_for": "Valid items for %s",
 	"ftbquests.task.ftbquests.item.click_recipe": "Click to view recipe(s)",
+	"ftbquests.task.ftbquests.item.shift_click_recipe": "Shift-Click to view recipe(s)",
 	"ftbquests.task.ftbquests.item.convert_tag": "Convert to '%s' Tag Filter",
 	"ftbquests.task.ftbquests.item.select_tag": "Select an Item Tag",
 	"ftbquests.task.ftbquests.item.only_from_crafting": "Only Detect From Crafting",

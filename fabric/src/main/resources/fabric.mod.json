@@ -30,5 +30,6 @@
 		"ftbteams": ">=2001.1.4-build.1"
 	},
 	"breaks": {
+		"ftbxmodcompat": "<3.0.4"
 	}
 }

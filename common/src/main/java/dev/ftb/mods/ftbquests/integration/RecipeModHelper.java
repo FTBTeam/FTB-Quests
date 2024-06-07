@@ -1,5 +1,6 @@
 package dev.ftb.mods.ftbquests.integration;
 
+import dev.architectury.fluid.FluidStack;
 import dev.ftb.mods.ftbquests.quest.QuestObjectBase;
 import net.minecraft.world.item.ItemStack;
 
@@ -12,6 +13,8 @@ public interface RecipeModHelper {
     void refreshRecipes(QuestObjectBase object);
 
     void showRecipes(ItemStack object);
+
+    void showRecipes(FluidStack object);
 
     default boolean isRecipeModAvailable() {
         return false;
@@ -43,6 +46,10 @@ public interface RecipeModHelper {
 
         @Override
         public void showRecipes(ItemStack object) {
+        }
+
+        @Override
+        public void showRecipes(FluidStack object) {
         }
 
         @Override
