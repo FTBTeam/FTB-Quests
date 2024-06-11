@@ -189,7 +189,7 @@ public class QuestButton extends Button implements QuestPositionableButton {
 				questScreen.toggleSelected(moveAndDeleteFocus());
 			} else if (!quest.getGuidePage().isEmpty() && quest.getTasks().isEmpty() && quest.getRewards().isEmpty() && quest.getDescription().isEmpty()) {
 				handleClick("guide", quest.getGuidePage());
-			} else if (questScreen.file.canEdit() || !quest.hideDetailsUntilStartable() || questScreen.file.selfTeamData.canStartTasks(quest)) {
+			} else {
 				questScreen.open(theQuestObject(), false);
 			}
 		} else if (questScreen.file.canEdit() && button.isMiddle()) {

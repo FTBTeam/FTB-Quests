@@ -151,7 +151,11 @@ public class QuestScreen extends BaseScreen {
 		questPanel.scrollTo(movable.getX(), movable.getY());
 	}
 
-	public void viewQuest(Quest quest) {
+	public void viewQuest(@Nullable Quest quest) {
+		if (quest != null && !file.canEdit() && quest.hideDetailsUntilStartable() && !file.selfTeamData.canStartTasks(quest)) {
+			return;
+		}
+
 		Quest current = viewQuestPanel.getViewedQuest();
 		if (current != quest) {
 			viewQuestPanel.setViewedQuest(quest);
@@ -365,7 +369,7 @@ public class QuestScreen extends BaseScreen {
 		}
 
 		return false;
-    }
+	}
 
 	private boolean pasteSelectedQuest(boolean withDeps) {
 		if (ChapterImage.isImageInClipboard()) {
