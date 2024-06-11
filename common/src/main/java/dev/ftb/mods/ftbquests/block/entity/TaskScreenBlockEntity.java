@@ -24,9 +24,9 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import javax.annotation.Nonnull;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -40,7 +40,8 @@ public class TaskScreenBlockEntity extends BlockEntity implements ITaskScreen {
     private boolean textShadow = false;
     private ItemStack inputModeIcon = ItemStack.EMPTY;
     private ItemStack skin = ItemStack.EMPTY;
-    @Nonnull private UUID teamId = Util.NIL_UUID;
+    @NotNull
+    private UUID teamId = Util.NIL_UUID;
     public float[] fakeTextureUV = null;  // null for unknown, 0-array for no texture, 4-array for a texture
     private TeamData cachedTeamData = null;
 
@@ -109,13 +110,13 @@ public class TaskScreenBlockEntity extends BlockEntity implements ITaskScreen {
         this.textShadow = textShadow;
     }
 
-    public void setTeamId(@Nonnull UUID teamId) {
+    public void setTeamId(@NotNull UUID teamId) {
         this.teamId = teamId;
         cachedTeamData = null;
     }
 
     @Override
-    @Nonnull
+    @NotNull
     public UUID getTeamId() {
         return teamId;
     }

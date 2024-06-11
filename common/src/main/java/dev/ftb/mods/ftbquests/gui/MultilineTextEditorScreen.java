@@ -22,8 +22,8 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.Whence;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
+import org.jetbrains.annotations.NotNull;
 
-import javax.annotation.Nonnull;
 import java.util.*;
 import java.util.regex.Pattern;
 
@@ -233,7 +233,7 @@ public class MultilineTextEditorScreen extends BaseScreen {
 		}
 	}
 
-	private static String stripFormatting(@Nonnull String selectedText) {
+	private static String stripFormatting(@NotNull String selectedText) {
 		return STRIP_FORMATTING_PATTERN.matcher(selectedText).replaceAll("");
 	}
 
@@ -462,6 +462,6 @@ public class MultilineTextEditorScreen extends BaseScreen {
 		}
 	}
 
-	private record HistoryElement(@Nonnull String text, int cursorPos) {
+	private record HistoryElement(@NotNull String text, int cursorPos) {
 	}
 }

@@ -52,18 +52,18 @@ processResources {
 
 shadowJar {
 	configurations = [project.configurations.shadowCommon]
-	classifier "dev-shadow"
+	setArchiveClassifier "dev-shadow"
 }
 
 remapJar {
 	input.set shadowJar.archiveFile
 	dependsOn shadowJar
 	archiveBaseName.set "${rootProject.archives_base_name}-${project.name}"
-	archiveClassifier.set null
+	setArchiveClassifier null
 }
 
 jar {
-	classifier "dev"
+	setArchiveClassifier "dev"
 }
 
 components.java {
