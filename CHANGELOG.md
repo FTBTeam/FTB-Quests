@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 * Fixed loading quest data from previous version leading to infinite loops and server timeouts in certain cases
   * Related to quest book being in flexible mode
+* Fixed right-clicking a quest (outside edit mode) ignoring the "Hide Details Until Startable" property
 
 ## [1902.5.8]
 
