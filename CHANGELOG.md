@@ -4,6 +4,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1902.5.9]
+
+### Fixed
+* Fixed loading quest data from previous version leading to infinite loops and server timeouts in certain cases
+  * Related to quest book being in flexible mode
+* Fixed right-clicking a quest (outside edit mode) ignoring the "Hide Details Until Startable" property
+
 ## [1902.5.8]
 
 ### Fixed

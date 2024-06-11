@@ -37,9 +37,9 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import org.apache.commons.lang3.mutable.MutableInt;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import javax.annotation.Nonnull;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -254,7 +254,7 @@ public abstract class QuestFile extends QuestObject {
 		return object instanceof Chapter ? (Chapter) object : null;
 	}
 
-	@Nonnull
+	@NotNull
 	public Chapter getChapterOrThrow(long id) {
 		if (getBase(id) instanceof Chapter c) return c;
 		throw new IllegalArgumentException("Unknown chapter ID: c");

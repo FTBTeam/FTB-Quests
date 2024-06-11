@@ -65,14 +65,14 @@ shadowJar {
 	exclude "fabric.mod.json"
 
 	configurations = [project.configurations.shadowCommon]
-	classifier "dev-shadow"
+	setArchiveClassifier "dev-shadow"
 }
 
 remapJar {
 	input.set shadowJar.archiveFile
 	dependsOn shadowJar
 	archiveBaseName.set "${rootProject.archives_base_name}-${project.name}"
-	archiveClassifier.set null
+	setArchiveClassifier null
 }
 
 jar {
@@ -88,7 +88,7 @@ jar {
 		])
 	}
 
-	classifier "dev"
+	setArchiveClassifier "dev"
 }
 
 components.java {

@@ -640,6 +640,10 @@ public class TeamData {
 	}
 
 	public void markTaskCompleted(Task task) {
+		if (isCompleted(task)) {
+			return;
+		}
+
 		List<ServerPlayer> onlineMembers = getOnlineMembers();
 		List<ServerPlayer> notifiedPlayers;
 

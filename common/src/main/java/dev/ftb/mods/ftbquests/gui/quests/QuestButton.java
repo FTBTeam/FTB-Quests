@@ -191,7 +191,7 @@ public class QuestButton extends Button implements QuestPositionableButton {
 				questScreen.toggleSelected(moveAndDeleteFocus());
 			} else if (!quest.guidePage.isEmpty() && quest.tasks.isEmpty() && quest.rewards.isEmpty() && quest.getDescription().length == 0) {
 				handleClick("guide", quest.guidePage);
-			} else if (questScreen.file.canEdit() || !quest.hideDetailsUntilStartable() || questScreen.file.self.canStartTasks(quest)) {
+			} else {
 				toggleQuestViewPanel();
 			}
 		} else if (questScreen.file.canEdit() && button.isMiddle()) {
@@ -207,6 +207,10 @@ public class QuestButton extends Button implements QuestPositionableButton {
 	}
 
 	private void toggleQuestViewPanel() {
+		if (!questScreen.file.canEdit() && quest.hideDetailsUntilStartable() && !questScreen.file.self.canStartTasks(quest)) {
+			return;
+		}
+
 		if (questScreen.getViewedQuest() != quest) {
 			questScreen.open(theQuestObject(), false);
 		} else {
