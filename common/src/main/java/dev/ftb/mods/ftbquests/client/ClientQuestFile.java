@@ -4,6 +4,7 @@ import com.mojang.blaze3d.platform.InputConstants;
 import dev.architectury.networking.NetworkManager;
 import dev.architectury.utils.Env;
 import dev.ftb.mods.ftblibrary.icon.Icons;
+import dev.ftb.mods.ftblibrary.util.TooltipList;
 import dev.ftb.mods.ftblibrary.util.client.ClientUtils;
 import dev.ftb.mods.ftbquests.FTBQuests;
 import dev.ftb.mods.ftbquests.client.gui.CustomToast;
@@ -15,6 +16,7 @@ import dev.ftb.mods.ftbquests.quest.QuestObject;
 import dev.ftb.mods.ftbquests.quest.TeamData;
 import dev.ftb.mods.ftbquests.quest.task.StructureTask;
 import dev.ftb.mods.ftbquests.quest.theme.QuestTheme;
+import dev.ftb.mods.ftbquests.quest.translation.TranslationKey;
 import dev.ftb.mods.ftbquests.util.TextUtils;
 import dev.ftb.mods.ftbteams.api.FTBTeamsAPI;
 import dev.ftb.mods.ftbteams.api.client.KnownClientPlayer;
@@ -196,6 +198,12 @@ public class ClientQuestFile extends BaseQuestFile {
 		return false;
 	}
 
+	@Override
+	public String getLocale() {
+		String locale = FTBQuestsClientConfig.EDITING_LOCALE.get();
+		return locale.isEmpty() ? Minecraft.getInstance().options.languageCode : locale;
+	}
+
 	public void setEditorPermission(boolean hasPermission) {
 		editorPermission = hasPermission;
 	}
@@ -221,5 +229,16 @@ public class ClientQuestFile extends BaseQuestFile {
 				}
 			}
 		}
+	}
+
+
+	public static void addTranslationWarning(TooltipList list, TranslationKey key) {
+		list.add(Component.translatable("ftbquests.message.missing_xlate_1",
+						Component.translatable(key.getTranslationKey()),
+						ClientQuestFile.INSTANCE.getLocale())
+				.withStyle(ChatFormatting.GRAY, ChatFormatting.ITALIC)
+		);
+		list.add(Component.translatable("ftbquests.message.missing_xlate_2")
+				.withStyle(ChatFormatting.GRAY, ChatFormatting.ITALIC));
 	}
 }

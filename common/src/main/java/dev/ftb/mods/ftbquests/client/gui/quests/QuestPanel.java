@@ -22,6 +22,7 @@ import dev.ftb.mods.ftbquests.quest.task.Task;
 import dev.ftb.mods.ftbquests.quest.task.TaskType;
 import dev.ftb.mods.ftbquests.quest.task.TaskTypes;
 import dev.ftb.mods.ftbquests.quest.theme.property.ThemeProperties;
+import dev.ftb.mods.ftbquests.quest.translation.TranslationKey;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.renderer.GameRenderer;
@@ -380,20 +381,20 @@ public class QuestPanel extends Panel {
 		poseStack.scale(0.5f, 0.5f, 0.5f);
 
 		String curStr = String.format("Cursor: [%+.2f, %+.2f]", questX, questY);
-		theme.drawString(graphics, curStr, 6, 0, Theme.SHADOW);
-
-		String cStr = String.format("Center: [%.2f, %.2f]", centerQuestX, centerQuestY);
-		theme.drawString(graphics, cStr, statusWidth * 2 - theme.getStringWidth(cStr) - 6, 0, Theme.SHADOW);
+		int pos = theme.drawString(graphics, curStr, 6, 0, Theme.SHADOW) + 25;
 
 		int total = questScreen.selectedChapter.getQuests().size()
 				+ questScreen.selectedChapter.getQuestLinks().size()
 				+ questScreen.selectedChapter.getImages().size();
-		String sStr = String.format("Selected: %d / %d", questScreen.selectedObjects.size(), total);
-		theme.drawString(graphics, sStr, statusWidth / 2, 0, Theme.SHADOW);
+		String sStr = String.format("%s: %d/%d", (questScreen.movingObjects ? "Moving" : "Selected"), questScreen.selectedObjects.size(), total);
+		pos = theme.drawString(graphics, sStr, pos, 0, Theme.SHADOW) + 25;
 
-		if (questScreen.movingObjects) {
-			theme.drawString(graphics, "Moving", statusWidth, 0, Theme.SHADOW);
-		}
+		String langStr = "Lang: " + questScreen.file.getLocale() + (FTBQuestsClientConfig.EDITING_LOCALE.get().isEmpty() ? " [Auto]" : "");
+		theme.drawString(graphics, langStr, pos, 0, Theme.SHADOW);
+
+		String cStr = String.format("Center: [%.2f, %.2f]", centerQuestX, centerQuestY);
+		theme.drawString(graphics, cStr, statusWidth * 2 - theme.getStringWidth(cStr) - 6, 0, Theme.SHADOW);
+
 		poseStack.popPose();
 	}
 
@@ -451,7 +452,14 @@ public class QuestPanel extends Panel {
 				contextMenu.add(new ContextMenuItem(type.getDisplayName(), type.getIconSupplier(), b -> {
 					playClickSound();
 					type.getGuiProvider().openCreationGui(this, new Quest(0L, questScreen.selectedChapter),
-							task -> NetworkManager.sendToServer(CreateTaskAtMessage.create(questScreen.selectedChapter, qx, qy, task))
+							(task, extra) -> {
+								String str = task.getProtoTranslation(TranslationKey.TITLE);
+								if (!str.isEmpty()) {
+									questScreen.file.getTranslationManager().addInitialTranslation(extra, questScreen.file.getLocale(),
+											TranslationKey.TITLE, task.getProtoTranslation(TranslationKey.TITLE));
+								}
+								NetworkManager.sendToServer(CreateTaskAtMessage.create(questScreen.selectedChapter, qx, qy, task, extra));
+							}
 					);
 				}));
 			}
@@ -520,7 +528,7 @@ public class QuestPanel extends Panel {
 		Task newTask = QuestObjectBase.copy(task,
 				() -> TaskType.createTask(0L, new Quest(0L, questScreen.selectedChapter), task.getType().getTypeId().toString()));
 		if (newTask != null) {
-			NetworkManager.sendToServer(CreateTaskAtMessage.create(questScreen.selectedChapter, qx, qy, newTask));
+			NetworkManager.sendToServer(CreateTaskAtMessage.create(questScreen.selectedChapter, qx, qy, newTask, null));
 		}
 	}
 

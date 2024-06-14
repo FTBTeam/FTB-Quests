@@ -395,8 +395,10 @@ public class FTBQuestsCommands {
 
 		instance.load();
 		NetworkHelper.sendToAll(source.getServer(), new SyncQuestsMessage(instance));
-		source.getServer().getPlayerList().getPlayers()
-				.forEach(p -> NetworkManager.sendToPlayer(p, SyncEditorPermissionMessage.forPlayer(p)));
+		source.getServer().getPlayerList().getPlayers().forEach(p -> {
+			NetworkManager.sendToPlayer(p, SyncEditorPermissionMessage.forPlayer(p));
+			instance.getTranslationManager().sendTranslationsToPlayer(p);
+		});
 
 		source.sendSuccess(() -> Component.translatable("commands.ftbquests.command.feedback.reloaded"), false);
 		UUID id = sender == null ? Util.NIL_UUID : sender.getUUID();

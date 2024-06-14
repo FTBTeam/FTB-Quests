@@ -18,6 +18,7 @@ import dev.ftb.mods.ftbquests.api.FTBQuestsAPI;
 import dev.ftb.mods.ftbquests.block.entity.TaskScreenBlockEntity;
 import dev.ftb.mods.ftbquests.events.ClearFileCacheEvent;
 import dev.ftb.mods.ftbquests.item.LootCrateItem;
+import dev.ftb.mods.ftbquests.net.RequestTranslationTableMessage;
 import dev.ftb.mods.ftbquests.net.SubmitTaskMessage;
 import dev.ftb.mods.ftbquests.quest.BaseQuestFile;
 import dev.ftb.mods.ftbquests.quest.Quest;
@@ -209,6 +210,11 @@ public class FTBQuestsClientEventHandler {
 		if (creativeTabRebuildPending) {
 			FTBQuestsClient.rebuildCreativeTabs();
 			creativeTabRebuildPending = false;
+		}
+
+		String locale = FTBQuestsClientConfig.EDITING_LOCALE.get();
+		if (!locale.isEmpty() && !locale.equals(Minecraft.getInstance().options.languageCode)) {
+			NetworkManager.sendToServer(new RequestTranslationTableMessage(locale));
 		}
 	}
 

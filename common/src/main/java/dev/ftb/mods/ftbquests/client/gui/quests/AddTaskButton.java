@@ -41,8 +41,8 @@ public class AddTaskButton extends Button {
 		for (TaskType type : TaskTypes.TYPES.values()) {
 			contextMenu.add(new ContextMenuItem(type.getDisplayName(), type.getIconSupplier(), b -> {
 				playClickSound();
-				type.getGuiProvider().openCreationGui(this.parent, quest, task ->
-						NetworkManager.sendToServer(CreateObjectMessage.create(task, type.makeExtraNBT())));
+				type.getGuiProvider().openCreationGui(this.parent, quest, (task, extra) ->
+						NetworkManager.sendToServer(CreateObjectMessage.create(task, extra)));
 			}));
 		}
 

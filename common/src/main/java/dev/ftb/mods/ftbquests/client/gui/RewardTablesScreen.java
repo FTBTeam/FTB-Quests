@@ -23,9 +23,12 @@ import dev.ftb.mods.ftbquests.quest.QuestObjectBase;
 import dev.ftb.mods.ftbquests.quest.loot.LootCrate;
 import dev.ftb.mods.ftbquests.quest.loot.RewardTable;
 import dev.ftb.mods.ftbquests.quest.reward.RandomReward;
+import dev.ftb.mods.ftbquests.quest.translation.TranslationKey;
 import dev.ftb.mods.ftbquests.registry.ModItems;
 import net.minecraft.ChatFormatting;
+import net.minecraft.Util;
 import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.Items;
 import org.apache.commons.lang3.mutable.MutableInt;
@@ -124,14 +127,18 @@ public class RewardTablesScreen extends AbstractButtonListScreen {
 
 	@Override
 	protected void doAccept() {
-		Set<Long> toRemove = ClientQuestFile.INSTANCE.getRewardTables().stream().map(t -> t.id).collect(Collectors.toSet());
+		ClientQuestFile file = ClientQuestFile.INSTANCE;
+		Set<Long> toRemove = file.getRewardTables().stream().map(t -> t.id).collect(Collectors.toSet());
 
 		rewardTablesCopy.forEach(table -> {
-			if (table.id == 0) {
+			if (table.getId() == 0L) {
 				// newly-created
-				NetworkManager.sendToServer(CreateObjectMessage.create(table, null));
+				CompoundTag extra = Util.make(new CompoundTag(), tag -> file.getTranslationManager().addInitialTranslation(
+						tag, file.getLocale(), TranslationKey.TITLE, table.getRawTitle())
+				);
+				NetworkManager.sendToServer(CreateObjectMessage.create(table, extra));
 			}
-			toRemove.remove(table.id);
+			toRemove.remove(table.getId());
 		});
 
 		toRemove.forEach(id -> NetworkManager.sendToServer(new DeleteObjectMessage(id)));
@@ -212,7 +219,7 @@ public class RewardTablesScreen extends AbstractButtonListScreen {
 
 		private void editRewardTable() {
 			new EditRewardTableScreen(RewardTablesScreen.this, table, editedReward -> {
-				rewardTablesCopy.replaceAll(t -> t.id == editedReward.id ? editedReward : t);
+				rewardTablesCopy.replaceAll(t -> t.getId() == editedReward.id ? editedReward : t);
 				changed = true;
 				editedTables.add(editedReward);
 				editedReward.clearCachedData();

@@ -13,7 +13,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.function.Consumer;
+import java.util.function.BiConsumer;
 import java.util.function.Supplier;
 
 public final class TaskType {
@@ -100,7 +100,7 @@ public final class TaskType {
 	@FunctionalInterface
 	public interface GuiProvider {
 		@Environment(EnvType.CLIENT)
-		void openCreationGui(Panel panel, Quest quest, Consumer<Task> callback);
+		void openCreationGui(Panel panel, Quest quest, BiConsumer<Task,CompoundTag> callback);
 	}
 
 }
