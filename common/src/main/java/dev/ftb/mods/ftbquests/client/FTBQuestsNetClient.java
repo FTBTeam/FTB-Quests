@@ -49,16 +49,19 @@ public class FTBQuestsNetClient {
 	}
 
 	public static void createObject(long id, long parent, QuestObjectType type, CompoundTag nbt, CompoundTag extra, UUID creator) {
-		QuestObjectBase object = ClientQuestFile.INSTANCE.create(id, type, parent, extra);
+		ClientQuestFile file = ClientQuestFile.INSTANCE;
+
+		QuestObjectBase object = file.create(id, type, parent, extra);
 		object.readData(nbt, FTBQuestsClient.holderLookup());
+		file.getTranslationManager().processInitialTranslation(extra, object);
 		object.onCreated();
-		ClientQuestFile.INSTANCE.refreshIDMap();
+		file.refreshIDMap();
 		object.editedFromGUI();
 		FTBQuests.getRecipeModHelper().refreshRecipes(object);
 
 		LocalPlayer player = Minecraft.getInstance().player;
 		if (object instanceof QuestObject qo && player != null && creator.equals(player.getUUID())) {
-			ClientQuestFile.INSTANCE.getQuestScreen()
+			file.getQuestScreen()
 					.ifPresent(questScreen -> questScreen.open(qo, true));
 		}
 
@@ -92,6 +95,7 @@ public class FTBQuestsNetClient {
 			ClientQuestFile.INSTANCE.refreshIDMap();
 			object.editedFromGUI();
 			FTBQuests.getRecipeModHelper().refreshRecipes(object);
+			ClientQuestFile.INSTANCE.getTranslationManager().removeAllTranslations(object);
 		}
 	}
 

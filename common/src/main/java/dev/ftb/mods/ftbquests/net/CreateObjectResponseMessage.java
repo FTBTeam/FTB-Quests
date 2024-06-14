@@ -51,9 +51,11 @@ public record CreateObjectResponseMessage(long id, long parent, QuestObjectType 
 	}
 
 	public static void handle(CreateObjectResponseMessage message, NetworkManager.PacketContext context) {
-		context.queue(() -> FTBQuestsNetClient.createObject(
-				message.id, message.parent, message.questObjectType, message.nbt,
-				message.extra.orElse(new CompoundTag()), message.creator.orElse(Util.NIL_UUID)
-		));
+		context.queue(() -> {
+			FTBQuestsNetClient.createObject(
+					message.id, message.parent, message.questObjectType, message.nbt,
+					message.extra.orElse(new CompoundTag()), message.creator.orElse(Util.NIL_UUID)
+			);
+		});
 	}
 }

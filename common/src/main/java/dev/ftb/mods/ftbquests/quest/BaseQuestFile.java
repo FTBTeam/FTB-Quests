@@ -20,6 +20,7 @@ import dev.ftb.mods.ftbquests.quest.loot.RewardTable;
 import dev.ftb.mods.ftbquests.quest.reward.*;
 import dev.ftb.mods.ftbquests.quest.task.*;
 import dev.ftb.mods.ftbquests.quest.theme.property.ThemeProperties;
+import dev.ftb.mods.ftbquests.quest.translation.TranslationManager;
 import dev.ftb.mods.ftbquests.util.FileUtils;
 import dev.ftb.mods.ftbteams.api.FTBTeamsAPI;
 import dev.ftb.mods.ftbteams.api.Team;
@@ -51,7 +52,6 @@ import java.nio.file.Path;
 import java.util.*;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public abstract class BaseQuestFile extends QuestObject implements QuestFile {
@@ -78,6 +78,8 @@ public abstract class BaseQuestFile extends QuestObject implements QuestFile {
 
 	protected final Int2ObjectOpenHashMap<TaskType> taskTypeIds;
 	protected final Int2ObjectOpenHashMap<RewardType> rewardTypeIds;
+
+	private final TranslationManager translationManager;
 
 	private final List<ItemStack> emergencyItems;
 	private int emergencyItemsCooldown;
@@ -137,6 +139,8 @@ public abstract class BaseQuestFile extends QuestObject implements QuestFile {
 		detectionDelay = 20;
 
 		allTasks = null;
+
+		translationManager = new TranslationManager();
 	}
 
 	public abstract Env getSide();
@@ -168,6 +172,10 @@ public abstract class BaseQuestFile extends QuestObject implements QuestFile {
 
 	public Path getFolder() {
 		throw new IllegalStateException("This quest file doesn't have a folder!");
+	}
+
+	public TranslationManager getTranslationManager() {
+		return translationManager;
 	}
 
 	@Override
@@ -555,8 +563,9 @@ public abstract class BaseQuestFile extends QuestObject implements QuestFile {
 			readData(fileNBT, provider);
 		}
 
-		Path groupsFile = folder.resolve("chapter_groups.snbt");
+		translationManager.loadFromNBT(folder.resolve("lang"));
 
+		Path groupsFile = folder.resolve("chapter_groups.snbt");
 		if (Files.exists(groupsFile)) {
 			CompoundTag chapterGroupsTag = SNBT.read(groupsFile);
 
@@ -610,7 +619,7 @@ public abstract class BaseQuestFile extends QuestObject implements QuestFile {
 								Task task = TaskType.createTask(taskId, quest, taskNBT.getString("type"));
 								if (task == null) {
 									task = new CustomTask(taskId, quest);
-									task.rawTitle = "Unknown type: " + taskNBT.getString("type");
+									task.setRawTitle("Unknown type: " + taskNBT.getString("type"));
 								}
 
 								questObjectMap.put(task.id, task);
@@ -626,7 +635,7 @@ public abstract class BaseQuestFile extends QuestObject implements QuestFile {
 								Reward reward = RewardType.createReward(rewardId, quest, rewardNBT.getString("type"));
 								if (reward == null) {
 									reward = new CustomReward(rewardId, quest);
-									reward.rawTitle = "Unknown type: " + rewardNBT.getString("type");
+									reward.setRawTitle("Unknown type: " + rewardNBT.getString("type"));
 								}
 
 								questObjectMap.put(reward.id, reward);
@@ -716,7 +725,7 @@ public abstract class BaseQuestFile extends QuestObject implements QuestFile {
 			markDirty();
 		}
 
-		FTBQuests.LOGGER.info("Loaded " + chapterGroups.size() + " chapter groups, " + chapterCounter + " chapters, " + questCounter + " quests, " + rewardTables.size() + " reward tables");
+        FTBQuests.LOGGER.info("Loaded {} chapter groups, {} chapters, {} quests, {} reward tables", chapterGroups.size(), chapterCounter, questCounter, rewardTables.size());
 	}
 
 	public void updateLootCrates() {
@@ -865,7 +874,7 @@ public abstract class BaseQuestFile extends QuestObject implements QuestFile {
 			}
 		}
 
-		FTBQuests.LOGGER.debug("Wrote " + (buffer.writerIndex() - pos) + " bytes, " + questObjectMap.size() + " objects");
+        FTBQuests.LOGGER.debug("Wrote {} bytes, {} objects", buffer.writerIndex() - pos, questObjectMap.size());
 	}
 
 	public final void readNetDataFull(RegistryFriendlyByteBuf buffer) {
@@ -1386,20 +1395,20 @@ public abstract class BaseQuestFile extends QuestObject implements QuestFile {
 		return del.intValue();
 	}
 
-	public String generateRewardTableName(String basename) {
-		String s = titleToID(basename).orElse(toString());
-		String filename = s;
-
-		Set<String> existingNames = rewardTables.stream().map(RewardTable::getFilename).collect(Collectors.toSet());
-		int i = 2;
-
-		while (existingNames.contains(filename)) {
-			filename = s + "_" + i;
-			i++;
-		}
-
-		return filename;
-	}
+//	public String generateRewardTableName(String basename) {
+//		String s = titleToID(basename).orElse(toString());
+//		String filename = s;
+//
+//		Set<String> existingNames = rewardTables.stream().map(RewardTable::getFilename).collect(Collectors.toSet());
+//		int i = 2;
+//
+//		while (existingNames.contains(filename)) {
+//			filename = s + "_" + i;
+//			i++;
+//		}
+//
+//		return filename;
+//	}
 
 	public List<ChapterGroup> getChapterGroups() {
 		return Collections.unmodifiableList(chapterGroups);
@@ -1441,4 +1450,6 @@ public abstract class BaseQuestFile extends QuestObject implements QuestFile {
 	public EntityWeight getLootCrateNoDrop() {
 		return lootCrateNoDrop;
 	}
+
+	public abstract String getLocale();
 }
