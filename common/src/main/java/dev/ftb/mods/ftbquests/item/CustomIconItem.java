@@ -25,7 +25,7 @@ import org.jetbrains.annotations.Nullable;
 import java.util.List;
 
 public class CustomIconItem extends Item {
-	private static final ResourceLocation FALLBACK_ICON = new ResourceLocation("minecraft:textures/misc/unknown_pack.png");
+	private static final ResourceLocation FALLBACK_ICON = ResourceLocation.withDefaultNamespace("textures/misc/unknown_pack.png");
 
 	public CustomIconItem() {
 		super(ModItems.defaultProps().stacksTo(1)

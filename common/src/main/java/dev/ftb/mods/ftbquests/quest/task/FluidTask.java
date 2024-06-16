@@ -26,7 +26,7 @@ import org.jetbrains.annotations.Nullable;
 import java.util.Optional;
 
 public class FluidTask extends Task {
-	public static final ResourceLocation TANK_TEXTURE = new ResourceLocation(FTBQuestsAPI.MOD_ID, "textures/tasks/tank.png");
+	public static final ResourceLocation TANK_TEXTURE = FTBQuestsAPI.rl("textures/tasks/tank.png");
 	private static final FluidStack WATER = FluidStack.create(Fluids.WATER, FluidStack.bucketAmount());
 
 	private FluidStack fluidStack = FluidStack.create(Fluids.WATER, FluidStack.bucketAmount());

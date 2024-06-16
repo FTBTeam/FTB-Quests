@@ -164,7 +164,6 @@ public class QuestPanel extends Panel {
 		}
 
 		Tesselator tesselator = Tesselator.getInstance();
-		BufferBuilder buffer = tesselator.getBuilder();
 
 		Icon icon = ThemeProperties.DEPENDENCY_LINE_TEXTURE.get(questScreen.selectedChapter);
 		if (icon instanceof ImageIcon img) {
@@ -184,7 +183,7 @@ public class QuestPanel extends Panel {
 		double mt = -(System.currentTimeMillis() * 0.001D);
 		float lineWidth = (float) (questScreen.getZoom() * ThemeProperties.DEPENDENCY_LINE_THICKNESS.get(questScreen.selectedChapter) / 4D * 3D);
 
-		RenderSystem.setShader(GameRenderer::getPositionColorTexShader);
+		RenderSystem.setShader(GameRenderer::getPositionTexColorShader);
 		RenderSystem.setShaderColor(1F, 1F, 1F, 1F);
 
 		// pass 1: render connections for all visible quests
@@ -199,7 +198,7 @@ public class QuestPanel extends Panel {
 
 				for (QuestButton button : qb.getDependencies()) {
 					if (button.shouldDraw() && button.quest != selectedQuest && qb.quest != selectedQuest && !button.quest.shouldHideDependentLines()) {
-						renderConnection(widget, button, graphics.pose(), buffer, lineWidth,
+						renderConnection(widget, button, graphics.pose(), lineWidth,
 								c.redi(), c.greeni(), c.bluei(), c.alphai(), c.alphai(),
 								mu, tesselator);
 					}
@@ -225,10 +224,10 @@ public class QuestPanel extends Panel {
 								a2 = 30;
 								toOutline.add(qb);
 							}
-							renderConnection(widget, button, graphics.pose(), buffer, lineWidth, c.redi(), c.greeni(), c.bluei(), a2, a, ms, tesselator);
+							renderConnection(widget, button, graphics.pose(), lineWidth, c.redi(), c.greeni(), c.bluei(), a2, a, ms, tesselator);
 						} else if (qb.quest == selectedQuest || qb.isMouseOver()) {
 							Color4I c = ThemeProperties.DEPENDENCY_LINE_REQUIRES_COLOR.get(questScreen.selectedChapter);
-							renderConnection(widget, button, graphics.pose(), buffer, lineWidth, c.redi(), c.greeni(), c.bluei(), c.alphai(), c.alphai(), ms, tesselator);
+							renderConnection(widget, button, graphics.pose(), lineWidth, c.redi(), c.greeni(), c.bluei(), c.alphai(), c.alphai(), ms, tesselator);
 						}
 					}
 				}
@@ -245,7 +244,7 @@ public class QuestPanel extends Panel {
 		});
 	}
 
-	private void renderConnection(Widget widget, QuestButton button, PoseStack poseStack, BufferBuilder buffer, float s, int r, int g, int b, int a, int a1, float mu, Tesselator tesselator) {
+	private void renderConnection(Widget widget, QuestButton button, PoseStack poseStack, float s, int r, int g, int b, int a, int a1, float mu, Tesselator tesselator) {
 		int sx = widget.getX() + widget.width / 2;
 		int sy = widget.getY() + widget.height / 2;
 		int ex = button.getX() + button.width / 2;
@@ -257,12 +256,12 @@ public class QuestPanel extends Panel {
 		poseStack.mulPose(Axis.ZP.rotation((float) Math.atan2(ey - sy, ex - sx)));
 		Matrix4f m = poseStack.last().pose();
 
-		buffer.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_COLOR_TEX);
-		buffer.vertex(m, 0, -s, 0).color(r, g, b, a).uv(len / s / 2F + mu, 0).endVertex();
-		buffer.vertex(m, 0, s, 0).color(r, g, b, a).uv(len / s / 2F + mu, 1).endVertex();
-		buffer.vertex(m, len, s, 0).color(r * 3 / 4, g * 3 / 4, b * 3 / 4, a1).uv(mu, 1).endVertex();
-		buffer.vertex(m, len, -s, 0).color(r * 3 / 4, g * 3 / 4, b * 3 / 4, a1).uv(mu, 0).endVertex();
-		tesselator.end();
+		BufferBuilder buffer = tesselator.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX_COLOR);
+		buffer.addVertex(m, 0, -s, 0).setColor(r, g, b, a).setUv(len / s / 2F + mu, 0);
+		buffer.addVertex(m, 0, s, 0).setColor(r, g, b, a).setUv(len / s / 2F + mu, 1);
+		buffer.addVertex(m, len, s, 0).setColor(r * 3 / 4, g * 3 / 4, b * 3 / 4, a1).setUv(mu, 1);
+		buffer.addVertex(m, len, -s, 0).setColor(r * 3 / 4, g * 3 / 4, b * 3 / 4, a1).setUv(mu, 0);
+		BufferUploader.drawWithShader(buffer.buildOrThrow());
 
 		poseStack.popPose();
 	}

@@ -53,9 +53,9 @@ public enum FTBQuestsEventHandler {
 		LifecycleEvent.SERVER_STARTED.register(this::serverStarted);
 		LifecycleEvent.SERVER_STOPPING.register(this::serverStopped);
 		LifecycleEvent.SERVER_LEVEL_SAVE.register(this::worldSaved);
+		ModDataComponents.register();
 		ModBlocks.register();
 		ModItems.register();
-		ModDataComponents.register();
 		ModBlockEntityTypes.register();
 		ClearFileCacheEvent.EVENT.register(this::fileCacheClear);
 		TeamEvent.PLAYER_LOGGED_IN.register(this::playerLoggedIn);

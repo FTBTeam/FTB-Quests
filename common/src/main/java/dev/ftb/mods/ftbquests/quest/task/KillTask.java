@@ -26,7 +26,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class KillTask extends Task {
-	private static final ResourceLocation ZOMBIE = new ResourceLocation("minecraft:zombie");
+	private static final ResourceLocation ZOMBIE = ResourceLocation.withDefaultNamespace("minecraft:zombie");
 
 	private ResourceLocation entity = ZOMBIE;
 	private long value = 100L;
@@ -55,7 +55,7 @@ public class KillTask extends Task {
 	@Override
 	public void readData(CompoundTag nbt, HolderLookup.Provider provider) {
 		super.readData(nbt, provider);
-		entity = new ResourceLocation(nbt.getString("entity"));
+		entity = ResourceLocation.tryParse(nbt.getString("entity"));
 		value = nbt.getLong("value");
 	}
 
@@ -69,7 +69,7 @@ public class KillTask extends Task {
 	@Override
 	public void readNetData(RegistryFriendlyByteBuf buffer) {
 		super.readNetData(buffer);
-		entity = new ResourceLocation(buffer.readUtf(Short.MAX_VALUE));
+		entity = ResourceLocation.tryParse(buffer.readUtf(Short.MAX_VALUE));
 		value = buffer.readVarInt();
 	}
 
