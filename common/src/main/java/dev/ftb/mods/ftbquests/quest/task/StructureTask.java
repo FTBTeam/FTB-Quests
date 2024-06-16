@@ -31,7 +31,7 @@ import java.util.List;
  * @author MaxNeedsSnacks
  */
 public class StructureTask extends AbstractBooleanTask {
-	private static final ResourceLocation DEFAULT_STRUCTURE = new ResourceLocation("minecraft:mineshaft");
+	private static final ResourceLocation DEFAULT_STRUCTURE = ResourceLocation.withDefaultNamespace("mineshaft");
 
 	private static final List<String> KNOWN_STRUCTURES = new ArrayList<>();
 

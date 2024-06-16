@@ -1,10 +1,7 @@
 package dev.ftb.mods.ftbquests.quest.theme.property;
 
 import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.BufferBuilder;
-import com.mojang.blaze3d.vertex.DefaultVertexFormat;
-import com.mojang.blaze3d.vertex.Tesselator;
-import com.mojang.blaze3d.vertex.VertexFormat;
+import com.mojang.blaze3d.vertex.*;
 import com.mojang.datafixers.util.Either;
 import dev.ftb.mods.ftblibrary.icon.Color4I;
 import dev.ftb.mods.ftblibrary.icon.Icon;
@@ -48,12 +45,10 @@ public interface ThemeProperties {
 		public void draw(GuiGraphics graphics, int x, int y, int w, int h) {
 			Matrix4f m = graphics.pose().last().pose();
 			Tesselator tesselator = Tesselator.getInstance();
-			BufferBuilder buffer = tesselator.getBuilder();
+			BufferBuilder buffer = tesselator.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_COLOR);
 
 			RenderSystem.enableBlend();
 			RenderSystem.setShader(GameRenderer::getPositionColorShader);
-
-			buffer.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_COLOR);
 
 			float dw = w / 16F;
 			float dh = h / 16F;
@@ -64,15 +59,15 @@ public interface ThemeProperties {
 			int b = out.bluei();
 			int a = out.alphai();
 
-			buffer.vertex(m, x + dw * 6, y + dh * 2, 0).color(r, g, b, a).endVertex();
-			buffer.vertex(m, x + dw * 6, y + dh * 14, 0).color(r, g, b, a).endVertex();
-			buffer.vertex(m, x + dw * 10, y + dh * 14, 0).color(r, g, b, a).endVertex();
-			buffer.vertex(m, x + dw * 10, y + dh * 2, 0).color(r, g, b, a).endVertex();
+			buffer.addVertex(m, x + dw * 6, y + dh * 2, 0).setColor(r, g, b, a);
+			buffer.addVertex(m, x + dw * 6, y + dh * 14, 0).setColor(r, g, b, a);
+			buffer.addVertex(m, x + dw * 10, y + dh * 14, 0).setColor(r, g, b, a);
+			buffer.addVertex(m, x + dw * 10, y + dh * 2, 0).setColor(r, g, b, a);
 
-			buffer.vertex(m, x + dw * 2, y + dh * 6, 0).color(r, g, b, a).endVertex();
-			buffer.vertex(m, x + dw * 2, y + dh * 10, 0).color(r, g, b, a).endVertex();
-			buffer.vertex(m, x + dw * 14, y + dh * 10, 0).color(r, g, b, a).endVertex();
-			buffer.vertex(m, x + dw * 14, y + dh * 6, 0).color(r, g, b, a).endVertex();
+			buffer.addVertex(m, x + dw * 2, y + dh * 6, 0).setColor(r, g, b, a);
+			buffer.addVertex(m, x + dw * 2, y + dh * 10, 0).setColor(r, g, b, a);
+			buffer.addVertex(m, x + dw * 14, y + dh * 10, 0).setColor(r, g, b, a);
+			buffer.addVertex(m, x + dw * 14, y + dh * 6, 0).setColor(r, g, b, a);
 
 			Color4I in = ThemeProperties.SYMBOL_IN.get();
 			r = in.redi();
@@ -80,17 +75,17 @@ public interface ThemeProperties {
 			b = in.bluei();
 			a = in.alphai();
 
-			buffer.vertex(m, x + dw * 7, y + dh * 3, 0).color(r, g, b, a).endVertex();
-			buffer.vertex(m, x + dw * 7, y + dh * 13, 0).color(r, g, b, a).endVertex();
-			buffer.vertex(m, x + dw * 9, y + dh * 13, 0).color(r, g, b, a).endVertex();
-			buffer.vertex(m, x + dw * 9, y + dh * 3, 0).color(r, g, b, a).endVertex();
+			buffer.addVertex(m, x + dw * 7, y + dh * 3, 0).setColor(r, g, b, a);
+			buffer.addVertex(m, x + dw * 7, y + dh * 13, 0).setColor(r, g, b, a);
+			buffer.addVertex(m, x + dw * 9, y + dh * 13, 0).setColor(r, g, b, a);
+			buffer.addVertex(m, x + dw * 9, y + dh * 3, 0).setColor(r, g, b, a);
 
-			buffer.vertex(m, x + dw * 3, y + dh * 7, 0).color(r, g, b, a).endVertex();
-			buffer.vertex(m, x + dw * 3, y + dh * 9, 0).color(r, g, b, a).endVertex();
-			buffer.vertex(m, x + dw * 13, y + dh * 9, 0).color(r, g, b, a).endVertex();
-			buffer.vertex(m, x + dw * 13, y + dh * 7, 0).color(r, g, b, a).endVertex();
+			buffer.addVertex(m, x + dw * 3, y + dh * 7, 0).setColor(r, g, b, a);
+			buffer.addVertex(m, x + dw * 3, y + dh * 9, 0).setColor(r, g, b, a);
+			buffer.addVertex(m, x + dw * 13, y + dh * 9, 0).setColor(r, g, b, a);
+			buffer.addVertex(m, x + dw * 13, y + dh * 7, 0).setColor(r, g, b, a);
 
-			tesselator.end();
+			BufferUploader.drawWithShader(buffer.buildOrThrow());
 		}
 
 		public int hashCode() {
@@ -177,11 +172,10 @@ public interface ThemeProperties {
 		public void draw(GuiGraphics graphics, int x, int y, int w, int h) {
 			Matrix4f m = graphics.pose().last().pose();
 			Tesselator tesselator = Tesselator.getInstance();
-			BufferBuilder buffer = tesselator.getBuilder();
+			BufferBuilder buffer = tesselator.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_COLOR);
 
 			RenderSystem.enableBlend();
 			RenderSystem.setShader(GameRenderer::getPositionColorShader);
-			buffer.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_COLOR);
 
 			float dw = w / 16F;
 			float dh = h / 16F;
@@ -192,15 +186,15 @@ public interface ThemeProperties {
 			int b = cOut.bluei();
 			int a = cOut.alphai();
 
-			buffer.vertex(m, x + dw * 0, y + dh * 8, 0).color(r, g, b, a).endVertex();
-			buffer.vertex(m, x + dw * 6, y + dh * 14, 0).color(r, g, b, a).endVertex();
-			buffer.vertex(m, x + dw * 6, y + dh * 8, 0).color(r, g, b, a).endVertex();
-			buffer.vertex(m, x + dw * 3, y + dh * 5, 0).color(r, g, b, a).endVertex();
+			buffer.addVertex(m, x + dw * 0, y + dh * 8, 0).setColor(r, g, b, a);
+			buffer.addVertex(m, x + dw * 6, y + dh * 14, 0).setColor(r, g, b, a);
+			buffer.addVertex(m, x + dw * 6, y + dh * 8, 0).setColor(r, g, b, a);
+			buffer.addVertex(m, x + dw * 3, y + dh * 5, 0).setColor(r, g, b, a);
 
-			buffer.vertex(m, x + dw * 6, y + dh * 8, 0).color(r, g, b, a).endVertex();
-			buffer.vertex(m, x + dw * 6, y + dh * 14, 0).color(r, g, b, a).endVertex();
-			buffer.vertex(m, x + dw * 16, y + dh * 4, 0).color(r, g, b, a).endVertex();
-			buffer.vertex(m, x + dw * 13, y + dh * 1, 0).color(r, g, b, a).endVertex();
+			buffer.addVertex(m, x + dw * 6, y + dh * 8, 0).setColor(r, g, b, a);
+			buffer.addVertex(m, x + dw * 6, y + dh * 14, 0).setColor(r, g, b, a);
+			buffer.addVertex(m, x + dw * 16, y + dh * 4, 0).setColor(r, g, b, a);
+			buffer.addVertex(m, x + dw * 13, y + dh * 1, 0).setColor(r, g, b, a);
 
 			Color4I cIn = in.map(col -> col, ThemeProperty::get);
 			r = cIn.redi();
@@ -208,17 +202,17 @@ public interface ThemeProperties {
 			b = cIn.bluei();
 			a = cIn.alphai();
 
-			buffer.vertex(m, x + dw * 0 + dw, y + dh * 8, 0).color(r, g, b, a).endVertex();
-			buffer.vertex(m, x + dw * 6, y + dh * 14 - dh, 0).color(r, g, b, a).endVertex();
-			buffer.vertex(m, x + dw * 6, y + dh * 8 + dh, 0).color(r, g, b, a).endVertex();
-			buffer.vertex(m, x + dw * 3, y + dh * 5 + dh, 0).color(r, g, b, a).endVertex();
+			buffer.addVertex(m, x + dw * 0 + dw, y + dh * 8, 0).setColor(r, g, b, a);
+			buffer.addVertex(m, x + dw * 6, y + dh * 14 - dh, 0).setColor(r, g, b, a);
+			buffer.addVertex(m, x + dw * 6, y + dh * 8 + dh, 0).setColor(r, g, b, a);
+			buffer.addVertex(m, x + dw * 3, y + dh * 5 + dh, 0).setColor(r, g, b, a);
 
-			buffer.vertex(m, x + dw * 6, y + dh * 8 + dh, 0).color(r, g, b, a).endVertex();
-			buffer.vertex(m, x + dw * 6, y + dh * 14 - dh, 0).color(r, g, b, a).endVertex();
-			buffer.vertex(m, x + dw * 16 - dw, y + dh * 4, 0).color(r, g, b, a).endVertex();
-			buffer.vertex(m, x + dw * 13, y + dh * 1 + dh, 0).color(r, g, b, a).endVertex();
+			buffer.addVertex(m, x + dw * 6, y + dh * 8 + dh, 0).setColor(r, g, b, a);
+			buffer.addVertex(m, x + dw * 6, y + dh * 14 - dh, 0).setColor(r, g, b, a);
+			buffer.addVertex(m, x + dw * 16 - dw, y + dh * 4, 0).setColor(r, g, b, a);
+			buffer.addVertex(m, x + dw * 13, y + dh * 1 + dh, 0).setColor(r, g, b, a);
 
-			tesselator.end();
+			BufferUploader.drawWithShader(buffer.buildOrThrow());
 		}
 
 		public int hashCode() {

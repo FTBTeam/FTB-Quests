@@ -11,7 +11,8 @@ public class EntityWeight {
 	public int boss = 0;
 
 	public int getWeight(Entity entity) {
-		if (!entity.canChangeDimensions()) {
+		// NOTE: (mikey | porting to 1.21): This looks right but it could be wrong. This is what the nether portal changed to using for the same check
+		if (!entity.canUsePortal(false)) {
 			return boss;
 		} else if (entity instanceof Enemy) {
 			return monster;
