@@ -8,4 +8,4 @@ pluginManagement {
 
 include "common", "fabric", /*"forge",*/ "neoforge"
 
-rootProject.name = 'FTB-Quests-1.20.6'
+rootProject.name = 'FTB-Quests-1.21'

@@ -24,7 +24,7 @@ public class AdvancementReward extends Reward {
 
 	public AdvancementReward(long id, Quest quest) {
 		super(id, quest);
-		advancement = new ResourceLocation("minecraft:story/root");
+		advancement = ResourceLocation.withDefaultNamespace("story/root");
 		criterion = "";
 	}
 
@@ -43,7 +43,7 @@ public class AdvancementReward extends Reward {
 	@Override
 	public void readData(CompoundTag nbt, HolderLookup.Provider provider) {
 		super.readData(nbt, provider);
-		advancement = new ResourceLocation(nbt.getString("advancement"));
+		advancement = ResourceLocation.tryParse(nbt.getString("advancement"));
 		criterion = nbt.getString("criterion");
 	}
 
@@ -74,7 +74,7 @@ public class AdvancementReward extends Reward {
 							.name(resourceLocation -> advancements.get(resourceLocation).name())
 							.create()).setNameKey("ftbquests.reward.ftbquests.advancement");
 		} else {
-			config.addString("advancement", advancement.toString(), v -> advancement = new ResourceLocation(v), "minecraft:story/root").setNameKey("ftbquests.reward.ftbquests.advancement");
+			config.addString("advancement", advancement.toString(), v -> advancement = ResourceLocation.tryParse(v), "minecraft:story/root").setNameKey("ftbquests.reward.ftbquests.advancement");
 		}
 
 		config.addString("criterion", criterion, v -> criterion = v, "");

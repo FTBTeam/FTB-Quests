@@ -16,28 +16,17 @@ public interface RewardTypes {
 		return TYPES.computeIfAbsent(name, id -> new RewardType(id, p, i));
 	}
 
-	RewardType ITEM = register(new ResourceLocation(FTBQuestsAPI.MOD_ID, "item"), ItemReward::new,
-			() -> Icon.getIcon("minecraft:item/diamond"));
-	RewardType CHOICE = register(new ResourceLocation(FTBQuestsAPI.MOD_ID, "choice"), ChoiceReward::new,
-			() -> Icons.COLOR_RGB).setExcludeFromListRewards(true);
-	RewardType RANDOM = register(new ResourceLocation(FTBQuestsAPI.MOD_ID, "random"), RandomReward::new,
-			() -> Icons.DICE).setExcludeFromListRewards(true);
-	RewardType LOOT = register(new ResourceLocation(FTBQuestsAPI.MOD_ID, "loot"), LootReward::new,
-			() -> Icons.MONEY_BAG).setExcludeFromListRewards(true);
-	RewardType COMMAND = register(new ResourceLocation(FTBQuestsAPI.MOD_ID, "command"), CommandReward::new,
-			() -> Icon.getIcon("minecraft:block/command_block_back"));
-	RewardType CUSTOM = register(new ResourceLocation(FTBQuestsAPI.MOD_ID, "custom"), CustomReward::new,
-			() -> Icons.COLOR_HSB);
-	RewardType XP = register(new ResourceLocation(FTBQuestsAPI.MOD_ID, "xp"), XPReward::new,
-			() -> Icon.getIcon("minecraft:item/experience_bottle"));
-	RewardType XP_LEVELS = register(new ResourceLocation(FTBQuestsAPI.MOD_ID, "xp_levels"), XPLevelsReward::new,
-			() -> Icon.getIcon("minecraft:item/experience_bottle"));
-	RewardType ADVANCEMENT = register(new ResourceLocation(FTBQuestsAPI.MOD_ID, "advancement"), AdvancementReward::new,
-			() -> Icon.getIcon("minecraft:item/wheat"));
-	RewardType TOAST = register(new ResourceLocation(FTBQuestsAPI.MOD_ID, "toast"), ToastReward::new,
-			() -> Icon.getIcon("minecraft:item/oak_sign"));
-	RewardType STAGE = RewardTypes.register(new ResourceLocation(FTBQuestsAPI.MOD_ID, "gamestage"), StageReward::new,
-			() -> Icons.CONTROLLER);
+	RewardType ITEM = register(FTBQuestsAPI.rl("item"), ItemReward::new, () -> Icon.getIcon("minecraft:item/diamond"));
+	RewardType CHOICE = register(FTBQuestsAPI.rl("choice"), ChoiceReward::new, () -> Icons.COLOR_RGB).setExcludeFromListRewards(true);
+	RewardType RANDOM = register(FTBQuestsAPI.rl("random"), RandomReward::new, () -> Icons.DICE).setExcludeFromListRewards(true);
+	RewardType LOOT = register(FTBQuestsAPI.rl("loot"), LootReward::new, () -> Icons.MONEY_BAG).setExcludeFromListRewards(true);
+	RewardType COMMAND = register(FTBQuestsAPI.rl("command"), CommandReward::new, () -> Icon.getIcon("minecraft:block/command_block_back"));
+	RewardType CUSTOM = register(FTBQuestsAPI.rl("custom"), CustomReward::new, () -> Icons.COLOR_HSB);
+	RewardType XP = register(FTBQuestsAPI.rl("xp"), XPReward::new, () -> Icon.getIcon("minecraft:item/experience_bottle"));
+	RewardType XP_LEVELS = register(FTBQuestsAPI.rl("xp_levels"), XPLevelsReward::new, () -> Icon.getIcon("minecraft:item/experience_bottle"));
+	RewardType ADVANCEMENT = register(FTBQuestsAPI.rl("advancement"), AdvancementReward::new, () -> Icon.getIcon("minecraft:item/wheat"));
+	RewardType TOAST = register(FTBQuestsAPI.rl("toast"), ToastReward::new, () -> Icon.getIcon("minecraft:item/oak_sign"));
+	RewardType STAGE = RewardTypes.register(FTBQuestsAPI.rl("gamestage"), StageReward::new, () -> Icons.CONTROLLER);
 
 	static void init() {
 	}

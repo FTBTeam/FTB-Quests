@@ -1,7 +1,7 @@
 plugins {
 	id "architectury-plugin" version "3.4-SNAPSHOT"
 	id "dev.architectury.loom" version "1.6-SNAPSHOT" apply false
-	id "com.matthewprenger.cursegradle" version "1.4.0" apply false
+	id "me.modmuss50.mod-publish-plugin" version "0.5.1"
 }
 
 architectury {
@@ -67,6 +67,83 @@ allprojects {
 	java {
 		withSourcesJar()
 	}
+
+	publishing {
+		repositories {
+			if (ftbPublishing.ftbToken) {
+				maven {
+					url ftbPublishing.ftbURL
+					credentials {
+						username = ftbPublishing.ftbUser
+						password = ftbPublishing.ftbToken
+					}
+				}
+			}
+
+			if (ftbPublishing.sapsToken) {
+				maven {
+					url ftbPublishing.sapsURL
+					credentials {
+						username = ftbPublishing.sapsUser
+						password = ftbPublishing.sapsToken
+					}
+				}
+			}
+		}
+	}
 }
 
-task curseforgePublish
+publishMods {
+	dryRun = providers.environmentVariable("CURSEFORGE_KEY").getOrNull() == null
+	changelog = providers.environmentVariable("CHANGELOG").getOrElse("No changelog provided")
+	version = "${mod_version}"
+
+	// TODO: Migrate to something else
+	def tag = providers.environmentVariable("TAG").getOrElse("release")
+	type = tag == "beta" ? BETA : (tag == "alpha" ? ALPHA : STABLE)
+
+	def createOptions = (String projectName) -> {
+		publishOptions {
+			file = project.provider { project(":$projectName").tasks.remapJar }.flatMap { it.archiveFile }
+			displayName = "[${projectName.toUpperCase()}][${minecraft_version}] ${readable_name} ${mod_version}"
+			modLoaders.add(projectName.toLowerCase())
+		}
+	}
+
+	def fabricOptions = createOptions("fabric")
+	def neoForgeOptions = createOptions("neoforge")
+	def forgeOptions = createOptions("forge")
+
+	def curseForgeOptions = curseforgeOptions {
+		accessToken = providers.environmentVariable("CURSEFORGE_KEY")
+		minecraftVersions.add("${minecraft_version}")
+	}
+
+	curseforge("curseforgeFabric") {
+		from(curseForgeOptions, fabricOptions)
+		projectId = curseforge_id_fabric
+		requires('architectury-api')
+		requires('fabric-api')
+		requires('ftb-library-fabric')
+		requires('ftb-teams-fabric')
+		optional('ftb-xmod-compat')
+	}
+
+	curseforge("curseforgeNeoForge") {
+		from(curseForgeOptions, neoForgeOptions)
+		projectId = curseforge_id_forge
+		requires('architectury-api')
+		requires('ftb-library-forge')
+		requires('ftb-teams-forge')
+		optional('ftb-xmod-compat')
+	}
+
+	curseforge("curseforgeForge") {
+		from(curseForgeOptions, forgeOptions)
+		projectId = curseforge_id_forge
+		requires('architectury-api')
+		requires('ftb-library-forge')
+		requires('ftb-teams-forge')
+		optional('ftb-xmod-compat')
+	}
+}

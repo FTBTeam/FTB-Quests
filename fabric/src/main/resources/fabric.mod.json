@@ -25,10 +25,10 @@
 	],
 	"depends": {
 		"fabric": "*",
-		"minecraft": "~1.20.1",
-		"architectury": ">=9.0.8",
-		"ftblibrary": ">=2001.2.0",
-		"ftbteams": ">=2001.1.4-build.1"
+		"minecraft": "~1.21",
+		"architectury": ">=13.0.0",
+		"ftblibrary": ">=2100.1.0",
+		"ftbteams": ">=2100.1.0"
 	},
 	"breaks": {
 	}

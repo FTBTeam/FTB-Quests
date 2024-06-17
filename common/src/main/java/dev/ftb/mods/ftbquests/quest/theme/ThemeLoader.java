@@ -1,6 +1,5 @@
 package dev.ftb.mods.ftbquests.quest.theme;
 
-import dev.ftb.mods.ftbquests.FTBQuests;
 import dev.ftb.mods.ftbquests.api.FTBQuestsAPI;
 import dev.ftb.mods.ftbquests.quest.QuestObjectBase;
 import dev.ftb.mods.ftbquests.quest.QuestObjectType;
@@ -13,6 +12,8 @@ import net.minecraft.server.packs.resources.Resource;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.server.packs.resources.ResourceManagerReloadListener;
 import org.jetbrains.annotations.Nullable;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.InputStream;
 import java.util.*;
@@ -22,6 +23,8 @@ import java.util.regex.Pattern;
  * @author LatvianModder
  */
 public class ThemeLoader implements ResourceManagerReloadListener {
+	private static final Logger LOGGER = LoggerFactory.getLogger(ThemeLoader.class);
+
 	@Override
 	public void onResourceManagerReload(ResourceManager resourceManager) {
 		loadTheme(resourceManager);
@@ -33,19 +36,20 @@ public class ThemeLoader implements ResourceManagerReloadListener {
 		Map<ThemeSelector, SelectorProperties> map = new HashMap<>();
 
 		try {
-			for (Resource resource : resourceManager.getResourceStack(new ResourceLocation(FTBQuestsAPI.MOD_ID, "ftb_quests_theme.txt"))) {
+			ResourceLocation rl = FTBQuestsAPI.rl("ftb_quests_theme.txt");
+			for (Resource resource : resourceManager.getResourceStack(rl)) {
 				try (InputStream in = resource.open()) {
 					parse(map, FileUtils.read(in));
 				} catch (Exception ex) {
-					ex.printStackTrace();
+					LOGGER.error("Failed to load FTB Quests theme file from " + rl, ex);
 				}
 			}
 		} catch (Exception ex) {
-			ex.printStackTrace();
+			LOGGER.error("Failed to load FTB Quests theme file", ex);
 		}
 
 		if (map.isEmpty()) {
-			FTBQuests.LOGGER.error("FTB Quests theme file is missing! Some mod has broken resource loading, inspect log for errors");
+			LOGGER.error("FTB Quests theme file is missing! Some mod has broken resource loading, inspect log for errors");
 		}
 
 		QuestTheme theme = new QuestTheme();
@@ -59,20 +63,20 @@ public class ThemeLoader implements ResourceManagerReloadListener {
 		theme.selectors.sort(null);
 		QuestTheme.instance = theme;
 
-		FTBQuests.LOGGER.debug("Theme:");
-		FTBQuests.LOGGER.debug("");
-		FTBQuests.LOGGER.debug("[*]");
+		LOGGER.debug("Theme:");
+		LOGGER.debug("");
+		LOGGER.debug("[*]");
 
 		for (Map.Entry<String, String> entry : theme.defaults.properties.entrySet()) {
-			FTBQuests.LOGGER.debug(entry.getKey() + ": " + theme.replaceVariables(entry.getValue(), 0));
+			LOGGER.debug(entry.getKey() + ": " + theme.replaceVariables(entry.getValue(), 0));
 		}
 
 		for (SelectorProperties selectorProperties : theme.selectors) {
-			FTBQuests.LOGGER.debug("");
-			FTBQuests.LOGGER.debug("[" + selectorProperties.selector + "]");
+			LOGGER.debug("");
+			LOGGER.debug("[" + selectorProperties.selector + "]");
 
 			for (Map.Entry<String, String> entry : selectorProperties.properties.entrySet()) {
-				FTBQuests.LOGGER.debug(entry.getKey() + ": " + theme.replaceVariables(entry.getValue(), 0));
+				LOGGER.debug(entry.getKey() + ": " + theme.replaceVariables(entry.getValue(), 0));
 			}
 		}
 

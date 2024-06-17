@@ -49,7 +49,7 @@ public class DimensionTask extends AbstractBooleanTask {
 	@Override
 	public void readData(CompoundTag nbt, HolderLookup.Provider provider) {
 		super.readData(nbt, provider);
-		dimension = ResourceKey.create(Registries.DIMENSION, new ResourceLocation(nbt.getString("dimension")));
+		dimension = ResourceKey.create(Registries.DIMENSION, ResourceLocation.tryParse(nbt.getString("dimension")));
 	}
 
 	@Override
@@ -75,7 +75,7 @@ public class DimensionTask extends AbstractBooleanTask {
 					NameMap.of(dimensions.getFirst(), dimensions.toArray(new ResourceLocation[0])).create()
 			);
 		} else {
-			config.addString("dim", dimension.location().toString(), v -> dimension = ResourceKey.create(Registries.DIMENSION, new ResourceLocation(v)), "minecraft:the_nether");
+			config.addString("dim", dimension.location().toString(), v -> dimension = ResourceKey.create(Registries.DIMENSION, ResourceLocation.tryParse(v)), "minecraft:the_nether");
 		}
 	}
 

@@ -32,6 +32,7 @@ import dev.ftb.mods.ftbquests.registry.ModBlockEntityTypes;
 import dev.ftb.mods.ftbquests.registry.ModItems;
 import it.unimi.dsi.fastutil.longs.LongSet;
 import net.minecraft.ChatFormatting;
+import net.minecraft.client.DeltaTracker;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.player.LocalPlayer;
@@ -56,7 +57,7 @@ import java.util.Objects;
 import static dev.ftb.mods.ftbquests.client.TaskScreenRenderer.*;
 
 public class FTBQuestsClientEventHandler {
-	private static final ResourceLocation QUESTS_BUTTON = new ResourceLocation(FTBQuestsAPI.MOD_ID, "quests");
+	private static final ResourceLocation QUESTS_BUTTON = FTBQuestsAPI.rl("quests");
 
 	static boolean creativeTabRebuildPending = false;
 
@@ -275,7 +276,7 @@ public class FTBQuestsClientEventHandler {
 
 	}
 
-	private void onScreenRender(GuiGraphics graphics, float tickDelta) {
+	private void onScreenRender(GuiGraphics graphics, DeltaTracker tickDelta) {
 		if (!ClientQuestFile.exists()) {
 			return;
 		}
@@ -289,7 +290,7 @@ public class FTBQuestsClientEventHandler {
 		}
 	}
 
-	private void renderCurrentlyObserving(Minecraft mc, GuiGraphics graphics, float tickDelta) {
+	private void renderCurrentlyObserving(Minecraft mc, GuiGraphics graphics, DeltaTracker tickDelta) {
 		int cx = mc.getWindow().getGuiScaledWidth() / 2;
 		int cy = mc.getWindow().getGuiScaledHeight() / 2;
 
@@ -301,7 +302,7 @@ public class FTBQuestsClientEventHandler {
 		GuiHelper.drawHollowRect(graphics, cx - boxWidth / 2 - 3, cy - 63, boxWidth + 6, 29, Color4I.DARK_GRAY, false);
 
 		graphics.drawString(mc.font, txt, cx - txtWidth / 2, cy - 60, 0xFFFFFF);
-		double completed = (currentlyObservingTicks + tickDelta) / (double) currentlyObserving.getTimer();
+		double completed = (currentlyObservingTicks + tickDelta.getGameTimeDeltaPartialTick(false)) / (double) currentlyObserving.getTimer();
 
 		GuiHelper.drawHollowRect(graphics, cx - boxWidth / 2, cy - 49, boxWidth, 12, Color4I.DARK_GRAY, false);
 		Color4I.LIGHT_BLUE.withAlpha(130).draw(graphics, cx - boxWidth / 2 + 1, cy - 48, (int) ((boxWidth - 2D) * completed), 10);

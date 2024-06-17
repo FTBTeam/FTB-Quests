@@ -16,7 +16,6 @@ import net.fabricmc.fabric.api.command.v2.ArgumentTypeRegistry;
 import net.fabricmc.fabric.api.transfer.v1.fluid.FluidStorage;
 import net.fabricmc.fabric.api.transfer.v1.item.ItemStorage;
 import net.minecraft.commands.synchronization.SingletonArgumentInfo;
-import net.minecraft.resources.ResourceLocation;
 import team.reborn.energy.api.EnergyStorage;
 
 public class FTBQuestsFabric implements ModInitializer {
@@ -25,10 +24,10 @@ public class FTBQuestsFabric implements ModInitializer {
 	public void onInitialize() {
 		new FTBQuests().setup();
 
-		ArgumentTypeRegistry.registerArgumentType(new ResourceLocation(FTBQuestsAPI.MOD_ID, "change_progress"), ChangeProgressArgument.class, SingletonArgumentInfo.contextFree(ChangeProgressArgument::changeProgress));
-		ArgumentTypeRegistry.registerArgumentType(new ResourceLocation(FTBQuestsAPI.MOD_ID, "quest_object"), QuestObjectArgument.class, SingletonArgumentInfo.contextFree(QuestObjectArgument::new));
+		ArgumentTypeRegistry.registerArgumentType(FTBQuestsAPI.rl("change_progress"), ChangeProgressArgument.class, SingletonArgumentInfo.contextFree(ChangeProgressArgument::changeProgress));
+		ArgumentTypeRegistry.registerArgumentType(FTBQuestsAPI.rl("quest_object"), QuestObjectArgument.class, SingletonArgumentInfo.contextFree(QuestObjectArgument::new));
 
-		TechRebornEnergyTask.TYPE = TaskTypes.register(new ResourceLocation(FTBQuestsAPI.MOD_ID, "tech_reborn_energy"), TechRebornEnergyTask::new, () -> Icon.getIcon(TechRebornEnergyTask.EMPTY_TEXTURE.toString()).combineWith(Icon.getIcon(TechRebornEnergyTask.FULL_TEXTURE.toString())));
+		TechRebornEnergyTask.TYPE = TaskTypes.register(FTBQuestsAPI.rl("tech_reborn_energy"), TechRebornEnergyTask::new, () -> Icon.getIcon(TechRebornEnergyTask.EMPTY_TEXTURE.toString()).combineWith(Icon.getIcon(TechRebornEnergyTask.FULL_TEXTURE.toString())));
 
 		ItemStorage.SIDED.registerForBlockEntity(
 				((blockEntity, direction) -> ((FabricTaskScreenBlockEntity) blockEntity).getItemStorage()), ModBlockEntityTypes.CORE_TASK_SCREEN.get()

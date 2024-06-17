@@ -45,7 +45,7 @@ public final class TaskType {
 			typeId = FTBQuestsAPI.MOD_ID + ':' + typeId;
 		}
 
-		TaskType type = TaskTypes.TYPES.get(new ResourceLocation(typeId));
+		TaskType type = TaskTypes.TYPES.get(ResourceLocation.tryParse(typeId));
 
 		if (type == null) {
 			return null;
