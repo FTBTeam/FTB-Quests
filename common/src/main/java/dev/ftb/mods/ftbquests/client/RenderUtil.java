@@ -58,25 +58,21 @@ public class RenderUtil {
 
     public void draw() {
         Matrix4f posMat = matrixStack.last().pose();
-        builder.vertex(posMat, x, y + h, 0)
-                .color(color)
-                .uv(u1, v2)
-                .uv2(packedLightIn)
-                .endVertex();
-        builder.vertex(posMat, x + w, y + h, 0)
-                .color(color)
-                .uv(u2, v2)
-                .uv2(packedLightIn)
-                .endVertex();
-        builder.vertex(posMat, x + w, y, 0)
-                .color(color)
-                .uv(u2, v1)
-                .uv2(packedLightIn)
-                .endVertex();
-        builder.vertex(posMat, x, y, 0)
-                .color(color)
-                .uv(u1, v1)
-                .uv2(packedLightIn)
-                .endVertex();
+        builder.addVertex(posMat, x, y + h, 0)
+                .setColor(color)
+                .setUv(u1, v2)
+                .setLight(packedLightIn);
+        builder.addVertex(posMat, x + w, y + h, 0)
+                .setColor(color)
+                .setUv(u2, v2)
+                .setLight(packedLightIn);
+        builder.addVertex(posMat, x + w, y, 0)
+                .setColor(color)
+                .setUv(u2, v1)
+                .setLight(packedLightIn);
+        builder.addVertex(posMat, x, y, 0)
+                .setColor(color)
+                .setUv(u1, v1)
+                .setLight(packedLightIn);
     }
 }

@@ -224,7 +224,7 @@ public final class ChapterImage implements Movable {
 		config.addDouble("height", height, v -> height = v, 1, 0, Double.POSITIVE_INFINITY);
 		config.addDouble("rotation", rotation, v -> rotation = v, 0, -180, 180);
 		config.add("image", new ImageResourceConfig(), ImageResourceConfig.getResourceLocation(image),
-				v -> setImage(Icon.getIcon(v)), new ResourceLocation("minecraft:textures/gui/presets/isles.png"));
+				v -> setImage(Icon.getIcon(v)), ResourceLocation.withDefaultNamespace("textures/gui/presets/isles.png"));
 		config.addColor("color", color, v -> color = v, Color4I.WHITE);
 		config.addInt("order", order, v -> order = v, 0, Integer.MIN_VALUE, Integer.MAX_VALUE);
 		config.addInt("alpha", alpha, v -> alpha = v, 255, 0, 255);

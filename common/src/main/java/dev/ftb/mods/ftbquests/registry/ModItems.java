@@ -10,7 +10,6 @@ import dev.ftb.mods.ftbquests.item.*;
 import dev.ftb.mods.ftbquests.item.ScreenBlockItem.ScreenSize;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.Item;
@@ -71,7 +70,7 @@ public class ModItems {
 
 	public static final RegistrySupplier<CreativeModeTab> CREATIVE_TAB = RegistrarManager.get(FTBQuestsAPI.MOD_ID)
 			.get(Registries.CREATIVE_MODE_TAB)
-			.register(new ResourceLocation(FTBQuestsAPI.MOD_ID, "default"), ModItems::buildDefaultTab);
+			.register(FTBQuestsAPI.rl("default"), ModItems::buildDefaultTab);
 
 	public static Item.Properties defaultProps() {
 		return new Item.Properties();

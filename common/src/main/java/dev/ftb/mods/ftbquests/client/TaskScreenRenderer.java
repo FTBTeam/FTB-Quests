@@ -33,12 +33,12 @@ import net.minecraft.world.phys.Vec3;
 import org.joml.Matrix4f;
 
 public class TaskScreenRenderer implements BlockEntityRenderer<TaskScreenBlockEntity> {
-    public static final ResourceLocation INPUT_ONLY_TEXTURE = new ResourceLocation(FTBQuestsAPI.MOD_ID, "tasks/input_only");
-    public static final ResourceLocation TANK_TEXTURE = new ResourceLocation(FTBQuestsAPI.MOD_ID, "tasks/tank");
-    public static final ResourceLocation FE_ENERGY_EMPTY_TEXTURE = new ResourceLocation(FTBQuestsAPI.MOD_ID, "tasks/fe_empty");
-    public static final ResourceLocation FE_ENERGY_FULL_TEXTURE = new ResourceLocation(FTBQuestsAPI.MOD_ID, "tasks/fe_full");
-    public static final ResourceLocation TR_ENERGY_EMPTY_TEXTURE = new ResourceLocation(FTBQuestsAPI.MOD_ID, "tasks/ic2_empty");
-    public static final ResourceLocation TR_ENERGY_FULL_TEXTURE = new ResourceLocation(FTBQuestsAPI.MOD_ID, "tasks/ic2_full");
+    public static final ResourceLocation INPUT_ONLY_TEXTURE = FTBQuestsAPI.rl("tasks/input_only");
+    public static final ResourceLocation TANK_TEXTURE = FTBQuestsAPI.rl("tasks/tank");
+    public static final ResourceLocation FE_ENERGY_EMPTY_TEXTURE = FTBQuestsAPI.rl("tasks/fe_empty");
+    public static final ResourceLocation FE_ENERGY_FULL_TEXTURE = FTBQuestsAPI.rl("tasks/fe_full");
+    public static final ResourceLocation TR_ENERGY_EMPTY_TEXTURE = FTBQuestsAPI.rl("tasks/ic2_empty");
+    public static final ResourceLocation TR_ENERGY_FULL_TEXTURE = FTBQuestsAPI.rl("tasks/ic2_full");
 
     private final BlockEntityRendererProvider.Context context;
 
