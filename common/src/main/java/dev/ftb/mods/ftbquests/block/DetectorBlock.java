@@ -3,6 +3,7 @@ package dev.ftb.mods.ftbquests.block;
 import com.mojang.serialization.MapCodec;
 import dev.ftb.mods.ftbquests.block.entity.DetectorBlockEntity;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
@@ -62,7 +63,7 @@ public class DetectorBlock extends BaseEntityBlock {
 	public void setPlacedBy(Level level, BlockPos pos, BlockState state, @Nullable LivingEntity entity, ItemStack stack) {
 		super.setPlacedBy(level, pos, state, entity, stack);
 
-		if (!level.isClientSide() && stack.hasCustomHoverName() && level.getBlockEntity(pos) instanceof DetectorBlockEntity dbe) {
+		if (!level.isClientSide() && stack.has(DataComponents.CUSTOM_NAME) && level.getBlockEntity(pos) instanceof DetectorBlockEntity dbe) {
 			dbe.update(stack.getHoverName().getString());
 		}
 	}

@@ -3,6 +3,9 @@ loaderVersion = "[${neoforgeloaderversion},)"
 issueTrackerURL = "https://github.com/FTBTeam/FTB-Mods-Issues/issues"
 license = "All Rights Reserved"
 
+[[mixins]]
+config = "ftbquests-common.mixins.json"
+
 [[mods]]
 modId = "ftbquests"
 version = "${version}"

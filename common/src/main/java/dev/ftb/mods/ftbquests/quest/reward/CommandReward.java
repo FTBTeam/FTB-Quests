@@ -7,8 +7,9 @@ import net.fabricmc.api.Environment;
 import net.minecraft.ChatFormatting;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.server.level.ServerPlayer;
@@ -32,8 +33,8 @@ public class CommandReward extends Reward {
 	}
 
 	@Override
-	public void writeData(CompoundTag nbt) {
-		super.writeData(nbt);
+	public void writeData(CompoundTag nbt, HolderLookup.Provider provider) {
+		super.writeData(nbt, provider);
 		nbt.putString("command", command);
 		if (elevatePerms) {
 			nbt.putBoolean("elevate_perms", true);
@@ -42,15 +43,15 @@ public class CommandReward extends Reward {
 	}
 
 	@Override
-	public void readData(CompoundTag nbt) {
-		super.readData(nbt);
+	public void readData(CompoundTag nbt, HolderLookup.Provider provider) {
+		super.readData(nbt, provider);
 		command = nbt.getString("command");
 		elevatePerms = nbt.getBoolean("elevate_perms");
 		silent = nbt.getBoolean("silent");
 	}
 
 	@Override
-	public void writeNetData(FriendlyByteBuf buffer) {
+	public void writeNetData(RegistryFriendlyByteBuf buffer) {
 		super.writeNetData(buffer);
 		buffer.writeUtf(command, Short.MAX_VALUE);
 		buffer.writeBoolean(elevatePerms);
@@ -58,7 +59,7 @@ public class CommandReward extends Reward {
 	}
 
 	@Override
-	public void readNetData(FriendlyByteBuf buffer) {
+	public void readNetData(RegistryFriendlyByteBuf buffer) {
 		super.readNetData(buffer);
 		command = buffer.readUtf(Short.MAX_VALUE);
 		elevatePerms = buffer.readBoolean();

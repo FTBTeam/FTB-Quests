@@ -1,38 +1,28 @@
 package dev.ftb.mods.ftbquests.net;
 
 import dev.architectury.networking.NetworkManager;
-import dev.architectury.networking.simple.BaseS2CMessage;
-import dev.architectury.networking.simple.MessageType;
+import dev.ftb.mods.ftbquests.api.FTBQuestsAPI;
 import dev.ftb.mods.ftbquests.client.FTBQuestsNetClient;
 import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.codec.ByteBufCodecs;
+import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 
-public class ChangeChapterGroupResponseMessage extends BaseS2CMessage {
-	private final long id;
-	private final long group;
+public record ChangeChapterGroupResponseMessage(long id, long group) implements CustomPacketPayload {
+	public static final Type<ChangeChapterGroupResponseMessage> TYPE = new Type<>(FTBQuestsAPI.rl("change_chapter_group_response_message"));
 
-	public ChangeChapterGroupResponseMessage(FriendlyByteBuf buffer) {
-		id = buffer.readLong();
-		group = buffer.readLong();
-	}
-
-	public ChangeChapterGroupResponseMessage(long i, long g) {
-		id = i;
-		group = g;
-	}
+	public static final StreamCodec<FriendlyByteBuf, ChangeChapterGroupResponseMessage> STREAM_CODEC = StreamCodec.composite(
+			ByteBufCodecs.VAR_LONG, ChangeChapterGroupResponseMessage::id,
+			ByteBufCodecs.VAR_LONG, ChangeChapterGroupResponseMessage::group,
+			ChangeChapterGroupResponseMessage::new
+	);
 
 	@Override
-	public MessageType getType() {
-		return FTBQuestsNetHandler.CHANGE_CHAPTER_GROUP_RESPONSE;
+	public Type<ChangeChapterGroupResponseMessage> type() {
+		return TYPE;
 	}
 
-	@Override
-	public void write(FriendlyByteBuf buffer) {
-		buffer.writeLong(id);
-		buffer.writeLong(group);
-	}
-
-	@Override
-	public void handle(NetworkManager.PacketContext context) {
-		FTBQuestsNetClient.changeChapterGroup(id, group);
+	public static void handle(ChangeChapterGroupResponseMessage message, NetworkManager.PacketContext context) {
+		context.queue(() -> FTBQuestsNetClient.changeChapterGroup(message.id, message.group));
 	}
 }

@@ -20,6 +20,7 @@
 		]
 	},
 	"mixins": [
+		"ftbquests-common.mixins.json",
 		"ftbquests-fabric.mixins.json"
 	],
 	"depends": {

@@ -1,15 +1,16 @@
 package dev.ftb.mods.ftbquests.item;
 
+import dev.architectury.networking.NetworkManager;
+import dev.ftb.mods.ftbquests.FTBQuests;
 import dev.ftb.mods.ftbquests.block.TaskScreenBlock;
 import dev.ftb.mods.ftbquests.block.entity.ITaskScreen;
-import dev.ftb.mods.ftbquests.net.TaskScreenConfigRequest;
+import dev.ftb.mods.ftbquests.net.TaskScreenConfigRequestMessage;
+import dev.ftb.mods.ftbquests.registry.ModDataComponents;
+import dev.ftb.mods.ftbquests.registry.ModItems;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.GlobalPos;
-import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
@@ -22,14 +23,13 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.Level;
-import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 import java.util.Optional;
 
 public class TaskScreenConfiguratorItem extends Item {
     public TaskScreenConfiguratorItem() {
-        super(FTBQuestsItems.defaultProps());
+        super(ModItems.defaultProps());
     }
 
     @Override
@@ -57,13 +57,15 @@ public class TaskScreenConfiguratorItem extends Item {
     }
 
     @Override
-    public void appendHoverText(ItemStack itemStack, @Nullable Level level, List<Component> list, TooltipFlag tooltipFlag) {
-        list.add(Component.translatable("item.ftbquests.task_screen_configurator.tooltip").withStyle(ChatFormatting.GRAY));
+    public void appendHoverText(ItemStack itemStack, TooltipContext context, List<Component> list, TooltipFlag tooltipFlag) {
+        if (context.registries() != null) {
+            list.add(Component.translatable("item.ftbquests.task_screen_configurator.tooltip").withStyle(ChatFormatting.GRAY));
 
-        readBlockPos(itemStack).ifPresent(gPos -> {
-            String str = gPos.dimension().location() + " / " + posToString(gPos.pos());
-            list.add(Component.translatable("ftbquests.message.configurator_bound", str).withStyle(ChatFormatting.DARK_AQUA));
-        });
+            readBlockPos(itemStack).ifPresent(gPos -> {
+                String str = gPos.dimension().location() + " / " + posToString(gPos.pos());
+                list.add(Component.translatable("ftbquests.message.configurator_bound", str).withStyle(ChatFormatting.DARK_AQUA));
+            });
+        }
     }
 
     private boolean tryUseOn(ServerPlayer player, ItemStack stack) {
@@ -75,7 +77,8 @@ public class TaskScreenConfiguratorItem extends Item {
             }
             if (level.getBlockEntity(gPos.pos()) instanceof ITaskScreen taskScreen) {
                 if (TaskScreenBlock.hasPermissionToEdit(player, taskScreen)) {
-                    taskScreen.getCoreScreen().ifPresent(coreScreen -> new TaskScreenConfigRequest(coreScreen.getBlockPos()).sendTo(player));
+                    taskScreen.getCoreScreen().ifPresent(coreScreen ->
+                            NetworkManager.sendToPlayer(player, new TaskScreenConfigRequestMessage(coreScreen.getBlockPos())));
                     return true;
                 } else {
                     player.displayClientMessage(Component.translatable("block.ftbquests.screen.no_permission").withStyle(ChatFormatting.RED), true);
@@ -87,17 +90,12 @@ public class TaskScreenConfiguratorItem extends Item {
         }).orElse(false);
     }
 
-    public static void storeBlockPos(ItemStack itemInHand, Level level, BlockPos clickedPos) {
-        itemInHand.getOrCreateTag().putLong("pos", clickedPos.asLong());
-        itemInHand.getOrCreateTag().putString("dim", level.dimension().location().toString());
+    public static void storeBlockPos(ItemStack stack, Level level, BlockPos clickedPos) {
+        stack.set(ModDataComponents.SCREEN_POS.get(), GlobalPos.of(level.dimension(), clickedPos));
     }
 
     public static Optional<GlobalPos> readBlockPos(ItemStack stack) {
-        if (stack.getItem() instanceof TaskScreenConfiguratorItem && stack.hasTag() && stack.getTag().contains("pos") && stack.getTag().contains("dim")) {
-            ResourceKey<Level> dim = ResourceKey.create(Registries.DIMENSION, new ResourceLocation(stack.getTag().getString("dim")));
-            return Optional.of(GlobalPos.of(dim, BlockPos.of(stack.getTag().getLong("pos"))));
-        }
-        return Optional.empty();
+        return FTBQuests.getComponent(stack, ModDataComponents.SCREEN_POS);
     }
 
     private static String posToString(BlockPos pos) {

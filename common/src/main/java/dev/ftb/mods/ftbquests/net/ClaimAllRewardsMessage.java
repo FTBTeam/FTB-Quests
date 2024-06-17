@@ -1,43 +1,38 @@
 package dev.ftb.mods.ftbquests.net;
 
 import dev.architectury.networking.NetworkManager;
-import dev.architectury.networking.simple.BaseC2SMessage;
-import dev.architectury.networking.simple.MessageType;
+import dev.ftb.mods.ftbquests.api.FTBQuestsAPI;
 import dev.ftb.mods.ftbquests.quest.ServerQuestFile;
 import dev.ftb.mods.ftbquests.quest.TeamData;
 import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.server.level.ServerPlayer;
 
-/**
- * @author LatvianModder
- */
-public class ClaimAllRewardsMessage extends BaseC2SMessage {
-	public ClaimAllRewardsMessage() {
-	}
+public class ClaimAllRewardsMessage implements CustomPacketPayload {
+	public static final Type<ClaimAllRewardsMessage> TYPE = new Type<>(FTBQuestsAPI.rl("claim_all_rewards_message"));
 
-	ClaimAllRewardsMessage(FriendlyByteBuf buffer) {
-	}
+	public static final ClaimAllRewardsMessage INSTANCE = new ClaimAllRewardsMessage();
+
+	public static final StreamCodec<FriendlyByteBuf, ClaimAllRewardsMessage> STREAM_CODEC = StreamCodec.unit(INSTANCE);
 
 	@Override
-	public MessageType getType() {
-		return FTBQuestsNetHandler.CLAIM_ALL_REWARDS;
+	public Type<ClaimAllRewardsMessage> type() {
+		return TYPE;
 	}
 
-	@Override
-	public void write(FriendlyByteBuf buffer) {
-	}
+	public static void handle(ClaimAllRewardsMessage message, NetworkManager.PacketContext context) {
+		context.queue(() -> {
+			ServerPlayer player = (ServerPlayer) context.getPlayer();
+			TeamData data = TeamData.get(player);
 
-	@Override
-	public void handle(NetworkManager.PacketContext context) {
-		ServerPlayer player = (ServerPlayer) context.getPlayer();
-		TeamData data = TeamData.get(player);
-
-		ServerQuestFile.INSTANCE.forAllQuests(quest -> {
-			if (data.isCompleted(quest)) {
-				quest.getRewards().stream()
-						.filter(reward -> !reward.getExcludeFromClaimAll())
-						.forEach(reward -> data.claimReward(player, reward, true));
-			}
+			ServerQuestFile.INSTANCE.forAllQuests(quest -> {
+				if (data.isCompleted(quest)) {
+					quest.getRewards().stream()
+							.filter(reward -> !reward.getExcludeFromClaimAll())
+							.forEach(reward -> data.claimReward(player, reward, true));
+				}
+			});
 		});
 	}
 }

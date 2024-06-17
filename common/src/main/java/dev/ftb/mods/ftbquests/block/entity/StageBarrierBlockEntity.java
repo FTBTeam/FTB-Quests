@@ -1,7 +1,9 @@
 package dev.ftb.mods.ftbquests.block.entity;
 
 import dev.ftb.mods.ftblibrary.integration.stages.StageHelper;
+import dev.ftb.mods.ftbquests.registry.ModBlockEntityTypes;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientGamePacketListener;
@@ -19,18 +21,18 @@ public class StageBarrierBlockEntity extends BlockEntity implements BarrierBlock
 	private String stage = "";
 
 	public StageBarrierBlockEntity(BlockPos blockPos, BlockState blockState) {
-		super(FTBQuestsBlockEntities.STAGE_BARRIER.get(), blockPos, blockState);
+		super(ModBlockEntityTypes.STAGE_BARRIER.get(), blockPos, blockState);
 	}
 
 	@Override
-	public void load(CompoundTag tag) {
-		super.load(tag);
+	public void loadAdditional(CompoundTag tag, HolderLookup.Provider provider) {
+		super.loadAdditional(tag, provider);
 		stage = tag.getString("Stage");
 	}
 
 	@Override
-	public void saveAdditional(CompoundTag tag) {
-		super.saveAdditional(tag);
+	public void saveAdditional(CompoundTag tag, HolderLookup.Provider provider) {
+		super.saveAdditional(tag, provider);
 		tag.putString("Stage", stage);
 	}
 
@@ -41,8 +43,8 @@ public class StageBarrierBlockEntity extends BlockEntity implements BarrierBlock
 	}
 
 	@Override
-	public CompoundTag getUpdateTag() {
-		return saveWithoutMetadata();
+	public CompoundTag getUpdateTag(HolderLookup.Provider provider) {
+		return saveWithoutMetadata(provider);
 	}
 
 	@Override

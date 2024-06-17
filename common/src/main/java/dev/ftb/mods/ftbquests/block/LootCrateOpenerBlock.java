@@ -5,7 +5,6 @@ import dev.architectury.injectables.annotations.ExpectPlatform;
 import dev.ftb.mods.ftbquests.block.entity.LootCrateOpenerBlockEntity;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
-import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
@@ -50,7 +49,7 @@ public class LootCrateOpenerBlock extends BaseEntityBlock {
     }
 
     @Override
-    public InteractionResult use(BlockState blockState, Level level, BlockPos blockPos, Player player, InteractionHand interactionHand, BlockHitResult blockHitResult) {
+    protected InteractionResult useWithoutItem(BlockState blockState, Level level, BlockPos blockPos, Player player, BlockHitResult blockHitResult) {
         if (!level.isClientSide) {
             if (level.getBlockEntity(blockPos) instanceof LootCrateOpenerBlockEntity opener) {
                 player.displayClientMessage(Component.translatable("block.ftbquests.loot_crate_opener.rightclick", opener.getOutputCount()), true);
@@ -68,5 +67,4 @@ public class LootCrateOpenerBlock extends BaseEntityBlock {
             opener.setOwner(livingEntity.getUUID());
         }
     }
-
 }

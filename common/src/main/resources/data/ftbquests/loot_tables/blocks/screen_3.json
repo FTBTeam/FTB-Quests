@@ -11,40 +11,11 @@
           "name": "ftbquests:screen_3",
           "functions": [
             {
-              "function": "minecraft:copy_nbt",
-              "source": "block_entity",
-              "ops": [
-                {
-                  "source": "TaskID",
-                  "target": "BlockEntityTag.TaskID",
-                  "op": "replace"
-                },
-                {
-                  "source": "Skin",
-                  "target": "BlockEntityTag.Skin",
-                  "op": "replace"
-                },
-                {
-                  "source": "Indestructible",
-                  "target": "BlockEntityTag.Indestructible",
-                  "op": "replace"
-                },
-                {
-                  "source": "InputOnly",
-                  "target": "BlockEntityTag.InputOnly",
-                  "op": "replace"
-                },
-                {
-                  "source": "InputModeIcon",
-                  "target": "BlockEntityTag.InputModeIcon",
-                  "op": "replace"
-                },
-                {
-                  "source": "TextShadow",
-                  "target": "BlockEntityTag.TextShadow",
-                  "op": "replace"
-                }
-              ]
+              "function": "minecraft:copy_components",
+              "include": [
+                "ftbquests:task_screen_saved"
+              ],
+              "source": "block_entity"
             }
           ]
         }

@@ -10,15 +10,11 @@
           "name": "ftbquests:loot_crate_opener",
           "functions": [
             {
-              "function": "minecraft:copy_nbt",
-              "source": "block_entity",
-              "ops": [
-                {
-                  "source": "Items",
-                  "target": "BlockEntityTag.Items",
-                  "op": "replace"
-                }
-              ]
+              "function": "minecraft:copy_components",
+              "include": [
+                "ftbquests:loot_crate_items"
+              ],
+              "source": "block_entity"
             }
           ]
         }

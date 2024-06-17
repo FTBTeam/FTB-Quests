@@ -1,23 +1,28 @@
 package dev.ftb.mods.ftbquests.client;
 
 import dev.ftb.mods.ftblibrary.config.*;
-import dev.ftb.mods.ftblibrary.config.ui.*;
+import dev.ftb.mods.ftblibrary.config.ui.EditConfigScreen;
+import dev.ftb.mods.ftblibrary.config.ui.EditStringConfigOverlay;
+import dev.ftb.mods.ftblibrary.config.ui.SelectFluidScreen;
+import dev.ftb.mods.ftblibrary.config.ui.SelectItemStackScreen;
 import dev.ftb.mods.ftbquests.api.FTBQuestsAPI;
 import dev.ftb.mods.ftbquests.client.gui.SelectQuestObjectScreen;
 import dev.ftb.mods.ftbquests.quest.QuestObjectType;
 import dev.ftb.mods.ftbquests.quest.loot.RewardTable;
 import dev.ftb.mods.ftbquests.quest.reward.*;
 import dev.ftb.mods.ftbquests.quest.task.*;
+import dev.ftb.mods.ftbquests.quest.translation.TranslationKey;
 import dev.ftb.mods.ftbquests.util.ConfigQuestObject;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.StructureBlockEntity;
 import net.minecraft.world.phys.BlockHitResult;
 
-import java.util.function.Consumer;
+import java.util.function.BiConsumer;
 
 public class GuiProviders {
     public static RewardType.GuiProvider defaultRewardGuiProvider(RewardType.Provider provider) {
@@ -60,7 +65,7 @@ public class GuiProviders {
                 EditStringConfigOverlay<Long> overlay = new EditStringConfigOverlay<>(panel.getGui(), c, accepted -> {
                     if (accepted) {
                         slvTask.setValue(c.getValue());
-                        callback.accept(task);
+                        callback.accept(task, task.getType().makeExtraNBT());
                     }
                     panel.run();
                 }, task.getType().getDisplayName()).atMousePosition();
@@ -80,7 +85,7 @@ public class GuiProviders {
                 gui.run();
                 if (accepted) {
                     ItemTask itemTask = new ItemTask(0L, quest).setStackAndCount(c.getValue(), c.getValue().getCount());
-                    callback.accept(itemTask);
+                    callback.accept(itemTask, itemTask.getType().makeExtraNBT());
                 }
             }).openGui();
         });
@@ -93,7 +98,9 @@ public class GuiProviders {
                 if (accepted) {
                     CheckmarkTask checkmarkTask = new CheckmarkTask(0L, quest);
                     checkmarkTask.setRawTitle(c.getValue());
-                    callback.accept(checkmarkTask);
+                    CompoundTag extra = checkmarkTask.getType().makeExtraNBT();
+                    quest.getQuestFile().getTranslationManager().addInitialTranslation(extra, quest.getQuestFile().getLocale(), TranslationKey.TITLE, c.getValue());
+                    callback.accept(checkmarkTask, extra);
                 }
                 panel.run();
             }, TaskTypes.CHECKMARK.getDisplayName()).atMousePosition();
@@ -108,7 +115,7 @@ public class GuiProviders {
                 gui.run();
                 if (accepted) {
                     FluidTask fluidTask = new FluidTask(0L, quest).setFluid(c.getValue());
-                    callback.accept(fluidTask);
+                    callback.accept(fluidTask, fluidTask.getType().makeExtraNBT());
                 }
             }).openGui();
         });
@@ -137,7 +144,7 @@ public class GuiProviders {
 
                 if (blockEntity instanceof StructureBlockEntity structure) {
                     task.initFromStructure(structure);
-                    callback.accept(task);
+                    callback.accept(task, task.getType().makeExtraNBT());
                     return;
                 }
             }
@@ -146,11 +153,11 @@ public class GuiProviders {
         });
     }
 
-    private static void openSetupGui(Runnable gui, Consumer<Task> callback, Task task) {
+    private static void openSetupGui(Runnable gui, BiConsumer<Task, CompoundTag> callback, Task task) {
         ConfigGroup group = new ConfigGroup(FTBQuestsAPI.MOD_ID, accepted -> {
             gui.run();
             if (accepted) {
-                callback.accept(task);
+                callback.accept(task, new CompoundTag());
             }
         });
         task.fillConfigGroup(task.createSubGroup(group));
@@ -177,14 +184,13 @@ public class GuiProviders {
             IntConfig c = new IntConfig(1, Integer.MAX_VALUE);
             c.setValue(100);
 
-            EditStringConfigOverlay<Integer> overlay = new EditStringConfigOverlay<>(panel, c, accepted -> {
+            EditStringConfigOverlay<Integer> overlay = new EditStringConfigOverlay<>(panel.getGui(), c, accepted -> {
                 if (accepted) {
                     callback.accept(new XPReward(0L, quest, c.getValue()));
                 }
 
                 panel.run();
-            }, RewardTypes.XP.getDisplayName())
-                    .atPosition(panel.width / 3, panel.height + 5);
+            }, RewardTypes.XP.getDisplayName()).atMousePosition();
             panel.getGui().pushModalPanel(overlay);
         });
 
@@ -192,13 +198,12 @@ public class GuiProviders {
             IntConfig c = new IntConfig(1, Integer.MAX_VALUE);
             c.setValue(5);
 
-            EditStringConfigOverlay<Integer> overlay = new EditStringConfigOverlay<>(panel, c, accepted -> {
+            EditStringConfigOverlay<Integer> overlay = new EditStringConfigOverlay<>(panel.getGui(), c, accepted -> {
                 if (accepted) {
                     callback.accept(new XPLevelsReward(0L, quest, c.getValue()));
                 }
                 panel.run();
-            }, RewardTypes.XP_LEVELS.getDisplayName())
-                    .atPosition(panel.width / 3, panel.height + 5);
+            }, RewardTypes.XP_LEVELS.getDisplayName()).atMousePosition();
             panel.getGui().pushModalPanel(overlay);
         });
     }

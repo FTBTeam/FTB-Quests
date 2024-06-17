@@ -1,43 +1,31 @@
 package dev.ftb.mods.ftbquests.net;
 
 import dev.architectury.networking.NetworkManager;
-import dev.architectury.networking.simple.BaseS2CMessage;
-import dev.architectury.networking.simple.MessageType;
+import dev.ftb.mods.ftbquests.api.FTBQuestsAPI;
 import dev.ftb.mods.ftbquests.client.FTBQuestsNetClient;
+import net.minecraft.core.UUIDUtil;
 import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.codec.ByteBufCodecs;
+import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 
 import java.util.UUID;
 
-/**
- * @author LatvianModder
- */
-public class SyncLockMessage extends BaseS2CMessage {
-	private final UUID id;
-	private final boolean lock;
+public record SyncLockMessage(UUID teamId, boolean lock) implements CustomPacketPayload {
+	public static final Type<SyncLockMessage> TYPE = new Type<>(FTBQuestsAPI.rl("sync_lock_message"));
 
-	public SyncLockMessage(FriendlyByteBuf buffer) {
-		id = buffer.readUUID();
-		lock = buffer.readBoolean();
-	}
-
-	public SyncLockMessage(UUID i, boolean e) {
-		id = i;
-		lock = e;
-	}
+	public static final StreamCodec<FriendlyByteBuf, SyncLockMessage> STREAM_CODEC = StreamCodec.composite(
+			UUIDUtil.STREAM_CODEC, SyncLockMessage::teamId,
+			ByteBufCodecs.BOOL, SyncLockMessage::lock,
+			SyncLockMessage::new
+	);
 
 	@Override
-	public MessageType getType() {
-		return FTBQuestsNetHandler.SYNC_LOCK;
+	public Type<SyncLockMessage> type() {
+		return TYPE;
 	}
 
-	@Override
-	public void write(FriendlyByteBuf buffer) {
-		buffer.writeUUID(id);
-		buffer.writeBoolean(lock);
-	}
-
-	@Override
-	public void handle(NetworkManager.PacketContext context) {
-		FTBQuestsNetClient.syncLock(id, lock);
+	public static void handle(SyncLockMessage message, NetworkManager.PacketContext context) {
+		context.queue(() -> FTBQuestsNetClient.syncLock(message.teamId, message.lock));
 	}
 }

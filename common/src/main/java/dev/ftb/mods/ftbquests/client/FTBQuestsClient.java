@@ -2,22 +2,24 @@ package dev.ftb.mods.ftbquests.client;
 
 import com.mojang.blaze3d.platform.InputConstants;
 import dev.architectury.event.events.client.ClientLifecycleEvent;
+import dev.architectury.networking.NetworkManager;
 import dev.architectury.registry.ReloadListenerRegistry;
 import dev.architectury.registry.client.keymappings.KeyMappingRegistry;
 import dev.architectury.registry.client.rendering.RenderTypeRegistry;
-import dev.ftb.mods.ftblibrary.config.*;
-import dev.ftb.mods.ftblibrary.config.ui.*;
+import dev.ftb.mods.ftblibrary.config.ImageResourceConfig;
+import dev.ftb.mods.ftblibrary.config.ui.EditConfigScreen;
 import dev.ftb.mods.ftblibrary.ui.Widget;
 import dev.ftb.mods.ftblibrary.ui.input.MouseButton;
 import dev.ftb.mods.ftbquests.FTBQuests;
-import dev.ftb.mods.ftbquests.block.FTBQuestsBlocks;
 import dev.ftb.mods.ftbquests.block.entity.TaskScreenBlockEntity;
-import dev.ftb.mods.ftbquests.item.FTBQuestsItems;
+import dev.ftb.mods.ftbquests.item.CustomIconItem;
 import dev.ftb.mods.ftbquests.net.SetCustomImageMessage;
 import dev.ftb.mods.ftbquests.quest.BaseQuestFile;
 import dev.ftb.mods.ftbquests.quest.QuestObjectBase;
 import dev.ftb.mods.ftbquests.quest.TeamData;
 import dev.ftb.mods.ftbquests.quest.theme.ThemeLoader;
+import dev.ftb.mods.ftbquests.registry.ModBlocks;
+import dev.ftb.mods.ftbquests.registry.ModItems;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
@@ -27,8 +29,8 @@ import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.core.RegistryAccess;
-import net.minecraft.nbt.StringTag;
 import net.minecraft.server.packs.PackType;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.InteractionHand;
@@ -57,13 +59,13 @@ public class FTBQuestsClient {
 	}
 
 	private static void onClientSetup(Minecraft minecraft) {
-		RenderTypeRegistry.register(RenderType.translucent(), FTBQuestsBlocks.BARRIER.get());
-		RenderTypeRegistry.register(RenderType.translucent(), FTBQuestsBlocks.STAGE_BARRIER.get());
-		RenderTypeRegistry.register(RenderType.solid(), FTBQuestsBlocks.TASK_SCREEN_1.get());
-		RenderTypeRegistry.register(RenderType.solid(), FTBQuestsBlocks.TASK_SCREEN_3.get());
-		RenderTypeRegistry.register(RenderType.solid(), FTBQuestsBlocks.TASK_SCREEN_5.get());
-		RenderTypeRegistry.register(RenderType.solid(), FTBQuestsBlocks.TASK_SCREEN_7.get());
-		RenderTypeRegistry.register(RenderType.solid(), FTBQuestsBlocks.AUX_SCREEN.get());
+		RenderTypeRegistry.register(RenderType.translucent(), ModBlocks.BARRIER.get());
+		RenderTypeRegistry.register(RenderType.translucent(), ModBlocks.STAGE_BARRIER.get());
+		RenderTypeRegistry.register(RenderType.solid(), ModBlocks.TASK_SCREEN_1.get());
+		RenderTypeRegistry.register(RenderType.solid(), ModBlocks.TASK_SCREEN_3.get());
+		RenderTypeRegistry.register(RenderType.solid(), ModBlocks.TASK_SCREEN_5.get());
+		RenderTypeRegistry.register(RenderType.solid(), ModBlocks.TASK_SCREEN_7.get());
+		RenderTypeRegistry.register(RenderType.solid(), ModBlocks.AUX_SCREEN.get());
 		GuiProviders.setTaskGuiProviders();
 		GuiProviders.setRewardGuiProviders();
 	}
@@ -93,6 +95,10 @@ public class FTBQuestsClient {
 		return new ClientQuestFile();
 	}
 
+	public static HolderLookup.Provider holderLookup() {
+		return getClientLevel().registryAccess();
+	}
+
 	public static void openGui() {
 		ClientQuestFile.openGui();
 	}
@@ -102,12 +108,12 @@ public class FTBQuestsClient {
 		config.onClicked(null, MouseButton.LEFT, accepted -> {
 			if (accepted) {
 				if (config.isEmpty()) {
-					player.getItemInHand(hand).removeTagKey("Icon");
+					CustomIconItem.setIcon(player.getItemInHand(hand), null);
 				} else {
-					player.getItemInHand(hand).addTagElement("Icon", StringTag.valueOf(config.getValue().toString()));
+					CustomIconItem.setIcon(player.getItemInHand(hand), config.getValue());
 				}
 
-				new SetCustomImageMessage(hand, config.getValue()).sendToServer();
+				NetworkManager.sendToServer(new SetCustomImageMessage(hand, config.getValue()));
 			}
 
 			Minecraft.getInstance().setScreen(null);
@@ -151,7 +157,7 @@ public class FTBQuestsClient {
 					player.canUseGameMasterBlocks(),
 					player.level().registryAccess()
 			);
-			FTBQuestsItems.CREATIVE_TAB.get().buildContents(params);
+			ModItems.CREATIVE_TAB.get().buildContents(params);
 			CreativeModeTabs.searchTab().buildContents(params);
 		}
 	}

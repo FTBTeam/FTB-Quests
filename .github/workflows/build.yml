@@ -18,6 +18,7 @@ jobs:
     with:
       curse-publish-task: ""
       maven-snapshots: true
+      java-version: 21
     secrets:
       ftb-maven-token: ${{ secrets.FTB_MAVEN_TOKEN }}
       saps-token: ${{ secrets.SAPS_TOKEN }}

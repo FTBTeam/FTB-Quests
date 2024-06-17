@@ -1,41 +1,27 @@
 package dev.ftb.mods.ftbquests.net;
 
 import dev.architectury.networking.NetworkManager;
-import dev.architectury.networking.simple.BaseS2CMessage;
-import dev.architectury.networking.simple.MessageType;
+import dev.ftb.mods.ftbquests.api.FTBQuestsAPI;
 import dev.ftb.mods.ftbquests.client.FTBQuestsNetClient;
 import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 
-/**
- * @author LatvianModder
- */
-public class TeamDataChangedMessage extends BaseS2CMessage {
-	private final TeamDataUpdate oldDataUpdate;
-	private final TeamDataUpdate newDataUpdate;
+public record TeamDataChangedMessage(TeamDataUpdate oldDataUpdate, TeamDataUpdate newDataUpdate) implements CustomPacketPayload {
+	public static final Type<TeamDataChangedMessage> TYPE = new Type<>(FTBQuestsAPI.rl("team_data_changed_message"));
 
-	TeamDataChangedMessage(FriendlyByteBuf buffer) {
-		oldDataUpdate = new TeamDataUpdate(buffer);
-		newDataUpdate = new TeamDataUpdate(buffer);
-	}
-
-	public TeamDataChangedMessage(TeamDataUpdate oldData, TeamDataUpdate newData) {
-		oldDataUpdate = oldData;
-		newDataUpdate = newData;
-	}
+	public static final StreamCodec<FriendlyByteBuf, TeamDataChangedMessage> STREAM_CODEC = StreamCodec.composite(
+			TeamDataUpdate.STREAM_CODEC, TeamDataChangedMessage::oldDataUpdate,
+			TeamDataUpdate.STREAM_CODEC, TeamDataChangedMessage::newDataUpdate,
+			TeamDataChangedMessage::new
+	);
 
 	@Override
-	public MessageType getType() {
-		return FTBQuestsNetHandler.TEAM_DATA_CHANGED;
+	public Type<TeamDataChangedMessage> type() {
+		return TYPE;
 	}
 
-	@Override
-	public void write(FriendlyByteBuf buffer) {
-		oldDataUpdate.write(buffer);
-		newDataUpdate.write(buffer);
-	}
-
-	@Override
-	public void handle(NetworkManager.PacketContext context) {
-		FTBQuestsNetClient.teamDataChanged(oldDataUpdate, newDataUpdate);
+	public static void handle(TeamDataChangedMessage message, NetworkManager.PacketContext context) {
+		context.queue(() -> FTBQuestsNetClient.teamDataChanged(message.oldDataUpdate, message.newDataUpdate));
 	}
 }

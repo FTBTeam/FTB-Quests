@@ -1,53 +1,42 @@
 package dev.ftb.mods.ftbquests.net;
 
 import dev.architectury.networking.NetworkManager;
-import dev.architectury.networking.simple.BaseC2SMessage;
-import dev.architectury.networking.simple.MessageType;
+import dev.ftb.mods.ftbquests.api.FTBQuestsAPI;
 import dev.ftb.mods.ftbquests.quest.ServerQuestFile;
 import dev.ftb.mods.ftbquests.quest.TeamData;
 import dev.ftb.mods.ftbquests.quest.reward.Reward;
 import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.codec.ByteBufCodecs;
+import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.server.level.ServerPlayer;
 
-/**
- * @author LatvianModder
- */
-public class ClaimRewardMessage extends BaseC2SMessage {
-	private final long id;
-	private final boolean notify;
+public record ClaimRewardMessage(long id, boolean shouldNotify) implements CustomPacketPayload {
+	public static final Type<ClaimRewardMessage> TYPE = new Type<>(FTBQuestsAPI.rl("claim_reward_message"));
 
-	ClaimRewardMessage(FriendlyByteBuf buffer) {
-		id = buffer.readLong();
-		notify = buffer.readBoolean();
-	}
-
-	public ClaimRewardMessage(long i, boolean n) {
-		id = i;
-		notify = n;
-	}
+	public static final StreamCodec<FriendlyByteBuf, ClaimRewardMessage> STREAM_CODEC = StreamCodec.composite(
+			ByteBufCodecs.VAR_LONG, ClaimRewardMessage::id,
+			ByteBufCodecs.BOOL, ClaimRewardMessage::shouldNotify,
+			ClaimRewardMessage::new
+	);
 
 	@Override
-	public MessageType getType() {
-		return FTBQuestsNetHandler.CLAIM_REWARD;
+	public Type<ClaimRewardMessage> type() {
+		return TYPE;
 	}
 
-	@Override
-	public void write(FriendlyByteBuf buffer) {
-		buffer.writeLong(id);
-		buffer.writeBoolean(notify);
-	}
+	public static void handle(ClaimRewardMessage message, NetworkManager.PacketContext context) {
+		context.queue(() -> {
+			Reward reward = ServerQuestFile.INSTANCE.getReward(message.id);
 
-	@Override
-	public void handle(NetworkManager.PacketContext context) {
-		Reward reward = ServerQuestFile.INSTANCE.getReward(id);
+			if (reward != null) {
+				ServerPlayer player = (ServerPlayer) context.getPlayer();
+				TeamData teamData = ServerQuestFile.INSTANCE.getOrCreateTeamData(player);
 
-		if (reward != null) {
-			ServerPlayer player = (ServerPlayer) context.getPlayer();
-			TeamData teamData = ServerQuestFile.INSTANCE.getOrCreateTeamData(player);
-
-			if (teamData.isCompleted(reward.getQuest())) {
-				teamData.claimReward(player, reward, notify);
+				if (teamData.isCompleted(reward.getQuest())) {
+					teamData.claimReward(player, reward, message.shouldNotify);
+				}
 			}
-		}
+		});
 	}
 }

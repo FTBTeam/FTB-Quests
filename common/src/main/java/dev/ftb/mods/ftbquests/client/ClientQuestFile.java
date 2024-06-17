@@ -1,8 +1,10 @@
 package dev.ftb.mods.ftbquests.client;
 
 import com.mojang.blaze3d.platform.InputConstants;
+import dev.architectury.networking.NetworkManager;
 import dev.architectury.utils.Env;
 import dev.ftb.mods.ftblibrary.icon.Icons;
+import dev.ftb.mods.ftblibrary.util.TooltipList;
 import dev.ftb.mods.ftblibrary.util.client.ClientUtils;
 import dev.ftb.mods.ftbquests.FTBQuests;
 import dev.ftb.mods.ftbquests.client.gui.CustomToast;
@@ -14,12 +16,14 @@ import dev.ftb.mods.ftbquests.quest.QuestObject;
 import dev.ftb.mods.ftbquests.quest.TeamData;
 import dev.ftb.mods.ftbquests.quest.task.StructureTask;
 import dev.ftb.mods.ftbquests.quest.theme.QuestTheme;
+import dev.ftb.mods.ftbquests.quest.translation.TranslationKey;
 import dev.ftb.mods.ftbquests.util.TextUtils;
 import dev.ftb.mods.ftbteams.api.FTBTeamsAPI;
 import dev.ftb.mods.ftbteams.api.client.KnownClientPlayer;
 import net.minecraft.ChatFormatting;
 import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
@@ -119,7 +123,8 @@ public class ClientQuestFile extends BaseQuestFile {
 			if (isDisableGui() && !canEdit()) {
 				Minecraft.getInstance().getToasts().addToast(new CustomToast(Component.translatable("item.ftbquests.book.disabled"), Icons.BARRIER, Component.empty()));
 			} else if (selfTeamData.isLocked()) {
-				Minecraft.getInstance().getToasts().addToast(new CustomToast(lockMessage.isEmpty() ? Component.literal("Quests locked!") : TextUtils.parseRawText(lockMessage), Icons.BARRIER, Component.empty()));
+				Component msg = lockMessage.isEmpty() ? Component.literal("Quests locked!") : TextUtils.parseRawText(lockMessage, holderLookup());
+				Minecraft.getInstance().getToasts().addToast(new CustomToast(msg, Icons.BARRIER, Component.empty()));
 			} else {
 				if (canEdit()) {
 					StructureTask.maybeRequestStructureSync();
@@ -139,8 +144,13 @@ public class ClientQuestFile extends BaseQuestFile {
 	}
 
 	@Override
+	public HolderLookup.Provider holderLookup() {
+		return FTBQuestsClient.holderLookup();
+	}
+
+	@Override
 	public void deleteObject(long id) {
-		new DeleteObjectMessage(id).sendToServer();
+		NetworkManager.sendToServer(new DeleteObjectMessage(id));
 	}
 
 	@Override
@@ -188,6 +198,12 @@ public class ClientQuestFile extends BaseQuestFile {
 		return false;
 	}
 
+	@Override
+	public String getLocale() {
+		String locale = FTBQuestsClientConfig.EDITING_LOCALE.get();
+		return locale.isEmpty() ? Minecraft.getInstance().options.languageCode : locale;
+	}
+
 	public void setEditorPermission(boolean hasPermission) {
 		editorPermission = hasPermission;
 	}
@@ -213,5 +229,16 @@ public class ClientQuestFile extends BaseQuestFile {
 				}
 			}
 		}
+	}
+
+
+	public static void addTranslationWarning(TooltipList list, TranslationKey key) {
+		list.add(Component.translatable("ftbquests.message.missing_xlate_1",
+						Component.translatable(key.getTranslationKey()),
+						ClientQuestFile.INSTANCE.getLocale())
+				.withStyle(ChatFormatting.GRAY, ChatFormatting.ITALIC)
+		);
+		list.add(Component.translatable("ftbquests.message.missing_xlate_2")
+				.withStyle(ChatFormatting.GRAY, ChatFormatting.ITALIC));
 	}
 }

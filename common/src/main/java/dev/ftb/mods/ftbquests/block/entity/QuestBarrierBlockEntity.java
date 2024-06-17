@@ -5,7 +5,9 @@ import dev.ftb.mods.ftbquests.quest.BaseQuestFile;
 import dev.ftb.mods.ftbquests.quest.QuestObject;
 import dev.ftb.mods.ftbquests.quest.QuestObjectBase;
 import dev.ftb.mods.ftbquests.quest.ServerQuestFile;
+import dev.ftb.mods.ftbquests.registry.ModBlockEntityTypes;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientGamePacketListener;
@@ -20,18 +22,18 @@ public class QuestBarrierBlockEntity extends BlockEntity implements BarrierBlock
 	private long objId = 0L;
 
 	public QuestBarrierBlockEntity(BlockPos blockPos, BlockState blockState) {
-		super(FTBQuestsBlockEntities.BARRIER.get(), blockPos, blockState);
+		super(ModBlockEntityTypes.BARRIER.get(), blockPos, blockState);
 	}
 
 	@Override
-	public void load(CompoundTag tag) {
-		super.load(tag);
+	public void loadAdditional(CompoundTag tag, HolderLookup.Provider provider) {
+		super.loadAdditional(tag, provider);
 		objId = QuestObjectBase.parseCodeString(tag.getString("Object"));
 	}
 
 	@Override
-	public void saveAdditional(CompoundTag tag) {
-		super.saveAdditional(tag);
+	public void saveAdditional(CompoundTag tag, HolderLookup.Provider provider) {
+		super.saveAdditional(tag, provider);
 		tag.putString("Object", QuestObjectBase.getCodeString(objId));
 	}
 
@@ -42,8 +44,8 @@ public class QuestBarrierBlockEntity extends BlockEntity implements BarrierBlock
 	}
 
 	@Override
-	public CompoundTag getUpdateTag() {
-		return saveWithoutMetadata();
+	public CompoundTag getUpdateTag(HolderLookup.Provider provider) {
+		return saveWithoutMetadata(provider);
 	}
 
 	@Override

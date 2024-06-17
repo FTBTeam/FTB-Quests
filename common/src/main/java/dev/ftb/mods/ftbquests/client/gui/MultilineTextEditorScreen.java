@@ -20,7 +20,6 @@ import dev.ftb.mods.ftbquests.quest.Quest;
 import dev.ftb.mods.ftbquests.quest.QuestObject;
 import dev.ftb.mods.ftbquests.quest.QuestObjectType;
 import dev.ftb.mods.ftbquests.util.ConfigQuestObject;
-import joptsimple.internal.Strings;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
@@ -35,7 +34,7 @@ import java.util.regex.Pattern;
 public class MultilineTextEditorScreen extends BaseScreen {
 	private static final Pattern STRIP_FORMATTING_PATTERN = Pattern.compile("(?i)&[0-9A-FK-OR]");
 	private static final int MAX_UNDO = 10;
-	protected static final String LINK_TEXT_TEMPLATE = "{ \"text\": \"%s\", \"underlined\": \"true\", \"clickEvent\": { \"action\": \"change_page\", \"value\": \"%016X\" } }";
+	protected static final String LINK_TEXT_TEMPLATE = "{ \"text\": \"%s\", \"underlined\": true, \"clickEvent\": { \"action\": \"change_page\", \"value\": \"%016X\" } }";
 
 	private final Component title;
 	private final ListConfig<String, StringConfig> config;

@@ -1,6 +1,7 @@
 package dev.ftb.mods.ftbquests.client.gui.quests;
 
 import com.mojang.blaze3d.vertex.PoseStack;
+import dev.architectury.networking.NetworkManager;
 import dev.ftb.mods.ftblibrary.config.DoubleConfig;
 import dev.ftb.mods.ftblibrary.config.ui.EditStringConfigOverlay;
 import dev.ftb.mods.ftblibrary.icon.Color4I;
@@ -155,7 +156,7 @@ public class QuestButton extends Button implements QuestPositionableButton {
 							b -> openAddRewardContextMenu()));
 					contextMenu.add(new ContextMenuItem(Component.translatable("ftbquests.gui.clear_reward_all"),
 							ThemeProperties.CLOSE_ICON.get(quest),
-							b -> selected.forEach(q -> q.getRewards().forEach(r -> new DeleteObjectMessage(r.id).sendToServer()))));
+							b -> selected.forEach(q -> q.getRewards().forEach(r -> NetworkManager.sendToServer(new DeleteObjectMessage(r.id))))));
 					contextMenu.add(new ContextMenuItem(Component.translatable("ftbquests.gui.bulk_change_size"),
 							Icons.SETTINGS,
 							b -> bulkChangeSize()));
@@ -202,7 +203,6 @@ public class QuestButton extends Button implements QuestPositionableButton {
 			questScreen.movingObjects = false;
 
 			if (questScreen.getViewedQuest() != quest) {
-//				questScreen.viewQuestPanel.hidePanel = true;
 				questScreen.viewQuest(quest);
 			} else {
 				questScreen.closeQuest();
@@ -221,7 +221,7 @@ public class QuestButton extends Button implements QuestPositionableButton {
 			if (accepted) {
 				quests.forEach(q -> {
 					q.setSize(c.getValue());
-					new EditObjectMessage(q).sendToServer();
+					NetworkManager.sendToServer(EditObjectMessage.forQuestObject(q));
 				});
 			}
 			run();
@@ -241,7 +241,7 @@ public class QuestButton extends Button implements QuestPositionableButton {
 					if (newReward != null) {
 						CompoundTag extra = new CompoundTag();
 						extra.putString("type", type.getTypeForNBT());
-						new CreateObjectMessage(newReward, extra).sendToServer();
+						NetworkManager.sendToServer(CreateObjectMessage.create(newReward, extra));
 					}
 				}));
 			}));
@@ -264,7 +264,7 @@ public class QuestButton extends Button implements QuestPositionableButton {
 		quest.removeInvalidDependencies();
 
 		if (quest.verifyDependencies(false)) {
-			new EditObjectMessage(quest).sendToServer();
+			NetworkManager.sendToServer(EditObjectMessage.forQuestObject(quest));
 			questScreen.questPanel.refreshWidgets();
 		} else {
 			quest.clearDependencies();

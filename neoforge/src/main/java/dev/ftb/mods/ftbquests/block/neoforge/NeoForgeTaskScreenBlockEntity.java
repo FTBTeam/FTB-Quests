@@ -8,6 +8,7 @@ import dev.ftb.mods.ftbquests.quest.task.FluidTask;
 import dev.ftb.mods.ftbquests.quest.task.ItemTask;
 import dev.ftb.mods.ftbquests.quest.task.neoforge.ForgeEnergyTask;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Holder;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.AABB;
@@ -15,7 +16,6 @@ import net.neoforged.neoforge.energy.IEnergyStorage;
 import net.neoforged.neoforge.fluids.FluidStack;
 import net.neoforged.neoforge.fluids.capability.IFluidHandler;
 import net.neoforged.neoforge.items.IItemHandler;
-import net.neoforged.neoforge.items.ItemHandlerHelper;
 import org.jetbrains.annotations.NotNull;
 
 public class NeoForgeTaskScreenBlockEntity extends TaskScreenBlockEntity {
@@ -66,7 +66,7 @@ public class NeoForgeTaskScreenBlockEntity extends TaskScreenBlockEntity {
         public ItemStack getStackInSlot(int slot) {
             // slot 1 is always empty - see above
             return getTask() instanceof ItemTask itemTask && slot == 0 ?
-                    ItemHandlerHelper.copyStackWithSize(itemTask.getItemStack(), (int) Math.min(getCachedTeamData().getProgress(itemTask), itemTask.getItemStack().getMaxStackSize())) :
+                    itemTask.getItemStack().copyWithCount((int) Math.min(getCachedTeamData().getProgress(itemTask), itemTask.getItemStack().getMaxStackSize())) :
                     ItemStack.EMPTY;
         }
 
@@ -91,7 +91,7 @@ public class NeoForgeTaskScreenBlockEntity extends TaskScreenBlockEntity {
                     if (!simulate) {
                         data.addProgress(itemTask, -itemsRemoved);
                     }
-                    return ItemHandlerHelper.copyStackWithSize(itemTask.getItemStack(), itemsRemoved);
+                    return itemTask.getItemStack().copyWithCount(itemsRemoved);
                 }
             }
             return ItemStack.EMPTY;
@@ -131,9 +131,12 @@ public class NeoForgeTaskScreenBlockEntity extends TaskScreenBlockEntity {
 
         @Override
         public boolean isFluidValid(int tank, @NotNull FluidStack fluidStack) {
-            return tank == 0 && getTask() instanceof FluidTask fluidTask
-                    && fluidTask.getFluid() == fluidStack.getFluid()
-                    && (fluidTask.getFluidNBT() == null || fluidTask.getFluidNBT().equals(fluidStack.getTag()));
+            if (tank != 0 || !(getTask() instanceof FluidTask fluidTask)) {
+                return false;
+            }
+            // amount is not important here
+            FluidStack taskFluidStack = new FluidStack(Holder.direct(fluidTask.getFluid()), 1000, fluidTask.getFluidDataComponentPatch());
+            return FluidStack.isSameFluidSameComponents(taskFluidStack, fluidStack);
         }
 
         @Override
@@ -171,7 +174,8 @@ public class NeoForgeTaskScreenBlockEntity extends TaskScreenBlockEntity {
                         data.addProgress(task, -toTake);
                     }
                     FluidStack result = new FluidStack(task.getFluid(), (int) toTake);
-                    if (task.getFluidNBT() != null) result.setTag(task.getFluidNBT().copy());
+                    result.applyComponents(task.getFluidDataComponents());
+//                    if (task.getFluidDataComponents() != null) result.setTag(task.getFluidDataComponents().copy());
                     return result;
                 }
             }

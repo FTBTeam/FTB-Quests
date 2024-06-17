@@ -1,44 +1,33 @@
 package dev.ftb.mods.ftbquests.net;
 
 import dev.architectury.networking.NetworkManager;
-import dev.architectury.networking.simple.BaseS2CMessage;
-import dev.architectury.networking.simple.MessageType;
+import dev.ftb.mods.ftbquests.api.FTBQuestsAPI;
 import dev.ftb.mods.ftbquests.client.FTBQuestsNetClient;
+import net.minecraft.core.UUIDUtil;
 import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.codec.ByteBufCodecs;
+import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 
 import java.util.Date;
 import java.util.UUID;
 
-/**
- * @author LatvianModder
- */
-public class ObjectStartedMessage extends BaseS2CMessage {
-	private final UUID team;
-	private final long id;
+public record ObjectStartedMessage(UUID teamId, long id) implements CustomPacketPayload {
+	public static final Type<ObjectStartedMessage> TYPE = new Type<>(FTBQuestsAPI.rl("object_started_message"));
 
-	public ObjectStartedMessage(FriendlyByteBuf buffer) {
-		team = buffer.readUUID();
-		id = buffer.readLong();
-	}
+	public static final StreamCodec<FriendlyByteBuf, ObjectStartedMessage> STREAM_CODEC = StreamCodec.composite(
+			UUIDUtil.STREAM_CODEC, ObjectStartedMessage::teamId,
+			ByteBufCodecs.VAR_LONG, ObjectStartedMessage::id,
+			ObjectStartedMessage::new
+	);
 
-	public ObjectStartedMessage(UUID t, long i) {
-		team = t;
-		id = i;
-	}
 
 	@Override
-	public MessageType getType() {
-		return FTBQuestsNetHandler.OBJECT_STARTED;
+	public Type<ObjectStartedMessage> type() {
+		return TYPE;
 	}
 
-	@Override
-	public void write(FriendlyByteBuf buffer) {
-		buffer.writeUUID(team);
-		buffer.writeLong(id);
-	}
-
-	@Override
-	public void handle(NetworkManager.PacketContext context) {
-		FTBQuestsNetClient.objectStarted(team, id, new Date());
+	public static void handle(ObjectStartedMessage message, NetworkManager.PacketContext context) {
+		context.queue(() -> FTBQuestsNetClient.objectStarted(message.teamId, message.id, new Date()));
 	}
 }

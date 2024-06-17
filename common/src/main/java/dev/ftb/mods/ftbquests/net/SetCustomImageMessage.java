@@ -1,51 +1,34 @@
 package dev.ftb.mods.ftbquests.net;
 
 import dev.architectury.networking.NetworkManager;
-import dev.architectury.networking.simple.BaseC2SMessage;
-import dev.architectury.networking.simple.MessageType;
-import dev.ftb.mods.ftblibrary.config.ImageResourceConfig;
+import dev.ftb.mods.ftblibrary.util.NetworkHelper;
+import dev.ftb.mods.ftbquests.api.FTBQuestsAPI;
 import dev.ftb.mods.ftbquests.item.CustomIconItem;
-import net.minecraft.nbt.StringTag;
 import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.InteractionHand;
 
-/**
- * @author LatvianModder
- */
-public class SetCustomImageMessage extends BaseC2SMessage {
-	private final InteractionHand hand;
-	private final ResourceLocation texture;
+public record SetCustomImageMessage(InteractionHand hand, ResourceLocation texture) implements CustomPacketPayload {
+	public static final Type<SetCustomImageMessage> TYPE = new Type<>(FTBQuestsAPI.rl("set_custom_image_message"));
 
-	SetCustomImageMessage(FriendlyByteBuf buffer) {
-		hand = buffer.readBoolean() ? InteractionHand.MAIN_HAND : InteractionHand.OFF_HAND;
-		texture = buffer.readResourceLocation();
-	}
-
-	public SetCustomImageMessage(InteractionHand h, ResourceLocation t) {
-		hand = h;
-		texture = t;
-	}
+	public static final StreamCodec<FriendlyByteBuf, SetCustomImageMessage> STREAM_CODEC = StreamCodec.composite(
+			NetworkHelper.enumStreamCodec(InteractionHand.class), SetCustomImageMessage::hand,
+			ResourceLocation.STREAM_CODEC, SetCustomImageMessage::texture,
+			SetCustomImageMessage::new
+	);
 
 	@Override
-	public MessageType getType() {
-		return FTBQuestsNetHandler.SET_CUSTOM_IMAGE;
+	public Type<SetCustomImageMessage> type() {
+		return TYPE;
 	}
 
-	@Override
-	public void write(FriendlyByteBuf buffer) {
-		buffer.writeBoolean(hand == InteractionHand.MAIN_HAND);
-		buffer.writeResourceLocation(texture);
-	}
-
-	@Override
-	public void handle(NetworkManager.PacketContext context) {
-		if (context.getPlayer().getItemInHand(hand).getItem() instanceof CustomIconItem) {
-			if (texture.equals(ImageResourceConfig.NONE)) {
-				context.getPlayer().getItemInHand(hand).removeTagKey("Icon");
-			} else {
-				context.getPlayer().getItemInHand(hand).addTagElement("Icon", StringTag.valueOf(texture.toString()));
+	public static void handle(SetCustomImageMessage message, NetworkManager.PacketContext context) {
+		context.queue(() -> {
+			if (context.getPlayer().getItemInHand(message.hand).getItem() instanceof CustomIconItem) {
+				CustomIconItem.setIcon(context.getPlayer().getItemInHand(message.hand), message.texture);
 			}
-		}
+		});
 	}
 }

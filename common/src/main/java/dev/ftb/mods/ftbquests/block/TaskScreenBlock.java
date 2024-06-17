@@ -4,30 +4,33 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import dev.architectury.injectables.annotations.ExpectPlatform;
+import dev.architectury.networking.NetworkManager;
 import dev.ftb.mods.ftbquests.block.entity.ITaskScreen;
 import dev.ftb.mods.ftbquests.block.entity.TaskScreenAuxBlockEntity;
 import dev.ftb.mods.ftbquests.block.entity.TaskScreenBlockEntity;
 import dev.ftb.mods.ftbquests.client.FTBQuestsClient;
 import dev.ftb.mods.ftbquests.item.ScreenBlockItem;
-import dev.ftb.mods.ftbquests.net.TaskScreenConfigRequest;
+import dev.ftb.mods.ftbquests.net.TaskScreenConfigRequestMessage;
 import dev.ftb.mods.ftbquests.quest.BaseQuestFile;
 import dev.ftb.mods.ftbquests.quest.ServerQuestFile;
 import dev.ftb.mods.ftbquests.quest.task.Task;
+import dev.ftb.mods.ftbquests.registry.ModBlocks;
 import dev.ftb.mods.ftbteams.api.FTBTeamsAPI;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.Tag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.DyeColor;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
+import net.minecraft.world.item.component.CustomData;
 import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
@@ -40,12 +43,11 @@ import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.DirectionProperty;
-import net.minecraft.world.phys.AABB;
+import net.minecraft.world.level.levelgen.structure.BoundingBox;
 import net.minecraft.world.phys.BlockHitResult;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
-import java.util.Objects;
 
 public class TaskScreenBlock extends BaseEntityBlock {
     private static final MapCodec<TaskScreenBlock> CODEC = RecordCodecBuilder.mapCodec(instance ->
@@ -59,7 +61,7 @@ public class TaskScreenBlock extends BaseEntityBlock {
 
     private final int size;
 
-    protected TaskScreenBlock(Properties props, int size) {
+    public TaskScreenBlock(Properties props, int size) {
         super(props);
         this.size = size;
 
@@ -132,7 +134,7 @@ public class TaskScreenBlock extends BaseEntityBlock {
             }
 
             Direction facing = blockState.getValue(FACING);
-            BlockState auxState = FTBQuestsBlocks.AUX_SCREEN.get().defaultBlockState().setValue(FACING, facing);
+            BlockState auxState = ModBlocks.AUX_SCREEN.get().defaultBlockState().setValue(FACING, facing);
             BlockPos.betweenClosedStream(getMultiblockBounds(blockPos, getSize(), facing))
                     .filter(pos -> !pos.equals(blockPos))
                     .forEach(auxPos -> {
@@ -168,10 +170,11 @@ public class TaskScreenBlock extends BaseEntityBlock {
     }
 
     @Override
-    public InteractionResult use(BlockState blockState, Level level, BlockPos blockPos, Player player, InteractionHand interactionHand, BlockHitResult blockHitResult) {
+    protected InteractionResult useWithoutItem(BlockState blockState, Level level, BlockPos blockPos, Player player, BlockHitResult blockHitResult) {
         if (player instanceof ServerPlayer sp && level.getBlockEntity(blockPos) instanceof ITaskScreen taskScreen) {
             if (hasPermissionToEdit(sp, taskScreen)) {
-                taskScreen.getCoreScreen().ifPresent(coreScreen -> new TaskScreenConfigRequest(coreScreen.getBlockPos()).sendTo(sp));
+                taskScreen.getCoreScreen().ifPresent(coreScreen ->
+                        NetworkManager.sendToPlayer(sp, new TaskScreenConfigRequestMessage(coreScreen.getBlockPos())));
             } else {
                 sp.displayClientMessage(Component.translatable("block.ftbquests.screen.no_permission").withStyle(ChatFormatting.RED), true);
                 return InteractionResult.FAIL;
@@ -181,11 +184,12 @@ public class TaskScreenBlock extends BaseEntityBlock {
     }
 
     @Override
-    public void appendHoverText(ItemStack itemStack, @Nullable BlockGetter blockGetter, List<Component> list, TooltipFlag tooltipFlag) {
-        super.appendHoverText(itemStack, blockGetter, list, tooltipFlag);
+    public void appendHoverText(ItemStack itemStack, Item.TooltipContext context, List<Component> list, TooltipFlag tooltipFlag) {
+        super.appendHoverText(itemStack, context, list, tooltipFlag);
 
-        if (itemStack.getTag() != null && itemStack.getTag().contains("BlockEntityTag", Tag.TAG_COMPOUND)) {
-            CompoundTag subTag = Objects.requireNonNull(itemStack.getTagElement("BlockEntityTag"));
+        CustomData data = itemStack.get(DataComponents.BLOCK_ENTITY_DATA);
+        if (data != null) {
+            CompoundTag subTag = data.copyTag();
             BaseQuestFile questFile = FTBQuestsClient.getClientQuestFile();
             if (questFile != null) {
                 Task task = questFile.getTask(subTag.getLong("TaskID"));
@@ -218,22 +222,21 @@ public class TaskScreenBlock extends BaseEntityBlock {
      * @param facing the side the display screen is on
      * @return the bounding box containing all blocks of the multiblock
      */
-    public static AABB getMultiblockBounds(BlockPos corePos, int size, Direction facing) {
-        if (size == 1) return new AABB(corePos);
+    public static BoundingBox getMultiblockBounds(BlockPos corePos, int size, Direction facing) {
+        if (size == 1) return new BoundingBox(corePos);
 
         int size2 = size / 2;
         facing = facing.getCounterClockWise();
 
-        return new AABB(
-                corePos.getX() - size2 * facing.getStepX(), corePos.getY(), corePos.getZ() - size2 * facing.getStepZ(),
-                corePos.getX() + size2 * facing.getStepX(), corePos.getY() + size - 1, corePos.getZ() + size2 * facing.getStepZ()
-        );
+        BlockPos pos1 = new BlockPos(corePos.getX() - size2 * facing.getStepX(), corePos.getY(), corePos.getZ() - size2 * facing.getStepZ());
+        BlockPos pos2 = new BlockPos(corePos.getX() + size2 * facing.getStepX(), corePos.getY() + size - 1, corePos.getZ() + size2 * facing.getStepZ());
+        return BoundingBox.fromCorners(pos1, pos2);
     }
 
     public static class Aux extends TaskScreenBlock {
         private static final MapCodec<Aux> CODEC = simpleCodec(Aux::new);
 
-        protected Aux(Properties props) {
+        public Aux(Properties props) {
             super(props, 0);
         }
 

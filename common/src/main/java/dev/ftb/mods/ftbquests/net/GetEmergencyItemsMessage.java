@@ -2,32 +2,30 @@ package dev.ftb.mods.ftbquests.net;
 
 import dev.architectury.hooks.item.ItemStackHooks;
 import dev.architectury.networking.NetworkManager;
-import dev.architectury.networking.simple.BaseC2SMessage;
-import dev.architectury.networking.simple.MessageType;
+import dev.ftb.mods.ftbquests.api.FTBQuestsAPI;
 import dev.ftb.mods.ftbquests.quest.ServerQuestFile;
 import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.server.level.ServerPlayer;
 
-public class GetEmergencyItemsMessage extends BaseC2SMessage {
-	GetEmergencyItemsMessage(FriendlyByteBuf buffer) {
-	}
+public record GetEmergencyItemsMessage() implements CustomPacketPayload {
+	public static final Type<GetEmergencyItemsMessage> TYPE = new Type<>(FTBQuestsAPI.rl("get_emergency_items_message"));
 
-	public GetEmergencyItemsMessage() {
-	}
+	public static final GetEmergencyItemsMessage INSTANCE = new GetEmergencyItemsMessage();
 
-	@Override
-	public MessageType getType() {
-		return FTBQuestsNetHandler.GET_EMERGENCY_ITEMS;
-	}
+	public static final StreamCodec<FriendlyByteBuf, GetEmergencyItemsMessage> STREAM_CODEC = StreamCodec.unit(INSTANCE);
 
 	@Override
-	public void write(FriendlyByteBuf buffer) {
+	public Type<GetEmergencyItemsMessage> type() {
+		return TYPE;
 	}
 
-	@Override
-	public void handle(NetworkManager.PacketContext context) {
-		ServerPlayer player = (ServerPlayer) context.getPlayer();
-		ServerQuestFile.INSTANCE.getEmergencyItems()
-				.forEach(stack -> ItemStackHooks.giveItem(player, stack.copy()));
+	public static void handle(GetEmergencyItemsMessage message, NetworkManager.PacketContext context) {
+		context.queue(() -> {
+			ServerPlayer player = (ServerPlayer) context.getPlayer();
+			ServerQuestFile.INSTANCE.getEmergencyItems()
+					.forEach(stack -> ItemStackHooks.giveItem(player, stack.copy()));
+		});
 	}
 }

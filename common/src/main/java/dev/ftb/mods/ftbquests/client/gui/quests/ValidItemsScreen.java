@@ -1,5 +1,6 @@
 package dev.ftb.mods.ftbquests.client.gui.quests;
 
+import dev.architectury.networking.NetworkManager;
 import dev.ftb.mods.ftblibrary.icon.Color4I;
 import dev.ftb.mods.ftblibrary.icon.ItemIcon;
 import dev.ftb.mods.ftblibrary.ui.*;
@@ -77,7 +78,7 @@ public class ValidItemsScreen extends BaseScreen {
 			@Override
 			public void onClicked(MouseButton button) {
 				playClickSound();
-				new SubmitTaskMessage(task.id).sendToServer();
+				NetworkManager.sendToServer(new SubmitTaskMessage(task.id));
 				onBack();
 			}
 
