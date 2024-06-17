@@ -1,5 +1,6 @@
 package dev.ftb.mods.ftbquests.quest.reward;
 
+import dev.architectury.networking.NetworkManager;
 import dev.ftb.mods.ftblibrary.config.ConfigGroup;
 import dev.ftb.mods.ftblibrary.icon.Color4I;
 import dev.ftb.mods.ftbquests.net.DisplayRewardToastMessage;
@@ -7,8 +8,9 @@ import dev.ftb.mods.ftbquests.quest.Quest;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.ChatFormatting;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.server.level.ServerPlayer;
@@ -31,25 +33,25 @@ public class XPLevelsReward extends Reward {
 	}
 
 	@Override
-	public void writeData(CompoundTag nbt) {
-		super.writeData(nbt);
+	public void writeData(CompoundTag nbt, HolderLookup.Provider provider) {
+		super.writeData(nbt, provider);
 		nbt.putInt("xp_levels", xpLevels);
 	}
 
 	@Override
-	public void readData(CompoundTag nbt) {
-		super.readData(nbt);
+	public void readData(CompoundTag nbt, HolderLookup.Provider provider) {
+		super.readData(nbt, provider);
 		xpLevels = nbt.getInt("xp_levels");
 	}
 
 	@Override
-	public void writeNetData(FriendlyByteBuf buffer) {
+	public void writeNetData(RegistryFriendlyByteBuf buffer) {
 		super.writeNetData(buffer);
 		buffer.writeVarInt(xpLevels);
 	}
 
 	@Override
-	public void readNetData(FriendlyByteBuf buffer) {
+	public void readNetData(RegistryFriendlyByteBuf buffer) {
 		super.readNetData(buffer);
 		xpLevels = buffer.readVarInt();
 	}
@@ -66,7 +68,9 @@ public class XPLevelsReward extends Reward {
 		player.giveExperienceLevels(xpLevels);
 
 		if (notify) {
-			new DisplayRewardToastMessage(id, Component.translatable("ftbquests.reward.ftbquests.xp_levels").append(": ").append(Component.literal("+" + xpLevels).withStyle(ChatFormatting.GREEN)), Color4I.empty()).sendTo(player);
+			Component text = Component.translatable("ftbquests.reward.ftbquests.xp_levels").append(": ")
+					.append(Component.literal("+" + xpLevels).withStyle(ChatFormatting.GREEN));
+			NetworkManager.sendToPlayer(player, new DisplayRewardToastMessage(id, text, Color4I.empty()));
 		}
 	}
 

@@ -1,42 +1,29 @@
 package dev.ftb.mods.ftbquests.net;
 
 import dev.architectury.networking.NetworkManager;
-import dev.architectury.networking.simple.BaseS2CMessage;
-import dev.architectury.networking.simple.MessageType;
+import dev.ftb.mods.ftbquests.api.FTBQuestsAPI;
 import dev.ftb.mods.ftbquests.client.FTBQuestsNetClient;
-import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.codec.ByteBufCodecs;
+import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.world.item.ItemStack;
 
-/**
- * @author LatvianModder
- */
-public class DisplayItemRewardToastMessage extends BaseS2CMessage {
-	private final ItemStack stack;
-	private final int count;
+public record DisplayItemRewardToastMessage(ItemStack stack, int count) implements CustomPacketPayload {
+	public static final Type<DisplayItemRewardToastMessage> TYPE = new Type<>(FTBQuestsAPI.rl("display_item_reward_toast_message"));
 
-	DisplayItemRewardToastMessage(FriendlyByteBuf buffer) {
-		stack = buffer.readItem();
-		count = buffer.readVarInt();
-	}
-
-	public DisplayItemRewardToastMessage(ItemStack is, int c) {
-		stack = is;
-		count = c;
-	}
+	public static final StreamCodec<RegistryFriendlyByteBuf, DisplayItemRewardToastMessage> STREAM_CODEC = StreamCodec.composite(
+			ItemStack.OPTIONAL_STREAM_CODEC, DisplayItemRewardToastMessage::stack,
+			ByteBufCodecs.VAR_INT, DisplayItemRewardToastMessage::count,
+			DisplayItemRewardToastMessage::new
+	);
 
 	@Override
-	public MessageType getType() {
-		return FTBQuestsNetHandler.DISPLAY_ITEM_REWARD_TOAST;
+	public Type<DisplayItemRewardToastMessage> type() {
+		return TYPE;
 	}
 
-	@Override
-	public void write(FriendlyByteBuf buffer) {
-		buffer.writeItem(stack);
-		buffer.writeVarInt(count);
-	}
-
-	@Override
-	public void handle(NetworkManager.PacketContext context) {
-		FTBQuestsNetClient.displayItemRewardToast(stack, count);
+	public static void handle(DisplayItemRewardToastMessage message, NetworkManager.PacketContext context) {
+		context.queue(() -> FTBQuestsNetClient.displayItemRewardToast(message.stack, message.count));
 	}
 }

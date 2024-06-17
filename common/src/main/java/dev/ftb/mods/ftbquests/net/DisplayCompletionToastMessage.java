@@ -1,37 +1,27 @@
 package dev.ftb.mods.ftbquests.net;
 
 import dev.architectury.networking.NetworkManager;
-import dev.architectury.networking.simple.BaseS2CMessage;
-import dev.architectury.networking.simple.MessageType;
+import dev.ftb.mods.ftbquests.api.FTBQuestsAPI;
 import dev.ftb.mods.ftbquests.client.FTBQuestsNetClient;
 import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.codec.ByteBufCodecs;
+import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 
-/**
- * @author LatvianModder
- */
-public class DisplayCompletionToastMessage extends BaseS2CMessage {
-	private final long id;
+public record DisplayCompletionToastMessage(long id) implements CustomPacketPayload {
+	public static final Type<DisplayCompletionToastMessage> TYPE = new Type<>(FTBQuestsAPI.rl("display_completion_toast_message"));
 
-	DisplayCompletionToastMessage(FriendlyByteBuf buffer) {
-		id = buffer.readLong();
-	}
-
-	public DisplayCompletionToastMessage(long i) {
-		id = i;
-	}
+	public static final StreamCodec<FriendlyByteBuf, DisplayCompletionToastMessage> STREAM_CODEC = StreamCodec.composite(
+			ByteBufCodecs.VAR_LONG, DisplayCompletionToastMessage::id,
+			DisplayCompletionToastMessage::new
+	);
 
 	@Override
-	public MessageType getType() {
-		return FTBQuestsNetHandler.DISPLAY_COMPLETION_TOAST;
+	public Type<DisplayCompletionToastMessage> type() {
+		return TYPE;
 	}
 
-	@Override
-	public void write(FriendlyByteBuf buffer) {
-		buffer.writeLong(id);
-	}
-
-	@Override
-	public void handle(NetworkManager.PacketContext context) {
-		FTBQuestsNetClient.displayCompletionToast(id);
+	public static void handle(DisplayCompletionToastMessage message, NetworkManager.PacketContext context) {
+		context.queue(() -> FTBQuestsNetClient.displayCompletionToast(message.id));
 	}
 }

@@ -12,7 +12,6 @@ import net.minecraft.network.chat.Component;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 /**
  * @author LatvianModder
@@ -106,7 +105,7 @@ public class ChapterGroup extends QuestObject {
 	@Override
 	@Environment(EnvType.CLIENT)
 	public void fillConfigGroup(ConfigGroup config) {
-		config.addString("title", rawTitle, v -> rawTitle = v, "").setNameKey("ftbquests.title").setOrder(-127);
+		config.addString("title", getRawTitle(), this::setRawTitle, "").setNameKey("ftbquests.title").setOrder(-127);
 	}
 
 	@Override

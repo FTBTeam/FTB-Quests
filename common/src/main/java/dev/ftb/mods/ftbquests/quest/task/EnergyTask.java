@@ -6,8 +6,9 @@ import dev.ftb.mods.ftbquests.client.EnergyTaskClientData;
 import dev.ftb.mods.ftbquests.quest.Quest;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 
@@ -25,8 +26,8 @@ public abstract class EnergyTask extends Task implements ISingleLongValueTask {
 	}
 
 	@Override
-	public void writeData(CompoundTag nbt) {
-		super.writeData(nbt);
+	public void writeData(CompoundTag nbt, HolderLookup.Provider provider) {
+		super.writeData(nbt, provider);
 		nbt.putLong("value", value);
 
 		if (maxInput > 0L) {
@@ -35,8 +36,8 @@ public abstract class EnergyTask extends Task implements ISingleLongValueTask {
 	}
 
 	@Override
-	public void readData(CompoundTag nbt) {
-		super.readData(nbt);
+	public void readData(CompoundTag nbt, HolderLookup.Provider provider) {
+		super.readData(nbt, provider);
 		value = nbt.getLong("value");
 
 		if (value < 1L) {
@@ -47,14 +48,14 @@ public abstract class EnergyTask extends Task implements ISingleLongValueTask {
 	}
 
 	@Override
-	public void writeNetData(FriendlyByteBuf buffer) {
+	public void writeNetData(RegistryFriendlyByteBuf buffer) {
 		super.writeNetData(buffer);
 		buffer.writeVarLong(value);
 		buffer.writeVarLong(maxInput);
 	}
 
 	@Override
-	public void readNetData(FriendlyByteBuf buffer) {
+	public void readNetData(RegistryFriendlyByteBuf buffer) {
 		super.readNetData(buffer);
 		value = buffer.readVarLong();
 		maxInput = buffer.readVarLong();

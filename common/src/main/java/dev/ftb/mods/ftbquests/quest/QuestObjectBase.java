@@ -1,29 +1,33 @@
 package dev.ftb.mods.ftbquests.quest;
 
+import dev.architectury.networking.NetworkManager;
 import dev.ftb.mods.ftblibrary.config.ConfigGroup;
 import dev.ftb.mods.ftblibrary.config.StringConfig;
 import dev.ftb.mods.ftblibrary.config.Tristate;
 import dev.ftb.mods.ftblibrary.config.ui.EditConfigScreen;
 import dev.ftb.mods.ftblibrary.icon.Icon;
 import dev.ftb.mods.ftblibrary.math.Bits;
+import dev.ftb.mods.ftblibrary.snbt.SNBTCompoundTag;
 import dev.ftb.mods.ftbquests.api.FTBQuestsAPI;
 import dev.ftb.mods.ftbquests.client.ClientQuestFile;
 import dev.ftb.mods.ftbquests.client.ConfigIconItemStack;
 import dev.ftb.mods.ftbquests.integration.RecipeModHelper;
 import dev.ftb.mods.ftbquests.item.CustomIconItem;
 import dev.ftb.mods.ftbquests.net.EditObjectMessage;
+import dev.ftb.mods.ftbquests.net.SyncTranslationMessageToServer;
 import dev.ftb.mods.ftbquests.quest.theme.property.ThemeProperties;
-import dev.ftb.mods.ftbquests.util.NBTUtils;
+import dev.ftb.mods.ftbquests.quest.translation.TranslationKey;
+import dev.ftb.mods.ftbquests.registry.ModDataComponents;
+import dev.ftb.mods.ftbquests.registry.ModItems;
 import dev.ftb.mods.ftbquests.util.NetUtils;
 import dev.ftb.mods.ftbquests.util.ProgressChange;
 import dev.ftb.mods.ftbquests.util.TextUtils;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.ListTag;
-import net.minecraft.nbt.StringTag;
-import net.minecraft.nbt.Tag;
-import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.Util;
+import net.minecraft.core.HolderLookup;
+import net.minecraft.nbt.*;
+import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.world.item.ItemStack;
@@ -31,6 +35,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
+import java.util.function.Consumer;
 import java.util.function.Supplier;
 import java.util.regex.Pattern;
 
@@ -41,7 +46,6 @@ public abstract class QuestObjectBase implements Comparable<QuestObjectBase> {
 	public final long id;
 
 	protected boolean invalid = false;
-	protected String rawTitle = "";
 	private ItemStack rawIcon = ItemStack.EMPTY;
 	private List<String> tags = new ArrayList<>(0);
 
@@ -49,8 +53,15 @@ public abstract class QuestObjectBase implements Comparable<QuestObjectBase> {
 	private Component cachedTitle = null;
 	private Set<String> cachedTags = null;
 
+	// stores translations in the client-side proto-quest-object before it's sent to server
+	protected EnumMap<TranslationKey,String> protoTranslations = new EnumMap<>(TranslationKey.class);
+
 	public QuestObjectBase(long id) {
 		this.id = id;
+	}
+
+	public long getId() {
+		return id;
 	}
 
 	public static boolean isNull(@Nullable QuestObjectBase object) {
@@ -73,6 +84,27 @@ public abstract class QuestObjectBase implements Comparable<QuestObjectBase> {
 		return sendNotifications.get(true);
 	}
 
+	public static ItemStack itemOrMissingFromNBT(CompoundTag tag, HolderLookup.Provider provider) {
+		return tag.isEmpty() ?
+				ItemStack.EMPTY :
+				ItemStack.parse(provider, tag).orElse(createMissing(tag));
+	}
+
+	public static ItemStack singleItemOrMissingFromNBT(CompoundTag tag, HolderLookup.Provider provider) {
+		return tag.isEmpty() ?
+				ItemStack.EMPTY :
+				ItemStack.SINGLE_ITEM_CODEC.parse(provider.createSerializationContext(NbtOps.INSTANCE), tag).result().orElse(createMissing(tag));
+	}
+
+	private static ItemStack createMissing(CompoundTag tag) {
+		String id = tag.getString("id");
+		int count = Math.max(1, tag.getInt("count"));
+		String text = count == 1 ? id : count + "x " + id;
+
+		return Util.make(new ItemStack(ModItems.MISSING_ITEM.get()),
+				stack -> stack.set(ModDataComponents.MISSING_ITEM_DESC.get(), text));
+	}
+
 	public final boolean isValid() {
 		return !invalid;
 	}
@@ -81,12 +113,60 @@ public abstract class QuestObjectBase implements Comparable<QuestObjectBase> {
 		this.rawIcon = rawIcon;
 	}
 
-	public final String getRawTitle() {
-		return rawTitle;
+	public String getRawTitle() {
+		if (!getQuestFile().isServerSide() && protoTranslations.containsKey(TranslationKey.TITLE)) {
+			return protoTranslations.get(TranslationKey.TITLE);
+		}
+		return getQuestFile().getTranslationManager().getStringTranslation(this, getQuestFile().getLocale(), TranslationKey.TITLE)
+				.orElse("");
 	}
 
-	public final void setRawTitle(String rawTitle) {
-		this.rawTitle = rawTitle;
+	public void setRawTitle(String rawTitle) {
+		setTranslatableValue(TranslationKey.TITLE, rawTitle);
+		cachedTitle = null;
+	}
+
+	protected final void setTranslatableValue(TranslationKey translationKey, String value) {
+		if (id != 0L) {
+			String locale = getQuestFile().getLocale();
+			getQuestFile().getTranslationManager().addTranslation(this, locale, translationKey, value);
+			if (!getQuestFile().isServerSide()) {
+				NetworkManager.sendToServer(SyncTranslationMessageToServer.create(this, locale, translationKey, value));
+			}
+		} else if (!getQuestFile().isServerSide()) {
+			protoTranslations.put(translationKey, value);
+		}
+	}
+
+	protected final void setTranslatableValue(TranslationKey translationKey, List<String> value) {
+		if (id != 0L) {
+			String locale = getQuestFile().getLocale();
+			getQuestFile().getTranslationManager().addTranslation(this, locale, translationKey, value);
+			if (!getQuestFile().isServerSide()) {
+				NetworkManager.sendToServer(SyncTranslationMessageToServer.create(this, locale, translationKey, value));
+			}
+		}
+		// proto-translations not handled here since there aren't any list values that need handling
+	}
+
+	/**
+	 * Only used client-side; get the translation for a proto-quest-object currently being built on the client before
+	 * it's sent to the server.
+	 *
+	 * @param key the translation key type
+	 * @return the raw translation string
+	 */
+	public final String getProtoTranslation(TranslationKey key) {
+		return protoTranslations.getOrDefault(key, "");
+	}
+
+	public final void modifyTranslatableListValue(TranslationKey translationKey, Consumer<List<String>> setter) {
+		if (translationKey.isListVal()) {
+			List<String> mutable = getQuestFile().getTranslationManager().getStringListTranslation(this, getQuestFile().getLocale(), translationKey)
+					.map(ArrayList::new).orElse(new ArrayList<>());
+			setter.accept(mutable);
+			setTranslatableValue(translationKey, List.copyOf(mutable));
+		}
 	}
 
 	public static long parseCodeString(String id) {
@@ -182,27 +262,22 @@ public abstract class QuestObjectBase implements Comparable<QuestObjectBase> {
 		return 1L;
 	}
 
-	public void writeData(CompoundTag nbt) {
-		if (!rawTitle.isEmpty()) {
-			nbt.putString("title", rawTitle);
+	public void writeData(CompoundTag nbt, HolderLookup.Provider provider) {
+		if (!rawIcon.isEmpty()) {
+			ItemStack.SINGLE_ITEM_CODEC.encodeStart(NbtOps.INSTANCE, rawIcon).ifSuccess(t -> nbt.put("icon", t));
 		}
 
-		NBTUtils.write(nbt, "icon", rawIcon);
-
 		if (!tags.isEmpty()) {
-			ListTag tagList = new ListTag();
-
-			for (String s : tags) {
-				tagList.add(StringTag.valueOf(s));
-			}
-
-			nbt.put("tags", tagList);
+			nbt.put("tags", Util.make(new ListTag(), l -> {
+				for (String s : tags) {
+					l.add(StringTag.valueOf(s));
+				}
+			}));
 		}
 	}
 
-	public void readData(CompoundTag nbt) {
-		rawTitle = nbt.getString("title");
-		rawIcon = NBTUtils.read(nbt, "icon");
+	public void readData(CompoundTag nbt, HolderLookup.Provider provider) {
+		rawIcon = singleItemOrMissingFromNBT(nbt.getCompound("icon"), provider);
 
 		ListTag tagsList = nbt.getList("tags", Tag.TAG_STRING);
 
@@ -217,20 +292,15 @@ public abstract class QuestObjectBase implements Comparable<QuestObjectBase> {
 		}
 	}
 
-	public void writeNetData(FriendlyByteBuf buffer) {
+	public void writeNetData(RegistryFriendlyByteBuf buffer) {
 		int flags = 0;
-		flags = Bits.setFlag(flags, 1, !rawTitle.isEmpty());
 		flags = Bits.setFlag(flags, 2, !rawIcon.isEmpty());
 		flags = Bits.setFlag(flags, 4, !tags.isEmpty());
 
 		buffer.writeVarInt(flags);
 
-		if (!rawTitle.isEmpty()) {
-			buffer.writeUtf(rawTitle, Short.MAX_VALUE);
-		}
-
 		if (!rawIcon.isEmpty()) {
-			buffer.writeItem(rawIcon);
+			ItemStack.OPTIONAL_STREAM_CODEC.encode(buffer, rawIcon);
 		}
 
 		if (!tags.isEmpty()) {
@@ -238,10 +308,9 @@ public abstract class QuestObjectBase implements Comparable<QuestObjectBase> {
 		}
 	}
 
-	public void readNetData(FriendlyByteBuf buffer) {
+	public void readNetData(RegistryFriendlyByteBuf buffer) {
 		int flags = buffer.readVarInt();
-		rawTitle = Bits.getFlag(flags, 1) ? buffer.readUtf(Short.MAX_VALUE) : "";
-		rawIcon = Bits.getFlag(flags, 2) ? buffer.readItem() : ItemStack.EMPTY;
+		rawIcon = Bits.getFlag(flags, 2) ? ItemStack.OPTIONAL_STREAM_CODEC.decode(buffer) : ItemStack.EMPTY;
 		tags = new ArrayList<>(0);
 
 		if (Bits.getFlag(flags, 4)) {
@@ -260,7 +329,7 @@ public abstract class QuestObjectBase implements Comparable<QuestObjectBase> {
 	@Environment(EnvType.CLIENT)
 	public void fillConfigGroup(ConfigGroup config) {
 		if (hasTitleConfig()) {
-			config.addString("title", rawTitle, v -> rawTitle = v, "").setNameKey("ftbquests.title").setOrder(-127);
+			config.addString("title", getRawTitle(), this::setRawTitle, "").setNameKey("ftbquests.title").setOrder(-127);
 		}
 
 		if (hasIconConfig()) {
@@ -282,8 +351,8 @@ public abstract class QuestObjectBase implements Comparable<QuestObjectBase> {
 			return cachedTitle.copy();
 		}
 
-		if (!rawTitle.isEmpty()) {
-			cachedTitle = TextUtils.parseRawText(rawTitle);
+		if (!getRawTitle().isEmpty()) {
+			cachedTitle = TextUtils.parseRawText(getRawTitle(), holderLookup());
 		} else {
 			cachedTitle = getAltTitle();
 		}
@@ -350,7 +419,7 @@ public abstract class QuestObjectBase implements Comparable<QuestObjectBase> {
 		ConfigGroup group = new ConfigGroup(FTBQuestsAPI.MOD_ID, accepted -> {
 			gui.run();
 			if (accepted && validateEditedConfig()) {
-				new EditObjectMessage(this).sendToServer();
+				NetworkManager.sendToServer(EditObjectMessage.forQuestObject(this));
 			}
 		});
 		fillConfigGroup(createSubGroup(group));
@@ -372,8 +441,8 @@ public abstract class QuestObjectBase implements Comparable<QuestObjectBase> {
 			return null;
 		}
 		CompoundTag tag = new CompoundTag();
-		orig.writeData(tag);
-		copied.readData(tag);
+		orig.writeData(tag, orig.holderLookup());
+		copied.readData(tag, orig.holderLookup());
 		return copied;
 	}
 
@@ -383,5 +452,13 @@ public abstract class QuestObjectBase implements Comparable<QuestObjectBase> {
 		return typeCmp == 0 ?
 				getTitle().getString().toLowerCase().compareTo(other.getTitle().getString().toLowerCase()) :
 				typeCmp;
+	}
+
+	public HolderLookup.Provider holderLookup() {
+		return getQuestFile().holderLookup();
+	}
+
+	protected CompoundTag saveItemSingleLine(ItemStack stack) {
+		return Util.make(SNBTCompoundTag.of(stack.save(holderLookup())), SNBTCompoundTag::singleLine);
 	}
 }

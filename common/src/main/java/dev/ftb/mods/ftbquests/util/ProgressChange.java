@@ -1,24 +1,32 @@
 package dev.ftb.mods.ftbquests.util;
 
-import dev.ftb.mods.ftbquests.quest.BaseQuestFile;
 import dev.ftb.mods.ftbquests.quest.QuestObjectBase;
 import dev.ftb.mods.ftbquests.quest.ServerQuestFile;
 import dev.ftb.mods.ftbquests.quest.TeamData;
+import net.minecraft.core.UUIDUtil;
 import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.codec.ByteBufCodecs;
+import net.minecraft.network.codec.StreamCodec;
 
 import java.util.Date;
 import java.util.UUID;
 
 public class ProgressChange {
-	private final BaseQuestFile file;
+	public static StreamCodec<FriendlyByteBuf, ProgressChange> STREAM_CODEC = StreamCodec.composite(
+			ByteBufCodecs.VAR_LONG, ProgressChange::getOriginId,
+			ByteBufCodecs.BOOL, ProgressChange::shouldReset,
+			UUIDUtil.STREAM_CODEC, ProgressChange::getPlayerId,
+			ByteBufCodecs.BOOL, ProgressChange::shouldNotify,
+			ProgressChange::createServerSide
+	);
+
 	private final Date date;
 	private final QuestObjectBase origin;
 	private final UUID playerId;
 	private boolean reset;
 	private boolean notifications;
 
-	public ProgressChange(BaseQuestFile file, QuestObjectBase origin, UUID playerId) {
-		this.file = file;
+	public ProgressChange(QuestObjectBase origin, UUID playerId) {
 		this.origin = origin;
 		this.playerId = playerId;
 		this.date = new Date();
@@ -27,20 +35,11 @@ public class ProgressChange {
 		notifications = false;
 	}
 
-	public ProgressChange(BaseQuestFile f, FriendlyByteBuf buffer) {
-		file = f;
-		date = new Date();
-		origin = file.getBase(buffer.readLong());
-		reset = buffer.readBoolean();
-		playerId = buffer.readUUID();
-		notifications = buffer.readBoolean();
-	}
-
-	public void write(FriendlyByteBuf buffer) {
-		buffer.writeLong(origin == null ? 0L : origin.id);
-		buffer.writeBoolean(reset);
-		buffer.writeUUID(playerId);
-		buffer.writeBoolean(notifications);
+	public static ProgressChange createServerSide(long origin, boolean reset, UUID playerId, boolean notifications) {
+		ProgressChange pc = new ProgressChange(ServerQuestFile.INSTANCE.getBase(origin), playerId);
+		pc.reset = reset;
+		pc.notifications = notifications;
+		return pc;
 	}
 
 	public void maybeForceProgress(UUID teamId) {
@@ -74,5 +73,9 @@ public class ProgressChange {
 
 	public boolean shouldNotify() {
 		return notifications;
+	}
+
+	private long getOriginId() {
+		return origin == null ? 0L : origin.id;
 	}
 }

@@ -6,9 +6,10 @@ import dev.ftb.mods.ftbquests.quest.Quest;
 import dev.ftb.mods.ftbquests.quest.TeamData;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.resources.ResourceLocation;
@@ -52,28 +53,28 @@ public class StatTask extends Task {
 	}
 
 	@Override
-	public void writeData(CompoundTag nbt) {
-		super.writeData(nbt);
+	public void writeData(CompoundTag nbt, HolderLookup.Provider provider) {
+		super.writeData(nbt, provider);
 		nbt.putString("stat", stat.toString());
 		nbt.putInt("value", value);
 	}
 
 	@Override
-	public void readData(CompoundTag nbt) {
-		super.readData(nbt);
+	public void readData(CompoundTag nbt, HolderLookup.Provider provider) {
+		super.readData(nbt, provider);
 		stat = new ResourceLocation(nbt.getString("stat"));
 		value = nbt.getInt("value");
 	}
 
 	@Override
-	public void writeNetData(FriendlyByteBuf buffer) {
+	public void writeNetData(RegistryFriendlyByteBuf buffer) {
 		super.writeNetData(buffer);
 		buffer.writeResourceLocation(stat);
 		buffer.writeVarInt(value);
 	}
 
 	@Override
-	public void readNetData(FriendlyByteBuf buffer) {
+	public void readNetData(RegistryFriendlyByteBuf buffer) {
 		super.readNetData(buffer);
 		stat = buffer.readResourceLocation();
 		value = buffer.readVarInt();

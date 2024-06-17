@@ -3,6 +3,7 @@ package dev.ftb.mods.ftbquests.util;
 import com.google.gson.JsonParseException;
 import dev.ftb.mods.ftblibrary.util.client.ClientTextComponentUtils;
 import net.minecraft.ChatFormatting;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.network.chat.Component;
 
 import java.util.regex.Pattern;
@@ -17,15 +18,15 @@ public class TextUtils {
      * @param str the raw string to parse
      * @return a component, which could be the error message if parsing failed
      */
-    public static Component parseRawText(String str) {
+    public static Component parseRawText(String str, HolderLookup.Provider provider) {
         return JSON_TEXT_PATTERN.matcher(str).find() ?
-                deserializeRawJsonText(str) :
+                deserializeRawJsonText(str, provider) :
                 ClientTextComponentUtils.parse(str);
     }
 
-    private static Component deserializeRawJsonText(String raw) {
+    private static Component deserializeRawJsonText(String raw, HolderLookup.Provider provider) {
         try {
-            return Component.Serializer.fromJson(raw);
+            return Component.Serializer.fromJson(raw, provider);
         } catch (JsonParseException e) {
             return Component.literal("ERROR: " + e.getMessage()).withStyle(ChatFormatting.RED);
         }

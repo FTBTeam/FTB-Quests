@@ -11,6 +11,7 @@ jobs:
     uses: FTBTeam/mods-meta/.github/workflows/standard-release.yml@main
     with:
       curse-publish-task: curseforge
+      java-version: 21
     secrets:
       ftb-maven-token: ${{ secrets.FTB_MAVEN_TOKEN }}
       saps-token: ${{ secrets.SAPS_TOKEN }}

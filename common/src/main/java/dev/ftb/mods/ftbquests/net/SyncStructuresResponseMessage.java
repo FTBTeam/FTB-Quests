@@ -1,20 +1,28 @@
 package dev.ftb.mods.ftbquests.net;
 
 import dev.architectury.networking.NetworkManager;
-import dev.architectury.networking.simple.BaseS2CMessage;
-import dev.architectury.networking.simple.MessageType;
+import dev.ftb.mods.ftbquests.api.FTBQuestsAPI;
 import dev.ftb.mods.ftbquests.quest.task.StructureTask;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.codec.ByteBufCodecs;
+import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.server.MinecraftServer;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class SyncStructuresResponseMessage extends BaseS2CMessage {
-    private final List<String> data = new ArrayList<>();
+public record SyncStructuresResponseMessage(List<String> data) implements CustomPacketPayload {
+    public static final Type<SyncStructuresResponseMessage> TYPE = new Type<>(FTBQuestsAPI.rl("sync_structures_response_message"));
 
-    public SyncStructuresResponseMessage(MinecraftServer server) {
+    public static final StreamCodec<FriendlyByteBuf, SyncStructuresResponseMessage> STREAM_CODEC = StreamCodec.composite(
+            ByteBufCodecs.STRING_UTF8.apply(ByteBufCodecs.list()), SyncStructuresResponseMessage::data,
+            SyncStructuresResponseMessage::new
+    );
+
+    public static SyncStructuresResponseMessage create(MinecraftServer server) {
+        List<String> data = new ArrayList<>();
         data.addAll(server.registryAccess()
                 .registryOrThrow(Registries.STRUCTURE).registryKeySet().stream()
                 .map(o -> o.location().toString())
@@ -27,28 +35,15 @@ public class SyncStructuresResponseMessage extends BaseS2CMessage {
                 .sorted(String::compareTo)
                 .toList()
         );
-    }
-
-    public SyncStructuresResponseMessage(FriendlyByteBuf buf) {
-        int size = buf.readVarInt();
-        for (int i = 0; i < size; i++) {
-            data.add(buf.readUtf(Short.MAX_VALUE));
-        }
+        return new SyncStructuresResponseMessage(data);
     }
 
     @Override
-    public MessageType getType() {
-        return FTBQuestsNetHandler.SYNC_STRUCTURES_RESPONSE;
+    public Type<SyncStructuresResponseMessage> type() {
+        return TYPE;
     }
 
-    @Override
-    public void write(FriendlyByteBuf buf) {
-        buf.writeVarInt(data.size());
-        data.forEach(buf::writeUtf);
-    }
-
-    @Override
-    public void handle(NetworkManager.PacketContext context) {
-        StructureTask.syncKnownStructureList(data);
+    public static void handle(SyncStructuresResponseMessage message, NetworkManager.PacketContext context) {
+        context.queue(() -> StructureTask.syncKnownStructureList(message.data));
     }
 }

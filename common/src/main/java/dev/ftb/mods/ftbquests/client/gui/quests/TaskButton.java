@@ -89,7 +89,7 @@ public class TaskButton extends Button {
 								b -> {
 									task.getQuest().setRawIcon(itemIcon.getStack().copy());
 									task.getQuest().clearCachedData();
-									new EditObjectMessage(task.getQuest()).sendToServer();
+									EditObjectMessage.sendToServer(task.getQuest());
 								})
 						)
 				);
@@ -106,7 +106,7 @@ public class TaskButton extends Button {
 			itemTask.setRawTitle("Any #" + tag.location());
 		}
 
-		new EditObjectMessage(itemTask).sendToServer();
+		EditObjectMessage.sendToServer(itemTask);
 	}
 
 	@Override

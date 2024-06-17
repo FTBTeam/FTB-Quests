@@ -1,5 +1,6 @@
 package dev.ftb.mods.ftbquests.quest.task;
 
+import dev.architectury.networking.NetworkManager;
 import dev.ftb.mods.ftblibrary.ui.Button;
 import dev.ftb.mods.ftbquests.net.SubmitTaskMessage;
 import dev.ftb.mods.ftbquests.quest.Quest;
@@ -7,7 +8,7 @@ import dev.ftb.mods.ftbquests.quest.QuestObjectBase;
 import dev.ftb.mods.ftbquests.quest.TeamData;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.item.ItemStack;
 
@@ -61,7 +62,7 @@ public class CustomTask extends Task {
 	public void onButtonClicked(Button button, boolean canClick) {
 		if (enableButton && canClick) {
 			button.playClickSound();
-			new SubmitTaskMessage(id).sendToServer();
+			NetworkManager.sendToServer(new SubmitTaskMessage(id));
 		}
 	}
 
@@ -71,7 +72,7 @@ public class CustomTask extends Task {
 	}
 
 	@Override
-	public void writeNetData(FriendlyByteBuf buffer) {
+	public void writeNetData(RegistryFriendlyByteBuf buffer) {
 		super.writeNetData(buffer);
 		buffer.writeVarInt(checkTimer);
 		buffer.writeVarLong(maxProgress);
@@ -79,7 +80,7 @@ public class CustomTask extends Task {
 	}
 
 	@Override
-	public void readNetData(FriendlyByteBuf buffer) {
+	public void readNetData(RegistryFriendlyByteBuf buffer) {
 		super.readNetData(buffer);
 		checkTimer = buffer.readVarInt();
 		maxProgress = buffer.readVarLong();

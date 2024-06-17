@@ -8,15 +8,18 @@ import dev.ftb.mods.ftbquests.quest.TeamData;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.ChatFormatting;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.level.Level;
+
+import java.util.List;
 
 public class DimensionTask extends AbstractBooleanTask {
 	private ResourceKey<Level> dimension;
@@ -38,25 +41,25 @@ public class DimensionTask extends AbstractBooleanTask {
 	}
 
 	@Override
-	public void writeData(CompoundTag nbt) {
-		super.writeData(nbt);
+	public void writeData(CompoundTag nbt, HolderLookup.Provider provider) {
+		super.writeData(nbt, provider);
 		nbt.putString("dimension", dimension.location().toString());
 	}
 
 	@Override
-	public void readData(CompoundTag nbt) {
-		super.readData(nbt);
+	public void readData(CompoundTag nbt, HolderLookup.Provider provider) {
+		super.readData(nbt, provider);
 		dimension = ResourceKey.create(Registries.DIMENSION, new ResourceLocation(nbt.getString("dimension")));
 	}
 
 	@Override
-	public void writeNetData(FriendlyByteBuf buffer) {
+	public void writeNetData(RegistryFriendlyByteBuf buffer) {
 		super.writeNetData(buffer);
 		buffer.writeResourceLocation(dimension.location());
 	}
 
 	@Override
-	public void readNetData(FriendlyByteBuf buffer) {
+	public void readNetData(RegistryFriendlyByteBuf buffer) {
 		super.readNetData(buffer);
 		dimension = ResourceKey.create(Registries.DIMENSION, buffer.readResourceLocation());
 	}
@@ -66,8 +69,11 @@ public class DimensionTask extends AbstractBooleanTask {
 	public void fillConfigGroup(ConfigGroup config) {
 		super.fillConfigGroup(config);
 
-		if (KnownServerRegistries.client != null && !KnownServerRegistries.client.dimensions.isEmpty()) {
-			config.addEnum("dim", dimension.location(), v -> dimension = ResourceKey.create(Registries.DIMENSION, v), NameMap.of(KnownServerRegistries.client.dimensions.iterator().next(), KnownServerRegistries.client.dimensions.toArray(new ResourceLocation[0])).create());
+		if (KnownServerRegistries.client != null && !KnownServerRegistries.client.dimension().isEmpty()) {
+			List<ResourceLocation> dimensions = KnownServerRegistries.client.dimension();
+			config.addEnum("dim", dimension.location(), v -> dimension = ResourceKey.create(Registries.DIMENSION, v),
+					NameMap.of(dimensions.getFirst(), dimensions.toArray(new ResourceLocation[0])).create()
+			);
 		} else {
 			config.addString("dim", dimension.location().toString(), v -> dimension = ResourceKey.create(Registries.DIMENSION, new ResourceLocation(v)), "minecraft:the_nether");
 		}

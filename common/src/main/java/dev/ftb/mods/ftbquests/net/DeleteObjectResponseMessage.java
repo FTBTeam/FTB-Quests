@@ -1,37 +1,26 @@
 package dev.ftb.mods.ftbquests.net;
 
 import dev.architectury.networking.NetworkManager;
-import dev.architectury.networking.simple.BaseS2CMessage;
-import dev.architectury.networking.simple.MessageType;
+import dev.ftb.mods.ftbquests.api.FTBQuestsAPI;
 import dev.ftb.mods.ftbquests.client.FTBQuestsNetClient;
 import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.codec.ByteBufCodecs;
+import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 
-/**
- * @author LatvianModder
- */
-public class DeleteObjectResponseMessage extends BaseS2CMessage {
-	private final long id;
+public record DeleteObjectResponseMessage(long id) implements CustomPacketPayload {
+	public static final Type<DeleteObjectResponseMessage> TYPE = new Type<>(FTBQuestsAPI.rl("delete_object_response_message"));
 
-	DeleteObjectResponseMessage(FriendlyByteBuf buffer) {
-		id = buffer.readLong();
-	}
-
-	public DeleteObjectResponseMessage(long i) {
-		id = i;
-	}
+	public static final StreamCodec<FriendlyByteBuf, DeleteObjectResponseMessage> STREAM_CODEC = StreamCodec.composite(
+			ByteBufCodecs.VAR_LONG, DeleteObjectResponseMessage::id,
+			DeleteObjectResponseMessage::new
+	);
 
 	@Override
-	public MessageType getType() {
-		return FTBQuestsNetHandler.DELETE_OBJECT_RESPONSE;
+	public Type<DeleteObjectResponseMessage> type() {
+		return TYPE;
 	}
 
-	@Override
-	public void write(FriendlyByteBuf buffer) {
-		buffer.writeLong(id);
-	}
-
-	@Override
-	public void handle(NetworkManager.PacketContext context) {
-		FTBQuestsNetClient.deleteObject(id);
-	}
+	public static void handle(DeleteObjectResponseMessage message, NetworkManager.PacketContext context) {
+		context.queue(() -> FTBQuestsNetClient.deleteObject(message.id));}
 }

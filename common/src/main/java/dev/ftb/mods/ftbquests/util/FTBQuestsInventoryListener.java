@@ -13,9 +13,6 @@ import net.minecraft.world.item.ItemStack;
 
 import java.util.List;
 
-/**
- * @author LatvianModder
- */
 public class FTBQuestsInventoryListener implements ContainerListener {
 	public final ServerPlayer player;
 

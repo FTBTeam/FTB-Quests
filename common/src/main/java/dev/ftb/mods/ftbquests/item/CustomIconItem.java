@@ -1,12 +1,17 @@
 package dev.ftb.mods.ftbquests.item;
 
+import dev.ftb.mods.ftblibrary.config.ImageResourceConfig;
 import dev.ftb.mods.ftblibrary.icon.Icon;
 import dev.ftb.mods.ftblibrary.icon.ItemIcon;
+import dev.ftb.mods.ftbquests.FTBQuests;
 import dev.ftb.mods.ftbquests.client.FTBQuestsClient;
+import dev.ftb.mods.ftbquests.registry.ModDataComponents;
+import dev.ftb.mods.ftbquests.registry.ModItems;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.InteractionResultHolder;
@@ -20,8 +25,12 @@ import org.jetbrains.annotations.Nullable;
 import java.util.List;
 
 public class CustomIconItem extends Item {
+	private static final ResourceLocation FALLBACK_ICON = new ResourceLocation("minecraft:textures/misc/unknown_pack.png");
+
 	public CustomIconItem() {
-		super(FTBQuestsItems.defaultProps().stacksTo(1));
+		super(ModItems.defaultProps().stacksTo(1)
+				.component(ModDataComponents.CUSTOM_ICON.get(), FALLBACK_ICON)
+		);
 	}
 
 	@Override
@@ -35,25 +44,29 @@ public class CustomIconItem extends Item {
 
 	@Override
 	@Environment(EnvType.CLIENT)
-	public void appendHoverText(ItemStack stack, @Nullable Level worldIn, List<Component> tooltip, TooltipFlag flagIn) {
+	public void appendHoverText(ItemStack stack, @Nullable TooltipContext context, List<Component> tooltip, TooltipFlag flagIn) {
 		tooltip.add(Component.translatable("item.ftbquests.custom_icon.tooltip").withStyle(ChatFormatting.GRAY));
 
-		if (stack.hasTag() && stack.getTag().contains("Icon")) {
-			tooltip.add(Component.literal(stack.getTag().getString("Icon")).withStyle(ChatFormatting.DARK_GRAY));
-		} else {
-			tooltip.add(Component.literal("-").withStyle(ChatFormatting.DARK_GRAY));
-		}
+		String icon = FTBQuests.getComponent(stack, ModDataComponents.CUSTOM_ICON)
+				.map(ResourceLocation::toString)
+				.orElse("-");
+		tooltip.add(Component.literal(icon).withStyle(ChatFormatting.DARK_GRAY));
 	}
 
 	public static Icon getIcon(ItemStack stack) {
 		if (stack.getItem() instanceof CustomIconItem) {
-			if (stack.hasTag() && stack.getTag().contains("Icon")) {
-				return Icon.getIcon(stack.getTag().getString("Icon"));
-			}
-
-			return Icon.getIcon("minecraft:textures/misc/unknown_pack.png");
+			ResourceLocation icon =  FTBQuests.getComponent(stack, ModDataComponents.CUSTOM_ICON).orElse(FALLBACK_ICON);
+			return Icon.getIcon(icon);
+		} else {
+			return ItemIcon.getItemIcon(stack);
 		}
+	}
 
-		return ItemIcon.getItemIcon(stack);
+	public static void setIcon(ItemStack stack, @Nullable ResourceLocation texture) {
+		if (texture == null || texture.equals(ImageResourceConfig.NONE)) {
+			stack.remove(ModDataComponents.CUSTOM_ICON.get());
+		} else {
+			stack.set(ModDataComponents.CUSTOM_ICON.get(), texture);
+		}
 	}
 }

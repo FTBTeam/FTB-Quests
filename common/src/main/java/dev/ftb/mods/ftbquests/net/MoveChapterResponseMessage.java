@@ -1,41 +1,28 @@
 package dev.ftb.mods.ftbquests.net;
 
 import dev.architectury.networking.NetworkManager;
-import dev.architectury.networking.simple.BaseS2CMessage;
-import dev.architectury.networking.simple.MessageType;
+import dev.ftb.mods.ftbquests.api.FTBQuestsAPI;
 import dev.ftb.mods.ftbquests.client.FTBQuestsNetClient;
 import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.codec.ByteBufCodecs;
+import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 
-/**
- * @author LatvianModder
- */
-public class MoveChapterResponseMessage extends BaseS2CMessage {
-	private final long id;
-	private final boolean up;
+public record MoveChapterResponseMessage(long id, boolean movingUp) implements CustomPacketPayload {
+	public static final Type<MoveChapterResponseMessage> TYPE = new Type<>(FTBQuestsAPI.rl("move_chapter_response_message"));
 
-	MoveChapterResponseMessage(FriendlyByteBuf buffer) {
-		id = buffer.readLong();
-		up = buffer.readBoolean();
-	}
-
-	public MoveChapterResponseMessage(long i, boolean u) {
-		id = i;
-		up = u;
-	}
+	public static final StreamCodec<FriendlyByteBuf, MoveChapterResponseMessage> STREAM_CODEC = StreamCodec.composite(
+			ByteBufCodecs.VAR_LONG, MoveChapterResponseMessage::id,
+			ByteBufCodecs.BOOL, MoveChapterResponseMessage::movingUp,
+			MoveChapterResponseMessage::new
+	);
 
 	@Override
-	public MessageType getType() {
-		return FTBQuestsNetHandler.MOVE_CHAPTER_RESPONSE;
+	public Type<MoveChapterResponseMessage> type() {
+		return TYPE;
 	}
 
-	@Override
-	public void write(FriendlyByteBuf buffer) {
-		buffer.writeLong(id);
-		buffer.writeBoolean(up);
-	}
-
-	@Override
-	public void handle(NetworkManager.PacketContext context) {
-		FTBQuestsNetClient.moveChapter(id, up);
+	public static void handle(MoveChapterResponseMessage message, NetworkManager.PacketContext context) {
+		context.queue(() -> FTBQuestsNetClient.moveChapter(message.id, message.movingUp));
 	}
 }

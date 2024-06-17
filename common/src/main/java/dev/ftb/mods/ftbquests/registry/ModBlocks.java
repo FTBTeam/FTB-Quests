@@ -1,15 +1,13 @@
-package dev.ftb.mods.ftbquests.block;
+package dev.ftb.mods.ftbquests.registry;
 
 import dev.architectury.registry.registries.DeferredRegister;
 import dev.architectury.registry.registries.RegistrySupplier;
 import dev.ftb.mods.ftbquests.api.FTBQuestsAPI;
+import dev.ftb.mods.ftbquests.block.*;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.world.level.block.Block;
 
-/**
- * @author LatvianModder
- */
-public class FTBQuestsBlocks {
+public class ModBlocks {
 	public static final DeferredRegister<Block> BLOCKS = DeferredRegister.create(FTBQuestsAPI.MOD_ID, Registries.BLOCK);
 
 	public static final RegistrySupplier<Block> BARRIER

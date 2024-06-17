@@ -1,6 +1,7 @@
 package dev.ftb.mods.ftbquests.client.gui.quests;
 
 import com.mojang.blaze3d.systems.RenderSystem;
+import dev.architectury.networking.NetworkManager;
 import dev.ftb.mods.ftblibrary.config.StringConfig;
 import dev.ftb.mods.ftblibrary.config.ui.EditStringConfigOverlay;
 import dev.ftb.mods.ftblibrary.icon.Color4I;
@@ -11,6 +12,7 @@ import dev.ftb.mods.ftblibrary.ui.input.MouseButton;
 import dev.ftb.mods.ftblibrary.util.TooltipList;
 import dev.ftb.mods.ftblibrary.util.client.PositionedIngredient;
 import dev.ftb.mods.ftbquests.client.ClientQuestFile;
+import dev.ftb.mods.ftbquests.client.FTBQuestsClientConfig;
 import dev.ftb.mods.ftbquests.client.gui.ChangeChapterGroupScreen;
 import dev.ftb.mods.ftbquests.client.gui.ContextMenuBuilder;
 import dev.ftb.mods.ftbquests.net.CreateObjectMessage;
@@ -20,8 +22,10 @@ import dev.ftb.mods.ftbquests.net.ToggleChapterPinnedMessage;
 import dev.ftb.mods.ftbquests.quest.Chapter;
 import dev.ftb.mods.ftbquests.quest.ChapterGroup;
 import dev.ftb.mods.ftbquests.quest.theme.property.ThemeProperties;
+import dev.ftb.mods.ftbquests.quest.translation.TranslationKey;
 import dev.ftb.mods.ftbquests.util.TextUtils;
 import net.minecraft.ChatFormatting;
+import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.nbt.CompoundTag;
@@ -39,6 +43,7 @@ public class ChapterPanel extends Panel {
 	public static final Icon ARROW_COLLAPSED = Icon.getIcon("ftbquests:textures/gui/arrow_collapsed.png");
 	public static final Icon ARROW_EXPANDED = Icon.getIcon("ftbquests:textures/gui/arrow_expanded.png");
 	public static final int Z_LEVEL = 300;
+	private static final Pattern NON_EMPTY_PAT = Pattern.compile("^.+$");
 
 	private final QuestScreen questScreen;
 	boolean expanded = isPinned();
@@ -182,48 +187,51 @@ public class ChapterPanel extends Panel {
 		public void onClicked(MouseButton button) {
 			if (getMouseX() > getX() + width - 18) {
 				playClickSound();
-				new ToggleChapterPinnedMessage().sendToServer();
-			} else if (chapterPanel.questScreen.file.canEdit() && getMouseX() > getX() + width - 34) {
-				playClickSound();
+				NetworkManager.sendToServer(ToggleChapterPinnedMessage.INSTANCE);
+			} else {
+				ClientQuestFile file = chapterPanel.questScreen.file;
+				if (file.canEdit() && getMouseX() > getX() + width - 34) {
+					playClickSound();
 
-				List<ContextMenuItem> contextMenu = new ArrayList<>();
-				contextMenu.add(new ContextMenuItem(Component.translatable("ftbquests.chapter"), ThemeProperties.ADD_ICON.get(), b -> {
-					StringConfig c = new StringConfig(Pattern.compile("^.+$"));
-					EditStringConfigOverlay<String> overlay = new EditStringConfigOverlay<>(parent, c, accepted -> {
-						chapterPanel.questScreen.openGui();
+					List<ContextMenuItem> contextMenu = new ArrayList<>();
+					contextMenu.add(new ContextMenuItem(Component.translatable("ftbquests.chapter"), ThemeProperties.ADD_ICON.get(), b -> {
+						StringConfig c = new StringConfig(NON_EMPTY_PAT);
+						EditStringConfigOverlay<String> overlay = new EditStringConfigOverlay<>(parent, c, accepted -> {
+							chapterPanel.questScreen.openGui();
 
-						if (accepted && !c.getValue().isEmpty()) {
-							Chapter chapter = new Chapter(0L, chapterPanel.questScreen.file, chapterPanel.questScreen.file.getDefaultChapterGroup());
-							chapter.setRawTitle(c.getValue());
-							CompoundTag extra = new CompoundTag();
-							extra.putLong("group", 0L);
-							new CreateObjectMessage(chapter, extra).sendToServer();
-						}
+							if (accepted && !c.getValue().isEmpty()) {
+								Chapter chapter = new Chapter(0L, file, file.getDefaultChapterGroup());
+								CompoundTag extra = Util.make(new CompoundTag(), t -> t.putLong("group", 0L));
+								file.getTranslationManager().addInitialTranslation(extra, file.getLocale(), TranslationKey.TITLE, c.getValue());
+								NetworkManager.sendToServer(CreateObjectMessage.create(chapter, extra));
+							}
 
-						run();
-					}, b.getTitle()).atMousePosition();
-					overlay.setWidth(150);
-					overlay.setExtraZlevel(Z_LEVEL + 10);
-					getGui().pushModalPanel(overlay);
-				}));
+							run();
+						}, b.getTitle()).atMousePosition();
+						overlay.setWidth(150);
+						overlay.setExtraZlevel(Z_LEVEL + 10);
+						getGui().pushModalPanel(overlay);
+					}));
 
-				contextMenu.add(new ContextMenuItem(Component.translatable("ftbquests.chapter_group"), ThemeProperties.ADD_ICON.get(), b -> {
-					StringConfig c = new StringConfig(Pattern.compile("^.+$"));
-					EditStringConfigOverlay<String> overlay = new EditStringConfigOverlay<>(parent, c, accepted -> {
-						chapterPanel.questScreen.openGui();
+					contextMenu.add(new ContextMenuItem(Component.translatable("ftbquests.chapter_group"), ThemeProperties.ADD_ICON.get(), b -> {
+						StringConfig c = new StringConfig(NON_EMPTY_PAT);
+						EditStringConfigOverlay<String> overlay = new EditStringConfigOverlay<>(parent, c, accepted -> {
+							chapterPanel.questScreen.openGui();
 
-						if (accepted) {
-							ChapterGroup group = new ChapterGroup(0L, ClientQuestFile.INSTANCE);
-							group.setRawTitle(c.getValue());
-							new CreateObjectMessage(group, null).sendToServer();
-						}
-					}, b.getTitle()).atMousePosition();
-					overlay.setWidth(150);
-					overlay.setExtraZlevel(Z_LEVEL + 10);
-					getGui().pushModalPanel(overlay);
-				}));
+							if (accepted) {
+								ChapterGroup group = new ChapterGroup(0L, ClientQuestFile.INSTANCE);
+								CompoundTag extra = Util.make(new CompoundTag(), t -> t.putLong("group", 0L));
+								file.getTranslationManager().addInitialTranslation(extra, file.getLocale(), TranslationKey.TITLE, c.getValue());
+								NetworkManager.sendToServer(CreateObjectMessage.create(group, extra));
+							}
+						}, b.getTitle()).atMousePosition();
+						overlay.setWidth(150);
+						overlay.setExtraZlevel(Z_LEVEL + 10);
+						getGui().pushModalPanel(overlay);
+					}));
 
-				chapterPanel.questScreen.openContextMenu(contextMenu);
+					chapterPanel.questScreen.openContextMenu(contextMenu);
+				}
 			}
 		}
 
@@ -272,29 +280,32 @@ public class ChapterPanel extends Panel {
 	public static class ChapterGroupButton extends ListButton {
 		public final ChapterGroup group;
 		public final List<Chapter> visibleChapters;
+		private final boolean xlateWarning;
 
 		public ChapterGroupButton(ChapterPanel panel, ChapterGroup g) {
 			super(panel, g.getTitle(), g.getIcon());
 			setSize(100, 18);
 			group = g;
 			visibleChapters = g.getVisibleChapters(panel.questScreen.file.selfTeamData);
+			xlateWarning = g.getQuestFile().getTranslationManager().hasMissingTranslation(group, TranslationKey.TITLE);
 		}
 
 		@Override
 		public void onClicked(MouseButton button) {
-			if (chapterPanel.questScreen.file.canEdit() && getMouseX() > getX() + width - 15) {
+			ClientQuestFile file = chapterPanel.questScreen.file;
+
+			if (file.canEdit() && getMouseX() > getX() + width - 15) {
 				playClickSound();
 
-				StringConfig c = new StringConfig(Pattern.compile("^.+$"));
+				StringConfig c = new StringConfig(NON_EMPTY_PAT);
 				EditStringConfigOverlay<String> overlay = new EditStringConfigOverlay<>(parent, c, accepted -> {
 					chapterPanel.questScreen.openGui();
 
 					if (accepted && !c.getValue().isEmpty()) {
-						Chapter chapter = new Chapter(0L, chapterPanel.questScreen.file, chapterPanel.questScreen.file.getDefaultChapterGroup());
-						chapter.setRawTitle(c.getValue());
-						CompoundTag extra = new CompoundTag();
-						extra.putLong("group", group.id);
-						new CreateObjectMessage(chapter, extra).sendToServer();
+						Chapter chapter = new Chapter(0L, file, file.getDefaultChapterGroup());
+						CompoundTag extra = Util.make(new CompoundTag(), t -> t.putLong("group", group.id));
+						file.getTranslationManager().addInitialTranslation(extra, file.getLocale(), TranslationKey.TITLE, c.getValue());
+						NetworkManager.sendToServer(CreateObjectMessage.create(chapter, extra));
 					}
 
 					run();
@@ -306,14 +317,14 @@ public class ChapterPanel extends Panel {
 				return;
 			}
 
-			if (chapterPanel.questScreen.file.canEdit() && button.isRight() && !group.isDefaultGroup()) {
+			if (file.canEdit() && button.isRight() && !group.isDefaultGroup()) {
 				ContextMenuBuilder.create(group, chapterPanel.questScreen).insertAtTop(List.of(
 						new ContextMenuItem(Component.translatable("gui.move"), ThemeProperties.MOVE_UP_ICON.get(),
-								b -> new MoveChapterGroupMessage(group.id, true).sendToServer())
+								b -> NetworkManager.sendToServer(new MoveChapterGroupMessage(group.id, true)))
 								.setEnabled(!group.isFirstGroup())
 								.setCloseMenu(false),
 						new ContextMenuItem(Component.translatable("gui.move"), ThemeProperties.MOVE_DOWN_ICON.get(),
-								b -> new MoveChapterGroupMessage(group.id, false).sendToServer())
+								b -> NetworkManager.sendToServer(new MoveChapterGroupMessage(group.id, false)))
 								.setEnabled(!group.isLastGroup())
 								.setCloseMenu(false)
 				)).openContextMenu(chapterPanel.questScreen);
@@ -328,6 +339,9 @@ public class ChapterPanel extends Panel {
 		public void draw(GuiGraphics graphics, Theme theme, int x, int y, int w, int h) {
 			GuiHelper.setupDrawing();
 
+			if (xlateWarning) {
+				Color4I.RED.withAlpha(40).draw(graphics, x, y, w, h);
+			}
 			if (isMouseOver()) {
 				Color4I.WHITE.withAlpha(40).draw(graphics, x + 1, y, w - 2, h);
 			}
@@ -353,20 +367,30 @@ public class ChapterPanel extends Panel {
 		@Override
 		public void addMouseOverText(TooltipList list) {
 			chapterPanel.questScreen.addInfoTooltip(list, group);
+
+			if (xlateWarning) {
+				ClientQuestFile.addTranslationWarning(list, TranslationKey.TITLE);
+			}
 		}
 	}
 
 	public static class ChapterButton extends ListButton {
 		private final Chapter chapter;
 		private final List<? extends Component> description;
+		private final boolean xlateWarningTitle;
+		private final boolean xlateWarningSubtitle;
 
 		public ChapterButton(ChapterPanel panel, Chapter c) {
 			super(panel, c.getTitle(), c.getIcon());
 
 			chapter = c;
 			description = chapter.getRawSubtitle().stream()
-					.map(line -> TextUtils.parseRawText(line).copy().withStyle(ChatFormatting.GRAY))
+					.map(line -> TextUtils.parseRawText(line, chapter.holderLookup()).copy().withStyle(ChatFormatting.GRAY))
 					.toList();
+			xlateWarningTitle = FTBQuestsClientConfig.HILITE_MISSING.get()
+					&& chapter.getQuestFile().getTranslationManager().hasMissingTranslation(chapter, TranslationKey.TITLE);
+			xlateWarningSubtitle = FTBQuestsClientConfig.HILITE_MISSING.get()
+					&& chapter.getQuestFile().getTranslationManager().hasMissingTranslation(chapter, TranslationKey.CHAPTER_SUBTITLE);
 		}
 
 		@Override
@@ -383,10 +407,10 @@ public class ChapterPanel extends Panel {
 			if (chapterPanel.questScreen.file.canEdit() && button.isRight()) {
 				ContextMenuBuilder.create(chapter, chapterPanel.questScreen).insertAtTop(List.of(
 						new ContextMenuItem(Component.translatable("gui.move"), ThemeProperties.MOVE_UP_ICON.get(),
-								b -> new MoveChapterMessage(chapter.id, true).sendToServer())
+								b -> NetworkManager.sendToServer(new MoveChapterMessage(chapter.id, true)))
 								.setEnabled(chapter.getIndex() > 0).setCloseMenu(false),
 						new ContextMenuItem(Component.translatable("gui.move"), ThemeProperties.MOVE_DOWN_ICON.get(),
-								b -> new MoveChapterMessage(chapter.id, false).sendToServer())
+								b -> NetworkManager.sendToServer(new MoveChapterMessage(chapter.id, false)))
 								.setEnabled(chapter.getIndex() < chapter.getGroup().getChapters().size() - 1).setCloseMenu(false),
 						new ContextMenuItem(Component.translatable("ftbquests.gui.change_group"), Icons.COLOR_RGB,
 								b -> new ChangeChapterGroupScreen(chapter, chapterPanel.questScreen).openGui())
@@ -398,6 +422,9 @@ public class ChapterPanel extends Panel {
 		public void draw(GuiGraphics graphics, Theme theme, int x, int y, int w, int h) {
 			GuiHelper.setupDrawing();
 
+			if (xlateWarningTitle || xlateWarningSubtitle) {
+				Color4I.RED.withAlpha(40).draw(graphics, x, y, w, h);
+			}
 			if (isMouseOver()) {
 				Color4I.WHITE.withAlpha(40).draw(graphics, x + 1, y, w - 2, h);
 			}
@@ -427,6 +454,13 @@ public class ChapterPanel extends Panel {
 
 			for (Component s : description) {
 				list.add(s);
+			}
+
+			if (xlateWarningTitle) {
+				ClientQuestFile.addTranslationWarning(list, TranslationKey.TITLE);
+			}
+			if (xlateWarningSubtitle) {
+				ClientQuestFile.addTranslationWarning(list, TranslationKey.CHAPTER_SUBTITLE);
 			}
 		}
 

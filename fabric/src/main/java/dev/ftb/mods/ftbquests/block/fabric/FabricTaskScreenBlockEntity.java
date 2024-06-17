@@ -166,7 +166,9 @@ public class FabricTaskScreenBlockEntity extends TaskScreenBlockEntity {
 
         @Override
         public FluidVariant getResource() {
-            return getTask() instanceof FluidTask fluidTask ? FluidVariant.of(fluidTask.getFluid(), fluidTask.getFluidNBT()) : getBlankVariant();
+            return getTask() instanceof FluidTask fluidTask ?
+                    FluidVariant.of(fluidTask.getFluid(), fluidTask.getFluidDataComponentPatch()) :
+                    getBlankVariant();
         }
 
         @Override

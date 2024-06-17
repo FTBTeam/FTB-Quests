@@ -1,6 +1,7 @@
 package dev.ftb.mods.ftbquests.quest;
 
 import com.mojang.datafixers.util.Pair;
+import dev.architectury.networking.NetworkManager;
 import dev.ftb.mods.ftblibrary.config.*;
 import dev.ftb.mods.ftblibrary.icon.Icon;
 import dev.ftb.mods.ftblibrary.icon.IconAnimation;
@@ -23,19 +24,20 @@ import dev.ftb.mods.ftbquests.quest.reward.RewardClaimType;
 import dev.ftb.mods.ftbquests.quest.reward.RewardType;
 import dev.ftb.mods.ftbquests.quest.task.Task;
 import dev.ftb.mods.ftbquests.quest.task.TaskType;
+import dev.ftb.mods.ftbquests.quest.translation.TranslationKey;
 import dev.ftb.mods.ftbquests.util.ConfigQuestObject;
-import dev.ftb.mods.ftbquests.util.NetUtils;
 import dev.ftb.mods.ftbquests.util.ProgressChange;
 import dev.ftb.mods.ftbquests.util.TextUtils;
 import it.unimi.dsi.fastutil.longs.LongOpenHashSet;
 import it.unimi.dsi.fastutil.longs.LongSet;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.StringTag;
 import net.minecraft.nbt.Tag;
-import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 
 import java.util.*;
@@ -46,11 +48,9 @@ public final class Quest extends QuestObject implements Movable {
 	public static final String PAGEBREAK_CODE = "{@pagebreak}";
 
 	private Chapter chapter;
-	private String rawSubtitle;
 	private double x, y;
 	private Tristate hideUntilDepsVisible;
 	private String shape;
-	private final List<String> rawDescription;
 	private final List<QuestObject> dependencies;
 	private final List<Task> tasks;
 	private final List<Reward> rewards;
@@ -82,11 +82,9 @@ public final class Quest extends QuestObject implements Movable {
 
 		this.chapter = chapter;
 
-		rawSubtitle = "";
 		x = 0;
 		y = 0;
 		shape = "";
-		rawDescription = new ArrayList<>(0);
 		dependencies = new ArrayList<>(0);
 		tasks = new ArrayList<>(1);
 		rewards = new ArrayList<>(1);
@@ -165,11 +163,13 @@ public final class Quest extends QuestObject implements Movable {
 	}
 
 	public String getRawSubtitle() {
-		return rawSubtitle;
+		return getQuestFile().getTranslationManager().getStringTranslation(this, getQuestFile().getLocale(), TranslationKey.QUEST_SUBTITLE)
+				.orElse("");
 	}
 
 	public void setRawSubtitle(String rawSubtitle) {
-		this.rawSubtitle = rawSubtitle;
+		setTranslatableValue(TranslationKey.QUEST_SUBTITLE, rawSubtitle);
+		cachedSubtitle = null;
 	}
 
 	public void setX(double x) {
@@ -201,7 +201,13 @@ public final class Quest extends QuestObject implements Movable {
 	}
 
 	public List<String> getRawDescription() {
-		return rawDescription;
+		return getQuestFile().getTranslationManager().getStringListTranslation(this, getQuestFile().getLocale(), TranslationKey.QUEST_DESC)
+				.orElse(List.of());
+	}
+
+	public void setRawDescription(List<String> rawDescription) {
+		setTranslatableValue(TranslationKey.QUEST_DESC, rawDescription);
+		cachedDescription = null;
 	}
 
 	public double getIconScale() {
@@ -218,27 +224,14 @@ public final class Quest extends QuestObject implements Movable {
 	}
 
 	@Override
-	public void writeData(CompoundTag nbt) {
-		super.writeData(nbt);
+	public void writeData(CompoundTag nbt, HolderLookup.Provider provider) {
+		super.writeData(nbt, provider);
+
 		nbt.putDouble("x", x);
 		nbt.putDouble("y", y);
 
 		if (!shape.isEmpty()) {
 			nbt.putString("shape", shape);
-		}
-
-		if (!rawSubtitle.isEmpty()) {
-			nbt.putString("subtitle", rawSubtitle);
-		}
-
-		if (!rawDescription.isEmpty()) {
-			ListTag array = new ListTag();
-
-			for (String value : rawDescription) {
-				array.add(StringTag.valueOf(value));
-			}
-
-			nbt.put("description", array);
 		}
 
 		if (!guidePage.isEmpty()) {
@@ -311,23 +304,15 @@ public final class Quest extends QuestObject implements Movable {
 	}
 
 	@Override
-	public void readData(CompoundTag nbt) {
-		super.readData(nbt);
-		rawSubtitle = nbt.getString("subtitle");
+	public void readData(CompoundTag nbt, HolderLookup.Provider provider) {
+		super.readData(nbt, provider);
+
 		x = nbt.getDouble("x");
 		y = nbt.getDouble("y");
 		shape = nbt.getString("shape");
 
 		if (shape.equals("default")) {
 			shape = "";
-		}
-
-		rawDescription.clear();
-
-		ListTag list = nbt.getList("description", Tag.TAG_STRING);
-
-		for (int k = 0; k < list.size(); k++) {
-			rawDescription.add(list.getString(k));
 		}
 
 		guidePage = nbt.getString("guide_page");
@@ -374,11 +359,9 @@ public final class Quest extends QuestObject implements Movable {
 	}
 
 	@Override
-	public void writeNetData(FriendlyByteBuf buffer) {
+	public void writeNetData(RegistryFriendlyByteBuf buffer) {
 		super.writeNetData(buffer);
 		int flags = 0;
-		flags = Bits.setFlag(flags, 0x01, !rawSubtitle.isEmpty());
-		flags = Bits.setFlag(flags, 0x02, !rawDescription.isEmpty());
 		flags = Bits.setFlag(flags, 0x04, size != 0D);
 		flags = Bits.setFlag(flags, 0x08, !guidePage.isEmpty());
 		flags = Bits.setFlag(flags, 0x10, ignoreRewardBlocking);
@@ -402,17 +385,9 @@ public final class Quest extends QuestObject implements Movable {
 		hideDependencyLines.write(buffer);
 		hideTextUntilComplete.write(buffer);
 
-		if (!rawSubtitle.isEmpty()) {
-			buffer.writeUtf(rawSubtitle, Short.MAX_VALUE);
-		}
-
 		buffer.writeDouble(x);
 		buffer.writeDouble(y);
 		buffer.writeUtf(shape, Short.MAX_VALUE);
-
-		if (!rawDescription.isEmpty()) {
-			NetUtils.writeStrings(buffer, rawDescription);
-		}
 
 		if (!guidePage.isEmpty()) {
 			buffer.writeUtf(guidePage, Short.MAX_VALUE);
@@ -446,23 +421,16 @@ public final class Quest extends QuestObject implements Movable {
 	}
 
 	@Override
-	public void readNetData(FriendlyByteBuf buffer) {
+	public void readNetData(RegistryFriendlyByteBuf buffer) {
 		super.readNetData(buffer);
 		int flags = buffer.readVarInt();
 		hideUntilDepsVisible = Tristate.read(buffer);
 		hideDependencyLines = Tristate.read(buffer);
 		hideTextUntilComplete = Tristate.read(buffer);
 
-		rawSubtitle = Bits.getFlag(flags, 0x01) ? buffer.readUtf(Short.MAX_VALUE) : "";
 		x = buffer.readDouble();
 		y = buffer.readDouble();
 		shape = buffer.readUtf(Short.MAX_VALUE);
-
-		if (Bits.getFlag(flags, 0x02)) {
-			NetUtils.readStrings(buffer, rawDescription);
-		} else {
-			rawDescription.clear();
-		}
 
 		guidePage = Bits.getFlag(flags, 0x08) ? buffer.readUtf(Short.MAX_VALUE) : "";
 
@@ -581,7 +549,7 @@ public final class Quest extends QuestObject implements Movable {
 	@Environment(EnvType.CLIENT)
 	public Component getAltTitle() {
 		if (!tasks.isEmpty()) {
-			return tasks.get(0).getTitle();
+			return tasks.getFirst().getTitle();
 		}
 
 		return Component.translatable("ftbquests.unnamed");
@@ -647,17 +615,14 @@ public final class Quest extends QuestObject implements Movable {
 	public void fillConfigGroup(ConfigGroup config) {
 		super.fillConfigGroup(config);
 
-		config.addString("subtitle", rawSubtitle, v -> rawSubtitle = v, "");
+		config.addString("subtitle", getRawSubtitle(), this::setRawSubtitle, "");
 		StringConfig descType = new StringConfig();
 		config.add("description", new ListConfig<String, StringConfig>(descType) {
 			@Override
 			public void onClicked(Widget clicked, MouseButton button, ConfigCallback callback) {
 				new MultilineTextEditorScreen(Component.translatable("ftbquests.gui.edit_description"), this, callback).openGui();
 			}
-		}, rawDescription, (t) -> {
-			rawDescription.clear();
-			rawDescription.addAll(t);
-		}, Collections.emptyList());
+		}, getRawDescription(), this::setRawDescription, Collections.emptyList());
 
 		ConfigGroup appearance = config.getOrCreateSubgroup("appearance");
 		appearance.addEnum("shape", shape.isEmpty() ? "default" : shape, v -> shape = v.equals("default") ? "" : v, QuestShape.idMapWithDefault);
@@ -734,8 +699,8 @@ public final class Quest extends QuestObject implements Movable {
 
 	@Override
 	@Environment(EnvType.CLIENT)
-	public void move(Chapter to, double x, double y) {
-		new MoveMovableMessage(this, to.id, x, y).sendToServer();
+	public void initiateMoveClientSide(Chapter to, double x, double y) {
+		NetworkManager.sendToServer(new MoveMovableMessage(id, to.id, x, y));
 	}
 
 	@Override
@@ -775,7 +740,7 @@ public final class Quest extends QuestObject implements Movable {
 	@Environment(EnvType.CLIENT)
 	public Component getSubtitle() {
 		if (cachedSubtitle == null) {
-			cachedSubtitle = TextUtils.parseRawText(rawSubtitle);
+			cachedSubtitle = TextUtils.parseRawText(getRawSubtitle(), holderLookup());
 		}
 		return cachedSubtitle;
 	}
@@ -783,7 +748,7 @@ public final class Quest extends QuestObject implements Movable {
 	@Environment(EnvType.CLIENT)
 	public List<Component> getDescription() {
 		if (cachedDescription == null) {
-			cachedDescription = rawDescription.stream().map(TextUtils::parseRawText).toList();
+			cachedDescription = getRawDescription().stream().map(str -> TextUtils.parseRawText(str, holderLookup())).toList();
 		}
 		return cachedDescription;
 	}
@@ -823,21 +788,21 @@ public final class Quest extends QuestObject implements Movable {
 			return true;
 		} catch (DependencyDepthException ex) {
 			if (autofix) {
-				FTBQuests.LOGGER.error("Too deep dependencies found in " + this + " (referenced in " + ex.object + ")! Deleting all dependencies...");
+                FTBQuests.LOGGER.error("Too deep dependencies found in {} (referenced in {})! Deleting all dependencies...", this, ex.object);
 				clearDependencies();
 				chapter.file.markDirty();
 			} else {
-				FTBQuests.LOGGER.error("Too deep dependencies found in " + this + " (referenced in " + ex.object + ")!");
+                FTBQuests.LOGGER.error("Too deep dependencies found in {} (referenced in {})!", this, ex.object);
 			}
 
 			return false;
 		} catch (DependencyLoopException ex) {
 			if (autofix) {
-				FTBQuests.LOGGER.error("Looping dependencies found in " + this + " (referenced in " + ex.object + ")! Deleting all dependencies...");
+                FTBQuests.LOGGER.error("Looping dependencies found in {} (referenced in {})! Deleting all dependencies...", this, ex.object);
 				clearDependencies();
 				chapter.file.markDirty();
 			} else {
-				FTBQuests.LOGGER.error("Looping dependencies found in " + this + " (referenced in " + ex.object + ")!");
+                FTBQuests.LOGGER.error("Looping dependencies found in {} (referenced in {})!", this, ex.object);
 			}
 
 			return false;
@@ -918,7 +883,7 @@ public final class Quest extends QuestObject implements Movable {
 
 	public void checkRepeatable(TeamData data, UUID player) {
 		if (canBeRepeated() && rewards.stream().allMatch(r -> data.isRewardClaimed(player, r))) {
-			forceProgress(data, new ProgressChange(data.getFile(), this, player));
+			forceProgress(data, new ProgressChange(this, player));
 		}
 	}
 
@@ -949,27 +914,27 @@ public final class Quest extends QuestObject implements Movable {
 		return ignoreRewardBlocking;
 	}
 
-	public void writeTasks(CompoundTag tag) {
+	public void writeTasks(CompoundTag tag, HolderLookup.Provider provider) {
 		ListTag t = new ListTag();
 		for (Task task : tasks) {
 			TaskType type = task.getType();
 			SNBTCompoundTag nbt3 = new SNBTCompoundTag();
 			nbt3.putString("id", task.getCodeString());
 			nbt3.putString("type", type.getTypeForNBT());
-			task.writeData(nbt3);
+			task.writeData(nbt3, provider);
 			t.add(nbt3);
 		}
 		tag.put("tasks", t);
 	}
 
-	public void writeRewards(CompoundTag tag) {
+	public void writeRewards(CompoundTag tag, HolderLookup.Provider provider) {
 		ListTag r = new ListTag();
 		for (Reward reward : rewards) {
 			RewardType type = reward.getType();
 			SNBTCompoundTag nbt3 = new SNBTCompoundTag();
 			nbt3.putString("id", reward.getCodeString());
 			nbt3.putString("type", type.getTypeForNBT());
-			reward.writeData(nbt3);
+			reward.writeData(nbt3, provider);
 			r.add(nbt3);
 		}
 		tag.put("rewards", r);
@@ -1068,6 +1033,8 @@ public final class Quest extends QuestObject implements Movable {
 
 	public List<Pair<Integer,Integer>> buildDescriptionIndex() {
 		List<Pair<Integer,Integer>> index = new ArrayList<>();
+
+		List<String> rawDescription = getRawDescription();
 
 		int l1 = 0;
 		for (int l2 = l1; l2 < rawDescription.size(); l2++) {

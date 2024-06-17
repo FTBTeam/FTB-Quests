@@ -1,41 +1,28 @@
 package dev.ftb.mods.ftbquests.net;
 
 import dev.architectury.networking.NetworkManager;
-import dev.architectury.networking.simple.BaseS2CMessage;
-import dev.architectury.networking.simple.MessageType;
+import dev.ftb.mods.ftbquests.api.FTBQuestsAPI;
 import dev.ftb.mods.ftbquests.client.FTBQuestsNetClient;
 import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.codec.ByteBufCodecs;
+import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 
-/**
- * @author LatvianModder
- */
-public class TogglePinnedResponseMessage extends BaseS2CMessage {
-	private final long id;
-	private final boolean pinned;
+public record TogglePinnedResponseMessage(long id, boolean pinned) implements CustomPacketPayload {
+	public static final Type<TogglePinnedResponseMessage> TYPE = new Type<>(FTBQuestsAPI.rl("toggle_pinned_response_message"));
 
-	TogglePinnedResponseMessage(FriendlyByteBuf buffer) {
-		id = buffer.readLong();
-		pinned = buffer.readBoolean();
-	}
-
-	public TogglePinnedResponseMessage(long i, boolean p) {
-		id = i;
-		pinned = p;
-	}
+	public static final StreamCodec<FriendlyByteBuf, TogglePinnedResponseMessage> STREAM_CODEC = StreamCodec.composite(
+			ByteBufCodecs.VAR_LONG, TogglePinnedResponseMessage::id,
+			ByteBufCodecs.BOOL, TogglePinnedResponseMessage::pinned,
+			TogglePinnedResponseMessage::new
+	);
 
 	@Override
-	public MessageType getType() {
-		return FTBQuestsNetHandler.TOGGLE_PINNED_RESPONSE;
+	public Type<TogglePinnedResponseMessage> type() {
+		return TYPE;
 	}
 
-	@Override
-	public void write(FriendlyByteBuf buffer) {
-		buffer.writeLong(id);
-		buffer.writeBoolean(pinned);
-	}
-
-	@Override
-	public void handle(NetworkManager.PacketContext context) {
-		FTBQuestsNetClient.togglePinned(id, pinned);
+	public static void handle(TogglePinnedResponseMessage message, NetworkManager.PacketContext context) {
+		context.queue(() -> FTBQuestsNetClient.togglePinned(message.id, message.pinned));
 	}
 }

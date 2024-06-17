@@ -8,21 +8,21 @@ import dev.ftb.mods.ftbquests.api.FTBQuestsAPI;
 import dev.ftb.mods.ftbquests.client.FTBQClientProxy;
 import dev.ftb.mods.ftbquests.client.FTBQuestsClient;
 import dev.ftb.mods.ftbquests.integration.RecipeModHelper;
-import dev.ftb.mods.ftbquests.integration.item_filtering.DisplayStacksCache;
 import dev.ftb.mods.ftbquests.net.ClearDisplayCacheMessage;
 import dev.ftb.mods.ftbquests.net.FTBQuestsNetHandler;
 import dev.ftb.mods.ftbquests.quest.reward.RewardTypes;
 import dev.ftb.mods.ftbquests.quest.task.TaskTypes;
-import net.minecraft.gametest.framework.GameTestServer;
-import net.minecraft.server.MinecraftServer;
-import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.core.component.DataComponentType;
 import net.minecraft.server.packs.PackType;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.server.packs.resources.ResourceManagerReloadListener;
+import net.minecraft.world.item.ItemStack;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.util.Objects;
+import java.util.Optional;
+import java.util.function.Supplier;
 
 public class FTBQuests {
 	public static final Logger LOGGER = LogManager.getLogger(FTBQuestsAPI.MOD_NAME);
@@ -68,5 +68,13 @@ public class FTBQuests {
 		public void onResourceManagerReload(ResourceManager resourceManager) {
 			ClearDisplayCacheMessage.clearForAll(GameInstance.getServer());
 		}
+	}
+
+	public static <T> Optional<T> getComponent(ItemStack stack, Supplier<DataComponentType<T>> componentType) {
+		return Optional.ofNullable(stack.get(componentType.get()));
+	}
+
+	public static <T> Optional<T> getComponent(ItemStack stack, DataComponentType<T> componentType) {
+		return Optional.ofNullable(stack.get(componentType));
 	}
 }

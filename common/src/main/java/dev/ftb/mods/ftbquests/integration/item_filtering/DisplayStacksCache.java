@@ -4,24 +4,22 @@ import com.google.common.collect.ImmutableList;
 import dev.ftb.mods.ftbquests.api.ItemFilterAdapter;
 import dev.ftb.mods.ftbquests.api.event.CustomFilterDisplayItemsEvent;
 import dev.ftb.mods.ftbquests.client.FTBQuestsClient;
-import it.unimi.dsi.fastutil.objects.Object2ObjectLinkedOpenHashMap;
-import net.minecraft.core.registries.BuiltInRegistries;
+import it.unimi.dsi.fastutil.ints.Int2ObjectLinkedOpenHashMap;
 import net.minecraft.world.flag.FeatureFlags;
 import net.minecraft.world.item.CreativeModeTabs;
 import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
-import java.util.Objects;
 
 public class DisplayStacksCache {
     private static final int MAX_CACHE_SIZE = 1024;
-    private static final Object2ObjectLinkedOpenHashMap<CacheKey, List<ItemStack>> cache = new Object2ObjectLinkedOpenHashMap<>(MAX_CACHE_SIZE);
+    private static final Int2ObjectLinkedOpenHashMap<List<ItemStack>> cache = new Int2ObjectLinkedOpenHashMap<>(MAX_CACHE_SIZE);
     private static List<ItemStack> extraCache = null;
 
     @NotNull
     public static List<ItemStack> getCachedDisplayStacks(ItemStack filterStack, ItemFilterAdapter adapter) {
-        CacheKey key = CacheKey.of(filterStack);
+        int key = ItemStack.hashItemAndComponents(filterStack);
 
         List<ItemStack> result = cache.getAndMoveToFirst(key);
         if (result == null) {
@@ -67,11 +65,5 @@ public class DisplayStacksCache {
             extraCache = builder.build();
         }
         return extraCache;
-    }
-
-    private record CacheKey(int key) {
-        static CacheKey of(ItemStack filterStack) {
-            return new CacheKey(Objects.hash(BuiltInRegistries.ITEM.getId(filterStack.getItem()), filterStack.hasTag() ? filterStack.getTag().hashCode() : 0));
-        }
     }
 }

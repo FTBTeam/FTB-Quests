@@ -82,9 +82,9 @@ public class TaskScreenRenderer implements BlockEntityRenderer<TaskScreenBlockEn
         // render quest and task title at top of screen
         Component top1 = taskScreen.isInputOnly() ? Component.empty() : task.getQuest().getTitle();
         Component top2 = taskScreen.isInputOnly() ? Component.empty() : task.getTitle();
-        drawString(taskScreen, font, multiBufferSource, poseStack, top1, 0.02D, 0.15D);
+        drawString(taskScreen, font, multiBufferSource, poseStack, top1, 0.02D, 0.15F);
         if (!top2.equals(Component.empty())) {
-            drawString(taskScreen, font, multiBufferSource, poseStack, top2, 0.17D, 0.07D);
+            drawString(taskScreen, font, multiBufferSource, poseStack, top2, 0.17D, 0.07F);
             iconY = 0.54D;
         }
 
@@ -93,7 +93,7 @@ public class TaskScreenRenderer implements BlockEntityRenderer<TaskScreenBlockEn
             long progress = data.getProgress(task);
             ChatFormatting col = progress == 0 ? ChatFormatting.GOLD : (progress < task.getMaxProgress() ? ChatFormatting.YELLOW : ChatFormatting.GREEN);
             Component txt = Component.literal(task.formatProgress(data, progress) + " / " + task.formatMaxProgress()).withStyle(col);
-            drawString(taskScreen, font, multiBufferSource, poseStack, txt, 0.83D, 0.15D);
+            drawString(taskScreen, font, multiBufferSource, poseStack, txt, 0.83D, 0.15F);
         }
 
         // render icon for task item/fluid/energy
@@ -150,11 +150,11 @@ public class TaskScreenRenderer implements BlockEntityRenderer<TaskScreenBlockEn
             TextureAtlasSprite sprite = Minecraft.getInstance().getModelManager().getAtlas(InventoryMenu.BLOCK_ATLAS).getSprite(as.getId());
             // fluid texture (interpolated according to task progress)
             if (progress > 0L) {
-                float heightInterpolated = 16f * (float) ((double) progress / task.getMaxProgress());
+                float interpolatedProgress = (float) ((double) progress / task.getMaxProgress());
                 RenderUtil.create(poseStack, vertexConsumer, -8f, -8f)
                         .withColor(FluidStackHooks.getColor(fluidTask.getFluid()) | 0xFF000000)
-                        .withSize(16f, heightInterpolated)
-                        .withUV(sprite.getU0(), sprite.getV0(), sprite.getU1(), sprite.getV(heightInterpolated))
+                        .withSize(16f, interpolatedProgress * 16f)
+                        .withUV(sprite.getU0(), sprite.getV0(), sprite.getU1(), sprite.getV(interpolatedProgress))
                         .draw();
             }
             // tank overlay
@@ -170,11 +170,11 @@ public class TaskScreenRenderer implements BlockEntityRenderer<TaskScreenBlockEn
                     .withUV(empty.getU0(), empty.getV0(), empty.getU1(), empty.getV1())
                     .draw();
             if (progress > 0L) {
-                float heightInterpolated = 16f * (float) ((double) progress / task.getMaxProgress());
+                float interpolatedProgress = (float) ((double) progress / task.getMaxProgress());
                 poseStack.translate(0, 0, -0.05f);
                 RenderUtil.create(poseStack, vertexConsumer, -8f, -8f)
-                        .withSize(16f, heightInterpolated)
-                        .withUV(full.getU0(), full.getV0(), full.getU1(), full.getV(heightInterpolated))
+                        .withSize(16f, interpolatedProgress * 16f)
+                        .withUV(full.getU0(), full.getV0(), full.getU1(), full.getV(interpolatedProgress))
                         .draw();
             }
         } else if (icon instanceof ItemIcon itemIcon) {
@@ -192,20 +192,20 @@ public class TaskScreenRenderer implements BlockEntityRenderer<TaskScreenBlockEn
         poseStack.popPose();
     }
 
-    private void drawString(TaskScreenBlockEntity taskScreen, Font font, MultiBufferSource bufferSource, PoseStack poseStack, Component text, double y, double size) {
+    private void drawString(TaskScreenBlockEntity taskScreen, Font font, MultiBufferSource bufferSource, PoseStack poseStack, Component text, double y, float size) {
         if (!text.equals(Component.empty())) {
             poseStack.pushPose();
             poseStack.translate(0.5D, y, 0D);
 
             int len = font.width(text);
-            float scale = (float) (size / 9F);
-            double width = len * scale;
-            if (width > 1D) {
+            float scale = size / 9F;
+            float width = len * scale;
+            if (width > 1F) {
                 scale /= width;
-                width = 1D;
+                width = 1F;
             }
-            if (width > 0.9D) {
-                scale *= 0.9D;
+            if (width > 0.9F) {
+                scale *= 0.9F;
             }
 
             poseStack.scale(scale, scale, 1F);

@@ -8,6 +8,7 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
@@ -44,7 +45,7 @@ public class QuestBarrierBlock extends BaseEntityBlock {
 			.lightLevel(blockState -> 3)
 			.emissiveRendering((blockState, blockGetter, blockPos) -> true);
 
-	protected QuestBarrierBlock(Properties props) {
+	public QuestBarrierBlock(Properties props) {
 		super(props);
 
 		registerDefaultState(defaultBlockState().setValue(OPEN, false));
@@ -102,7 +103,7 @@ public class QuestBarrierBlock extends BaseEntityBlock {
 	public void setPlacedBy(Level level, BlockPos pos, BlockState state, @Nullable LivingEntity entity, ItemStack stack) {
 		super.setPlacedBy(level, pos, state, entity, stack);
 
-		if (!level.isClientSide() && stack.hasCustomHoverName() && level.getBlockEntity(pos) instanceof BarrierBlockEntity barrier) {
+		if (!level.isClientSide() && stack.has(DataComponents.CUSTOM_NAME) && level.getBlockEntity(pos) instanceof BarrierBlockEntity barrier) {
 			barrier.update(stack.getHoverName().getString());
 		}
 	}

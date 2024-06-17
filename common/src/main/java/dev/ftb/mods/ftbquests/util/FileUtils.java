@@ -5,9 +5,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-/**
- * @author LatvianModder
- */
 public class FileUtils {
 	public static List<String> read(InputStream in) throws IOException {
 		List<String> list = new ArrayList<>();

@@ -7,8 +7,9 @@ import dev.ftb.mods.ftbquests.quest.theme.property.ThemeProperties;
 import dev.ftb.mods.ftbquests.util.ProgressChange;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.RegistryFriendlyByteBuf;
 
 import java.util.Collection;
 import java.util.List;
@@ -22,8 +23,8 @@ public abstract class QuestObject extends QuestObjectBase {
 	}
 
 	@Override
-	public void writeData(CompoundTag nbt) {
-		super.writeData(nbt);
+	public void writeData(CompoundTag nbt, HolderLookup.Provider provider) {
+		super.writeData(nbt, provider);
 
 		if (disableToast) {
 			nbt.putBoolean("disable_toast", true);
@@ -31,19 +32,19 @@ public abstract class QuestObject extends QuestObjectBase {
 	}
 
 	@Override
-	public void readData(CompoundTag nbt) {
-		super.readData(nbt);
+	public void readData(CompoundTag nbt, HolderLookup.Provider provider) {
+		super.readData(nbt, provider);
 		disableToast = nbt.getBoolean("disable_toast");
 	}
 
 	@Override
-	public void writeNetData(FriendlyByteBuf buffer) {
+	public void writeNetData(RegistryFriendlyByteBuf buffer) {
 		super.writeNetData(buffer);
 		buffer.writeBoolean(disableToast);
 	}
 
 	@Override
-	public void readNetData(FriendlyByteBuf buffer) {
+	public void readNetData(RegistryFriendlyByteBuf buffer) {
 		super.readNetData(buffer);
 		disableToast = buffer.readBoolean();
 	}

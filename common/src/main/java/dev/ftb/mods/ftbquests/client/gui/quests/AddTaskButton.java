@@ -1,5 +1,6 @@
 package dev.ftb.mods.ftbquests.client.gui.quests;
 
+import dev.architectury.networking.NetworkManager;
 import dev.ftb.mods.ftblibrary.icon.Icons;
 import dev.ftb.mods.ftblibrary.ui.Button;
 import dev.ftb.mods.ftblibrary.ui.ContextMenuItem;
@@ -16,7 +17,6 @@ import dev.ftb.mods.ftbquests.quest.task.TaskTypes;
 import dev.ftb.mods.ftbquests.quest.theme.property.ThemeProperties;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import org.jetbrains.annotations.Nullable;
 
@@ -41,11 +41,8 @@ public class AddTaskButton extends Button {
 		for (TaskType type : TaskTypes.TYPES.values()) {
 			contextMenu.add(new ContextMenuItem(type.getDisplayName(), type.getIconSupplier(), b -> {
 				playClickSound();
-				type.getGuiProvider().openCreationGui(this.parent, quest, task -> {
-					CompoundTag extra = new CompoundTag();
-					extra.putString("type", type.getTypeForNBT());
-					new CreateObjectMessage(task, extra).sendToServer();
-				});
+				type.getGuiProvider().openCreationGui(this.parent, quest, (task, extra) ->
+						NetworkManager.sendToServer(CreateObjectMessage.create(task, extra)));
 			}));
 		}
 
@@ -63,11 +60,10 @@ public class AddTaskButton extends Button {
 	}
 
 	private void copyAndCreateTask(Task task) {
-		Task newTask = QuestObjectBase.copy(task, () -> TaskType.createTask(0L, quest, task.getType().getTypeId().toString()));
+		Task newTask = QuestObjectBase.copy(task,
+				() -> TaskType.createTask(0L, quest, task.getType().getTypeId().toString()));
 		if (newTask != null) {
-			CompoundTag extra = new CompoundTag();
-			extra.putString("type", newTask.getType().getTypeForNBT());
-			new CreateObjectMessage(newTask, extra).sendToServer();
+			NetworkManager.sendToServer(CreateObjectMessage.create(newTask, newTask.getType().makeExtraNBT()));
 		}
 	}
 

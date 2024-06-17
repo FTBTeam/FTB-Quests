@@ -1,49 +1,30 @@
 package dev.ftb.mods.ftbquests.net;
 
 import dev.architectury.networking.NetworkManager;
-import dev.architectury.networking.simple.BaseS2CMessage;
-import dev.architectury.networking.simple.MessageType;
+import dev.ftb.mods.ftbquests.api.FTBQuestsAPI;
 import dev.ftb.mods.ftbquests.client.FTBQuestsNetClient;
-import dev.ftb.mods.ftbquests.quest.Movable;
 import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.codec.ByteBufCodecs;
+import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 
-/**
- * @author LatvianModder
- */
-public class MoveMovableResponseMessage extends BaseS2CMessage {
-	private final long id;
-	private final long chapter;
-	private final double x, y;
+public record MoveMovableResponseMessage(long id, long chapterId, double x, double y) implements CustomPacketPayload {
+	public static final Type<MoveMovableResponseMessage> TYPE = new Type<>(FTBQuestsAPI.rl("move_movable_response_message"));
 
-	MoveMovableResponseMessage(FriendlyByteBuf buffer) {
-		id = buffer.readLong();
-		chapter = buffer.readLong();
-		x = buffer.readDouble();
-		y = buffer.readDouble();
-	}
-
-	public MoveMovableResponseMessage(Movable movable, long c, double _x, double _y) {
-		id = movable.getMovableID();
-		chapter = c;
-		x = _x;
-		y = _y;
-	}
+	public static final StreamCodec<FriendlyByteBuf, MoveMovableResponseMessage> STREAM_CODEC = StreamCodec.composite(
+			ByteBufCodecs.VAR_LONG, MoveMovableResponseMessage::id,
+			ByteBufCodecs.VAR_LONG, MoveMovableResponseMessage::chapterId,
+			ByteBufCodecs.DOUBLE, MoveMovableResponseMessage::x,
+			ByteBufCodecs.DOUBLE, MoveMovableResponseMessage::y,
+			MoveMovableResponseMessage::new
+	);
 
 	@Override
-	public MessageType getType() {
-		return FTBQuestsNetHandler.MOVE_QUEST_RESPONSE;
+	public Type<MoveMovableResponseMessage> type() {
+		return TYPE;
 	}
 
-	@Override
-	public void write(FriendlyByteBuf buffer) {
-		buffer.writeLong(id);
-		buffer.writeLong(chapter);
-		buffer.writeDouble(x);
-		buffer.writeDouble(y);
-	}
-
-	@Override
-	public void handle(NetworkManager.PacketContext context) {
-		FTBQuestsNetClient.moveQuest(id, chapter, x, y);
+	public static void handle(MoveMovableResponseMessage message, NetworkManager.PacketContext context) {
+		context.queue(() -> FTBQuestsNetClient.moveQuest(message.id, message.chapterId, message.x, message.y));
 	}
 }

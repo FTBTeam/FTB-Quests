@@ -1,5 +1,6 @@
 package dev.ftb.mods.ftbquests.quest.reward;
 
+import dev.architectury.networking.NetworkManager;
 import dev.ftb.mods.ftblibrary.config.ConfigGroup;
 import dev.ftb.mods.ftblibrary.config.Tristate;
 import dev.ftb.mods.ftblibrary.icon.Icon;
@@ -15,8 +16,9 @@ import dev.ftb.mods.ftbquests.quest.*;
 import dev.ftb.mods.ftbquests.util.ProgressChange;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.util.RandomSource;
@@ -75,8 +77,8 @@ public abstract class Reward extends QuestObjectBase {
 	public abstract RewardType getType();
 
 	@Override
-	public void writeData(CompoundTag nbt) {
-		super.writeData(nbt);
+	public void writeData(CompoundTag nbt, HolderLookup.Provider provider) {
+		super.writeData(nbt, provider);
 
 		if (team != Tristate.DEFAULT) {
 			team.write(nbt, "team_reward");
@@ -91,8 +93,8 @@ public abstract class Reward extends QuestObjectBase {
 	}
 
 	@Override
-	public void readData(CompoundTag nbt) {
-		super.readData(nbt);
+	public void readData(CompoundTag nbt, HolderLookup.Provider provider) {
+		super.readData(nbt, provider);
 		team = Tristate.read(nbt, "team_reward");
 		autoclaim = RewardAutoClaim.NAME_MAP.get(nbt.getString("auto"));
 		excludeFromClaimAll = nbt.getBoolean("exclude_from_claim_all");
@@ -100,7 +102,7 @@ public abstract class Reward extends QuestObjectBase {
 	}
 
 	@Override
-	public void writeNetData(FriendlyByteBuf buffer) {
+	public void writeNetData(RegistryFriendlyByteBuf buffer) {
 		super.writeNetData(buffer);
 		Tristate.NAME_MAP.write(buffer, team);
 		RewardAutoClaim.NAME_MAP.write(buffer, autoclaim);
@@ -109,7 +111,7 @@ public abstract class Reward extends QuestObjectBase {
 	}
 
 	@Override
-	public void readNetData(FriendlyByteBuf buffer) {
+	public void readNetData(RegistryFriendlyByteBuf buffer) {
 		super.readNetData(buffer);
 		team = Tristate.NAME_MAP.read(buffer);
 		autoclaim = RewardAutoClaim.NAME_MAP.read(buffer);
@@ -259,7 +261,7 @@ public abstract class Reward extends QuestObjectBase {
 	public void onButtonClicked(Button button, boolean canClick) {
 		if (canClick) {
 			button.playClickSound();
-			new ClaimRewardMessage(id, true).sendToServer();
+			NetworkManager.sendToServer(new ClaimRewardMessage(id, true));
 		}
 	}
 

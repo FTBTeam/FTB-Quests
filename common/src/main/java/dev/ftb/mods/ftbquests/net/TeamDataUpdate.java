@@ -1,26 +1,21 @@
 package dev.ftb.mods.ftbquests.net;
 
 import dev.ftb.mods.ftbquests.quest.TeamData;
+import net.minecraft.core.UUIDUtil;
 import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.codec.ByteBufCodecs;
+import net.minecraft.network.codec.StreamCodec;
 
 import java.util.UUID;
 
-public class TeamDataUpdate {
-	public final UUID uuid;
-	public final String name;
+public record TeamDataUpdate(UUID uuid, String name) {
+	public static StreamCodec<FriendlyByteBuf, TeamDataUpdate> STREAM_CODEC = StreamCodec.composite(
+			UUIDUtil.STREAM_CODEC, TeamDataUpdate::uuid,
+			ByteBufCodecs.STRING_UTF8, TeamDataUpdate::name,
+			TeamDataUpdate::new
+	);
 
-	public TeamDataUpdate(FriendlyByteBuf buffer) {
-		uuid = buffer.readUUID();
-		name = buffer.readUtf(Short.MAX_VALUE);
-	}
-
-	public TeamDataUpdate(TeamData data) {
-		uuid = data.getTeamId();
-		name = data.getName();
-	}
-
-	public void write(FriendlyByteBuf buffer) {
-		buffer.writeUUID(uuid);
-		buffer.writeUtf(name, Short.MAX_VALUE);
+	public static TeamDataUpdate forTeamData(TeamData data) {
+		return new TeamDataUpdate(data.getTeamId(), data.getName());
 	}
 }
