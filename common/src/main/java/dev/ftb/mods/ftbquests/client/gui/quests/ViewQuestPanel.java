@@ -79,7 +79,10 @@ public class ViewQuestPanel extends ModalPanel {
 		setPosAndSize(-1, -1, 0, 0);
 		setOnlyRenderWidgetsInside(true);
 		setOnlyInteractWithWidgetsInside(true);
-		setExtraZlevel(300); // ensure we render above any quest button icons (item icons in particular)
+		// Vanilla applies a +Z translation of 150 for item rendering
+		// Supported quest size is up to 8x, so we need to translate at least 8*150 along the +Z axis,
+		//   to ensure the panel renders above any item icons
+		setExtraZlevel(1250);
 	}
 
 	@Override
