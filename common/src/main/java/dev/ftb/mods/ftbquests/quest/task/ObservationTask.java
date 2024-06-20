@@ -179,7 +179,7 @@ public class ObservationTask extends AbstractBooleanTask {
 
 	private Optional<ResourceLocation> asTagRL(String str) {
 		try {
-			return Optional.of(new ResourceLocation(str.startsWith("#") ? str.substring(1) : str));
+			return Optional.ofNullable(ResourceLocation.tryParse(str.startsWith("#") ? str.substring(1) : str));
 		} catch (ResourceLocationException e) {
 			return Optional.empty();
 		}

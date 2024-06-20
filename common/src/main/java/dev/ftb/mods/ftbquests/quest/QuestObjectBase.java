@@ -459,6 +459,10 @@ public abstract class QuestObjectBase implements Comparable<QuestObjectBase> {
 	}
 
 	protected CompoundTag saveItemSingleLine(ItemStack stack) {
+		if (stack.isEmpty()) {
+			return new SNBTCompoundTag();
+		}
+
 		return Util.make(SNBTCompoundTag.of(stack.save(holderLookup())), SNBTCompoundTag::singleLine);
 	}
 }

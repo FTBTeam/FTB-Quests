@@ -214,7 +214,7 @@ public class RewardTable extends QuestObjectBase {
 			lootCrate.readData(nbt.getCompound("loot_crate"));
 		}
 
-		lootTableId = nbt.contains("loot_table_id") ? new ResourceLocation(nbt.getString("loot_table_id")) : null;
+		lootTableId = nbt.contains("loot_table_id") ? ResourceLocation.tryParse(nbt.getString("loot_table_id")) : null;
 	}
 
 	@Override

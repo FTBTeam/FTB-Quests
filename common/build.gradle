@@ -1,7 +1,7 @@
 dependencies {
 	modImplementation "net.fabricmc:fabric-loader:${rootProject.fabric_loader_version}"
 
-	modApi "dev.architectury:architectury:${rootProject.architectury_version}"
+	modApi "dev.architectury:architectury:${rootProject.architectury_api_version}"
 
 	modApi("dev.ftb.mods:ftb-library:${rootProject.ftb_library_version}") { transitive false }
 	modApi "dev.ftb.mods:ftb-teams:${rootProject.ftb_teams_version}"
@@ -17,28 +17,6 @@ publishing {
 			artifactId = "${rootProject.archives_base_name}"
 			version ftbPublishing.mavenVersion
 			from components.java
-		}
-	}
-
-	repositories {
-		if (ftbPublishing.ftbToken) {
-			maven {
-				url ftbPublishing.ftbURL
-				credentials {
-					username = ftbPublishing.ftbUser
-					password = ftbPublishing.ftbToken
-				}
-			}
-		}
-
-		if (ftbPublishing.sapsToken) {
-			maven {
-				url ftbPublishing.sapsURL
-				credentials {
-					username = ftbPublishing.sapsUser
-					password = ftbPublishing.sapsToken
-				}
-			}
 		}
 	}
 }
