@@ -62,7 +62,7 @@ public class StatTask extends Task {
 	@Override
 	public void readData(CompoundTag nbt, HolderLookup.Provider provider) {
 		super.readData(nbt, provider);
-		stat = new ResourceLocation(nbt.getString("stat"));
+		stat = ResourceLocation.tryParse(nbt.getString("stat"));
 		value = nbt.getInt("value");
 	}
 
@@ -112,7 +112,7 @@ public class StatTask extends Task {
 
 		// workaround for a bug where mods might register a modded stat in the vanilla namespace
 		//  https://github.com/FTBTeam/FTB-Mods-Issues/issues/724
-		if (statId == null) statId = BuiltInRegistries.CUSTOM_STAT.get(new ResourceLocation(stat.getPath()));
+		if (statId == null) statId = BuiltInRegistries.CUSTOM_STAT.get(ResourceLocation.tryParse(stat.getPath()));
 
 		if (statId != null) {
 			// could be null, if someone brought an FTB Quests save from a different world and the stat's missing here

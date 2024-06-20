@@ -22,7 +22,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 
 public class AdvancementTask extends AbstractBooleanTask {
-	private ResourceLocation advancement = new ResourceLocation("minecraft:story/root");
+	private ResourceLocation advancement = ResourceLocation.withDefaultNamespace("minecraft:story/root");
 	private String criterion = "";
 
 	public AdvancementTask(long id, Quest quest) {
@@ -44,7 +44,7 @@ public class AdvancementTask extends AbstractBooleanTask {
 	@Override
 	public void readData(CompoundTag nbt, HolderLookup.Provider provider) {
 		super.readData(nbt, provider);
-		advancement = new ResourceLocation(nbt.getString("advancement"));
+		advancement = ResourceLocation.tryParse(nbt.getString("advancement"));
 		criterion = nbt.getString("criterion");
 	}
 
@@ -76,7 +76,7 @@ public class AdvancementTask extends AbstractBooleanTask {
 							.name(id -> advancements.getOrDefault(id, def).name())
 							.create()).setNameKey("ftbquests.task.ftbquests.advancement");
 		} else {
-			config.addString("advancement", advancement.toString(), v -> advancement = new ResourceLocation(v), "minecraft:story/root").setNameKey("ftbquests.task.ftbquests.advancement");
+			config.addString("advancement", advancement.toString(), v -> advancement = ResourceLocation.tryParse(v), "minecraft:story/root").setNameKey("ftbquests.task.ftbquests.advancement");
 		}
 
 		config.addString("criterion", criterion, v -> criterion = v, "");

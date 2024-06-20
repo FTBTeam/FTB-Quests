@@ -23,7 +23,6 @@ import dev.ftb.mods.ftbquests.util.ProgressChange;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.ChatFormatting;
-import net.minecraft.ResourceLocationException;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
@@ -340,16 +339,18 @@ public abstract class Task extends QuestObject {
 	}
 
 	protected ResourceLocation safeResourceLocation(String str, ResourceLocation fallback) {
-		try {
-			return new ResourceLocation(str);
-		} catch (ResourceLocationException e) {
-			if (getQuestFile().isServerSide()) {
-				FTBQuests.LOGGER.warn("Ignoring bad resource location '{}' for task {}", str, id);
-			} else {
-				FTBQuestsClient.getClientPlayer().displayClientMessage(
-						Component.literal("Bad resource location: " + str).withStyle(ChatFormatting.RED), false);
-			}
-			return fallback;
+		var location = ResourceLocation.tryParse(str);
+		if (location != null) {
+			return location;
 		}
+
+		if (getQuestFile().isServerSide()) {
+			FTBQuests.LOGGER.warn("Ignoring bad resource location '{}' for task {}", str, id);
+		} else {
+			FTBQuestsClient.getClientPlayer().displayClientMessage(
+					Component.literal("Bad resource location: " + str).withStyle(ChatFormatting.RED), false);
+		}
+
+		return fallback;
 	}
 }

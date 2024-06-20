@@ -45,7 +45,6 @@ import net.minecraft.client.gui.screens.ConfirmLinkScreen;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.*;
 import net.minecraft.network.chat.contents.PlainTextContents;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.Items;
@@ -60,7 +59,7 @@ import java.util.*;
 import java.util.function.BiConsumer;
 
 public class ViewQuestPanel extends ModalPanel {
-	public static final Icon PAGEBREAK_ICON = Icon.getIcon(new ResourceLocation(FTBQuestsAPI.MOD_ID, "textures/gui/pagebreak.png"));
+	public static final Icon PAGEBREAK_ICON = Icon.getIcon(FTBQuestsAPI.rl("textures/gui/pagebreak.png"));
 
 	private final QuestScreen questScreen;
 	private Quest quest = null;
@@ -80,7 +79,10 @@ public class ViewQuestPanel extends ModalPanel {
 		setPosAndSize(-1, -1, 0, 0);
 		setOnlyRenderWidgetsInside(true);
 		setOnlyInteractWithWidgetsInside(true);
-		setExtraZlevel(300); // ensure we render above any quest button icons (item icons in particular)
+		// Vanilla applies a +Z translation of 150 for item rendering
+		// Supported quest size is up to 8x, so we need to translate at least 8*150 along the +Z axis,
+		//   to ensure the panel renders above any item icons
+		setExtraZlevel(1250);
 	}
 
 	@Override

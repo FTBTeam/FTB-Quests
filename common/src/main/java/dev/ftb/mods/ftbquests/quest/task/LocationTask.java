@@ -63,7 +63,7 @@ public class LocationTask extends AbstractBooleanTask {
 	@Override
 	public void readData(CompoundTag nbt, HolderLookup.Provider provider) {
 		super.readData(nbt, provider);
-		dimension = ResourceKey.create(Registries.DIMENSION, new ResourceLocation(nbt.getString("dimension")));
+		dimension = ResourceKey.create(Registries.DIMENSION, ResourceLocation.tryParse(nbt.getString("dimension")));
 		ignoreDimension = nbt.getBoolean("ignore_dimension");
 
 		int[] pos = nbt.getIntArray("position");
@@ -113,7 +113,7 @@ public class LocationTask extends AbstractBooleanTask {
 	@Environment(EnvType.CLIENT)
 	public void fillConfigGroup(ConfigGroup config) {
 		super.fillConfigGroup(config);
-		config.addString("dim", dimension.location().toString(), v -> dimension = ResourceKey.create(Registries.DIMENSION, new ResourceLocation(v)), "minecraft:overworld");
+		config.addString("dim", dimension.location().toString(), v -> dimension = ResourceKey.create(Registries.DIMENSION, ResourceLocation.tryParse(v)), "minecraft:overworld");
 		config.addBool("ignore_dim", ignoreDimension, v -> ignoreDimension = v, false);
 		config.addInt("x", x, v -> x = v, 0, Integer.MIN_VALUE, Integer.MAX_VALUE);
 		config.addInt("y", y, v -> y = v, 0, Integer.MIN_VALUE, Integer.MAX_VALUE);

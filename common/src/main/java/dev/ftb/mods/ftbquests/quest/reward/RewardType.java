@@ -42,7 +42,7 @@ public final class RewardType {
 			typeId = FTBQuestsAPI.MOD_ID + ':' + typeId;
 		}
 
-		RewardType type = RewardTypes.TYPES.get(new ResourceLocation(typeId));
+		RewardType type = RewardTypes.TYPES.get(ResourceLocation.tryParse(typeId));
 
         return type == null ? null : type.provider.create(id, quest);
     }
