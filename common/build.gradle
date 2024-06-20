@@ -19,26 +19,4 @@ publishing {
 			from components.java
 		}
 	}
-
-	repositories {
-		if (ftbPublishing.ftbToken) {
-			maven {
-				url ftbPublishing.ftbURL
-				credentials {
-					username = ftbPublishing.ftbUser
-					password = ftbPublishing.ftbToken
-				}
-			}
-		}
-
-		if (ftbPublishing.sapsToken) {
-			maven {
-				url ftbPublishing.sapsURL
-				credentials {
-					username = ftbPublishing.sapsUser
-					password = ftbPublishing.sapsToken
-				}
-			}
-		}
-	}
 }

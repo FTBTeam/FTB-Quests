@@ -7,13 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 # [2006.1.0]
 
 ### Changed
-* Ported to Minecraft 1.20.6. Support for Fabric and NeoForge.
+* Ported to Minecraft 1.21. Support for Fabric and NeoForge.
   * Forge support may be re-added if/when Architectury adds support for Forge
 * The way translations are handled has changed significantly in this release
   * Translation text is now stored separately from other quest data, under the `lang/` folder with the quest book folder hierarchy, in a file named after the locale, e.g. `lang/en_us.snbt`
   * This should make it easier to produce translations in the future, since all text is located in one place.
-  * Editing language can be overridden via client preference; default is to use whatever Minecraft language is in force. When text is edited in-game, it's stored in the appropriate language file based in the active editing locale. 
+  * Editing language can be overridden via client preferences; default is to use whatever Minecraft language is in force. When text is edited in-game, it's stored in the appropriate language file based on the active editing locale. 
   * Text which doesn't have a translation in the current locale (but does in the `en_us` locale) is highlighted when in edit mode.
+  * Changes do not affect the player experience
 
 # [2004.2.1]
 

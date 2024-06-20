@@ -70,7 +70,7 @@ components.java {
 
 publishing {
 	publications {
-		mavenForge(MavenPublication) {
+		mavenFabric(MavenPublication) {
 			artifactId = "${rootProject.archives_base_name}-${project.name}"
 			version ftbPublishing.mavenVersion
 			from components.java
