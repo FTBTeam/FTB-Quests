@@ -112,7 +112,7 @@ publishMods {
 
 	def fabricOptions = createOptions("fabric")
 	def neoForgeOptions = createOptions("neoforge")
-	def forgeOptions = createOptions("forge")
+//	def forgeOptions = createOptions("forge")
 
 	def curseForgeOptions = curseforgeOptions {
 		accessToken = providers.environmentVariable("CURSEFORGE_KEY")
@@ -138,12 +138,12 @@ publishMods {
 		optional('ftb-xmod-compat')
 	}
 
-	curseforge("curseforgeForge") {
-		from(curseForgeOptions, forgeOptions)
-		projectId = curseforge_id_forge
-		requires('architectury-api')
-		requires('ftb-library-forge')
-		requires('ftb-teams-forge')
-		optional('ftb-xmod-compat')
-	}
+//	curseforge("curseforgeForge") {
+//		from(curseForgeOptions, forgeOptions)
+//		projectId = curseforge_id_forge
+//		requires('architectury-api')
+//		requires('ftb-library-forge')
+//		requires('ftb-teams-forge')
+//		optional('ftb-xmod-compat')
+//	}
 }
