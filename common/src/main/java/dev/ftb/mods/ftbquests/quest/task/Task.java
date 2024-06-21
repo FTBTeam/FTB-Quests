@@ -232,10 +232,6 @@ public abstract class Task extends QuestObject {
 	 */
 	@Environment(EnvType.CLIENT)
 	public void addMouseOverText(TooltipList list, TeamData teamData) {
-		if (consumesResources()) {
-			list.blankLine();
-			list.add(Component.translatable("ftbquests.task.click_to_submit").withStyle(ChatFormatting.YELLOW, ChatFormatting.UNDERLINE));
-		}
 	}
 
 	@Environment(EnvType.CLIENT)
