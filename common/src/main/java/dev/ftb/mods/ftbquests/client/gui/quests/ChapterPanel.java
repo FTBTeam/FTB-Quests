@@ -196,7 +196,7 @@ public class ChapterPanel extends Panel {
 					List<ContextMenuItem> contextMenu = new ArrayList<>();
 					contextMenu.add(new ContextMenuItem(Component.translatable("ftbquests.chapter"), ThemeProperties.ADD_ICON.get(), b -> {
 						StringConfig c = new StringConfig(NON_EMPTY_PAT);
-						EditStringConfigOverlay<String> overlay = new EditStringConfigOverlay<>(parent, c, accepted -> {
+						EditStringConfigOverlay<String> overlay = new EditStringConfigOverlay<>(parent.getParent(), c, accepted -> {
 							chapterPanel.questScreen.openGui();
 
 							if (accepted && !c.getValue().isEmpty()) {
@@ -215,7 +215,7 @@ public class ChapterPanel extends Panel {
 
 					contextMenu.add(new ContextMenuItem(Component.translatable("ftbquests.chapter_group"), ThemeProperties.ADD_ICON.get(), b -> {
 						StringConfig c = new StringConfig(NON_EMPTY_PAT);
-						EditStringConfigOverlay<String> overlay = new EditStringConfigOverlay<>(parent, c, accepted -> {
+						EditStringConfigOverlay<String> overlay = new EditStringConfigOverlay<>(parent.getParent(), c, accepted -> {
 							chapterPanel.questScreen.openGui();
 
 							if (accepted) {
@@ -298,7 +298,7 @@ public class ChapterPanel extends Panel {
 				playClickSound();
 
 				StringConfig c = new StringConfig(NON_EMPTY_PAT);
-				EditStringConfigOverlay<String> overlay = new EditStringConfigOverlay<>(parent, c, accepted -> {
+				EditStringConfigOverlay<String> overlay = new EditStringConfigOverlay<>(parent.getParent(), c, accepted -> {
 					chapterPanel.questScreen.openGui();
 
 					if (accepted && !c.getValue().isEmpty()) {
