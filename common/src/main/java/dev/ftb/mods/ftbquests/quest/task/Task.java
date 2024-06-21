@@ -232,10 +232,6 @@ public abstract class Task extends QuestObject {
 	 */
 	@Environment(EnvType.CLIENT)
 	public void addMouseOverText(TooltipList list, TeamData teamData) {
-		if (consumesResources()) {
-			list.blankLine();
-			list.add(Component.translatable("ftbquests.task.click_to_submit").withStyle(ChatFormatting.YELLOW, ChatFormatting.UNDERLINE));
-		}
 	}
 
 	@Environment(EnvType.CLIENT)
@@ -334,7 +330,7 @@ public abstract class Task extends QuestObject {
 	public void fillConfigGroup(ConfigGroup config) {
 		super.fillConfigGroup(config);
 
-		config.addBool("optional_task", optionalTask, v -> optionalTask = v, false).setNameKey("ftbquests.quest.misc.optional");
+		config.addBool("optional_task", optionalTask, v -> optionalTask = v, false).setNameKey("ftbquests.quest.misc.optional_task");
 	}
 
 	protected ResourceLocation safeResourceLocation(String str, ResourceLocation fallback) {
