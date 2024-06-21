@@ -10,6 +10,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 * Fluids in fluid tasks can now be shift-clicked to show recipes for the fluid in JEI or REI
   * Added a tooltip to fluid tasks when viewing quests to mention this
 
+### Fixed
+* Fixed Task Screen multiblocks being oversized
+* Removed misleading "Click to submit" tooltip from fluid tasks (fluid tasks can only be submitted via Task Screen)
+
 # [2004.2.1]
 
 ### Added
