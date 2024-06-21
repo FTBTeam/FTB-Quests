@@ -40,6 +40,7 @@ import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.DirectionProperty;
+import net.minecraft.world.level.levelgen.structure.BoundingBox;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.BlockHitResult;
 import org.jetbrains.annotations.Nullable;
@@ -218,16 +219,15 @@ public class TaskScreenBlock extends BaseEntityBlock {
      * @param facing the side the display screen is on
      * @return the bounding box containing all blocks of the multiblock
      */
-    public static AABB getMultiblockBounds(BlockPos corePos, int size, Direction facing) {
-        if (size == 1) return new AABB(corePos);
+    public static BoundingBox getMultiblockBounds(BlockPos corePos, int size, Direction facing) {
+        if (size == 1) return new BoundingBox(corePos);
 
         int size2 = size / 2;
         facing = facing.getCounterClockWise();
 
-        return new AABB(
-                corePos.getX() - size2 * facing.getStepX(), corePos.getY(), corePos.getZ() - size2 * facing.getStepZ(),
-                corePos.getX() + size2 * facing.getStepX(), corePos.getY() + size - 1, corePos.getZ() + size2 * facing.getStepZ()
-        );
+        BlockPos pos1 = new BlockPos(corePos.getX() - size2 * facing.getStepX(), corePos.getY(), corePos.getZ() - size2 * facing.getStepZ());
+        BlockPos pos2 = new BlockPos(corePos.getX() + size2 * facing.getStepX(), corePos.getY() + size - 1, corePos.getZ() + size2 * facing.getStepZ());
+        return BoundingBox.fromCorners(pos1, pos2);
     }
 
     public static class Aux extends TaskScreenBlock {
