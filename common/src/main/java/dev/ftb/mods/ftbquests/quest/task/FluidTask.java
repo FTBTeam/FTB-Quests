@@ -14,12 +14,15 @@ import dev.ftb.mods.ftbquests.quest.TeamData;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.component.DataComponentMap;
 import net.minecraft.core.component.DataComponentPatch;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.Tag;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.material.Fluid;
+import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.level.material.Fluids;
 import org.jetbrains.annotations.Nullable;
 
@@ -88,7 +91,17 @@ public class FluidTask extends Task {
 	public void readData(CompoundTag nbt, HolderLookup.Provider provider) {
 		super.readData(nbt, provider);
 
-		fluidStack = FluidStack.read(provider, nbt.getCompound("fluid")).orElse(FluidStack.empty());
+		if (nbt.contains("fluid", Tag.TAG_STRING)) {
+			// legacy - fluid stored as string ID
+			ResourceLocation id = ResourceLocation.tryParse(nbt.getString("fluid"));
+			if (id == null) {
+				fluidStack = FluidStack.create(Fluids.WATER, 1000L);
+			} else {
+				fluidStack = FluidStack.create(BuiltInRegistries.FLUID.get(id), nbt.getLong("amount"));
+			}
+		} else {
+			fluidStack = FluidStack.read(provider, nbt.getCompound("fluid")).orElse(FluidStack.empty());
+		}
 	}
 
 	@Override

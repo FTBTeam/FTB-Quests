@@ -4,7 +4,18 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-# [2006.1.0]
+# [2100.1.1]
+
+### Fixed
+* Fixed chapter and chapter group creation popups moving in and out with the chapter panel when it's not pinned.
+* Fixed crash when creating Kill and Advancement tasks
+* Fixed Fluid Tasks not loading correctly from older quest book data
+* Any translatable text loaded from older quest book data is now automatically migrated into the new translation system
+  * A `lang/en_us.snbt` file will be auto-created under your `config/ftbquests/quests` folder when an older quest book is loaded
+* Removed a misleading "Click to Submit" tooltip from fluid tasks in the quest view panel
+  * Fluid tasks can only be submitted via a Task Screen
+
+# [2100.1.0]
 
 ### Changed
 * Ported to Minecraft 1.21. Support for Fabric and NeoForge.
