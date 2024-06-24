@@ -22,7 +22,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 
 public class AdvancementTask extends AbstractBooleanTask {
-	private ResourceLocation advancement = ResourceLocation.withDefaultNamespace("minecraft:story/root");
+	private ResourceLocation advancement = ResourceLocation.parse("minecraft:story/root");
 	private String criterion = "";
 
 	public AdvancementTask(long id, Quest quest) {
