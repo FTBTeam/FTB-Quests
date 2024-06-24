@@ -20,8 +20,10 @@ import dev.ftb.mods.ftbquests.quest.loot.RewardTable;
 import dev.ftb.mods.ftbquests.quest.reward.*;
 import dev.ftb.mods.ftbquests.quest.task.*;
 import dev.ftb.mods.ftbquests.quest.theme.property.ThemeProperties;
+import dev.ftb.mods.ftbquests.quest.translation.TranslationKey;
 import dev.ftb.mods.ftbquests.quest.translation.TranslationManager;
 import dev.ftb.mods.ftbquests.util.FileUtils;
+import dev.ftb.mods.ftbquests.util.TextUtils;
 import dev.ftb.mods.ftbteams.api.FTBTeamsAPI;
 import dev.ftb.mods.ftbteams.api.Team;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
@@ -561,6 +563,7 @@ public abstract class BaseQuestFile extends QuestObject implements QuestFile {
 			fileVersion = fileNBT.getInt("version");
 			questObjectMap.put(1, this);
 			readData(fileNBT, provider);
+			handleLegacyFileNBT(fileNBT);
 		}
 
 		translationManager.loadFromNBT(folder.resolve("lang"));
@@ -575,6 +578,9 @@ public abstract class BaseQuestFile extends QuestObject implements QuestFile {
 				for (int i = 0; i < groupListTag.size(); i++) {
 					CompoundTag groupNBT = groupListTag.getCompound(i);
 					ChapterGroup chapterGroup = new ChapterGroup(readID(groupNBT.get("id")), this);
+
+					handleLegacyChapterGroupNBT(groupNBT, chapterGroup);
+
 					questObjectMap.put(chapterGroup.id, chapterGroup);
 					dataCache.put(chapterGroup.id, groupNBT);
 					chapterGroups.add(chapterGroup);
@@ -597,6 +603,9 @@ public abstract class BaseQuestFile extends QuestObject implements QuestFile {
 								getChapterGroup(getID(chapterNBT.get("group"))),
 								path.getFileName().toString().replace(".snbt", "")
 						);
+
+						handleLegacyChapterNBT(chapterNBT, chapter);
+
 						objectOrderMap.put(chapter.id, chapterNBT.getInt("order_index"));
 						questObjectMap.put(chapter.id, chapter);
 						dataCache.put(chapter.id, chapterNBT);
@@ -607,6 +616,9 @@ public abstract class BaseQuestFile extends QuestObject implements QuestFile {
 						for (int i = 0; i < questList.size(); i++) {
 							CompoundTag questNBT = questList.getCompound(i);
 							Quest quest = new Quest(readID(questNBT.get("id")), chapter);
+
+							handleLegacyQuestNBT(quest, questNBT);
+
 							questObjectMap.put(quest.id, quest);
 							dataCache.put(quest.id, questNBT);
 							chapter.addQuest(quest);
@@ -617,6 +629,9 @@ public abstract class BaseQuestFile extends QuestObject implements QuestFile {
 								CompoundTag taskNBT = taskList.getCompound(j);
 								long taskId = readID(taskNBT.get("id"));
 								Task task = TaskType.createTask(taskId, quest, taskNBT.getString("type"));
+
+								handleLegacyTaskNBT(task, taskNBT);
+
 								if (task == null) {
 									task = new CustomTask(taskId, quest);
 									task.setRawTitle("Unknown type: " + taskNBT.getString("type"));
@@ -726,6 +741,53 @@ public abstract class BaseQuestFile extends QuestObject implements QuestFile {
 		}
 
         FTBQuests.LOGGER.info("Loaded {} chapter groups, {} chapters, {} quests, {} reward tables", chapterGroups.size(), chapterCounter, questCounter, rewardTables.size());
+	}
+
+	private void handleLegacyFileNBT(CompoundTag fileNBT) {
+		if (fileNBT.contains("title", Tag.TAG_STRING)) {
+			translationManager.addTranslation(this, "en_us", TranslationKey.TITLE, fileNBT.getString("title"));
+			markDirty();
+		}
+	}
+
+	private void handleLegacyChapterGroupNBT(CompoundTag groupNBT, ChapterGroup chapterGroup) {
+		if (groupNBT.contains("title", Tag.TAG_STRING)) {
+			translationManager.addTranslation(chapterGroup, "en_us", TranslationKey.TITLE, groupNBT.getString("title"));
+			markDirty();
+		}
+	}
+
+	private void handleLegacyChapterNBT(CompoundTag chapterNBT, Chapter chapter) {
+		if (chapterNBT.contains("title", Tag.TAG_STRING)) {
+			translationManager.addTranslation(chapter, "en_us", TranslationKey.TITLE, chapterNBT.getString("title"));
+			markDirty();
+		}
+		if (chapterNBT.contains("subtitle", Tag.TAG_LIST)) {
+			translationManager.addTranslation(chapter, "en_us", TranslationKey.CHAPTER_SUBTITLE, TextUtils.fromListTag(chapterNBT.getList("subtitle", Tag.TAG_STRING)));
+			markDirty();
+		}
+	}
+
+	private void handleLegacyQuestNBT(Quest quest, CompoundTag questNBT) {
+		if (questNBT.contains("title", Tag.TAG_STRING)) {
+			translationManager.addTranslation(quest, "en_us", TranslationKey.TITLE, questNBT.getString("title"));
+			markDirty();
+		}
+		if (questNBT.contains("subtitle", Tag.TAG_STRING)) {
+			translationManager.addTranslation(quest, "en_us", TranslationKey.QUEST_SUBTITLE, questNBT.getString("subtitle"));
+			markDirty();
+		}
+		if (questNBT.contains("description", Tag.TAG_LIST)) {
+			translationManager.addTranslation(quest, "en_us", TranslationKey.QUEST_DESC, TextUtils.fromListTag(questNBT.getList("description", Tag.TAG_STRING)));
+			markDirty();
+		}
+	}
+
+	private void handleLegacyTaskNBT(Task task, CompoundTag taskNBT) {
+		if (taskNBT.contains("title", Tag.TAG_STRING)) {
+			translationManager.addTranslation(task, "en_us", TranslationKey.TITLE, taskNBT.getString("title"));
+			markDirty();
+		}
 	}
 
 	public void updateLootCrates() {
