@@ -26,7 +26,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class KillTask extends Task {
-	private static final ResourceLocation ZOMBIE = ResourceLocation.withDefaultNamespace("minecraft:zombie");
+	private static final ResourceLocation ZOMBIE = ResourceLocation.parse("minecraft:zombie");
 
 	private ResourceLocation entity = ZOMBIE;
 	private long value = 100L;
