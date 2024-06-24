@@ -302,7 +302,7 @@ public class ChapterPanel extends Panel {
 					chapterPanel.questScreen.openGui();
 
 					if (accepted && !c.getValue().isEmpty()) {
-						Chapter chapter = new Chapter(0L, file, file.getDefaultChapterGroup());
+						Chapter chapter = new Chapter(0L, file, file.getDefaultChapterGroup(), Chapter.titleToID( c.getValue()).orElse(""));
 						CompoundTag extra = Util.make(new CompoundTag(), t -> t.putLong("group", group.id));
 						file.getTranslationManager().addInitialTranslation(extra, file.getLocale(), TranslationKey.TITLE, c.getValue());
 						NetworkManager.sendToServer(CreateObjectMessage.create(chapter, extra));
