@@ -4,6 +4,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+# [2100.1.2]
+
+### Fixed
+* Fixed raw json text in quest descriptions not always being recognised
+* Fixed a packet sync error related to translation system when on dedicated server
+* Chapter filenames are now again named after the chapter title (at the time of creation), as they used to be in 1.20 and earlier
+
 # [2100.1.1]
 
 ### Fixed
