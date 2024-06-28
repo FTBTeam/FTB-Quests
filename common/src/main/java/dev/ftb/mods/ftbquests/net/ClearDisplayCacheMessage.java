@@ -34,8 +34,7 @@ public class ClearDisplayCacheMessage implements CustomPacketPayload {
 
     public static void clearForAll(MinecraftServer server) {
         if (server != null) {
-            ClearDisplayCacheMessage msg = new ClearDisplayCacheMessage();
-            NetworkHelper.sendToAll(server, msg);
+            NetworkHelper.sendToAll(server, ClearDisplayCacheMessage.INSTANCE);
         }
     }
 }
