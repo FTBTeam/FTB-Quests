@@ -4,6 +4,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2001.4.7]
+
+### Fixed
+* Hopefully fixed problem where items matching a filter (Item Filters or FTB Filter System) don't always get displayed correctly in the GUI
+  * "Hopefully" because this is a tricky one to reproduce...
+
 ## [2001.4.6]
 
 ### Fixed
