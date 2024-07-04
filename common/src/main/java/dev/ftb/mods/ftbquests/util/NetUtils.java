@@ -21,7 +21,8 @@ public class NetUtils {
 	}
 
 	public static <T> void read(FriendlyByteBuf buffer, Collection<T> list, Function<FriendlyByteBuf, T> reader) {
-		list.retainAll(buffer.readList(reader::apply));
+		list.clear();
+		list.addAll(buffer.readList(reader::apply));
 	}
 
 	public static void writeStrings(FriendlyByteBuf buffer, Collection<String> list) {
