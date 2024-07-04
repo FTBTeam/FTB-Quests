@@ -27,7 +27,6 @@ import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.core.RegistryAccess;
 import net.minecraft.nbt.StringTag;
 import net.minecraft.server.packs.PackType;
 import net.minecraft.util.RandomSource;
@@ -156,8 +155,12 @@ public class FTBQuestsClient {
 		}
 	}
 
-	public static Optional<RegistryAccess> registryAccess() {
-		return Minecraft.getInstance().level == null ? Optional.empty() : Optional.of(Minecraft.getInstance().level.registryAccess());
+	public static Optional<CreativeModeTab.ItemDisplayParameters> creativeTabDisplayParams() {
+		LocalPlayer player = Minecraft.getInstance().player;
+		if (player != null) {
+			return Optional.of(new CreativeModeTab.ItemDisplayParameters(player.connection.enabledFeatures(), Minecraft.getInstance().options.operatorItemsTab().get(), player.clientLevel.registryAccess()));
+		}
+		return Optional.empty();
 	}
 
 	public static void copyToClipboard(QuestObjectBase qo) {
