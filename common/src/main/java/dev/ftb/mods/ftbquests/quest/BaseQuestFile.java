@@ -836,7 +836,8 @@ public abstract class BaseQuestFile extends QuestObject implements QuestFile {
 	public final void readNetData(RegistryFriendlyByteBuf buffer) {
 		super.readNetData(buffer);
 
-		emergencyItems.retainAll(ItemStack.OPTIONAL_STREAM_CODEC.apply(ByteBufCodecs.list()).decode(buffer));
+		emergencyItems.clear();
+		emergencyItems.addAll(ItemStack.OPTIONAL_STREAM_CODEC.apply(ByteBufCodecs.list()).decode(buffer));
 		emergencyItemsCooldown = buffer.readVarInt();
 		defaultPerTeamReward = buffer.readBoolean();
 		defaultTeamConsumeItems = buffer.readBoolean();

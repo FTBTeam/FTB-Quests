@@ -157,7 +157,7 @@ public class GuiProviders {
         ConfigGroup group = new ConfigGroup(FTBQuestsAPI.MOD_ID, accepted -> {
             gui.run();
             if (accepted) {
-                callback.accept(task, new CompoundTag());
+                callback.accept(task, task.getType().makeExtraNBT());
             }
         });
         task.fillConfigGroup(task.createSubGroup(group));

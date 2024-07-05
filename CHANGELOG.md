@@ -4,6 +4,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+# [2100.1.3]
+
+### Fixed
+* Fixed adding tasks to existing quests sometimes losing the task type (leading to a '?' button appearing)
+* Fixed images in the quest book not sync'ing to the client
+* Fixed issue where using FTB Filter System filters would sometimes fail to find matching items for GUI display
+
 # [2100.1.2]
 
 ### Fixed
