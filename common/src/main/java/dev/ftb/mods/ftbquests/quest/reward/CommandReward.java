@@ -2,6 +2,7 @@ package dev.ftb.mods.ftbquests.quest.reward;
 
 import dev.ftb.mods.ftblibrary.config.ConfigGroup;
 import dev.ftb.mods.ftbquests.quest.Quest;
+import dev.ftb.mods.ftbteams.api.FTBTeamsAPI;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.ChatFormatting;
@@ -17,13 +18,15 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class CommandReward extends Reward {
+	private static final String DEFAULT_COMMAND = "/say Hi, @p!";
+
 	private String command;
 	private boolean elevatePerms;
 	private boolean silent;
 
 	public CommandReward(long id, Quest quest) {
 		super(id, quest);
-		command = "/say Hi, @p!";
+		command = DEFAULT_COMMAND;
 	}
 
 	@Override
@@ -69,7 +72,7 @@ public class CommandReward extends Reward {
 	@Environment(EnvType.CLIENT)
 	public void fillConfigGroup(ConfigGroup config) {
 		super.fillConfigGroup(config);
-		config.addString("command", command, v -> command = v, "/say Hi, @team!").setNameKey("ftbquests.reward.ftbquests.command");
+		config.addString("command", command, v -> command = v, DEFAULT_COMMAND).setNameKey("ftbquests.reward.ftbquests.command");
 		config.addBool("elevate", elevatePerms, v -> elevatePerms = v, false);
 		config.addBool("silent", silent, v -> silent = v, false);
 	}
@@ -89,6 +92,10 @@ public class CommandReward extends Reward {
 		}
 
 		overrides.put("quest", quest);
+		overrides.put("team", FTBTeamsAPI.api().getManager().getTeamForPlayer(player)
+				.map(team -> team.getName().getString())
+				.orElse(player.getGameProfile().getName())
+		);
 
 		String cmd = command;
 		for (Map.Entry<String, Object> entry : overrides.entrySet()) {
