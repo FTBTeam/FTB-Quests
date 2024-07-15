@@ -1,14 +1,13 @@
 package dev.ftb.mods.ftbquests.util;
 
 import com.google.gson.JsonParseException;
-import com.google.gson.JsonParser;
 import dev.ftb.mods.ftblibrary.util.client.ClientTextComponentUtils;
-import net.minecraft.ChatFormatting;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.network.chat.contents.PlainTextContents;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -45,5 +44,9 @@ public class TextUtils {
             }
         });
         return res;
+    }
+
+    public static boolean isComponentEmpty(Component c) {
+        return c.getSiblings().isEmpty() && c.getContents() == PlainTextContents.EMPTY;
     }
 }

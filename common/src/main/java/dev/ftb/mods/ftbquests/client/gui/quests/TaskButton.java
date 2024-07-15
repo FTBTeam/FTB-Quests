@@ -17,12 +17,12 @@ import dev.ftb.mods.ftbquests.net.EditObjectMessage;
 import dev.ftb.mods.ftbquests.quest.task.ItemTask;
 import dev.ftb.mods.ftbquests.quest.task.Task;
 import dev.ftb.mods.ftbquests.quest.theme.property.ThemeProperties;
+import dev.ftb.mods.ftbquests.util.TextUtils;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
-import net.minecraft.network.chat.contents.PlainTextContents;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.Item;
 
@@ -181,14 +181,13 @@ public class TaskButton extends Button {
 			ThemeProperties.CHECK_ICON.get().draw(graphics, x + w - 9, y + 1, 8, 8);
 			poseStack.popPose();
 		} else {
-			MutableComponent s = task.getButtonText();
-
-			if (s.getContents() != PlainTextContents.EMPTY) {
+			MutableComponent buttonText = task.getButtonText();
+			if (!TextUtils.isComponentEmpty(buttonText)) {
 				poseStack.pushPose();
-				poseStack.translate(x + 19F - theme.getStringWidth(s) / 2F, y + 15F, 200F);
+				poseStack.translate(x + 19F - theme.getStringWidth(buttonText) / 2F, y + 15F, 200F);
 				poseStack.scale(0.5F, 0.5F, 1F);
 				RenderSystem.enableBlend();
-				theme.drawString(graphics, s, 0, 0, Color4I.WHITE, Theme.SHADOW);
+				theme.drawString(graphics, buttonText, 0, 0, Color4I.WHITE, Theme.SHADOW);
 				poseStack.popPose();
 			}
 		}
