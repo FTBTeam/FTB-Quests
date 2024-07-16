@@ -254,7 +254,7 @@ public class MultilineTextEditorScreen extends BaseScreen {
 				v -> component.image = Icon.getIcon(v), ImageResourceConfig.NONE);
 		group.addInt("width", component.width, v -> component.width = v, 0, 1, 1000);
 		group.addInt("height", component.height, v -> component.height = v, 0, 1, 1000);
-		group.addInt("align", component.align, v -> component.align = v, 0, 1, 2);
+		group.addEnum("align", component.align, v -> component.align = v, ImageComponent.ImageAlign.NAME_MAP, ImageComponent.ImageAlign.CENTER);
 		group.addBool("fit", component.fit, v -> component.fit = v, false);
 
 		new EditConfigScreen(group).openGui();
