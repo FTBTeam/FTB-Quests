@@ -718,6 +718,11 @@ public class TeamData {
 	 * @return the player's per-player data, or {@code Optional.empty()} if the player isn't in this team
 	 */
 	private Optional<PerPlayerData> getOrCreatePlayerData(Player player) {
+		if (file == null) {
+			// shouldn't normally be the base, but can happen if ReplayMod is installed
+			//   https://github.com/FTBTeam/FTB-Mods-Issues/issues/1276
+			return Optional.empty();
+		}
 		if (!perPlayerData.containsKey(player.getUUID()) && file.isPlayerOnTeam(player, this)) {
 			perPlayerData.put(player.getUUID(), new PerPlayerData());
 		}
