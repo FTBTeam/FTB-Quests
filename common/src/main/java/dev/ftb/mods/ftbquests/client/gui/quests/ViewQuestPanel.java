@@ -351,7 +351,7 @@ public class ViewQuestPanel extends ModalPanel {
 					.addFlags(Theme.CENTERED)
 					.setMinWidth(panelText.width).setMaxWidth(panelText.width)
 					.setSpacing(9)
-					.setText(Component.empty().withStyle(ChatFormatting.ITALIC,ChatFormatting.GRAY).append(subtitle))); //.copy().withStyle(ChatFormatting.ITALIC, ChatFormatting.GRAY)));
+					.setText(Component.empty().withStyle(ChatFormatting.ITALIC,ChatFormatting.GRAY).append(subtitle)));
 		}
 
 		boolean showText = !quest.getHideTextUntilComplete().get(false) || questScreen.file.selfTeamData != null && questScreen.file.selfTeamData.isCompleted(quest);
