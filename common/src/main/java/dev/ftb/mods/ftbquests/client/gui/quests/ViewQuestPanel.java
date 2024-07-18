@@ -17,6 +17,7 @@ import dev.ftb.mods.ftblibrary.ui.input.MouseButton;
 import dev.ftb.mods.ftblibrary.ui.misc.CompactGridLayout;
 import dev.ftb.mods.ftblibrary.util.TooltipList;
 import dev.ftb.mods.ftblibrary.util.client.ImageComponent;
+import dev.ftb.mods.ftblibrary.util.client.ImageComponent.ImageAlign;
 import dev.ftb.mods.ftbquests.api.FTBQuestsAPI;
 import dev.ftb.mods.ftbquests.client.ClientQuestFile;
 import dev.ftb.mods.ftbquests.client.gui.ImageComponentWidget;
@@ -404,9 +405,9 @@ public class ViewQuestPanel extends ModalPanel {
 				if (cw.getComponent().fit) {
 					double scale = panelText.width / (double) cw.width;
 					cw.setSize((int) (cw.width * scale), (int) (cw.height * scale));
-				} else if (cw.getComponent().align == 1) {
+				} else if (cw.getComponent().align == ImageAlign.CENTER) {
 					cw.setX((panelText.width - cw.width) / 2);
-				} else if (cw.getComponent().align == 2) {
+				} else if (cw.getComponent().align == ImageAlign.RIGHT) {
 					cw.setX(panelText.width - cw.width);
 				} else {
 					cw.setX(0);
@@ -736,7 +737,7 @@ public class ViewQuestPanel extends ModalPanel {
 				v -> component.image = Icon.getIcon(v), ImageResourceConfig.NONE);
 		group.addInt("width", component.width, v -> component.width = v, 0, 1, 1000);
 		group.addInt("height", component.height, v -> component.height = v, 0, 1, 1000);
-		group.addInt("align", component.align, v -> component.align = v, 0, 0, 2);
+		group.addEnum("align", component.align, v -> component.align = v, ImageAlign.NAME_MAP, ImageAlign.CENTER);
 		group.addBool("fit", component.fit, v -> component.fit = v, false);
 
 		new EditConfigScreen(group).openGui();

@@ -4,6 +4,17 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2001.4.8]
+
+### Fixed
+* Fixed image component alignment settings other than centered getting ignored
+  * Image alignment now uses 'left', 'center' & 'right' instead of 0, 1 & 2 (previous quest book data will be imported correctly)
+* Fixed crash when ReplayMod is also installed
+
+### Added
+* Command rewards now support a {team} substitution in the executed command, which is replaced with the player's short team name
+  * The command setting in the reward properties screen now has a tooltip listing all available substitutions
+
 ## [2001.4.7]
 
 ### Fixed
