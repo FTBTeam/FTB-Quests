@@ -35,6 +35,7 @@ import dev.ftb.mods.ftbquests.quest.task.Task;
 import dev.ftb.mods.ftbquests.quest.theme.QuestTheme;
 import dev.ftb.mods.ftbquests.quest.theme.property.ThemeProperties;
 import dev.ftb.mods.ftbquests.quest.translation.TranslationKey;
+import dev.ftb.mods.ftbquests.util.TextUtils;
 import it.unimi.dsi.fastutil.longs.Long2IntMap;
 import it.unimi.dsi.fastutil.longs.Long2IntOpenHashMap;
 import net.minecraft.ChatFormatting;
@@ -44,7 +45,6 @@ import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.ConfirmLinkScreen;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.*;
-import net.minecraft.network.chat.contents.PlainTextContents;
 import net.minecraft.util.Mth;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.Items;
@@ -157,7 +157,7 @@ public class ViewQuestPanel extends ModalPanel {
 		titleField = new QuestDescriptionField(this, canEdit, TranslationKey.TITLE, (b, clickedW) -> editTitle())
 				.addFlags(Theme.CENTERED)
 				.setMinWidth(150).setMaxWidth(500).setSpacing(9)
-				.setText(quest.getTitle().copy().withStyle(Style.EMPTY.withColor(TextColor.fromRgb(ThemeProperties.QUEST_VIEW_TITLE.get().rgb()))));
+				.setText(Component.empty().withColor(ThemeProperties.QUEST_VIEW_TITLE.get().rgb()).append(quest.getTitle()));
 		int w = Math.max(200, titleField.width + 54);
 
 		if (quest.getMinWidth() > 0) {
@@ -342,16 +342,16 @@ public class ViewQuestPanel extends ModalPanel {
 
 		Component subtitle = quest.getSubtitle();
 
-		if (subtitle.getContents() == PlainTextContents.EMPTY && canEdit) {
+		if (TextUtils.isComponentEmpty(subtitle) && canEdit) {
 			subtitle = Component.literal("[No Subtitle]");
 		}
 
-		if (!subtitle.equals(Component.empty())) {
+		if (!TextUtils.isComponentEmpty(subtitle)) {
 			panelText.add(new QuestDescriptionField(panelText, canEdit, TranslationKey.QUEST_SUBTITLE, (b, clickedW) -> editSubtitle())
 					.addFlags(Theme.CENTERED)
 					.setMinWidth(panelText.width).setMaxWidth(panelText.width)
 					.setSpacing(9)
-					.setText(subtitle.copy().withStyle(ChatFormatting.ITALIC, ChatFormatting.GRAY)));
+					.setText(Component.empty().withStyle(ChatFormatting.ITALIC,ChatFormatting.GRAY).append(subtitle)));
 		}
 
 		boolean showText = !quest.getHideTextUntilComplete().get(false) || questScreen.file.selfTeamData != null && questScreen.file.selfTeamData.isCompleted(quest);
@@ -363,7 +363,7 @@ public class ViewQuestPanel extends ModalPanel {
 				addDescriptionText(canEdit, subtitle);
 			}
 			if (!quest.getGuidePage().isEmpty()) {
-				if (subtitle.getContents() != PlainTextContents.EMPTY) {
+				if (!TextUtils.isComponentEmpty(subtitle)) {
 					panelText.add(new VerticalSpaceWidget(panelText, 7));
 				}
 				panelText.add(new OpenInGuideButton(panelText, quest));
@@ -397,7 +397,7 @@ public class ViewQuestPanel extends ModalPanel {
 
 	private void addDescriptionText(boolean canEdit, Component subtitle) {
 		Pair<Integer,Integer> pageSpan = pageIndices.get(getCurrentPage());
-		if (subtitle.getContents() != PlainTextContents.EMPTY) {
+		if (!TextUtils.isComponentEmpty(subtitle)) {
 			panelText.add(new VerticalSpaceWidget(panelText, 7));
 		}
 

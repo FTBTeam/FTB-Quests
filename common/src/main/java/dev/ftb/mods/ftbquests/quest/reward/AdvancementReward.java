@@ -6,6 +6,7 @@ import dev.ftb.mods.ftblibrary.icon.Icon;
 import dev.ftb.mods.ftblibrary.icon.ItemIcon;
 import dev.ftb.mods.ftblibrary.util.KnownServerRegistries;
 import dev.ftb.mods.ftbquests.quest.Quest;
+import dev.ftb.mods.ftbquests.util.TextUtils;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.ChatFormatting;
@@ -14,7 +15,6 @@ import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.contents.PlainTextContents;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 
@@ -102,7 +102,7 @@ public class AdvancementReward extends Reward {
 				null :
 				KnownServerRegistries.client.advancements().get(advancement);
 
-		if (info != null && info.name().getContents() != PlainTextContents.EMPTY) {
+		if (info != null && !TextUtils.isComponentEmpty(info.name())) {
 			return Component.translatable("ftbquests.reward.ftbquests.advancement").append(": ").append(info.name().copy().withStyle(ChatFormatting.YELLOW));
 		}
 

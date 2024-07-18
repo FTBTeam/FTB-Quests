@@ -4,6 +4,16 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+# [2100.1.4]
+
+### Fixed
+* Fixed coloured text in quest titles & subtitles not showing in the quest view panel
+* Command rewards now support a {team} substitution in the executed command, which is replaced with the player's short team name
+  * The command setting in the reward properties screen now has a tooltip listing all available substitutions
+* Filenames for new chapters are now all named after the chapter title, as intended
+  * Pre-existing chapter files may be named after the hex chapter id; they will still work fine, but you can rename them if you wish
+  * If you choose to rename them, also update the `filename` field in the file correspondingly
+
 # [2100.1.3]
 
 ### Fixed
