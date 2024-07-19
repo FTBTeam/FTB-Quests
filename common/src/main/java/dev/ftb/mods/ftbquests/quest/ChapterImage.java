@@ -45,7 +45,7 @@ public final class ChapterImage implements Movable {
 			long chapterId = buf.readLong();
             ChapterImage img = new ChapterImage(ServerQuestFile.INSTANCE.getChapter(chapterId));
             img.readNetData(buf);
-            return null;
+            return img;
         }
 
         @Override
