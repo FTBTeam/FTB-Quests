@@ -320,10 +320,17 @@ public class QuestPanel extends Panel {
 						double sx = (questX + ox - questMinX) / dx * questScreen.scrollWidth + px;
 						double sy = (questY + oy - questMinY) / dy * questScreen.scrollHeight + py;
 						poseStack.pushPose();
-						poseStack.translate(sx - bs * m.getWidth() / 2D, sy - bs * m.getHeight() / 2D, 0D);
+						// translate/rotate order is highly dependent on whether the object aligns at center or corner.  fun fun fun
+						if (m.isAlignToCorner()) {
+							poseStack.translate(sx - bs * m.getWidth() / 2D, sy - bs * m.getHeight() / 2D, 0D);
+						} else {
+							poseStack.translate(sx, sy, 0D);
+						}
+						poseStack.mulPose(Axis.ZP.rotationDegrees((float) m.getRotation()));
+						if (!m.isAlignToCorner()) {
+							poseStack.translate(-bs * m.getWidth() / 2D, -bs * m.getHeight() / 2D, 0D);
+						}
 						poseStack.scale((float) (bs * m.getWidth()), (float) (bs * m.getHeight()), 1F);
-						GuiHelper.setupDrawing();
-						RenderSystem.enableDepthTest();
 						m.drawMoved(graphics);
 						poseStack.popPose();
 					}

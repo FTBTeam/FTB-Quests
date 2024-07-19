@@ -24,6 +24,14 @@ public interface Movable {
 
 	String getShape();
 
+	default double getRotation() {
+		return 0.0;
+	}
+
+	default boolean isAlignToCorner() {
+		return false;
+	}
+
 	/**
 	 * Called client-side to initiate moving the object
 	 *
