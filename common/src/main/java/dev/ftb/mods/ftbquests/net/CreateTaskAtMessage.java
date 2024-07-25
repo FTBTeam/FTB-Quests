@@ -12,20 +12,23 @@ import dev.ftb.mods.ftbquests.util.NetUtils;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.server.level.ServerPlayer;
+import org.jetbrains.annotations.Nullable;
 
 public class CreateTaskAtMessage extends BaseC2SMessage {
 	private final long chapterId;
 	private final double x, y;
 	private final TaskType type;
 	private final CompoundTag nbt;
+	private final CompoundTag extra;
 
-	public CreateTaskAtMessage(Chapter chapter, double x, double y, Task task) {
+	public CreateTaskAtMessage(Chapter chapter, double x, double y, Task task, @Nullable CompoundTag e) {
 		chapterId = chapter.id;
 		this.x = x;
 		this.y = y;
 		type = task.getType();
 		nbt = new CompoundTag();
 		task.writeData(nbt);
+		extra = e;
 	}
 
 	CreateTaskAtMessage(FriendlyByteBuf buffer) {
@@ -34,6 +37,7 @@ public class CreateTaskAtMessage extends BaseC2SMessage {
 		y = buffer.readDouble();
 		type = ServerQuestFile.INSTANCE.getTaskType(buffer.readVarInt()); //taskTypeIds.get(buffer.readVarInt());
 		nbt = buffer.readNbt();
+		extra = buffer.readNbt();
 	}
 
 	@Override

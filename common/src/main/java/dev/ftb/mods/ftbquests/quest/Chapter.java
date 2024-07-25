@@ -10,12 +10,12 @@ import dev.ftb.mods.ftblibrary.snbt.SNBTCompoundTag;
 import dev.ftb.mods.ftbquests.events.ObjectCompletedEvent;
 import dev.ftb.mods.ftbquests.events.ObjectStartedEvent;
 import dev.ftb.mods.ftbquests.events.QuestProgressEventData;
+import dev.ftb.mods.ftbquests.quest.translation.TranslationKey;
 import dev.ftb.mods.ftbquests.util.NetUtils;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
-import net.minecraft.nbt.StringTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.Component;
@@ -33,7 +33,6 @@ public final class Chapter extends QuestObject {
 	private String filename;
 	private final List<Quest> quests;
 	private final List<QuestLink> questLinks;
-	private final List<String> rawSubtitle;
 	private boolean alwaysInvisible;
 	private String defaultQuestShape;
 	private double defaultQuestSize;
@@ -60,7 +59,6 @@ public final class Chapter extends QuestObject {
 		this.filename = filename;
 		quests = new ArrayList<>();
 		questLinks = new ArrayList<>();
-		rawSubtitle = new ArrayList<>(0);
 		alwaysInvisible = false;
 		defaultQuestShape = "";
 		defaultQuestSize = 1D;
@@ -143,16 +141,6 @@ public final class Chapter extends QuestObject {
 		nbt.putString("filename", filename);
 		super.writeData(nbt);
 
-		if (!rawSubtitle.isEmpty()) {
-			ListTag list = new ListTag();
-
-			for (String v : rawSubtitle) {
-				list.add(StringTag.valueOf(v));
-			}
-
-			nbt.put("subtitle", list);
-		}
-
 		if (alwaysInvisible) {
 			nbt.putBoolean("always_invisible", true);
 		}
@@ -197,13 +185,6 @@ public final class Chapter extends QuestObject {
 	public void readData(CompoundTag nbt) {
 		filename = nbt.getString("filename");
 		super.readData(nbt);
-		rawSubtitle.clear();
-
-		ListTag subtitleNBT = nbt.getList("subtitle", Tag.TAG_STRING);
-
-		for (int i = 0; i < subtitleNBT.size(); i++) {
-			rawSubtitle.add(subtitleNBT.getString(i));
-		}
 
 		alwaysInvisible = nbt.getBoolean("always_invisible");
 		defaultQuestShape = nbt.getString("default_quest_shape");
@@ -242,7 +223,6 @@ public final class Chapter extends QuestObject {
 	public void writeNetData(FriendlyByteBuf buffer) {
 		super.writeNetData(buffer);
 		buffer.writeUtf(filename, Short.MAX_VALUE);
-		NetUtils.writeStrings(buffer, rawSubtitle);
 		buffer.writeUtf(defaultQuestShape, Short.MAX_VALUE);
 		buffer.writeDouble(defaultQuestSize);
 		NetUtils.write(buffer, images, (d, img) -> img.writeNetData(d));
@@ -268,7 +248,6 @@ public final class Chapter extends QuestObject {
 	public void readNetData(FriendlyByteBuf buffer) {
 		super.readNetData(buffer);
 		filename = buffer.readUtf(Short.MAX_VALUE);
-		NetUtils.readStrings(buffer, rawSubtitle);
 		defaultQuestShape = buffer.readUtf(Short.MAX_VALUE);
 		defaultQuestSize = buffer.readDouble();
 		NetUtils.read(buffer, images, d -> {
@@ -388,16 +367,17 @@ public final class Chapter extends QuestObject {
 
 	@Override
 	public void onCreated() {
+		// filename should have been suggested by the client and available here
+		// but in case not, fall back to the chapter's hex object id
 		if (filename.isEmpty()) {
-			String basename = titleToID(rawTitle).orElse(toString());
-			filename = basename;
+			filename = getCodeString();
+		}
 
-			Set<String> existingNames = new HashSet<>();
-			getQuestFile().forAllChapters(ch -> existingNames.add(ch.filename));
-
-			for (int i = 2; existingNames.contains(filename); i++) {
-				filename = basename + "_" + i;
-			}
+		// ensure the filename is actually unique (same chapter name could appear in multiple groups...)
+		Set<String> existingNames = new HashSet<>();
+		getQuestFile().forAllChapters(ch -> existingNames.add(ch.filename));
+		if (existingNames.contains(filename)) {
+			filename = filename + "_" + getCodeString();
 		}
 
 		group.addChapter(this);
@@ -429,7 +409,9 @@ public final class Chapter extends QuestObject {
 	public void fillConfigGroup(ConfigGroup config) {
 		super.fillConfigGroup(config);
 
-		config.addList("subtitle", rawSubtitle, new StringConfig(null), "");
+		// TODO: Wait for FTBLibrary
+		//config.addList("subtitle", getRawSubtitle(), new StringConfig(), this::setRawSubtitle, "");
+		config.addList("subtitle", getRawSubtitle(), new StringConfig(null), "");
 
 		ConfigGroup appearance = config.getOrCreateSubgroup("appearance").setNameKey("ftbquests.quest.appearance");
 		appearance.addEnum("default_quest_shape", defaultQuestShape.isEmpty() ? "default" : defaultQuestShape, v -> defaultQuestShape = v.equals("default") ? "" : v, QuestShape.idMapWithDefault);
@@ -534,7 +516,12 @@ public final class Chapter extends QuestObject {
 	}
 
 	public List<String> getRawSubtitle() {
-		return Collections.unmodifiableList(rawSubtitle);
+		return file.getTranslationManager().getStringListTranslation(this, file.getLocale(), TranslationKey.CHAPTER_SUBTITLE)
+				.orElse(List.of());
+	}
+
+	public void setRawSubtitle(List<String> rawSubtitle) {
+		setTranslatableValue(TranslationKey.CHAPTER_SUBTITLE, rawSubtitle);
 	}
 
 	public boolean consumeItems() {

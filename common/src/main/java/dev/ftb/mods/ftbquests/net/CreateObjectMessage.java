@@ -65,6 +65,8 @@ public class CreateObjectMessage extends BaseC2SMessage {
 			object.getQuestFile().clearCachedData();
 			object.getQuestFile().markDirty();
 
+			object.getQuestFile().getTranslationManager().processInitialTranslation(extra, object);
+
 			new CreateObjectResponseMessage(object, extra, openScreen ? sp.getUUID() : Util.NIL_UUID).sendToAll(sp.getServer());
 		}
 	}
