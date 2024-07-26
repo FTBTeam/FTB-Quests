@@ -8,7 +8,7 @@ import net.fabricmc.api.Environment;
 
 public class LocaleValue extends StringValue {
     public LocaleValue(SNBTConfig config, String value, String def) {
-        super(config, value, def); // TODO: Wait for FTBLibrary
+        super(config, value, def);
     }
 
     @Override

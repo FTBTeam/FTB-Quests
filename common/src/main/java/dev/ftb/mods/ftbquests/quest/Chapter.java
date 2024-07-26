@@ -409,9 +409,7 @@ public final class Chapter extends QuestObject {
 	public void fillConfigGroup(ConfigGroup config) {
 		super.fillConfigGroup(config);
 
-		// TODO: Wait for FTBLibrary
-		//config.addList("subtitle", getRawSubtitle(), new StringConfig(), this::setRawSubtitle, "");
-		config.addList("subtitle", getRawSubtitle(), new StringConfig(null), "");
+		config.addList("subtitle", getRawSubtitle(), new StringConfig(), this::setRawSubtitle, "");
 
 		ConfigGroup appearance = config.getOrCreateSubgroup("appearance").setNameKey("ftbquests.quest.appearance");
 		appearance.addEnum("default_quest_shape", defaultQuestShape.isEmpty() ? "default" : defaultQuestShape, v -> defaultQuestShape = v.equals("default") ? "" : v, QuestShape.idMapWithDefault);
