@@ -6,6 +6,7 @@ import dev.architectury.networking.NetworkManager;
 import dev.architectury.registry.ReloadListenerRegistry;
 import dev.architectury.registry.client.keymappings.KeyMappingRegistry;
 import dev.architectury.registry.client.rendering.RenderTypeRegistry;
+import dev.ftb.mods.ftblibrary.FTBLibrary;
 import dev.ftb.mods.ftblibrary.config.ImageResourceConfig;
 import dev.ftb.mods.ftblibrary.config.ui.EditConfigScreen;
 import dev.ftb.mods.ftblibrary.ui.Widget;
@@ -157,7 +158,7 @@ public class FTBQuestsClient {
 					player.canUseGameMasterBlocks(),
 					player.level().registryAccess()
 			);
-			ModItems.CREATIVE_TAB.get().buildContents(params);
+			FTBLibrary.getCreativeModeTab().get().buildContents(params);
 			CreativeModeTabs.searchTab().buildContents(params);
 		}
 	}
