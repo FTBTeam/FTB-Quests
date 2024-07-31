@@ -51,7 +51,7 @@ public class FTBQuestsNetClient {
 		}
 	}
 
-	public static void createObject(long id, long parent, QuestObjectType type, CompoundTag nbt, @Nullable CompoundTag extra, UUID creator) {
+	public static void createObject(long id, long parent, QuestObjectType type, CompoundTag nbt, CompoundTag extra, UUID creator) {
 		ClientQuestFile file = ClientQuestFile.INSTANCE;
 
 		QuestObjectBase object = file.create(id, type, parent, extra);

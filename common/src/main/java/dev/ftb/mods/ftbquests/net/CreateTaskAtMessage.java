@@ -52,6 +52,7 @@ public class CreateTaskAtMessage extends BaseC2SMessage {
 		buffer.writeDouble(y);
 		buffer.writeVarInt(type.internalId);
 		buffer.writeNbt(nbt);
+		buffer.writeNbt(extra);
 	}
 
 	@Override

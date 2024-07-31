@@ -10,8 +10,8 @@ import net.minecraft.server.level.ServerPlayer;
 public class RequestTranslationTableMessage extends BaseC2SMessage {
     private final String locale;
 
-    RequestTranslationTableMessage(FriendlyByteBuf buf) {
-        this.locale = buf.readUtf();
+    RequestTranslationTableMessage(FriendlyByteBuf buffer) {
+        this.locale = buffer.readUtf();
     }
 
     public RequestTranslationTableMessage(String locale) {
@@ -24,8 +24,8 @@ public class RequestTranslationTableMessage extends BaseC2SMessage {
     }
 
     @Override
-    public void write(FriendlyByteBuf buf) {
-        buf.writeUtf(locale);
+    public void write(FriendlyByteBuf buffer) {
+        buffer.writeUtf(locale);
     }
 
     @Override

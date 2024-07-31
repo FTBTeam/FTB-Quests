@@ -1,5 +1,6 @@
 package dev.ftb.mods.ftbquests.quest.translation;
 
+import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.mojang.datafixers.util.Either;
 import net.minecraft.Util;
@@ -18,14 +19,16 @@ public class TranslationTable {
     private final Map<String, Either<String, List<String>>> map;
     private boolean saveNeeded;
 
-    public TranslationTable(FriendlyByteBuf buffer) {
-        this.map = new HashMap<>();
-
-        buffer.readMap(Maps::newHashMapWithExpectedSize, buf -> buf.readUtf(), buf -> buf.readEither(buf1 -> buf1.readUtf(), buf1 -> buf1.readList(buf2 -> buf2.readUtf())));
-    }
-
     public TranslationTable() {
         this.map = new HashMap<>();
+    }
+
+    public TranslationTable(FriendlyByteBuf buffer) {
+        this.map = buffer.readMap(Maps::newHashMapWithExpectedSize, buf -> buf.readUtf(), buf -> buf.readEither(buf1 -> buf1.readUtf(), buf1 -> buf1.readList(buf2 -> buf2.readUtf())));
+    }
+
+    public void write(FriendlyByteBuf buffer) {
+        buffer.writeMap(map, (buf, string) -> buf.writeUtf(string), (buf, stringListEither) -> buf.writeEither(stringListEither, (buf1, string) -> buf1.writeUtf(string), (buf1, strings) -> buf1.writeCollection(Lists.newArrayList(), (buf2, o) -> buf2.writeUtf(String.valueOf(strings)))));
     }
 
     public static TranslationTable fromNBT(CompoundTag tag) {

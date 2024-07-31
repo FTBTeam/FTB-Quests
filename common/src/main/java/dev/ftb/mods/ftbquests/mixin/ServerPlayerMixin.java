@@ -22,7 +22,7 @@ public class ServerPlayerMixin implements FTBQuestsServerPlayer {
     }
 
     @Override
-    public String ftbquests$language() {
+    public String ftbquests$getLanguage() {
         return this.ftbquests$language;
     }
 }

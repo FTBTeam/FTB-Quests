@@ -162,7 +162,7 @@ public class TranslationManager {
         // make sure player always has the fallback en_us translations
         sendTableToPlayer(player, "en_us");
 
-        String lang = ((FTBQuestsServerPlayer) player).ftbquests$language();
+        String lang = ((FTBQuestsServerPlayer) player).ftbquests$getLanguage();
         if (!lang.equals("en_us")) {
             sendTableToPlayer(player, lang);
         }

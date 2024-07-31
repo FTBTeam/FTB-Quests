@@ -18,7 +18,7 @@ public class ServerGamePacketListenerImplMixin {
 
     @Inject(method = "handleClientInformation", at = @At(value = "INVOKE", target = "Lnet/minecraft/network/protocol/PacketUtils;ensureRunningOnSameThread(Lnet/minecraft/network/protocol/Packet;Lnet/minecraft/network/PacketListener;Lnet/minecraft/server/level/ServerLevel;)V", shift = At.Shift.AFTER))
     public void handleClientInformation(ServerboundClientInformationPacket packet, CallbackInfo ci) {
-        if (!((FTBQuestsServerPlayer) player).ftbquests$language().equals(packet.language())) {
+        if (!((FTBQuestsServerPlayer) player).ftbquests$getLanguage().equals(packet.language())) {
             TranslationManager.syncTable(player, packet.language());
         }
     }

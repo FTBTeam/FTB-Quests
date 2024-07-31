@@ -12,9 +12,9 @@ public class SyncTranslationTableMessage extends BaseS2CMessage {
     private final String locale;
     private final TranslationTable table;
 
-    SyncTranslationTableMessage(FriendlyByteBuf buf) {
-        locale = buf.readUtf();
-        table = new TranslationTable(buf);
+    SyncTranslationTableMessage(FriendlyByteBuf buffer) {
+        locale = buffer.readUtf();
+        table = new TranslationTable(buffer);
     }
 
     public SyncTranslationTableMessage(String locale, TranslationTable table) {
@@ -28,9 +28,9 @@ public class SyncTranslationTableMessage extends BaseS2CMessage {
     }
 
     @Override
-    public void write(FriendlyByteBuf buf) {
-        buf.writeUtf(locale);
-        new TranslationTable(buf);
+    public void write(FriendlyByteBuf buffer) {
+        buffer.writeUtf(locale);
+        table.write(buffer);
     }
 
     @Override

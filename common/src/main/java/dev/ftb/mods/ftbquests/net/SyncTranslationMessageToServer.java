@@ -5,7 +5,6 @@ import com.mojang.datafixers.util.Either;
 import dev.architectury.networking.NetworkManager;
 import dev.architectury.networking.simple.BaseC2SMessage;
 import dev.architectury.networking.simple.MessageType;
-import dev.ftb.mods.ftblibrary.util.NetworkHelper;
 import dev.ftb.mods.ftbquests.quest.QuestObjectBase;
 import dev.ftb.mods.ftbquests.quest.ServerQuestFile;
 import dev.ftb.mods.ftbquests.quest.translation.TranslationKey;
@@ -19,17 +18,15 @@ public class SyncTranslationMessageToServer extends BaseC2SMessage {
     private final String locale;
     private final TranslationKey subKey;
     private final Either<String, List<String>> val;
-    private FriendlyByteBuf byteBuf;
 
-    SyncTranslationMessageToServer(FriendlyByteBuf buf) {
-        id = buf.readLong();
-        locale = buf.readUtf();
-        subKey = buf.readEnum(TranslationKey.class);
-        val = buf.readEither(buf1 -> buf1.readUtf(), buf2 -> buf2.readList(buf1 -> buf1.readUtf()));
-        byteBuf = buf;
+    SyncTranslationMessageToServer(FriendlyByteBuf buffer) {
+        id = buffer.readLong();
+        locale = buffer.readUtf();
+        subKey = buffer.readEnum(TranslationKey.class);
+        val = buffer.readEither(buffer1 -> buffer1.readUtf(), buffer2 -> buffer2.readList(buffer1 -> buffer1.readUtf()));
     }
 
-    public SyncTranslationMessageToServer(long id, String locale, TranslationKey subKey, Either<String, List<String>> val) {
+    private SyncTranslationMessageToServer(long id, String locale, TranslationKey subKey, Either<String, List<String>> val) {
         this.id = id;
         this.locale = locale;
         this.subKey = subKey;
@@ -50,11 +47,11 @@ public class SyncTranslationMessageToServer extends BaseC2SMessage {
     }
 
     @Override
-    public void write(FriendlyByteBuf buf) {
-        buf.writeLong(id);
-        buf.writeUtf(locale);
-        buf.writeEnum(subKey);
-        buf.writeEither(val, (buf1, string) -> buf1.writeUtf(string), (buf1, strings) -> buf1.writeCollection(Lists.newArrayList(), (buf2, o) -> buf2.writeUtf(String.valueOf(strings))));
+    public void write(FriendlyByteBuf buffer) {
+        buffer.writeLong(id);
+        buffer.writeUtf(locale);
+        buffer.writeEnum(subKey);
+        buffer.writeEither(val, (buf1, string) -> buf1.writeUtf(string), (buf1, strings) -> buf1.writeCollection(Lists.newArrayList(), (buf2, o) -> buf2.writeUtf(String.valueOf(strings))));
     }
 
     @Override
@@ -66,7 +63,7 @@ public class SyncTranslationMessageToServer extends BaseC2SMessage {
                 if (object != null) {
                     val.ifLeft(str -> file.getTranslationManager().addTranslation(object, locale, subKey, str))
                             .ifRight(list -> file.getTranslationManager().addTranslation(object, locale, subKey, list));
-                    NetworkHelper.sendToAll(getType(), file.server, byteBuf);
+                    new SyncTranslationMessageToClient(object.id, locale, subKey, val).sendTo(file.server.getPlayerList().getPlayers());
                 }
             }
         }
