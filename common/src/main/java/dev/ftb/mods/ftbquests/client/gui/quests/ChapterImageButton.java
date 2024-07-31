@@ -16,6 +16,7 @@ import dev.ftb.mods.ftbquests.quest.ChapterImage;
 import dev.ftb.mods.ftbquests.quest.Movable;
 import dev.ftb.mods.ftbquests.quest.theme.property.ThemeProperties;
 import net.minecraft.ChatFormatting;
+import net.minecraft.Util;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
@@ -25,10 +26,28 @@ import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.function.BiFunction;
 
 public class ChapterImageButton extends Button implements QuestPositionableButton {
 	private final QuestScreen questScreen;
 	private final ChapterImage chapterImage;
+
+	private static final BiFunction<XYPair, Double, XYPair> MEMOIZED_ROTATE = Util.memoize((xy, rotateDeg) -> {
+		// cartesian -> polar, rotate, polar -> cartesian
+		double radius = xy.radius();
+		double angle = xy.angle();
+		double rotateRad = Math.toRadians(rotateDeg);
+		// yes, negative is needed here
+		return new XYPair(radius * Math.cos(angle - rotateRad), radius * Math.sin(angle - rotateRad));
+	});
+	private record XYPair(double x, double y) {
+		double radius() {
+			return Math.sqrt(x * x + y * y);
+		}
+		double angle() {
+			return Math.atan2(y, x);
+		}
+	}
 
 	public ChapterImageButton(Panel panel, ChapterImage i) {
 		super(panel, Component.empty(), i.getImage());
@@ -59,6 +78,17 @@ public class ChapterImageButton extends Button implements QuestPositionableButto
 				|| chapterImage.getClick().isEmpty() && !questScreen.file.canEdit()) {
             return false;
         }
+
+		if (chapterImage.getRotation() != 0) {
+			// need a bit of trig here, and we'll memoize it for performance
+			// rotate the effective mouse position about either the corner or the center of the image
+			double cx = chapterImage.isAlignToCorner() ? getX() : getX() + getWidth() / 2.0;
+			double cy = chapterImage.isAlignToCorner() ? getY() : getY() + getHeight() / 2.0;
+
+			XYPair rotated = MEMOIZED_ROTATE.apply(new XYPair(mouseX - cx, mouseY - cy), chapterImage.getRotation());
+			mouseX = (int) (cx + rotated.x);
+			mouseY = (int) (cy + rotated.y);
+		}
 
         return super.checkMouseOver(mouseX, mouseY);
 	}

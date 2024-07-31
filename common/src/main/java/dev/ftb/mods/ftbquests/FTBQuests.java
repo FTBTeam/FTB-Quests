@@ -37,12 +37,12 @@ public class FTBQuests {
 	public FTBQuests() {
 		FTBQuestsAPI._init(FTBQuestsAPIImpl.INSTANCE);
 
+		PROXY = EnvExecutor.getEnvSpecific(() -> FTBQClientProxy::new, () -> FTBQServerProxy::new);
+
 		TaskTypes.init();
 		RewardTypes.init();
 		FTBQuestsNetHandler.init();
 		FTBQuestsEventHandler.INSTANCE.init();
-
-		PROXY = EnvExecutor.getEnvSpecific(() -> FTBQClientProxy::new, () -> FTBQServerProxy::new);
 
 		ReloadListenerRegistry.register(PackType.SERVER_DATA, new TagReloadListener());
 

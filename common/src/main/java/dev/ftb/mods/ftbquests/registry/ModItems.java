@@ -2,22 +2,21 @@ package dev.ftb.mods.ftbquests.registry;
 
 import dev.architectury.registry.CreativeTabRegistry;
 import dev.architectury.registry.registries.DeferredRegister;
-import dev.architectury.registry.registries.RegistrarManager;
 import dev.architectury.registry.registries.RegistrySupplier;
+import dev.ftb.mods.ftblibrary.FTBLibrary;
 import dev.ftb.mods.ftbquests.FTBQuests;
 import dev.ftb.mods.ftbquests.api.FTBQuestsAPI;
 import dev.ftb.mods.ftbquests.item.*;
 import dev.ftb.mods.ftbquests.item.ScreenBlockItem.ScreenSize;
 import net.minecraft.core.registries.Registries;
-import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.BlockItem;
-import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.Block;
 
 import java.util.List;
 import java.util.function.Supplier;
+import java.util.stream.Stream;
 
 public class ModItems {
 	public static final DeferredRegister<Item> ITEMS = DeferredRegister.create(FTBQuestsAPI.MOD_ID, Registries.ITEM);
@@ -66,25 +65,17 @@ public class ModItems {
 
 	public static void register() {
 		ITEMS.register();
-	}
 
-	public static final RegistrySupplier<CreativeModeTab> CREATIVE_TAB = RegistrarManager.get(FTBQuestsAPI.MOD_ID)
-			.get(Registries.CREATIVE_MODE_TAB)
-			.register(FTBQuestsAPI.rl("default"), ModItems::buildDefaultTab);
+		CreativeTabRegistry.appendStack(FTBLibrary.getCreativeModeTab(), BASE_ITEMS.stream().map(item -> () -> new ItemStack(item.get())));
+
+		Stream<Supplier<ItemStack>> lootCreates = FTBQuests.PROXY.getKnownLootCrates()
+				.stream()
+				.map(crate -> crate::createStack);
+
+		CreativeTabRegistry.appendStack(FTBLibrary.getCreativeModeTab(), lootCreates);
+	}
 
 	public static Item.Properties defaultProps() {
 		return new Item.Properties();
-	}
-
-	private static CreativeModeTab buildDefaultTab() {
-		return CreativeTabRegistry.create(builder -> builder.title(Component.translatable("ftbquests"))
-				.icon(() -> new ItemStack(BOOK.get()))
-				.displayItems((params, output) -> {
-					// base items, always present
-					output.acceptAll(BASE_ITEMS.stream().map(item -> new ItemStack(item.get())).toList());
-					// dynamically add loot crates based on current reward tables
-					FTBQuests.PROXY.getKnownLootCrates().forEach(crate -> output.accept(crate.createStack()));
-				})
-		);
 	}
 }
