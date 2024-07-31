@@ -1,7 +1,6 @@
 package dev.ftb.mods.ftbquests.quest;
 
 import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.math.Axis;
 import dev.architectury.networking.NetworkManager;
 import dev.ftb.mods.ftblibrary.config.ConfigGroup;
 import dev.ftb.mods.ftblibrary.config.ImageResourceConfig;
@@ -45,7 +44,7 @@ public final class ChapterImage implements Movable {
 			long chapterId = buf.readLong();
             ChapterImage img = new ChapterImage(ServerQuestFile.INSTANCE.getChapter(chapterId));
             img.readNetData(buf);
-            return null;
+            return img;
         }
 
         @Override
@@ -121,10 +120,12 @@ public final class ChapterImage implements Movable {
 		return order;
 	}
 
+	@Override
 	public double getRotation() {
 		return rotation;
 	}
 
+	@Override
 	public boolean isAlignToCorner() {
 		return alignToCorner;
 	}
@@ -301,20 +302,18 @@ public final class ChapterImage implements Movable {
 		poseStack.pushPose();
 
 		if (alignToCorner) {
-			poseStack.mulPose(Axis.ZP.rotationDegrees((float) rotation));
 			image.withColor(Color4I.WHITE.withAlpha(50)).draw(graphics, 0, 0, 1, 1);
 		} else {
 			poseStack.translate(0.5D, 0.5D, 0);
-			poseStack.mulPose(Axis.ZP.rotationDegrees((float) rotation));
 			poseStack.scale(0.5F, 0.5F, 1);
 			image.withColor(Color4I.WHITE.withAlpha(50)).draw(graphics, -1, -1, 2, 2);
 		}
 
-		poseStack.popPose();
+//		QuestShape.get(getShape()).getOutline()
+//				.withColor(Color4I.WHITE.withAlpha(30))
+//				.draw(graphics, 0, 0, 1, 1);
 
-		QuestShape.get(getShape()).getOutline()
-				.withColor(Color4I.WHITE.withAlpha(30))
-				.draw(graphics, 0, 0, 1, 1);
+		poseStack.popPose();
 	}
 
 	@Override

@@ -44,7 +44,7 @@ processResources {
 	filesMatching("META-INF/neoforge.mods.toml") {
 		expand "version": project.version,
 			"archversion": project.architectury_api_version,
-			"neoforgeversion": project.neoforge_version,
+			"neoforgeversionrange": project.neoforge_version_range,
 			"neoforgeloaderversion": project.neoforge_loader_version,
 			"mcversion": project.minecraft_version,
 			"ftblibraryversion": project.ftb_library_version,
