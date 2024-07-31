@@ -6,6 +6,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 # [2100.1.5]
 
+### Changed
+* FTB Quests items are now registered to the `FTB Suite` creative tab instead of FTB Quests own tab
+  * In practice, this means they share a tab with other FTB mods, but only FTB Filter System registers an item at this time
+
 ### Fixed
 * Rotated images now have a correctly rotated hitbox
   * In addition, rotated images with a non-default aspect ratio now preview correctly during rotation
