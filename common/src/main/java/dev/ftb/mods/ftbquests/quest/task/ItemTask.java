@@ -263,7 +263,7 @@ public class ItemTask extends Task implements Predicate<ItemStack> {
 
 	@Override
 	public void addMouseOverHeader(TooltipList list, TeamData teamData, boolean advanced) {
-		if (!rawTitle.isEmpty()) {
+		if (!getRawTitle().isEmpty()) {
 			// task has had a custom title set, use that in preference to the item's tooltip
 			list.add(getTitle());
 		} else {

@@ -12,6 +12,8 @@ public interface FTBQuestsNetHandler {
 
 	MessageType SYNC_QUESTS = NET.registerS2C("sync_quests", SyncQuestsMessage::new);
 	MessageType SYNC_TEAM_DATA = NET.registerS2C("sync_team_data", SyncTeamDataMessage::new);
+	MessageType SYNC_TRANSLATION_TO_CLIENT = NET.registerS2C("sync_translation_to_client", SyncTranslationMessageToClient::new);
+	MessageType SYNC_TRANSLATION_TABLE = NET.registerS2C("sync_translation_table", SyncTranslationTableMessage::new);
 	MessageType UPDATE_TASK_PROGRESS = NET.registerS2C("update_task_progress", UpdateTaskProgressMessage::new);
 	MessageType SUBMIT_TASK = NET.registerC2S("submit_task", SubmitTaskMessage::new);
 	MessageType CLAIM_REWARD = NET.registerC2S("claim_reward", ClaimRewardMessage::new);
@@ -62,8 +64,10 @@ public interface FTBQuestsNetHandler {
 	MessageType COPY_QUEST = NET.registerC2S("copy_quest", CopyQuestMessage::new);
 	MessageType COPY_CHAPTER_IMAGE = NET.registerC2S("copy_chapter_image", CopyChapterImageMessage::new);
 	MessageType SYNC_STRUCTURES_REQUEST = NET.registerC2S("sync_structures_request", SyncStructuresRequestMessage::new);
+	MessageType SYNC_TRANSLATION_TO_SERVER = NET.registerC2S("sync_translation_to_server", SyncTranslationMessageToServer::new);
 	MessageType SYNC_STRUCTURES_RESPONSE = NET.registerS2C("sync_structures_response", SyncStructuresResponseMessage::new);
 	MessageType REQUEST_TEAM_DATA = NET.registerC2S("request_team_data", RequestTeamDataMessage::new);
+	MessageType REQUEST_TRANSLATION_TABLE = NET.registerC2S("request_translation_table", RequestTranslationTableMessage::new);
 	MessageType SYNC_EDITOR_PERMISSION = NET.registerS2C("sync_editor_permission", SyncEditorPermissionMessage::new);
 	MessageType OPEN_QUEST_BOOK = NET.registerS2C("open_quest_book", OpenQuestBookMessage::new);
 	MessageType CLEAR_DISPLAY_CACHE = NET.registerS2C("clear_display_cache", ClearDisplayCacheMessage::new);

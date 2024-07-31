@@ -3,8 +3,12 @@ package dev.ftb.mods.ftbquests.util;
 import com.google.gson.JsonParseException;
 import dev.ftb.mods.ftblibrary.util.client.ClientTextComponentUtils;
 import net.minecraft.ChatFormatting;
+import net.minecraft.nbt.ListTag;
+import net.minecraft.nbt.Tag;
 import net.minecraft.network.chat.Component;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.regex.Pattern;
 
 public class TextUtils {
@@ -29,5 +33,15 @@ public class TextUtils {
         } catch (JsonParseException e) {
             return Component.literal("ERROR: " + e.getMessage()).withStyle(ChatFormatting.RED);
         }
+    }
+
+    public static List<String> fromListTag(ListTag tag) {
+        List<String> res = new ArrayList<>();
+        tag.forEach(el -> {
+            if (el.getId() == Tag.TAG_STRING) {
+                res.add(el.getAsString());
+            }
+        });
+        return res;
     }
 }

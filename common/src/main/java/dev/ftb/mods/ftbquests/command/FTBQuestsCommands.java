@@ -396,8 +396,10 @@ public class FTBQuestsCommands {
 
 		instance.load();
 		new SyncQuestsMessage(instance).sendToAll(source.getServer());
-		source.getServer().getPlayerList().getPlayers()
-				.forEach(p -> new SyncEditorPermissionMessage(PermissionsHelper.hasEditorPermission(p, false)).sendTo(p));
+		source.getServer().getPlayerList().getPlayers().forEach(p -> {
+			new SyncEditorPermissionMessage(PermissionsHelper.hasEditorPermission(p, false)).sendTo(p);
+			instance.getTranslationManager().sendTranslationsToPlayer(p);
+		});
 
 		source.sendSuccess(() -> Component.translatable("commands.ftbquests.command.feedback.reloaded"), false);
 		UUID id = sender == null ? Util.NIL_UUID : sender.getUUID();

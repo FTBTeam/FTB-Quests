@@ -119,6 +119,7 @@ public class ServerQuestFile extends BaseQuestFile {
 		QuestObjectBase object = getBase(id);
 
 		if (object != null) {
+			getTranslationManager().removeAllTranslations(object);
 			object.deleteChildren();
 			object.deleteSelf();
 			refreshIDMap();
@@ -139,6 +140,8 @@ public class ServerQuestFile extends BaseQuestFile {
 			writeDataFull(getFolder());
 			shouldSave = false;
 		}
+
+		getTranslationManager().saveToNBT(getFolder().resolve("lang"));
 
 		getAllTeamData().forEach(TeamData::saveIfChanged);
 	}
@@ -170,6 +173,8 @@ public class ServerQuestFile extends BaseQuestFile {
 		// - client will respond to this with a RequestTeamData message
 		// - server will only then send a SyncTeamData message to the client
 		new SyncQuestsMessage(this).sendTo(player);
+
+		getTranslationManager().sendTranslationsToPlayer(player);
 
 		new SyncEditorPermissionMessage(PermissionsHelper.hasEditorPermission(player, false)).sendTo(player);
 
@@ -255,5 +260,10 @@ public class ServerQuestFile extends BaseQuestFile {
 			return true;
 		}
 		return false;
+	}
+
+	@Override
+	public String getLocale() {
+		return "en_us";
 	}
 }
