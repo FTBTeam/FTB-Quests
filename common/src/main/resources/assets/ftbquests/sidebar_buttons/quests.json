@@ -1,0 +1,10 @@
+{
+  "icon": "ftbquests:item/book",
+  "sort_index": 575,
+  "click": [
+    "ftbquests:open_gui"
+  ],
+  "required_server_mods": [
+    "ftbquests"
+  ]
+}
