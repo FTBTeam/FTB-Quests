@@ -36,7 +36,7 @@ public class AddRewardButton extends Button {
 				contextMenu.add(new ContextMenuItem(type.getDisplayName(), type.getIconSupplier(), b -> {
 					playClickSound();
 					type.getGuiProvider().openCreationGui(parent, quest, reward ->
-							NetworkManager.sendToServer(CreateObjectMessage.create(reward, type.makeExtraNBT()))
+							NetworkManager.sendToServer(CreateObjectMessage.requestCreation(reward))
 					);
 				}));
 			}

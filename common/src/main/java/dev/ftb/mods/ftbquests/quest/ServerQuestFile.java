@@ -137,7 +137,7 @@ public class ServerQuestFile extends BaseQuestFile {
 			getTranslationManager().removeAllTranslations(object);
 			object.deleteChildren();
 			object.deleteSelf();
-			refreshIDMap();
+//			refreshIDMap();
 			markDirty();
 			object.getPath().ifPresent(path -> FileUtils.delete(getFolder().resolve(path).toFile()));
 		}

@@ -13,19 +13,17 @@ import dev.ftb.mods.ftbquests.quest.QuestObjectType;
 import dev.ftb.mods.ftbquests.quest.loot.RewardTable;
 import dev.ftb.mods.ftbquests.quest.reward.*;
 import dev.ftb.mods.ftbquests.quest.task.*;
-import dev.ftb.mods.ftbquests.quest.translation.TranslationKey;
 import dev.ftb.mods.ftbquests.util.ConfigQuestObject;
 import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.StructureBlockEntity;
 import net.minecraft.world.phys.BlockHitResult;
 
-import java.util.function.BiConsumer;
+import java.util.function.Consumer;
 
 public class GuiProviders {
     public static RewardType.GuiProvider defaultRewardGuiProvider(RewardType.Provider provider) {
@@ -69,7 +67,7 @@ public class GuiProviders {
                 EditStringConfigOverlay<Long> overlay = new EditStringConfigOverlay<>(panel.getGui(), c, accepted -> {
                     if (accepted) {
                         slvTask.setValue(c.getValue());
-                        callback.accept(task, task.getType().makeExtraNBT());
+                        callback.accept(task);
                     }
                     panel.run();
                 }, task.getType().getDisplayName()).atMousePosition();
@@ -88,8 +86,7 @@ public class GuiProviders {
             new SelectItemStackScreen(c, accepted -> {
                 gui.run();
                 if (accepted) {
-                    ItemTask itemTask = new ItemTask(0L, quest).setStackAndCount(c.getValue(), c.getValue().getCount());
-                    callback.accept(itemTask, itemTask.getType().makeExtraNBT());
+                    callback.accept(new ItemTask(0L, quest).setStackAndCount(c.getValue(), c.getValue().getCount()));
                 }
             }).openGui();
         });
@@ -102,9 +99,7 @@ public class GuiProviders {
                 if (accepted) {
                     CheckmarkTask checkmarkTask = new CheckmarkTask(0L, quest);
                     checkmarkTask.setRawTitle(c.getValue());
-                    CompoundTag extra = checkmarkTask.getType().makeExtraNBT();
-                    quest.getQuestFile().getTranslationManager().addInitialTranslation(extra, quest.getQuestFile().getLocale(), TranslationKey.TITLE, c.getValue());
-                    callback.accept(checkmarkTask, extra);
+                    callback.accept(checkmarkTask);
                 }
                 panel.run();
             }, TaskTypes.CHECKMARK.getDisplayName()).atMousePosition();
@@ -119,7 +114,7 @@ public class GuiProviders {
                 gui.run();
                 if (accepted) {
                     FluidTask fluidTask = new FluidTask(0L, quest).setFluid(c.getValue());
-                    callback.accept(fluidTask, fluidTask.getType().makeExtraNBT());
+                    callback.accept(fluidTask);
                 }
             }).openGui();
         });
@@ -148,7 +143,7 @@ public class GuiProviders {
 
                 if (blockEntity instanceof StructureBlockEntity structure) {
                     task.initFromStructure(structure);
-                    callback.accept(task, task.getType().makeExtraNBT());
+                    callback.accept(task);
                     return;
                 }
             }
@@ -157,11 +152,11 @@ public class GuiProviders {
         });
     }
 
-    private static void openSetupGui(Runnable gui, BiConsumer<Task, CompoundTag> callback, Task task) {
+    private static void openSetupGui(Runnable gui, Consumer<Task> callback, Task task) {
         ConfigGroup group = new ConfigGroup(FTBQuestsAPI.MOD_ID, accepted -> {
             gui.run();
             if (accepted) {
-                callback.accept(task, task.getType().makeExtraNBT());
+                callback.accept(task);
             }
         });
         group.setNameKey(task.getType().getTypeId().toLanguageKey("ftbquests.task"));
