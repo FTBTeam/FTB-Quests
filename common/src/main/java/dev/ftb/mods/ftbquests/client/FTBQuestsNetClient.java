@@ -100,17 +100,16 @@ public class FTBQuestsNetClient {
 	public static void deleteObject(List<Long> ids) {
 		for (long id : ids) {
 			QuestObjectBase object = ClientQuestFile.INSTANCE.getBase(id);
-
 			if (object != null) {
 				object.deleteChildren();
 				object.deleteSelf();
+//			ClientQuestFile.INSTANCE.refreshIDMap();
 				object.editedFromGUI();
-//				object.getQuestFile().clearCachedData();
 				FTBQuests.getRecipeModHelper().refreshRecipes(object);
 				ClientQuestFile.INSTANCE.getTranslationManager().removeAllTranslations(object);
 			}
+			ClientQuestFile.INSTANCE.clearCachedData();
 		}
-		ClientQuestFile.INSTANCE.clearCachedData();
 	}
 
 	public static void notifyPlayerOfCompletion(long id) {
@@ -151,6 +150,7 @@ public class FTBQuestsNetClient {
 			object.readData(nbt, FTBQuestsClient.holderLookup());
 			object.getQuestFile().clearCachedData();
 			object.editedFromGUI();
+			object.clearCachedData();
 			FTBQuests.getRecipeModHelper().refreshRecipes(object);
 		}
 	}
