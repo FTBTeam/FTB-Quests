@@ -10,6 +10,7 @@ import dev.architectury.injectables.annotations.ExpectPlatform;
 import dev.architectury.networking.NetworkManager;
 import dev.architectury.registry.client.rendering.BlockEntityRendererRegistry;
 import dev.architectury.registry.client.rendering.ColorHandlerRegistry;
+import dev.ftb.mods.ftblibrary.api.sidebar.ButtonOverlayRender;
 import dev.ftb.mods.ftblibrary.icon.Color4I;
 import dev.ftb.mods.ftblibrary.sidebar.SidebarButtonCreatedEvent;
 import dev.ftb.mods.ftblibrary.ui.CustomClickEvent;
@@ -117,7 +118,7 @@ public class FTBQuestsClientEventHandler {
 
 	private void onSidebarButtonCreated(SidebarButtonCreatedEvent event) {
 		if (event.getButton().getId().equals(QUESTS_BUTTON)) {
-			event.getButton().setCustomTextHandler(() ->
+			event.getButton().addOverlayRender(ButtonOverlayRender.ofSimpleString(() ->
 			{
 				if (ClientQuestFile.exists()) {
 					if (ClientQuestFile.INSTANCE.isDisableGui() && !ClientQuestFile.INSTANCE.canEdit()) {
@@ -130,7 +131,7 @@ public class FTBQuestsClientEventHandler {
 				}
 
 				return "";
-			});
+			}));
 		}
 	}
 
