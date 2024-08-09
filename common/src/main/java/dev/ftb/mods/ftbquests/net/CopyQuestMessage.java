@@ -79,7 +79,6 @@ public record CopyQuestMessage(long id, long chapterId, double qx, double qy, bo
 
                 // and update the server quest map etc.
                 ServerQuestFile.INSTANCE.refreshIDMap();
-                ServerQuestFile.INSTANCE.clearCachedData();
                 ServerQuestFile.INSTANCE.markDirty();
             }
         });

@@ -14,13 +14,13 @@ import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.server.level.ServerPlayer;
-import org.jetbrains.annotations.Nullable;
 
 import java.util.Optional;
 
 /**
  * Received on: SERVER<br>
- * Sent by client to create a brand-new quest object of any kind
+ * Sent by client to create a brand-new quest object of any kind. See also {@link CreateTaskAtMessage} which is used
+ * for creating a quest and task together.
  *
  * @param parent id of the parent object (the quest id for tasks/chapters, the chapter id for quests/quest links,
  *              and 1 for everything else)
@@ -41,17 +41,17 @@ public record CreateObjectMessage(long parent, QuestObjectType questObjectType, 
 			CreateObjectMessage::new
 	);
 
-	public static CreateObjectMessage create(QuestObjectBase questObject, @Nullable CompoundTag extra, boolean openScreen) {
+	public static CreateObjectMessage requestCreation(QuestObjectBase questObject, boolean openScreen) {
 		return new CreateObjectMessage(questObject.getParentID(),
 				questObject.getObjectType(),
 				openScreen,
 				Util.make(new CompoundTag(), nbt1 -> questObject.writeData(nbt1, questObject.getQuestFile().holderLookup())),
-				Optional.ofNullable(extra)
+				Optional.ofNullable(questObject.makeExtraCreationData())
 		);
 	}
 
-	public static CreateObjectMessage create(QuestObjectBase questObject, @Nullable CompoundTag extra) {
-		return create(questObject, extra, true);
+	public static CreateObjectMessage requestCreation(QuestObjectBase questObject) {
+		return requestCreation(questObject, true);
 	}
 
 	@Override
@@ -71,7 +71,7 @@ public record CreateObjectMessage(long parent, QuestObjectType questObjectType, 
 
 				object.onCreated();
 				object.getQuestFile().refreshIDMap();
-				object.getQuestFile().clearCachedData();
+//				object.getQuestFile().clearCachedData();
 				object.getQuestFile().markDirty();
 
 				object.getQuestFile().getTranslationManager().processInitialTranslation(extra, object);

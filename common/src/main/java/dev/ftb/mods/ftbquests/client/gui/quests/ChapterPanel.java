@@ -24,10 +24,8 @@ import dev.ftb.mods.ftbquests.quest.theme.property.ThemeProperties;
 import dev.ftb.mods.ftbquests.quest.translation.TranslationKey;
 import dev.ftb.mods.ftbquests.util.TextUtils;
 import net.minecraft.ChatFormatting;
-import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.Style;
@@ -207,10 +205,9 @@ public class ChapterPanel extends Panel {
 							chapterPanel.questScreen.openGui();
 
 							if (accepted && !c.getValue().isEmpty()) {
-								Chapter chapter = new Chapter(0L, file, file.getDefaultChapterGroup(), Chapter.titleToID( c.getValue()).orElse(""));
-								CompoundTag extra = Util.make(new CompoundTag(), t -> t.putLong("group", 0L));
-								file.getTranslationManager().addInitialTranslation(extra, file.getLocale(), TranslationKey.TITLE, c.getValue());
-								NetworkManager.sendToServer(CreateObjectMessage.create(chapter, extra));
+								Chapter chapter = new Chapter(0L, file, file.getDefaultChapterGroup(), Chapter.titleToID(c.getValue()).orElse(""));
+								chapter.setRawTitle(c.getValue());
+								NetworkManager.sendToServer(CreateObjectMessage.requestCreation(chapter));
 							}
 
 							run();
@@ -227,9 +224,8 @@ public class ChapterPanel extends Panel {
 
 							if (accepted) {
 								ChapterGroup group = new ChapterGroup(0L, ClientQuestFile.INSTANCE);
-								CompoundTag extra = Util.make(new CompoundTag(), t -> t.putLong("group", 0L));
-								file.getTranslationManager().addInitialTranslation(extra, file.getLocale(), TranslationKey.TITLE, c.getValue());
-								NetworkManager.sendToServer(CreateObjectMessage.create(group, extra));
+								group.setRawTitle(c.getValue());
+								NetworkManager.sendToServer(CreateObjectMessage.requestCreation(group));
 							}
 						}, b.getTitle()).atMousePosition();
 						overlay.setWidth(150);
@@ -307,10 +303,9 @@ public class ChapterPanel extends Panel {
 					chapterPanel.questScreen.openGui();
 
 					if (accepted && !c.getValue().isEmpty()) {
-						Chapter chapter = new Chapter(0L, file, file.getDefaultChapterGroup(), Chapter.titleToID( c.getValue()).orElse(""));
-						CompoundTag extra = Util.make(new CompoundTag(), t -> t.putLong("group", group.id));
-						file.getTranslationManager().addInitialTranslation(extra, file.getLocale(), TranslationKey.TITLE, c.getValue());
-						NetworkManager.sendToServer(CreateObjectMessage.create(chapter, extra));
+						Chapter chapter = new Chapter(0L, file, group, Chapter.titleToID( c.getValue()).orElse(""));
+						chapter.setRawTitle(c.getValue());
+						NetworkManager.sendToServer(CreateObjectMessage.requestCreation(chapter));
 					}
 
 					run();

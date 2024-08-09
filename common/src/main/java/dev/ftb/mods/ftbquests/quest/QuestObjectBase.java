@@ -465,4 +465,19 @@ public abstract class QuestObjectBase implements Comparable<QuestObjectBase> {
 
 		return Util.make(SNBTCompoundTag.of(stack.save(holderLookup())), SNBTCompoundTag::singleLine);
 	}
+
+	/**
+	 * Build the extra NBT data sent along with a quest object creation request to the server. Default is to include
+	 * the initial raw title text for insertion into the translation manager. Override to augment this with any other
+	 * extra data that needs to be handled in {@link BaseQuestFile#create(long, QuestObjectType, long, CompoundTag)}.
+	 *
+	 * @return some nbt data
+	 */
+	public CompoundTag makeExtraCreationData() {
+		CompoundTag tag = new CompoundTag();
+		if (getRawTitle() != null && !getRawTitle().isEmpty()) {
+			getQuestFile().getTranslationManager().addInitialTranslation(tag, getQuestFile().getLocale(), TranslationKey.TITLE, getRawTitle());
+		}
+		return tag;
+	}
 }

@@ -55,6 +55,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.*;
 import java.util.function.Consumer;
+import java.util.function.LongFunction;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
 
@@ -337,8 +338,11 @@ public abstract class BaseQuestFile extends QuestObject implements QuestFile {
 		return object instanceof ChapterGroup ? (ChapterGroup) object : defaultChapterGroup;
 	}
 
+	/**
+	 * Rebuild the id -> quest object map after some object has been added or removed. Also clears all cached data for
+	 * all known objects, forcing a re-cache on the next access.
+	 */
 	public void refreshIDMap() {
-		clearCachedData();
 		questObjectMap.clear();
 
 		chapterGroups.forEach(group -> questObjectMap.put(group.id, group));
@@ -363,55 +367,44 @@ public abstract class BaseQuestFile extends QuestObject implements QuestFile {
 		rewardTables.forEach(table -> table.getWeightedRewards().forEach(wr -> questObjectMap.put(wr.getReward().id, wr.getReward())));
 	}
 
+	private <T extends QuestObjectBase> T requireQuestObject(long id, LongFunction<T> getter) {
+		T res = getter.apply(id);
+		if (res == null) {
+			throw new IllegalArgumentException("Quest object " + id + " not found!");
+		}
+		return res;
+	}
+
 	public QuestObjectBase create(long id, QuestObjectType type, long parent, CompoundTag extra) {
-		switch (type) {
-			case CHAPTER -> {
-				return new Chapter(id, this, getChapterGroup(extra.getLong("group")));
-			}
-			case QUEST -> {
-				Chapter chapter = getChapter(parent);
-				if (chapter != null) {
-					return new Quest(id, chapter);
-				}
-				throw new IllegalArgumentException("Parent chapter not found!");
-			}
-			case QUEST_LINK -> {
-				Chapter chapter = getChapter(parent);
-				if (chapter != null) {
-					return new QuestLink(id, chapter, 0L);
-				}
-				throw new IllegalArgumentException("Parent chapter not found!");
-			}
+		return switch (type) {
+			case CHAPTER ->
+					new Chapter(id,this, getChapterGroup(extra.getLong("group")));
+			case QUEST ->
+					new Quest(id, requireQuestObject(parent, this::getChapter));
+			case QUEST_LINK ->
+					new QuestLink(id, requireQuestObject(parent, this::getChapter), 0L);
 			case TASK -> {
-				Quest quest = getQuest(parent);
-				if (quest != null) {
-					Task task = TaskType.createTask(id, quest, extra.getString("type"));
-					if (task != null) {
-						return task;
-					}
-					throw new IllegalArgumentException("Unknown task type!");
-				}
-				throw new IllegalArgumentException("Parent quest not found!");
+				Quest quest = requireQuestObject(parent, this::getQuest);
+				yield TaskType.requireCreateTask(id, quest, extra.getString("type"));
 			}
 			case REWARD -> {
 				String rewardType = extra.getString("type");
 				if (RewardTable.isFakeQuestId(parent)) {
-					return RewardTable.createRewardForTable(id, rewardType, this);
+					yield RewardTable.createRewardForTable(id, rewardType, this);
 				} else {
 					Quest quest = getQuestObjectOrThrow(parent, Quest.class);
 					Reward reward = RewardType.createReward(id, quest, rewardType);
 					Validate.isTrue(reward != null, "Unknown reward type: " + rewardType);
-					return reward;
+					yield reward;
 				}
 			}
-			case REWARD_TABLE -> {
-				return new RewardTable(id, this);
-			}
-			case CHAPTER_GROUP -> {
-				return new ChapterGroup(id, this);
-			}
-			default -> throw new IllegalArgumentException("Unknown type: " + type);
-		}
+			case REWARD_TABLE ->
+					new RewardTable(id, this);
+			case CHAPTER_GROUP ->
+					new ChapterGroup(id, this);
+			default ->
+					throw new IllegalArgumentException("Unknown/unsupported type: " + type);
+		};
 	}
 
 	@Override

@@ -19,6 +19,17 @@ import net.minecraft.server.level.ServerPlayer;
 
 import java.util.Optional;
 
+/**
+ * Received on: SERVER<br>
+ * Sent by client to create a new quest and task from the GUI.
+ *
+ * @param chapterId chapter in which the new quest belongs
+ * @param x X-position of the new quest
+ * @param y Y-position of the new quest
+ * @param taskTypeId internal ID for the task type
+ * @param nbt the task data NBT
+ * @param extra extra initial task data
+ */
 public record CreateTaskAtMessage(long chapterId, double x, double y, int taskTypeId, CompoundTag nbt, Optional<CompoundTag> extra) implements CustomPacketPayload {
 	public static final Type<CreateTaskAtMessage> TYPE = new Type<>(FTBQuestsAPI.rl("create_task_at_message"));
 
@@ -32,10 +43,10 @@ public record CreateTaskAtMessage(long chapterId, double x, double y, int taskTy
 			CreateTaskAtMessage::new
 	);
 
-	public static CreateTaskAtMessage create(Chapter chapter, double x, double y, Task task, CompoundTag extra) {
+	public static CreateTaskAtMessage requestCreation(Chapter chapter, double x, double y, Task task) {
 		return new CreateTaskAtMessage(chapter.id, x, y, task.getType().internalId,
 				Util.make(new CompoundTag(), nbt1 -> task.writeData(nbt1, chapter.getQuestFile().holderLookup())),
-                Optional.ofNullable(extra)
+                Optional.ofNullable(task.makeExtraCreationData())
 		);
 	}
 
@@ -67,7 +78,6 @@ public record CreateTaskAtMessage(long chapterId, double x, double y, int taskTy
 					NetworkHelper.sendToAll(sp.getServer(), CreateObjectResponseMessage.create(task, extra, sp.getUUID()));
 
 					file.refreshIDMap();
-					file.clearCachedData();
 					file.markDirty();
 				}
 			}

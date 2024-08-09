@@ -415,7 +415,7 @@ public class FTBQuestsCommands {
 			task.onCreated();
 			task.setStackAndCount(stack, 1).setConsumeItems(Tristate.TRUE);
 
-			NetworkHelper.sendToAll(source.getServer(), CreateObjectMessage.create(task, task.getType().makeExtraNBT()));
+			NetworkHelper.sendToAll(source.getServer(), CreateObjectMessage.requestCreation(task));
 
 			col++;
 		}
