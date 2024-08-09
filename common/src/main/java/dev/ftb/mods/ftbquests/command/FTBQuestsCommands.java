@@ -329,7 +329,7 @@ public class FTBQuestsCommands {
 				.filter(stack -> !stack.isEmpty() && RegistrarManager.getId(stack.getItem(), Registries.ITEM) != null)
 				.sorted(Comparator.comparing(a -> RegistrarManager.getId(a.getItem(), Registries.ITEM)))
 				.toList();
-		FTBQuests.LOGGER.info("Found " + allItems.size() + " items in total, chapter ID: " + chapter);
+        FTBQuests.LOGGER.info("Found {} items in total, chapter ID: {}", allItems.size(), chapter);
 
 		if (list.isEmpty()) {
 			return 0;
@@ -362,7 +362,7 @@ public class FTBQuestsCommands {
 			task.onCreated();
 			task.setStackAndCount(stack, 1).setConsumeItems(Tristate.TRUE);
 
-			NetworkHelper.sendToAll(source.getServer(), CreateObjectMessage.create(task, task.getType().makeExtraNBT()));
+			NetworkHelper.sendToAll(source.getServer(), CreateObjectMessage.requestCreation(task));
 
 			col++;
 		}

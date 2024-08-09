@@ -92,7 +92,7 @@ public class FTBQuestsNetClient {
 		if (object != null) {
 			object.deleteChildren();
 			object.deleteSelf();
-			ClientQuestFile.INSTANCE.refreshIDMap();
+//			ClientQuestFile.INSTANCE.refreshIDMap();
 			object.editedFromGUI();
 			FTBQuests.getRecipeModHelper().refreshRecipes(object);
 			ClientQuestFile.INSTANCE.getTranslationManager().removeAllTranslations(object);
@@ -135,12 +135,13 @@ public class FTBQuestsNetClient {
 	}
 
 	public static void editObject(long id, CompoundTag nbt) {
-		ClientQuestFile.INSTANCE.clearCachedData();
+//		ClientQuestFile.INSTANCE.clearCachedData();
 		QuestObjectBase object = ClientQuestFile.INSTANCE.getBase(id);
 
 		if (object != null) {
 			object.readData(nbt, FTBQuestsClient.holderLookup());
 			object.editedFromGUI();
+			object.clearCachedData();
 			FTBQuests.getRecipeModHelper().refreshRecipes(object);
 		}
 	}

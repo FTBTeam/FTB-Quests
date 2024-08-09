@@ -53,6 +53,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.*;
 import java.util.function.Consumer;
+import java.util.function.LongFunction;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
 
@@ -60,16 +61,16 @@ public abstract class BaseQuestFile extends QuestObject implements QuestFile {
 	public static int VERSION = 13;
 
 	public static final StreamCodec<RegistryFriendlyByteBuf,BaseQuestFile> STREAM_CODEC = new StreamCodec<>() {
-        @Override
-        public BaseQuestFile decode(RegistryFriendlyByteBuf buf) {
+		@Override
+		public BaseQuestFile decode(RegistryFriendlyByteBuf buf) {
 			return Util.make(FTBQuestsClient.createClientQuestFile(), file -> file.readNetDataFull(buf));
-        }
+		}
 
-        @Override
-        public void encode(RegistryFriendlyByteBuf buf, BaseQuestFile file) {
+		@Override
+		public void encode(RegistryFriendlyByteBuf buf, BaseQuestFile file) {
 			file.writeNetDataFull(buf);
-        }
-    };
+		}
+	};
 
 	private final DefaultChapterGroup defaultChapterGroup;
 	final List<ChapterGroup> chapterGroups;
@@ -321,8 +322,11 @@ public abstract class BaseQuestFile extends QuestObject implements QuestFile {
 		return object instanceof ChapterGroup ? (ChapterGroup) object : defaultChapterGroup;
 	}
 
+	/**
+	 * Rebuild the id -> quest object map after some object has been added or removed. Also clears all cached data for
+	 * all known objects, forcing a re-cache on the next access.
+	 */
 	public void refreshIDMap() {
-		clearCachedData();
 		questObjectMap.clear();
 
 		chapterGroups.forEach(group -> questObjectMap.put(group.id, group));
@@ -343,55 +347,37 @@ public abstract class BaseQuestFile extends QuestObject implements QuestFile {
 		clearCachedData();
 	}
 
+	private <T extends QuestObjectBase> T requireQuestObject(long id, LongFunction<T> getter) {
+		T res = getter.apply(id);
+		if (res == null) {
+			throw new IllegalArgumentException("Quest object " + id + " not found!");
+		}
+		return res;
+	}
+
 	public QuestObjectBase create(long id, QuestObjectType type, long parent, CompoundTag extra) {
-		switch (type) {
-			case CHAPTER -> {
-				return new Chapter(id, this, getChapterGroup(extra.getLong("group")));
-			}
-			case QUEST -> {
-				Chapter chapter = getChapter(parent);
-				if (chapter != null) {
-					return new Quest(id, chapter);
-				}
-				throw new IllegalArgumentException("Parent chapter not found!");
-			}
-			case QUEST_LINK -> {
-				Chapter chapter = getChapter(parent);
-				if (chapter != null) {
-					return new QuestLink(id, chapter, 0L);
-				}
-				throw new IllegalArgumentException("Parent chapter not found!");
-			}
+		return switch (type) {
+			case CHAPTER ->
+					new Chapter(id,this, getChapterGroup(extra.getLong("group")));
+			case QUEST ->
+					new Quest(id, requireQuestObject(parent, this::getChapter));
+			case QUEST_LINK ->
+					new QuestLink(id, requireQuestObject(parent, this::getChapter), 0L);
 			case TASK -> {
-				Quest quest = getQuest(parent);
-				if (quest != null) {
-					Task task = TaskType.createTask(id, quest, extra.getString("type"));
-					if (task != null) {
-						return task;
-					}
-					throw new IllegalArgumentException("Unknown task type!");
-				}
-				throw new IllegalArgumentException("Parent quest not found!");
+				Quest quest = requireQuestObject(parent, this::getQuest);
+				yield TaskType.requireCreateTask(id, quest, extra.getString("type"));
 			}
 			case REWARD -> {
-				Quest quest = getQuest(parent);
-				if (quest != null) {
-					Reward reward = RewardType.createReward(id, quest, extra.getString("type"));
-					if (reward != null) {
-						return reward;
-					}
-					throw new IllegalArgumentException("Unknown reward type!");
-				}
-				throw new IllegalArgumentException("Parent quest not found!");
+				Quest quest = requireQuestObject(parent, this::getQuest);
+				yield RewardType.requireCreateReward(id, quest, extra.getString("type"));
 			}
-			case REWARD_TABLE -> {
-				return new RewardTable(id, this);
-			}
-			case CHAPTER_GROUP -> {
-				return new ChapterGroup(id, this);
-			}
-			default -> throw new IllegalArgumentException("Unknown type: " + type);
-		}
+			case REWARD_TABLE ->
+					new RewardTable(id, this);
+			case CHAPTER_GROUP ->
+					new ChapterGroup(id, this);
+			default ->
+					throw new IllegalArgumentException("Unknown/unsupported type: " + type);
+		};
 	}
 
 	@Override
@@ -740,7 +726,7 @@ public abstract class BaseQuestFile extends QuestObject implements QuestFile {
 			markDirty();
 		}
 
-        FTBQuests.LOGGER.info("Loaded {} chapter groups, {} chapters, {} quests, {} reward tables", chapterGroups.size(), chapterCounter, questCounter, rewardTables.size());
+		FTBQuests.LOGGER.info("Loaded {} chapter groups, {} chapters, {} quests, {} reward tables", chapterGroups.size(), chapterCounter, questCounter, rewardTables.size());
 	}
 
 	private void handleLegacyFileNBT(CompoundTag fileNBT) {
@@ -938,7 +924,7 @@ public abstract class BaseQuestFile extends QuestObject implements QuestFile {
 			}
 		}
 
-        FTBQuests.LOGGER.debug("Wrote {} bytes, {} objects", buffer.writerIndex() - pos, questObjectMap.size());
+		FTBQuests.LOGGER.debug("Wrote {} bytes, {} objects", buffer.writerIndex() - pos, questObjectMap.size());
 	}
 
 	public final void readNetDataFull(RegistryFriendlyByteBuf buffer) {
@@ -1056,7 +1042,7 @@ public abstract class BaseQuestFile extends QuestObject implements QuestFile {
 			}
 		}
 
-        FTBQuests.LOGGER.info("Read {} bytes, {} objects", buffer.readerIndex() - pos, questObjectMap.size());
+		FTBQuests.LOGGER.info("Read {} bytes, {} objects", buffer.readerIndex() - pos, questObjectMap.size());
 	}
 
 	@Override
@@ -1189,22 +1175,22 @@ public abstract class BaseQuestFile extends QuestObject implements QuestFile {
 	}
 
 	public long getID(@Nullable Object obj) {
-        switch (obj) {
-            case null -> {
-                return 0L;
-            }
-            case Number n -> {
-                return n.longValue();
-            }
-            case NumericTag nt -> {
-                return nt.getAsLong();
-            }
-            case StringTag st -> {
-                return getID(st.getAsString());
-            }
-            default -> {
-            }
-        }
+		switch (obj) {
+			case null -> {
+				return 0L;
+			}
+			case Number n -> {
+				return n.longValue();
+			}
+			case NumericTag nt -> {
+				return nt.getAsLong();
+			}
+			case StringTag st -> {
+				return getID(st.getAsString());
+			}
+			default -> {
+			}
+		}
 
 		String idStr = obj.toString();
 		long id = parseCodeString(idStr);

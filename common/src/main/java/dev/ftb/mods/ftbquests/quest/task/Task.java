@@ -23,6 +23,7 @@ import dev.ftb.mods.ftbquests.util.ProgressChange;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.ChatFormatting;
+import net.minecraft.Util;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
@@ -353,5 +354,10 @@ public abstract class Task extends QuestObject {
 		}
 
 		return fallback;
+	}
+
+	@Override
+	public CompoundTag makeExtraCreationData() {
+		return Util.make(super.makeExtraCreationData(), t -> t.putString("type", getType().getTypeForNBT()));
 	}
 }

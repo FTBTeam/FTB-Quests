@@ -409,7 +409,7 @@ public class QuestScreen extends BaseScreen {
 			Pair<Double,Double> qxy = getSnappedXY();
 			QuestLink link = new QuestLink(0L, selectedChapter, id);
 			link.setPosition(qxy.getFirst(), qxy.getSecond());
-			NetworkManager.sendToServer(CreateObjectMessage.create(link, null, false));
+			NetworkManager.sendToServer(CreateObjectMessage.requestCreation(link, false));
 			return true;
 		}).orElse(false);
 	}
@@ -734,13 +734,6 @@ public class QuestScreen extends BaseScreen {
 		}
 
 		return super.handleClick(scheme, path);
-	}
-
-	@Override
-	public void addMouseOverText(TooltipList list) {
-//		list.zOffset = 950;
-//		list.zOffsetItemTooltip = 500;
-		super.addMouseOverText(list);
 	}
 
 	public void addInfoTooltip(TooltipList list, QuestObjectBase object) {

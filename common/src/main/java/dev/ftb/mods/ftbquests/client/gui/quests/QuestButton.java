@@ -25,7 +25,6 @@ import dev.ftb.mods.ftbquests.util.TextUtils;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.player.Player;
 
@@ -239,9 +238,7 @@ public class QuestButton extends Button implements QuestPositionableButton {
 				type.getGuiProvider().openCreationGui(parent, quest, reward -> questScreen.getSelectedQuests().forEach(quest -> {
 					Reward newReward = QuestObjectBase.copy(reward, () -> type.createReward(0L, quest));
 					if (newReward != null) {
-						CompoundTag extra = new CompoundTag();
-						extra.putString("type", type.getTypeForNBT());
-						NetworkManager.sendToServer(CreateObjectMessage.create(newReward, extra));
+						NetworkManager.sendToServer(CreateObjectMessage.requestCreation(newReward));
 					}
 				}));
 			}));

@@ -14,6 +14,7 @@ import dev.ftb.mods.ftbquests.quest.translation.TranslationKey;
 import dev.ftb.mods.ftbquests.util.NetUtils;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.Util;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
@@ -559,5 +560,10 @@ public final class Chapter extends QuestObject {
 
 	public boolean isAutofocus(long id) {
 		return id == getAutofocus().map(Movable::getMovableID).orElse(0L);
+	}
+
+	@Override
+	public CompoundTag makeExtraCreationData() {
+		return Util.make(super.makeExtraCreationData(), t -> t.putLong("group", group.id));
 	}
 }

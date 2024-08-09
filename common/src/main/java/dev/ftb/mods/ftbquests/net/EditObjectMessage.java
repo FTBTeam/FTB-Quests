@@ -26,7 +26,7 @@ public record EditObjectMessage(long id, CompoundTag nbt) implements CustomPacke
 
 	public static EditObjectMessage forQuestObject(QuestObjectBase qo) {
 		FTBQuests.getRecipeModHelper().refreshRecipes(qo);
-		ClientQuestFile.INSTANCE.clearCachedData();
+//		ClientQuestFile.INSTANCE.clearCachedData();
 
 		return new EditObjectMessage(qo.id, Util.make(new CompoundTag(), nbt1 -> qo.writeData(nbt1, ClientQuestFile.INSTANCE.holderLookup())));
 	}
@@ -47,7 +47,8 @@ public record EditObjectMessage(long id, CompoundTag nbt) implements CustomPacke
 				if (object != null) {
 					object.readData(message.nbt, context.registryAccess());
 					object.editedFromGUIOnServer();
-					ServerQuestFile.INSTANCE.clearCachedData();
+					object.clearCachedData();
+//					ServerQuestFile.INSTANCE.clearCachedData();
 					ServerQuestFile.INSTANCE.markDirty();
 					NetworkHelper.sendToAll(context.getPlayer().getServer(), new EditObjectResponseMessage(object));
 				}

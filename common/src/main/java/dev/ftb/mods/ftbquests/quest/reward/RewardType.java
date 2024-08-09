@@ -47,6 +47,14 @@ public final class RewardType {
         return type == null ? null : type.provider.create(id, quest);
     }
 
+	public static Reward requireCreateReward(long id, Quest quest, String typeId) {
+		Reward reward = createReward(id, quest, typeId);
+		if (reward == null) {
+			throw new IllegalArgumentException("Unknown reward type: '" + typeId + "'");
+		}
+		return reward;
+	}
+
 	public ResourceLocation getTypeId() {
 		return typeId;
 	}
