@@ -49,6 +49,7 @@ public final class Quest extends QuestObject implements Movable {
 	private String rawSubtitle;
 	private double x, y;
 	private Tristate hideUntilDepsVisible;
+	private Tristate hideUntilDepsComplete;
 	private String shape;
 	private final List<String> rawDescription;
 	private final List<QuestObject> dependencies;
@@ -94,6 +95,7 @@ public final class Quest extends QuestObject implements Movable {
 		hideDependencyLines = Tristate.DEFAULT;
 		hideDependentLines = false;
 		hideUntilDepsVisible = Tristate.DEFAULT;
+		hideUntilDepsComplete = Tristate.DEFAULT;
 		dependencyRequirement = DependencyRequirement.ALL_COMPLETED;
 		minRequiredDependencies = 0;
 		hideTextUntilComplete = Tristate.DEFAULT;
@@ -265,7 +267,8 @@ public final class Quest extends QuestObject implements Movable {
 			nbt.put("dependencies", deps);
 		}
 
-		hideUntilDepsVisible.write(nbt, "hide");
+		hideUntilDepsVisible.write(nbt, "hide_until_deps_visible");
+		hideUntilDepsComplete.write(nbt, "hide_until_deps_complete");
 
 		if (dependencyRequirement != DependencyRequirement.ALL_COMPLETED) {
 			nbt.putString("dependency_requirement", dependencyRequirement.getId());
@@ -357,7 +360,14 @@ public final class Quest extends QuestObject implements Movable {
 			}
 		}
 
-		hideUntilDepsVisible = Tristate.read(nbt, "hide");
+		if (nbt.contains("hide", Tag.TAG_BYTE)) {
+			// TODO legacy; remove in 1.22
+            hideUntilDepsVisible = Tristate.read(nbt, "hide");
+        } else {
+			hideUntilDepsVisible = Tristate.read(nbt, "hide_until_deps_visible");
+		}
+		hideUntilDepsComplete = Tristate.read(nbt, "hide_until_deps_complete");
+
 		dependencyRequirement = DependencyRequirement.NAME_MAP.get(nbt.getString("dependency_requirement"));
 		hideTextUntilComplete = Tristate.read(nbt, "hide_text_until_complete");
 		size = nbt.getDouble("size");
@@ -398,6 +408,7 @@ public final class Quest extends QuestObject implements Movable {
 		flags = Bits.setFlag(flags, 0x20000, iconScale != 1f);
 		buffer.writeVarInt(flags);
 
+		hideUntilDepsComplete.write(buffer);
 		hideUntilDepsVisible.write(buffer);
 		hideDependencyLines.write(buffer);
 		hideTextUntilComplete.write(buffer);
@@ -449,6 +460,7 @@ public final class Quest extends QuestObject implements Movable {
 	public void readNetData(FriendlyByteBuf buffer) {
 		super.readNetData(buffer);
 		int flags = buffer.readVarInt();
+		hideUntilDepsComplete = Tristate.read(buffer);
 		hideUntilDepsVisible = Tristate.read(buffer);
 		hideDependencyLines = Tristate.read(buffer);
 		hideTextUntilComplete = Tristate.read(buffer);
@@ -668,7 +680,8 @@ public final class Quest extends QuestObject implements Movable {
 		appearance.addDouble("icon_scale", iconScale, v -> iconScale = v, 1f, 0.1, 2.0);
 
 		ConfigGroup visibility = config.getOrCreateSubgroup("visibility");
-		visibility.addTristate("hide", hideUntilDepsVisible, v -> hideUntilDepsVisible = v);
+		visibility.addTristate("hide_until_deps_complete", hideUntilDepsComplete, v -> hideUntilDepsComplete = v);
+		visibility.addTristate("hide_until_deps_visible", hideUntilDepsVisible, v -> hideUntilDepsVisible = v);
 		visibility.addBool("invisible", invisible, v -> invisible = v, false);
 		visibility.addInt("invisible_until_tasks", invisibleUntilTasks, v -> invisibleUntilTasks = v, 0, 0, Integer.MAX_VALUE).setCanEdit(invisible);
 		visibility.addTristate("hide_details_until_startable", hideDetailsUntilStartable, v -> hideDetailsUntilStartable = v);
@@ -750,8 +763,10 @@ public final class Quest extends QuestObject implements Movable {
 			return true;
 		}
 
-		if (hideUntilDepsVisible.get(chapter.hideQuestUntilDepsVisible())) {
+		if (hideUntilDepsComplete.get(chapter.hideQuestUntilDepsComplete())) {
 			return data.areDependenciesComplete(this);
+		} else if (hideUntilDepsVisible.get(chapter.isHideQuestUntilDepsVisible())) {
+				return data.areDependenciesVisible(this);
 		}
 
 		return streamDependencies().anyMatch(object -> object.isVisible(data));
@@ -1051,19 +1066,33 @@ public final class Quest extends QuestObject implements Movable {
 		rewards.remove(reward);
 	}
 
-	public boolean areDependenciesComplete(TeamData teamData) {
+	@FunctionalInterface
+	private interface DependencyChecker {
+		default boolean check(QuestObject questObject) {
+			return !questObject.invalid && check0(questObject);
+		}
+		boolean check0(QuestObject questObject);
+	}
+
+	private boolean checkDependencies(DependencyChecker checker) {
 		if (minRequiredDependencies > 0) {
 			return streamDependencies()
-					.filter(dep -> teamData.isCompleted(dep) && !dep.invalid)
+					.filter(checker::check)
 					.limit(minRequiredDependencies)
 					.count() == minRequiredDependencies;
 		} else if (dependencyRequirement.needOnlyOne()) {
-			return streamDependencies()
-					.anyMatch(dep -> !dep.invalid && (dependencyRequirement.needCompletion() ? teamData.isCompleted(dep) : teamData.isStarted(dep)));
+			return streamDependencies().anyMatch(checker::check);
 		} else {
-			return streamDependencies()
-					.allMatch(dep -> !dep.invalid && (dependencyRequirement.needCompletion() ? teamData.isCompleted(dep) : teamData.isStarted(dep)));
+			return streamDependencies().allMatch(checker::check);
 		}
+	}
+
+	public boolean areDependenciesComplete(TeamData teamData) {
+		return checkDependencies(dep -> dependencyRequirement.needCompletion() ? teamData.isCompleted(dep) : teamData.isStarted(dep));
+	}
+
+	public boolean areDependenciesVisible(TeamData teamData) {
+		return checkDependencies(dep -> dep.isVisible(teamData));
 	}
 
 	public List<Pair<Integer,Integer>> buildDescriptionIndex() {
