@@ -69,6 +69,8 @@ public class CreateObjectResponseMessage extends BaseS2CMessage {
 
 	@Override
 	public void handle(NetworkManager.PacketContext context) {
-		FTBQuestsNetClient.createObject(id, parent, type, nbt, extra, creator);
+		context.queue(() -> {
+			FTBQuestsNetClient.createObject(id, parent, type, nbt, extra, creator);
+		});
 	}
 }

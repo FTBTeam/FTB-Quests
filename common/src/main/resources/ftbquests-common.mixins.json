@@ -1,0 +1,15 @@
+{
+  "required": true,
+  "package": "dev.ftb.mods.ftbquests.mixin",
+  "compatibilityLevel": "JAVA_8",
+  "mixins": [
+    "ServerGamePacketListenerImplMixin",
+    "ServerPlayerMixin"
+  ],
+  "client": [
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  },
+  "minVersion": "0.8"
+}

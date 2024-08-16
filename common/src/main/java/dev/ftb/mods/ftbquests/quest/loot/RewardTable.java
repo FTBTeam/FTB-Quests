@@ -38,7 +38,7 @@ import org.jetbrains.annotations.Nullable;
 import java.util.*;
 import java.util.stream.Collectors;
 
-public final class RewardTable extends QuestObjectBase {
+public class RewardTable extends QuestObjectBase {
 	private final BaseQuestFile file;
 	private final List<WeightedReward> weightedRewards;
 	private final Quest fakeQuest;
@@ -160,12 +160,12 @@ public final class RewardTable extends QuestObjectBase {
 
 			if (wr.getReward().getType() != RewardTypes.ITEM) {
 				nbt1.putString("type", wr.getReward().getType().getTypeForNBT());
-			} else if (nbt1.getTagType("item") == Tag.TAG_STRING) {
-				nbt1.singleLine();
 			}
-
 			if (wr.getWeight() != 1f) {
 				nbt1.putFloat("weight", wr.getWeight());
+			}
+			if (nbt1.size() < 3) {
+				nbt1.singleLine();
 			}
 
 			list.add(nbt1);
@@ -329,9 +329,9 @@ public final class RewardTable extends QuestObjectBase {
 
 	@Override
 	public void onCreated() {
-		if (filename.isEmpty()) {
-			filename = file.generateRewardTableName(titleToID(rawTitle).orElse(toString()));
-		}
+//		if (filename.isEmpty()) {
+//			filename = file.generateRewardTableName(titleToID(rawTitle).orElse(toString()));
+//		}
 
 		file.addRewardTable(this);
 	}
