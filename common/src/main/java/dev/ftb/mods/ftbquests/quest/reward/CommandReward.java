@@ -15,11 +15,16 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.server.level.ServerPlayer;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class CommandReward extends Reward {
 	private static final String DEFAULT_COMMAND = "/say Hi, @p!";
+	public static final Pattern PATTERN = Pattern.compile("[{](\\w+)}");
 
 	private String command;
 	private boolean elevatePerms;
@@ -81,7 +86,7 @@ public class CommandReward extends Reward {
 	@Override
 	public void claim(ServerPlayer player, boolean notify) {
 		Map<String, Object> overrides = new HashMap<>();
-//		overrides.put("p", player.getGameProfile().getName());
+		overrides.put("p", player.getGameProfile().getName());
 
 		BlockPos pos = player.blockPosition();
 		overrides.put("x", pos.getX());
@@ -93,17 +98,15 @@ public class CommandReward extends Reward {
 		}
 
 		overrides.put("quest", quest);
-		overrides.put("team", FTBTeamsAPI.api().getManager().getTeamForPlayer(player)
-				.map(team -> team.getName().getString())
-				.orElse(player.getGameProfile().getName())
-		);
+		FTBTeamsAPI.api().getManager().getTeamForPlayer(player).ifPresent(team -> {
+			overrides.put("team", team.getName().getString());
+			overrides.put("team_id", team.getShortName());
+			overrides.put("long_team_id", team.getId().toString());
+			overrides.put("member_count", team.getMembers().size());
+			overrides.put("online_member_count", team.getOnlineMembers().size());
+		});
 
-		String cmd = command;
-		for (Map.Entry<String, Object> entry : overrides.entrySet()) {
-			if (entry.getValue() != null) {
-				cmd = cmd.replace("{" + entry.getKey() + "}", entry.getValue().toString());
-			}
-		}
+		String cmd = format(command, overrides);
 
 		CommandSourceStack source = player.createCommandSourceStack();
 		if (elevatePerms) source = source.withPermission(2);
@@ -116,5 +119,27 @@ public class CommandReward extends Reward {
 	@Environment(EnvType.CLIENT)
 	public MutableComponent getAltTitle() {
 		return Component.translatable("ftbquests.reward.ftbquests.command").append(": ").append(Component.literal(command).withStyle(ChatFormatting.RED));
+	}
+
+	public static String format(String template, Map<String, Object> parameters) {
+		StringBuilder newTemplate = new StringBuilder(template);
+		List<Object> valueList = new ArrayList<>();
+
+		Matcher matcher = PATTERN.matcher(template);
+
+		while (matcher.find()) {
+			String key = matcher.group(1);
+
+			if (parameters.containsKey(key)) {
+				String paramName = "{" + key + "}";
+				int index = newTemplate.indexOf(paramName);
+				if (index != -1) {
+					newTemplate.replace(index, index + paramName.length(), "%s");
+					valueList.add(parameters.get(key));
+				}
+			}
+		}
+
+		return String.format(newTemplate.toString(), valueList.toArray());
 	}
 }
