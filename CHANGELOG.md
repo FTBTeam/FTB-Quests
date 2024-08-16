@@ -11,6 +11,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 * Sidebar buttons for this and other FTB mods can now be enabled/disabled/rearranged (new functionality in FTB Library 2101.1.0)
+* A few new template substitutions are available in command rewards
+  * `{team_id}` - the short team name, e.g. "Dev#380df991"
+  * `{long_team_id}` - the full team UUID, e.g. "380df991-f603-344c-a090-369bad2a924a"
+  * `{member_count}` - the number of players in the team
+  * `{online_member_count}` - the number of currently-online players in the team
 
 ### Fixed
 * Fixed "Hide Quests until Dependencies Visible" setting actually checking for dependencies being _complete_
