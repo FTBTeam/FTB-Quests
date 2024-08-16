@@ -32,6 +32,7 @@ import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
+import org.apache.commons.lang3.function.ToBooleanBiFunction;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -77,8 +78,9 @@ public class TeamData {
 	private final Long2LongOpenHashMap completed;
 	private final Object2ObjectOpenHashMap<UUID,PerPlayerData> perPlayerData;
 
-	private Long2ByteOpenHashMap areDependenciesCompleteCache;
-	private Object2ByteOpenHashMap<QuestKey> unclaimedRewardsCache;
+	private final Long2ByteOpenHashMap areDependenciesCompleteCache;
+	private final Long2ByteOpenHashMap areDependenciesVisibleCache;
+	private final Object2ByteOpenHashMap<QuestKey> unclaimedRewardsCache;
 
 	public TeamData(UUID teamId, BaseQuestFile file) {
 		this(teamId, file, "");
@@ -100,6 +102,9 @@ public class TeamData {
 		completed = new Long2LongOpenHashMap();
 		completed.defaultReturnValue(0L);
 		perPlayerData = new Object2ObjectOpenHashMap<>();
+		areDependenciesCompleteCache = new Long2ByteOpenHashMap();
+		areDependenciesVisibleCache = new Long2ByteOpenHashMap();
+		unclaimedRewardsCache = new Object2ByteOpenHashMap<>();
 	}
 
 	public UUID getTeamId() {
@@ -257,14 +262,8 @@ public class TeamData {
 	}
 
 	public boolean hasUnclaimedRewards(UUID player, QuestObject object) {
-		if (unclaimedRewardsCache == null) {
-			unclaimedRewardsCache = new Object2ByteOpenHashMap<>();
-			unclaimedRewardsCache.defaultReturnValue(BOOL_UNKNOWN);
-		}
-
 		QuestKey key = QuestKey.create(player, object.id);
-		byte b = unclaimedRewardsCache.getByte(key);
-
+		byte b = unclaimedRewardsCache.getOrDefault(key, BOOL_UNKNOWN);
 		if (b == BOOL_UNKNOWN) {
 			b = object.hasUnclaimedRewardsRaw(this, player) ? BOOL_TRUE : BOOL_FALSE;
 			unclaimedRewardsCache.put(key, b);
@@ -320,8 +319,9 @@ public class TeamData {
 	}
 
 	public void clearCachedProgress() {
-		areDependenciesCompleteCache = null;
-		unclaimedRewardsCache = null;
+		areDependenciesCompleteCache.clear();
+		areDependenciesVisibleCache.clear();
+		unclaimedRewardsCache.clear();
 	}
 
 	public SNBTCompoundTag serializeNBT() {
@@ -524,23 +524,26 @@ public class TeamData {
 		return completed.containsKey(object.id);
 	}
 
-	public boolean areDependenciesComplete(Quest quest) {
+	private boolean checkDepsCached(Quest quest, Long2ByteOpenHashMap cache, ToBooleanBiFunction<Quest,TeamData> checker) {
 		if (!quest.hasDependencies()) {
 			return true;
 		}
 
-		if (areDependenciesCompleteCache == null) {
-			areDependenciesCompleteCache = new Long2ByteOpenHashMap();
-			areDependenciesCompleteCache.defaultReturnValue(BOOL_UNKNOWN);
-		}
-
-		byte res = areDependenciesCompleteCache.get(quest.id);
+		byte res = cache.getOrDefault(quest.id, BOOL_UNKNOWN);
 		if (res == BOOL_UNKNOWN) {
-			res = quest.areDependenciesComplete(this) ? BOOL_TRUE : BOOL_FALSE;
-			areDependenciesCompleteCache.put(quest.id, res);
+			res = checker.applyAsBoolean(quest, this) ? BOOL_TRUE : BOOL_FALSE;
+			cache.put(quest.id, res);
 		}
 
 		return res == BOOL_TRUE;
+	}
+
+	public boolean areDependenciesComplete(Quest quest) {
+		return checkDepsCached(quest, areDependenciesCompleteCache, Quest::areDependenciesComplete);
+	}
+
+	public boolean areDependenciesVisible(Quest quest) {
+		return checkDepsCached(quest, areDependenciesVisibleCache, Quest::areDependenciesVisible);
 	}
 
 	public boolean canStartTasks(Quest quest) {
