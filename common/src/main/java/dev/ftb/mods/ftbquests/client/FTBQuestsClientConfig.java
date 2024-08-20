@@ -21,8 +21,8 @@ public interface FTBQuestsClientConfig {
     SNBTConfig UI = CONFIG.addGroup("ui", 0);
     BooleanValue OLD_SCROLL_WHEEL = UI.addBoolean("old_scroll_wheel", false);
     EnumValue<PanelPositioning> PINNED_QUESTS_POS = UI.addEnum("pinned_quests_pos", PanelPositioning.NAME_MAP, PanelPositioning.RIGHT);
-    IntValue PINNED_QUESTS_INSET_X = UI.addInt("pinned_quests_inset_x", 2);
-    IntValue PINNED_QUESTS_INSET_Y = UI.addInt("pinned_quests_inset_y", 2);
+    IntValue PINNED_QUESTS_INSET_X = UI.addInt("pinned_quests_inset_x", 4);
+    IntValue PINNED_QUESTS_INSET_Y = UI.addInt("pinned_quests_inset_y", 4);
 
     // TODO migrate chapter-pinned and pinned-quests data out of per-player team data into here
 
