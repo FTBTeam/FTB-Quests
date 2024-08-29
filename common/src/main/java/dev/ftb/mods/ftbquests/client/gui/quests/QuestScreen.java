@@ -42,6 +42,10 @@ import java.text.DateFormat;
 import java.util.*;
 
 public class QuestScreen extends BaseScreen {
+	// A fairly large z-offset is needed to ensure various GUI elements render above drawn block items,
+	//   which can extend quite some way out of the screen if the quest button is scaled up...
+	public static final int Z_LEVEL = 1250;
+
 	final ClientQuestFile file;
 
 	double scrollWidth, scrollHeight;
@@ -105,6 +109,11 @@ public class QuestScreen extends BaseScreen {
 	@Override
 	public boolean doesGuiPauseGame() {
 		return ClientQuestFile.INSTANCE.isPauseGame();
+	}
+
+	@Override
+	public int getMaxZLevel() {
+		return Z_LEVEL + 100;
 	}
 
 	@Override

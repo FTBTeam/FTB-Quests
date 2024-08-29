@@ -402,7 +402,7 @@ public class QuestButton extends Button implements QuestPositionableButton {
 		if (!questIcon.isEmpty()) {
 			int s = (int) (w / 8F * 3F);
 			poseStack.pushPose();
-			poseStack.translate(x + w - s, y, 0);
+			poseStack.translate(x + w - s, y, QuestScreen.Z_LEVEL);
 			questIcon.draw(graphics, 0, 0, s, s);
 			poseStack.popPose();
 		}
@@ -410,7 +410,7 @@ public class QuestButton extends Button implements QuestPositionableButton {
 		if (!hiddenIcon.isEmpty()) {
 			int s = (int) (w / 8F * 3F);
 			poseStack.pushPose();
-			poseStack.translate(x, y, 0);
+			poseStack.translate(x, y, QuestScreen.Z_LEVEL);
 			hiddenIcon.draw(graphics, 0, 0, s, s);
 			poseStack.popPose();
 		}

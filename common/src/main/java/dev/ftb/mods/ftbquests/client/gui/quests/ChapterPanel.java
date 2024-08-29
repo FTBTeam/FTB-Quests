@@ -42,7 +42,6 @@ import java.util.regex.Pattern;
 public class ChapterPanel extends Panel {
 	public static final Icon ARROW_COLLAPSED = Icon.getIcon("ftbquests:textures/gui/arrow_collapsed.png");
 	public static final Icon ARROW_EXPANDED = Icon.getIcon("ftbquests:textures/gui/arrow_expanded.png");
-	public static final int Z_LEVEL = 300;
 	private static final Pattern NON_EMPTY_PAT = Pattern.compile("^.+$");
 
 	private final QuestScreen questScreen;
@@ -140,7 +139,7 @@ public class ChapterPanel extends Panel {
 	@Override
 	public void draw(GuiGraphics graphics, Theme theme, int x, int y, int w, int h) {
 		graphics.pose().pushPose();
-		graphics.pose().translate(0, 0, Z_LEVEL);
+		graphics.pose().translate(0, 0, QuestScreen.Z_LEVEL);
 		RenderSystem.enableDepthTest();
 		super.draw(graphics, theme, x, y, w, h);
 		graphics.pose().popPose();
@@ -209,7 +208,7 @@ public class ChapterPanel extends Panel {
 							run();
 						}, b.getTitle()).atMousePosition();
 						overlay.setWidth(150);
-						overlay.setExtraZlevel(Z_LEVEL + 10);
+						overlay.setExtraZlevel(QuestScreen.Z_LEVEL + 10);
 						getGui().pushModalPanel(overlay);
 					}));
 
@@ -226,7 +225,7 @@ public class ChapterPanel extends Panel {
 							}
 						}, b.getTitle()).atMousePosition();
 						overlay.setWidth(150);
-						overlay.setExtraZlevel(Z_LEVEL + 10);
+						overlay.setExtraZlevel(QuestScreen.Z_LEVEL + 10);
 						getGui().pushModalPanel(overlay);
 					}));
 
@@ -311,7 +310,7 @@ public class ChapterPanel extends Panel {
 					run();
 				}, Component.translatable("ftbquests.chapter")).atMousePosition();
 				overlay.setWidth(150);
-				overlay.setExtraZlevel(Z_LEVEL + 10);
+				overlay.setExtraZlevel(QuestScreen.Z_LEVEL + 10);
 				getGui().pushModalPanel(overlay);
 
 				return;
