@@ -4,24 +4,36 @@ import dev.architectury.networking.NetworkManager;
 import dev.ftb.mods.ftbquests.api.FTBQuestsAPI;
 import dev.ftb.mods.ftbquests.client.FTBQuestsNetClient;
 import dev.ftb.mods.ftbquests.quest.QuestObjectBase;
-import net.minecraft.Util;
-import net.minecraft.nbt.CompoundTag;
+import dev.ftb.mods.ftbquests.quest.history.EditRecord;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 
-public record EditObjectResponseMessage(long id, CompoundTag nbt) implements CustomPacketPayload {
+import java.util.Collection;
+import java.util.List;
+
+/**
+ * Received on: CLIENT
+ * <br>
+ * Sent by server in response to a {@link EditObjectMessage} packet.
+ *
+ * @param editRecords one or more of (questobject id, serialized questobject data)
+ */
+public record EditObjectResponseMessage(List<EditRecord> editRecords) implements CustomPacketPayload {
 	public static final Type<EditObjectResponseMessage> TYPE = new Type<>(FTBQuestsAPI.rl("edit_object_response_message"));
 
 	public static final StreamCodec<FriendlyByteBuf, EditObjectResponseMessage> STREAM_CODEC = StreamCodec.composite(
-			ByteBufCodecs.VAR_LONG, EditObjectResponseMessage::id,
-			ByteBufCodecs.COMPOUND_TAG, EditObjectResponseMessage::nbt,
+			EditRecord.STREAM_CODEC.apply(ByteBufCodecs.list()), EditObjectResponseMessage::editRecords,
 			EditObjectResponseMessage::new
 	);
 
-	public EditObjectResponseMessage(QuestObjectBase questObjectBase) {
-		this(questObjectBase.id, Util.make(new CompoundTag(), nbt1 -> questObjectBase.writeData(nbt1, questObjectBase.getQuestFile().holderLookup())));
+	public EditObjectResponseMessage(QuestObjectBase qo) {
+		this(List.of(qo));
+	}
+
+	public EditObjectResponseMessage(Collection<? extends QuestObjectBase> list) {
+		this(list.stream().map(EditRecord::ofQuestObject).toList());
 	}
 
 	@Override
@@ -30,6 +42,8 @@ public record EditObjectResponseMessage(long id, CompoundTag nbt) implements Cus
 	}
 
 	public static void handle(EditObjectResponseMessage message, NetworkManager.PacketContext context) {
-		context.queue(() -> FTBQuestsNetClient.editObject(message.id, message.nbt));
+		context.queue(() -> {
+            message.editRecords.forEach(editRecord -> FTBQuestsNetClient.editObject(editRecord.id(), editRecord.nbt()));
+        });
 	}
 }

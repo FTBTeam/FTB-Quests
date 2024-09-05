@@ -76,6 +76,8 @@ public class ChapterGroup extends QuestObject {
 
 	@Override
 	public void onCreated() {
+		super.onCreated();
+
 		file.chapterGroups.add(this);
 	}
 
@@ -90,6 +92,8 @@ public class ChapterGroup extends QuestObject {
 
 	@Override
 	public void deleteSelf() {
+		super.deleteSelf();
+
 		file.chapterGroups.remove(this);
 
 		for (Chapter chapter : chapters) {

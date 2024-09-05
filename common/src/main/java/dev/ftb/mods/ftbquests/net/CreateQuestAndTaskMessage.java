@@ -17,6 +17,7 @@ import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.server.level.ServerPlayer;
 
+import java.util.List;
 import java.util.Optional;
 
 /**
@@ -30,32 +31,32 @@ import java.util.Optional;
  * @param nbt the task data NBT
  * @param extra extra initial task data
  */
-public record CreateTaskAtMessage(long chapterId, double x, double y, int taskTypeId, CompoundTag nbt, Optional<CompoundTag> extra) implements CustomPacketPayload {
-	public static final Type<CreateTaskAtMessage> TYPE = new Type<>(FTBQuestsAPI.rl("create_task_at_message"));
+public record CreateQuestAndTaskMessage(long chapterId, double x, double y, int taskTypeId, CompoundTag nbt, Optional<CompoundTag> extra) implements CustomPacketPayload {
+	public static final Type<CreateQuestAndTaskMessage> TYPE = new Type<>(FTBQuestsAPI.rl("create_task_at_message"));
 
-	public static final StreamCodec<FriendlyByteBuf, CreateTaskAtMessage> STREAM_CODEC = StreamCodec.composite(
-			ByteBufCodecs.VAR_LONG, CreateTaskAtMessage::chapterId,
-			ByteBufCodecs.DOUBLE, CreateTaskAtMessage::x,
-			ByteBufCodecs.DOUBLE, CreateTaskAtMessage::y,
-			ByteBufCodecs.VAR_INT, CreateTaskAtMessage::taskTypeId,
-			ByteBufCodecs.COMPOUND_TAG, CreateTaskAtMessage::nbt,
-			ByteBufCodecs.optional(ByteBufCodecs.COMPOUND_TAG), CreateTaskAtMessage::extra,
-			CreateTaskAtMessage::new
+	public static final StreamCodec<FriendlyByteBuf, CreateQuestAndTaskMessage> STREAM_CODEC = StreamCodec.composite(
+			ByteBufCodecs.VAR_LONG, CreateQuestAndTaskMessage::chapterId,
+			ByteBufCodecs.DOUBLE, CreateQuestAndTaskMessage::x,
+			ByteBufCodecs.DOUBLE, CreateQuestAndTaskMessage::y,
+			ByteBufCodecs.VAR_INT, CreateQuestAndTaskMessage::taskTypeId,
+			ByteBufCodecs.COMPOUND_TAG, CreateQuestAndTaskMessage::nbt,
+			ByteBufCodecs.optional(ByteBufCodecs.COMPOUND_TAG), CreateQuestAndTaskMessage::extra,
+			CreateQuestAndTaskMessage::new
 	);
 
-	public static CreateTaskAtMessage requestCreation(Chapter chapter, double x, double y, Task task) {
-		return new CreateTaskAtMessage(chapter.id, x, y, task.getType().internalId,
+	public static CreateQuestAndTaskMessage requestCreation(Chapter chapter, double x, double y, Task task) {
+		return new CreateQuestAndTaskMessage(chapter.id, x, y, task.getType().internalId,
 				Util.make(new CompoundTag(), nbt1 -> task.writeData(nbt1, chapter.getQuestFile().holderLookup())),
                 Optional.ofNullable(task.makeExtraCreationData())
 		);
 	}
 
 	@Override
-	public Type<CreateTaskAtMessage> type() {
+	public Type<CreateQuestAndTaskMessage> type() {
 		return TYPE;
 	}
 
-	public static void handle(CreateTaskAtMessage message, NetworkManager.PacketContext context) {
+	public static void handle(CreateQuestAndTaskMessage message, NetworkManager.PacketContext context) {
 		context.queue(() -> {
 			if (NetUtils.canEdit(context) && context.getPlayer() instanceof ServerPlayer sp) {
 				ServerQuestFile file = ServerQuestFile.INSTANCE;
@@ -67,17 +68,15 @@ public record CreateTaskAtMessage(long chapterId, double x, double y, int taskTy
 					quest.setX(message.x);
 					quest.setY(message.y);
 					quest.onCreated();
-					NetworkHelper.sendToAll(sp.getServer(), CreateObjectResponseMessage.create(quest, null));
 
 					Task task = taskType.createTask(file.newID(), quest);
 					task.readData(message.nbt, context.registryAccess());
 					task.onCreated();
 					CompoundTag extra = message.extra.orElse(new CompoundTag());
 					file.getTranslationManager().processInitialTranslation(extra, task);
-					extra.putString("type", taskType.getTypeForNBT());
-					NetworkHelper.sendToAll(sp.getServer(), CreateObjectResponseMessage.create(task, extra, sp.getUUID()));
 
-					file.refreshIDMap();
+					NetworkHelper.sendToAll(sp.getServer(), CreateObjectResponseMessage.create(List.of(quest, task), sp.getUUID()));
+
 					file.markDirty();
 				}
 			}

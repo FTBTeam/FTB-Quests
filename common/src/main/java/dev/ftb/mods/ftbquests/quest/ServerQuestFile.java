@@ -11,6 +11,7 @@ import dev.ftb.mods.ftbquests.FTBQuests;
 import dev.ftb.mods.ftbquests.events.QuestProgressEventData;
 import dev.ftb.mods.ftbquests.integration.PermissionsHelper;
 import dev.ftb.mods.ftbquests.net.*;
+import dev.ftb.mods.ftbquests.quest.history.HistoryStack;
 import dev.ftb.mods.ftbquests.quest.reward.RewardType;
 import dev.ftb.mods.ftbquests.quest.reward.RewardTypes;
 import dev.ftb.mods.ftbquests.quest.task.Task;
@@ -46,12 +47,13 @@ public class ServerQuestFile extends BaseQuestFile {
 	private boolean isLoading;
 	private Path folder;
 	private final Deque<ServerPlayer> playerContextStack = new ArrayDeque<>();
-//	private ServerPlayer currentPlayer = null;
+	private final HistoryStack historyStack;
 
 	public ServerQuestFile(MinecraftServer s) {
 		server = s;
 		shouldSave = false;
 		isLoading = false;
+		historyStack = new HistoryStack();
 
 		int taskTypeId = 0;
 
@@ -130,24 +132,35 @@ public class ServerQuestFile extends BaseQuestFile {
 	}
 
 	@Override
-	public void deleteObject(long id) {
-		QuestObjectBase object = getBase(id);
-
-		if (object != null) {
-			getTranslationManager().removeAllTranslations(object);
-			object.deleteChildren();
-			object.deleteSelf();
-//			refreshIDMap();
-			markDirty();
-			object.getPath().ifPresent(path -> FileUtils.delete(getFolder().resolve(path).toFile()));
+	public void deleteObjects(List<Long> ids) {
+		List<Long> deleted = new ArrayList<>();
+		for (long id : ids) {
+			QuestObjectBase object = getBase(id);
+			if (object != null) {
+				getTranslationManager().removeAllTranslations(object);
+				object.deleteChildren();
+				object.deleteSelf();
+//				object.getQuestFile().clearCachedData();
+				object.getPath().ifPresent(path -> FileUtils.delete(getFolder().resolve(path).toFile()));
+				deleted.add(id);
+			}
 		}
 
-		NetworkHelper.sendToAll(server, new DeleteObjectResponseMessage(id));
+		if (!deleted.isEmpty()) {
+			clearCachedData();
+			markDirty();
+
+			NetworkHelper.sendToAll(server, new DeleteObjectResponseMessage(deleted));
+		}
 	}
 
 	@Override
 	public void markDirty() {
 		shouldSave = true;
+	}
+
+	public HistoryStack getHistoryStack() {
+		return historyStack;
 	}
 
 	public void saveNow() {
