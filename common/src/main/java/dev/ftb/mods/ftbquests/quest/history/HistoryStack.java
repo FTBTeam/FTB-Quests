@@ -1,16 +1,17 @@
 package dev.ftb.mods.ftbquests.quest.history;
 
-import dev.ftb.mods.ftbquests.quest.QuestObject;
+import dev.ftb.mods.ftbquests.quest.ServerQuestFile;
 
 import java.util.ArrayDeque;
 import java.util.Deque;
 
-public enum HistoryStack {
-    INSTANCE;
+public class HistoryStack {
+    private final Deque<HistoryEvent> undoStack = new ArrayDeque<>();
+    private final Deque<HistoryEvent> redoStack = new ArrayDeque<>();
 
-    private final Deque<HistoryEvent> stack = new ArrayDeque<>();
+    public void addAndApply(ServerQuestFile file, HistoryEvent event) {
+        undoStack.push(event);
 
-    public void pushCreation(QuestObject object) {
-
+        event.apply(file);
     }
 }

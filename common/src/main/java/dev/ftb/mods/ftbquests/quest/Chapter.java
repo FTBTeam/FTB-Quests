@@ -365,6 +365,7 @@ public final class Chapter extends QuestObject {
 	@Override
 	public void deleteSelf() {
 		super.deleteSelf();
+
 		group.removeChapter(this);
 	}
 
@@ -380,6 +381,8 @@ public final class Chapter extends QuestObject {
 
 	@Override
 	public void onCreated() {
+		super.onCreated();
+
 		// filename should have been suggested by the client and available here
 		// but in case not, fall back to the chapter's hex object id
 		if (filename.isEmpty()) {
