@@ -210,6 +210,8 @@ public abstract class Reward extends QuestObjectBase {
 
 	@Override
 	public void onCreated() {
+		super.onCreated();
+
 		quest.addReward(this);
 	}
 

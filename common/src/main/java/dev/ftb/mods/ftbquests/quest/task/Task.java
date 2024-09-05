@@ -178,6 +178,8 @@ public abstract class Task extends QuestObject {
 
 	@Override
 	public final void onCreated() {
+		super.onCreated();
+
 		quest.addTask(this);
 
 		if (this instanceof CustomTask && getQuestFile().isServerSide()) {

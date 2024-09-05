@@ -8,6 +8,7 @@ import dev.ftb.mods.ftblibrary.config.ui.EditConfigScreen;
 import dev.ftb.mods.ftblibrary.icon.Icon;
 import dev.ftb.mods.ftblibrary.math.Bits;
 import dev.ftb.mods.ftblibrary.snbt.SNBTCompoundTag;
+import dev.ftb.mods.ftbquests.FTBQuests;
 import dev.ftb.mods.ftbquests.api.FTBQuestsAPI;
 import dev.ftb.mods.ftbquests.client.ClientQuestFile;
 import dev.ftb.mods.ftbquests.client.ConfigIconItemStack;
@@ -383,7 +384,9 @@ public abstract class QuestObjectBase implements Comparable<QuestObjectBase> {
 	}
 
 	public void deleteSelf() {
-		getQuestFile().remove(id);
+		if (getQuestFile().removeFromMap(id) == null) {
+			FTBQuests.LOGGER.warn("tried to remove quest object {} from ID map, but it wasn't present!", this);
+		}
 	}
 
 	public void deleteChildren() {
@@ -398,6 +401,9 @@ public abstract class QuestObjectBase implements Comparable<QuestObjectBase> {
 	}
 
 	public void onCreated() {
+		if (getQuestFile().addtoMap(this) != null) {
+			FTBQuests.LOGGER.warn("quest object {} already in ID map, overwriting!", this);
+		}
 	}
 
 	public Optional<String> getPath() {

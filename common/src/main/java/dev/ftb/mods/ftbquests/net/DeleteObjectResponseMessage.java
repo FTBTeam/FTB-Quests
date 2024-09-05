@@ -8,11 +8,13 @@ import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 
-public record DeleteObjectResponseMessage(long id) implements CustomPacketPayload {
+import java.util.List;
+
+public record DeleteObjectResponseMessage(List<Long> id) implements CustomPacketPayload {
 	public static final Type<DeleteObjectResponseMessage> TYPE = new Type<>(FTBQuestsAPI.rl("delete_object_response_message"));
 
 	public static final StreamCodec<FriendlyByteBuf, DeleteObjectResponseMessage> STREAM_CODEC = StreamCodec.composite(
-			ByteBufCodecs.VAR_LONG, DeleteObjectResponseMessage::id,
+			ByteBufCodecs.VAR_LONG.apply(ByteBufCodecs.list()), DeleteObjectResponseMessage::id,
 			DeleteObjectResponseMessage::new
 	);
 

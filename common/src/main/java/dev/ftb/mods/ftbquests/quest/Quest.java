@@ -607,15 +607,16 @@ public final class Quest extends QuestObject implements Movable, Excludable {
 	@Override
 	public void deleteSelf() {
 		super.deleteSelf();
+
 		chapter.removeQuest(this);
 
-		List<QuestLink> linksToDel = new ArrayList<>();
+		List<Long> linksToDel = new ArrayList<>();
 		getQuestFile().forAllQuestLinks(l -> {
 			if (l.linksTo(this)) {
-				linksToDel.add(l);
+				linksToDel.add(l.id);
 			}
 		});
-		linksToDel.forEach(l -> getQuestFile().deleteObject(l.id));
+		getQuestFile().deleteObjects(linksToDel);
 	}
 
 	@Override
@@ -636,6 +637,8 @@ public final class Quest extends QuestObject implements Movable, Excludable {
 
 	@Override
 	public void onCreated() {
+		super.onCreated();
+
 		chapter.addQuest(this);
 
 		if (!tasks.isEmpty()) {

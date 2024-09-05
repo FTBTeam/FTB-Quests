@@ -8,13 +8,14 @@ import dev.ftb.mods.ftbquests.quest.reward.Reward;
 import dev.ftb.mods.ftbquests.quest.reward.RewardType;
 import dev.ftb.mods.ftbquests.quest.task.Task;
 import dev.ftb.mods.ftbquests.quest.task.TaskType;
-import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.server.MinecraftServer;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 
 public record CopyQuestMessage(long id, long chapterId, double qx, double qy, boolean copyDeps) implements CustomPacketPayload {
@@ -65,20 +66,26 @@ public record CopyQuestMessage(long id, long chapterId, double qx, double qy, bo
 
                 // sync new objects to clients
                 MinecraftServer server = context.getPlayer().getServer();
-                NetworkHelper.sendToAll(server, CreateObjectResponseMessage.create(newQuest, null));
-                newQuest.getTasks().forEach(task -> {
-                    CompoundTag extra = new CompoundTag();
-                    extra.putString("type", task.getType().getTypeForNBT());
-                    NetworkHelper.sendToAll(server, CreateObjectResponseMessage.create(task, extra));
-                });
-                newQuest.getRewards().forEach(reward -> {
-                    CompoundTag extra = new CompoundTag();
-                    extra.putString("type", reward.getType().getTypeForNBT());
-                    NetworkHelper.sendToAll(server, CreateObjectResponseMessage.create(reward, extra));
-                });
+                List<QuestObjectBase> toSync = new ArrayList<>();
+                toSync.add(newQuest);
+                toSync.addAll(newQuest.getTasks());
+                toSync.addAll(newQuest.getRewards());
+                NetworkHelper.sendToAll(server, CreateObjectResponseMessage.create(toSync, null));
+
+//                NetworkHelper.sendToAll(server, CreateObjectResponseMessage.create(newQuest, null));
+//                newQuest.getTasks().forEach(task -> {
+//                    CompoundTag extra = new CompoundTag();
+//                    extra.putString("type", task.getType().getTypeForNBT());
+//                    NetworkHelper.sendToAll(server, CreateObjectResponseMessage.create(task));
+//                });
+//                newQuest.getRewards().forEach(reward -> {
+//                    CompoundTag extra = new CompoundTag();
+//                    extra.putString("type", reward.getType().getTypeForNBT());
+//                    NetworkHelper.sendToAll(server, CreateObjectResponseMessage.create(reward));
+//                });
 
                 // and update the server quest map etc.
-                ServerQuestFile.INSTANCE.refreshIDMap();
+//                ServerQuestFile.INSTANCE.refreshIDMap();
                 ServerQuestFile.INSTANCE.markDirty();
             }
         });

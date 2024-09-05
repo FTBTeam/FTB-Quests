@@ -112,7 +112,7 @@ public class QuestScreen extends BaseScreen {
 
 	@Override
 	public boolean doesGuiPauseGame() {
-		return ClientQuestFile.INSTANCE.isPauseGame();
+		return file.isPauseGame();
 	}
 
 	@Override
@@ -259,11 +259,11 @@ public class QuestScreen extends BaseScreen {
 		}
 
 		long delId = deletionFocus == null ? object.id : deletionFocus.getMovableID();
-		QuestObjectBase delObject = ClientQuestFile.INSTANCE.getBase(delId);
+		QuestObjectBase delObject = file.getBase(delId);
 		if (delObject != null) {
 			ContextMenuItem delete = new ContextMenuItem(Component.translatable("selectServer.delete"),
 					ThemeProperties.DELETE_ICON.get(),
-					b -> ClientQuestFile.INSTANCE.deleteObject(delId));
+					b -> file.deleteObjects(List.of(delId)));
 			if (!isShiftKeyDown()) {
 				delete.setYesNoText(Component.translatable("delete_item", delObject.getTitle()));
 			}
@@ -444,16 +444,24 @@ public class QuestScreen extends BaseScreen {
 	}
 
 	void deleteSelectedObjects() {
+		List<Long> toDelete = new ArrayList<>();
+		List<Chapter> toUpdate = new ArrayList<>();
+
 		selectedObjects.forEach(movable -> {
-			if (movable instanceof Quest q) {
-				file.deleteObject(q.id);
-			} else if (movable instanceof QuestLink ql) {
-				file.deleteObject(ql.id);
+			if (movable instanceof Quest quest) {
+				toDelete.add(quest.id);
+			} else if (movable instanceof QuestLink questLink) {
+				toDelete.add(questLink.id);
 			} else if (movable instanceof ChapterImage img) {
 				img.getChapter().removeImage(img);
-				NetworkManager.sendToServer(EditObjectMessage.forQuestObject(img.getChapter()));
+				toUpdate.add(img.getChapter());
 			}
 		});
+
+		if (!toUpdate.isEmpty()) {
+			NetworkManager.sendToServer(EditObjectMessage.forQuestObjects(toUpdate));
+		}
+		file.deleteObjects(toDelete);
 		selectedObjects.clear();
 	}
 

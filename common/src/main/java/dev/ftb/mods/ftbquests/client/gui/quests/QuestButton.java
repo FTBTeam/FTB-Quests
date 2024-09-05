@@ -159,7 +159,9 @@ public class QuestButton extends Button implements QuestPositionableButton {
 							b -> openAddRewardContextMenu()));
 					contextMenu.add(new ContextMenuItem(Component.translatable("ftbquests.gui.clear_reward_all"),
 							ThemeProperties.CLOSE_ICON.get(quest),
-							b -> selected.forEach(q -> q.getRewards().forEach(r -> NetworkManager.sendToServer(new DeleteObjectMessage(r.id))))));
+							b -> selected.forEach(q -> NetworkManager.sendToServer(
+									new DeleteObjectMessage(q.getRewards().stream().map(QuestObjectBase::getId).toList())
+                            ))));
 					contextMenu.add(new ContextMenuItem(Component.translatable("ftbquests.gui.bulk_change_size"),
 							Icons.SETTINGS,
 							b -> bulkChangeSize()));
@@ -228,10 +230,8 @@ public class QuestButton extends Button implements QuestPositionableButton {
 
 		EditStringConfigOverlay<Double> overlay = new EditStringConfigOverlay<>(getGui(), c, accepted -> {
 			if (accepted) {
-				quests.forEach(q -> {
-					q.setSize(c.getValue());
-					NetworkManager.sendToServer(EditObjectMessage.forQuestObject(q));
-				});
+				quests.forEach(q -> q.setSize(c.getValue()));
+				NetworkManager.sendToServer(EditObjectMessage.forQuestObjects(quests));
 			}
 			run();
 		}, Component.translatable("ftbquests.quest.appearance.size")).atMousePosition();

@@ -81,12 +81,15 @@ public class QuestLink extends QuestObject implements Movable, Excludable {
 
     @Override
     public void onCreated() {
+        super.onCreated();
+
         chapter.addQuestLink(this);
     }
 
     @Override
     public void deleteSelf() {
         super.deleteSelf();
+
         chapter.removeQuestLink(this);
     }
 

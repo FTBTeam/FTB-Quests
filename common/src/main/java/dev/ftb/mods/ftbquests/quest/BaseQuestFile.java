@@ -256,31 +256,40 @@ public abstract class BaseQuestFile extends QuestObject implements QuestFile {
 		return getBase(id) instanceof QuestObject qo ? qo : null;
 	}
 
+	/**
+	 * Remove the quest object from the ID map. Only to be called from {@link QuestObjectBase#deleteSelf()} !
+	 *
+	 * @param id the quest id
+	 * @return the removed quest, or null if the quest isn't in the map
+	 */
 	@Nullable
-	public QuestObjectBase remove(long id) {
+	QuestObjectBase removeFromMap(long id) {
 		QuestObjectBase object = questObjectMap.remove(id);
 
 		if (object != null) {
+			FTBQuests.LOGGER.debug("remove mapping for {} quest object {}", object.getObjectType(), id);
+
 			if (object instanceof QuestObject qo) {
 				forAllQuests(quest -> quest.removeDependency(qo));
 			}
 			object.invalid = true;
-			refreshIDMap();
+//			refreshIDMap();
 			return object;
 		}
 
 		return null;
 	}
 
-	public <T extends QuestObjectBase> T getQuestObjectOrThrow(long id, Class<T> cls) {
-		QuestObjectBase object = getBase(id);
-		if (object == null) {
-			throw new IllegalArgumentException("Unknown object id " + id);
-		} else if (cls.isAssignableFrom(object.getClass())) {
-			return cls.cast(object);
-		} else {
-			throw new IllegalArgumentException("Wrong class for object id " + id + ": wanted " + cls.getName() + ", got " + object.getClass().getName());
-		}
+	/**
+	 * Add the quest to the map. Only to be called from {@link BaseQuestFile#onCreated()} !
+	 * @param qo the quest object to add
+	 * @return the quest object already in the map (hopefully null)
+	 */
+	@Nullable
+	QuestObjectBase addtoMap(QuestObjectBase qo) {
+		FTBQuests.LOGGER.debug("add mapping for {} quest object {}", qo.getObjectType(), qo);
+
+		return questObjectMap.put(qo.id, qo);
 	}
 
 	@Nullable
@@ -342,7 +351,7 @@ public abstract class BaseQuestFile extends QuestObject implements QuestFile {
 	 * Rebuild the id -> quest object map after some object has been added or removed. Also clears all cached data for
 	 * all known objects, forcing a re-cache on the next access.
 	 */
-	public void refreshIDMap() {
+	private void refreshIDMap() {
 		questObjectMap.clear();
 
 		chapterGroups.forEach(group -> questObjectMap.put(group.id, group));
@@ -392,7 +401,7 @@ public abstract class BaseQuestFile extends QuestObject implements QuestFile {
 				if (RewardTable.isFakeQuestId(parent)) {
 					yield RewardTable.createRewardForTable(id, rewardType, this);
 				} else {
-					Quest quest = getQuestObjectOrThrow(parent, Quest.class);
+					Quest quest = requireQuestObject(parent, this::getQuest);
 					Reward reward = RewardType.createReward(id, quest, rewardType);
 					Validate.isTrue(reward != null, "Unknown reward type: " + rewardType);
 					yield reward;
@@ -1129,7 +1138,7 @@ public abstract class BaseQuestFile extends QuestObject implements QuestFile {
 		return Collections.unmodifiableCollection(teamDataMap.values());
 	}
 
-	public abstract void deleteObject(long id);
+	public abstract void deleteObjects(List<Long> ids);
 
 	@Override
 	@Environment(EnvType.CLIENT)
@@ -1483,39 +1492,22 @@ public abstract class BaseQuestFile extends QuestObject implements QuestFile {
 	}
 
 	public int removeEmptyRewardTables(CommandSourceStack source) {
-		MutableInt del = new MutableInt(0);
+		List<RewardTable> toRemove = rewardTables.stream().filter(table -> table.getWeightedRewards().isEmpty()).toList();
+		List<Long> idsToRemove = new ArrayList<>();
+		toRemove.forEach(table -> {
+			table.deleteSelf();
+			table.invalid = true;
+			FileUtils.delete(ServerQuestFile.INSTANCE.getFolder().resolve(table.getPath().orElseThrow()).toFile());
+			idsToRemove.add(table.id);
+		});
 
-		for (RewardTable table : rewardTables) {
-			if (table.getWeightedRewards().isEmpty()) {
-				del.increment();
-				table.invalid = true;
-				FileUtils.delete(ServerQuestFile.INSTANCE.getFolder().resolve(table.getPath().orElseThrow()).toFile());
-				NetworkHelper.sendToAll(source.getServer(), new DeleteObjectResponseMessage(table.id));
-			}
-		}
-
-		if (rewardTables.removeIf(rewardTable -> rewardTable.invalid)) {
-			refreshIDMap();
+		if (!idsToRemove.isEmpty()) {
+			NetworkHelper.sendToAll(source.getServer(), new DeleteObjectResponseMessage(idsToRemove));
 			markDirty();
 		}
 
-		return del.intValue();
+		return toRemove.size();
 	}
-
-//	public String generateRewardTableName(String basename) {
-//		String s = titleToID(basename).orElse(toString());
-//		String filename = s;
-//
-//		Set<String> existingNames = rewardTables.stream().map(RewardTable::getFilename).collect(Collectors.toSet());
-//		int i = 2;
-//
-//		while (existingNames.contains(filename)) {
-//			filename = s + "_" + i;
-//			i++;
-//		}
-//
-//		return filename;
-//	}
 
 	public List<ChapterGroup> getChapterGroups() {
 		return Collections.unmodifiableList(chapterGroups);

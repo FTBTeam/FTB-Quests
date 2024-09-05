@@ -10,6 +10,7 @@ import dev.ftb.mods.ftbquests.client.gui.*;
 import dev.ftb.mods.ftbquests.client.gui.quests.QuestScreen;
 import dev.ftb.mods.ftbquests.net.TeamDataUpdate;
 import dev.ftb.mods.ftbquests.quest.*;
+import dev.ftb.mods.ftbquests.quest.history.CreateDeleteRecord;
 import dev.ftb.mods.ftbquests.quest.reward.Reward;
 import dev.ftb.mods.ftbquests.quest.task.Task;
 import net.minecraft.client.Minecraft;
@@ -21,6 +22,7 @@ import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Date;
+import java.util.List;
 import java.util.UUID;
 
 public class FTBQuestsNetClient {
@@ -48,27 +50,29 @@ public class FTBQuestsNetClient {
 		}
 	}
 
-	public static void createObject(long id, long parent, QuestObjectType type, CompoundTag nbt, CompoundTag extra, UUID creator) {
+	public static void createObjects(List<CreateDeleteRecord> creationRecords, UUID creator) {
 		ClientQuestFile file = ClientQuestFile.INSTANCE;
+		QuestObjectUpdateListener listener = ClientUtils.getCurrentGuiAs(QuestObjectUpdateListener.class);
+		QuestObjectBase toOpen = null;
 
-		QuestObjectBase object = file.create(id, type, parent, extra);
-		object.readData(nbt, FTBQuestsClient.holderLookup());
-		file.getTranslationManager().processInitialTranslation(extra, object);
-		object.onCreated();
-		file.refreshIDMap();
-		object.editedFromGUI();
-		FTBQuests.getRecipeModHelper().refreshRecipes(object);
+        for (CreateDeleteRecord c : creationRecords) {
+            QuestObjectBase object = file.create(c.id(), c.questObjectType(), c.parent(), c.extra());
+            object.readData(c.nbt(), FTBQuestsClient.holderLookup());
+            file.getTranslationManager().processInitialTranslation(c.extra(), object);
+            object.onCreated();
+//			file.clearCachedData();
+			object.editedFromGUI();
+			FTBQuests.getRecipeModHelper().refreshRecipes(object);
+			if (listener != null) {
+				listener.onQuestObjectUpdate(object);
+			}
+			toOpen = object;
+		}
+		file.clearCachedData();
 
 		LocalPlayer player = Minecraft.getInstance().player;
-		if (object instanceof QuestObject qo && player != null && creator.equals(player.getUUID())) {
-			file.getQuestScreen()
-					.ifPresent(questScreen -> questScreen.open(qo, true));
-		}
-
-		QuestObjectUpdateListener listener = ClientUtils.getCurrentGuiAs(QuestObjectUpdateListener.class);
-
-		if (listener != null) {
-			listener.onQuestObjectUpdate(object);
+		if (toOpen instanceof final QuestObject qo && player != null && creator.equals(player.getUUID())) {
+			file.getQuestScreen().ifPresent(questScreen -> questScreen.open(qo, true));
 		}
 	}
 
@@ -86,17 +90,20 @@ public class FTBQuestsNetClient {
 		}
 	}
 
-	public static void deleteObject(long id) {
-		QuestObjectBase object = ClientQuestFile.INSTANCE.getBase(id);
+	public static void deleteObject(List<Long> ids) {
+		for (long id : ids) {
+			QuestObjectBase object = ClientQuestFile.INSTANCE.getBase(id);
 
-		if (object != null) {
-			object.deleteChildren();
-			object.deleteSelf();
-//			ClientQuestFile.INSTANCE.refreshIDMap();
-			object.editedFromGUI();
-			FTBQuests.getRecipeModHelper().refreshRecipes(object);
-			ClientQuestFile.INSTANCE.getTranslationManager().removeAllTranslations(object);
+			if (object != null) {
+				object.deleteChildren();
+				object.deleteSelf();
+				object.editedFromGUI();
+//				object.getQuestFile().clearCachedData();
+				FTBQuests.getRecipeModHelper().refreshRecipes(object);
+				ClientQuestFile.INSTANCE.getTranslationManager().removeAllTranslations(object);
+			}
 		}
+		ClientQuestFile.INSTANCE.clearCachedData();
 	}
 
 	public static void displayCompletionToast(long id) {
@@ -135,13 +142,12 @@ public class FTBQuestsNetClient {
 	}
 
 	public static void editObject(long id, CompoundTag nbt) {
-//		ClientQuestFile.INSTANCE.clearCachedData();
 		QuestObjectBase object = ClientQuestFile.INSTANCE.getBase(id);
 
 		if (object != null) {
 			object.readData(nbt, FTBQuestsClient.holderLookup());
+			object.getQuestFile().clearCachedData();
 			object.editedFromGUI();
-			object.clearCachedData();
 			FTBQuests.getRecipeModHelper().refreshRecipes(object);
 		}
 	}
