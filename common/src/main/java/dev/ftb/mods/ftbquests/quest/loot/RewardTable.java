@@ -331,6 +331,8 @@ public class RewardTable extends QuestObjectBase {
 
 	@Override
 	public void onCreated() {
+		super.onCreated();
+
 //		if (filename.isEmpty()) {
 //			filename = file.generateRewardTableName(titleToID(getRawTitle()).orElse(toString()));
 //		}

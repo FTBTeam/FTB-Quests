@@ -2,33 +2,41 @@ package dev.ftb.mods.ftbquests.net;
 
 import dev.architectury.networking.NetworkManager;
 import dev.ftb.mods.ftblibrary.util.NetworkHelper;
-import dev.ftb.mods.ftbquests.FTBQuests;
 import dev.ftb.mods.ftbquests.api.FTBQuestsAPI;
-import dev.ftb.mods.ftbquests.client.ClientQuestFile;
 import dev.ftb.mods.ftbquests.quest.QuestObjectBase;
 import dev.ftb.mods.ftbquests.quest.ServerQuestFile;
+import dev.ftb.mods.ftbquests.quest.history.EditRecord;
+import dev.ftb.mods.ftbquests.quest.history.HistoryEvent;
 import dev.ftb.mods.ftbquests.util.NetUtils;
-import net.minecraft.Util;
-import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 
-public record EditObjectMessage(long id, CompoundTag nbt) implements CustomPacketPayload {
+import java.util.Collection;
+import java.util.List;
+
+/**
+ * Received on: SERVER
+ * <br>
+ * Sent by client whenever any quest object is being edited client-side.
+ *
+ * @param editRecords one or more of (questobject id, serialized questobject data)
+ */
+public record EditObjectMessage(List<EditRecord> editRecords) implements CustomPacketPayload {
 	public static final Type<EditObjectMessage> TYPE = new Type<>(FTBQuestsAPI.rl("edit_object_message"));
 
 	public static final StreamCodec<FriendlyByteBuf, EditObjectMessage> STREAM_CODEC = StreamCodec.composite(
-			ByteBufCodecs.VAR_LONG, EditObjectMessage::id,
-			ByteBufCodecs.COMPOUND_TAG, EditObjectMessage::nbt,
+			EditRecord.STREAM_CODEC.apply(ByteBufCodecs.list()), EditObjectMessage::editRecords,
 			EditObjectMessage::new
 	);
 
 	public static EditObjectMessage forQuestObject(QuestObjectBase qo) {
-		FTBQuests.getRecipeModHelper().refreshRecipes(qo);
-//		ClientQuestFile.INSTANCE.clearCachedData();
+		return EditObjectMessage.forQuestObjects(List.of(qo));
+	}
 
-		return new EditObjectMessage(qo.id, Util.make(new CompoundTag(), nbt1 -> qo.writeData(nbt1, ClientQuestFile.INSTANCE.holderLookup())));
+	public static EditObjectMessage forQuestObjects(Collection<? extends QuestObjectBase> list) {
+		return new EditObjectMessage(list.stream().map(EditRecord::ofQuestObject).toList());
 	}
 
 	public static void sendToServer(QuestObjectBase qo) {
@@ -43,15 +51,22 @@ public record EditObjectMessage(long id, CompoundTag nbt) implements CustomPacke
 	public static void handle(EditObjectMessage message, NetworkManager.PacketContext context) {
 		context.queue(() -> {
 			if (NetUtils.canEdit(context)) {
-				QuestObjectBase object = ServerQuestFile.INSTANCE.getBase(message.id);
-				if (object != null) {
-					object.readData(message.nbt, context.registryAccess());
-					object.editedFromGUIOnServer();
-					object.clearCachedData();
-//					ServerQuestFile.INSTANCE.clearCachedData();
-					ServerQuestFile.INSTANCE.markDirty();
-					NetworkHelper.sendToAll(context.getPlayer().getServer(), new EditObjectResponseMessage(object));
-				}
+				ServerQuestFile sqf = ServerQuestFile.INSTANCE;
+				HistoryEvent.Modification.fromEditRecords(message.editRecords).ifPresent(modification -> {
+					sqf.getHistoryStack().addAndApply(sqf, modification);
+					NetworkHelper.sendToAll(context.getPlayer().getServer(), new EditObjectResponseMessage(modification.newRecords()));
+				});
+//				{
+//					QuestObjectBase object = ServerQuestFile.INSTANCE.getBase(editRecord.id());
+//					if (object != null) {
+//						object.readData(editRecord.nbt(), context.registryAccess());
+//						object.editedFromGUIOnServer();
+//						object.getQuestFile().clearCachedData();
+//						responses.add(object);
+//					}
+//				});
+//				NetworkHelper.sendToAll(context.getPlayer().getServer(), new EditObjectResponseMessage(responses));
+//				ServerQuestFile.INSTANCE.markDirty();
 			}
 		});
 	}

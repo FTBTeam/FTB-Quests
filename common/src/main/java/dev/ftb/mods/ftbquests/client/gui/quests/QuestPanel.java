@@ -457,7 +457,7 @@ public class QuestPanel extends Panel {
 				contextMenu.add(new ContextMenuItem(type.getDisplayName(), type.getIconSupplier(), b -> {
 					playClickSound();
 					type.getGuiProvider().openCreationGui(this, new Quest(0L, questScreen.selectedChapter),
-                            task -> NetworkManager.sendToServer(CreateTaskAtMessage.requestCreation(questScreen.selectedChapter, qx, qy, task))
+                            task -> NetworkManager.sendToServer(CreateQuestAndTaskMessage.requestCreation(questScreen.selectedChapter, qx, qy, task))
 					);
 				}));
 			}
@@ -526,7 +526,7 @@ public class QuestPanel extends Panel {
 		Task newTask = QuestObjectBase.copy(task,
 				() -> TaskType.createTask(0L, new Quest(0L, questScreen.selectedChapter), task.getType().getTypeId().toString()));
 		if (newTask != null) {
-			NetworkManager.sendToServer(CreateTaskAtMessage.requestCreation(questScreen.selectedChapter, qx, qy, newTask));
+			NetworkManager.sendToServer(CreateQuestAndTaskMessage.requestCreation(questScreen.selectedChapter, qx, qy, newTask));
 		}
 	}
 

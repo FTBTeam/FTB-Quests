@@ -149,8 +149,13 @@ public class ClientQuestFile extends BaseQuestFile {
 	}
 
 	@Override
-	public void deleteObject(long id) {
-		NetworkManager.sendToServer(new DeleteObjectMessage(id));
+	public void deleteObjects(List<Long> ids) {
+		// Don't actually delete the object(s) yet, but just send a deletion request to the server
+		// See FTBQuestNetClient#deleteObject for actual client-side deletion, done on receipt of
+		//   the server deletion response
+		if (!ids.isEmpty()) {
+			NetworkManager.sendToServer(new DeleteObjectMessage(ids));
+		}
 	}
 
 	@Override

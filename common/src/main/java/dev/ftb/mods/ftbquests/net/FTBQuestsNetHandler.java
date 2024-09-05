@@ -12,7 +12,7 @@ public class FTBQuestsNetHandler {
 		NetworkHelper.registerC2S(CopyChapterImageMessage.TYPE, CopyChapterImageMessage.STREAM_CODEC, CopyChapterImageMessage::handle);
 		NetworkHelper.registerC2S(CopyQuestMessage.TYPE, CopyQuestMessage.STREAM_CODEC, CopyQuestMessage::handle);
 		NetworkHelper.registerC2S(CreateObjectMessage.TYPE, CreateObjectMessage.STREAM_CODEC, CreateObjectMessage::handle);
-		NetworkHelper.registerC2S(CreateTaskAtMessage.TYPE, CreateTaskAtMessage.STREAM_CODEC, CreateTaskAtMessage::handle);
+		NetworkHelper.registerC2S(CreateQuestAndTaskMessage.TYPE, CreateQuestAndTaskMessage.STREAM_CODEC, CreateQuestAndTaskMessage::handle);
 		NetworkHelper.registerC2S(DeleteObjectMessage.TYPE, DeleteObjectMessage.STREAM_CODEC, DeleteObjectMessage::handle);
 		NetworkHelper.registerC2S(EditObjectMessage.TYPE, EditObjectMessage.STREAM_CODEC, EditObjectMessage::handle);
 		NetworkHelper.registerC2S(ForceSaveMessage.TYPE, ForceSaveMessage.STREAM_CODEC, ForceSaveMessage::handle);
