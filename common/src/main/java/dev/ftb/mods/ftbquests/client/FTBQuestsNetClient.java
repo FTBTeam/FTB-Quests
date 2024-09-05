@@ -110,6 +110,7 @@ public class FTBQuestsNetClient {
 			}
 			ClientQuestFile.INSTANCE.clearCachedData();
 		}
+		ClientQuestFile.INSTANCE.clearCachedData();
 	}
 
 	public static void notifyPlayerOfCompletion(long id) {
@@ -150,7 +151,6 @@ public class FTBQuestsNetClient {
 			object.readData(nbt, FTBQuestsClient.holderLookup());
 			object.getQuestFile().clearCachedData();
 			object.editedFromGUI();
-			object.clearCachedData();
 			FTBQuests.getRecipeModHelper().refreshRecipes(object);
 		}
 	}
