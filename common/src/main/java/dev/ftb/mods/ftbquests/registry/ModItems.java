@@ -8,6 +8,7 @@ import dev.ftb.mods.ftbquests.FTBQuests;
 import dev.ftb.mods.ftbquests.api.FTBQuestsAPI;
 import dev.ftb.mods.ftbquests.item.*;
 import dev.ftb.mods.ftbquests.item.ScreenBlockItem.ScreenSize;
+import dev.ftb.mods.ftbquests.quest.loot.LootCrate;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.Item;
@@ -16,7 +17,6 @@ import net.minecraft.world.level.block.Block;
 
 import java.util.List;
 import java.util.function.Supplier;
-import java.util.stream.Stream;
 
 public class ModItems {
 	public static final DeferredRegister<Item> ITEMS = DeferredRegister.create(FTBQuestsAPI.MOD_ID, Registries.ITEM);
@@ -68,11 +68,14 @@ public class ModItems {
 
 		CreativeTabRegistry.appendStack(FTBLibrary.getCreativeModeTab(), BASE_ITEMS.stream().map(item -> () -> new ItemStack(item.get())));
 
-		Stream<Supplier<ItemStack>> lootCreates = FTBQuests.PROXY.getKnownLootCrates()
-				.stream()
-				.map(crate -> crate::createStack);
-
-		CreativeTabRegistry.appendStack(FTBLibrary.getCreativeModeTab(), lootCreates);
+		CreativeTabRegistry.modify(FTBLibrary.getCreativeModeTab(), (flags, output, canUseGameMasterBlocks) -> {
+            var stacks = FTBQuests.PROXY.getKnownLootCrates()
+                    .stream()
+                    .map(LootCrate::createStack)
+					.filter(stack -> !stack.isEmpty())
+                    .toList();
+            output.acceptAllAfter(BASE_ITEMS.getLast().get(), stacks);
+        });
 	}
 
 	public static Item.Properties defaultProps() {
