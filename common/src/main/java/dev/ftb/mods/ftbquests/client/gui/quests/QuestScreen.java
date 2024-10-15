@@ -18,6 +18,7 @@ import dev.ftb.mods.ftbquests.client.ClientQuestFile;
 import dev.ftb.mods.ftbquests.client.FTBQuestsClient;
 import dev.ftb.mods.ftbquests.client.gui.CustomToast;
 import dev.ftb.mods.ftbquests.client.gui.FTBQuestsTheme;
+import dev.ftb.mods.ftbquests.client.gui.RewardTablesScreen;
 import dev.ftb.mods.ftbquests.client.gui.SelectQuestObjectScreen;
 import dev.ftb.mods.ftbquests.net.*;
 import dev.ftb.mods.ftbquests.quest.*;
@@ -266,11 +267,11 @@ public class QuestScreen extends BaseScreen {
 				};
 		if (selectedChapter != null) {
 			if (selectedChapter.isAutofocus(object.id)) {
-				contextMenu.add(new ContextMenuItem(Component.translatable("ftbquest.gui.clear_autofocused"),
+				contextMenu.add(new ContextMenuItem(Component.translatable("ftbquests.gui.clear_autofocused"),
 						Icons.MARKER,
 						b -> setAutofocusedId(0L)));
 			} else if (object instanceof Quest || object instanceof QuestLink) {
-				contextMenu.add(new ContextMenuItem(Component.translatable("ftbquest.gui.set_autofocused"),
+				contextMenu.add(new ContextMenuItem(Component.translatable("ftbquests.gui.set_autofocused"),
 						Icons.MARKER,
 						b -> setAutofocusedId(object.id)));
 			}
@@ -536,6 +537,12 @@ public class QuestScreen extends BaseScreen {
 						return pasteSelectedQuestLinks();
 					} else {
 						return pasteSelectedQuest(!key.modifiers.shift());
+					}
+				}
+				case GLFW.GLFW_KEY_T -> {
+					if (key.modifiers.control()) {
+						new RewardTablesScreen(this).openGui();
+						return true;
 					}
 				}
 			}

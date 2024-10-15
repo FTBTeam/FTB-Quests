@@ -18,6 +18,7 @@ import dev.ftb.mods.ftbquests.net.ToggleEditingModeMessage;
 import dev.ftb.mods.ftbquests.quest.task.StructureTask;
 import dev.ftb.mods.ftbquests.quest.theme.ThemeLoader;
 import dev.ftb.mods.ftbquests.quest.theme.property.ThemeProperties;
+import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.network.chat.ClickEvent;
 import net.minecraft.network.chat.Component;
@@ -118,8 +119,8 @@ public class OtherButtonsPanelBottom extends OtherButtonsPanel {
 					b -> ChangeProgressMessage.sendToServer(questScreen.file.selfTeamData, questScreen.file, progressChange -> progressChange.setReset(false)))
 					.setYesNoText(Component.translatable("ftbquests.gui.complete_instantly_q")));
 
-			contextMenu.add(new ContextMenuItem(Component.translatable("ftbquests.reward_tables"), ThemeProperties.REWARD_TABLE_ICON.get(),
-					b -> new RewardTablesScreen(questScreen).openGui()));
+			contextMenu.add(new TooltipContextMenuItem(Component.translatable("ftbquests.reward_tables"), ThemeProperties.REWARD_TABLE_ICON.get(),
+					b -> new RewardTablesScreen(questScreen).openGui(), Component.literal("[Ctrl + T]").withStyle(ChatFormatting.DARK_GRAY)));
 			contextMenu.add(new ContextMenuItem(Component.translatable("ftbquests.gui.save_on_server"), ThemeProperties.SAVE_ICON.get(),
 					b -> NetworkManager.sendToServer(ForceSaveMessage.INSTANCE)));
 			contextMenu.add(new ContextMenuItem(Component.translatable("ftbquests.gui.save_as_file"), ThemeProperties.DOWNLOAD_ICON.get(),

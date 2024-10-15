@@ -111,7 +111,7 @@ public class FTBQuestsClientEventHandler {
 
 	private void registerItemColors(Minecraft minecraft) {
 		ColorHandlerRegistry.registerItemColors((stack, tintIndex) -> {
-			LootCrate crate = LootCrateItem.getCrate(stack);
+			LootCrate crate = LootCrateItem.getCrate(stack, true);
 			return crate == null ? 0xFFFFFFFF : (0xFF000000 | crate.getColor().rgb());
 		}, ModItems.LOOTCRATE.get());
 	}

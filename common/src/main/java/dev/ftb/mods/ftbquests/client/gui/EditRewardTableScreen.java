@@ -1,5 +1,6 @@
 package dev.ftb.mods.ftbquests.client.gui;
 
+import com.mojang.blaze3d.platform.InputConstants;
 import dev.ftb.mods.ftblibrary.config.ConfigGroup;
 import dev.ftb.mods.ftblibrary.config.DoubleConfig;
 import dev.ftb.mods.ftblibrary.config.ui.EditConfigScreen;
@@ -98,6 +99,17 @@ public class EditRewardTableScreen extends AbstractButtonListScreen {
 	protected void doAccept() {
 		callback.accept(editedTable);
 		parentScreen.run();
+	}
+
+	public boolean keyPressed(Key key) {
+		if (super.keyPressed(key)) {
+			return true;
+		} else if ((key.is(InputConstants.KEY_RETURN) || key.is(InputConstants.KEY_NUMPADENTER)) && key.modifiers.shift()) {
+			this.doAccept();
+			return true;
+		} else {
+			return false;
+		}
 	}
 
 	private class CustomTopPanel extends TopPanel {

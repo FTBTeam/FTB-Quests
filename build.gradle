@@ -13,6 +13,13 @@ subprojects {
 
 	loom {
 		silentMojangMappingsLicense()
+
+		runs {
+			client {
+				vmArgs "-Xmx4G"
+				programArgs "--width", "1920", "--height", "1080"
+			}
+		}
 	}
 
 	dependencies {
