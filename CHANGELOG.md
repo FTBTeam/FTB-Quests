@@ -4,6 +4,20 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2001.4.9]
+
+### Added
+* A few new template substitutions are available in command rewards
+  * `{team_id}` - the short team name, e.g. "Dev#380df991"
+  * `{long_team_id}` - the full team UUID, e.g. "380df991-f603-344c-a090-369bad2a924a"
+  * `{member_count}` - the number of players in the team
+  * `{online_member_count}` - the number of currently-online players in the team
+
+### Fixed
+* Fixed "Hide Quests until Dependencies Visible" setting actually checking for dependencies being _complete_
+  * Added new "Hide Quests until Dependencies Complete" setting
+  * So there are now two independent setting for hiding quests based on dependency visibility and/or completion
+
 ## [2001.4.8]
 
 ### Fixed
