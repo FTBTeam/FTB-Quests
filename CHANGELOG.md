@@ -4,6 +4,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+# [2101.1.1]
+
+### Fixed
+* Fixed context menu tooltips sometimes appearing behind the context menu
+* Fixed some issues with the reward table editor GUI (changes not getting correctly sync'd to server in some cases)
+
 # [2101.1.0]
 
 ### Changed
