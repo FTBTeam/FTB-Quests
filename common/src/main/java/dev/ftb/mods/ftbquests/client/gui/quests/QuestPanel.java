@@ -507,7 +507,7 @@ public class QuestPanel extends Panel {
 				});
 			}
 
-			questScreen.openContextMenu(contextMenu);
+			questScreen.openContextMenu(contextMenu).setExtraZlevel(900);
 			return true;
 		}
 

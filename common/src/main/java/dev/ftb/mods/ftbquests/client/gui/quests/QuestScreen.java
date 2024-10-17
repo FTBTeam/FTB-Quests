@@ -45,7 +45,8 @@ import java.util.*;
 public class QuestScreen extends BaseScreen {
 	// A fairly large z-offset is needed to ensure various GUI elements render above drawn block items,
 	//   which can extend quite some way out of the screen if the quest button is scaled up...
-	public static final int Z_LEVEL = 1250;
+	// Note: can't be larger than this, apparently, or tooltips end up underneath
+	public static final int Z_LEVEL = 900;
 
 	final ClientQuestFile file;
 
