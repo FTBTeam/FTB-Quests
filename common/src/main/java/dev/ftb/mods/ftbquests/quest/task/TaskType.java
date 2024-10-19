@@ -7,11 +7,13 @@ import dev.ftb.mods.ftbquests.client.GuiProviders;
 import dev.ftb.mods.ftbquests.quest.Quest;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.Util;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.function.Consumer;
+import java.util.function.BiConsumer;
 import java.util.function.Supplier;
 
 public final class TaskType {
@@ -60,6 +62,10 @@ public final class TaskType {
 		return typeId.getNamespace().equals(FTBQuestsAPI.MOD_ID) ? typeId.getPath() : typeId.toString();
 	}
 
+	public CompoundTag makeExtraNBT() {
+		return Util.make(new CompoundTag(), t -> t.putString("type", getTypeForNBT()));
+	}
+
 	public TaskType setDisplayName(Component name) {
 		displayName = name;
 		return this;
@@ -94,7 +100,7 @@ public final class TaskType {
 	@FunctionalInterface
 	public interface GuiProvider {
 		@Environment(EnvType.CLIENT)
-		void openCreationGui(Panel panel, Quest quest, Consumer<Task> callback);
+		void openCreationGui(Panel panel, Quest quest, BiConsumer<Task, CompoundTag> callback);
 	}
 
 }

@@ -41,6 +41,9 @@ public class EditRewardTableScreen extends AbstractButtonListScreen {
 		this.callback = callback;
 
 		editedTable = QuestObjectBase.copy(originalTable, () ->  new RewardTable(originalTable.id, originalTable.getFile()));
+		if (editedTable != null) {
+			editedTable.setRawTitle(originalTable.getRawTitle());
+		}
 
 		setBorder(1, 1, 1);
 	}

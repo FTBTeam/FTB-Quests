@@ -23,8 +23,11 @@ import dev.ftb.mods.ftbquests.quest.QuestObjectBase;
 import dev.ftb.mods.ftbquests.quest.loot.LootCrate;
 import dev.ftb.mods.ftbquests.quest.loot.RewardTable;
 import dev.ftb.mods.ftbquests.quest.reward.RandomReward;
+import dev.ftb.mods.ftbquests.quest.translation.TranslationKey;
 import net.minecraft.ChatFormatting;
+import net.minecraft.Util;
 import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.Items;
 import org.apache.commons.lang3.mutable.MutableInt;
@@ -122,14 +125,18 @@ public class RewardTablesScreen extends AbstractButtonListScreen {
 
 	@Override
 	protected void doAccept() {
-		Set<Long> toRemove = ClientQuestFile.INSTANCE.getRewardTables().stream().map(t -> t.id).collect(Collectors.toSet());
+		ClientQuestFile file = ClientQuestFile.INSTANCE;
+		Set<Long> toRemove = file.getRewardTables().stream().map(t -> t.id).collect(Collectors.toSet());
 
 		rewardTablesCopy.forEach(table -> {
-			if (table.id == 0) {
+			if (table.getId() == 0L) {
 				// newly-created
-				new CreateObjectMessage(table, null).sendToServer();
+				CompoundTag extra = Util.make(new CompoundTag(), tag -> file.getTranslationManager().addInitialTranslation(
+						tag, file.getLocale(), TranslationKey.TITLE, table.getRawTitle())
+				);
+				new CreateObjectMessage(table, extra).sendToServer();
 			}
-			toRemove.remove(table.id);
+			toRemove.remove(table.getId());
 		});
 
 		toRemove.forEach(id -> new DeleteObjectMessage(id).sendToServer());
