@@ -6,6 +6,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 # [2101.1.1]
 
+### Added
+* The pinned quests panel now has a "Pinned Quests" title for clarity
+
 ### Fixed
 * Fixed context menu tooltips sometimes appearing behind the context menu
 * Fixed some issues with the reward table editor GUI (changes not getting correctly sync'd to server in some cases)
