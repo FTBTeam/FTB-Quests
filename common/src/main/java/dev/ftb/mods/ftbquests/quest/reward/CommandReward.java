@@ -127,7 +127,7 @@ public class CommandReward extends Reward {
 		player.server.getCommands().performPrefixedCommand(source, cmd);
 
 		if (notify) {
-			String key = feedbackMessage.isEmpty() ? "ftbquests.reward.ftbquests.command.claimed" : feedbackMessage;
+			String key = feedbackMessage.isEmpty() ? "ftbquests.reward.ftbquests.command.success" : feedbackMessage;
 			NetworkManager.sendToPlayer(player, new DisplayRewardToastMessage(id, Component.translatable(key), REWARD_ICON));
 		}
 	}
