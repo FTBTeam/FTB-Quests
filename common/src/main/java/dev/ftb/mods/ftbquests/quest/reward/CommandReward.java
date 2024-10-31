@@ -1,6 +1,10 @@
 package dev.ftb.mods.ftbquests.quest.reward;
 
+import dev.architectury.networking.NetworkManager;
 import dev.ftb.mods.ftblibrary.config.ConfigGroup;
+import dev.ftb.mods.ftblibrary.icon.Color4I;
+import dev.ftb.mods.ftblibrary.icon.Icon;
+import dev.ftb.mods.ftbquests.net.DisplayRewardToastMessage;
 import dev.ftb.mods.ftbquests.quest.Quest;
 import dev.ftb.mods.ftbteams.api.FTBTeamsAPI;
 import net.fabricmc.api.EnvType;
@@ -24,15 +28,18 @@ import java.util.regex.Pattern;
 
 public class CommandReward extends Reward {
 	private static final String DEFAULT_COMMAND = "/say Hi, @p!";
+	private static final Icon REWARD_ICON = Icon.getIcon("minecraft:block/command_block_back");
 	public static final Pattern PATTERN = Pattern.compile("[{](\\w+)}");
 
 	private String command;
 	private boolean elevatePerms;
 	private boolean silent;
+	private String feedbackMessage;
 
 	public CommandReward(long id, Quest quest) {
 		super(id, quest);
 		command = DEFAULT_COMMAND;
+		feedbackMessage = "";
 	}
 
 	@Override
@@ -48,6 +55,7 @@ public class CommandReward extends Reward {
 			nbt.putBoolean("elevate_perms", true);
 		}
 		if (silent) nbt.putBoolean("silent", true);
+		nbt.putString("feedback_message", feedbackMessage);
 	}
 
 	@Override
@@ -56,6 +64,7 @@ public class CommandReward extends Reward {
 		command = nbt.getString("command");
 		elevatePerms = nbt.getBoolean("elevate_perms");
 		silent = nbt.getBoolean("silent");
+		feedbackMessage = nbt.getString("feedback_message");
 	}
 
 	@Override
@@ -64,6 +73,7 @@ public class CommandReward extends Reward {
 		buffer.writeUtf(command, Short.MAX_VALUE);
 		buffer.writeBoolean(elevatePerms);
 		buffer.writeBoolean(silent);
+		buffer.writeUtf(feedbackMessage, Short.MAX_VALUE);
 	}
 
 	@Override
@@ -72,6 +82,7 @@ public class CommandReward extends Reward {
 		command = buffer.readUtf(Short.MAX_VALUE);
 		elevatePerms = buffer.readBoolean();
 		silent = buffer.readBoolean();
+		feedbackMessage = buffer.readUtf(Short.MAX_VALUE);
 	}
 
 	@Override
@@ -81,6 +92,7 @@ public class CommandReward extends Reward {
 		config.addString("command", command, v -> command = v, DEFAULT_COMMAND).setNameKey("ftbquests.reward.ftbquests.command");
 		config.addBool("elevate", elevatePerms, v -> elevatePerms = v, false);
 		config.addBool("silent", silent, v -> silent = v, false);
+		config.addString("feedback_message", feedbackMessage, v -> feedbackMessage = v, "");
 	}
 
 	@Override
@@ -113,6 +125,11 @@ public class CommandReward extends Reward {
 		if (silent) source = source.withSuppressedOutput();
 		
 		player.server.getCommands().performPrefixedCommand(source, cmd);
+
+		if (notify) {
+			String key = feedbackMessage.isEmpty() ? "ftbquests.reward.ftbquests.command.claimed" : feedbackMessage;
+			NetworkManager.sendToPlayer(player, new DisplayRewardToastMessage(id, Component.translatable(key), REWARD_ICON));
+		}
 	}
 
 	@Override
