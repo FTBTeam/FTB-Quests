@@ -442,7 +442,7 @@
 	"ftbquests.reward.ftbquests.xp": "XP",
 	"ftbquests.reward.ftbquests.xp_levels": "XP Levels",
 	"ftbquests.reward.ftbquests.command": "Command",
-	"ftbquests.reward.ftbquests.command.success": "Successively claimed command reward",
+	"ftbquests.reward.ftbquests.command.success": "Successfully claimed command reward",
 	"ftbquests.reward.ftbquests.command.tooltip": "Vanilla substitutions, e.g. @p, are supported\nSpecial substitutions:\n{x} / {y} / {z} - player's current X/Y/Z pos\n{quest} - ID of this quest\n{chapter} - ID of this chapter\n{team} - short name of player's team",
 	"ftbquests.reward.ftbquests.command.elevate": "Run with Elevated Permission",
 	"ftbquests.reward.ftbquests.command.elevate.tooltip": "Run the command as if the player had permission level 2",
