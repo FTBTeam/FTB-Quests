@@ -62,6 +62,7 @@ public class RewardNotificationsScreen extends BaseScreen implements IRewardList
 			}
 		};
 
+		setRenderBlur(false);
 		itemPanel.setOnlyRenderWidgetsInside(false);
 		//itemPanel.setUnicode(true);
 	}
