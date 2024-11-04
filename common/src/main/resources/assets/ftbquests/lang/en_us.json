@@ -255,6 +255,8 @@
 	"ftbquests.gui.select_reward_table": "Select Reward Table",
 	"ftbquests.gui.select_reward_type": "Select Reward Type",
 	"ftbquests.gui.reset_progress": "Reset Progress",
+	"ftbquests.gui.stays_open": "Stays Open",
+	"ftbquests.gui.does_not_stay_open": "Doesn't Stay Open",
 	"ftbquests.gui.reset_progress_q": "Reset progress for your team?",
 	"ftbquests.gui.complete_instantly": "Complete Instantly",
 	"ftbquests.gui.complete_instantly_q": "Complete this task instantly?",

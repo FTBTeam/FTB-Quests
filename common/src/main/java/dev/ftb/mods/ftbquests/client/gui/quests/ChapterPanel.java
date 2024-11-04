@@ -269,7 +269,7 @@ public class ChapterPanel extends Panel {
 			chapterPanel.questScreen.addInfoTooltip(list, chapterPanel.questScreen.file);
 
 			if (getMouseX() > getX() + width - 18) {
-				list.string(chapterPanel.isPinned() ? "Stays open" : "Doesn't stay open");
+				list.translate(chapterPanel.isPinned() ? "ftbquests.gui.stays_open" : "ftbquests.gui.does_not_stay_open");
 			} else if (chapterPanel.questScreen.file.canEdit() && getMouseX() > getX() + width - 34) {
 				list.translate("gui.add");
 			}
