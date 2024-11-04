@@ -8,6 +8,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 * The pinned quests panel now has a "Pinned Quests" title for clarity
+* Added a feedback option for command reward
+  * In the case where running a command produces no obvious effect, this can help notify the player that something has happened
+
+### Changed
+* Overhauled and cleaned up many icon textures
 
 ### Fixed
 * Fixed context menu tooltips sometimes appearing behind the context menu
