@@ -42,6 +42,9 @@ public class RewardNotificationsScreen extends BaseScreen implements IRewardList
 				for (RewardKey key : keys) {
 					add(new RewardNotification(this, key));
 				}
+
+				boolean renderBlur = keys.stream().anyMatch(RewardKey::disableBlur);
+				RewardNotificationsScreen.this.setRenderBlur(!renderBlur);
 			}
 
 			@Override
@@ -62,7 +65,6 @@ public class RewardNotificationsScreen extends BaseScreen implements IRewardList
 			}
 		};
 
-		setRenderBlur(false);
 		itemPanel.setOnlyRenderWidgetsInside(false);
 		//itemPanel.setUnicode(true);
 	}
