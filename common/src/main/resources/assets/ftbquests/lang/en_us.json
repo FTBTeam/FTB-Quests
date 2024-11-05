@@ -476,6 +476,7 @@
 	"ftbquests.reward.ftbquests.npc_mail.items": "Items",
 	"ftbquests.reward.ftbquests.npc_mail.time_past": "Time Past",
 	"ftbquests.reward_table": "Reward Table",
+	"ftbquests.reward.disable_reward_screen_blur": "Disable Reward Screen Blur",
 	"ftbquests.reward_table.hide_tooltip": "Hide Tooltip",
 	"ftbquests.reward_table.use_title": "Use Title",
 	"ftbquests.reward_table.edit": "Edit Reward Table",
