@@ -38,6 +38,7 @@ public abstract class Reward extends QuestObjectBase {
 	protected RewardAutoClaim autoclaim;
 	private boolean excludeFromClaimAll;
 	private boolean ignoreRewardBlocking;
+	protected boolean disableRewardScreenBlur;
 
 	public Reward(long id, Quest q) {
 		super(id);
@@ -47,6 +48,7 @@ public abstract class Reward extends QuestObjectBase {
 		autoclaim = RewardAutoClaim.DEFAULT;
 		excludeFromClaimAll = getType().getExcludeFromListRewards();
 		ignoreRewardBlocking = false;
+		disableRewardScreenBlur = false;
 	}
 
 	public Quest getQuest() {
@@ -90,6 +92,7 @@ public abstract class Reward extends QuestObjectBase {
 
 		if (excludeFromClaimAll) nbt.putBoolean("exclude_from_claim_all", true);
 		if (ignoreRewardBlocking) nbt.putBoolean("ignore_reward_blocking", true);
+		if (disableRewardScreenBlur) nbt.putBoolean("disable_reward_screen_blur", true);
 	}
 
 	@Override
@@ -99,6 +102,7 @@ public abstract class Reward extends QuestObjectBase {
 		autoclaim = RewardAutoClaim.NAME_MAP.get(nbt.getString("auto"));
 		excludeFromClaimAll = nbt.getBoolean("exclude_from_claim_all");
 		ignoreRewardBlocking = nbt.getBoolean("ignore_reward_blocking");
+		disableRewardScreenBlur	= nbt.getBoolean("disable_reward_screen_blur");
 	}
 
 	@Override
@@ -108,6 +112,7 @@ public abstract class Reward extends QuestObjectBase {
 		RewardAutoClaim.NAME_MAP.write(buffer, autoclaim);
 		buffer.writeBoolean(excludeFromClaimAll);
 		buffer.writeBoolean(ignoreRewardBlocking);
+		buffer.writeBoolean(disableRewardScreenBlur);
 	}
 
 	@Override
@@ -117,6 +122,7 @@ public abstract class Reward extends QuestObjectBase {
 		autoclaim = RewardAutoClaim.NAME_MAP.read(buffer);
 		excludeFromClaimAll = buffer.readBoolean();
 		ignoreRewardBlocking = buffer.readBoolean();
+		disableRewardScreenBlur = buffer.readBoolean();
 	}
 
 	@Override
@@ -133,6 +139,8 @@ public abstract class Reward extends QuestObjectBase {
 		config.addBool("ignore_reward_blocking", ignoreRewardBlocking(), v -> ignoreRewardBlocking = v, ignoreRewardBlocking)
 				.setNameKey("ftbquests.quest.misc.ignore_reward_blocking")
 				.setCanEdit(!isIgnoreRewardBlockingHardcoded());
+		config.addBool("disable_reward_screen_blur", disableRewardScreenBlur, v -> disableRewardScreenBlur = v, false)
+				.setNameKey("ftbquests.reward.disable_reward_screen_blur");
 	}
 
 	public abstract void claim(ServerPlayer player, boolean notify);

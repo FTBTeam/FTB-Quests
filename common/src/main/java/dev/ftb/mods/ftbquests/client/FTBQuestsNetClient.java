@@ -114,11 +114,11 @@ public class FTBQuestsNetClient {
 		}
 	}
 
-	public static void displayItemRewardToast(ItemStack stack, int count) {
+	public static void displayItemRewardToast(ItemStack stack, int count, boolean disableBlur) {
 		ItemStack stack1 = ItemStackHooks.copyWithCount(stack, 1);
 		Icon icon = ItemIcon.getItemIcon(stack1);
 
-		if (!IRewardListenerScreen.add(new RewardKey(stack.getHoverName().getString(), icon, stack1), count)) {
+		if (!IRewardListenerScreen.add(new RewardKey(stack.getHoverName().getString(), icon, stack1, disableBlur), count)) {
 			MutableComponent comp = count > 1 ?
 					Component.literal(count + "x ").append(stack.getHoverName()) :
 					stack.getHoverName().copy();
@@ -126,10 +126,10 @@ public class FTBQuestsNetClient {
 		}
 	}
 
-	public static void displayRewardToast(long id, Component text, Icon icon) {
+	public static void displayRewardToast(long id, Component text, Icon icon, boolean disableBlur) {
 		Icon i = icon.isEmpty() ? ClientQuestFile.INSTANCE.getBase(id).getIcon() : icon;
 
-		if (!IRewardListenerScreen.add(new RewardKey(text.getString(), i), 1)) {
+		if (!IRewardListenerScreen.add(new RewardKey(text.getString(), i, disableBlur), 1)) {
 			Minecraft.getInstance().getToasts().addToast(new RewardToast(text, i));
 		}
 	}
