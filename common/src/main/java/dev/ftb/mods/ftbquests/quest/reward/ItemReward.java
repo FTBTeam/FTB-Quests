@@ -142,7 +142,7 @@ public class ItemReward extends Reward {
 		}
 
 		if (notify) {
-			NetworkManager.sendToPlayer(player, new DisplayItemRewardToastMessage(item, size));
+			NetworkManager.sendToPlayer(player, new DisplayItemRewardToastMessage(item, size, disableRewardScreenBlur));
 		}
 	}
 

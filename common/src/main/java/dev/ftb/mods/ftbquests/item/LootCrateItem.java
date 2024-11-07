@@ -1,5 +1,6 @@
 package dev.ftb.mods.ftbquests.item;
 
+import dev.architectury.platform.Platform;
 import dev.ftb.mods.ftbquests.FTBQuests;
 import dev.ftb.mods.ftbquests.client.ClientQuestFile;
 import dev.ftb.mods.ftbquests.client.gui.RewardNotificationsScreen;
@@ -42,16 +43,21 @@ public class LootCrateItem extends Item {
 	}
 
 	@Nullable
-	public static LootCrate getCrate(ItemStack stack) {
+	public static LootCrate getCrate(ItemStack stack, boolean isClientSide) {
 		return FTBQuests.getComponent(stack, ModDataComponents.LOOT_CRATE)
-				.map(type -> LootCrate.LOOT_CRATES.get(type))
+				.map(type -> LootCrate.getLootCrates(isClientSide).get(type))
 				.orElse(null);
+	}
+
+	@Nullable
+	public static LootCrate getCrate(ItemStack stack) {
+		return getCrate(stack, Platform.getEnv() == EnvType.CLIENT);
 	}
 
 	@Override
 	public InteractionResultHolder<ItemStack> use(Level world, Player player, InteractionHand hand) {
 		ItemStack stack = player.getItemInHand(hand);
-		LootCrate crate = getCrate(stack);
+		LootCrate crate = getCrate(stack, player.level().isClientSide);
 
 		if (crate == null) {
 			return new InteractionResultHolder<>(InteractionResult.FAIL, stack);
@@ -87,7 +93,7 @@ public class LootCrateItem extends Item {
 
 	@Override
 	public boolean isFoil(ItemStack stack) {
-		LootCrate crate = getCrate(stack);
+		LootCrate crate = getCrate(stack, true);
 		return crate != null && crate.isGlow();
 	}
 
@@ -104,7 +110,7 @@ public class LootCrateItem extends Item {
 			return;
 		}
 
-		LootCrate crate = getCrate(stack);
+		LootCrate crate = getCrate(stack, true);
 		if (crate != null) {
 			if (crate.getItemName().isEmpty()) {
 				// if crate doesn't have an item name, show the reward table's name in the tooltip

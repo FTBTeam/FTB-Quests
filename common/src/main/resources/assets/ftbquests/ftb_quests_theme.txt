@@ -30,8 +30,8 @@ wiki_icon:            ftbquests:textures/gui/info.png
 wiki_url:             -
 pin_icon_on:          ftbquests:textures/gui/pin.png; color=#F8BD1C
 pin_icon_off:         ftbquests:textures/gui/pin.png; color=#DBDBDB
-editor_icon_on:       ftbquests:textures/gui/editor.png; color=#F8BD1C
-editor_icon_off:      ftbquests:textures/gui/editor.png; color=#DBDBDB
+editor_icon_on:       ftbquests:textures/gui/editor.png
+editor_icon_off:      ftbquests:textures/gui/editor_white.png
 hidden_icon:          ftbquests:textures/gui/hidden.png; color=#DBDBDB
 link_icon:            ftbquests:textures/gui/link.png; color=#DBDBDB
 save_icon:            ftbquests:textures/gui/save.png

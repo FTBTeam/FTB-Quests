@@ -20,14 +20,15 @@ public final class LootCrate {
 	private static final Pattern NON_ALPHANUM = Pattern.compile("[^a-z0-9_]");
 	private static final Pattern MULTI_UNDERSCORE = Pattern.compile("_{2,}");
 
-	public static Map<String, LootCrate> LOOT_CRATES = new LinkedHashMap<>();
+	private static final Map<String, LootCrate> LOOT_CRATES_CLIENT = new LinkedHashMap<>();
+	private static final Map<String, LootCrate> LOOT_CRATES_SERVER = new LinkedHashMap<>();
 
 	private final RewardTable table;
 	private String stringID;
 	private String itemName = "";
 	private Color4I color = Color4I.WHITE;
 	private boolean glow = false;
-	private EntityWeight drops = new EntityWeight();
+	private final EntityWeight drops = new EntityWeight();
 
 	public LootCrate(RewardTable table, boolean initFromTable) {
 		this.table = table;
@@ -37,6 +38,10 @@ public final class LootCrate {
 		} else {
 			stringID = table.toString();
 		}
+	}
+
+	public static Map<String,LootCrate> getLootCrates(boolean isClient) {
+		return isClient ? LOOT_CRATES_CLIENT : LOOT_CRATES_SERVER;
 	}
 
 	public void initFromTable() {
@@ -142,8 +147,8 @@ public final class LootCrate {
 		return stack;
 	}
 
-	public static Collection<ItemStack> allCrateStacks() {
-		return LOOT_CRATES.values().stream().map(LootCrate::createStack).toList();
+	public static Collection<ItemStack> allCrateStacks(boolean isClientSide) {
+		return getLootCrates(isClientSide).values().stream().map(LootCrate::createStack).toList();
 	}
 
 	private enum Defaults {
