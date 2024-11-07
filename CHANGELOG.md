@@ -4,7 +4,7 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-# [2101.1.1]
+## [2101.1.1]
 
 ### Added
 * The pinned quests panel now has a "Pinned Quests" title for clarity
@@ -18,7 +18,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 * Fixed context menu tooltips sometimes appearing behind the context menu
 * Fixed some issues with the reward table editor GUI (changes not getting correctly sync'd to server in some cases)
 
-# [2101.1.0]
+## [2101.1.0]
 
 ### Changed
 * Minecraft 1.21.1 is now required; this no longer supports Minecraft 1.21
@@ -36,7 +36,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   * Added new "Hide Quests until Dependencies Complete" setting
   * So there are now two independent setting for hiding quests based on dependency visibility and/or completion
 
-# [2100.1.5]
+## [2100.1.5]
 
 ### Changed
 * FTB Quests items are now registered to the `FTB Suite` creative tab instead of FTB Quests own tab
@@ -47,7 +47,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   * In addition, rotated images with a non-default aspect ratio now preview correctly during rotation
 * Fixed copy/pasting images
 
-# [2100.1.4]
+## [2100.1.4]
 
 ### Fixed
 * Fixed coloured text in quest titles & subtitles not showing in the quest view panel
@@ -57,21 +57,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   * Pre-existing chapter files may be named after the hex chapter id; they will still work fine, but you can rename them if you wish
   * If you choose to rename them, also update the `filename` field in the file correspondingly
 
-# [2100.1.3]
+## [2100.1.3]
 
 ### Fixed
 * Fixed adding tasks to existing quests sometimes losing the task type (leading to a '?' button appearing)
 * Fixed images in the quest book not sync'ing to the client
 * Fixed issue where using FTB Filter System filters would sometimes fail to find matching items for GUI display
 
-# [2100.1.2]
+## [2100.1.2]
 
 ### Fixed
 * Fixed raw json text in quest descriptions not always being recognised
 * Fixed a packet sync error related to translation system when on dedicated server
 * Chapter filenames are now again named after the chapter title (at the time of creation), as they used to be in 1.20 and earlier
 
-# [2100.1.1]
+## [2100.1.1]
 
 ### Fixed
 * Fixed chapter and chapter group creation popups moving in and out with the chapter panel when it's not pinned.
@@ -82,7 +82,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 * Removed a misleading "Click to Submit" tooltip from fluid tasks in the quest view panel
   * Fluid tasks can only be submitted via a Task Screen
 
-# [2100.1.0]
+## [2100.1.0]
 
 ### Changed
 * Ported to Minecraft 1.21. Support for Fabric and NeoForge.
@@ -94,19 +94,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   * Text which doesn't have a translation in the current locale (but does in the `en_us` locale) is highlighted when in edit mode.
   * Changes do not affect the player experience
 
-# [2004.2.1]
+## [2004.2.1]
 
 ### Added
 * The pinned quests panel positioned can now be adjusted in client config (use "Player Preferences" button in lower right of screen)
 * A couple of other minor GUI fixes and improvements (mainly via FTB Library)
 
-# [2004.2.0]
+## [2004.2.0]
 
 ### Changed
 * Ported to Minecraft 1.20.4. Supported on Forge, NeoForge and Fabric.
 * Some GUI enhancements in a few places.
 
-# [2001.3.4]
+## [2001.3.4]
 
 ### Added
 * The color of dependency lines for uncompleted quests is now themable
