@@ -2,6 +2,7 @@ package dev.ftb.mods.ftbquests.net;
 
 import dev.architectury.networking.NetworkManager;
 import dev.ftb.mods.ftbquests.api.FTBQuestsAPI;
+import dev.ftb.mods.ftbquests.quest.QuestObjectBase;
 import dev.ftb.mods.ftbquests.quest.ServerQuestFile;
 import dev.ftb.mods.ftbquests.util.NetUtils;
 import net.minecraft.network.FriendlyByteBuf;
@@ -16,6 +17,10 @@ public record DeleteObjectMessage(long id) implements CustomPacketPayload {
 			ByteBufCodecs.VAR_LONG, DeleteObjectMessage::id,
 			DeleteObjectMessage::new
 	);
+
+	public static DeleteObjectMessage forQuestObject(QuestObjectBase qo) {
+		return new DeleteObjectMessage(qo.id);
+	}
 
 	@Override
 	public Type<DeleteObjectMessage> type() {

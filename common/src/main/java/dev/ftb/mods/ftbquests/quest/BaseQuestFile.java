@@ -791,22 +791,23 @@ public abstract class BaseQuestFile extends QuestObject implements QuestFile {
 	}
 
 	public void updateLootCrates() {
-		Set<String> prevCrateNames = new HashSet<>(LootCrate.LOOT_CRATES.keySet());
-		Collection<ItemStack> oldStacks = LootCrate.allCrateStacks();
+		Map<String, LootCrate> lootCrates = LootCrate.getLootCrates(!isServerSide());
+		Set<String> prevCrateNames = new HashSet<>(lootCrates.keySet());
+		Collection<ItemStack> oldStacks = LootCrate.allCrateStacks(!isServerSide());
 
-		LootCrate.LOOT_CRATES.clear();
+		lootCrates.clear();
 		for (RewardTable table : rewardTables) {
 			if (table.getLootCrate() != null) {
-				LootCrate.LOOT_CRATES.put(table.getLootCrate().getStringID(), table.getLootCrate());
+				lootCrates.put(table.getLootCrate().getStringID(), table.getLootCrate());
 			}
 		}
 
-		if (!isServerSide() && !prevCrateNames.equals(LootCrate.LOOT_CRATES.keySet())) {
+		if (!isServerSide() && !prevCrateNames.equals(lootCrates.keySet())) {
 			FTBQuestsClient.rebuildCreativeTabs();
-			FTBQuests.getRecipeModHelper().updateItemsDynamic(oldStacks, LootCrate.allCrateStacks());
+			FTBQuests.getRecipeModHelper().updateItemsDynamic(oldStacks, LootCrate.allCrateStacks(!isServerSide()));
 		}
 
-		FTBQuests.LOGGER.debug("Updated loot crates (was {}, now {})", prevCrateNames.size(), LootCrate.LOOT_CRATES.size());
+		FTBQuests.LOGGER.debug("Updated loot crates (was {}, now {})", prevCrateNames.size(), lootCrates.size());
 	}
 
 	public void markDirty() {

@@ -44,7 +44,7 @@ public class ContextMenuBuilder {
     }
 
     public void openContextMenu(BaseScreen gui) {
-        gui.openContextMenu(build(gui));
+        gui.openContextMenu(build(gui)).setExtraZlevel(900);
     }
 
     public List<ContextMenuItem> build(BaseScreen gui) {

@@ -126,7 +126,7 @@ public class LootCrateOpenerBlockEntity extends BlockEntity {
             return stack;
         }
 
-        LootCrate crate = LootCrateItem.getCrate(stack);
+        LootCrate crate = LootCrateItem.getCrate(stack, false);
         if (crate == null) {
             return stack;
         }
@@ -160,7 +160,7 @@ public class LootCrateOpenerBlockEntity extends BlockEntity {
     }
 
     protected boolean _isItemValid(int slot, ItemStack stack) {
-        return slot == 0 && LootCrateItem.getCrate(stack) != null;
+        return slot == 0 && LootCrateItem.getCrate(stack, level.isClientSide) != null;
     }
 
     protected ItemStack _extractItem(int slot, int amount, boolean simulate) {

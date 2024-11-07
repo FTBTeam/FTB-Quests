@@ -14,6 +14,7 @@ import dev.ftb.mods.ftblibrary.ui.input.Key;
 import dev.ftb.mods.ftblibrary.ui.input.MouseButton;
 import dev.ftb.mods.ftblibrary.ui.misc.AbstractButtonListScreen;
 import dev.ftb.mods.ftblibrary.util.TooltipList;
+import dev.ftb.mods.ftbquests.FTBQuests;
 import dev.ftb.mods.ftbquests.client.ClientQuestFile;
 import dev.ftb.mods.ftbquests.client.gui.quests.QuestScreen;
 import dev.ftb.mods.ftbquests.net.CreateObjectMessage;
@@ -25,24 +26,31 @@ import dev.ftb.mods.ftbquests.quest.loot.RewardTable;
 import dev.ftb.mods.ftbquests.quest.reward.RandomReward;
 import dev.ftb.mods.ftbquests.quest.translation.TranslationKey;
 import dev.ftb.mods.ftbquests.registry.ModItems;
+import it.unimi.dsi.fastutil.ints.IntOpenHashSet;
+import it.unimi.dsi.fastutil.ints.IntSet;
 import net.minecraft.ChatFormatting;
 import net.minecraft.Util;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.world.item.Items;
 import org.apache.commons.lang3.mutable.MutableInt;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.List;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 public class RewardTablesScreen extends AbstractButtonListScreen {
 	private final QuestScreen questScreen;
 	private final SimpleTextButton addButton;
 	private final List<RewardTable> rewardTablesCopy; // deep local copy of reward tables
+	private final IntSet editedIndexes = new IntOpenHashSet();
+	private final IntSet pendingDeleteIndexes = new IntOpenHashSet();
 	private boolean changed = false;
-	private final Set<RewardTable> editedTables = new HashSet<>();
 
 	public RewardTablesScreen(QuestScreen questScreen) {
 		super();
@@ -79,8 +87,12 @@ public class RewardTablesScreen extends AbstractButtonListScreen {
 
 	@Override
 	public void addButtons(Panel panel) {
-		rewardTablesCopy.stream().sorted()
-				.forEach(table -> panel.add(new RewardTableButton(panel, table)));
+		List<RewardTableButton> buttons = new ArrayList<>();
+		for (int i = 0; i < rewardTablesCopy.size(); i++) {
+			RewardTable table = rewardTablesCopy.get(i);
+			buttons.add(new RewardTableButton(panel, table, i));
+		}
+		panel.addAll(buttons.stream().sorted(Comparator.comparing(btn -> btn.table)).toList());
 	}
 
 	@Override
@@ -127,25 +139,44 @@ public class RewardTablesScreen extends AbstractButtonListScreen {
 
 	@Override
 	protected void doAccept() {
-		ClientQuestFile file = ClientQuestFile.INSTANCE;
-		Set<Long> toRemove = file.getRewardTables().stream().map(t -> t.id).collect(Collectors.toSet());
-
-		rewardTablesCopy.forEach(table -> {
-			if (table.getId() == 0L) {
-				// newly-created
-				CompoundTag extra = Util.make(new CompoundTag(), tag -> file.getTranslationManager().addInitialTranslation(
-						tag, file.getLocale(), TranslationKey.TITLE, table.getRawTitle())
-				);
-				NetworkManager.sendToServer(CreateObjectMessage.create(table, extra));
+		IntSet toCreate = new IntOpenHashSet();
+		for (int idx = 0; idx < rewardTablesCopy.size(); idx++) {
+			if (rewardTablesCopy.get(idx).getId() == 0L && !pendingDeleteIndexes.contains(idx)) {
+				toCreate.add(idx);
 			}
-			toRemove.remove(table.getId());
-		});
+		}
+		editedIndexes.removeAll(pendingDeleteIndexes);
 
-		toRemove.forEach(id -> NetworkManager.sendToServer(new DeleteObjectMessage(id)));
+		int nAdded = sendToServer(toCreate, RewardTablesScreen::makeCreationPacket, true);
+		int nEdited = sendToServer(editedIndexes, EditObjectMessage::forQuestObject, false);
+		int nDeleted = sendToServer(pendingDeleteIndexes, DeleteObjectMessage::forQuestObject, false);
 
-		editedTables.forEach(table -> NetworkManager.sendToServer(EditObjectMessage.forQuestObject(table)));
+		FTBQuests.LOGGER.debug("Sent {} new, {} edited, {} deleted reward tables to server", nAdded, nEdited, nDeleted);
 
 		questScreen.run();
+	}
+
+	private static CreateObjectMessage makeCreationPacket(RewardTable table) {
+		ClientQuestFile file = ClientQuestFile.INSTANCE;
+		CompoundTag extra = Util.make(new CompoundTag(), tag -> file.getTranslationManager().addInitialTranslation(
+				tag, file.getLocale(), TranslationKey.TITLE, table.getRawTitle())
+		);
+		return CreateObjectMessage.create(table, extra);
+	}
+
+	private <T extends CustomPacketPayload> int sendToServer(IntSet indexes, Function<RewardTable, T> func, boolean addNew) {
+		int sent = 0;
+		for (int idx : indexes) {
+			if (idx >= 0 && idx < rewardTablesCopy.size()) {
+				RewardTable table = rewardTablesCopy.get(idx);
+				if (addNew && table.id == 0 || !addNew && table.id != 0) {
+					// id == 0 means table is only locally added, no need to sync an edit/delete for it
+					NetworkManager.sendToServer(func.apply(table));
+					sent++;
+				}
+			}
+		}
+		return sent;
 	}
 
 	private class CustomTopPanel extends TopPanel {
@@ -169,11 +200,13 @@ public class RewardTablesScreen extends AbstractButtonListScreen {
 
 	private class RewardTableButton extends SimpleTextButton {
 		private final RewardTable table;
+		private final int idx;
 
-		public RewardTableButton(Panel panel, RewardTable table) {
+		public RewardTableButton(Panel panel, RewardTable table, int idx) {
 			super(panel, table.getTitle(), table.getIcon());
 
 			this.table = table;
+			this.idx = idx;
 			setHeight(16);
 
 			if (this.table.getLootCrate() != null) {
@@ -199,7 +232,7 @@ public class RewardTablesScreen extends AbstractButtonListScreen {
 			List<ContextMenuItem> menu = List.of(
 					new ContextMenuItem(Component.translatable("ftbquests.gui.edit"), ItemIcon.getItemIcon(Items.FEATHER),
 							b -> editRewardTable()),
-					new ContextMenuItem(Component.translatable("gui.remove"), Icons.BIN,
+					new ContextMenuItem(Component.translatable(pendingDeleteIndexes.contains(idx) ? "ftbquests.gui.restore" : "gui.remove"), Icons.BIN,
 							b -> deleteRewardTable()),
 					new ContextMenuItem(getLootCrateText(), ItemIcon.getItemIcon(ModItems.LOOTCRATE.get()),
 							b -> toggleLootCrate())
@@ -214,25 +247,43 @@ public class RewardTablesScreen extends AbstractButtonListScreen {
 				ItemIcon.getItemIcon(ModItems.LOOTCRATE.get()).draw(graphics, x + w - 26, y + 2, 12, 12);
 				Icons.BIN.draw(graphics, x + w - 13, y + 2, 12, 12);
 			}
+			if (pendingDeleteIndexes.contains(idx)) {
+				Color4I.RED.withAlpha(64).draw(graphics, x, y, w, h);
+			} else if (rewardTablesCopy.get(idx).getId() == 0) {
+				Color4I.GREEN.withAlpha(64).draw(graphics, x, y, w, h);
+			}
 			Color4I.GRAY.withAlpha(40).draw(graphics, x, y + h, w, 1);
+		}
+
+		@Override
+		public void draw(GuiGraphics graphics, Theme theme, int x, int y, int w, int h) {
+			super.draw(graphics, theme, x, y, w, h);
+
+			if (pendingDeleteIndexes.contains(idx)) {
+				Color4I.GRAY.draw(graphics, x + 20, y + h / 2, theme.getStringWidth(title), 1);
+			}  else if (rewardTablesCopy.get(idx).getId() == 0) {
+				Icons.ADD.draw(graphics, x + 24 + theme.getStringWidth(title), y + 2, 12, 12);
+			}
 		}
 
 		private void editRewardTable() {
 			new EditRewardTableScreen(RewardTablesScreen.this, table, editedReward -> {
-				rewardTablesCopy.replaceAll(t -> t.getId() == editedReward.id ? editedReward : t);
+				rewardTablesCopy.set(idx, editedReward);
 				changed = true;
-				editedTables.add(editedReward);
+				editedIndexes.add(idx);
 				editedReward.clearCachedData();
 				refreshWidgets();
 			}).openGui();
 		}
 
 		private void deleteRewardTable() {
-			openYesNo(Component.translatable("delete_item", table.getTitle()), Component.empty(), () -> {
-				rewardTablesCopy.removeIf(t -> t == table);
-				changed = true;
-				refreshWidgets();
-			});
+			if (pendingDeleteIndexes.contains(idx)) {
+				pendingDeleteIndexes.remove(idx);
+			} else {
+				pendingDeleteIndexes.add(idx);
+			}
+			changed = true;
+			refreshWidgets();
 		}
 
 		private void toggleLootCrate() {
@@ -245,6 +296,7 @@ public class RewardTablesScreen extends AbstractButtonListScreen {
 			}
 
 			changed = true;
+			editedIndexes.add(idx);
 			refreshWidgets();
 		}
 
@@ -253,7 +305,7 @@ public class RewardTablesScreen extends AbstractButtonListScreen {
 			super.addMouseOverText(list);
 
 			if (getMouseX() > getX() + width - 13) {
-				list.add(Component.translatable("gui.remove"));
+				list.add(Component.translatable(pendingDeleteIndexes.contains(idx) ? "ftbquests.gui.restore" : "gui.remove"));
 			} else if (getMouseX() > getX() + width - 26) {
 				list.add(getLootCrateText());
 			} else {
@@ -269,7 +321,7 @@ public class RewardTablesScreen extends AbstractButtonListScreen {
 
 		@NotNull
 		private Component getLootCrateText() {
-            return Component.translatable("ftbquests.reward_table." +
+			return Component.translatable("ftbquests.reward_table." +
 					(table.getLootCrate() != null ? "disable_loot_crate" : "enable_loot_crate"));
 		}
 	}

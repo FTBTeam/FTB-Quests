@@ -7,7 +7,6 @@ import dev.ftb.mods.ftbquests.api.FTBQuestsAPI;
 import dev.ftb.mods.ftbquests.client.ClientQuestFile;
 import dev.ftb.mods.ftbquests.quest.QuestObjectBase;
 import dev.ftb.mods.ftbquests.quest.translation.TranslationKey;
-import dev.ftb.mods.ftbquests.util.NetUtils;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
@@ -52,7 +51,7 @@ public record SyncTranslationMessageToClient(long id, String locale, Translation
     public static void handle(SyncTranslationMessageToClient message, NetworkManager.PacketContext context) {
         context.queue(() -> {
             ClientQuestFile file = ClientQuestFile.INSTANCE;
-            if (file.isValid() && NetUtils.canEdit(context)) {
+            if (file.isValid()) {
                 QuestObjectBase object = file.getBase(message.id);
                 if (object != null) {
                     message.val.ifLeft(str -> file.getTranslationManager().addTranslation(object, message.locale, message.subKey, str))
