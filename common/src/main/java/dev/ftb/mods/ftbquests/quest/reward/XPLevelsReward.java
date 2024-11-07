@@ -70,7 +70,7 @@ public class XPLevelsReward extends Reward {
 		if (notify) {
 			Component text = Component.translatable("ftbquests.reward.ftbquests.xp_levels").append(": ")
 					.append(Component.literal("+" + xpLevels).withStyle(ChatFormatting.GREEN));
-			NetworkManager.sendToPlayer(player, new DisplayRewardToastMessage(id, text, Color4I.empty()));
+			NetworkManager.sendToPlayer(player, new DisplayRewardToastMessage(id, text, Color4I.empty(), disableRewardScreenBlur));
 		}
 	}
 
