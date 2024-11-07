@@ -11,13 +11,14 @@ import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 
-public record DisplayRewardToastMessage(long id, Component text, Icon icon) implements CustomPacketPayload {
+public record DisplayRewardToastMessage(long id, Component text, Icon icon, boolean disableBlur) implements CustomPacketPayload {
 	public static final Type<DisplayRewardToastMessage> TYPE = new Type<>(FTBQuestsAPI.rl("display_reward_toast_message"));
 
 	public static final StreamCodec<RegistryFriendlyByteBuf, DisplayRewardToastMessage> STREAM_CODEC = StreamCodec.composite(
 			ByteBufCodecs.VAR_LONG, DisplayRewardToastMessage::id,
 			ComponentSerialization.STREAM_CODEC, DisplayRewardToastMessage::text,
 			Icon.STREAM_CODEC, DisplayRewardToastMessage::icon,
+			ByteBufCodecs.BOOL, DisplayRewardToastMessage::disableBlur,
 			DisplayRewardToastMessage::new
 	);
 
@@ -27,6 +28,6 @@ public record DisplayRewardToastMessage(long id, Component text, Icon icon) impl
 	}
 
 	public static void handle(DisplayRewardToastMessage message, NetworkManager.PacketContext context) {
-		context.queue(() -> FTBQuestsNetClient.displayRewardToast(message.id, message.text, message.icon));
+		context.queue(() -> FTBQuestsNetClient.displayRewardToast(message.id, message.text, message.icon, message.disableBlur));
 	}
 }

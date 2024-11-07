@@ -9,15 +9,17 @@ public class RewardKey {
 	private final String title;
 	private final Icon icon;
 	private final ItemStack stack;
+	private final boolean disableBlur;
 
-	public RewardKey(String title, Icon icon) {
-		this(title, icon, ItemStack.EMPTY);
+	public RewardKey(String title, Icon icon, boolean disableBlur) {
+		this(title, icon, ItemStack.EMPTY, disableBlur);
 	}
 
-	public RewardKey(String title, Icon icon, ItemStack stack) {
+	public RewardKey(String title, Icon icon, ItemStack stack, boolean disableBlur) {
 		this.title = title;
 		this.icon = icon;
 		this.stack = stack;
+		this.disableBlur = disableBlur;
 	}
 
 	public String getTitle() {
@@ -26,6 +28,10 @@ public class RewardKey {
 
 	public Icon getIcon() {
 		return icon;
+	}
+
+	public boolean disableBlur() {
+		return disableBlur;
 	}
 
 	public int hashCode() {
