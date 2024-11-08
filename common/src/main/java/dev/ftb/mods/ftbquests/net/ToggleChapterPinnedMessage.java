@@ -3,7 +3,6 @@ package dev.ftb.mods.ftbquests.net;
 import dev.architectury.networking.NetworkManager;
 import dev.ftb.mods.ftbquests.api.FTBQuestsAPI;
 import dev.ftb.mods.ftbquests.quest.ServerQuestFile;
-import dev.ftb.mods.ftbquests.quest.TeamData;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
@@ -24,10 +23,11 @@ public record ToggleChapterPinnedMessage() implements CustomPacketPayload {
     public static void handle(ToggleChapterPinnedMessage message, NetworkManager.PacketContext context) {
         context.queue(() -> {
             ServerPlayer player = (ServerPlayer) context.getPlayer();
-            TeamData data = ServerQuestFile.INSTANCE.getOrCreateTeamData(player);
-            boolean newPinned = !data.isChapterPinned(player);
-            data.setChapterPinned(player, newPinned);
-            NetworkManager.sendToPlayer(player, new ToggleChapterPinnedResponseMessage(newPinned));
+            ServerQuestFile.INSTANCE.getTeamData(player).ifPresent(data -> {
+                boolean newPinned = !data.isChapterPinned(player);
+                data.setChapterPinned(player, newPinned);
+                NetworkManager.sendToPlayer(player, new ToggleChapterPinnedResponseMessage(newPinned));
+            });
         });
     }
 }

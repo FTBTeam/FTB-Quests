@@ -3,7 +3,6 @@ package dev.ftb.mods.ftbquests.net;
 import dev.architectury.networking.NetworkManager;
 import dev.ftb.mods.ftbquests.api.FTBQuestsAPI;
 import dev.ftb.mods.ftbquests.quest.ServerQuestFile;
-import dev.ftb.mods.ftbquests.quest.TeamData;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
@@ -26,10 +25,11 @@ public record TogglePinnedMessage(long id) implements CustomPacketPayload {
 	public static void handle(TogglePinnedMessage message, NetworkManager.PacketContext context) {
 		context.queue(() -> {
 			ServerPlayer player = (ServerPlayer) context.getPlayer();
-			TeamData data = ServerQuestFile.INSTANCE.getOrCreateTeamData(player);
-			boolean newPinned = !data.isQuestPinned(player, message.id);
-			data.setQuestPinned(player, message.id, newPinned);
-			NetworkManager.sendToPlayer(player, new TogglePinnedResponseMessage(message.id, newPinned));
+			ServerQuestFile.INSTANCE.getTeamData(player).ifPresent(data -> {
+				boolean newPinned = !data.isQuestPinned(player, message.id);
+				data.setQuestPinned(player, message.id, newPinned);
+				NetworkManager.sendToPlayer(player, new TogglePinnedResponseMessage(message.id, newPinned));
+			});
 		});
 	}
 }

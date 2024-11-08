@@ -1078,4 +1078,9 @@ public final class Quest extends QuestObject implements Movable {
 
 		return index;
 	}
+
+	@Override
+	public Quest getRelatedQuest() {
+		return this;
+	}
 }

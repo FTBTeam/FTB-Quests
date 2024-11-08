@@ -18,7 +18,6 @@ import dev.ftb.mods.ftbquests.quest.loot.RewardTable;
 import dev.ftb.mods.ftbquests.quest.loot.WeightedReward;
 import dev.ftb.mods.ftbquests.quest.reward.ItemReward;
 import dev.ftb.mods.ftbquests.quest.task.ItemTask;
-import dev.ftb.mods.ftbquests.quest.task.Task;
 import dev.ftb.mods.ftbquests.util.ProgressChange;
 import net.minecraft.ChatFormatting;
 import net.minecraft.Util;
@@ -187,16 +186,10 @@ public class FTBQuestsCommands {
 		if (qo instanceof Chapter) {
 			return true;
 		}
-		TeamData data = TeamData.get(player);
-		Quest quest = null;
-		if (qo instanceof QuestLink link) {
-			quest = link.getQuest().orElse(null);
-		} else if (qo instanceof Task task) {
-			quest = task.getQuest();
-		} else if (qo instanceof Quest q) {
-			quest = q;
-		}
-		return quest != null && (data.getCanEdit(player) || !quest.hideDetailsUntilStartable() || data.canStartTasks(quest));
+		return ServerQuestFile.INSTANCE.getTeamData(player).map(data -> {
+			Quest quest = qo.getRelatedQuest();
+			return quest != null && (data.getCanEdit(player) || !quest.hideDetailsUntilStartable() || data.canStartTasks(quest));
+		}).orElse(false);
 	}
 
 	private static int exportRewards(CommandSourceStack source, RewardTable table, BlockPos pos) throws CommandSyntaxException {
@@ -264,45 +257,43 @@ public class FTBQuestsCommands {
 	}
 
 	private static int editingMode(CommandSourceStack source, ServerPlayer player, @Nullable Boolean canEdit) {
-		TeamData data = ServerQuestFile.INSTANCE.getOrCreateTeamData(player);
+		return ServerQuestFile.INSTANCE.getTeamData(player).map(data -> {
+			boolean newCanEdit = Objects.requireNonNullElse(canEdit, !data.getCanEdit(player));
 
-		if (canEdit == null) {
-			canEdit = !data.getCanEdit(player);
-		}
+			data.setCanEdit(player, newCanEdit);
 
-		data.setCanEdit(player, canEdit);
+			if (newCanEdit) {
+				source.sendSuccess(() -> Component.translatable("commands.ftbquests.editing_mode.enabled", player.getDisplayName()), true);
+			} else {
+				source.sendSuccess(() -> Component.translatable("commands.ftbquests.editing_mode.disabled", player.getDisplayName()), true);
+			}
 
-		if (canEdit) {
-			source.sendSuccess(() -> Component.translatable("commands.ftbquests.editing_mode.enabled", player.getDisplayName()), true);
-		} else {
-			source.sendSuccess(() -> Component.translatable("commands.ftbquests.editing_mode.disabled", player.getDisplayName()), true);
-		}
-
-		return 1;
+			return 1;
+		}).orElse(0);
 	}
 
 	private static int locked(CommandSourceStack source, ServerPlayer player, @Nullable Boolean locked) {
-		TeamData data = ServerQuestFile.INSTANCE.getOrCreateTeamData(player);
+		return ServerQuestFile.INSTANCE.getTeamData(player).map(data -> {
+			boolean newLocked = Objects.requireNonNullElse(locked, !data.isLocked());
 
-		if (locked == null) {
-			locked = !data.isLocked();
-		}
+			data.setLocked(newLocked);
 
-		data.setLocked(locked);
+			if (newLocked) {
+				source.sendSuccess(() -> Component.translatable("commands.ftbquests.locked.enabled", player.getDisplayName()), true);
+			} else {
+				source.sendSuccess(() -> Component.translatable("commands.ftbquests.locked.disabled", player.getDisplayName()), true);
+			}
 
-		if (locked) {
-			source.sendSuccess(() -> Component.translatable("commands.ftbquests.locked.enabled", player.getDisplayName()), true);
-		} else {
-			source.sendSuccess(() -> Component.translatable("commands.ftbquests.locked.disabled", player.getDisplayName()), true);
-		}
-
-		return 1;
+			return 1;
+		}).orElse(0);
 	}
 
 	private static int changeProgress(CommandSourceStack source, Collection<ServerPlayer> players, boolean reset, QuestObjectBase questObject) {
 		for (ServerPlayer player : players) {
-			ProgressChange progressChange = new ProgressChange(questObject, player.getUUID()).setReset(reset);
-			questObject.forceProgress(ServerQuestFile.INSTANCE.getOrCreateTeamData(player), progressChange);
+			ServerQuestFile.INSTANCE.getTeamData(player).ifPresent(data -> {
+				ProgressChange progressChange = new ProgressChange(questObject, player.getUUID()).setReset(reset);
+				questObject.forceProgress(data, progressChange);
+            });
 		}
 
 		source.sendSuccess(() -> Component.translatable("commands.ftbquests.change_progress.text"), false);
@@ -388,7 +379,12 @@ public class FTBQuestsCommands {
 		ServerQuestFile instance = ServerQuestFile.INSTANCE;
 		ServerPlayer sender = source.getPlayer();
 
-		if (sender != null && !instance.getOrCreateTeamData(sender).getCanEdit(sender)) {
+		Optional<TeamData> playerData = instance.getTeamData(sender);
+		if (playerData.isEmpty()) {
+			return 0;
+		}
+
+		if (sender != null && !playerData.get().getCanEdit(sender)) {
 			source.sendFailure(Component.translatable("commands.ftbquests.command.error.not_editing"));
 			return 1;
 		}
@@ -411,17 +407,15 @@ public class FTBQuestsCommands {
 	}
 
 	private static int toggleRewardBlocking(CommandSourceStack source, ServerPlayer player, Boolean doBlocking) {
-		TeamData data = ServerQuestFile.INSTANCE.getOrCreateTeamData(player);
+		return ServerQuestFile.INSTANCE.getTeamData(player).map(data -> {
+			boolean shouldBlock = Objects.requireNonNullElse(doBlocking, !data.areRewardsBlocked());
+			data.setRewardsBlocked(shouldBlock);
 
-		if (doBlocking == null) {
-			doBlocking = !data.areRewardsBlocked();
-		}
+			source.sendSuccess(() -> Component.translatable("commands.ftbquests.command.feedback.rewards_blocked", data, data.areRewardsBlocked()), false);
 
-		data.setRewardsBlocked(doBlocking);
+			return 1;
+		}).orElse(0);
 
-		source.sendSuccess(() -> Component.translatable("commands.ftbquests.command.feedback.rewards_blocked", data, data.areRewardsBlocked()), false);
-
-		return 1;
 	}
 
 	private static int clearDisplayCache(CommandSourceStack source) {

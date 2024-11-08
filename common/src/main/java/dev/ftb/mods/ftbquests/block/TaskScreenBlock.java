@@ -130,7 +130,7 @@ public class TaskScreenBlock extends BaseEntityBlock {
 
         if (level.getBlockEntity(blockPos) instanceof TaskScreenBlockEntity coreScreen) {
             if (livingEntity instanceof ServerPlayer sp) {
-                coreScreen.setTeamId(ServerQuestFile.INSTANCE.getOrCreateTeamData(sp).getTeamId());
+                ServerQuestFile.INSTANCE.getTeamData(sp).ifPresent(d -> coreScreen.setTeamId(d.getTeamId()));
             }
 
             Direction facing = blockState.getValue(FACING);
