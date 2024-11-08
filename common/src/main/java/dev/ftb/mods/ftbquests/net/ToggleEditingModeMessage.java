@@ -4,7 +4,6 @@ import dev.architectury.networking.NetworkManager;
 import dev.ftb.mods.ftbquests.api.FTBQuestsAPI;
 import dev.ftb.mods.ftbquests.integration.PermissionsHelper;
 import dev.ftb.mods.ftbquests.quest.ServerQuestFile;
-import dev.ftb.mods.ftbquests.quest.TeamData;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
@@ -28,8 +27,9 @@ public record ToggleEditingModeMessage() implements CustomPacketPayload {
             if (PermissionsHelper.hasEditorPermission(player, false)
                     || player.getServer() != null && player.getServer().isSingleplayerOwner(player.getGameProfile()))
             {
-                TeamData data = ServerQuestFile.INSTANCE.getOrCreateTeamData(player);
-                data.setCanEdit(player, !data.getCanEdit(player));  // will send a response to the client, causing GUI refresh
+                // will send a response to the client, causing GUI refresh
+                ServerQuestFile.INSTANCE.getTeamData(player)
+                        .ifPresent(data -> data.setCanEdit(player, !data.getCanEdit(player)));
             }
         });
     }

@@ -8,7 +8,6 @@ import dev.ftb.mods.ftbquests.command.FTBQuestsCommands;
 import dev.ftb.mods.ftbquests.events.ClearFileCacheEvent;
 import dev.ftb.mods.ftbquests.quest.BaseQuestFile;
 import dev.ftb.mods.ftbquests.quest.ServerQuestFile;
-import dev.ftb.mods.ftbquests.quest.TeamData;
 import dev.ftb.mods.ftbquests.quest.task.DimensionTask;
 import dev.ftb.mods.ftbquests.quest.task.KillTask;
 import dev.ftb.mods.ftbquests.quest.task.Task;
@@ -124,13 +123,13 @@ public enum FTBQuestsEventHandler {
 				return EventResult.pass();
 			}
 
-			TeamData data = ServerQuestFile.INSTANCE.getOrCreateTeamData(player);
-
-			for (KillTask task : killTasks) {
-				if (data.getProgress(task) < task.getMaxProgress() && data.canStartTasks(task.getQuest())) {
-					task.kill(data, entity);
+			ServerQuestFile.INSTANCE.getTeamData(player).ifPresent(data -> {
+				for (KillTask task : killTasks) {
+					if (data.getProgress(task) < task.getMaxProgress() && data.canStartTasks(task.getQuest())) {
+						task.kill(data, entity);
+					}
 				}
-			}
+			});
 		}
 
 		return EventResult.pass();
@@ -139,34 +138,29 @@ public enum FTBQuestsEventHandler {
 	private void playerTick(Player player) {
 		ServerQuestFile file = ServerQuestFile.INSTANCE;
 
-		if (player instanceof ServerPlayer && file != null && !PlayerHooks.isFake(player)) {
+		if (player instanceof ServerPlayer serverPlayer && file != null && !PlayerHooks.isFake(player)) {
 			if (autoSubmitTasks == null) {
-				autoSubmitTasks = file.collect(o -> o instanceof Task && ((Task) o).autoSubmitOnPlayerTick() > 0);
+				autoSubmitTasks = file.collect(o -> o instanceof Task t && t.autoSubmitOnPlayerTick() > 0);
 			}
 
-			// Don't be deceived, its somehow possible to be null here
+			// Don't be deceived, it's somehow possible to be null here
 			if (autoSubmitTasks == null || autoSubmitTasks.isEmpty()) {
 				return;
 			}
 
-			TeamData data = file.getOrCreateTeamData(player);
+			file.getTeamData(player).ifPresent(data -> {
+				long now = player.level().getGameTime();
 
-			if (data.isLocked()) {
-				return;
-			}
-
-			long t = player.level().getGameTime();
-
-			file.withPlayerContext((ServerPlayer) player, () -> {
-				for (Task task : autoSubmitTasks) {
-					long d = task.autoSubmitOnPlayerTick();
-
-					if (d > 0L && t % d == 0L) {
-						if (!data.isCompleted(task) && data.canStartTasks(task.getQuest())) {
-							task.submitTask(data, (ServerPlayer) player);
+				file.withPlayerContext(serverPlayer, () -> {
+					for (Task task : autoSubmitTasks) {
+						long interval = task.autoSubmitOnPlayerTick();
+						if (interval > 0L && now % interval == 0L) {
+							if (!data.isCompleted(task) && data.canStartTasks(task.getQuest())) {
+								task.submitTask(data, serverPlayer);
+							}
 						}
 					}
-				}
+				});
 			});
 		}
 	}
@@ -206,17 +200,15 @@ public enum FTBQuestsEventHandler {
 	private void changedDimension(ServerPlayer player, ResourceKey<Level> oldLevel, ResourceKey<Level> newLevel) {
 		if (!PlayerHooks.isFake(player)) {
 			ServerQuestFile file = ServerQuestFile.INSTANCE;
-			TeamData data = file.getOrCreateTeamData(player);
-
-			if (data.isLocked()) {
-				return;
-			}
-
-			file.withPlayerContext(player, () -> {
-				for (DimensionTask task : file.collect(DimensionTask.class)) {
-					if (data.canStartTasks(task.getQuest())) {
-						task.submitTask(data, player);
-					}
+			file.getTeamData(player).ifPresent(data -> {
+				if (!data.isLocked()) {
+					file.withPlayerContext(player, () -> {
+						for (DimensionTask task : file.collect(DimensionTask.class)) {
+							if (data.canStartTasks(task.getQuest())) {
+								task.submitTask(data, player);
+							}
+						}
+					});
 				}
 			});
 		}

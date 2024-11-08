@@ -1088,6 +1088,12 @@ public abstract class BaseQuestFile extends QuestObject implements QuestFile {
 	}
 
 	@Override
+	public Optional<TeamData> getTeamData(Player player) {
+		return FTBTeamsAPI.api().getManager().getTeamForPlayerID(player.getUUID())
+				.map(this::getOrCreateTeamData);
+	}
+
+	@Override
 	public Collection<TeamData> getAllTeamData() {
 		return Collections.unmodifiableCollection(teamDataMap.values());
 	}

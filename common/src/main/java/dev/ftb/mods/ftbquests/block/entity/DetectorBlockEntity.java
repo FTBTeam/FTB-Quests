@@ -3,7 +3,6 @@ package dev.ftb.mods.ftbquests.block.entity;
 import dev.architectury.hooks.level.entity.PlayerHooks;
 import dev.ftb.mods.ftbquests.quest.QuestObjectBase;
 import dev.ftb.mods.ftbquests.quest.ServerQuestFile;
-import dev.ftb.mods.ftbquests.quest.TeamData;
 import dev.ftb.mods.ftbquests.registry.ModBlockEntityTypes;
 import dev.ftb.mods.ftbquests.util.ProgressChange;
 import net.minecraft.core.BlockPos;
@@ -50,8 +49,8 @@ public class DetectorBlockEntity extends BlockEntity {
 		if (qo != null) {
 			AABB box = new AABB(pos).inflate(radius);
 			for (ServerPlayer player : level.getEntitiesOfClass(ServerPlayer.class, box, DetectorBlockEntity::isRealPlayer)) {
-				TeamData data = ServerQuestFile.INSTANCE.getOrCreateTeamData(player);
-				qo.forceProgressRaw(data, new ProgressChange(qo, player.getUUID()).setReset(false).withNotifications());
+				ServerQuestFile.INSTANCE.getTeamData(player).ifPresent(data ->
+						qo.forceProgressRaw(data, new ProgressChange(qo, player.getUUID()).setReset(false).withNotifications()));
 			}
 		}
 	}

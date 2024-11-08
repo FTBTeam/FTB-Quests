@@ -3,7 +3,6 @@ package dev.ftb.mods.ftbquests.net;
 import dev.architectury.networking.NetworkManager;
 import dev.ftb.mods.ftbquests.api.FTBQuestsAPI;
 import dev.ftb.mods.ftbquests.quest.ServerQuestFile;
-import dev.ftb.mods.ftbquests.quest.TeamData;
 import dev.ftb.mods.ftbquests.quest.loot.RewardTable;
 import dev.ftb.mods.ftbquests.quest.reward.ChoiceReward;
 import dev.ftb.mods.ftbquests.quest.reward.Reward;
@@ -32,15 +31,16 @@ public record ClaimChoiceRewardMessage(long id, int index) implements CustomPack
 			Reward reward = ServerQuestFile.INSTANCE.getReward(message.id);
 
 			if (reward instanceof ChoiceReward choiceReward && context.getPlayer() instanceof ServerPlayer serverPlayer) {
-				TeamData data = TeamData.get(serverPlayer);
-				RewardTable table = choiceReward.getTable();
+				ServerQuestFile.INSTANCE.getTeamData(serverPlayer).ifPresent(data -> {
+					RewardTable table = choiceReward.getTable();
 
-				if (table != null && data.isCompleted(reward.getQuest())) {
-					if (message.index >= 0 && message.index < table.getWeightedRewards().size()) {
-						table.getWeightedRewards().get(message.index).getReward().claim(serverPlayer, true);
-						data.claimReward(serverPlayer, reward, true);
+					if (table != null && data.isCompleted(reward.getQuest())) {
+						if (message.index >= 0 && message.index < table.getWeightedRewards().size()) {
+							table.getWeightedRewards().get(message.index).getReward().claim(serverPlayer, true);
+							data.claimReward(serverPlayer, reward, true);
+						}
 					}
-				}
+				});
 			}
 		});
 	}
