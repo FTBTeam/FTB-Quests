@@ -542,20 +542,23 @@ public final class Quest extends QuestObject implements Movable {
 
 	@Override
 	public void onCompleted(QuestProgressEventData<?> data) {
-		data.setCompleted(id);
-		ObjectCompletedEvent.QUEST.invoker().act(new ObjectCompletedEvent.QuestEvent(data.withObject(this)));
+		if (!data.getTeamData().isCompleted(this)) {
+			// it's possible this quest is already completed, if it has one or more optional tasks
+			data.setCompleted(id);
+			ObjectCompletedEvent.QUEST.invoker().act(new ObjectCompletedEvent.QuestEvent(data.withObject(this)));
 
-		if (!disableToast) {
-			data.notifyPlayers(id);
+			if (!disableToast) {
+				data.notifyPlayers(id);
+			}
+
+			if (chapter.isCompletedRaw(data.getTeamData())) {
+				chapter.onCompleted(data.withObject(chapter));
+			}
+
+			data.getTeamData().checkAutoCompletion(this);
+
+			checkForDependantCompletion(data.getTeamData());
 		}
-
-		if (chapter.isCompletedRaw(data.getTeamData())) {
-			chapter.onCompleted(data.withObject(chapter));
-		}
-
-		data.getTeamData().checkAutoCompletion(this);
-
-		checkForDependantCompletion(data.getTeamData());
 	}
 
 	private void checkForDependantCompletion(TeamData data) {
