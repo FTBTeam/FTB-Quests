@@ -52,7 +52,7 @@ public record EditObjectMessage(List<EditRecord> editRecords) implements CustomP
 		context.queue(() -> {
 			if (NetUtils.canEdit(context)) {
 				ServerQuestFile sqf = ServerQuestFile.INSTANCE;
-				HistoryEvent.Modification.fromEditRecords(message.editRecords).ifPresent(modification -> {
+				HistoryEvent.Modification.fromEditRecords(sqf, message.editRecords).ifPresent(modification -> {
 					sqf.getHistoryStack().addAndApply(sqf, modification);
 					NetworkHelper.sendToAll(context.getPlayer().getServer(), new EditObjectResponseMessage(modification.newRecords()));
 				});
