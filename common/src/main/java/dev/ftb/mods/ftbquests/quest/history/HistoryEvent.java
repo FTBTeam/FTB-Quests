@@ -64,11 +64,10 @@ public interface HistoryEvent {
             }
         }
 
-        public static Optional<Modification> fromEditRecords(List<EditRecord> newRecs) {
-            ServerQuestFile sqf = ServerQuestFile.INSTANCE;
+        public static Optional<Modification> fromEditRecords(ServerQuestFile file, List<EditRecord> newRecs) {
             List<EditRecord> oldRecs = newRecs.stream()
                     .map(EditRecord::id)
-                    .map(sqf::get)
+                    .map(file::get)
                     .filter(Objects::nonNull)
                     .map(EditRecord::ofQuestObject)
                     .toList();

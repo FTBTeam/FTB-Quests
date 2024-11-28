@@ -69,6 +69,10 @@ public class ServerQuestFile extends BaseQuestFile {
 		}
 	}
 
+	public static Optional<ServerQuestFile> getInstance() {
+		return Optional.ofNullable(INSTANCE);
+	}
+
 	public void load() {
 		load(true, true);
 	}
