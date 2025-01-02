@@ -2,7 +2,6 @@ package dev.ftb.mods.ftbquests.quest.reward;
 
 import dev.architectury.networking.NetworkManager;
 import dev.ftb.mods.ftblibrary.config.ConfigGroup;
-import dev.ftb.mods.ftblibrary.icon.Color4I;
 import dev.ftb.mods.ftblibrary.icon.Icon;
 import dev.ftb.mods.ftbquests.net.DisplayRewardToastMessage;
 import dev.ftb.mods.ftbquests.quest.Quest;
@@ -55,7 +54,9 @@ public class CommandReward extends Reward {
 			nbt.putBoolean("elevate_perms", true);
 		}
 		if (silent) nbt.putBoolean("silent", true);
-		nbt.putString("feedback_message", feedbackMessage);
+		if (!feedbackMessage.isEmpty()) {
+			nbt.putString("feedback_message", feedbackMessage);
+		}
 	}
 
 	@Override
