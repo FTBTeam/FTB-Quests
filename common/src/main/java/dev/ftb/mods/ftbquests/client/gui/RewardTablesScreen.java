@@ -1,5 +1,6 @@
 package dev.ftb.mods.ftbquests.client.gui;
 
+import dev.architectury.networking.simple.BaseC2SMessage;
 import dev.ftb.mods.ftblibrary.config.StringConfig;
 import dev.ftb.mods.ftblibrary.config.ui.EditStringConfigOverlay;
 import dev.ftb.mods.ftblibrary.icon.Color4I;
@@ -13,6 +14,7 @@ import dev.ftb.mods.ftblibrary.ui.input.Key;
 import dev.ftb.mods.ftblibrary.ui.input.MouseButton;
 import dev.ftb.mods.ftblibrary.ui.misc.AbstractButtonListScreen;
 import dev.ftb.mods.ftblibrary.util.TooltipList;
+import dev.ftb.mods.ftbquests.FTBQuests;
 import dev.ftb.mods.ftbquests.client.ClientQuestFile;
 import dev.ftb.mods.ftbquests.client.gui.quests.QuestScreen;
 import dev.ftb.mods.ftbquests.item.FTBQuestsItems;
@@ -23,6 +25,8 @@ import dev.ftb.mods.ftbquests.quest.QuestObjectBase;
 import dev.ftb.mods.ftbquests.quest.loot.LootCrate;
 import dev.ftb.mods.ftbquests.quest.loot.RewardTable;
 import dev.ftb.mods.ftbquests.quest.reward.RandomReward;
+import it.unimi.dsi.fastutil.ints.IntOpenHashSet;
+import it.unimi.dsi.fastutil.ints.IntSet;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.network.chat.Component;
@@ -30,7 +34,10 @@ import net.minecraft.world.item.Items;
 import org.apache.commons.lang3.mutable.MutableInt;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.List;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 public class RewardTablesScreen extends AbstractButtonListScreen {
@@ -38,7 +45,8 @@ public class RewardTablesScreen extends AbstractButtonListScreen {
 	private final SimpleTextButton addButton;
 	private final List<RewardTable> rewardTablesCopy; // deep local copy of reward tables
 	private boolean changed = false;
-	private final Set<RewardTable> editedTables = new HashSet<>();
+	private final IntSet editedIndexes = new IntOpenHashSet();
+	private final IntSet pendingDeleteIndexes = new IntOpenHashSet();
 
 	public RewardTablesScreen(QuestScreen questScreen) {
 		super();
@@ -74,8 +82,12 @@ public class RewardTablesScreen extends AbstractButtonListScreen {
 
 	@Override
 	public void addButtons(Panel panel) {
-		rewardTablesCopy.stream().sorted()
-				.forEach(table -> panel.add(new RewardTableButton(panel, table)));
+		List<RewardTableButton> buttons = new ArrayList<>();
+		for (int i = 0; i < rewardTablesCopy.size(); i++) {
+			RewardTable table = rewardTablesCopy.get(i);
+			buttons.add(new RewardTableButton(panel, table, i));
+		}
+		panel.addAll(buttons.stream().sorted(Comparator.comparing(btn -> btn.table)).toList());
 	}
 
 	@Override
@@ -122,21 +134,36 @@ public class RewardTablesScreen extends AbstractButtonListScreen {
 
 	@Override
 	protected void doAccept() {
-		Set<Long> toRemove = ClientQuestFile.INSTANCE.getRewardTables().stream().map(t -> t.id).collect(Collectors.toSet());
-
-		rewardTablesCopy.forEach(table -> {
-			if (table.id == 0) {
-				// newly-created
-				new CreateObjectMessage(table, null).sendToServer();
+		IntSet toCreate = new IntOpenHashSet();
+		for (int idx = 0; idx < rewardTablesCopy.size(); idx++) {
+			if (rewardTablesCopy.get(idx).id == 0L && !pendingDeleteIndexes.contains(idx)) {
+				toCreate.add(idx);
 			}
-			toRemove.remove(table.id);
-		});
+		}
+		editedIndexes.removeAll(pendingDeleteIndexes);
 
-		toRemove.forEach(id -> new DeleteObjectMessage(id).sendToServer());
+		int nAdded = sendToServer(toCreate, tbl -> new CreateObjectMessage(tbl, null), true);
+		int nEdited = sendToServer(editedIndexes, EditObjectMessage::new, false);
+		int nDeleted = sendToServer(pendingDeleteIndexes, tbl -> new DeleteObjectMessage(tbl.id), false);
 
-		editedTables.forEach(t -> new EditObjectMessage(t).sendToServer());
+		FTBQuests.LOGGER.debug("Sent {} new, {} edited, {} deleted reward tables to server", nAdded, nEdited, nDeleted);
 
 		questScreen.run();
+	}
+
+	private <T extends BaseC2SMessage> int sendToServer(IntSet indexes, Function<RewardTable, T> func, boolean addNew) {
+		int sent = 0;
+		for (int idx : indexes) {
+			if (idx >= 0 && idx < rewardTablesCopy.size()) {
+				RewardTable table = rewardTablesCopy.get(idx);
+				if (addNew && table.id == 0 || !addNew && table.id != 0) {
+					// id == 0 means table is only locally added, no need to sync an edit/delete for it
+					func.apply(table).sendToServer();
+					sent++;
+				}
+			}
+		}
+		return sent;
 	}
 
 	private class CustomTopPanel extends TopPanel {
@@ -160,12 +187,14 @@ public class RewardTablesScreen extends AbstractButtonListScreen {
 
 	private class RewardTableButton extends SimpleTextButton {
 		private final RewardTable table;
+		private final int idx;
 
-		public RewardTableButton(Panel panel, RewardTable table) {
+		public RewardTableButton(Panel panel, RewardTable table, int idx) {
 			super(panel, table.getTitle(), table.getIcon());
 
 			this.table = table;
-			setHeight(16);
+            this.idx = idx;
+            setHeight(16);
 
 			if (this.table.getLootCrate() != null) {
 				title = title.copy().withStyle(ChatFormatting.YELLOW);
@@ -190,7 +219,7 @@ public class RewardTablesScreen extends AbstractButtonListScreen {
 			List<ContextMenuItem> menu = List.of(
 					new ContextMenuItem(Component.translatable("ftbquests.gui.edit"), ItemIcon.getItemIcon(Items.FEATHER),
 							b -> editRewardTable()),
-					new ContextMenuItem(Component.translatable("gui.remove"), Icons.BIN,
+					new ContextMenuItem(Component.translatable(pendingDeleteIndexes.contains(idx) ? "ftbquests.gui.restore" : "gui.remove"), Icons.BIN,
 							b -> deleteRewardTable()),
 					new ContextMenuItem(getLootCrateText(), ItemIcon.getItemIcon(FTBQuestsItems.LOOTCRATE.get()),
 							b -> toggleLootCrate())
@@ -205,25 +234,43 @@ public class RewardTablesScreen extends AbstractButtonListScreen {
 				ItemIcon.getItemIcon(FTBQuestsItems.LOOTCRATE.get()).draw(graphics, x + w - 26, y + 2, 12, 12);
 				Icons.BIN.draw(graphics, x + w - 13, y + 2, 12, 12);
 			}
+			if (pendingDeleteIndexes.contains(idx)) {
+				Color4I.RED.withAlpha(64).draw(graphics, x, y, w, h);
+			} else if (rewardTablesCopy.get(idx).id == 0) {
+				Color4I.GREEN.withAlpha(64).draw(graphics, x, y, w, h);
+			}
 			Color4I.GRAY.withAlpha(40).draw(graphics, x, y + h, w, 1);
+		}
+
+		@Override
+		public void draw(GuiGraphics graphics, Theme theme, int x, int y, int w, int h) {
+			super.draw(graphics, theme, x, y, w, h);
+
+			if (pendingDeleteIndexes.contains(idx)) {
+				Color4I.GRAY.draw(graphics, x + 20, y + h / 2, theme.getStringWidth(title), 1);
+			}  else if (rewardTablesCopy.get(idx).id == 0) {
+				Icons.ADD.draw(graphics, x + 24 + theme.getStringWidth(title), y + 2, 12, 12);
+			}
 		}
 
 		private void editRewardTable() {
 			new EditRewardTableScreen(RewardTablesScreen.this, table, editedReward -> {
 				rewardTablesCopy.replaceAll(t -> t.id == editedReward.id ? editedReward : t);
 				changed = true;
-				editedTables.add(editedReward);
+				editedIndexes.add(idx);
 				editedReward.clearCachedData();
 				refreshWidgets();
 			}).openGui();
 		}
 
 		private void deleteRewardTable() {
-			openYesNo(Component.translatable("delete_item", table.getTitle()), Component.empty(), () -> {
-				rewardTablesCopy.removeIf(t -> t == table);
-				changed = true;
-				refreshWidgets();
-			});
+			if (pendingDeleteIndexes.contains(idx)) {
+				pendingDeleteIndexes.remove(idx);
+			} else {
+				pendingDeleteIndexes.add(idx);
+			}
+			changed = true;
+			refreshWidgets();
 		}
 
 		private void toggleLootCrate() {
@@ -236,6 +283,7 @@ public class RewardTablesScreen extends AbstractButtonListScreen {
 			}
 
 			changed = true;
+			editedIndexes.add(idx);
 			refreshWidgets();
 		}
 
@@ -244,7 +292,7 @@ public class RewardTablesScreen extends AbstractButtonListScreen {
 			super.addMouseOverText(list);
 
 			if (getMouseX() > getX() + width - 13) {
-				list.add(Component.translatable("gui.remove"));
+				list.add(Component.translatable(pendingDeleteIndexes.contains(idx) ? "ftbquests.gui.restore" : "gui.remove"));
 			} else if (getMouseX() > getX() + width - 26) {
 				list.add(getLootCrateText());
 			} else {
