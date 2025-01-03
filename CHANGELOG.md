@@ -10,6 +10,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 * Fixed a rare server-side crash which can occur when new (as in, never on this server before) players join the server
   * Timing issue with FTB Teams initialising their team data for the first time
 * Fixed quest completion toasts appearing more than once if a quest has multiple optional tasks
+* Image objects with no click action can now be clicked-through, allowing the background to be scrolled/panned
+* Fixed issue with several ftbquests subcommands meaning they could not be used in MC functions
+  * Commands are `/ftbquests change_progress`, `/ftbquests open_book`, and `/ftbquests export_reward_table_to_chest`
 
 ## [2101.1.1]
 
