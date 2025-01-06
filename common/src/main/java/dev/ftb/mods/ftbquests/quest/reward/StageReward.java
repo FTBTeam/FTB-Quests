@@ -17,9 +17,14 @@ public class StageReward extends Reward {
 	private String stage = "";
 	private boolean remove = false;
 
-	public StageReward(long id, Quest quest) {
+	public StageReward(long id, Quest quest, String stage) {
 		super(id, quest);
+		this.stage = stage;
 		autoclaim = RewardAutoClaim.INVISIBLE;
+	}
+
+	public StageReward(long id, Quest quest) {
+		this(id, quest, "");
 	}
 
 	@Override

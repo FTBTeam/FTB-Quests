@@ -37,6 +37,7 @@ import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.world.item.Items;
 import org.apache.commons.lang3.mutable.MutableInt;
 import org.jetbrains.annotations.NotNull;
+import org.lwjgl.glfw.GLFW;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -303,6 +304,10 @@ public class RewardTablesScreen extends AbstractButtonListScreen {
 		@Override
 		public void addMouseOverText(TooltipList list) {
 			super.addMouseOverText(list);
+
+			if (isKeyDown(GLFW.GLFW_KEY_F1) || isShiftKeyDown() && isCtrlKeyDown()) {
+				list.add(Component.literal(table.getCodeString()).withStyle(ChatFormatting.DARK_GRAY));
+			}
 
 			if (getMouseX() > getX() + width - 13) {
 				list.add(Component.translatable(pendingDeleteIndexes.contains(idx) ? "ftbquests.gui.restore" : "gui.remove"));
