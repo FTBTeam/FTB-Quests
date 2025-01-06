@@ -129,7 +129,7 @@ public class OtherButtonsPanelBottom extends OtherButtonsPanel {
 			contextMenu.add(new ContextMenuItem(Component.translatable("ftbquests.gui.reload_theme"), ThemeProperties.RELOAD_ICON.get(),
 					b -> reload_theme()));
 			contextMenu.add(new ContextMenuItem(Component.translatable("ftbquests.gui.wiki"), Icons.INFO,
-					b -> handleClick("https://help.ftb.team/mods")));
+					b -> handleClick("https://docs.feed-the-beast.com/docs/mods/suite/Quests/")));
 
 			questScreen.openContextMenu(contextMenu);
 		}
