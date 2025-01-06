@@ -44,6 +44,7 @@ import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
+import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.mutable.MutableInt;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -60,16 +61,16 @@ public abstract class BaseQuestFile extends QuestObject implements QuestFile {
 	public static int VERSION = 13;
 
 	public static final StreamCodec<RegistryFriendlyByteBuf,BaseQuestFile> STREAM_CODEC = new StreamCodec<>() {
-        @Override
-        public BaseQuestFile decode(RegistryFriendlyByteBuf buf) {
+		@Override
+		public BaseQuestFile decode(RegistryFriendlyByteBuf buf) {
 			return Util.make(FTBQuestsClient.createClientQuestFile(), file -> file.readNetDataFull(buf));
-        }
+		}
 
-        @Override
-        public void encode(RegistryFriendlyByteBuf buf, BaseQuestFile file) {
+		@Override
+		public void encode(RegistryFriendlyByteBuf buf, BaseQuestFile file) {
 			file.writeNetDataFull(buf);
-        }
-    };
+		}
+	};
 
 	private final DefaultChapterGroup defaultChapterGroup;
 	final List<ChapterGroup> chapterGroups;
@@ -267,6 +268,17 @@ public abstract class BaseQuestFile extends QuestObject implements QuestFile {
 		return null;
 	}
 
+	public <T extends QuestObjectBase> T getQuestObjectOrThrow(long id, Class<T> cls) {
+		QuestObjectBase object = getBase(id);
+		if (object == null) {
+			throw new IllegalArgumentException("Unknown object id " + id);
+		} else if (cls.isAssignableFrom(object.getClass())) {
+			return cls.cast(object);
+		} else {
+			throw new IllegalArgumentException("Wrong class for object id " + id + ": wanted " + cls.getName() + ", got " + object.getClass().getName());
+		}
+	}
+
 	@Nullable
 	public Chapter getChapter(long id) {
 		QuestObjectBase object = getBase(id);
@@ -341,7 +353,11 @@ public abstract class BaseQuestFile extends QuestObject implements QuestFile {
 			chapter.getQuestLinks().forEach(link -> questObjectMap.put(link.id, link));
 		});
 
-		clearCachedData();
+		refreshRewardTableRewardIDs();
+	}
+
+	public void refreshRewardTableRewardIDs() {
+		rewardTables.forEach(table -> table.getWeightedRewards().forEach(wr -> questObjectMap.put(wr.getReward().id, wr.getReward())));
 	}
 
 	public QuestObjectBase create(long id, QuestObjectType type, long parent, CompoundTag extra) {
@@ -375,15 +391,15 @@ public abstract class BaseQuestFile extends QuestObject implements QuestFile {
 				throw new IllegalArgumentException("Parent quest not found!");
 			}
 			case REWARD -> {
-				Quest quest = getQuest(parent);
-				if (quest != null) {
-					Reward reward = RewardType.createReward(id, quest, extra.getString("type"));
-					if (reward != null) {
-						return reward;
-					}
-					throw new IllegalArgumentException("Unknown reward type!");
+				String rewardType = extra.getString("type");
+				if (RewardTable.isFakeQuestId(parent)) {
+					return RewardTable.createRewardForTable(id, rewardType, this);
+				} else {
+					Quest quest = getQuestObjectOrThrow(parent, Quest.class);
+					Reward reward = RewardType.createReward(id, quest, rewardType);
+					Validate.isTrue(reward != null, "Unknown reward type: " + rewardType);
+					return reward;
 				}
-				throw new IllegalArgumentException("Parent quest not found!");
 			}
 			case REWARD_TABLE -> {
 				return new RewardTable(id, this);
@@ -723,6 +739,7 @@ public abstract class BaseQuestFile extends QuestObject implements QuestFile {
 		rewardTables.sort(Comparator.comparingInt(c -> objectOrderMap.get(c.id)));
 		updateLootCrates();
 
+		refreshRewardTableRewardIDs();
         /*
 		for (Chapter chapter : chapters)
 		{
@@ -743,7 +760,7 @@ public abstract class BaseQuestFile extends QuestObject implements QuestFile {
 			markDirty();
 		}
 
-        FTBQuests.LOGGER.info("Loaded {} chapter groups, {} chapters, {} quests, {} reward tables", chapterGroups.size(), chapterCounter, questCounter, rewardTables.size());
+		FTBQuests.LOGGER.info("Loaded {} chapter groups, {} chapters, {} quests, {} reward tables", chapterGroups.size(), chapterCounter, questCounter, rewardTables.size());
 	}
 
 	private void handleLegacyFileNBT(CompoundTag fileNBT) {
@@ -943,7 +960,7 @@ public abstract class BaseQuestFile extends QuestObject implements QuestFile {
 			}
 		}
 
-        FTBQuests.LOGGER.debug("Wrote {} bytes, {} objects", buffer.writerIndex() - pos, questObjectMap.size());
+		FTBQuests.LOGGER.debug("Wrote {} bytes, {} objects", buffer.writerIndex() - pos, questObjectMap.size());
 	}
 
 	public final void readNetDataFull(RegistryFriendlyByteBuf buffer) {
@@ -1033,11 +1050,11 @@ public abstract class BaseQuestFile extends QuestObject implements QuestFile {
 			}
 		}
 
-		refreshIDMap();
-
 		for (RewardTable table : rewardTables) {
 			table.readNetData(buffer);
 		}
+
+		refreshIDMap();
 
 		for (ChapterGroup group : chapterGroups) {
 			if (!group.isDefaultGroup()) {
@@ -1061,7 +1078,7 @@ public abstract class BaseQuestFile extends QuestObject implements QuestFile {
 			}
 		}
 
-        FTBQuests.LOGGER.info("Read {} bytes, {} objects", buffer.readerIndex() - pos, questObjectMap.size());
+		FTBQuests.LOGGER.info("Read {} bytes, {} objects", buffer.readerIndex() - pos, questObjectMap.size());
 	}
 
 	@Override
@@ -1195,22 +1212,22 @@ public abstract class BaseQuestFile extends QuestObject implements QuestFile {
 	}
 
 	public long getID(@Nullable Object obj) {
-        switch (obj) {
-            case null -> {
-                return 0L;
-            }
-            case Number n -> {
-                return n.longValue();
-            }
-            case NumericTag nt -> {
-                return nt.getAsLong();
-            }
-            case StringTag st -> {
-                return getID(st.getAsString());
-            }
-            default -> {
-            }
-        }
+		switch (obj) {
+			case null -> {
+				return 0L;
+			}
+			case Number n -> {
+				return n.longValue();
+			}
+			case NumericTag nt -> {
+				return nt.getAsLong();
+			}
+			case StringTag st -> {
+				return getID(st.getAsString());
+			}
+			default -> {
+			}
+		}
 
 		String idStr = obj.toString();
 		long id = parseCodeString(idStr);

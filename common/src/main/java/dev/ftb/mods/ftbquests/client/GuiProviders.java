@@ -48,6 +48,7 @@ public class GuiProviders {
                     }
                     gui.run();
                 });
+                group.setNameKey(reward.getType().getTypeId().toLanguageKey("ftbquests.reward"));
                 reward.fillConfigGroup(reward.createSubGroup(group));
                 new EditConfigScreen(group).openGui();
             }
@@ -160,6 +161,7 @@ public class GuiProviders {
                 callback.accept(task, task.getType().makeExtraNBT());
             }
         });
+        group.setNameKey(task.getType().getTypeId().toLanguageKey("ftbquests.task"));
         task.fillConfigGroup(task.createSubGroup(group));
 
         new EditConfigScreen(group).openGui();
@@ -204,6 +206,18 @@ public class GuiProviders {
                 }
                 panel.run();
             }, RewardTypes.XP_LEVELS.getDisplayName()).atMousePosition();
+            panel.getGui().pushModalPanel(overlay);
+        });
+
+        RewardTypes.STAGE.setGuiProvider((panel, quest, callback) -> {
+            StringConfig c = new StringConfig();
+
+            EditStringConfigOverlay<String> overlay = new EditStringConfigOverlay<>(panel.getGui(), c, accepted -> {
+                if (accepted) {
+                    callback.accept(new StageReward(0L, quest, c.getValue()));
+                }
+                panel.run();
+            }, RewardTypes.STAGE.getDisplayName()).atMousePosition();
             panel.getGui().pushModalPanel(overlay);
         });
     }

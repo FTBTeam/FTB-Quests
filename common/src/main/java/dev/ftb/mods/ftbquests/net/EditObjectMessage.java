@@ -46,10 +46,10 @@ public record EditObjectMessage(long id, CompoundTag nbt) implements CustomPacke
 				QuestObjectBase object = ServerQuestFile.INSTANCE.getBase(message.id);
 				if (object != null) {
 					object.readData(message.nbt, context.registryAccess());
-					object.editedFromGUIOnServer();
 					ServerQuestFile.INSTANCE.clearCachedData();
 					ServerQuestFile.INSTANCE.markDirty();
 					NetworkHelper.sendToAll(context.getPlayer().getServer(), new EditObjectResponseMessage(object));
+					object.editedFromGUIOnServer();
 				}
 			}
 		});

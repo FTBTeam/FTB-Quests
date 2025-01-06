@@ -15,7 +15,6 @@ import dev.ftb.mods.ftblibrary.ui.misc.AbstractButtonListScreen;
 import dev.ftb.mods.ftblibrary.util.TooltipList;
 import dev.ftb.mods.ftblibrary.util.client.PositionedIngredient;
 import dev.ftb.mods.ftbquests.api.FTBQuestsAPI;
-import dev.ftb.mods.ftbquests.quest.QuestObjectBase;
 import dev.ftb.mods.ftbquests.quest.loot.RewardTable;
 import dev.ftb.mods.ftbquests.quest.loot.WeightedReward;
 import dev.ftb.mods.ftbquests.quest.reward.RewardType;
@@ -24,6 +23,7 @@ import net.minecraft.ChatFormatting;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.Items;
+import org.lwjgl.glfw.GLFW;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -40,11 +40,7 @@ public class EditRewardTableScreen extends AbstractButtonListScreen {
 	public EditRewardTableScreen(Runnable parentScreen, RewardTable originalTable, Consumer<RewardTable> callback) {
 		this.parentScreen = parentScreen;
 		this.callback = callback;
-
-		editedTable = QuestObjectBase.copy(originalTable, () ->  new RewardTable(originalTable.id, originalTable.getFile()));
-		if (editedTable != null) {
-			editedTable.setRawTitle(originalTable.getRawTitle());
-		}
+		this.editedTable = originalTable.copy();
 
 		setBorder(1, 1, 1);
 	}
@@ -203,6 +199,10 @@ public class EditRewardTableScreen extends AbstractButtonListScreen {
 		@Override
 		public void addMouseOverText(TooltipList list) {
 			super.addMouseOverText(list);
+
+			if (isKeyDown(GLFW.GLFW_KEY_F1) || isShiftKeyDown() && isCtrlKeyDown()) {
+				list.add(Component.literal(wr.getReward().getCodeString()).withStyle(ChatFormatting.DARK_GRAY));
+			}
 
 			if (getMouseX() > getX() + width - 13) {
 				list.add(Component.translatable("gui.remove"));
