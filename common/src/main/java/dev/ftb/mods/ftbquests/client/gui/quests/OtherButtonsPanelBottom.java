@@ -154,6 +154,8 @@ public class OtherButtonsPanelBottom extends OtherButtonsPanel {
 				appendNum(fileName, time.get(Calendar.SECOND), '\0');
 				File file = new File(Minecraft.getInstance().gameDirectory, fileName.toString()).getCanonicalFile();
 				ClientQuestFile.INSTANCE.writeDataFull(file.toPath(), ClientQuestFile.INSTANCE.holderLookup());
+				ClientQuestFile.INSTANCE.getTranslationManager().saveToNBT(file.toPath().resolve("lang"), true);
+
 				Component component = Component.translatable("ftbquests.gui.saved_as_file", "." + file.getPath().replace(Minecraft.getInstance().gameDirectory.getCanonicalFile().getAbsolutePath(), ""));
 				component.getStyle().withClickEvent(new ClickEvent(ClickEvent.Action.OPEN_FILE, file.getAbsolutePath()));
 				Minecraft.getInstance().player.sendSystemMessage(component);
