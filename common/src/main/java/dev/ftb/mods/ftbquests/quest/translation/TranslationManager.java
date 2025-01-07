@@ -69,9 +69,9 @@ public class TranslationManager {
         }
     }
 
-    public void saveToNBT(Path langFolder) {
+    public void saveToNBT(Path langFolder, boolean force) {
         map.forEach((locale, table) -> {
-            if (table.isSaveNeeded()) {
+            if (force || table.isSaveNeeded()) {
                 boolean prevSort = SNBT.setShouldSortKeysOnWrite(true);
                 Path savePath = langFolder.resolve(locale + ".snbt");
                 if (!SNBT.write(savePath, table.saveToNBT())) {
