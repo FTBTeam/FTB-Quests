@@ -128,6 +128,7 @@ public interface ThemeProperties {
 	IconProperty EDIT_ICON = new IconProperty("edit_icon");
 	IconProperty MOVE_UP_ICON = new IconProperty("move_up_icon");
 	IconProperty MOVE_DOWN_ICON = new IconProperty("move_down_icon");
+	IconProperty LOCK_ICON = new IconProperty("lock_icon");
 
 	// Quest window //
 	IconProperty ICON = new IconProperty("icon");

@@ -85,6 +85,8 @@ public class ThemeLoader implements ResourceManagerReloadListener {
 			list.add(s.trim());
 		}
 
+		list.add("none");
+
 		QuestShape.reload(new ArrayList<>(list));
 	}
 

@@ -23,6 +23,7 @@ public interface FTBQuestsClientConfig {
     EnumValue<PanelPositioning> PINNED_QUESTS_POS = UI.addEnum("pinned_quests_pos", PanelPositioning.NAME_MAP, PanelPositioning.RIGHT);
     IntValue PINNED_QUESTS_INSET_X = UI.addInt("pinned_quests_inset_x", 4);
     IntValue PINNED_QUESTS_INSET_Y = UI.addInt("pinned_quests_inset_y", 4);
+    BooleanValue SHOW_LOCK_ICON = UI.addBoolean("show_lock_icon", true);
 
     // TODO migrate chapter-pinned and pinned-quests data out of per-player team data into here
 
