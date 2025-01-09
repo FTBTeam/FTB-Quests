@@ -115,7 +115,7 @@ public class QuestScreen extends BaseScreen {
 
 	@Override
 	public int getMaxZLevel() {
-		return Z_LEVEL + 100;
+		return 2000;  // to keep tooltips above context menus with a possibly high Z translation
 	}
 
 	@Override
