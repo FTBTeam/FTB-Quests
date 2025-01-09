@@ -6,6 +6,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [2101.1.2]
 
+### Added
+* Added a new "None" quest shape, which simply means to not draw any border around the quest icon
+  * This doesn't affect the icon itself, which is still rendered as normal
+* Locked quests (i.e. which can't be started due to dependencies) now show a small padlock icon
+  * This can be disabled in player preferences if preferred - "Show Icon for Locked Quests"
+* Added a new "All Table" reward type
+  * This works on an existing reward table, and rewards the player with one of every reward in the table
+
 ### Fixed
 * Fixed a rare server-side crash which can occur when new (as in, never on this server before) players join the server
   * Timing issue with FTB Teams initialising their team data for the first time
@@ -13,6 +21,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 * Image objects with no click action can now be clicked-through, allowing the background to be scrolled/panned
 * Fixed issue with several ftbquests subcommands meaning they could not be used in MC functions
   * Commands are `/ftbquests change_progress`, `/ftbquests open_book`, and `/ftbquests export_reward_table_to_chest`
+* Fixed tooltips sometimes rendering underneath context menus
+* Fixed rewards in reward tables not being able to have a custom title set
+  * Technical detail: rewards in reward tables (unlike rewards in quests) have historically not had a unique ID, but this ID is necessary for titles to work with the new translation system which the mod uses.
+* Fixed recipes for craftable items (task screens etc.) not working
+* Fixed loot tables for task screens not working
+* The "Open Wiki" entry in the Settings context menu now opens the new FTB Quests docs at https://docs.feed-the-beast.com/docs/mods/suite/Quests/
+* The "Download Quest Files" entry in the Settings menu now also saves the `lang/` folder 
+  * Caveat: only translations which the client knows about are included in this download (translations on the server that the client has not used won't be included)
 
 ## [2101.1.1]
 
