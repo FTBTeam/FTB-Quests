@@ -226,9 +226,15 @@ public class RewardTable extends QuestObjectBase {
 		for (int i = 0; i < list.size(); i++) {
 			boolean newReward = false;
 			CompoundTag rewardTag = list.getCompound(i);
-			long rewardId = file.getID(rewardTag.get("id"));
-			if (rewardId == 0L) {
-				// should only occur on server when the client has sent a reward table with new reward(s)
+			if (!rewardTag.contains("id") && file.isServerSide()) {
+				// can happen on server when reading in an older quest book where reward table rewards didn't have IDs
+				rewardTag.putString("id", QuestObjectBase.getCodeString(file.newID()));
+			}
+			long rewardId = QuestObjectBase.parseCodeString(rewardTag.getString("id"));
+			if (rewardId == 0L && file.isServerSide()) {
+				// Can happen on server when the client has sent a reward table with new reward(s)
+				// Note: can also happen on client when copying rewards that haven't been sent to server yet (reward editor screen)
+				//       - in that case, an id of 0 is fine, so don't do anything here
 				rewardId = file.newID();
 				rewardTag.putString("id", QuestObjectBase.getCodeString(rewardId));
 				newReward = refreshIds = true;
