@@ -3,7 +3,6 @@ package dev.ftb.mods.ftbquests.net;
 import dev.architectury.networking.NetworkManager;
 import dev.ftb.mods.ftbquests.api.FTBQuestsAPI;
 import dev.ftb.mods.ftbquests.quest.ServerQuestFile;
-import dev.ftb.mods.ftbquests.quest.TeamData;
 import dev.ftb.mods.ftbquests.quest.reward.Reward;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
@@ -29,13 +28,12 @@ public record ClaimRewardMessage(long id, boolean shouldNotify) implements Custo
 		context.queue(() -> {
 			Reward reward = ServerQuestFile.INSTANCE.getReward(message.id);
 
-			if (reward != null) {
-				ServerPlayer player = (ServerPlayer) context.getPlayer();
-				TeamData teamData = ServerQuestFile.INSTANCE.getOrCreateTeamData(player);
-
-				if (teamData.isCompleted(reward.getQuest())) {
-					teamData.claimReward(player, reward, message.shouldNotify);
-				}
+			if (reward != null && context.getPlayer() instanceof ServerPlayer player) {
+				ServerQuestFile.INSTANCE.getTeamData(player).ifPresent(teamData -> {
+					if (teamData.isCompleted(reward.getQuest())) {
+						teamData.claimReward(player, reward, message.shouldNotify);
+					}
+				});
 			}
 		});
 	}

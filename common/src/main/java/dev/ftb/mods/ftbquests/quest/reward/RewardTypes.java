@@ -18,6 +18,7 @@ public interface RewardTypes {
 
 	RewardType ITEM = register(FTBQuestsAPI.rl("item"), ItemReward::new, () -> Icon.getIcon("minecraft:item/diamond"));
 	RewardType CHOICE = register(FTBQuestsAPI.rl("choice"), ChoiceReward::new, () -> Icons.COLOR_RGB).setExcludeFromListRewards(true);
+	RewardType ALL_TABLE = register(FTBQuestsAPI.rl("all_table"), AllTableReward::new, () -> Icons.COLOR_HSB).setExcludeFromListRewards(true);
 	RewardType RANDOM = register(FTBQuestsAPI.rl("random"), RandomReward::new, () -> Icons.DICE).setExcludeFromListRewards(true);
 	RewardType LOOT = register(FTBQuestsAPI.rl("loot"), LootReward::new, () -> Icons.MONEY_BAG).setExcludeFromListRewards(true);
 	RewardType COMMAND = register(FTBQuestsAPI.rl("command"), CommandReward::new, () -> Icon.getIcon("minecraft:block/command_block_back"));

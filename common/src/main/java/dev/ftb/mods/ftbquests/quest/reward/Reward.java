@@ -13,6 +13,7 @@ import dev.ftb.mods.ftbquests.client.gui.quests.QuestScreen;
 import dev.ftb.mods.ftbquests.integration.RecipeModHelper;
 import dev.ftb.mods.ftbquests.net.ClaimRewardMessage;
 import dev.ftb.mods.ftbquests.quest.*;
+import dev.ftb.mods.ftbquests.quest.translation.TranslationKey;
 import dev.ftb.mods.ftbquests.util.ProgressChange;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -302,5 +303,11 @@ public abstract class Reward extends QuestObjectBase {
 
 	protected boolean isIgnoreRewardBlockingHardcoded() {
 		return false;
+	}
+
+	public void addAnyProtoTranslations(CompoundTag tag) {
+		if (protoTranslations.containsKey(TranslationKey.TITLE)) {
+			getQuestFile().getTranslationManager().addInitialTranslation(tag, getQuestFile().getLocale(), TranslationKey.TITLE, protoTranslations.get(TranslationKey.TITLE));
+		}
 	}
 }

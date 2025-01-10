@@ -54,6 +54,11 @@ public abstract class Task extends QuestObject {
 	}
 
 	@Override
+	public Quest getRelatedQuest() {
+		return quest;
+	}
+
+	@Override
 	public final QuestObjectType getObjectType() {
 		return QuestObjectType.TASK;
 	}

@@ -27,6 +27,7 @@ public final class QuestShape extends Icon {
 
 	private final String id;
 	private final ImageIcon background, outline, shape;
+	private final boolean shouldDraw;
 	private PixelBuffer shapePixels;
 
 	public QuestShape(String id) {
@@ -34,6 +35,7 @@ public final class QuestShape extends Icon {
 		background = new ImageIcon(FTBQuestsAPI.rl("textures/shapes/" + this.id + "/background.png"));
 		outline = new ImageIcon(FTBQuestsAPI.rl("textures/shapes/" + this.id + "/outline.png"));
 		shape = new ImageIcon(FTBQuestsAPI.rl("textures/shapes/" + this.id + "/shape.png"));
+		shouldDraw = !id.equals("none");
 	}
 
 	public static void reload(List<String> list) {
@@ -97,6 +99,10 @@ public final class QuestShape extends Icon {
 		}
 
 		return shapePixels;
+	}
+
+	public boolean shouldDraw() {
+		return shouldDraw;
 	}
 
 	public static Map<String,QuestShape> map() {

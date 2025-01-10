@@ -149,7 +149,7 @@ public class ServerQuestFile extends BaseQuestFile {
 			shouldSave = false;
 		}
 
-		getTranslationManager().saveToNBT(getFolder().resolve("lang"));
+		getTranslationManager().saveToNBT(getFolder().resolve("lang"), false);
 
 		getAllTeamData().forEach(TeamData::saveIfChanged);
 	}

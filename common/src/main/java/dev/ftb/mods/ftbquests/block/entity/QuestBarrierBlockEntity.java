@@ -66,6 +66,8 @@ public class QuestBarrierBlockEntity extends BlockEntity implements BarrierBlock
 	public boolean isOpen(Player player) {
 		BaseQuestFile file = FTBQuestsAPI.api().getQuestFile(player.level().isClientSide());
 		QuestObject qo = file.get(objId);
-		return qo != null && file.getOrCreateTeamData(player).isCompleted(qo);
+		return qo != null && file.getTeamData(player)
+				.map(d -> d.isCompleted(qo))
+				.orElse(false);
 	}
 }

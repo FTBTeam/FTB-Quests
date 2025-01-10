@@ -4,7 +4,35 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-# [2101.1.1]
+## [2101.1.2]
+
+### Added
+* Added a new "None" quest shape, which simply means to not draw any border around the quest icon
+  * This doesn't affect the icon itself, which is still rendered as normal
+* Locked quests (i.e. which can't be started due to dependencies) now show a small padlock icon
+  * This can be disabled in player preferences if preferred - "Show Icon for Locked Quests"
+* Added a new "All Table" reward type
+  * This works on an existing reward table, and rewards the player with one of every reward in the table
+* Added a new "Grab Copy of Item" context menu entry for item tasks in the quest view panel
+  * This is intended to allow getting copies of items with custom components (e.g. FTB Filter System filters) if you don't have a copy of the item to hand
+
+### Fixed
+* Fixed a rare server-side crash which can occur when new (as in, never on this server before) players join the server
+  * Timing issue with FTB Teams initialising their team data for the first time
+* Fixed quest completion toasts appearing more than once if a quest has multiple optional tasks
+* Image objects with no click action can now be clicked-through, allowing the background to be scrolled/panned
+* Fixed issue with several ftbquests subcommands meaning they could not be used in MC functions
+  * Commands are `/ftbquests change_progress`, `/ftbquests open_book`, and `/ftbquests export_reward_table_to_chest`
+* Fixed tooltips sometimes rendering underneath context menus
+* Fixed rewards in reward tables not being able to have a custom title set
+  * Technical detail: rewards in reward tables (unlike rewards in quests) have historically not had a unique ID, but this ID is necessary for titles to work with the new translation system which the mod uses.
+* Fixed recipes for craftable items (task screens etc.) not working
+* Fixed loot tables for task screens not working
+* The "Open Wiki" entry in the Settings context menu now opens the new FTB Quests docs at https://go.ftb.team/docs-quests
+* The "Download Quest Files" entry in the Settings menu now also saves the `lang/` folder 
+  * Caveat: only translations which the client knows about are included in this download (translations on the server that the client has not used won't be included)
+
+## [2101.1.1]
 
 ### Added
 * The pinned quests panel now has a "Pinned Quests" title for clarity
@@ -18,7 +46,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 * Fixed context menu tooltips sometimes appearing behind the context menu
 * Fixed some issues with the reward table editor GUI (changes not getting correctly sync'd to server in some cases)
 
-# [2101.1.0]
+## [2101.1.0]
 
 ### Changed
 * Minecraft 1.21.1 is now required; this no longer supports Minecraft 1.21
@@ -36,7 +64,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   * Added new "Hide Quests until Dependencies Complete" setting
   * So there are now two independent setting for hiding quests based on dependency visibility and/or completion
 
-# [2100.1.5]
+## [2100.1.5]
 
 ### Changed
 * FTB Quests items are now registered to the `FTB Suite` creative tab instead of FTB Quests own tab
@@ -47,7 +75,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   * In addition, rotated images with a non-default aspect ratio now preview correctly during rotation
 * Fixed copy/pasting images
 
-# [2100.1.4]
+## [2100.1.4]
 
 ### Fixed
 * Fixed coloured text in quest titles & subtitles not showing in the quest view panel
@@ -57,21 +85,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   * Pre-existing chapter files may be named after the hex chapter id; they will still work fine, but you can rename them if you wish
   * If you choose to rename them, also update the `filename` field in the file correspondingly
 
-# [2100.1.3]
+## [2100.1.3]
 
 ### Fixed
 * Fixed adding tasks to existing quests sometimes losing the task type (leading to a '?' button appearing)
 * Fixed images in the quest book not sync'ing to the client
 * Fixed issue where using FTB Filter System filters would sometimes fail to find matching items for GUI display
 
-# [2100.1.2]
+## [2100.1.2]
 
 ### Fixed
 * Fixed raw json text in quest descriptions not always being recognised
 * Fixed a packet sync error related to translation system when on dedicated server
 * Chapter filenames are now again named after the chapter title (at the time of creation), as they used to be in 1.20 and earlier
 
-# [2100.1.1]
+## [2100.1.1]
 
 ### Fixed
 * Fixed chapter and chapter group creation popups moving in and out with the chapter panel when it's not pinned.
@@ -82,7 +110,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 * Removed a misleading "Click to Submit" tooltip from fluid tasks in the quest view panel
   * Fluid tasks can only be submitted via a Task Screen
 
-# [2100.1.0]
+## [2100.1.0]
 
 ### Changed
 * Ported to Minecraft 1.21. Support for Fabric and NeoForge.
@@ -94,19 +122,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   * Text which doesn't have a translation in the current locale (but does in the `en_us` locale) is highlighted when in edit mode.
   * Changes do not affect the player experience
 
-# [2004.2.1]
+## [2004.2.1]
 
 ### Added
 * The pinned quests panel positioned can now be adjusted in client config (use "Player Preferences" button in lower right of screen)
 * A couple of other minor GUI fixes and improvements (mainly via FTB Library)
 
-# [2004.2.0]
+## [2004.2.0]
 
 ### Changed
 * Ported to Minecraft 1.20.4. Supported on Forge, NeoForge and Fabric.
 * Some GUI enhancements in a few places.
 
-# [2001.3.4]
+## [2001.3.4]
 
 ### Added
 * The color of dependency lines for uncompleted quests is now themable
