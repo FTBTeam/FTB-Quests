@@ -117,7 +117,7 @@ public class TeamData {
 
 	@NotNull
 	public static TeamData get(Player player) {
-		return FTBQuestsAPI.api().getQuestFile(player.getCommandSenderWorld().isClientSide()).getOrCreateTeamData(player);
+		return FTBQuestsAPI.api().getQuestFile(player.getCommandSenderWorld().isClientSide()).getTeamData(player).orElseThrow();
 	}
 
 	public void markDirty() {

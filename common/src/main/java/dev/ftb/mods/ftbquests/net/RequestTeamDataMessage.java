@@ -2,7 +2,7 @@ package dev.ftb.mods.ftbquests.net;
 
 import dev.architectury.networking.NetworkManager;
 import dev.ftb.mods.ftbquests.api.FTBQuestsAPI;
-import dev.ftb.mods.ftbquests.quest.TeamData;
+import dev.ftb.mods.ftbquests.quest.ServerQuestFile;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
@@ -20,10 +20,11 @@ public record RequestTeamDataMessage() implements CustomPacketPayload {
         return TYPE;
     }
 
-    public static void handle(RequestTeamDataMessage message, NetworkManager.PacketContext context) {
+    public static void handle(RequestTeamDataMessage ignoredMessage, NetworkManager.PacketContext context) {
         context.queue(() -> {
             if (context.getPlayer() instanceof ServerPlayer serverPlayer) {
-                NetworkManager.sendToPlayer(serverPlayer, new SyncTeamDataMessage(TeamData.get(serverPlayer)));
+                ServerQuestFile.INSTANCE.getTeamData(serverPlayer)
+                        .ifPresent(data -> NetworkManager.sendToPlayer(serverPlayer, new SyncTeamDataMessage(data)));
             }
         });
     }

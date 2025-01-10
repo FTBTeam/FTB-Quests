@@ -16,6 +16,7 @@ public class FTBQuestsNetHandler {
 		NetworkHelper.registerC2S(DeleteObjectMessage.TYPE, DeleteObjectMessage.STREAM_CODEC, DeleteObjectMessage::handle);
 		NetworkHelper.registerC2S(EditObjectMessage.TYPE, EditObjectMessage.STREAM_CODEC, EditObjectMessage::handle);
 		NetworkHelper.registerC2S(ForceSaveMessage.TYPE, ForceSaveMessage.STREAM_CODEC, ForceSaveMessage::handle);
+		NetworkHelper.registerC2S(GiveItemToPlayerMessage.TYPE, GiveItemToPlayerMessage.STREAM_CODEC, GiveItemToPlayerMessage::handle);
 		NetworkHelper.registerC2S(GetEmergencyItemsMessage.TYPE, GetEmergencyItemsMessage.STREAM_CODEC, GetEmergencyItemsMessage::handle);
 		NetworkHelper.registerC2S(MoveChapterGroupMessage.TYPE, MoveChapterGroupMessage.STREAM_CODEC, MoveChapterGroupMessage::handle);
 		NetworkHelper.registerC2S(MoveChapterMessage.TYPE, MoveChapterMessage.STREAM_CODEC, MoveChapterMessage::handle);

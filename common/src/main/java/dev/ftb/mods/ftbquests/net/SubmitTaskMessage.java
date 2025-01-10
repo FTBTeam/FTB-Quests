@@ -3,7 +3,6 @@ package dev.ftb.mods.ftbquests.net;
 import dev.architectury.networking.NetworkManager;
 import dev.ftb.mods.ftbquests.api.FTBQuestsAPI;
 import dev.ftb.mods.ftbquests.quest.ServerQuestFile;
-import dev.ftb.mods.ftbquests.quest.TeamData;
 import dev.ftb.mods.ftbquests.quest.task.Task;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
@@ -27,13 +26,14 @@ public record SubmitTaskMessage(long taskId) implements CustomPacketPayload {
 	public static void handle(SubmitTaskMessage message, NetworkManager.PacketContext context) {
 		if (context.getPlayer() instanceof ServerPlayer player) {
 			context.queue(() -> {
-				TeamData data = TeamData.get(player);
-				if (!data.isLocked()) {
-					Task task = data.getFile().getTask(message.taskId);
-					if (task != null && data.getFile() instanceof ServerQuestFile sqf && data.canStartTasks(task.getQuest())) {
-						sqf.withPlayerContext(player, () -> task.submitTask(data, player));
+				ServerQuestFile.INSTANCE.getTeamData(player).ifPresent(data -> {
+					if (!data.isLocked()) {
+						Task task = data.getFile().getTask(message.taskId);
+						if (task != null && data.getFile() instanceof ServerQuestFile sqf && data.canStartTasks(task.getQuest())) {
+							sqf.withPlayerContext(player, () -> task.submitTask(data, player));
+						}
 					}
-				}
+				});
 			});
 		}
 	}

@@ -36,6 +36,11 @@ public class QuestLink extends QuestObject implements Movable {
     }
 
     @Override
+    public Quest getRelatedQuest() {
+        return getQuest().orElse(null);
+    }
+
+    @Override
     public QuestObjectType getObjectType() {
         return QuestObjectType.QUEST_LINK;
     }

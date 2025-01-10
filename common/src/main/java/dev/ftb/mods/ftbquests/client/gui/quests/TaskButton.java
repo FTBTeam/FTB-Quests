@@ -2,6 +2,7 @@ package dev.ftb.mods.ftbquests.client.gui.quests;
 
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
+import dev.architectury.networking.NetworkManager;
 import dev.ftb.mods.ftblibrary.icon.Color4I;
 import dev.ftb.mods.ftblibrary.icon.Icons;
 import dev.ftb.mods.ftblibrary.icon.ItemIcon;
@@ -14,6 +15,7 @@ import dev.ftb.mods.ftbquests.api.ItemFilterAdapter;
 import dev.ftb.mods.ftbquests.client.gui.ContextMenuBuilder;
 import dev.ftb.mods.ftbquests.integration.item_filtering.ItemMatchingSystem;
 import dev.ftb.mods.ftbquests.net.EditObjectMessage;
+import dev.ftb.mods.ftbquests.net.GiveItemToPlayerMessage;
 import dev.ftb.mods.ftbquests.quest.task.ItemTask;
 import dev.ftb.mods.ftbquests.quest.task.Task;
 import dev.ftb.mods.ftbquests.quest.theme.property.ThemeProperties;
@@ -21,14 +23,17 @@ import dev.ftb.mods.ftbquests.util.TextUtils;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
 
 import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 public class TaskButton extends Button {
 	private final QuestScreen questScreen;
@@ -64,7 +69,7 @@ public class TaskButton extends Button {
 
 			ContextMenuBuilder builder = ContextMenuBuilder.create(task, questScreen);
 
-			if (task instanceof ItemTask itemTask) {
+			if (task instanceof ItemTask itemTask && !itemTask.getItemStack().isEmpty()) {
 				var tags = itemTask.getItemStack().getItem().builtInRegistryHolder().tags().toList();
 				if (!tags.isEmpty() && !ItemMatchingSystem.INSTANCE.isItemFilter(itemTask.getItemStack())) {
 					for (ItemFilterAdapter adapter : ItemMatchingSystem.INSTANCE.adapters()) {
@@ -82,6 +87,9 @@ public class TaskButton extends Button {
 						}
 					}
 				}
+				builder.insertAtTop(List.of(new ContextMenuItem(Component.translatable("ftbquests.task.grab_item"), Icons.ADD_GRAY,
+						b -> NetworkManager.sendToServer(new GiveItemToPlayerMessage(itemTask.getItemStack()))))
+				);
 			}
 			if (task.getIcon() instanceof ItemIcon itemIcon) {
 				builder.insertAtTop(List.of(new ContextMenuItem(Component.translatable("ftbquests.gui.use_as_quest_icon"),
@@ -97,6 +105,24 @@ public class TaskButton extends Button {
 
 			builder.openContextMenu(getGui());
 		}
+	}
+
+	private static String stackToString(ItemStack itemStack) {
+		StringBuilder builder = new StringBuilder(BuiltInRegistries.ITEM.getKey(itemStack.getItem()).toString());
+
+		String compData = itemStack.getComponents().stream()
+				.filter(c -> !c.value().equals(itemStack.getItem().components().get(c.type())))
+				.map(c -> c.type() + "=\"" + c.value() + "\"")
+				.collect(Collectors.joining(","));
+		if (!compData.isEmpty()) {
+			builder.append("[").append(compData).append("]");
+		}
+
+		if (itemStack.getCount() > 1) {
+			builder.append(" ").append(itemStack.getCount());
+		}
+
+		return builder.toString();
 	}
 
 	private void setTagFilterAndSave(ItemTask itemTask, ItemFilterAdapter adapter, TagKey<Item> tag) {

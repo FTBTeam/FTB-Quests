@@ -23,6 +23,7 @@ public interface FTBQuestsClientConfig {
     EnumValue<PanelPositioning> PINNED_QUESTS_POS = UI.addEnum("pinned_quests_pos", PanelPositioning.NAME_MAP, PanelPositioning.RIGHT);
     IntValue PINNED_QUESTS_INSET_X = UI.addInt("pinned_quests_inset_x", 2);
     IntValue PINNED_QUESTS_INSET_Y = UI.addInt("pinned_quests_inset_y", 2);
+    BooleanValue SHOW_LOCK_ICON = UI.addBoolean("show_lock_icon", true);
 
     SNBTConfig XLATE = CONFIG.addGroup("xlate", 1);
     StringValue EDITING_LOCALE = XLATE.add(new LocaleValue(XLATE,"editing_locale", ""));

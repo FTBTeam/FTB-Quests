@@ -94,6 +94,17 @@ public class ChapterImageButton extends Button implements QuestPositionableButto
 	}
 
 	@Override
+	public boolean mousePressed(MouseButton button) {
+        if (isMouseOver() && getWidgetType() != WidgetType.DISABLED) {
+			onClicked(button);
+			// returning false on left button click allows click-through for panning behaviour
+			//  (also, images with a click action defined should swallow the mouse click)
+			return !button.isLeft() || !chapterImage.getClick().isEmpty();
+		}
+		return false;
+	}
+
+	@Override
 	public void onClicked(MouseButton button) {
 		if (questScreen.file.canEdit() && button.isRight()) {
 			List<ContextMenuItem> contextMenu = new ArrayList<>();

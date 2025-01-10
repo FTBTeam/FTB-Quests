@@ -1,6 +1,8 @@
 package dev.ftb.mods.ftbquests.quest.loot;
 
+import dev.ftb.mods.ftbquests.quest.QuestObjectBase;
 import dev.ftb.mods.ftbquests.quest.reward.Reward;
+import dev.ftb.mods.ftbquests.quest.reward.RewardType;
 
 public class WeightedReward implements Comparable<WeightedReward> {
 	private final Reward reward;
@@ -49,5 +51,10 @@ public class WeightedReward implements Comparable<WeightedReward> {
 	@Override
 	public int compareTo(WeightedReward o) {
 		return Float.compare(weight, o.weight);
+	}
+
+	public WeightedReward copy() {
+		Reward r = QuestObjectBase.copy(reward, () -> RewardType.createReward(reward.id, reward.getQuest(), reward.getType().getTypeId().toString()));
+		return new WeightedReward(r, weight);
 	}
 }
