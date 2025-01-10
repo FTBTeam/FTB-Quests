@@ -5,6 +5,7 @@ import dev.architectury.networking.NetworkManager;
 import dev.ftb.mods.ftblibrary.snbt.SNBT;
 import dev.ftb.mods.ftblibrary.snbt.SNBTCompoundTag;
 import dev.ftb.mods.ftbquests.FTBQuests;
+import dev.ftb.mods.ftbquests.api.FTBQuestsAPI;
 import dev.ftb.mods.ftbquests.client.ClientQuestFile;
 import dev.ftb.mods.ftbquests.events.QuestProgressEventData;
 import dev.ftb.mods.ftbquests.net.*;
@@ -32,6 +33,7 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import org.apache.commons.lang3.function.ToBooleanBiFunction;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.nio.file.Path;
@@ -113,10 +115,10 @@ public class TeamData {
 		return file;
 	}
 
-//	@NotNull
-//	public static TeamData get(Player player) {
-//		return FTBQuestsAPI.api().getQuestFile(player.getCommandSenderWorld().isClientSide()).getOrCreateTeamData(player);
-//	}
+	@NotNull
+	public static TeamData get(Player player) {
+		return FTBQuestsAPI.api().getQuestFile(player.getCommandSenderWorld().isClientSide()).getTeamData(player).orElseThrow();
+	}
 
 	public void markDirty() {
 		shouldSave = true;
