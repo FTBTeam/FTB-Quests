@@ -13,7 +13,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   * This can be disabled in player preferences if preferred - "Show Icon for Locked Quests"
 * Added a new "All Table" reward type
   * This works on an existing reward table, and rewards the player with one of every reward in the table
-* Added a new "Grab Copy of Item" context menu entry for tasks in the quest view panel
+* Added a new "Grab Copy of Item" context menu entry for item tasks in the quest view panel
   * This is intended to allow getting copies of items with custom components (e.g. FTB Filter System filters) if you don't have a copy of the item to hand
 
 ### Fixed
