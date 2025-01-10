@@ -28,7 +28,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   * Technical detail: rewards in reward tables (unlike rewards in quests) have historically not had a unique ID, but this ID is necessary for titles to work with the new translation system which the mod uses.
 * Fixed recipes for craftable items (task screens etc.) not working
 * Fixed loot tables for task screens not working
-* The "Open Wiki" entry in the Settings context menu now opens the new FTB Quests docs at https://docs.feed-the-beast.com/docs/mods/suite/Quests/
+* The "Open Wiki" entry in the Settings context menu now opens the new FTB Quests docs at https://go.ftb.team/docs-quests
 * The "Download Quest Files" entry in the Settings menu now also saves the `lang/` folder 
   * Caveat: only translations which the client knows about are included in this download (translations on the server that the client has not used won't be included)
 
