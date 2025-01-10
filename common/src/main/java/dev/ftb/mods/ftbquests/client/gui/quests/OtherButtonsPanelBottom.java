@@ -29,6 +29,8 @@ import java.util.Calendar;
 import java.util.List;
 
 public class OtherButtonsPanelBottom extends OtherButtonsPanel {
+	private static final String WIKI_URL = "https://go.ftb.team/docs-quests";
+
 	public OtherButtonsPanelBottom(Panel panel) {
 		super(panel);
 	}
@@ -129,7 +131,7 @@ public class OtherButtonsPanelBottom extends OtherButtonsPanel {
 			contextMenu.add(new ContextMenuItem(Component.translatable("ftbquests.gui.reload_theme"), ThemeProperties.RELOAD_ICON.get(),
 					b -> reload_theme()));
 			contextMenu.add(new ContextMenuItem(Component.translatable("ftbquests.gui.wiki"), Icons.INFO,
-					b -> handleClick("https://docs.feed-the-beast.com/docs/mods/suite/Quests/")));
+					b -> handleClick(WIKI_URL)));
 
 			questScreen.openContextMenu(contextMenu);
 		}
