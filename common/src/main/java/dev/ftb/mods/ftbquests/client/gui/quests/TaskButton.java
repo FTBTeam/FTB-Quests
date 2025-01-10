@@ -14,6 +14,7 @@ import dev.ftb.mods.ftbquests.api.ItemFilterAdapter;
 import dev.ftb.mods.ftbquests.client.gui.ContextMenuBuilder;
 import dev.ftb.mods.ftbquests.integration.item_filtering.ItemMatchingSystem;
 import dev.ftb.mods.ftbquests.net.EditObjectMessage;
+import dev.ftb.mods.ftbquests.net.GiveItemToPlayerMessage;
 import dev.ftb.mods.ftbquests.quest.task.ItemTask;
 import dev.ftb.mods.ftbquests.quest.task.Task;
 import dev.ftb.mods.ftbquests.quest.theme.property.ThemeProperties;
@@ -68,7 +69,7 @@ public class TaskButton extends Button {
 
 			ContextMenuBuilder builder = ContextMenuBuilder.create(task, questScreen);
 
-			if (task instanceof ItemTask itemTask) {
+			if (task instanceof ItemTask itemTask && !itemTask.getItemStack().isEmpty()) {
 				var tags = itemTask.getItemStack().getItem().builtInRegistryHolder().tags().toList();
 				if (!tags.isEmpty() && !ItemMatchingSystem.INSTANCE.isItemFilter(itemTask.getItemStack())) {
 					for (ItemFilterAdapter adapter : ItemMatchingSystem.INSTANCE.adapters()) {
@@ -86,6 +87,9 @@ public class TaskButton extends Button {
 						}
 					}
 				}
+				builder.insertAtTop(List.of(new ContextMenuItem(Component.translatable("ftbquests.task.grab_item"), Icons.ADD_GRAY,
+						b -> new GiveItemToPlayerMessage(itemTask.getItemStack()).sendToServer()))
+				);
 			}
 			if (task.getIcon() instanceof ItemIcon itemIcon) {
 				builder.insertAtTop(List.of(new ContextMenuItem(Component.translatable("ftbquests.gui.use_as_quest_icon"),

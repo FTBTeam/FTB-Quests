@@ -41,6 +41,7 @@ public interface FTBQuestsNetHandler {
 	MessageType TEAM_DATA_CHANGED = NET.registerS2C("team_data_changed", TeamDataChangedMessage::new);
 	MessageType TASK_SCREEN_CONFIG_REQ = NET.registerS2C("task_screen_config_req", TaskScreenConfigRequest::new);
 	MessageType TASK_SCREEN_CONFIG_RESP = NET.registerC2S("task_screen_config_resp", TaskScreenConfigResponse::new);
+	MessageType GIVE_ITEM_TO_PLAYER = NET.registerC2S("give_item_to_player", GiveItemToPlayerMessage::new);
 
 	MessageType CHANGE_PROGRESS = NET.registerC2S("change_progress", ChangeProgressMessage::new);
 	MessageType CREATE_OBJECT = NET.registerC2S("create_object", CreateObjectMessage::new);

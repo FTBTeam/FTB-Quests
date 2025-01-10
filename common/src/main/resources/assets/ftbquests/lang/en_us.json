@@ -331,6 +331,8 @@
 	"ftbquests.task.auto_detected": "Items will be auto-detected",
 	"ftbquests.task.click_to_submit_all": "Click to submit all items",
 	"ftbquests.task.max_input": "Max Input Rate",
+	"ftbquests.task.grab_item": "Grab Copy of Item",
+	"ftbquests.task.gave_item": "Gave Task Item: %s",
 	"ftbquests.task.ftbquests.item": "Item",
 	"ftbquests.task.ftbquests.item.count": "Count",
 	"ftbquests.task.ftbquests.item.consume_items": "Consume Items",
