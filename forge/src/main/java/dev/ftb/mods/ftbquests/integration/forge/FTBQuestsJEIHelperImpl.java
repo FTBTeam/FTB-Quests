@@ -5,6 +5,7 @@ import dev.ftb.mods.ftbquests.integration.jei.LootCrateRecipeManagerPlugin;
 import dev.ftb.mods.ftbquests.integration.jei.QuestRecipeManagerPlugin;
 import dev.ftb.mods.ftbquests.quest.QuestObjectBase;
 import mezz.jei.api.recipe.IFocus;
+import mezz.jei.api.runtime.IJeiRuntime;
 import net.minecraftforge.fml.ModList;
 
 import static dev.ftb.mods.ftbquests.integration.FTBQuestsJEIHelper.LOOTCRATES;
@@ -37,6 +38,9 @@ public class FTBQuestsJEIHelperImpl {
 	}
 
 	public static void showRecipes(Object object) {
-		FTBQuestsJEIIntegration.runtime.getRecipesGui().show(FTBQuestsJEIIntegration.runtime.getRecipeManager().createFocus(IFocus.Mode.OUTPUT, object));
+		IJeiRuntime runtime = FTBQuestsJEIIntegration.runtime;
+		if (runtime != null) {
+			runtime.getRecipesGui().show(runtime.getRecipeManager().createFocus(IFocus.Mode.OUTPUT, object));
+		}
 	}
 }
