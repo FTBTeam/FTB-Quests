@@ -56,9 +56,8 @@ public class FTBQuestsCommands {
 	public static void register(CommandDispatcher<CommandSourceStack> dispatcher) {
 		//noinspection ConstantValue
 		dispatcher.register(Commands.literal("ftbquests")
-				// s.getServer() *can* be null here, whatever the IDE thinks!
-				.requires(s -> s.getServer() != null && s.getServer().isSingleplayer() || hasEditorPermission(s))
 				.then(Commands.literal("editing_mode")
+						.requires(FTBQuestsCommands::isSSPOrEditor)
 						.executes(c -> editingMode(c.getSource(), c.getSource().getPlayerOrException(), null))
 						.then(Commands.argument("enabled", BoolArgumentType.bool())
 								.executes(c -> editingMode(c.getSource(), c.getSource().getPlayerOrException(), BoolArgumentType.getBool(c, "enabled")))
@@ -68,6 +67,7 @@ public class FTBQuestsCommands {
 						)
 				)
 				.then(Commands.literal("locked")
+						.requires(FTBQuestsCommands::hasEditorPermission)
 						.executes(c -> locked(c.getSource(), c.getSource().getPlayerOrException(), null))
 						.then(Commands.argument("enabled", BoolArgumentType.bool())
 								.executes(c -> locked(c.getSource(), c.getSource().getPlayerOrException(), BoolArgumentType.getBool(c, "enabled")))
@@ -77,6 +77,7 @@ public class FTBQuestsCommands {
 						)
 				)
 				.then(Commands.literal("delete_empty_reward_tables")
+						.requires(FTBQuestsCommands::hasEditorPermission)
 						.executes(context -> deleteEmptyRewardTables(context.getSource()))
 				)
 				.then(Commands.literal("change_progress")
@@ -131,6 +132,7 @@ public class FTBQuestsCommands {
 						)
 				)
 				.then(Commands.literal("generate_chapter_with_all_items_in_game")
+						.requires(FTBQuestsCommands::hasEditorPermission)
 						.executes(context -> generateAllItemChapter(context.getSource()))
 				)
 				.then(Commands.literal("reload")
@@ -138,6 +140,7 @@ public class FTBQuestsCommands {
 						.executes(context -> doReload(context.getSource()))
 				)
 				.then(Commands.literal("block_rewards")
+						.requires(FTBQuestsCommands::hasEditorPermission)
 						.executes(c -> toggleRewardBlocking(c.getSource(), c.getSource().getPlayerOrException(), null))
 						.then(Commands.argument("enabled", BoolArgumentType.bool())
 								.executes(c -> toggleRewardBlocking(c.getSource(), c.getSource().getPlayerOrException(), BoolArgumentType.getBool(c, "enabled")))
@@ -157,6 +160,12 @@ public class FTBQuestsCommands {
 						.executes(c -> clearDisplayCache(c.getSource()))
 				)
 		);
+	}
+
+	private static boolean isSSPOrEditor(CommandSourceStack s) {
+		// s.getServer() *can* be null here, whatever the IDE thinks!
+        //noinspection ConstantValue
+        return s.getServer() != null && s.getServer().isSingleplayer() || hasEditorPermission(s);
 	}
 
 	private static boolean hasEditorPermission(CommandSourceStack stack) {
