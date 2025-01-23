@@ -72,7 +72,8 @@ public class SelectQuestObjectScreen<T extends QuestObjectBase> extends Abstract
 
 		ClientQuestFile file = ClientQuestFile.INSTANCE;
 		for (QuestObjectBase objectBase : file.getAllObjects()) {
-			if (config.predicate.test(objectBase) && (file.canEdit() || (!(objectBase instanceof QuestObject qo) || qo.isVisible(file.selfTeamData)))) {
+			if (config.predicate.test(objectBase) &&
+					(file.canEdit() || (!(objectBase instanceof QuestObject qo) || qo.isSearchable(file.selfTeamData)))) {
 				list.add((T) objectBase);
 			}
 		}

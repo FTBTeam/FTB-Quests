@@ -542,7 +542,7 @@ public class ViewQuestPanel extends ModalPanel {
 		}
 
 		for (QuestObject object : c) {
-			if (questScreen.file.canEdit() || object.isVisible(questScreen.file.selfTeamData)) {
+			if (questScreen.file.canEdit() || object.isSearchable(questScreen.file.selfTeamData)) {
 				MutableComponent title = object.getMutableTitle();
 				if (object.getQuestChapter() != null && object.getQuestChapter() != quest.getQuestChapter()) {
 					Component suffix = Component.literal(" [").append(object.getQuestChapter().getTitle()).append("]").withStyle(ChatFormatting.GRAY);
