@@ -72,6 +72,7 @@ public final class Quest extends QuestObject implements Movable, Excludable {
 	private Tristate requireSequentialTasks;
 	private double iconScale;
 	private int maxCompletableDeps;
+	private boolean hideLockIcon;
 
 	private Component cachedSubtitle = null;
 	private List<Component> cachedDescription = null;
@@ -114,6 +115,7 @@ public final class Quest extends QuestObject implements Movable, Excludable {
 		requireSequentialTasks = Tristate.DEFAULT;
 		iconScale = 1d;
 		maxCompletableDeps = 0;
+		hideLockIcon = false;
 	}
 
 	@Override
@@ -317,6 +319,9 @@ public final class Quest extends QuestObject implements Movable, Excludable {
 		if (maxCompletableDeps > 0) {
 			nbt.putInt("max_completable_dependents", maxCompletableDeps);
 		}
+		if (hideLockIcon) {
+			nbt.putBoolean("hide_lock_icon", true);
+		}
 	}
 
 	@Override
@@ -388,6 +393,7 @@ public final class Quest extends QuestObject implements Movable, Excludable {
 		hideDetailsUntilStartable = Tristate.read(nbt, "hide_details_until_startable");
 		requireSequentialTasks = Tristate.read(nbt, "require_sequential_tasks");
 		maxCompletableDeps = nbt.getInt("max_completable_dependents");
+		hideLockIcon = nbt.getBoolean("hide_lock_icon");
 	}
 
 	@Override
@@ -413,6 +419,7 @@ public final class Quest extends QuestObject implements Movable, Excludable {
 		flags = Bits.setFlag(flags, 0x8000, requireSequentialTasks != Tristate.DEFAULT);
 		flags = Bits.setFlag(flags, 0x10000, requireSequentialTasks == Tristate.TRUE);
 		flags = Bits.setFlag(flags, 0x20000, iconScale != 1f);
+		flags = Bits.setFlag(flags, 0x40000, hideLockIcon);
 		buffer.writeVarInt(flags);
 
 		hideUntilDepsComplete.write(buffer);
@@ -511,7 +518,7 @@ public final class Quest extends QuestObject implements Movable, Excludable {
 		invisibleUntilTasks = Bits.getFlag(flags, 0x400) ? buffer.readVarInt() : 0;
 		hideDetailsUntilStartable = Bits.getFlag(flags, 0x800) ? Bits.getFlag(flags, 0x1000) ? Tristate.TRUE : Tristate.FALSE : Tristate.DEFAULT;
 		requireSequentialTasks = Bits.getFlag(flags, 0x8000) ? Bits.getFlag(flags, 0x10000) ? Tristate.TRUE : Tristate.FALSE : Tristate.DEFAULT;
-
+		hideLockIcon = Bits.getFlag(flags, 0x40000);
 		progressionMode = ProgressionMode.NAME_MAP.read(buffer);
 		maxCompletableDeps = buffer.readVarInt();
 	}
@@ -699,6 +706,7 @@ public final class Quest extends QuestObject implements Movable, Excludable {
 		visibility.addInt("invisible_until_tasks", invisibleUntilTasks, v -> invisibleUntilTasks = v, 0, 0, Integer.MAX_VALUE).setCanEdit(invisibleUntilCompleted);
 		visibility.addTristate("hide_details_until_startable", hideDetailsUntilStartable, v -> hideDetailsUntilStartable = v);
 		visibility.addTristate("hide_text_until_complete", hideTextUntilComplete, v -> hideTextUntilComplete = v);
+		visibility.addBool("hide_lock_icon", hideLockIcon, v -> hideLockIcon = v, false);
 
 		Predicate<QuestObjectBase> depTypes = object -> object != chapter.file && object != chapter && object instanceof QuestObject;// && !(object instanceof Task);
 		removeInvalidDependencies();
@@ -722,6 +730,10 @@ public final class Quest extends QuestObject implements Movable, Excludable {
 
 	public boolean shouldHideDependencyLines() {
 		return hideDependencyLines.get(chapter.defaultHideDependencyLines);
+	}
+
+	public boolean shouldHideLockIcon() {
+		return hideLockIcon;
 	}
 
 	@Override

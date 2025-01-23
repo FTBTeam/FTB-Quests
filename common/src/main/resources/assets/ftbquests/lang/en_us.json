@@ -212,6 +212,8 @@
 	"ftbquests.quest.min_required_dependencies.tooltip": "If you set this to anything more than 0, it becomes an OR quest, where only certain amount of dependencies is required for it to unlock",
 	"ftbquests.quest.visibility.hide_text_until_complete": "Hide Text Until Quest is Completed",
 	"ftbquests.quest.visibility.hide_text_until_complete.tooltip": "Quest details can be opened, but no description text is displayed until the quest is completed",
+	"ftbquests.quest.visibility.hide_lock_icon": "Hide Lock Icon",
+	"ftbquests.quest.visibility.hide_lock_icon.tooltip": "Hide the lock icon that is normally show when quest is locked due to a dependency",
 	"ftbquests.quest.misc.disable_jei": "Disable JEI Recipe",
 	"ftbquests.quest.misc.optional": "Optional Quest",
 	"ftbquests.quest.locked": "Locked: uncompleted dependencies",
