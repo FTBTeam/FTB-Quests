@@ -189,7 +189,7 @@ public class QuestPanel extends Panel {
 		// pass 1: render connections for all visible quests
 		float mu = (float) ((mt * ThemeProperties.DEPENDENCY_LINE_UNSELECTED_SPEED.get(questScreen.selectedChapter)) % 1D);
 		for (Widget widget : widgets) {
-			if (widget.shouldDraw() && widget instanceof QuestButton qb && !qb.quest.shouldHideDependencyLines()) {
+			if (widget.shouldDraw() && widget instanceof QuestButton qb && (!qb.quest.shouldHideDependencyLines() || qb.isMouseOver())) {
 				boolean unavailable = !questScreen.file.selfTeamData.canStartTasks(qb.quest);
 				boolean complete = !unavailable && questScreen.file.selfTeamData.isCompleted(qb.quest);
 				Color4I c = complete ?
