@@ -543,7 +543,7 @@ public class ViewQuestPanel extends Panel {
 		}
 
 		for (QuestObject object : c) {
-			if (questScreen.file.canEdit() || object.isVisible(questScreen.file.self)) {
+			if (questScreen.file.canEdit() || object.isSearchable(questScreen.file.self)) {
 				MutableComponent title = object.getMutableTitle();
 				if (object.getQuestChapter() != null && object.getQuestChapter() != quest.getQuestChapter()) {
 					Component suffix = Component.literal(" [").append(object.getQuestChapter().getTitle()).append("]").withStyle(ChatFormatting.GRAY);

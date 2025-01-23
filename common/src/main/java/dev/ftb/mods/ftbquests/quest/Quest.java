@@ -632,10 +632,6 @@ public final class Quest extends QuestObject implements Movable {
 
 	@Override
 	public boolean isVisible(TeamData data) {
-		if (chapter.alwaysInvisible) {
-			return false;
-		}
-
 		if (invisible && !data.isCompleted(this)) {
 			if (invisibleUntilTasks == 0 || tasks.stream().filter(data::isCompleted).limit(invisibleUntilTasks).count() < invisibleUntilTasks) {
 				return false;
@@ -651,6 +647,11 @@ public final class Quest extends QuestObject implements Movable {
 		}
 
 		return getDependencies().anyMatch(object -> object.isVisible(data));
+	}
+
+	@Override
+	public boolean isSearchable(TeamData data) {
+		return !chapter.alwaysInvisible && super.isSearchable(data);
 	}
 
 	@Override
