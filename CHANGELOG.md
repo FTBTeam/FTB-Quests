@@ -10,6 +10,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 * Added "Hide Lock Icon" boolean quest property to allow the lock icon to be hidden on a per-quest basis
 * Unicode escape sequences (e.g. `\u2022`) are now parsed in translation files
   * Note however that a double escape is required, e.g. `\\u2022`
+* Added zh_tw translation (thanks @sheiun)
+* Added tr_tr translation (thanks @RuyaSavascisi)
+* Added uk_ua translation (thanks @GIGABAIT93)
 
 ### Fixed
 * Fixed quests in always-invisible chapters being searchable outside edit mode
