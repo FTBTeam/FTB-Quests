@@ -754,6 +754,11 @@ public final class Quest extends QuestObject implements Movable {
 	}
 
 	@Override
+	public boolean isSearchable(TeamData data) {
+		return !chapter.isAlwaysInvisible() && super.isSearchable(data);
+	}
+
+	@Override
 	public void clearCachedData() {
 		super.clearCachedData();
 		cachedSubtitle = null;
