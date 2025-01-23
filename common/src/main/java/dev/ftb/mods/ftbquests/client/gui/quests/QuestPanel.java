@@ -211,7 +211,7 @@ public class QuestPanel extends Panel {
 		float ms = (float) ((mt * ThemeProperties.DEPENDENCY_LINE_SELECTED_SPEED.get(questScreen.selectedChapter)) % 1D);
 		List<QuestButton> toOutline = new ArrayList<>();
 		for (Widget widget : widgets) {
-			if (widget.shouldDraw() && widget instanceof QuestButton qb && !qb.quest.shouldHideDependencyLines()) {
+			if (widget.shouldDraw() && widget instanceof QuestButton qb && (!qb.quest.shouldHideDependencyLines() || qb.isMouseOver())) {
 				for (QuestButton button : qb.getDependencies()) {
 					if (button.shouldDraw()) {
 						if (button.quest == selectedQuest || button.isMouseOver()) {
