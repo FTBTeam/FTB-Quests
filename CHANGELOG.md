@@ -14,6 +14,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 * Added tr_tr translation (thanks @RuyaSavascisi)
 * Added uk_ua translation (thanks @GIGABAIT93)
 
+### Changed
+* Quests with "Hide Dependency Lines" set to false will now show the dependency line when (and only when) hovered with the mouse pointer
+  * This is now consistent with the behaviour of "Hide Dependent Lines" and more useful in general, allowing dependency lines to be selectively shown
+
 ### Fixed
 * Fixed quests in always-invisible chapters being searchable outside edit mode
 
