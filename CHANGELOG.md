@@ -20,6 +20,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 * Fixed quests in always-invisible chapters being searchable outside edit mode
+* Fixed Quest Barrier blocks crashing in SMP environments
 
 ## [2101.1.2]
 
