@@ -4,6 +4,24 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2101.1.3]
+
+### Added
+* Added "Hide Lock Icon" boolean quest property to allow the lock icon to be hidden on a per-quest basis
+* Unicode escape sequences (e.g. `\u2022`) are now parsed in translation files
+  * Note however that a double escape is required, e.g. `\\u2022`
+* Added zh_tw translation (thanks @sheiun)
+* Added tr_tr translation (thanks @RuyaSavascisi)
+* Added uk_ua translation (thanks @GIGABAIT93)
+
+### Changed
+* Quests with "Hide Dependency Lines" set to false will now show the dependency line when (and only when) hovered with the mouse pointer
+  * This is now consistent with the behaviour of "Hide Dependent Lines" and more useful in general, allowing dependency lines to be selectively shown
+
+### Fixed
+* Fixed quests in always-invisible chapters being searchable outside edit mode
+* Fixed Quest Barrier blocks crashing in SMP environments
+
 ## [2101.1.2]
 
 ### Added
