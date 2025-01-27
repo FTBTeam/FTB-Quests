@@ -61,7 +61,7 @@ public class SelectQuestObjectScreen<T extends QuestObjectBase> extends ButtonLi
 
 		ClientQuestFile file = ClientQuestFile.INSTANCE;
 		for (QuestObjectBase objectBase : file.getAllObjects()) {
-			if (config.predicate.test(objectBase) && (file.canEdit() || (!(objectBase instanceof QuestObject qo) || qo.isVisible(file.self)))) {
+			if (config.predicate.test(objectBase) && (file.canEdit() || (!(objectBase instanceof QuestObject qo) || qo.isSearchable(file.self)))) {
 				list.add((T) objectBase);
 			}
 		}

@@ -86,6 +86,10 @@ public abstract class QuestObject extends QuestObjectBase {
 		return true;
 	}
 
+	public boolean isSearchable(TeamData data) {
+		return isVisible(data);
+	}
+
 	public void onStarted(QuestProgressEventData<?> data) {
 	}
 
