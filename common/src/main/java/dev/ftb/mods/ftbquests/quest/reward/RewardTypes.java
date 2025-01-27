@@ -20,6 +20,8 @@ public interface RewardTypes {
 			() -> Icon.getIcon("minecraft:item/diamond"));
 	RewardType CHOICE = register(new ResourceLocation(FTBQuestsAPI.MOD_ID, "choice"), ChoiceReward::new,
 			() -> Icons.COLOR_RGB).setExcludeFromListRewards(true);
+	RewardType ALL_TABLE = register(new ResourceLocation(FTBQuestsAPI.MOD_ID, "all_table"), AllTableReward::new,
+			() -> Icons.COLOR_HSB).setExcludeFromListRewards(true);
 	RewardType RANDOM = register(new ResourceLocation(FTBQuestsAPI.MOD_ID, "random"), RandomReward::new,
 			() -> Icons.DICE).setExcludeFromListRewards(true);
 	RewardType LOOT = register(new ResourceLocation(FTBQuestsAPI.MOD_ID, "loot"), LootReward::new,

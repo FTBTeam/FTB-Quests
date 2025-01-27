@@ -433,6 +433,7 @@
 	"ftbquests.reward.ftbquests.item.count": "Count",
 	"ftbquests.reward.ftbquests.item.only_one": "Only One",
 	"ftbquests.reward.ftbquests.item.only_one.tooltip": "If inventory has that item, doesn't give it. Ignores NBT.",
+	"ftbquests.reward.ftbquests.all_table": "All Table Reward",
 	"ftbquests.reward.ftbquests.choice": "Choice Reward",
 	"ftbquests.reward.ftbquests.random": "Random Reward",
 	"ftbquests.reward.ftbquests.loot": "Loot Reward",

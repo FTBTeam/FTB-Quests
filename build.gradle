@@ -4,6 +4,8 @@ plugins {
 	id "com.matthewprenger.cursegradle" version "1.4.0" apply false
 }
 
+apply from: 'https://raw.githubusercontent.com/FTBTeam/mods-meta/main/gradle/changelog.gradle'
+
 architectury {
 	minecraft = rootProject.minecraft_version
 }
