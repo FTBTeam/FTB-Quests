@@ -8,11 +8,16 @@ import net.minecraft.nbt.Tag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.contents.PlainTextContents;
+import org.apache.commons.lang3.text.translate.UnicodeUnescaper;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class TextUtils {
+    // deprecated in apache commons, but we don't have apache commons text available here
+    @SuppressWarnings("deprecation")
+    private static final UnicodeUnescaper UNESCAPER = new UnicodeUnescaper();
+
     /**
      * Parse some rich text into a Component. Use vanilla-style raw JSON if applicable, fall back to old-style FTB
      * Quests rich text otherwise. (FTB Quests rich text is more concise, raw JSON is much more powerful)
@@ -25,15 +30,14 @@ public class TextUtils {
         if (str2.startsWith("[") && str2.endsWith("]") || str2.startsWith("{") && str2.endsWith("}")) {
             // could be JSON raw text, but not for definite...
             try {
-                MutableComponent res = Component.Serializer.fromJson(str2, provider);
+                MutableComponent res = Component.Serializer.fromJson(UNESCAPER.translate(str2), provider);
                 if (res != null) {
                     return res;
                 }
             } catch (JsonParseException ignored) {
-
             }
         }
-        return ClientTextComponentUtils.parse(str);
+        return ClientTextComponentUtils.parse(UNESCAPER.translate(str));
     }
 
     public static List<String> fromListTag(ListTag tag) {

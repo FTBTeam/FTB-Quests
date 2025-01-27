@@ -6,10 +6,10 @@ import net.minecraft.Util;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.StringTag;
+import net.minecraft.nbt.Tag;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
-import org.apache.commons.lang3.StringEscapeUtils;
 
 import java.util.HashMap;
 import java.util.List;
@@ -33,14 +33,12 @@ public class TranslationTable {
         this.map = new HashMap<>();
     }
 
-    // deprecated StringEscapeUtils, but we don't have Apache Commons Text available to us, so whatever...
-    @SuppressWarnings("deprecation")
     public static TranslationTable fromNBT(CompoundTag tag) {
         Map<String, Either<String, List<String>>> map = new HashMap<>();
         tag.getAllKeys().forEach(k -> {
             switch (tag.get(k)) {
-                case StringTag str -> map.put(k, Either.left(StringEscapeUtils.unescapeJava(str.getAsString())));
-                case ListTag list -> map.put(k, Either.right(list.stream().map(tag1 -> StringEscapeUtils.unescapeJava(tag1.getAsString())).toList()));
+                case StringTag str -> map.put(k, Either.left(str.getAsString()));
+                case ListTag list -> map.put(k, Either.right(list.stream().map(Tag::getAsString).toList()));
                 case null, default -> { }
             }
         });
