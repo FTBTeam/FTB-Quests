@@ -6,6 +6,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [2001.4.10]
 
+### Added
+* Added a new "All Table" reward type
+  * This works on an existing reward table, and rewards the player with one of every reward in the table
+
 ### Fixed
 * Fixed some reliability issues with the reward table editor (backported improvements from 1.21)
 
