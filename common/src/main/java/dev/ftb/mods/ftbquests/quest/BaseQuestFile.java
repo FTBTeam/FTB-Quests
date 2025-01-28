@@ -25,6 +25,7 @@ import dev.ftb.mods.ftbquests.util.FileUtils;
 import dev.ftb.mods.ftbquests.util.NetUtils;
 import dev.ftb.mods.ftbteams.api.FTBTeamsAPI;
 import dev.ftb.mods.ftbteams.api.Team;
+import dev.ftb.mods.ftbteams.api.client.ClientTeamManager;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.longs.Long2IntOpenHashMap;
 import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
@@ -999,9 +1000,18 @@ public abstract class BaseQuestFile extends QuestObject implements QuestFile {
 
 	@Override
 	public TeamData getOrCreateTeamData(Entity player) {
-		return FTBTeamsAPI.api().getManager().getTeamForPlayerID(player.getUUID())
-				.map(this::getOrCreateTeamData)
-				.orElse(null);
+		return player.level().isClientSide && player instanceof Player p ?
+				getClientTeamData(p).orElse(null) :
+				FTBTeamsAPI.api().getManager().getTeamForPlayerID(player.getUUID())
+						.map(this::getOrCreateTeamData)
+						.orElse(null);
+	}
+
+	private Optional<TeamData> getClientTeamData(Player player) {
+		ClientTeamManager mgr = FTBTeamsAPI.api().getClientManager();
+		return mgr.getKnownPlayer(player.getUUID())
+				.map(kcp -> mgr.getTeamByID(kcp.teamId()))
+				.flatMap(team -> team.map(this::getOrCreateTeamData));
 	}
 
 	@Override
