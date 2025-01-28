@@ -12,6 +12,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 * Fixed some reliability issues with the reward table editor (backported improvements from 1.21)
+* Fixed quest completion toasts appearing more than once if a quest has multiple optional tasks
+* Fixed Quest Barrier blocks crashing in SMP environments
+* Improvements and fixes for ru_ru translations (thanks @j-tap)
 
 ## [2001.4.9]
 
