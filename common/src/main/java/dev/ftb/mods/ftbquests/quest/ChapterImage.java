@@ -52,6 +52,7 @@ public final class ChapterImage implements Movable {
 	private double aspectRatio;
 	private boolean needAspectRecalc;
 	private int order;
+	private int animationFrames = 1;
 
 	public ChapterImage(Chapter c) {
 		chapter = c;
@@ -78,6 +79,7 @@ public final class ChapterImage implements Movable {
 	public ChapterImage setImage(Icon image) {
 		this.image = image;
 		needAspectRecalc = true;
+		animationFrames = image.getPixelBufferFrameCount();
 		return this;
 	}
 
@@ -308,7 +310,7 @@ public final class ChapterImage implements Movable {
 	}
 
 	public boolean isAspectRatioOff() {
-		return image.hasPixelBuffer() && !Mth.equal(getAspectRatio(), width / height);
+		return image.hasPixelBuffer() && !Mth.equal(getAspectRatio(), width / (height / animationFrames));
 	}
 
 	public void fixupAspectRatio(boolean adjustWidth) {
@@ -326,7 +328,7 @@ public final class ChapterImage implements Movable {
 		if (needAspectRecalc) {
 			PixelBuffer buffer = image.createPixelBuffer();
 			if (buffer != null) {
-				aspectRatio = (double) buffer.getWidth() / (double) buffer.getHeight();
+				aspectRatio = (double) buffer.getWidth() / ((double) buffer.getHeight() / animationFrames);
 			} else {
 				aspectRatio = 1d;
 			}
