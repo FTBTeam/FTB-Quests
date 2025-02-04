@@ -242,7 +242,7 @@ public class FTBQuestsCommands {
 			}
 		}
 
-		source.sendSuccess(() -> Component.translatable("commands.ftbquests.command.feedback.table_imported", table.getTitle(), table.getWeightedRewards().size()), false);
+		source.sendSuccess(() -> Component.translatable("commands.ftbquests.command.feedback.table_exported", table.getTitle(), table.getWeightedRewards().size()), false);
 
 		return Command.SINGLE_SUCCESS;
 	}
@@ -289,6 +289,12 @@ public class FTBQuestsCommands {
 		}
 
 		data.setCanEdit(player, canEdit);
+
+		if (canEdit) {
+			source.sendSuccess(() -> Component.translatable("commands.ftbquests.editing_mode.enabled", player.getDisplayName()), true);
+		} else {
+			source.sendSuccess(() -> Component.translatable("commands.ftbquests.editing_mode.disabled", player.getDisplayName()), true);
+		}
 		return Command.SINGLE_SUCCESS;
 	}
 
@@ -300,6 +306,11 @@ public class FTBQuestsCommands {
 		}
 
 		data.setLocked(locked);
+		if (locked) {
+			source.sendSuccess(() -> Component.translatable("commands.ftbquests.locked.enabled", player.getDisplayName()), true);
+		} else {
+			source.sendSuccess(() -> Component.translatable("commands.ftbquests.locked.disabled", player.getDisplayName()), true);
+		}
 
 		return Command.SINGLE_SUCCESS;
 	}
