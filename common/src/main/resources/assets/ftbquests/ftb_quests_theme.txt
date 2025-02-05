@@ -1,5 +1,7 @@
 [*]
 background:          ftblibrary:textures/gui/background_squares.png; color=#DCFFFFFF; tile_size=64
+chapter_panel_background:          ftblibrary:textures/gui/background_squares.png; color=#DCFFFFFF; tile_size=64
+key_reference_background:          ftblibrary:textures/gui/background_squares.png; color=#DCFFFFFF; tile_size=64
 extra_quest_shapes:  diamond, pentagon, hexagon, octagon, heart, gear
 
 text_color:          #FFFFFF
