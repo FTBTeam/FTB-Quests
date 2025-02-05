@@ -15,6 +15,8 @@ import org.joml.Matrix4f;
 public interface ThemeProperties {
 	// Main GUI //
 	IconProperty BACKGROUND = new IconProperty("background");
+	IconProperty CHAPTER_PANEL_BACKGROUND = new IconProperty("chapter_panel_background");
+	IconProperty KEY_REFERENCE_BACKGROUND = new IconProperty("key_reference_background");
 	StringProperty EXTRA_QUEST_SHAPES = new StringProperty("extra_quest_shapes");
 
 	// Text Color //

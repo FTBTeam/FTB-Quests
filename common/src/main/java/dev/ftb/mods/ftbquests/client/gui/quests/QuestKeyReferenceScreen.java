@@ -12,6 +12,6 @@ public class QuestKeyReferenceScreen extends KeyReferenceScreen {
 
     @Override
     protected void drawTextBackground(GuiGraphics graphics, Theme theme, int x, int y, int w, int h) {
-        ThemeProperties.BACKGROUND.get().draw(graphics, x, y, w, h);
+        ThemeProperties.KEY_REFERENCE_BACKGROUND.get().draw(graphics, x, y, w, h);
     }
 }

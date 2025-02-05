@@ -133,7 +133,7 @@ public class ChapterPanel extends Panel {
 
 	@Override
 	public void drawBackground(GuiGraphics graphics, Theme theme, int x, int y, int w, int h) {
-		theme.drawContextMenuBackground(graphics, x, y, w, h);
+		ThemeProperties.CHAPTER_PANEL_BACKGROUND.get().draw(graphics, x, y, w, h);
 	}
 
 	@Override
