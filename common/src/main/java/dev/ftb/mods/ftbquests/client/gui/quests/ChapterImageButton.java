@@ -168,6 +168,14 @@ public class ChapterImageButton extends Button implements QuestPositionableButto
 		}
 	}
 
+    @Override
+    public boolean collidesWith(int x, int y, int w, int h) {
+        // small kludge: always try to render rotated images, even if they're off-screen
+        // while it's possible to do extra calculations to determine the effective bounding area of a rotated image,
+        //   it adds a lot of complexity for a relatively small benefit
+        return chapterImage.getRotation() != 0 || super.collidesWith(x, y, w, h);
+    }
+
 	@Override
 	public void addMouseOverText(TooltipList list) {
 		chapterImage.addHoverText(list);
