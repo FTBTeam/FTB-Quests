@@ -8,7 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 * Fixed image aspect ratio calculations for icons with animated textures (as controlled by .mcmeta files)
-  * Note: FTB Library 2001.2.8+ required
+  * Note: FTB Library 2001.2.9+ required
 
 ## [2001.4.10]
 
