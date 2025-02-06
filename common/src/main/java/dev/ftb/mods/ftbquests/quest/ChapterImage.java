@@ -7,7 +7,6 @@ import dev.ftb.mods.ftblibrary.config.ImageResourceConfig;
 import dev.ftb.mods.ftblibrary.config.StringConfig;
 import dev.ftb.mods.ftblibrary.icon.Color4I;
 import dev.ftb.mods.ftblibrary.icon.Icon;
-import dev.ftb.mods.ftblibrary.math.PixelBuffer;
 import dev.ftb.mods.ftblibrary.ui.Widget;
 import dev.ftb.mods.ftblibrary.util.TooltipList;
 import dev.ftb.mods.ftbquests.net.EditObjectMessage;
@@ -49,10 +48,7 @@ public final class ChapterImage implements Movable {
 	private boolean editorsOnly;
 	private boolean alignToCorner;
 	private Quest dependency;
-	private double aspectRatio;
-	private boolean needAspectRecalc;
 	private int order;
-	private int animationFrames = 1;
 
 	public ChapterImage(Chapter c) {
 		chapter = c;
@@ -63,7 +59,6 @@ public final class ChapterImage implements Movable {
 		image = Color4I.empty();
 		color = Color4I.WHITE;
 		alpha = 255;
-		needAspectRecalc = true;
 		hover = new ArrayList<>();
 		click = "";
 		editorsOnly = false;
@@ -78,8 +73,6 @@ public final class ChapterImage implements Movable {
 
 	public ChapterImage setImage(Icon image) {
 		this.image = image;
-		needAspectRecalc = true;
-		animationFrames = image.getPixelBufferFrameCount();
 		return this;
 	}
 
@@ -310,31 +303,18 @@ public final class ChapterImage implements Movable {
 	}
 
 	public boolean isAspectRatioOff() {
-		return image.hasPixelBuffer() && !Mth.equal(getAspectRatio(), width / (height / animationFrames));
+		return !Mth.equal(image.aspectRatio(), width / height);
 	}
 
 	public void fixupAspectRatio(boolean adjustWidth) {
 		if (isAspectRatioOff()) {
 			if (adjustWidth) {
-				width = height * getAspectRatio();
+				width = height * image.aspectRatio();
 			} else {
-				height = width / getAspectRatio();
+				height = width / image.aspectRatio();
 			}
 			new EditObjectMessage(chapter).sendToServer();
 		}
-	}
-
-	private double getAspectRatio() {
-		if (needAspectRecalc) {
-			PixelBuffer buffer = image.createPixelBuffer();
-			if (buffer != null) {
-				aspectRatio = (double) buffer.getWidth() / ((double) buffer.getHeight() / animationFrames);
-			} else {
-				aspectRatio = 1d;
-			}
-			needAspectRecalc = false;
-		}
-		return aspectRatio;
 	}
 
 	public ChapterImage copy(Chapter newChapter, double newX, double newY) {
