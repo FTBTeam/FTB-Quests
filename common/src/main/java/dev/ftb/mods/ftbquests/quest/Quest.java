@@ -877,6 +877,7 @@ public final class Quest extends QuestObject implements Movable {
 		QuestScreen gui = ClientUtils.getCurrentGuiAs(QuestScreen.class);
 
 		if (gui != null) {
+			gui.refreshChapterPanel();
 			gui.refreshQuestPanel();
 			gui.refreshViewQuestPanel();
 		}
