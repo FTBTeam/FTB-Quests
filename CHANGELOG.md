@@ -4,6 +4,15 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2001.4.11]
+
+### Fixed
+* Fixed image aspect ratio calculations for icons with animated textures (as controlled by .mcmeta files)
+  * Note: FTB Library 2001.2.9+ required
+* Fixed rotated images sometimes not rendering when partially off-screen
+* Fixed issue with several ftbquests subcommands meaning they could not be used in MC functions
+  * Commands are `/ftbquests change_progress`, `/ftbquests open_book`, and `/ftbquests export_reward_table_to_chest`
+
 ## [2001.4.10]
 
 ### Added
