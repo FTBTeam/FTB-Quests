@@ -246,7 +246,7 @@ public class FTBQuestsCommands {
 			}
 		}
 
-		source.sendSuccess(() -> Component.translatable("commands.ftbquests.command.feedback.table_imported", table.getTitle(), table.getWeightedRewards().size()), false);
+		source.sendSuccess(() -> Component.translatable("commands.ftbquests.command.feedback.table_exported", table.getTitle(), table.getWeightedRewards().size()), false);
 
 		return Command.SINGLE_SUCCESS;
 	}

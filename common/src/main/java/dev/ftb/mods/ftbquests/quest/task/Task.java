@@ -169,6 +169,7 @@ public abstract class Task extends QuestObject {
 	public void editedFromGUI() {
 		QuestScreen gui = ClientUtils.getCurrentGuiAs(QuestScreen.class);
 		if (gui != null) {
+			gui.refreshChapterPanel();
 			gui.refreshQuestPanel();
 			gui.refreshViewQuestPanel();
 		}

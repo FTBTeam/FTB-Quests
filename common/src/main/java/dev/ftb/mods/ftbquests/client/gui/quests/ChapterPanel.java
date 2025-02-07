@@ -33,6 +33,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.Style;
 import net.minecraft.network.chat.TextColor;
+import net.minecraft.util.Mth;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -46,19 +47,12 @@ public class ChapterPanel extends Panel {
 
 	private final QuestScreen questScreen;
 	boolean expanded = isPinned();
+	int curX = expanded ? 0 : -width;
+	int prevX = curX;
 
 	public ChapterPanel(Panel panel) {
 		super(panel);
 		questScreen = (QuestScreen) panel.getGui();
-	}
-
-	@Override
-	public boolean checkMouseOver(int mouseX, int mouseY) {
-		if (questScreen.isViewingQuest()) {
-			return false;
-		}
-
-		return super.checkMouseOver(mouseX, mouseY);
 	}
 
 	@Override
@@ -104,7 +98,7 @@ public class ChapterPanel extends Panel {
 			wd = Math.min(Math.max(wd, ((ListButton) w).getActualWidth(questScreen)), 800);
 		}
 
-		setPosAndSize(((expanded || isPinned()) && !questScreen.isViewingQuest()) ? 0 : -wd, 0, wd, questScreen.height);
+		setPosAndSize(((expanded || isPinned())) ? 0 : -wd, 0, wd, questScreen.height);
 
 		for (Widget w : widgets) {
 			w.setWidth(wd);
@@ -118,6 +112,18 @@ public class ChapterPanel extends Panel {
 	}
 
 	@Override
+	public void tick() {
+		super.tick();
+
+		prevX = curX;
+		if (expanded && curX < 0) {
+			curX = Math.min(curX + 40, 0);
+		} else if (!expanded && curX > -width) {
+			curX = Math.max(curX - 40, -width);
+		}
+	}
+
+	@Override
 	public void updateMouseOver(int mouseX, int mouseY) {
 		super.updateMouseOver(mouseX, mouseY);
 
@@ -127,13 +133,18 @@ public class ChapterPanel extends Panel {
 	}
 
 	@Override
+	public boolean shouldDraw() {
+		return !questScreen.isViewingQuest() && super.shouldDraw();
+	}
+
+	@Override
 	public int getX() {
-		return (expanded || isPinned()) && !questScreen.isViewingQuest() ? 0 : -width;
+		return Mth.lerpInt(Minecraft.getInstance().getTimer().getGameTimeDeltaPartialTick(true), prevX, curX);
 	}
 
 	@Override
 	public void drawBackground(GuiGraphics graphics, Theme theme, int x, int y, int w, int h) {
-		theme.drawContextMenuBackground(graphics, x, y, w, h);
+		ThemeProperties.CHAPTER_PANEL_BACKGROUND.get().draw(graphics, x, y, w, h);
 	}
 
 	@Override
@@ -152,7 +163,6 @@ public class ChapterPanel extends Panel {
 	boolean isPinned() {
 		return ClientQuestFile.INSTANCE.selfTeamData.isChapterPinned(Minecraft.getInstance().player);
 	}
-
 
 	public static abstract class ListButton extends Button {
 		public final ChapterPanel chapterPanel;

@@ -4,6 +4,21 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2101.1.5]
+
+### Changed
+* The left-hand chapter panel now slides smoothly in and out (assuming it's not pinned)
+* Separated `background` in `ftb_quests_theme.txt` into three separate properties for better resource pack configurability
+  * `background` is used for the main quest panel background
+  * `chapter_panel_background` is used for the chapter panel which pops out from the left (an opaque texture should be used here)
+  * `key_reference_background` is used for the popup key reference panel
+  * All three values by default use the existing `background_squares.png` image from FTB Library as before
+
+### Fixed
+* Fixed image aspect ratio calculations for icons with animated textures (as controlled by .mcmeta files)
+  * Note: FTB Library 2101.1.9+ required
+* Fixed rotated images sometimes not rendering when partially off-screen
+
 ## [2101.1.4]
 
 ### Fixed
