@@ -122,9 +122,9 @@ public class CommandReward extends Reward {
 		String cmd = format(command, overrides);
 
 		CommandSourceStack source = player.createCommandSourceStack();
-		if (elevatePerms) source = source.withPermission(2);
+		if (elevatePerms) source = source.withPermission(4);
 		if (silent) source = source.withSuppressedOutput();
-		
+
 		player.server.getCommands().performPrefixedCommand(source, cmd);
 
 		if (notify) {
