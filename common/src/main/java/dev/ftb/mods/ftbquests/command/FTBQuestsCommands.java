@@ -19,6 +19,7 @@ import dev.ftb.mods.ftbquests.quest.loot.RewardTable;
 import dev.ftb.mods.ftbquests.quest.loot.WeightedReward;
 import dev.ftb.mods.ftbquests.quest.reward.ItemReward;
 import dev.ftb.mods.ftbquests.quest.task.ItemTask;
+import dev.ftb.mods.ftbquests.quest.translation.TranslationKey;
 import dev.ftb.mods.ftbquests.util.ProgressChange;
 import net.minecraft.ChatFormatting;
 import net.minecraft.Util;
@@ -260,14 +261,14 @@ public class FTBQuestsCommands {
 			pos = BlockPos.containing(player.pick(10, 1F, false).getLocation());
 		}
 
-		RewardTable table = new RewardTable(file.newID(), file);
-		table.setRawTitle(name);
-		table.setRawIcon(Items.CHEST.getDefaultInstance());
-
 		BlockEntity be = level.getBlockEntity(pos);
 		if (!(be instanceof BaseContainerBlockEntity container)) {
 			throw NO_INVENTORY.create();
 		}
+
+		RewardTable table = new RewardTable(file.newID(), file);
+		table.setRawTitle(name);
+		table.setRawIcon(Items.CHEST.getDefaultInstance());
 
 		for (int i = 0; i < container.getContainerSize(); i++) {
 			ItemStack stack = container.getItem(i);
@@ -277,8 +278,12 @@ public class FTBQuestsCommands {
 		}
 
 		file.addRewardTable(table);
+		file.refreshIDMap();
+		file.clearCachedData();
+		file.markDirty();
 
 		NetworkHelper.sendToAll(level.getServer(), CreateObjectResponseMessage.create(table, null));
+		NetworkHelper.sendToAll(level.getServer(), SyncTranslationMessageToClient.create(table, file.getLocale(), TranslationKey.TITLE, name));
 
 		source.sendSuccess(() -> Component.translatable("commands.ftbquests.command.feedback.table_imported", name, table.getWeightedRewards().size()), false);
 
