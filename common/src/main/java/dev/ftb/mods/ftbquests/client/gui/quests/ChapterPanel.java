@@ -47,8 +47,8 @@ public class ChapterPanel extends Panel {
 
 	private final QuestScreen questScreen;
 	boolean expanded = isPinned();
-	int curX = expanded ? 0 : -width;
-	int prevX = curX;
+	int curX;
+	int prevX;
 
 	public ChapterPanel(Panel panel) {
 		super(panel);
@@ -59,22 +59,10 @@ public class ChapterPanel extends Panel {
 	public void addWidgets() {
 		add(new ModpackButton(this, questScreen.file));
 
-        /*
-		if (Platform.isModLoaded("ftbmoney")) {
-			add(new OpenShopButton(this));
-			Color4I borderColor = ThemeProperties.WIDGET_BORDER.get(treeGui.selectedChapter);
-			add(new ColorWidget(this, borderColor, null).setPosAndSize(1, 0, width - 2, 1));
-		}
-		 */
-
 		boolean canEdit = questScreen.file.canEdit();
 
 		for (Chapter chapter : questScreen.file.getDefaultChapterGroup().getVisibleChapters(questScreen.file.selfTeamData)) {
 			add(new ChapterButton(this, chapter));
-		}
-
-		if (canEdit) {
-			//add(new AddChapterButton(this, questScreen.file.defaultChapterGroup));
 		}
 
 		questScreen.file.forAllChapterGroups(group -> {
@@ -109,6 +97,8 @@ public class ChapterPanel extends Panel {
 		if (getContentHeight() <= height) {
 			setScrollY(0);
 		}
+
+		curX = expanded ? 0 : -width;
 	}
 
 	@Override
@@ -145,6 +135,15 @@ public class ChapterPanel extends Panel {
 	@Override
 	public void drawBackground(GuiGraphics graphics, Theme theme, int x, int y, int w, int h) {
 		ThemeProperties.CHAPTER_PANEL_BACKGROUND.get().draw(graphics, x, y, w, h);
+	}
+
+	@Override
+	public void onClosed() {
+		super.onClosed();
+
+		if (!isPinned()) {
+			curX = -width;
+		}
 	}
 
 	@Override
