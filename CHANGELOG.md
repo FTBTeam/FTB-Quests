@@ -4,6 +4,25 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2101.1.6]
+
+### Added
+* New hotkeys when hovering quests:
+  * Left-Alt & Left-Mouse opens directly to quest properties
+  * Right-Alt & Left-Mouse copies the quest
+
+### Changed
+* Command rewards: replaced boolean "Run with Elevated Permission" with integer "Permission Level"
+  * Permission level may be anything between 0 and 4 inclusive; see https://minecraft.wiki/w/Permission_level
+  * Previous data is migrated; true value of "Run with Elevated Permission" maps to permission level 2
+* Kill Entity task now has "Entity Type" and "Entity Name" properties
+  * "Entity Type" is renamed from the old "Entity Name"
+  * "Entity Name" can be used to require that the entity have a custom name (either a player name or a name from a name tag for non-player entities)
+
+### Fixed
+* Fixed chapter panel always starting open (and sliding shut) even if not pinned
+* Fixed `/ftbquests import_reward_table_from_chest` command not correctly updating quest book id mappings for new reward table
+
 ## [2101.1.5]
 
 ### Changed
