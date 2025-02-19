@@ -1,5 +1,6 @@
 package dev.ftb.mods.ftbquests.client.gui.quests;
 
+import com.mojang.blaze3d.platform.InputConstants;
 import com.mojang.blaze3d.vertex.PoseStack;
 import dev.ftb.mods.ftblibrary.config.DoubleConfig;
 import dev.ftb.mods.ftblibrary.config.ui.EditStringConfigOverlay;
@@ -13,6 +14,7 @@ import dev.ftb.mods.ftblibrary.util.TooltipList;
 import dev.ftb.mods.ftblibrary.util.client.PositionedIngredient;
 import dev.ftb.mods.ftbquests.client.FTBQuestsClientConfig;
 import dev.ftb.mods.ftbquests.client.gui.ContextMenuBuilder;
+import dev.ftb.mods.ftbquests.client.gui.CustomToast;
 import dev.ftb.mods.ftbquests.net.CreateObjectMessage;
 import dev.ftb.mods.ftbquests.net.DeleteObjectMessage;
 import dev.ftb.mods.ftbquests.net.EditObjectMessage;
@@ -126,7 +128,8 @@ public class QuestButton extends Button implements QuestPositionableButton {
 	public void onClicked(MouseButton button) {
 		playClickSound();
 
-		if (questScreen.file.canEdit() && button.isRight()) {
+		boolean canEdit = questScreen.file.canEdit();
+		if (canEdit && button.isRight()) {
 			List<ContextMenuItem> contextMenu = new ArrayList<>();
 
 			Collection<Quest> selected = questScreen.getSelectedQuests();
@@ -184,17 +187,23 @@ public class QuestButton extends Button implements QuestPositionableButton {
 						.openContextMenu(getGui());
 			}
 		} else if (button.isLeft()) {
-			if (isCtrlKeyDown() && questScreen.file.canEdit()) {
+			if (isCtrlKeyDown() && canEdit) {
 				if (questScreen.isViewingQuest()) {
 					questScreen.closeQuest();
 				}
 				questScreen.toggleSelected(moveAndDeleteFocus());
+			} else if (isKeyDown(InputConstants.KEY_LALT) && canEdit) {
+				quest.onEditButtonClicked(questScreen);
+			} else if (isKeyDown(InputConstants.KEY_RALT) && canEdit) {
+				quest.copyToClipboard();
+				Minecraft.getInstance().getToasts().addToast(new CustomToast(Component.translatable("ftbquests.quest.copied"),
+						Icons.INFO, Component.literal(moveAndDeleteFocus().getTitle().getString())));
 			} else if (!quest.getGuidePage().isEmpty() && quest.getTasks().isEmpty() && quest.getRewards().isEmpty() && quest.getDescription().isEmpty()) {
 				handleClick("guide", quest.getGuidePage());
-			} else {
+			} else if (canEdit || !quest.hideDetailsUntilStartable() || questScreen.file.selfTeamData.canStartTasks(quest)) {
 				questScreen.open(theQuestObject(), false);
 			}
-		} else if (questScreen.file.canEdit() && button.isMiddle()) {
+		} else if (canEdit && button.isMiddle()) {
 			if (!questScreen.selectedObjects.contains(moveAndDeleteFocus())) {
 				questScreen.toggleSelected(moveAndDeleteFocus());
 			}
