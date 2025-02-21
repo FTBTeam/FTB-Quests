@@ -22,6 +22,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 * Fixed chapter panel always starting open (and sliding shut) even if not pinned
 * Fixed `/ftbquests import_reward_table_from_chest` command not correctly updating quest book id mappings for new reward table
+* Quest view panel now uses the "quest_view_border" theme property from `ftb_quests_theme.txt` consistently now
+  * Previously a mixture of "quest_view_border" and "widget_border" were used to draw the border lines for the view panel
 
 ## [2101.1.5]
 
