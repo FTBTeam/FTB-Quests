@@ -224,7 +224,7 @@ public class ViewQuestPanel extends ModalPanel {
 			ww = Math.max(ww, widget.width);
 		}
 
-		Color4I borderColor = ThemeProperties.WIDGET_BORDER.get(questScreen.selectedChapter);
+		Color4I borderColor = ThemeProperties.QUEST_VIEW_BORDER.get(questScreen.selectedChapter);
 
 		ww = Mth.clamp(ww, 70, 140);
 		w = Math.max(w, ww * 2 + 10);
