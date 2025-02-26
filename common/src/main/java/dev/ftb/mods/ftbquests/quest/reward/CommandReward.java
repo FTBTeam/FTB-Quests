@@ -125,7 +125,7 @@ public class CommandReward extends Reward {
 			overrides.put("online_member_count", team.getOnlineMembers().size());
 		});
 
-		String cmd = format(command, overrides);
+		String cmd = format(command.trim(), overrides);
 
 		CommandSourceStack source = player.createCommandSourceStack();
 		if (permissionLevel > 0) source = source.withPermission(permissionLevel);
