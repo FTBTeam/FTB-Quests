@@ -219,8 +219,8 @@ public class MultilineTextEditorScreen extends BaseScreen {
 
 				StringBuilder builder = new StringBuilder("[ ");
 				if (!parts.get(0).isEmpty()) builder.append("\"").append(parts.get(0)).append("\", ");
-				builder.append(String.format(LINK_TEXT_TEMPLATE, parts.get(1), questID)).append(", ");
-				if (!parts.get(2).isEmpty()) builder.append("\"").append(parts.get(2)).append("\"");
+				builder.append(String.format(LINK_TEXT_TEMPLATE, parts.get(1), questID));
+				if (!parts.get(2).isEmpty()) builder.append(", ").append("\"").append(parts.get(2)).append("\"");
 				builder.append(" ]");
 
 				textBox.selectCurrentLine();
