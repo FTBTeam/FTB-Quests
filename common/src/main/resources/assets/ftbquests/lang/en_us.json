@@ -110,6 +110,7 @@
 	"ftbquests.file.pause_game": "Quest Screen Pauses SSP Game",
 	"ftbquests.file.pause_game.tooltip": "Does not apply to multiplayer games",
 	"ftbquests.file.detection_delay": "Item Auto-Detection Minimum Interval",
+	"ftbquests.file.drop_book_on_death": "Drop FTB Quests Book on Death",
 	"ftbquests.file.detection_delay.tooltip": "Minimum interval (in ticks) between checks of a player's inventory when it changes\nHigher values are kinder on server TPS, especially if players inventories change frequently, but mean longer delays for quest auto-completion messages.",
 	"ftbquests.chapter.misc.progression_mode": "Default 'Progression Mode'",
 	"ftbquests.chapter.misc.default_repeatable": "Default 'Repeatable Quest'",

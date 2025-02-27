@@ -104,6 +104,7 @@ public abstract class BaseQuestFile extends QuestObject implements QuestFile {
 	private ProgressionMode progressionMode;
 	private int detectionDelay;
 	private boolean showLockIcons;
+	private boolean dropBookOnDeath;
 
 	private List<Task> allTasks;
 	private List<Task> submitTasks;
@@ -142,6 +143,7 @@ public abstract class BaseQuestFile extends QuestObject implements QuestFile {
 		lockMessage = "";
 		progressionMode = ProgressionMode.LINEAR;
 		detectionDelay = 20;
+		dropBookOnDeath = false;
 
 		allTasks = null;
 
@@ -442,6 +444,7 @@ public abstract class BaseQuestFile extends QuestObject implements QuestFile {
 		nbt.putString("progression_mode", progressionMode.getId());
 		nbt.putInt("detection_delay", detectionDelay);
 		nbt.putBoolean("show_lock_icons", showLockIcons);
+		nbt.putBoolean("drop_book_on_death", dropBookOnDeath);
 	}
 
 	@Override
@@ -480,6 +483,7 @@ public abstract class BaseQuestFile extends QuestObject implements QuestFile {
 			detectionDelay = nbt.getInt("detection_delay");
 		}
 		showLockIcons = !nbt.contains("show_lock_icons") || nbt.getBoolean("show_lock_icons");
+		dropBookOnDeath = nbt.getBoolean("drop_book_on_death");
 	}
 
 	public final void writeDataFull(Path folder, HolderLookup.Provider provider) {
@@ -853,6 +857,7 @@ public abstract class BaseQuestFile extends QuestObject implements QuestFile {
 		ProgressionMode.NAME_MAP_NO_DEFAULT.write(buffer, progressionMode);
 		buffer.writeVarInt(detectionDelay);
 		buffer.writeBoolean(showLockIcons);
+		buffer.writeBoolean(dropBookOnDeath);
 	}
 
 	@Override
@@ -876,6 +881,7 @@ public abstract class BaseQuestFile extends QuestObject implements QuestFile {
 		progressionMode = ProgressionMode.NAME_MAP_NO_DEFAULT.read(buffer);
 		detectionDelay = buffer.readVarInt();
 		showLockIcons = buffer.readBoolean();
+		dropBookOnDeath = buffer.readBoolean();
 	}
 
 	public final void writeNetDataFull(RegistryFriendlyByteBuf buffer) {
@@ -1158,6 +1164,7 @@ public abstract class BaseQuestFile extends QuestObject implements QuestFile {
 		config.addInt("detection_delay", detectionDelay, v -> detectionDelay = v, 20, 0, 200);
 		config.addBool("pause_game", pauseGame, v -> pauseGame = v, false);
 		config.addBool("show_lock_icons", showLockIcons, v -> showLockIcons = v, true).setNameKey("ftbquests.ui.show_lock_icon");
+		config.addBool("drop_book_on_death", dropBookOnDeath, v -> dropBookOnDeath = v, true);
 
 		ConfigGroup defaultsGroup = config.getOrCreateSubgroup("defaults");
 		defaultsGroup.addBool("reward_team", defaultPerTeamReward, v -> defaultPerTeamReward = v, false);
@@ -1559,4 +1566,8 @@ public abstract class BaseQuestFile extends QuestObject implements QuestFile {
 	}
 
 	public abstract String getLocale();
+
+	public boolean dropBookOnDeath() {
+		return dropBookOnDeath;
+	}
 }
