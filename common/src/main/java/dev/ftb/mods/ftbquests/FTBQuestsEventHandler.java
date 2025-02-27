@@ -192,11 +192,14 @@ public enum FTBQuestsEventHandler {
 			return;
 		}
 
-		for (int i = 0; i < oldPlayer.getInventory().items.size(); i++) {
-			ItemStack stack = oldPlayer.getInventory().items.get(i);
+		if (!ServerQuestFile.INSTANCE.dropBookOnDeath()) {
+			for (int i = 0; i < oldPlayer.getInventory().items.size(); i++) {
+				ItemStack stack = oldPlayer.getInventory().items.get(i);
 
-			if (stack.getItem() == FTBQuestsItems.BOOK.get() && newPlayer.addItem(stack)) {
-				oldPlayer.getInventory().items.set(i, ItemStack.EMPTY);
+				if (stack.getItem() == FTBQuestsItems.BOOK.get() && newPlayer.addItem(stack)) {
+					oldPlayer.getInventory().items.set(i, ItemStack.EMPTY);
+
+				}
 			}
 		}
 	}
