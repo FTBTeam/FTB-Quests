@@ -1,22 +1,15 @@
 package dev.ftb.mods.ftbquests.client;
 
-import dev.architectury.networking.NetworkManager;
-import dev.ftb.mods.ftblibrary.config.ConfigGroup;
-import dev.ftb.mods.ftblibrary.config.ui.EditConfigScreen;
+import dev.ftb.mods.ftblibrary.config.manager.ConfigManager;
 import dev.ftb.mods.ftblibrary.snbt.config.*;
 import dev.ftb.mods.ftblibrary.util.PanelPositioning;
 import dev.ftb.mods.ftbquests.api.FTBQuestsAPI;
 import dev.ftb.mods.ftbquests.client.config.LocaleValue;
-import dev.ftb.mods.ftbquests.net.RequestTranslationTableMessage;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.screens.Screen;
-
-import static dev.ftb.mods.ftblibrary.snbt.config.ConfigUtil.LOCAL_DIR;
-import static dev.ftb.mods.ftblibrary.snbt.config.ConfigUtil.loadDefaulted;
+import dev.ftb.mods.ftbquests.client.gui.QuestsClientConfigScreen;
 
 public interface FTBQuestsClientConfig {
-    SNBTConfig CONFIG = SNBTConfig.create(FTBQuestsAPI.MOD_ID + "-client");
-    String CLIENT_CONFIG = "client-config.snbt";
+    String KEY = FTBQuestsAPI.MOD_ID + "-client";
+    SNBTConfig CONFIG = SNBTConfig.create(KEY);
 
     SNBTConfig UI = CONFIG.addGroup("ui", 0);
     BooleanValue OLD_SCROLL_WHEEL = UI.addBoolean("old_scroll_wheel", false);
@@ -32,35 +25,8 @@ public interface FTBQuestsClientConfig {
 
     // TODO migrate chapter-pinned and pinned-quests data out of per-player team data into here
 
-    static void openSettings(Screen screen) {
-        String prevLocale = EDITING_LOCALE.get();
-
-        ConfigGroup group = new ConfigGroup("ftbquests", accepted -> {
-            if (accepted) {
-                saveConfig();
-                if (!prevLocale.equals(EDITING_LOCALE.get()) && ClientQuestFile.INSTANCE != null) {
-                    NetworkManager.sendToServer(new RequestTranslationTableMessage(ClientQuestFile.INSTANCE.getLocale()));
-                    ClientQuestFile.INSTANCE.clearCachedData();
-                }
-            }
-            Minecraft.getInstance().setScreen(screen);
-        });
-        CONFIG.createClientConfig(group);
-        EditConfigScreen gui = new EditConfigScreen(group) {
-            @Override
-            public boolean doesGuiPauseGame() {
-                return screen.isPauseScreen();
-            }
-        };
-
-        gui.openGui();
-    }
-
-    static void init() {
-        loadDefaulted(CONFIG, LOCAL_DIR.resolve(FTBQuestsAPI.MOD_ID), FTBQuestsAPI.MOD_ID, CLIENT_CONFIG);
-    }
-
-    static void saveConfig() {
-        CONFIG.save(LOCAL_DIR.resolve(FTBQuestsAPI.MOD_ID).resolve(CLIENT_CONFIG));
+    static void openSettings(boolean pauseGame) {
+        ConfigManager.getInstance().createConfigGroup(KEY)
+                .ifPresent(group -> new QuestsClientConfigScreen(group, pauseGame).openGui());
     }
 }

@@ -4,7 +4,6 @@ import dev.architectury.networking.NetworkManager;
 import dev.ftb.mods.ftblibrary.icon.Icons;
 import dev.ftb.mods.ftblibrary.ui.ContextMenuItem;
 import dev.ftb.mods.ftblibrary.ui.Panel;
-import dev.ftb.mods.ftblibrary.ui.ScreenWrapper;
 import dev.ftb.mods.ftblibrary.ui.WidgetLayout;
 import dev.ftb.mods.ftblibrary.ui.input.MouseButton;
 import dev.ftb.mods.ftbquests.client.ClientQuestFile;
@@ -89,7 +88,7 @@ public class OtherButtonsPanelBottom extends OtherButtonsPanel {
 
 		@Override
 		public void onClicked(MouseButton button) {
-			FTBQuestsClientConfig.openSettings(new ScreenWrapper(questScreen));
+			FTBQuestsClientConfig.openSettings(questScreen.doesGuiPauseGame());
 		}
 	}
 
