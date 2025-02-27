@@ -194,7 +194,10 @@ public class QuestPanel extends Panel {
 				boolean complete = !unavailable && questScreen.file.selfTeamData.isCompleted(qb.quest);
 				Color4I c = complete ?
 						ThemeProperties.DEPENDENCY_LINE_COMPLETED_COLOR.get(questScreen.selectedChapter) :
-						ThemeProperties.DEPENDENCY_LINE_UNCOMPLETED_COLOR.get(questScreen.selectedChapter);
+						(unavailable ?
+								ThemeProperties.DEPENDENCY_LINE_UNAVAILABLE_COLOR.get(questScreen.selectedChapter) :
+								ThemeProperties.DEPENDENCY_LINE_UNCOMPLETED_COLOR.get(questScreen.selectedChapter)
+						);
 
 				for (QuestButton button : qb.getDependencies()) {
 					if (button.shouldDraw() && button.quest != selectedQuest && qb.quest != selectedQuest && !button.quest.shouldHideDependentLines()) {
