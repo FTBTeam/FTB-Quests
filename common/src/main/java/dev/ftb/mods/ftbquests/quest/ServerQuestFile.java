@@ -69,35 +69,42 @@ public class ServerQuestFile extends BaseQuestFile {
 	}
 
 	public void load() {
+		load(true, true);
+	}
+
+	public void load(boolean quests, boolean progression) {
 		folder = Platform.getConfigFolder().resolve("ftbquests/quests");
 
-		if (Files.exists(folder)) {
-			FTBQuests.LOGGER.info("Loading quests from " + folder);
-			isLoading = true;
-			readDataFull(folder, server.registryAccess());
-			isLoading = false;
+		if (quests) {
+			if (Files.exists(folder)) {
+                FTBQuests.LOGGER.info("Loading quests from {}", folder);
+				isLoading = true;
+				readDataFull(folder, server.registryAccess());
+				isLoading = false;
+			}
 		}
 
-		Path path = server.getWorldPath(FTBQUESTS_DATA);
+		if (progression) {
+			Path path = server.getWorldPath(FTBQUESTS_DATA);
 
-		if (Files.exists(path)) {
-			try (Stream<Path> s = Files.list(path)) {
-				s.filter(p -> p.getFileName().toString().contains("-") && p.getFileName().toString().endsWith(".snbt")).forEach(path1 -> {
-					SNBTCompoundTag nbt = SNBT.read(path1);
-
-					if (nbt != null) {
-						try {
-							UUID uuid = UndashedUuid.fromString(nbt.getString("uuid"));
-							TeamData data = new TeamData(uuid, this);
-							addData(data, true);
-							data.deserializeNBT(nbt);
-						} catch (Exception ex) {
-							ex.printStackTrace();
+			if (Files.exists(path)) {
+				try (Stream<Path> s = Files.list(path)) {
+					s.filter(p -> p.getFileName().toString().contains("-") && p.getFileName().toString().endsWith(".snbt")).forEach(path1 -> {
+						SNBTCompoundTag nbt = SNBT.read(path1);
+						if (nbt != null) {
+							try {
+								UUID uuid = UndashedUuid.fromString(nbt.getString("uuid"));
+								TeamData data = new TeamData(uuid, this);
+								addData(data, true);
+								data.deserializeNBT(nbt);
+							} catch (Exception ex) {
+								FTBQuests.LOGGER.error("can't parse progression data for {}: {}", path1, ex.getMessage());
+							}
 						}
-					}
-				});
-			} catch (Exception ex) {
-				ex.printStackTrace();
+					});
+				} catch (Exception ex) {
+					FTBQuests.LOGGER.error("can't read directory {}: {}", path, ex.getMessage());
+				}
 			}
 		}
 	}
