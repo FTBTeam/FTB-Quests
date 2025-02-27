@@ -428,6 +428,7 @@
 	"ftbquests.reward": "Reward",
 	"ftbquests.rewards": "Rewards",
 	"ftbquests.reward.team_reward": "Team Reward",
+	"ftbquests.reward.team_reward.tooltip": "When true, this is one reward for the whole team; only the submitting player receives it\nWhen false, all online players receive the reward",
 	"ftbquests.reward.blocked": "%d reward(s) blocked for team '%s'",
 	"ftbquests.reward.this_blocked": "Reward blocked for team '%s'",
 	"ftbquests.reward.emergency": "Emergency Item",
