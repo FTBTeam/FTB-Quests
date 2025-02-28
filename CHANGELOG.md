@@ -43,6 +43,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   * Also added tooltip to team reward setting in the reward properties GUI to clarify: team reward means one reward for the whole team
 * Fixed multiline quest editor "L" (insert link) button sometimes inserting a spurious comma, depending on current text selection
 * Leading/trailing whitespace is now silently trimmed from command text in command rewards (trailing whitespace could cause confusing failures to execute commands)
+* Fixed "Disable in JEI" quest property not being correctly saved or sync'd to clients
 
 ## [2101.1.5]
 
