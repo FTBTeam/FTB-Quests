@@ -649,8 +649,10 @@ public class QuestScreen extends BaseScreen {
 		Color4I borderColor = ThemeProperties.WIDGET_BORDER.get(selectedChapter);
 		Color4I backgroundColor = ThemeProperties.WIDGET_BACKGROUND.get(selectedChapter);
 
-		borderColor.draw(graphics, x + pw - 1, y + 1, 1, h - 2);
-		backgroundColor.draw(graphics, x + 1, y + 1, pw - 2, h - 2);
+		if (!chapterPanel.expanded) {
+			borderColor.draw(graphics, x + pw - 1, y + 1, 1, h - 2);
+			backgroundColor.draw(graphics, x + 1, y + 1, pw - 2, h - 2);
+		}
 
 		borderColor.draw(graphics, x + w - pw, y + 1, 1, h - 2);
 		backgroundColor.draw(graphics, x + w - pw + 1, y + 1, pw - 2, h - 2);
