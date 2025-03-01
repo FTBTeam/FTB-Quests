@@ -19,6 +19,7 @@ import dev.ftb.mods.ftbquests.quest.loot.RewardTable;
 import dev.ftb.mods.ftbquests.quest.loot.WeightedReward;
 import dev.ftb.mods.ftbquests.quest.reward.ItemReward;
 import dev.ftb.mods.ftbquests.quest.task.ItemTask;
+import dev.ftb.mods.ftbquests.quest.translation.TranslationKey;
 import dev.ftb.mods.ftbquests.util.ProgressChange;
 import net.minecraft.ChatFormatting;
 import net.minecraft.Util;
@@ -91,6 +92,12 @@ public class FTBQuestsCommands {
 												})
 										)
 								)
+								.then(Commands.literal("reset-all")
+										.executes(ctx -> {
+											Collection<ServerPlayer> players = EntityArgument.getPlayers(ctx, "players");
+											return changeProgress(ctx.getSource(), players, true, "1");
+										})
+								)
 								.then(Commands.literal("complete")
 										.then(Commands.argument("quest_object", StringArgumentType.string())
 												.executes(ctx -> {
@@ -98,6 +105,12 @@ public class FTBQuestsCommands {
 													return changeProgress(ctx.getSource(), players, false, StringArgumentType.getString(ctx, "quest_object"));
 												})
 										)
+								)
+								.then(Commands.literal("complete-all")
+										.executes(ctx -> {
+											Collection<ServerPlayer> players = EntityArgument.getPlayers(ctx, "players");
+											return changeProgress(ctx.getSource(), players, false, "1");
+										})
 								)
 						)
 				)
@@ -137,7 +150,13 @@ public class FTBQuestsCommands {
 				)
 				.then(Commands.literal("reload")
 						.requires(FTBQuestsCommands::hasEditorPermission)
-						.executes(context -> doReload(context.getSource()))
+						.executes(context -> doReload(context.getSource(), true, true))
+						.then(Commands.literal("quests")
+								.executes(context -> doReload(context.getSource(), true, false))
+						)
+						.then(Commands.literal("team_progress")
+								.executes(context -> doReload(context.getSource(), false, true))
+						)
 				)
 				.then(Commands.literal("block_rewards")
 						.requires(FTBQuestsCommands::hasEditorPermission)
@@ -164,8 +183,8 @@ public class FTBQuestsCommands {
 
 	private static boolean isSSPOrEditor(CommandSourceStack s) {
 		// s.getServer() *can* be null here, whatever the IDE thinks!
-        //noinspection ConstantValue
-        return s.getServer() != null && s.getServer().isSingleplayer() || hasEditorPermission(s);
+		//noinspection ConstantValue
+		return s.getServer() != null && s.getServer().isSingleplayer() || hasEditorPermission(s);
 	}
 
 	private static boolean hasEditorPermission(CommandSourceStack stack) {
@@ -260,14 +279,14 @@ public class FTBQuestsCommands {
 			pos = BlockPos.containing(player.pick(10, 1F, false).getLocation());
 		}
 
-		RewardTable table = new RewardTable(file.newID(), file);
-		table.setRawTitle(name);
-		table.setRawIcon(Items.CHEST.getDefaultInstance());
-
 		BlockEntity be = level.getBlockEntity(pos);
 		if (!(be instanceof BaseContainerBlockEntity container)) {
 			throw NO_INVENTORY.create();
 		}
+
+		RewardTable table = new RewardTable(file.newID(), file);
+		table.setRawTitle(name);
+		table.setRawIcon(Items.CHEST.getDefaultInstance());
 
 		for (int i = 0; i < container.getContainerSize(); i++) {
 			ItemStack stack = container.getItem(i);
@@ -277,8 +296,12 @@ public class FTBQuestsCommands {
 		}
 
 		file.addRewardTable(table);
+		file.refreshIDMap();
+		file.clearCachedData();
+		file.markDirty();
 
 		NetworkHelper.sendToAll(level.getServer(), CreateObjectResponseMessage.create(table, null));
+		NetworkHelper.sendToAll(level.getServer(), SyncTranslationMessageToClient.create(table, file.getLocale(), TranslationKey.TITLE, name));
 
 		source.sendSuccess(() -> Component.translatable("commands.ftbquests.command.feedback.table_imported", name, table.getWeightedRewards().size()), false);
 
@@ -323,7 +346,7 @@ public class FTBQuestsCommands {
 			ServerQuestFile.INSTANCE.getTeamData(player).ifPresent(data -> {
 				ProgressChange progressChange = new ProgressChange(questObject, player.getUUID()).setReset(reset);
 				questObject.forceProgress(data, progressChange);
-            });
+			});
 		}
 
 		source.sendSuccess(() -> Component.translatable("commands.ftbquests.change_progress.text"), false);
@@ -359,7 +382,7 @@ public class FTBQuestsCommands {
 				.filter(stack -> !stack.isEmpty() && RegistrarManager.getId(stack.getItem(), Registries.ITEM) != null)
 				.sorted(Comparator.comparing(a -> RegistrarManager.getId(a.getItem(), Registries.ITEM)))
 				.toList();
-        FTBQuests.LOGGER.info("Found {} items in total, chapter ID: {}", allItems.size(), chapter);
+		FTBQuests.LOGGER.info("Found {} items in total, chapter ID: {}", allItems.size(), chapter);
 
 		if (list.isEmpty()) {
 			return 0;
@@ -405,27 +428,27 @@ public class FTBQuestsCommands {
 
 	private static final Set<UUID> warnedPlayers = new HashSet<>();
 
-	private static int doReload(CommandSourceStack source) {
-		ServerQuestFile instance = ServerQuestFile.INSTANCE;
-		ServerPlayer sender = source.getPlayer();
-
-		boolean canEdit = sender == null || instance.getTeamData(sender).map(data -> data.getCanEdit(sender)).orElse(false);
-		if (!canEdit) {
-			source.sendFailure(Component.translatable("commands.ftbquests.command.error.not_editing"));
+	private static int doReload(CommandSourceStack source, boolean quests, boolean progression) {
+		if (!quests && !progression) {
 			return 0;
 		}
 
-		instance.load();
+		ServerQuestFile instance = ServerQuestFile.INSTANCE;
+		ServerPlayer sender = source.getPlayer();
+
+		instance.load(quests, progression);
 		NetworkHelper.sendToAll(source.getServer(), new SyncQuestsMessage(instance));
 		source.getServer().getPlayerList().getPlayers().forEach(p -> {
 			NetworkManager.sendToPlayer(p, SyncEditorPermissionMessage.forPlayer(p));
 			instance.getTranslationManager().sendTranslationsToPlayer(p);
 		});
 
-		source.sendSuccess(() -> Component.translatable("commands.ftbquests.command.feedback.reloaded"), false);
+		String suffix = quests && progression ? "" : (quests ? "_quest" : "_progress");
+		source.sendSuccess(() -> Component.translatable("commands.ftbquests.command.feedback.reloaded" + suffix), false);
 		UUID id = sender == null ? Util.NIL_UUID : sender.getUUID();
 		if (!warnedPlayers.contains(id)) {
-			source.sendSuccess(() -> Component.translatable("commands.ftbquests.command.feedback.reloaded.disclaimer").withStyle(ChatFormatting.GOLD), false);
+			source.sendSuccess(() -> Component.translatable("commands.ftbquests.command.feedback.reloaded.disclaimer")
+					.withStyle(ChatFormatting.GOLD), false);
 			warnedPlayers.add(id);
 		}
 

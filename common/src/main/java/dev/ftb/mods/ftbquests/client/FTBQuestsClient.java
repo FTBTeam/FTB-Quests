@@ -3,6 +3,7 @@ package dev.ftb.mods.ftbquests.client;
 import com.mojang.blaze3d.platform.InputConstants;
 import dev.architectury.event.events.client.ClientLifecycleEvent;
 import dev.architectury.networking.NetworkManager;
+import dev.architectury.platform.Platform;
 import dev.architectury.registry.ReloadListenerRegistry;
 import dev.architectury.registry.client.keymappings.KeyMappingRegistry;
 import dev.architectury.registry.client.rendering.RenderTypeRegistry;
@@ -20,7 +21,6 @@ import dev.ftb.mods.ftbquests.quest.QuestObjectBase;
 import dev.ftb.mods.ftbquests.quest.TeamData;
 import dev.ftb.mods.ftbquests.quest.theme.ThemeLoader;
 import dev.ftb.mods.ftbquests.registry.ModBlocks;
-import dev.ftb.mods.ftbquests.registry.ModItems;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
@@ -31,7 +31,6 @@ import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.HolderLookup;
-import net.minecraft.core.RegistryAccess;
 import net.minecraft.server.packs.PackType;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.InteractionHand;
@@ -42,6 +41,9 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
 import org.jetbrains.annotations.Nullable;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.List;
 import java.util.Optional;
 
@@ -49,7 +51,7 @@ public class FTBQuestsClient {
 	public static KeyMapping KEY_QUESTS;
 
 	public static void init() {
-		FTBQuestsClientConfig.init();
+		maybeMigrateClientConfig();
 
 		ClientLifecycleEvent.CLIENT_SETUP.register(FTBQuestsClient::onClientSetup);
 		ReloadListenerRegistry.register(PackType.CLIENT_RESOURCES, new QuestFileCacheReloader());
@@ -57,6 +59,21 @@ public class FTBQuestsClient {
 		KeyMappingRegistry.register(KEY_QUESTS = new KeyMapping("key.ftbquests.quests", InputConstants.Type.KEYSYM, -1, "key.categories.ftbquests"));
 
 		new FTBQuestsClientEventHandler().init();
+	}
+
+	private static void maybeMigrateClientConfig() {
+		// TODO delete in 1.22
+		Path oldConfig = Platform.getGameFolder().resolve("local/ftbquests/client-config.snbt");
+		Path newConfig = Platform.getConfigFolder().resolve("ftbquests-client.snbt");
+
+		if (Files.exists(oldConfig) && !Files.exists(newConfig)) {
+			try {
+				Files.move(oldConfig, newConfig);
+				FTBQuests.LOGGER.info("migrated {} to {}", oldConfig, newConfig);
+			} catch (IOException e) {
+				FTBQuests.LOGGER.error("can't migrate {} to {}: {}", oldConfig, newConfig, e.getMessage());
+			}
+		}
 	}
 
 	private static void onClientSetup(Minecraft minecraft) {

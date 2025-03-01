@@ -49,6 +49,7 @@ import net.minecraft.util.Mth;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.TooltipFlag;
+import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.lwjgl.glfw.GLFW;
@@ -224,7 +225,7 @@ public class ViewQuestPanel extends ModalPanel {
 			ww = Math.max(ww, widget.width);
 		}
 
-		Color4I borderColor = ThemeProperties.WIDGET_BORDER.get(questScreen.selectedChapter);
+		Color4I borderColor = ThemeProperties.QUEST_VIEW_BORDER.get(questScreen.selectedChapter);
 
 		ww = Mth.clamp(ww, 70, 140);
 		w = Math.max(w, ww * 2 + 10);
@@ -887,9 +888,13 @@ public class ViewQuestPanel extends ModalPanel {
 			if (clickEvent == null) return false;
 
 			if (clickEvent.getAction() == ClickEvent.Action.CHANGE_PAGE) {
-				QuestObjectBase.parseHexId(clickEvent.getValue()).ifPresentOrElse(questId -> {
+				String[] fields = clickEvent.getValue().split("/");
+				QuestObjectBase.parseHexId(fields[0]).ifPresentOrElse(questId -> {
 					QuestObject qo = quest.getQuestFile().get(questId);
 					if (qo != null) {
+						if (qo instanceof Quest && fields.length >= 2 && StringUtils.isNumeric(fields[1])) {
+							currentPages.put(questId.longValue(), Integer.parseInt(fields[1]) - 1);
+						}
 						questScreen.open(qo, false);
 					} else {
 						errorToPlayer("Unknown quest object id: %s", clickEvent.getValue());

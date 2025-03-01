@@ -31,7 +31,7 @@ public class CommandReward extends Reward {
 	public static final Pattern PATTERN = Pattern.compile("[{](\\w+)}");
 
 	private String command;
-	private boolean elevatePerms;
+	private int permissionLevel;
 	private boolean silent;
 	private String feedbackMessage;
 
@@ -39,6 +39,7 @@ public class CommandReward extends Reward {
 		super(id, quest);
 		command = DEFAULT_COMMAND;
 		feedbackMessage = "";
+		permissionLevel = 0;
 	}
 
 	@Override
@@ -50,8 +51,8 @@ public class CommandReward extends Reward {
 	public void writeData(CompoundTag nbt, HolderLookup.Provider provider) {
 		super.writeData(nbt, provider);
 		nbt.putString("command", command);
-		if (elevatePerms) {
-			nbt.putBoolean("elevate_perms", true);
+		if (permissionLevel > 0) {
+			nbt.putInt("permission_level", permissionLevel);
 		}
 		if (silent) nbt.putBoolean("silent", true);
 		if (!feedbackMessage.isEmpty()) {
@@ -63,7 +64,12 @@ public class CommandReward extends Reward {
 	public void readData(CompoundTag nbt, HolderLookup.Provider provider) {
 		super.readData(nbt, provider);
 		command = nbt.getString("command");
-		elevatePerms = nbt.getBoolean("elevate_perms");
+		if (nbt.getBoolean("elevate_perms")) {
+			// legacy migration
+			permissionLevel = 2;
+		} else {
+			permissionLevel = nbt.getInt("permission_level");
+		}
 		silent = nbt.getBoolean("silent");
 		feedbackMessage = nbt.getString("feedback_message");
 	}
@@ -72,7 +78,7 @@ public class CommandReward extends Reward {
 	public void writeNetData(RegistryFriendlyByteBuf buffer) {
 		super.writeNetData(buffer);
 		buffer.writeUtf(command, Short.MAX_VALUE);
-		buffer.writeBoolean(elevatePerms);
+		buffer.writeVarInt(permissionLevel);
 		buffer.writeBoolean(silent);
 		buffer.writeUtf(feedbackMessage, Short.MAX_VALUE);
 	}
@@ -81,7 +87,7 @@ public class CommandReward extends Reward {
 	public void readNetData(RegistryFriendlyByteBuf buffer) {
 		super.readNetData(buffer);
 		command = buffer.readUtf(Short.MAX_VALUE);
-		elevatePerms = buffer.readBoolean();
+		permissionLevel = buffer.readVarInt();
 		silent = buffer.readBoolean();
 		feedbackMessage = buffer.readUtf(Short.MAX_VALUE);
 	}
@@ -91,7 +97,7 @@ public class CommandReward extends Reward {
 	public void fillConfigGroup(ConfigGroup config) {
 		super.fillConfigGroup(config);
 		config.addString("command", command, v -> command = v, DEFAULT_COMMAND).setNameKey("ftbquests.reward.ftbquests.command");
-		config.addBool("elevate", elevatePerms, v -> elevatePerms = v, false);
+		config.addInt("permission_level", permissionLevel, v -> permissionLevel = v, 0, 0, 4);
 		config.addBool("silent", silent, v -> silent = v, false);
 		config.addString("feedback_message", feedbackMessage, v -> feedbackMessage = v, "");
 	}
@@ -119,10 +125,10 @@ public class CommandReward extends Reward {
 			overrides.put("online_member_count", team.getOnlineMembers().size());
 		});
 
-		String cmd = format(command, overrides);
+		String cmd = format(command.trim(), overrides);
 
 		CommandSourceStack source = player.createCommandSourceStack();
-		if (elevatePerms) source = source.withPermission(2);
+		if (permissionLevel > 0) source = source.withPermission(permissionLevel);
 		if (silent) source = source.withSuppressedOutput();
 		
 		player.server.getCommands().performPrefixedCommand(source, cmd);

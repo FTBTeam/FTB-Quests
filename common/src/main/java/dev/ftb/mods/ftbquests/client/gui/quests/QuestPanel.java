@@ -150,7 +150,7 @@ public class QuestPanel extends Panel {
 
 				double x = (qx - questMinX - qw / 2D) * (bs + bp) + bp / 2D + bp * (qw - 1D) / 2D;
 				double y = (qy - questMinY - qh / 2D) * (bs + bp) + bp / 2D + bp * (qh - 1D) / 2D;
-				w.setPosAndSize((int) x, (int) y, (int) (bs * qw), (int) (bs * qh));
+				w.setPosAndSize((int) Math.round(x), (int) Math.round(y), (int) Math.round(bs * qw), (int) Math.round(bs * qh));
 			}
 		}
 
@@ -194,7 +194,10 @@ public class QuestPanel extends Panel {
 				boolean complete = !unavailable && questScreen.file.selfTeamData.isCompleted(qb.quest);
 				Color4I c = complete ?
 						ThemeProperties.DEPENDENCY_LINE_COMPLETED_COLOR.get(questScreen.selectedChapter) :
-						ThemeProperties.DEPENDENCY_LINE_UNCOMPLETED_COLOR.get(questScreen.selectedChapter);
+						(unavailable ?
+								ThemeProperties.DEPENDENCY_LINE_UNAVAILABLE_COLOR.get(questScreen.selectedChapter) :
+								ThemeProperties.DEPENDENCY_LINE_UNCOMPLETED_COLOR.get(questScreen.selectedChapter)
+						);
 
 				for (QuestButton button : qb.getDependencies()) {
 					if (button.shouldDraw() && button.quest != selectedQuest && qb.quest != selectedQuest && !button.quest.shouldHideDependentLines()) {
@@ -245,10 +248,10 @@ public class QuestPanel extends Panel {
 	}
 
 	private void renderConnection(Widget widget, QuestButton button, PoseStack poseStack, float s, int r, int g, int b, int a, int a1, float mu, Tesselator tesselator) {
-		int sx = widget.getX() + widget.width / 2;
-		int sy = widget.getY() + widget.height / 2;
-		int ex = button.getX() + button.width / 2;
-		int ey = button.getY() + button.height / 2;
+		double sx = widget.getX() + widget.width / 2.0;
+		double sy = widget.getY() + widget.height / 2.0;
+		double ex = button.getX() + button.width / 2.0;
+		double ey = button.getY() + button.height / 2.0;
 		float len = (float) MathUtils.dist(sx, sy, ex, ey);
 
 		poseStack.pushPose();
@@ -343,7 +346,7 @@ public class QuestPanel extends Panel {
 
 						poseStack.pushPose();
 						poseStack.translate(0, 0, 200);
-						GuiHelper.drawHollowRect(graphics, (int) boxX, (int) boxY, (int) boxW, (int) boxH, Color4I.WHITE.withAlpha(30), false);
+						GuiHelper.drawHollowRect(graphics, (int) Math.round(boxX), (int) Math.round(boxY), (int) Math.round(boxW), (int) Math.round(boxH), Color4I.WHITE.withAlpha(30), false);
 						poseStack.popPose();
 					}
 				} else if (!questScreen.isViewingQuest() || !questScreen.viewQuestPanel.isMouseOver()) {
@@ -364,9 +367,9 @@ public class QuestPanel extends Panel {
 					if (QuestScreen.grid && !questScreen.isViewingQuest()) {
 						poseStack.pushPose();
 						poseStack.translate(0, 0, 1000);
-						Color4I.WHITE.draw(graphics, (int) sx, (int) sy, 1, 1);
+						Color4I.WHITE.draw(graphics, (int) Math.round(sx), (int) Math.round(sy), 1, 1);
 						Color4I.WHITE.withAlpha(30).draw(graphics, getX(), (int) sy, width, 1);
-						Color4I.WHITE.withAlpha(30).draw(graphics, (int) sx, getY(), 1, height);
+						Color4I.WHITE.withAlpha(30).draw(graphics, (int) Math.round(sx), getY(), 1, height);
 						poseStack.popPose();
 					}
 				}
