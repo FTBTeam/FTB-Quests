@@ -4,6 +4,47 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2101.1.6]
+
+### Added
+* New hotkeys when hovering quests:
+  * Left-Alt & Left-Mouse opens directly to quest properties
+  * Right-Alt & Left-Mouse copies the quest
+* Added `/ftbquests change_progress <player> reset-all` and `... complete-all` commands
+  * These are equivalent to the existing `/ftbquests change_progress <player> reset 1` and `... complete 1` but are clearer, avoiding the use of the magic "1" id which represents the whole quest book
+* Added `/ftbquests reload quests` and `/ftbquests reload team_progress` variants to the existing `/ftbquests reload` command
+  * Reload just the quest book data or the team progression data
+* Added new quest theme property `"dependency_line_unavailable_color` to color lines drawn from currently locked quests to their dependents
+  * Default colour is a slightly faded version of the `dependency_line_uncompleted_color` property
+* Backspace key now actually moves back to previously viewed quest when pressed on the quest view panel (previously operated as Escape and just closed the panel)
+  *  Can be disabled in client config to get old behaviour back, but why would you want to?
+* The "click_event" -> "change_page" action in json text components in quest description text can now jump to a specific subpage of a quest if it has multiple pages
+  * Example syntax: `[ { "text": "click me", "underlined": true, "clickEvent": { "action": "change_page", "value": "74D53BE3AB369184/2" } } ]` jumps to page 2 of the quest (note the `/2` on the end of the quest ID)
+
+### Changed
+* Now using the FTB Library 2101.1.10 config system
+  * **IMPORTANT** the client config file `local/ftbquests/client-config.snbt` is now `config/ftbquests-client.snbt`
+  * Existing configs are auto-migrated; players do not need to take any action
+* Command rewards: replaced boolean "Run with Elevated Permission" with integer "Permission Level"
+  * Permission level may be anything between 0 and 4 inclusive; see https://minecraft.wiki/w/Permission_level
+  * Previous data is migrated; true value of "Run with Elevated Permission" maps to permission level 2
+* Kill Entity task now has "Entity Type" and "Entity Name" properties
+  * "Entity Type" is renamed from the old "Entity Name"
+  * "Entity Name" can be used to require that the entity have a custom name (either a player name or a name from a name tag for non-player entities)
+* Players no longer need to be in edit mode to do `/ftbquests reload` (but still must have editor permission, of course)
+
+### Fixed
+* Fixed chapter panel always starting open (and sliding shut) even if not pinned
+* Fixed `/ftbquests import_reward_table_from_chest` command not correctly updating quest book id mappings for new reward table
+* Quest view panel now uses the "quest_view_border" theme property from `ftb_quests_theme.txt` consistently now
+  * Previously a mixture of "quest_view_border" and "widget_border" were used to draw the border lines for the view panel
+* Fixed some quest button alignment issues depending on the zoom level of the quest panel
+* Fixed autoclaim rewards being given to entire team even when marked as team reward
+  * Also added tooltip to team reward setting in the reward properties GUI to clarify: team reward means one reward for the whole team
+* Fixed multiline quest editor "L" (insert link) button sometimes inserting a spurious comma, depending on current text selection
+* Leading/trailing whitespace is now silently trimmed from command text in command rewards (trailing whitespace could cause confusing failures to execute commands)
+* Fixed "Disable in JEI" quest property not being correctly saved or sync'd to clients
+
 ## [2101.1.5]
 
 ### Changed

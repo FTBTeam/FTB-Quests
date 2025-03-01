@@ -72,13 +72,14 @@ public class FTBQuestsNeoForge {
 	}
 
 	private static void dropsEvent(LivingDropsEvent event) {
-        if (!(event.getEntity() instanceof ServerPlayer player)
+		if (!(event.getEntity() instanceof ServerPlayer player)
 				|| player instanceof FakePlayer
-				|| player.level().getGameRules().getBoolean(GameRules.RULE_KEEPINVENTORY)) {
-            return;
-        }
+				|| player.level().getGameRules().getBoolean(GameRules.RULE_KEEPINVENTORY)
+				|| ServerQuestFile.INSTANCE.dropBookOnDeath()) {
+			return;
+		}
 
-        Iterator<ItemEntity> iterator = event.getDrops().iterator();
+		Iterator<ItemEntity> iterator = event.getDrops().iterator();
 
 		while (iterator.hasNext()) {
 			ItemEntity drop = iterator.next();

@@ -163,7 +163,7 @@ public final class Quest extends QuestObject implements Movable {
 	}
 
 	public boolean showInRecipeMod() {
-		return disableJEI.get(!getQuestFile().isDefaultQuestDisableJEI());
+		return !disableJEI.get(getQuestFile().isDefaultQuestDisableJEI());
 	}
 
 	public String getRawSubtitle() {
@@ -262,6 +262,7 @@ public final class Quest extends QuestObject implements Movable {
 			nbt.put("dependencies", deps);
 		}
 
+		disableJEI.write(nbt, "disable_recipe_mod");
 		hideUntilDepsVisible.write(nbt, "hide_until_deps_visible");
 		hideUntilDepsComplete.write(nbt, "hide_until_deps_complete");
 
@@ -353,12 +354,12 @@ public final class Quest extends QuestObject implements Movable {
 
 		if (nbt.contains("hide", Tag.TAG_BYTE)) {
 			// TODO legacy; remove in 1.22
-            hideUntilDepsVisible = Tristate.read(nbt, "hide");
-        } else {
+			hideUntilDepsVisible = Tristate.read(nbt, "hide");
+		} else {
 			hideUntilDepsVisible = Tristate.read(nbt, "hide_until_deps_visible");
 		}
 		hideUntilDepsComplete = Tristate.read(nbt, "hide_until_deps_complete");
-
+		disableJEI = Tristate.read(nbt, "disable_recipe_mod");
 		dependencyRequirement = DependencyRequirement.NAME_MAP.get(nbt.getString("dependency_requirement"));
 		hideTextUntilComplete = Tristate.read(nbt, "hide_text_until_complete");
 		size = nbt.getDouble("size");
@@ -397,6 +398,8 @@ public final class Quest extends QuestObject implements Movable {
 		flags = Bits.setFlag(flags, 0x10000, requireSequentialTasks == Tristate.TRUE);
 		flags = Bits.setFlag(flags, 0x20000, iconScale != 1f);
 		flags = Bits.setFlag(flags, 0x40000, hideLockIcon);
+		flags = Bits.setFlag(flags, 0x80000, disableJEI != Tristate.DEFAULT);
+		flags = Bits.setFlag(flags, 0x100000, disableJEI == Tristate.TRUE);
 		buffer.writeVarInt(flags);
 
 		hideUntilDepsComplete.write(buffer);
@@ -478,6 +481,7 @@ public final class Quest extends QuestObject implements Movable {
 		invisibleUntilTasks = Bits.getFlag(flags, 0x400) ? buffer.readVarInt() : 0;
 		hideDetailsUntilStartable = Bits.getFlag(flags, 0x800) ? Bits.getFlag(flags, 0x1000) ? Tristate.TRUE : Tristate.FALSE : Tristate.DEFAULT;
 		requireSequentialTasks = Bits.getFlag(flags, 0x8000) ? Bits.getFlag(flags, 0x10000) ? Tristate.TRUE : Tristate.FALSE : Tristate.DEFAULT;
+		disableJEI = Bits.getFlag(flags, 0x80000) ? Bits.getFlag(flags, 0x100000) ? Tristate.TRUE : Tristate.FALSE : Tristate.DEFAULT;
 		hideLockIcon = Bits.getFlag(flags, 0x40000);
 		progressionMode = ProgressionMode.NAME_MAP.read(buffer);
 	}
@@ -747,7 +751,7 @@ public final class Quest extends QuestObject implements Movable {
 		if (hideUntilDepsComplete.get(chapter.hideQuestUntilDepsComplete())) {
 			return data.areDependenciesComplete(this);
 		} else if (hideUntilDepsVisible.get(chapter.isHideQuestUntilDepsVisible())) {
-				return data.areDependenciesVisible(this);
+			return data.areDependenciesVisible(this);
 		}
 
 		return streamDependencies().anyMatch(object -> object.isVisible(data));
@@ -824,21 +828,21 @@ public final class Quest extends QuestObject implements Movable {
 			return true;
 		} catch (DependencyDepthException ex) {
 			if (autofix) {
-                FTBQuests.LOGGER.error("Too deep dependencies found in {} (referenced in {})! Deleting all dependencies...", this, ex.object);
+				FTBQuests.LOGGER.error("Too deep dependencies found in {} (referenced in {})! Deleting all dependencies...", this, ex.object);
 				clearDependencies();
 				chapter.file.markDirty();
 			} else {
-                FTBQuests.LOGGER.error("Too deep dependencies found in {} (referenced in {})!", this, ex.object);
+				FTBQuests.LOGGER.error("Too deep dependencies found in {} (referenced in {})!", this, ex.object);
 			}
 
 			return false;
 		} catch (DependencyLoopException ex) {
 			if (autofix) {
-                FTBQuests.LOGGER.error("Looping dependencies found in {} (referenced in {})! Deleting all dependencies...", this, ex.object);
+				FTBQuests.LOGGER.error("Looping dependencies found in {} (referenced in {})! Deleting all dependencies...", this, ex.object);
 				clearDependencies();
 				chapter.file.markDirty();
 			} else {
-                FTBQuests.LOGGER.error("Looping dependencies found in {} (referenced in {})!", this, ex.object);
+				FTBQuests.LOGGER.error("Looping dependencies found in {} (referenced in {})!", this, ex.object);
 			}
 
 			return false;

@@ -16,6 +16,7 @@ import dev.ftb.mods.ftblibrary.util.client.ClientUtils;
 import dev.ftb.mods.ftbquests.api.FTBQuestsAPI;
 import dev.ftb.mods.ftbquests.client.ClientQuestFile;
 import dev.ftb.mods.ftbquests.client.FTBQuestsClient;
+import dev.ftb.mods.ftbquests.client.FTBQuestsClientConfig;
 import dev.ftb.mods.ftbquests.client.gui.CustomToast;
 import dev.ftb.mods.ftbquests.client.gui.FTBQuestsTheme;
 import dev.ftb.mods.ftbquests.client.gui.RewardTablesScreen;
@@ -61,6 +62,7 @@ public class QuestScreen extends BaseScreen {
 	int zoom = 16;
 	static boolean grid = false;
 	private PersistedData pendingPersistedData;
+	private final Deque<Long> questViewHistory = new ArrayDeque<>();
 
 	public final QuestPanel questPanel;
 	public final OtherButtonsPanelBottom otherButtonsBottomPanel;
@@ -162,9 +164,19 @@ public class QuestScreen extends BaseScreen {
 	}
 
 	public void viewQuest(Quest quest) {
+		viewQuest(quest, true);
+	}
+
+	private void viewQuest(Quest quest, boolean addHistory) {
 		Quest current = viewQuestPanel.getViewedQuest();
 		if (current != quest) {
 			viewQuestPanel.setViewedQuest(quest);
+			if (addHistory && quest != null) {
+				questViewHistory.addFirst(quest.id);
+				if (questViewHistory.size() > 50) {
+					questViewHistory.removeLast();
+				}
+			}
 			if (current == null) {
 				pushModalPanel(viewQuestPanel);
 			} else if (quest == null) {
@@ -177,7 +189,17 @@ public class QuestScreen extends BaseScreen {
 	@Override
 	public void onBack() {
 		if (isViewingQuest()) {
-			closeQuest();
+			if (FTBQuestsClientConfig.BACKSPACE_HISTORY.get() && !questViewHistory.isEmpty()) {
+				questViewHistory.removeFirst();
+				Long prevId = questViewHistory.peekFirst();
+				if (prevId != null && file.getBase(prevId) instanceof Quest q) {
+					viewQuest(q, false);
+				} else {
+					closeQuest();
+				}
+			} else {
+				closeQuest();
+			}
 		} else {
 			super.onBack();
 		}
@@ -627,8 +649,10 @@ public class QuestScreen extends BaseScreen {
 		Color4I borderColor = ThemeProperties.WIDGET_BORDER.get(selectedChapter);
 		Color4I backgroundColor = ThemeProperties.WIDGET_BACKGROUND.get(selectedChapter);
 
-		borderColor.draw(graphics, x + pw - 1, y + 1, 1, h - 2);
-		backgroundColor.draw(graphics, x + 1, y + 1, pw - 2, h - 2);
+		if (!chapterPanel.expanded) {
+			borderColor.draw(graphics, x + pw - 1, y + 1, 1, h - 2);
+			backgroundColor.draw(graphics, x + 1, y + 1, pw - 2, h - 2);
+		}
 
 		borderColor.draw(graphics, x + w - pw, y + 1, 1, h - 2);
 		backgroundColor.draw(graphics, x + w - pw + 1, y + 1, pw - 2, h - 2);
@@ -797,6 +821,8 @@ public class QuestScreen extends BaseScreen {
 		questPanel.centerQuestX = persistedData.scrollX;
 		questPanel.centerQuestY = persistedData.scrollY;
 		chapterPanel.setExpanded(persistedData.chaptersExpanded);
+		questViewHistory.clear();
+		questViewHistory.addAll(persistedData.questViewHistory);
 	}
 
 	public void initiateMoving(Movable movable) {
@@ -814,6 +840,7 @@ public class QuestScreen extends BaseScreen {
 		private final long selectedChapter;
 		private final List<Long> selectedQuests;
 		private final boolean chaptersExpanded;
+		private final Deque<Long> questViewHistory;
 
 		private PersistedData(QuestScreen questScreen) {
 			zoom = questScreen.zoom;
@@ -822,6 +849,7 @@ public class QuestScreen extends BaseScreen {
 			selectedChapter = questScreen.selectedChapter == null ? 0L : questScreen.selectedChapter.id;
 			selectedQuests = questScreen.selectedObjects.stream().map(Movable::getMovableID).filter(id -> id != 0).toList();
 			chaptersExpanded = questScreen.chapterPanel.expanded;
+			questViewHistory = new ArrayDeque<>(questScreen.questViewHistory);
 		}
 	}
 }
