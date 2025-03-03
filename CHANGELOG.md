@@ -4,6 +4,15 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2001.4.12]
+
+### Fixed
+* Fixed `/ftbquests import_reward_table_from_chest` command not correctly updating quest book id mappings for new reward table
+* Fixed some quest button alignment issues depending on the zoom level of the quest panel* Fixed autoclaim rewards being given to entire team even when marked as team reward
+  * Also added tooltip to team reward setting in the reward properties GUI to clarify: team reward means one reward for the whole team
+* Fixed multiline quest editor "L" (insert link) button sometimes inserting a spurious comma, depending on current text selection
+* Leading/trailing whitespace is now silently trimmed from command text in command rewards (trailing whitespace could cause confusing failures to execute commands)
+
 ## [2001.4.11]
 
 ### Fixed

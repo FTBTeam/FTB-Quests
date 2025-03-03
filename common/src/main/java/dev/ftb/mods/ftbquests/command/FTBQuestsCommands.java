@@ -256,14 +256,14 @@ public class FTBQuestsCommands {
 			pos = BlockPos.containing(player.pick(10, 1F, false).getLocation());
 		}
 
-		RewardTable table = new RewardTable(file.newID(), file);
-		table.setRawTitle(name);
-		table.setRawIcon(Items.CHEST.getDefaultInstance());
-
 		BlockEntity be = level.getBlockEntity(pos);
 		if (!(be instanceof BaseContainerBlockEntity container)) {
 			throw NO_INVENTORY.create();
 		}
+
+		RewardTable table = new RewardTable(file.newID(), file);
+		table.setRawTitle(name);
+		table.setRawIcon(Items.CHEST.getDefaultInstance());
 
 		for (int i = 0; i < container.getContainerSize(); i++) {
 			ItemStack stack = container.getItem(i);
@@ -273,6 +273,9 @@ public class FTBQuestsCommands {
 		}
 
 		file.addRewardTable(table);
+		file.refreshIDMap();
+		file.clearCachedData();
+		file.markDirty();
 
 		new CreateObjectResponseMessage(table, null).sendToAll(level.getServer());
 
