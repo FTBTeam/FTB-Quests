@@ -84,6 +84,7 @@ public abstract class BaseQuestFile extends QuestObject implements QuestFile {
 	protected String lockMessage;
 	private ProgressionMode progressionMode;
 	private int detectionDelay;
+	private boolean dropBookOnDeath;
 
 	private List<Task> allTasks;
 	private List<Task> submitTasks;
@@ -122,6 +123,7 @@ public abstract class BaseQuestFile extends QuestObject implements QuestFile {
 		lockMessage = "";
 		progressionMode = ProgressionMode.LINEAR;
 		detectionDelay = 20;
+		dropBookOnDeath = false;
 
 		allTasks = null;
 	}
@@ -400,6 +402,7 @@ public abstract class BaseQuestFile extends QuestObject implements QuestFile {
 		nbt.putString("lock_message", lockMessage);
 		nbt.putString("progression_mode", progressionMode.getId());
 		nbt.putInt("detection_delay", detectionDelay);
+		nbt.putBoolean("drop_book_on_death", dropBookOnDeath);
 	}
 
 	@Override
@@ -442,6 +445,7 @@ public abstract class BaseQuestFile extends QuestObject implements QuestFile {
 		if (nbt.contains("detection_delay")) {
 			detectionDelay = nbt.getInt("detection_delay");
 		}
+		dropBookOnDeath = nbt.getBoolean("drop_book_on_death");
 	}
 
 	public final void writeDataFull(Path folder) {
@@ -751,6 +755,7 @@ public abstract class BaseQuestFile extends QuestObject implements QuestFile {
 		buffer.writeUtf(lockMessage, Short.MAX_VALUE);
 		ProgressionMode.NAME_MAP_NO_DEFAULT.write(buffer, progressionMode);
 		buffer.writeVarInt(detectionDelay);
+		buffer.writeBoolean(dropBookOnDeath);
 	}
 
 	@Override
@@ -771,6 +776,7 @@ public abstract class BaseQuestFile extends QuestObject implements QuestFile {
 		lockMessage = buffer.readUtf(Short.MAX_VALUE);
 		progressionMode = ProgressionMode.NAME_MAP_NO_DEFAULT.read(buffer);
 		detectionDelay = buffer.readVarInt();
+		dropBookOnDeath = buffer.readBoolean();
 	}
 
 	public final void writeNetDataFull(FriendlyByteBuf buffer) {
@@ -1046,6 +1052,7 @@ public abstract class BaseQuestFile extends QuestObject implements QuestFile {
 		config.addEnum("progression_mode", progressionMode, v -> progressionMode = v, ProgressionMode.NAME_MAP_NO_DEFAULT);
 		config.addInt("detection_delay", detectionDelay, v -> detectionDelay = v, 20, 0, 200);
 		config.addBool("pause_game", pauseGame, v -> pauseGame = v, false);
+		config.addBool("drop_book_on_death", dropBookOnDeath, v -> dropBookOnDeath = v, true);
 
 		ConfigGroup defaultsGroup = config.getOrCreateSubgroup("defaults");
 		defaultsGroup.addBool("reward_team", defaultPerTeamReward, v -> defaultPerTeamReward = v, false);
@@ -1433,5 +1440,9 @@ public abstract class BaseQuestFile extends QuestObject implements QuestFile {
 
 	public EntityWeight getLootCrateNoDrop() {
 		return lootCrateNoDrop;
+	}
+
+	public boolean dropBookOnDeath() {
+		return dropBookOnDeath;
 	}
 }

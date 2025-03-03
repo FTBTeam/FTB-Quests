@@ -78,11 +78,10 @@ public class FTBQuestsForge {
 	}
 
 	private static void dropsEvent(LivingDropsEvent event) {
-		if (!(event.getEntity() instanceof ServerPlayer player)) {
-			return;
-		}
-
-		if (player instanceof FakePlayer || player.level().getGameRules().getBoolean(GameRules.RULE_KEEPINVENTORY)) {
+		if (!(event.getEntity() instanceof ServerPlayer player)
+				|| player instanceof FakePlayer
+				|| player.level().getGameRules().getBoolean(GameRules.RULE_KEEPINVENTORY)
+				|| ServerQuestFile.INSTANCE.dropBookOnDeath()) {
 			return;
 		}
 
