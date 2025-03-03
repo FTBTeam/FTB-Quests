@@ -84,7 +84,6 @@ public abstract class BaseQuestFile extends QuestObject implements QuestFile {
 	protected String lockMessage;
 	private ProgressionMode progressionMode;
 	private int detectionDelay;
-	private boolean showLockIcons;
 	private boolean dropBookOnDeath;
 
 	private List<Task> allTasks;
@@ -403,7 +402,6 @@ public abstract class BaseQuestFile extends QuestObject implements QuestFile {
 		nbt.putString("lock_message", lockMessage);
 		nbt.putString("progression_mode", progressionMode.getId());
 		nbt.putInt("detection_delay", detectionDelay);
-		nbt.putBoolean("show_lock_icons", showLockIcons);
 		nbt.putBoolean("drop_book_on_death", dropBookOnDeath);
 	}
 
@@ -447,7 +445,6 @@ public abstract class BaseQuestFile extends QuestObject implements QuestFile {
 		if (nbt.contains("detection_delay")) {
 			detectionDelay = nbt.getInt("detection_delay");
 		}
-		showLockIcons = !nbt.contains("show_lock_icons") || nbt.getBoolean("show_lock_icons");
 		dropBookOnDeath = nbt.getBoolean("drop_book_on_death");
 	}
 
@@ -758,7 +755,6 @@ public abstract class BaseQuestFile extends QuestObject implements QuestFile {
 		buffer.writeUtf(lockMessage, Short.MAX_VALUE);
 		ProgressionMode.NAME_MAP_NO_DEFAULT.write(buffer, progressionMode);
 		buffer.writeVarInt(detectionDelay);
-		buffer.writeBoolean(showLockIcons);
 		buffer.writeBoolean(dropBookOnDeath);
 	}
 
@@ -780,7 +776,6 @@ public abstract class BaseQuestFile extends QuestObject implements QuestFile {
 		lockMessage = buffer.readUtf(Short.MAX_VALUE);
 		progressionMode = ProgressionMode.NAME_MAP_NO_DEFAULT.read(buffer);
 		detectionDelay = buffer.readVarInt();
-		showLockIcons = buffer.readBoolean();
 		dropBookOnDeath = buffer.readBoolean();
 	}
 
@@ -1057,7 +1052,6 @@ public abstract class BaseQuestFile extends QuestObject implements QuestFile {
 		config.addEnum("progression_mode", progressionMode, v -> progressionMode = v, ProgressionMode.NAME_MAP_NO_DEFAULT);
 		config.addInt("detection_delay", detectionDelay, v -> detectionDelay = v, 20, 0, 200);
 		config.addBool("pause_game", pauseGame, v -> pauseGame = v, false);
-		config.addBool("show_lock_icons", showLockIcons, v -> showLockIcons = v, true).setNameKey("ftbquests.ui.show_lock_icon");
 		config.addBool("drop_book_on_death", dropBookOnDeath, v -> dropBookOnDeath = v, true);
 
 		ConfigGroup defaultsGroup = config.getOrCreateSubgroup("defaults");
