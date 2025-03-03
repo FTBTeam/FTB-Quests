@@ -6,6 +6,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [2001.4.12]
 
+### Added
+* Added new "Drop FTB Quests Book on Death" setting in quest book properties (default false, as before)
+
 ### Fixed
 * Fixed `/ftbquests import_reward_table_from_chest` command not correctly updating quest book id mappings for new reward table
 * Fixed some quest button alignment issues depending on the zoom level of the quest panel* Fixed autoclaim rewards being given to entire team even when marked as team reward
