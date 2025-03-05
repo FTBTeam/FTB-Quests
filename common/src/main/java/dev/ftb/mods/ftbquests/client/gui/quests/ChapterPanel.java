@@ -406,7 +406,9 @@ public class ChapterPanel extends Panel {
 			if (chapterPanel.questScreen.file.canEdit() || chapter.hasAnyVisibleChildren()) {
 				playClickSound();
 
-				if (chapterPanel.questScreen.selectedChapter != chapter) {
+				if (chapterPanel.questScreen.file.canEdit() && button.isLeft() && ScreenWrapper.hasAltDown()) {
+					chapter.onEditButtonClicked(chapterPanel.questScreen);
+				} else if (chapterPanel.questScreen.selectedChapter != chapter) {
 					chapterPanel.questScreen.open(chapter, false);
 					chapter.getAutofocus().ifPresent(chapterPanel.questScreen::scrollTo);
 				}
