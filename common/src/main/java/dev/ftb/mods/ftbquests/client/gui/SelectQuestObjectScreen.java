@@ -26,7 +26,7 @@ import java.util.function.Function;
 public class SelectQuestObjectScreen<T extends QuestObjectBase> extends AbstractButtonListScreen {
 	private final ConfigQuestObject<T> config;
 	private final ConfigCallback callback;
-	private Function<T,Component> formatter = this::defaultFormatter;
+	private Function<T,Component> formatter = ConfigQuestObject::formatEntry;
 
 	public SelectQuestObjectScreen(ConfigQuestObject<T> config, ConfigCallback callback) {
 		setTitle(Component.translatable("ftbquests.gui.select_quest_object"));
@@ -41,7 +41,7 @@ public class SelectQuestObjectScreen<T extends QuestObjectBase> extends Abstract
 	}
 
 	public SelectQuestObjectScreen<T> withFormatter(@Nullable Function<T,Component> formatter) {
-		this.formatter = Objects.requireNonNullElse(formatter, this::defaultFormatter);
+		this.formatter = Objects.requireNonNullElse(formatter, ConfigQuestObject::formatEntry);
 		return this;
 	}
 
@@ -106,10 +106,6 @@ public class SelectQuestObjectScreen<T extends QuestObjectBase> extends Abstract
 	@Override
 	protected void doAccept() {
 		callback.save(true);
-	}
-
-	private Component defaultFormatter(T qo) {
-		return ConfigQuestObject.formatEntry(qo);
 	}
 
 	private class QuestObjectButton extends SimpleTextButton {
