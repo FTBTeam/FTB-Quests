@@ -6,9 +6,6 @@ import net.fabricmc.api.Environment;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.network.chat.Component;
 
-/**
- * @author LatvianModder
- */
 public interface Movable {
 	long getMovableID();
 

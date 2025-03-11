@@ -10,13 +10,24 @@ import dev.ftb.mods.ftbquests.quest.QuestObjectBase;
 import net.minecraft.network.chat.Component;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.function.Function;
 import java.util.function.Predicate;
 
 public class ConfigQuestObject<T extends QuestObjectBase> extends ConfigValue<T> {
 	public final Predicate<QuestObjectBase> predicate;
+	private final Function<T, Component> formatter;
 
-	public ConfigQuestObject(Predicate<QuestObjectBase> t) {
-		predicate = t;
+	public ConfigQuestObject(Predicate<QuestObjectBase> predicate, Function<T, Component> formatter) {
+		this.predicate = predicate;
+		this.formatter = formatter;
+	}
+
+	public ConfigQuestObject(Predicate<QuestObjectBase> predicate) {
+		this(predicate, null);
+	}
+
+	public static Component formatEntry(QuestObjectBase qo) {
+		return qo.getMutableTitle().withStyle(qo.getObjectType().getColor());
 	}
 
 	@Override
@@ -31,7 +42,7 @@ public class ConfigQuestObject<T extends QuestObjectBase> extends ConfigValue<T>
 	@Override
 	public void onClicked(Widget clickedWidget, MouseButton button, ConfigCallback callback) {
 		if (getCanEdit()) {
-			new SelectQuestObjectScreen<>(this, callback).openGui();
+			new SelectQuestObjectScreen<>(this, callback).withFormatter(formatter).openGui();
 		}
 	}
 

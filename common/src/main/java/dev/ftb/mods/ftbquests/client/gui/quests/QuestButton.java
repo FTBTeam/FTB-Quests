@@ -26,6 +26,7 @@ import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.ComponentContents;
+import net.minecraft.network.chat.Style;
 import net.minecraft.world.entity.player.Player;
 
 import java.util.ArrayList;
@@ -316,6 +317,10 @@ public class QuestButton extends Button implements QuestPositionableButton {
 		}
 		if (!questScreen.file.selfTeamData.canStartTasks(quest)) {
 			list.add(Component.literal("[").withStyle(ChatFormatting.DARK_GRAY).append(Component.translatable("ftbquests.quest.locked")).append("]"));
+		}
+		if (quest.isExclusiveQuest()) {
+			list.add(Component.translatable("ftbquests.quest.misc.exclusive").withStyle(ChatFormatting.GOLD));
+			list.add(Component.translatable("ftbquests.quest.misc.exclusive.desc").withStyle(Style.EMPTY.withColor(0xFFC08000)));
 		}
 	}
 

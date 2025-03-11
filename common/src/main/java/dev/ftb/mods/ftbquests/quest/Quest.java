@@ -42,7 +42,7 @@ import java.util.*;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
 
-public final class Quest extends QuestObject implements Movable {
+public final class Quest extends QuestObject implements Movable, Excludable {
 	public static final String PAGEBREAK_CODE = "{@pagebreak}";
 
 	private Chapter chapter;
@@ -67,10 +67,11 @@ public final class Quest extends QuestObject implements Movable {
 	private boolean optional;
 	private int minWidth;
 	private Tristate canRepeat;
-	private boolean invisible;  // invisible to players (not the same as hidden!)
+	private boolean invisibleUntilCompleted;
 	private int invisibleUntilTasks;  // invisible until at least X number of tasks have been completed
 	private Tristate requireSequentialTasks;
 	private double iconScale;
+	private int maxCompletableDeps;
 
 	private Component cachedSubtitle = null;
 	private List<Component> cachedDescription = null;
@@ -105,13 +106,14 @@ public final class Quest extends QuestObject implements Movable {
 		optional = false;
 		minWidth = 0;
 		canRepeat = Tristate.DEFAULT;
-		invisible = false;
+		invisibleUntilCompleted = false;
 		invisibleUntilTasks = 0;
 		ignoreRewardBlocking = false;
 		progressionMode = ProgressionMode.DEFAULT;
 		dependantIDs = new HashSet<>();
 		requireSequentialTasks = Tristate.DEFAULT;
 		iconScale = 1d;
+		maxCompletableDeps = 0;
 	}
 
 	@Override
@@ -294,7 +296,7 @@ public final class Quest extends QuestObject implements Movable {
 
 		canRepeat.write(nbt, "can_repeat");
 
-		if (invisible) {
+		if (invisibleUntilCompleted) {
 			nbt.putBoolean("invisible", true);
 		}
 		if (invisibleUntilTasks > 0) {
@@ -311,6 +313,10 @@ public final class Quest extends QuestObject implements Movable {
 
 		hideDetailsUntilStartable.write(nbt, "hide_details_until_startable");
 		requireSequentialTasks.write(nbt, "require_sequential_tasks");
+
+		if (maxCompletableDeps > 0) {
+			nbt.putInt("max_completable_dependents", maxCompletableDeps);
+		}
 	}
 
 	@Override
@@ -375,12 +381,13 @@ public final class Quest extends QuestObject implements Movable {
 		optional = nbt.getBoolean("optional");
 		minWidth = nbt.getInt("min_width");
 		canRepeat = Tristate.read(nbt, "can_repeat");
-		invisible = nbt.getBoolean("invisible");
+		invisibleUntilCompleted = nbt.getBoolean("invisible");
 		invisibleUntilTasks = nbt.getInt("invisible_until_tasks");
 		ignoreRewardBlocking = nbt.getBoolean("ignore_reward_blocking");
 		progressionMode = ProgressionMode.NAME_MAP.get(nbt.getString("progression_mode"));
 		hideDetailsUntilStartable = Tristate.read(nbt, "hide_details_until_startable");
 		requireSequentialTasks = Tristate.read(nbt, "require_sequential_tasks");
+		maxCompletableDeps = nbt.getInt("max_completable_dependents");
 	}
 
 	@Override
@@ -395,7 +402,7 @@ public final class Quest extends QuestObject implements Movable {
 		flags = Bits.setFlag(flags, 0x20, hideDependentLines);
 		//implement others
 		//flags = Bits.setFlag(flags, 32, !customClick.isEmpty());
-		flags = Bits.setFlag(flags, 0x80, invisible);
+		flags = Bits.setFlag(flags, 0x80, invisibleUntilCompleted);
 		flags = Bits.setFlag(flags, 0x100, optional);
 		flags = Bits.setFlag(flags, 0x200, minWidth > 0);
 		flags = Bits.setFlag(flags, 0x400, invisibleUntilTasks > 0);
@@ -454,6 +461,8 @@ public final class Quest extends QuestObject implements Movable {
 		}
 
 		ProgressionMode.NAME_MAP.write(buffer, progressionMode);
+
+		buffer.writeVarInt(maxCompletableDeps);
 	}
 
 	@Override
@@ -497,13 +506,14 @@ public final class Quest extends QuestObject implements Movable {
 		ignoreRewardBlocking = Bits.getFlag(flags, 0x10);
 		hideDependentLines = Bits.getFlag(flags, 0x20);
 		canRepeat = Bits.getFlag(flags, 0x2000) ? Bits.getFlag(flags, 0x4000) ? Tristate.TRUE : Tristate.FALSE : Tristate.DEFAULT;
-		invisible = Bits.getFlag(flags, 0x80);
+		invisibleUntilCompleted = Bits.getFlag(flags, 0x80);
 		optional = Bits.getFlag(flags, 0x100);
 		invisibleUntilTasks = Bits.getFlag(flags, 0x400) ? buffer.readVarInt() : 0;
 		hideDetailsUntilStartable = Bits.getFlag(flags, 0x800) ? Bits.getFlag(flags, 0x1000) ? Tristate.TRUE : Tristate.FALSE : Tristate.DEFAULT;
 		requireSequentialTasks = Bits.getFlag(flags, 0x8000) ? Bits.getFlag(flags, 0x10000) ? Tristate.TRUE : Tristate.FALSE : Tristate.DEFAULT;
 
 		progressionMode = ProgressionMode.NAME_MAP.read(buffer);
+		maxCompletableDeps = buffer.readVarInt();
 	}
 
 	@Override
@@ -685,8 +695,8 @@ public final class Quest extends QuestObject implements Movable {
 		ConfigGroup visibility = config.getOrCreateSubgroup("visibility");
 		visibility.addTristate("hide_until_deps_complete", hideUntilDepsComplete, v -> hideUntilDepsComplete = v);
 		visibility.addTristate("hide_until_deps_visible", hideUntilDepsVisible, v -> hideUntilDepsVisible = v);
-		visibility.addBool("invisible", invisible, v -> invisible = v, false);
-		visibility.addInt("invisible_until_tasks", invisibleUntilTasks, v -> invisibleUntilTasks = v, 0, 0, Integer.MAX_VALUE).setCanEdit(invisible);
+		visibility.addBool("invisible", invisibleUntilCompleted, v -> invisibleUntilCompleted = v, false);
+		visibility.addInt("invisible_until_tasks", invisibleUntilTasks, v -> invisibleUntilTasks = v, 0, 0, Integer.MAX_VALUE).setCanEdit(invisibleUntilCompleted);
 		visibility.addTristate("hide_details_until_startable", hideDetailsUntilStartable, v -> hideDetailsUntilStartable = v);
 		visibility.addTristate("hide_text_until_complete", hideTextUntilComplete, v -> hideTextUntilComplete = v);
 
@@ -698,6 +708,7 @@ public final class Quest extends QuestObject implements Movable {
 		deps.addInt("min_required_dependencies", minRequiredDependencies, v -> minRequiredDependencies = v, 0, 0, Integer.MAX_VALUE);
 		deps.addTristate("hide_dependency_lines", hideDependencyLines, v -> hideDependencyLines = v);
 		deps.addBool("hide_dependent_lines", hideDependentLines, v -> hideDependentLines = v, false);
+		deps.addInt("max_completable_dependents", maxCompletableDeps, v -> maxCompletableDeps = v, 0, 0, Integer.MAX_VALUE);
 
 		ConfigGroup misc = config.getOrCreateSubgroup("misc");
 		misc.addString("guide_page", guidePage, v -> guidePage = v, "");
@@ -756,10 +767,14 @@ public final class Quest extends QuestObject implements Movable {
 
 	@Override
 	public boolean isVisible(TeamData data) {
-		if (invisible && !data.isCompleted(this)) {
+		if (invisibleUntilCompleted && !data.isCompleted(this)) {
 			if (invisibleUntilTasks == 0 || tasks.stream().filter(data::isCompleted).limit(invisibleUntilTasks).count() < invisibleUntilTasks) {
 				return false;
 			}
+		}
+
+		if (data.isExcludedByOtherQuestline(this)) {
+			return false;
 		}
 
 		if (dependencies.isEmpty()) {
@@ -919,8 +934,8 @@ public final class Quest extends QuestObject implements Movable {
 		FTBQuestsClient.copyToClipboard(this);
 	}
 
-	public boolean isProgressionIgnored() {
-		return canBeRepeated() || optional;
+	public boolean isProgressionIgnored(TeamData data) {
+		return canBeRepeated() || optional || data.isExcludedByOtherQuestline(this);
 	}
 
 	/**
@@ -1113,5 +1128,27 @@ public final class Quest extends QuestObject implements Movable {
 		}
 
 		return index;
+	}
+
+	@Override
+	public boolean isQuestObjectExcluded(TeamData teamData) {
+		for (QuestObject qo : dependencies) {
+            if (qo instanceof Quest quest) {
+                if (!quest.dependantIDs.isEmpty() && quest.maxCompletableDeps > 0) {
+                    long completed = quest.getDependants().stream().filter(teamData::isCompleted).count();
+                    if (completed >= quest.maxCompletableDeps && !teamData.isCompleted(this)) {
+                        return true;
+                    }
+                }
+				// note: this effectively recurses, but the results are cached in TeamData to avoid excessive recursion
+				return teamData.isExcludedByOtherQuestline(qo);
+			}
+		}
+
+		return false;
+	}
+
+	public boolean isExclusiveQuest() {
+		return dependencies.stream().anyMatch(qo -> qo instanceof Quest q && q.maxCompletableDeps > 0);
 	}
 }

@@ -54,6 +54,10 @@ public abstract class QuestObjectBase implements Comparable<QuestObjectBase> {
 		this.id = id;
 	}
 
+	public long getId() {
+		return id;
+	}
+
 	public static boolean isNull(@Nullable QuestObjectBase object) {
 		return object == null || object.invalid;
 	}
