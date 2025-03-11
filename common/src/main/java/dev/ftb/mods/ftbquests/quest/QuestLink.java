@@ -16,7 +16,7 @@ import net.minecraft.network.chat.Component;
 
 import java.util.Optional;
 
-public class QuestLink extends QuestObject implements Movable {
+public class QuestLink extends QuestObject implements Movable, Excludable {
     private Chapter chapter;
     private long linkId;
 
@@ -232,4 +232,8 @@ public class QuestLink extends QuestObject implements Movable {
         return linkId == quest.id;
     }
 
+    @Override
+    public boolean isQuestObjectExcluded(TeamData teamData) {
+        return getQuest().map(q -> q.isQuestObjectExcluded(teamData)).orElse(false);
+    }
 }
