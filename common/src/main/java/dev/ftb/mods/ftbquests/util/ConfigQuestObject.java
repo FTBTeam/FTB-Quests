@@ -31,7 +31,7 @@ public class ConfigQuestObject<T extends QuestObjectBase> extends ConfigValue<T>
 	}
 
 	@Override
-	public Component getStringForGUI(@Nullable QuestObjectBase value) {
+	public Component getStringForGUI(@Nullable T value) {
 		if (value == null) {
 			return Component.empty();
 		}
