@@ -250,7 +250,7 @@
 	"ftbquests.gui.save_on_server": "今すぐサーバーに保存",
 	"ftbquests.gui.export_spreadsheet": "スプレッドシートをエクスポート",
 	"ftbquests.gui.saved_as_file": "クエストは%sのクライアントに保存されました",
-	"ftbquests.gui.saved_on_server": "サーバーに保存されたクエスト",
+	"ftbquests.gui.saved_on_server": "クエストをサーバーに保存しました",
 	"ftbquests.gui.error": "エラー！",
 	"ftbquests.gui.add_reward_all": "全員に報酬を追加...",
 	"ftbquests.gui.clear_reward_all": "全員からのクリア報酬",
