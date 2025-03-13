@@ -18,7 +18,6 @@ import dev.ftb.mods.ftbquests.client.gui.ContextMenuBuilder;
 import dev.ftb.mods.ftbquests.net.CreateObjectMessage;
 import dev.ftb.mods.ftbquests.net.MoveChapterGroupMessage;
 import dev.ftb.mods.ftbquests.net.MoveChapterMessage;
-import dev.ftb.mods.ftbquests.net.ToggleChapterPinnedMessage;
 import dev.ftb.mods.ftbquests.quest.Chapter;
 import dev.ftb.mods.ftbquests.quest.ChapterGroup;
 import dev.ftb.mods.ftbquests.quest.theme.property.ThemeProperties;
@@ -160,7 +159,7 @@ public class ChapterPanel extends Panel {
 	}
 
 	boolean isPinned() {
-		return ClientQuestFile.INSTANCE.selfTeamData.isChapterPinned(Minecraft.getInstance().player);
+		return FTBQuestsClientConfig.CHAPTER_PANEL_PINNED.get();
 	}
 
 	public static abstract class ListButton extends Button {
@@ -195,7 +194,7 @@ public class ChapterPanel extends Panel {
 		public void onClicked(MouseButton button) {
 			if (getMouseX() > getX() + width - 18) {
 				playClickSound();
-				NetworkManager.sendToServer(ToggleChapterPinnedMessage.INSTANCE);
+				FTBQuestsClientConfig.setChapterPanelPinned(!FTBQuestsClientConfig.CHAPTER_PANEL_PINNED.get());
 			} else {
 				ClientQuestFile file = chapterPanel.questScreen.file;
 				if (file.canEdit() && getMouseX() > getX() + width - 34) {
@@ -277,9 +276,7 @@ public class ChapterPanel extends Panel {
 		public void addMouseOverText(TooltipList list) {
 			chapterPanel.questScreen.addInfoTooltip(list, chapterPanel.questScreen.file);
 
-			if (getMouseX() > getX() + width - 18) {
-				list.translate(chapterPanel.isPinned() ? "ftbquests.gui.stays_open" : "ftbquests.gui.does_not_stay_open");
-			} else if (chapterPanel.questScreen.file.canEdit() && getMouseX() > getX() + width - 34) {
+			if (chapterPanel.questScreen.file.canEdit() && getMouseX() > getX() + width - 34) {
 				list.translate("gui.add");
 			}
 		}
