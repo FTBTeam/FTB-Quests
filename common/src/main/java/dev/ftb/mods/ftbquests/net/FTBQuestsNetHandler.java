@@ -28,7 +28,6 @@ public class FTBQuestsNetHandler {
 		NetworkHelper.registerC2S(SyncStructuresRequestMessage.TYPE, SyncStructuresRequestMessage.STREAM_CODEC, SyncStructuresRequestMessage::handle);
 		NetworkHelper.registerC2S(SyncTranslationMessageToServer.TYPE, SyncTranslationMessageToServer.STREAM_CODEC, SyncTranslationMessageToServer::handle);
 		NetworkHelper.registerC2S(TaskScreenConfigResponseMessage.TYPE, TaskScreenConfigResponseMessage.STREAM_CODEC, TaskScreenConfigResponseMessage::handle);
-		NetworkHelper.registerC2S(ToggleChapterPinnedMessage.TYPE, ToggleChapterPinnedMessage.STREAM_CODEC, ToggleChapterPinnedMessage::handle);
 		NetworkHelper.registerC2S(ToggleEditingModeMessage.TYPE, ToggleEditingModeMessage.STREAM_CODEC, ToggleEditingModeMessage::handle);
 		NetworkHelper.registerC2S(TogglePinnedMessage.TYPE, TogglePinnedMessage.STREAM_CODEC, TogglePinnedMessage::handle);
 
@@ -62,7 +61,6 @@ public class FTBQuestsNetHandler {
 		NetworkHelper.registerS2C(SyncTranslationTableMessage.TYPE, SyncTranslationTableMessage.STREAM_CODEC, SyncTranslationTableMessage::handle);
 		NetworkHelper.registerS2C(TaskScreenConfigRequestMessage.TYPE, TaskScreenConfigRequestMessage.STREAM_CODEC, TaskScreenConfigRequestMessage::handle);
 		NetworkHelper.registerS2C(TeamDataChangedMessage.TYPE, TeamDataChangedMessage.STREAM_CODEC, TeamDataChangedMessage::handle);
-		NetworkHelper.registerS2C(ToggleChapterPinnedResponseMessage.TYPE, ToggleChapterPinnedResponseMessage.STREAM_CODEC, ToggleChapterPinnedResponseMessage::handle);
 		NetworkHelper.registerS2C(TogglePinnedResponseMessage.TYPE, TogglePinnedResponseMessage.STREAM_CODEC, TogglePinnedResponseMessage::handle);
 		NetworkHelper.registerS2C(UpdateTaskProgressMessage.TYPE, UpdateTaskProgressMessage.STREAM_CODEC, UpdateTaskProgressMessage::handle);
 		NetworkHelper.registerS2C(UpdateTeamDataMessage.TYPE, UpdateTeamDataMessage.STREAM_CODEC, UpdateTeamDataMessage::handle);

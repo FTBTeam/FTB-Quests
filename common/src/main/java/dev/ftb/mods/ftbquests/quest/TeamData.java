@@ -773,19 +773,6 @@ public class TeamData {
 		});
 	}
 
-	public void setChapterPinned(Player player, boolean pinned) {
-		getOrCreatePlayerData(player).ifPresent(playerData -> {
-			if (playerData.chapterPinned != pinned) {
-				playerData.chapterPinned = pinned;
-				markDirty();
-			}
-		});
-	}
-
-	public boolean isChapterPinned(Player player) {
-		return getOrCreatePlayerData(player).map(playerData -> playerData.chapterPinned).orElse(false);
-	}
-
 	public LongSet getPinnedQuestIds(Player player) {
 		return getOrCreatePlayerData(player).map(playerData -> playerData.pinnedQuests).orElse(LongSet.of());
 	}
@@ -797,33 +784,30 @@ public class TeamData {
 	private static class PerPlayerData {
 		private boolean canEdit;
 		private boolean autoPin;
-		private boolean chapterPinned;
 		private final LongSet pinnedQuests;
 
 		PerPlayerData() {
-			canEdit = autoPin = chapterPinned = false;
+			canEdit = autoPin = false;
 			pinnedQuests = new LongOpenHashSet();
 		}
 
-		PerPlayerData(boolean canEdit, boolean autoPin, boolean chapterPinned, LongSet pinnedQuests) {
+		PerPlayerData(boolean canEdit, boolean autoPin, LongSet pinnedQuests) {
 			this.canEdit = canEdit;
 			this.autoPin = autoPin;
-			this.chapterPinned = chapterPinned;
 			this.pinnedQuests = pinnedQuests;
 		}
 
 		public boolean hasDefaultValues() {
-			return !canEdit && !autoPin && !chapterPinned && pinnedQuests.isEmpty();
+			return !canEdit && !autoPin && pinnedQuests.isEmpty();
 		}
 
 		public static PerPlayerData fromNBT(CompoundTag nbt, BaseQuestFile file) {
 			boolean canEdit = nbt.getBoolean("can_edit");
 			boolean autoPin = nbt.getBoolean("auto_pin");
-			boolean chapterPinned = nbt.getBoolean("chapter_pinned");
 			LongSet pq = nbt.getList("pinned_quests", Tag.TAG_STRING).stream()
 					.map(tag -> file.getID(tag.getAsString()))
 					.collect(Collectors.toCollection(LongOpenHashSet::new));
-			return new PerPlayerData(canEdit, autoPin, chapterPinned, pq);
+			return new PerPlayerData(canEdit, autoPin, pq);
 		}
 
 		public static PerPlayerData fromNet(FriendlyByteBuf buffer) {
@@ -831,7 +815,6 @@ public class TeamData {
 
 			ppd.canEdit = buffer.readBoolean();
 			ppd.autoPin = buffer.readBoolean();
-			ppd.chapterPinned = buffer.readBoolean();
 			int pinnedCount = buffer.readVarInt();
 			for (int i = 0; i < pinnedCount; i++) {
 				ppd.pinnedQuests.add(buffer.readLong());
@@ -845,7 +828,6 @@ public class TeamData {
 
 			if (canEdit) nbt.putBoolean("can_edit", true);
 			if (autoPin) nbt.putBoolean("auto_pin", true);
-			if (chapterPinned) nbt.putBoolean("chapter_pinned", true);
 
 			if (!pinnedQuests.isEmpty()) {
 				long[] pinnedQuestsArray = pinnedQuests.toLongArray();
@@ -863,7 +845,6 @@ public class TeamData {
 		public void writeNet(FriendlyByteBuf buffer) {
 			buffer.writeBoolean(canEdit);
 			buffer.writeBoolean(autoPin);
-			buffer.writeBoolean(chapterPinned);
 
 			buffer.writeVarInt(pinnedQuests.size());
 			for (long reward : pinnedQuests) {
