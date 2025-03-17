@@ -382,7 +382,7 @@ public class FTBQuestsCommands {
 				.filter(stack -> !stack.isEmpty() && RegistrarManager.getId(stack.getItem(), Registries.ITEM) != null)
 				.sorted(Comparator.comparing(a -> RegistrarManager.getId(a.getItem(), Registries.ITEM)))
 				.toList();
-		FTBQuests.LOGGER.info("Found {} items in total, chapter ID: {}", allItems.size(), chapter);
+        FTBQuests.LOGGER.info("Found {} items in total, chapter ID: {}", allItems.size(), chapter);
 
 		if (list.isEmpty()) {
 			return 0;
