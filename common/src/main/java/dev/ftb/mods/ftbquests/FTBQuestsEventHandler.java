@@ -114,7 +114,7 @@ public enum FTBQuestsEventHandler {
 	}
 
 	private EventResult playerKill(LivingEntity entity, DamageSource source) {
-		if (source.getEntity() instanceof ServerPlayer player && !PlayerHooks.isFake(player)) {
+		if (source != null && source.getEntity() instanceof ServerPlayer player && !PlayerHooks.isFake(player)) {
 			if (killTasks == null) {
 				killTasks = ServerQuestFile.INSTANCE.collect(KillTask.class);
 			}
