@@ -114,6 +114,11 @@ public enum FTBQuestsEventHandler {
 	}
 
 	private EventResult playerKill(LivingEntity entity, DamageSource source) {
+		// `source` should never be null, this is a defensive check against badly behaved mods.
+		if (source == null) {
+			return EventResult.pass();
+		}
+
 		if (source.getEntity() instanceof ServerPlayer player && !PlayerHooks.isFake(player)) {
 			if (killTasks == null) {
 				killTasks = ServerQuestFile.INSTANCE.collect(KillTask.class);
