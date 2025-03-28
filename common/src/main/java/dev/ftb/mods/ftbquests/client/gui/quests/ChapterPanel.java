@@ -1,5 +1,6 @@
 package dev.ftb.mods.ftbquests.client.gui.quests;
 
+import com.mojang.blaze3d.platform.InputConstants;
 import com.mojang.blaze3d.systems.RenderSystem;
 import dev.architectury.networking.NetworkManager;
 import dev.ftb.mods.ftblibrary.config.StringConfig;
@@ -12,9 +13,11 @@ import dev.ftb.mods.ftblibrary.ui.input.MouseButton;
 import dev.ftb.mods.ftblibrary.util.TooltipList;
 import dev.ftb.mods.ftblibrary.util.client.PositionedIngredient;
 import dev.ftb.mods.ftbquests.client.ClientQuestFile;
+import dev.ftb.mods.ftbquests.client.FTBQuestsClient;
 import dev.ftb.mods.ftbquests.client.FTBQuestsClientConfig;
 import dev.ftb.mods.ftbquests.client.gui.ChangeChapterGroupScreen;
 import dev.ftb.mods.ftbquests.client.gui.ContextMenuBuilder;
+import dev.ftb.mods.ftbquests.client.gui.CustomToast;
 import dev.ftb.mods.ftbquests.net.CreateObjectMessage;
 import dev.ftb.mods.ftbquests.net.MoveChapterGroupMessage;
 import dev.ftb.mods.ftbquests.net.MoveChapterMessage;
@@ -403,12 +406,21 @@ public class ChapterPanel extends Panel {
 			if (chapterPanel.questScreen.file.canEdit() || chapter.hasAnyVisibleChildren()) {
 				playClickSound();
 
-				if (chapterPanel.questScreen.file.canEdit() && button.isLeft() && ScreenWrapper.hasAltDown()) {
-					chapter.onEditButtonClicked(chapterPanel.questScreen);
-				} else if (chapterPanel.questScreen.selectedChapter != chapter) {
-					chapterPanel.questScreen.open(chapter, false);
-					chapter.getAutofocus().ifPresent(chapterPanel.questScreen::scrollTo);
-				}
+                if (chapterPanel.questScreen.file.canEdit() && button.isLeft()) {
+                    if (isKeyDown(InputConstants.KEY_LALT)) {
+						chapter.onEditButtonClicked(chapterPanel.questScreen);
+					} else if (isKeyDown(InputConstants.KEY_RALT)) {
+						FTBQuestsClient.copyToClipboard(chapter);
+						Minecraft.getInstance().getToasts().addToast(new CustomToast(Component.translatable("ftbquests.quest.copied"),
+								Icons.INFO, Component.literal(chapter.getTitle().getString())));
+                    } else if (chapterPanel.questScreen.selectedChapter != chapter) {
+                        chapterPanel.questScreen.open(chapter, false);
+                        chapter.getAutofocus().ifPresent(chapterPanel.questScreen::scrollTo);
+                    }
+                } else if (chapterPanel.questScreen.selectedChapter != chapter) {
+                    chapterPanel.questScreen.open(chapter, false);
+                    chapter.getAutofocus().ifPresent(chapterPanel.questScreen::scrollTo);
+                }
 			}
 
 			if (chapterPanel.questScreen.file.canEdit() && button.isRight()) {
