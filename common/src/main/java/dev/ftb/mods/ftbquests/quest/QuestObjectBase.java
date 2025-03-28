@@ -84,16 +84,43 @@ public abstract class QuestObjectBase implements Comparable<QuestObjectBase> {
 		return sendNotifications.get(true);
 	}
 
-	public static ItemStack itemOrMissingFromNBT(CompoundTag tag, HolderLookup.Provider provider) {
-		return tag.isEmpty() ?
+	public static ItemStack itemOrMissingFromNBT(Tag tag, HolderLookup.Provider provider) {
+		CompoundTag compoundTag = processItemTagData(tag);
+		return compoundTag.isEmpty() ?
 				ItemStack.EMPTY :
-				ItemStack.parse(provider, tag).orElse(createMissing(tag));
+				ItemStack.parse(provider, compoundTag)
+						.orElse(createMissing(compoundTag));
 	}
 
-	public static ItemStack singleItemOrMissingFromNBT(CompoundTag tag, HolderLookup.Provider provider) {
-		return tag.isEmpty() ?
+	public static ItemStack singleItemOrMissingFromNBT(Tag tag, HolderLookup.Provider provider) {
+		CompoundTag compoundTag = processItemTagData(tag);
+		return compoundTag.isEmpty() ?
 				ItemStack.EMPTY :
-				ItemStack.SINGLE_ITEM_CODEC.parse(provider.createSerializationContext(NbtOps.INSTANCE), tag).result().orElse(createMissing(tag));
+				ItemStack.SINGLE_ITEM_CODEC.parse(provider.createSerializationContext(NbtOps.INSTANCE), compoundTag).result()
+						.orElse(createMissing(compoundTag));
+	}
+
+	// support for importing SNBT for itemstacks from legacy (1.20 and older) quest book data
+	private static CompoundTag processItemTagData(Tag tag) {
+		if (tag instanceof StringTag s) {
+			// 1.20 or earlier, item name only
+			return Util.make(new CompoundTag(), t -> t.putString("id", s.getAsString()));
+		} else if (tag instanceof CompoundTag c) {
+			if (c.contains("Count") || c.contains("tag")) {
+				// 1.20 or earlier with count and/or NBT data; migrate, but no NBT -> component data conversion
+				return Util.make(new CompoundTag(), t -> {
+					t.putString("id", c.getString("id"));
+					int count = c.getInt("Count");
+					if (count != 0) t.putInt("count", count);
+				});
+			} else {
+				// 1.21 or later; it's good as-is
+				return c;
+			}
+		} else {
+			// shouldn't get here?
+			return new CompoundTag();
+		}
 	}
 
 	private static ItemStack createMissing(CompoundTag tag) {

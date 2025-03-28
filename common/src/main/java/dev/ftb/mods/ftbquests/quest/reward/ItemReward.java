@@ -85,7 +85,7 @@ public class ItemReward extends Reward {
 	public void readData(CompoundTag nbt, HolderLookup.Provider provider) {
 		super.readData(nbt, provider);
 
-		item = itemOrMissingFromNBT(nbt.getCompound("item"), provider);
+		item = itemOrMissingFromNBT(nbt.get("item"), provider);
 
 		count = nbt.getInt("count");
 		if (count == 0) {
