@@ -10,6 +10,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 * Added exclusive quest branching, where starting one quest makes certain other quests unavailable
   * New "Max Completable Dependents" integer property for quests
   * When that number of dependent quests is completed, other uncompleted dependents of that quest become unavailable to the player/team
+* Improved importing of legacy quest data (from quest book data in 1.20.1 and earlier)
+  * Item SNBT data is now imported, other than custom NBT data, which can't reliably be auto-converted to 1.21 item component data
+* Added ja_jp translation (thanks @twister716)
+* Task Screens now show related quest names along with task names (and can search on those)
+* New hotkeys when hovering chapters (same as 2101.1.6 changes made to quests):
+  * Left-Alt & Left-Mouse opens directly to chapter properties
+  * Right-Alt & Left-Mouse copies the chapter ID
+
+### Fixed
+* Add extra defensive null-checking to avoid crashes by mods incorrectly calling `Entity#die` with a null damage source
 
 ## [2101.1.6]
 
