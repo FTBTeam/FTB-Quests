@@ -1128,13 +1128,13 @@ public final class Quest extends QuestObject implements Movable, Excludable {
 	@Override
 	public boolean isQuestObjectExcluded(TeamData teamData) {
 		for (QuestObject qo : dependencies) {
-            if (qo instanceof Quest quest) {
-                if (!quest.dependantIDs.isEmpty() && quest.maxCompletableDeps > 0) {
-                    long completed = quest.getDependants().stream().filter(teamData::isCompleted).count();
-                    if (completed >= quest.maxCompletableDeps && !teamData.isCompleted(this)) {
-                        return true;
-                    }
-                }
+			if (qo instanceof Quest quest) {
+				if (!quest.dependantIDs.isEmpty() && quest.maxCompletableDeps > 0) {
+					long completed = quest.getDependants().stream().filter(teamData::isCompleted).count();
+					if (completed >= quest.maxCompletableDeps && !teamData.isCompleted(this)) {
+						return true;
+					}
+				}
 				// note: this effectively recurses, but the results are cached in TeamData to avoid excessive recursion
 				return teamData.isExcludedByOtherQuestline(qo);
 			}
