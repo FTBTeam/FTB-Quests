@@ -4,6 +4,17 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2101.1.8]
+
+### Added
+* If all tasks in a quest are marked optional, now require at least one to be completed to complete the quest
+  * Previously quest would just auto-complete, which is less useful (if that behaviour is really needed, use a quest with no tasks at all)
+  * This allows for quests with a choice of two or more tasks, where completing any of the tasks will complete the quest
+
+### Fixed
+* Hotfix: fix player login exception related to exclusive quest branching feature added in 2101.1.7
+* Tooltip on optional tasks now reads "Optional Task" instead of "Optional Quest"
+
 ## [2101.1.7]
 
 ### Added
