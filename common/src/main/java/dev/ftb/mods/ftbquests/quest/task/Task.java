@@ -334,7 +334,7 @@ public abstract class Task extends QuestObject {
 	public void fillConfigGroup(ConfigGroup config) {
 		super.fillConfigGroup(config);
 
-		config.addBool("optional_task", optionalTask, v -> optionalTask = v, false).setNameKey("ftbquests.quest.misc.optional");
+		config.addBool("optional_task", optionalTask, v -> optionalTask = v, false).setNameKey("ftbquests.quest.misc.optional_task");
 	}
 
 	protected ResourceLocation safeResourceLocation(String str, ResourceLocation fallback) {
