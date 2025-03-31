@@ -122,14 +122,23 @@ public abstract class QuestObject extends QuestObjectBase {
 	}
 
 	public boolean isCompletedRaw(TeamData data) {
+		int nOptional = 0;
+		int nCompleted = 0;
         for (QuestObject child : getChildren()) {
-            if (!child.isOptionalForProgression()
-                    && !data.isExcludedByOtherQuestline(child)
-                    && !data.isCompleted(child)) {
-				return false;
+			boolean uncompleted = !data.isCompleted(child) && !data.isExcludedByOtherQuestline(child);
+			if (uncompleted) {
+				if (child.isOptionalForProgression()) {
+					nOptional++;
+				} else {
+					return false;
+				}
+			} else {
+				nCompleted++;
 			}
         }
-        return true;
+		// if there are no children at all, it's auto-completed (degenerate case)
+		// if ALL children are optional, require at least one to be completed (e.g. quests with either/or tasks)
+        return getChildren().isEmpty() || nOptional < getChildren().size() || nCompleted > 0;
 	}
 
 	public boolean isOptionalForProgression() {
