@@ -547,8 +547,8 @@ public class TeamData {
 	}
 
 	public boolean canStartTasks(Quest quest) {
-		return !isExcludedByOtherQuestline(quest) &&
-				(quest.getProgressionMode() == ProgressionMode.FLEXIBLE || areDependenciesComplete(quest));
+		return (quest.getProgressionMode() == ProgressionMode.FLEXIBLE || areDependenciesComplete(quest))
+				&& !isExcludedByOtherQuestline(quest);
 	}
 
 	public void claimReward(ServerPlayer player, Reward reward, boolean notify) {
@@ -778,7 +778,18 @@ public class TeamData {
 	}
 
 	public boolean isExcludedByOtherQuestline(QuestObject qo) {
-		return qo instanceof Excludable e && exclusionCache.computeIfAbsent(e.getId(), k -> e.isQuestObjectExcluded(this));
+		if (qo instanceof Excludable e) {
+			// note: computeIfAbsent() won't work well here due to indirect recursion
+			//   (can throw exception with both standard and fastutil maps)
+			if (exclusionCache.containsKey(e.getId())) {
+				return exclusionCache.get(e.getId());
+			}
+			boolean excluded = e.isQuestObjectExcluded(this);
+			exclusionCache.put(e.getId(), excluded);
+			return excluded;
+
+		}
+		return false;
 	}
 
 	private static class PerPlayerData {
