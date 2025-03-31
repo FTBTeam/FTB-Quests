@@ -1,5 +1,6 @@
 package dev.ftb.mods.ftbquests.client.gui.quests;
 
+import com.mojang.blaze3d.platform.InputConstants;
 import com.mojang.blaze3d.systems.RenderSystem;
 import dev.architectury.networking.NetworkManager;
 import dev.ftb.mods.ftblibrary.config.StringConfig;
@@ -12,13 +13,14 @@ import dev.ftb.mods.ftblibrary.ui.input.MouseButton;
 import dev.ftb.mods.ftblibrary.util.TooltipList;
 import dev.ftb.mods.ftblibrary.util.client.PositionedIngredient;
 import dev.ftb.mods.ftbquests.client.ClientQuestFile;
+import dev.ftb.mods.ftbquests.client.FTBQuestsClient;
 import dev.ftb.mods.ftbquests.client.FTBQuestsClientConfig;
 import dev.ftb.mods.ftbquests.client.gui.ChangeChapterGroupScreen;
 import dev.ftb.mods.ftbquests.client.gui.ContextMenuBuilder;
+import dev.ftb.mods.ftbquests.client.gui.CustomToast;
 import dev.ftb.mods.ftbquests.net.CreateObjectMessage;
 import dev.ftb.mods.ftbquests.net.MoveChapterGroupMessage;
 import dev.ftb.mods.ftbquests.net.MoveChapterMessage;
-import dev.ftb.mods.ftbquests.net.ToggleChapterPinnedMessage;
 import dev.ftb.mods.ftbquests.quest.Chapter;
 import dev.ftb.mods.ftbquests.quest.ChapterGroup;
 import dev.ftb.mods.ftbquests.quest.theme.property.ThemeProperties;
@@ -160,7 +162,7 @@ public class ChapterPanel extends Panel {
 	}
 
 	boolean isPinned() {
-		return ClientQuestFile.INSTANCE.selfTeamData.isChapterPinned(Minecraft.getInstance().player);
+		return FTBQuestsClientConfig.CHAPTER_PANEL_PINNED.get();
 	}
 
 	public static abstract class ListButton extends Button {
@@ -195,7 +197,7 @@ public class ChapterPanel extends Panel {
 		public void onClicked(MouseButton button) {
 			if (getMouseX() > getX() + width - 18) {
 				playClickSound();
-				NetworkManager.sendToServer(ToggleChapterPinnedMessage.INSTANCE);
+				FTBQuestsClientConfig.setChapterPanelPinned(!FTBQuestsClientConfig.CHAPTER_PANEL_PINNED.get());
 			} else {
 				ClientQuestFile file = chapterPanel.questScreen.file;
 				if (file.canEdit() && getMouseX() > getX() + width - 34) {
@@ -277,9 +279,7 @@ public class ChapterPanel extends Panel {
 		public void addMouseOverText(TooltipList list) {
 			chapterPanel.questScreen.addInfoTooltip(list, chapterPanel.questScreen.file);
 
-			if (getMouseX() > getX() + width - 18) {
-				list.translate(chapterPanel.isPinned() ? "ftbquests.gui.stays_open" : "ftbquests.gui.does_not_stay_open");
-			} else if (chapterPanel.questScreen.file.canEdit() && getMouseX() > getX() + width - 34) {
+			if (chapterPanel.questScreen.file.canEdit() && getMouseX() > getX() + width - 34) {
 				list.translate("gui.add");
 			}
 		}
@@ -406,10 +406,21 @@ public class ChapterPanel extends Panel {
 			if (chapterPanel.questScreen.file.canEdit() || chapter.hasAnyVisibleChildren()) {
 				playClickSound();
 
-				if (chapterPanel.questScreen.selectedChapter != chapter) {
-					chapterPanel.questScreen.open(chapter, false);
-					chapter.getAutofocus().ifPresent(chapterPanel.questScreen::scrollTo);
-				}
+                if (chapterPanel.questScreen.file.canEdit() && button.isLeft()) {
+                    if (isKeyDown(InputConstants.KEY_LALT)) {
+						chapter.onEditButtonClicked(chapterPanel.questScreen);
+					} else if (isKeyDown(InputConstants.KEY_RALT)) {
+						FTBQuestsClient.copyToClipboard(chapter);
+						Minecraft.getInstance().getToasts().addToast(new CustomToast(Component.translatable("ftbquests.quest.copied"),
+								Icons.INFO, Component.literal(chapter.getTitle().getString())));
+                    } else if (chapterPanel.questScreen.selectedChapter != chapter) {
+                        chapterPanel.questScreen.open(chapter, false);
+                        chapter.getAutofocus().ifPresent(chapterPanel.questScreen::scrollTo);
+                    }
+                } else if (chapterPanel.questScreen.selectedChapter != chapter) {
+                    chapterPanel.questScreen.open(chapter, false);
+                    chapter.getAutofocus().ifPresent(chapterPanel.questScreen::scrollTo);
+                }
 			}
 
 			if (chapterPanel.questScreen.file.canEdit() && button.isRight()) {

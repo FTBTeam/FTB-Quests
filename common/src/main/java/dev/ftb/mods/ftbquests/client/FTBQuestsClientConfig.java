@@ -18,6 +18,7 @@ public interface FTBQuestsClientConfig {
     IntValue PINNED_QUESTS_INSET_Y = UI.addInt("pinned_quests_inset_y", 2);
     BooleanValue SHOW_LOCK_ICON = UI.addBoolean("show_lock_icon", true);
     BooleanValue BACKSPACE_HISTORY = UI.addBoolean("backspace_history", true);
+    BooleanValue CHAPTER_PANEL_PINNED = UI.addBoolean("chapter_panel_pinned", false);
 
     SNBTConfig XLATE = CONFIG.addGroup("xlate", 1);
     StringValue EDITING_LOCALE = XLATE.add(new LocaleValue(XLATE,"editing_locale", ""));
@@ -28,5 +29,12 @@ public interface FTBQuestsClientConfig {
     static void openSettings(boolean pauseGame) {
         ConfigManager.getInstance().createConfigGroup(KEY)
                 .ifPresent(group -> new QuestsClientConfigScreen(group, pauseGame).openGui());
+    }
+
+    static void setChapterPanelPinned(boolean pinned) {
+        if (pinned != CHAPTER_PANEL_PINNED.get()) {
+            CHAPTER_PANEL_PINNED.set(pinned);
+            ConfigManager.getInstance().save(KEY);
+        }
     }
 }

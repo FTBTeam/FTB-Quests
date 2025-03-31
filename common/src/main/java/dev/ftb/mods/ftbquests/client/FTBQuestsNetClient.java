@@ -259,11 +259,6 @@ public class FTBQuestsNetClient {
 		}
 	}
 
-	public static void toggleChapterPinned(boolean pinned) {
-		ClientQuestFile.INSTANCE.selfTeamData.setChapterPinned(FTBQuestsClient.getClientPlayer(), pinned);
-		ClientQuestFile.INSTANCE.getQuestScreen().ifPresent(QuestScreen::refreshChapterPanel);
-	}
-
 	public static void syncRewardBlocking(UUID teamId, boolean rewardsBlocked) {
 		if (ClientQuestFile.INSTANCE.getOrCreateTeamData(teamId).setRewardsBlocked(rewardsBlocked)) {
 			ClientQuestFile.INSTANCE.refreshGui();

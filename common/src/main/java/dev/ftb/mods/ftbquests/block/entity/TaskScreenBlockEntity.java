@@ -18,6 +18,7 @@ import dev.ftb.mods.ftbquests.registry.ModBlockEntityTypes;
 import dev.ftb.mods.ftbquests.registry.ModBlocks;
 import dev.ftb.mods.ftbquests.registry.ModDataComponents;
 import dev.ftb.mods.ftbquests.util.ConfigQuestObject;
+import net.minecraft.ChatFormatting;
 import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -26,6 +27,7 @@ import net.minecraft.core.component.DataComponentMap;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtOps;
 import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.chat.Component;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.Packet;
@@ -223,7 +225,7 @@ public class TaskScreenBlockEntity extends BlockEntity implements ITaskScreen {
 
         cg0.setNameKey(getBlockState().getBlock().getDescriptionId());
         ConfigGroup cg = cg0.getOrCreateSubgroup("screen");
-        cg.add("task", new ConfigQuestObject<>(o -> isSuitableTask(data, o)), getTask(), this::setTask, null).setNameKey("ftbquests.task");
+        cg.add("task", new ConfigQuestObject<>(o -> isSuitableTask(data, o), this::formatLine), getTask(), this::setTask, null).setNameKey("ftbquests.task");
         cg.add("skin", new ItemStackConfig(true, true), getSkin(), this::setSkin, ItemStack.EMPTY).setNameKey("block.ftbquests.screen.skin");
         cg.add("text_shadow", new BooleanConfig(), isTextShadow(), this::setTextShadow, false).setNameKey("block.ftbquests.screen.text_shadow");
         cg.add("indestructible", new BooleanConfig(), isIndestructible(), this::setIndestructible, false).setNameKey("block.ftbquests.screen.indestructible");
@@ -231,6 +233,13 @@ public class TaskScreenBlockEntity extends BlockEntity implements ITaskScreen {
         cg.add("input_icon", new ItemStackConfig(true, true), getInputModeIcon(), this::setInputModeIcon, ItemStack.EMPTY).setNameKey("block.ftbquests.screen.input_mode_icon");
 
         return cg0;
+    }
+
+    private Component formatLine(Task task) {
+        if (this.task == null) return Component.empty();
+
+        Component questTxt = Component.literal(" [").append(task.getQuest().getTitle()).append("]").withStyle(ChatFormatting.GREEN);
+        return ConfigQuestObject.formatEntry(task).copy().append(questTxt);
     }
 
     private boolean isSuitableTask(TeamData data, QuestObjectBase o) {

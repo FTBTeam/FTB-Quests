@@ -102,8 +102,7 @@ public class ItemTask extends Task implements Predicate<ItemStack> {
 	@Override
 	public void readData(CompoundTag nbt, HolderLookup.Provider provider) {
 		super.readData(nbt, provider);
-		// TODO: FIXME: Something here is causing items to not be read correctly
-		itemStack = itemOrMissingFromNBT(nbt.getCompound("item"), provider);
+		itemStack = itemOrMissingFromNBT(nbt.get("item"), provider);
 		count = Math.max(nbt.getLong("count"), 1L);
 		consumeItems = Tristate.read(nbt, "consume_items");
 		onlyFromCrafting = Tristate.read(nbt, "only_from_crafting");

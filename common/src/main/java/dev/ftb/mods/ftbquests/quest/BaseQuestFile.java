@@ -464,7 +464,7 @@ public abstract class BaseQuestFile extends QuestObject implements QuestFile {
 
 		ListTag emergencyItemsTag = nbt.getList("emergency_items", Tag.TAG_COMPOUND);
 		for (int i = 0; i < emergencyItemsTag.size(); i++) {
-			emergencyItems.add(itemOrMissingFromNBT(emergencyItemsTag.getCompound(i), provider));
+			emergencyItems.add(itemOrMissingFromNBT(emergencyItemsTag.get(i), provider));
 		}
 
 		emergencyItemsCooldown = nbt.getInt("emergency_items_cooldown");

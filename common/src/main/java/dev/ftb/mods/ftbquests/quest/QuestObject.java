@@ -126,7 +126,12 @@ public abstract class QuestObject extends QuestObjectBase {
 	}
 
 	public boolean isCompletedRaw(TeamData data) {
-		return getChildren().stream().noneMatch(child -> !child.isOptionalForProgression() && !data.isCompleted(child));
+        for (QuestObject child : getChildren()) {
+            if (!child.isOptionalForProgression() && !data.isExcludedByOtherQuestline(child) && !data.isCompleted(child)) {
+				return false;
+			}
+        }
+        return true;
 	}
 
 	public boolean isOptionalForProgression() {
