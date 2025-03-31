@@ -60,10 +60,14 @@ public class TaskButton extends Button {
 	@Override
 	public void onClicked(MouseButton button) {
 		if (button.isLeft()) {
-			boolean canClick = task.isValid()
-					&& questScreen.file.selfTeamData.canStartTasks(task.getQuest())
-					&& !questScreen.file.selfTeamData.isCompleted(task);
-			task.onButtonClicked(this, canClick);
+			if (task.getQuestFile().canEdit() && ScreenWrapper.hasAltDown()) {
+				task.onEditButtonClicked(questScreen);
+			} else {
+				boolean canClick = task.isValid()
+						&& questScreen.file.selfTeamData.canStartTasks(task.getQuest())
+						&& !questScreen.file.selfTeamData.isCompleted(task);
+				task.onButtonClicked(this, canClick);
+			}
 		} else if (button.isRight() && questScreen.file.canEdit()) {
 			playClickSound();
 
@@ -168,7 +172,7 @@ public class TaskButton extends Button {
 		}
 
 		if (task.isOptionalForProgression()) {
-			list.add(Component.translatable("ftbquests.quest.misc.optional").withStyle(ChatFormatting.GRAY));
+			list.add(Component.translatable("ftbquests.quest.misc.optional_task").withStyle(ChatFormatting.GRAY));
 		}
 
 		task.addMouseOverText(list, questScreen.file.selfTeamData);
