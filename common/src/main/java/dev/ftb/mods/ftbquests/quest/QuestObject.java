@@ -2,7 +2,6 @@ package dev.ftb.mods.ftbquests.quest;
 
 import dev.ftb.mods.ftblibrary.config.ConfigGroup;
 import dev.ftb.mods.ftblibrary.icon.Color4I;
-import dev.ftb.mods.ftbquests.FTBQuests;
 import dev.ftb.mods.ftbquests.events.QuestProgressEventData;
 import dev.ftb.mods.ftbquests.quest.theme.property.ThemeProperties;
 import dev.ftb.mods.ftbquests.util.ProgressChange;
@@ -127,19 +126,12 @@ public abstract class QuestObject extends QuestObjectBase {
 	}
 
 	public boolean isCompletedRaw(TeamData data) {
-		FTBQuests.LOGGER.info("is completed raw: checking {}", this);
         for (QuestObject child : getChildren()) {
-			FTBQuests.LOGGER.info("- check child {}", child);
-            if (!child.isOptionalForProgression()
-                    && !data.isExcludedByOtherQuestline(child)
-                    && !data.isCompleted(child)) {
-				FTBQuests.LOGGER.info("- not completed!");
+            if (!child.isOptionalForProgression() && !data.isExcludedByOtherQuestline(child) && !data.isCompleted(child)) {
 				return false;
 			}
         }
         return true;
-
-//		return getChildren().stream().noneMatch(child -> !child.isOptionalForProgression() && !data.isCompleted(child));
 	}
 
 	public boolean isOptionalForProgression() {
