@@ -469,13 +469,10 @@ public class QuestScreen extends BaseScreen {
 		List<Chapter> visibleChapters = file.getVisibleChapters(file.selfTeamData);
 
 		if (key.is(GLFW.GLFW_KEY_TAB)) {
-			if (selectedChapter != null && file.getVisibleChapters(file.selfTeamData).size() > 1) {
-
-				if (!visibleChapters.isEmpty()) {
-					selectChapter(visibleChapters.get(MathUtils.mod(visibleChapters.indexOf(selectedChapter) + (isShiftKeyDown() ? -1 : 1), visibleChapters.size())));
-					selectedChapter.getAutofocus().ifPresent(this::scrollTo);
-				}
-			}
+			if (selectedChapter != null && visibleChapters.size() > 1) {
+                selectChapter(visibleChapters.get(MathUtils.mod(visibleChapters.indexOf(selectedChapter) + (isShiftKeyDown() ? -1 : 1), visibleChapters.size())));
+                selectedChapter.getAutofocus().ifPresent(this::scrollTo);
+            }
 
 			return true;
 		}
