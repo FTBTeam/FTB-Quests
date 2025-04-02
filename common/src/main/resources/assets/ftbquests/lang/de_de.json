@@ -212,7 +212,7 @@
   "ftbquests.quest.visibility.hide_lock_icon.tooltip": "Verstecke das Schloss-Symbol, das normalerweise angezeigt wird, wenn die Quest aufgrund einer Abhängigkeit gesperrt ist.",
   "ftbquests.quest.misc.disable_jei": "JEI Rezepte deaktivieren",
   "ftbquests.quest.misc.optional": "Optionale Quest",
-  "ftbquests.quest.misc.optional_task": "Optionae Aufgabe",
+  "ftbquests.quest.misc.optional_task": "Optionale Aufgabe",
   "ftbquests.quest.locked": "Gesperrt: unerledigte Abhängigkeiten",
   "ftbquests.quest.appearance.min_width": "Minimale Breite des geöffneten Questfensters",
   "ftbquests.quest.misc.ignore_reward_blocking": "Ignoriere Belohnungsblockierung",
