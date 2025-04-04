@@ -122,19 +122,14 @@ public abstract class QuestObject extends QuestObjectBase {
 	}
 
 	public boolean isCompletedRaw(TeamData data) {
-		FTBQuests.LOGGER.info("is completed raw: checking {}", this);
         for (QuestObject child : getChildren()) {
-			FTBQuests.LOGGER.info("- check child {}", child);
             if (!child.isOptionalForProgression()
                     && !data.isExcludedByOtherQuestline(child)
                     && !data.isCompleted(child)) {
-				FTBQuests.LOGGER.info("- not completed!");
 				return false;
 			}
         }
         return true;
-
-//		return getChildren().stream().noneMatch(child -> !child.isOptionalForProgression() && !data.isCompleted(child));
 	}
 
 	public boolean isOptionalForProgression() {
