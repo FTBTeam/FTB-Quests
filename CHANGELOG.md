@@ -12,6 +12,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 * Locked quests (i.e. which can't be started due to dependencies) now show a small padlock icon
   * This can be disabled in player preferences if preferred - "Show Icon for Locked Quests"
   * Added "Hide Lock Icon" boolean quest property to allow the lock icon to be hidden on a per-quest basis
+* Added exclusive quest branching, where starting one quest makes certain other quests unavailable
+  * New "Max Completable Dependents" integer property for quests
+  * When that number of dependent quests is completed, other uncompleted dependents of that quest become unavailable to the player/team
+* Added Spanish translations for various regions (thanks @TheLegendofSaram)
 
 ### Changed
 * Quests with "Hide Dependency Lines" set to false will now show the dependency line when (and only when) hovered with the mouse pointer
