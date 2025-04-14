@@ -434,7 +434,7 @@ public class QuestButton extends Button implements QuestPositionableButton {
 		if (!lockIcon.isEmpty()) {
 			int s = (int) (w / 8F * 3F);
 			poseStack.pushPose();
-			poseStack.translate(x + w - s, y + h - 1 - s, QuestScreen.Z_LEVEL);
+			poseStack.translate(x + w - s, y + h - 1 - s, 0);
 			lockIcon.draw(graphics, 0, 0, s, s);
 			poseStack.popPose();
 		}
