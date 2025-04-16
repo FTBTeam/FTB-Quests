@@ -4,6 +4,15 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2101.1.9]
+
+### Changed
+* Added de_de translation (thanks @FlyonDE)
+
+### Fixed
+* More graceful handling when sync'ing items with invalid component data on player login
+  * Should fix issues where players get kicked on login due to bad itemstacks in a quest book
+
 ## [2101.1.8]
 
 ### Added

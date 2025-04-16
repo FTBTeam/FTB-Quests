@@ -7,8 +7,11 @@ import dev.ftb.mods.ftblibrary.icon.Icon;
 import dev.ftb.mods.ftblibrary.icon.ItemIcon;
 import dev.ftb.mods.ftblibrary.ui.Widget;
 import dev.ftb.mods.ftblibrary.util.client.PositionedIngredient;
+import dev.ftb.mods.ftbquests.FTBQuests;
 import dev.ftb.mods.ftbquests.net.DisplayItemRewardToastMessage;
 import dev.ftb.mods.ftbquests.quest.Quest;
+import dev.ftb.mods.ftbquests.registry.ModItems;
+import io.netty.handler.codec.EncoderException;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.core.HolderLookup;
@@ -101,7 +104,16 @@ public class ItemReward extends Reward {
 	public void writeNetData(RegistryFriendlyByteBuf buffer) {
 		super.writeNetData(buffer);
 
-		ItemStack.OPTIONAL_STREAM_CODEC.encode(buffer, item);
+		try {
+			ItemStack.OPTIONAL_STREAM_CODEC.encode(buffer, item);
+		} catch (EncoderException e) {
+			FTBQuests.LOGGER.error("Caught EncoderException while encoding item for client sync! {}", e.getMessage());
+			FTBQuests.LOGGER.error("- Item:");
+			FTBQuests.LOGGER.error(item);
+			FTBQuests.LOGGER.error("- Item components:");
+			FTBQuests.LOGGER.error(item.getComponents());
+			ItemStack.OPTIONAL_STREAM_CODEC.encode(buffer, ModItems.MISSING_ITEM.get().getDefaultInstance());
+		}
 		buffer.writeVarInt(count);
 		buffer.writeVarInt(randomBonus);
 		buffer.writeBoolean(onlyOne);
