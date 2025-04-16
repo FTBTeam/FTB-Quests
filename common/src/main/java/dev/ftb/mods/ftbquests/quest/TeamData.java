@@ -16,10 +16,7 @@ import dev.ftb.mods.ftbquests.util.QuestKey;
 import dev.ftb.mods.ftbteams.api.FTBTeamsAPI;
 import dev.ftb.mods.ftbteams.api.Team;
 import it.unimi.dsi.fastutil.longs.*;
-import it.unimi.dsi.fastutil.objects.Object2ByteOpenHashMap;
-import it.unimi.dsi.fastutil.objects.Object2LongMap;
-import it.unimi.dsi.fastutil.objects.Object2LongOpenHashMap;
-import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
+import it.unimi.dsi.fastutil.objects.*;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.StringTag;
@@ -54,15 +51,16 @@ public class TeamData {
 	private boolean locked;
 	private boolean rewardsBlocked;
 
-	private final Long2LongOpenHashMap taskProgress;
-	private final Object2LongOpenHashMap<QuestKey> claimedRewards;
-	private final Long2LongOpenHashMap started;
-	private final Long2LongOpenHashMap completed;
-	private final Object2ObjectOpenHashMap<UUID,PerPlayerData> perPlayerData;
+	private final Long2LongMap taskProgress;
+	private final Object2LongMap<QuestKey> claimedRewards;
+	private final Long2LongMap started;
+	private final Long2LongMap completed;
+	private final Object2ObjectMap<UUID,PerPlayerData> perPlayerData;
 
-	private final Long2ByteOpenHashMap areDependenciesCompleteCache;
-	private final Long2ByteOpenHashMap areDependenciesVisibleCache;
-	private final Object2ByteOpenHashMap<QuestKey> unclaimedRewardsCache;
+	private final Long2ByteMap areDependenciesCompleteCache;
+	private final Long2ByteMap areDependenciesVisibleCache;
+	private final Object2ByteMap<QuestKey> unclaimedRewardsCache;
+	private final Long2BooleanMap exclusionCache;
 
 	public TeamData(UUID teamId, BaseQuestFile file) {
 		this(teamId, file, "");
@@ -87,6 +85,7 @@ public class TeamData {
 		areDependenciesCompleteCache = new Long2ByteOpenHashMap();
 		areDependenciesVisibleCache = new Long2ByteOpenHashMap();
 		unclaimedRewardsCache = new Object2ByteOpenHashMap<>();
+		exclusionCache = new Long2BooleanOpenHashMap();
 	}
 
 	public UUID getTeamId() {
@@ -303,6 +302,7 @@ public class TeamData {
 		areDependenciesCompleteCache.clear();
 		areDependenciesVisibleCache.clear();
 		unclaimedRewardsCache.clear();
+		exclusionCache.clear();
 	}
 
 	public SNBTCompoundTag serializeNBT() {
@@ -510,7 +510,7 @@ public class TeamData {
 		return completed.containsKey(object.id);
 	}
 
-	private boolean checkDepsCached(Quest quest, Long2ByteOpenHashMap cache, ToBooleanBiFunction<Quest,TeamData> checker) {
+	private boolean checkDepsCached(Quest quest, Long2ByteMap cache, ToBooleanBiFunction<Quest,TeamData> checker) {
 		if (!quest.hasDependencies()) {
 			return true;
 		}
@@ -533,7 +533,8 @@ public class TeamData {
 	}
 
 	public boolean canStartTasks(Quest quest) {
-		return quest.getProgressionMode() == ProgressionMode.FLEXIBLE || areDependenciesComplete(quest);
+		return (quest.getProgressionMode() == ProgressionMode.FLEXIBLE || areDependenciesComplete(quest))
+				&& !isExcludedByOtherQuestline(quest);
 	}
 
 	public void claimReward(ServerPlayer player, Reward reward, boolean notify) {
@@ -782,6 +783,21 @@ public class TeamData {
 
 	public LongSet getPinnedQuestIds(Player player) {
 		return getOrCreatePlayerData(player).map(playerData -> playerData.pinnedQuests).orElse(LongSet.of());
+	}
+
+	public boolean isExcludedByOtherQuestline(QuestObject qo) {
+		if (qo instanceof Excludable e) {
+			// note: computeIfAbsent() won't work well here due to indirect recursion
+			//   (can throw exception with both standard and fastutil maps)
+			if (exclusionCache.containsKey(e.getId())) {
+				return exclusionCache.get(e.getId());
+			}
+			boolean excluded = e.isQuestObjectExcluded(this);
+			exclusionCache.put(e.getId(), excluded);
+			return excluded;
+
+		}
+		return false;
 	}
 
 	private static class PerPlayerData {

@@ -23,10 +23,13 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
+import java.util.function.Function;
 
 public class SelectQuestObjectScreen<T extends QuestObjectBase> extends AbstractButtonListScreen {
 	private final ConfigQuestObject<T> config;
 	private final ConfigCallback callback;
+	private Function<T,Component> formatter = ConfigQuestObject::formatEntry;
 
 	public SelectQuestObjectScreen(ConfigQuestObject<T> config, ConfigCallback callback) {
 		setTitle(Component.translatable("ftbquests.gui.select_quest_object"));
@@ -38,6 +41,11 @@ public class SelectQuestObjectScreen<T extends QuestObjectBase> extends Abstract
 
 		this.config = config;
 		this.callback = callback;
+	}
+
+	public SelectQuestObjectScreen<T> withFormatter(@Nullable Function<T,Component> formatter) {
+		this.formatter = Objects.requireNonNullElse(formatter, ConfigQuestObject::formatEntry);
+		return this;
 	}
 
 	@Override
@@ -64,7 +72,8 @@ public class SelectQuestObjectScreen<T extends QuestObjectBase> extends Abstract
 
 		ClientQuestFile file = ClientQuestFile.INSTANCE;
 		for (QuestObjectBase objectBase : file.getAllObjects()) {
-			if (config.predicate.test(objectBase) && (file.canEdit() || (!(objectBase instanceof QuestObject qo) || qo.isVisible(file.selfTeamData)))) {
+			if (config.predicate.test(objectBase) &&
+					(file.canEdit() || (!(objectBase instanceof QuestObject qo) || qo.isSearchable(file.selfTeamData)))) {
 				list.add((T) objectBase);
 			}
 		}

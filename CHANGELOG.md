@@ -4,6 +4,26 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2001.4.13]
+
+### Added
+* Added a new "None" quest shape, which simply means to not draw any border around the quest icon
+  * This doesn't affect the icon itself, which is still rendered as normal
+* Locked quests (i.e. which can't be started due to dependencies) now show a small padlock icon
+  * This can be disabled in player preferences if preferred - "Show Icon for Locked Quests"
+  * Added "Hide Lock Icon" boolean quest property to allow the lock icon to be hidden on a per-quest basis
+* Added exclusive quest branching, where starting one quest makes certain other quests unavailable
+  * New "Max Completable Dependents" integer property for quests
+  * When that number of dependent quests is completed, other uncompleted dependents of that quest become unavailable to the player/team
+* Added Spanish translations for various regions (thanks @TheLegendofSaram)
+
+### Changed
+* Quests with "Hide Dependency Lines" set to false will now show the dependency line when (and only when) hovered with the mouse pointer
+  * This is now consistent with the behaviour of "Hide Dependent Lines" and more useful in general, allowing dependency lines to be selectively shown
+
+### Fixed
+* Fixed quests in always-invisible chapters being searchable outside edit mode
+
 ## [2001.4.12]
 
 ### Added
@@ -11,7 +31,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 * Fixed `/ftbquests import_reward_table_from_chest` command not correctly updating quest book id mappings for new reward table
-* Fixed some quest button alignment issues depending on the zoom level of the quest panel* Fixed autoclaim rewards being given to entire team even when marked as team reward
+* Fixed some quest button alignment issues depending on the zoom level of the quest panel
+* Fixed autoclaim rewards being given to entire team even when marked as team reward
   * Also added tooltip to team reward setting in the reward properties GUI to clarify: team reward means one reward for the whole team
 * Fixed multiline quest editor "L" (insert link) button sometimes inserting a spurious comma, depending on current text selection
 * Leading/trailing whitespace is now silently trimmed from command text in command rewards (trailing whitespace could cause confusing failures to execute commands)
