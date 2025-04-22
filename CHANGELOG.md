@@ -4,6 +4,17 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2001.4.14]
+
+### Added
+* Task Screens now show related quest names along with task names (and can search on those)
+
+### Changed
+* Updated es_es and es_mx translations (thanks @ArrivedBog593)
+
+### Fixed
+* Tooltip on optional tasks now reads "Optional Task" instead of "Optional Quest"
+
 ## [2001.4.13]
 
 ### Added
