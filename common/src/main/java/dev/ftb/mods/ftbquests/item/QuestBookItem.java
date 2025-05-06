@@ -17,9 +17,6 @@ import net.minecraft.world.level.Level;
 
 import java.util.List;
 
-/**
- * @author LatvianModder
- */
 public class QuestBookItem extends Item {
 	public QuestBookItem() {
 		super(ModItems.defaultProps().stacksTo(1));
