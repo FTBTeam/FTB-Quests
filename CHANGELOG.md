@@ -4,6 +4,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2101.1.10]
+
+### Changed
+* Loot crate items with no stored loot crate ID no longer display an "unknown loot crate" error in the tooltip
+  * This is mainly for the benefit of JEI display for uninitialised loot crates where the error is unnecessary and misleading
+
 ## [2101.1.9]
 
 ### Changed
