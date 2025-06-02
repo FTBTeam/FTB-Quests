@@ -285,9 +285,11 @@ public class QuestButton extends Button implements QuestPositionableButton {
 
 		Component title = getTitle();
 
-		if (questScreen.file.selfTeamData != null) {
-			if (questScreen.file.selfTeamData.isStarted(quest) && !questScreen.file.selfTeamData.isCompleted(quest)) {
-				title = title.copy().append(Component.literal(" " + questScreen.file.selfTeamData.getRelativeProgress(quest) + "%").withStyle(ChatFormatting.DARK_GRAY));
+		TeamData teamData = questScreen.file.selfTeamData;
+
+		if (teamData != null) {
+			if (teamData.isStarted(quest) && !teamData.isCompleted(quest)) {
+				title = title.copy().append(Component.literal(" " + teamData.getRelativeProgress(quest) + "%").withStyle(ChatFormatting.DARK_GRAY));
 			}
 		}
 
@@ -316,8 +318,9 @@ public class QuestButton extends Button implements QuestPositionableButton {
 		if (quest.canBeRepeated()) {
 			list.add(Component.translatable("ftbquests.quest.misc.can_repeat").withStyle(ChatFormatting.GRAY));
 		}
-		if (!questScreen.file.selfTeamData.canStartTasks(quest)) {
-			list.add(Component.literal("[").withStyle(ChatFormatting.DARK_GRAY).append(Component.translatable("ftbquests.quest.locked")).append("]"));
+		if (teamData != null && !teamData.canStartTasks(quest)) {
+			String key = teamData.isExcludedByOtherQuestline(quest) ? "ftbquests.quest.locked.excluded" : "ftbquests.quest.locked";
+			list.add(Component.literal("[").withStyle(ChatFormatting.DARK_GRAY).append(Component.translatable(key)).append("]"));
 		}
 		if (quest.isExclusiveQuest()) {
 			list.add(Component.translatable("ftbquests.quest.misc.exclusive").withStyle(ChatFormatting.GOLD));
@@ -335,7 +338,7 @@ public class QuestButton extends Button implements QuestPositionableButton {
 		TeamData teamData = questScreen.file.selfTeamData;
 		boolean isCompleted = teamData.isCompleted(quest);
 		boolean isStarted = isCompleted || teamData.isStarted(quest);
-		boolean canStart = isCompleted || isStarted || teamData.areDependenciesComplete(quest);
+		boolean canStart = /*isCompleted || isStarted ||*/ teamData.areDependenciesComplete(quest) && !teamData.isExcludedByOtherQuestline(quest);
 		Player player = Minecraft.getInstance().player;
 
 		if (canStart) {
