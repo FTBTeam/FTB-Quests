@@ -755,7 +755,7 @@ public final class Quest extends QuestObject implements Movable, Excludable {
 			}
 		}
 
-		if (data.isExcludedByOtherQuestline(this)) {
+		if (data.getFile().isHideExcludedQuests() && data.isExcludedByOtherQuestline(this)) {
 			return false;
 		}
 
@@ -1127,20 +1127,27 @@ public final class Quest extends QuestObject implements Movable, Excludable {
 
 	@Override
 	public boolean isQuestObjectExcluded(TeamData teamData) {
+		if (dependencies.isEmpty()) {
+			return false;
+		}
+
+		int nExcluded = 0;
 		for (QuestObject qo : dependencies) {
-			if (qo instanceof Quest quest) {
-				if (!quest.dependantIDs.isEmpty() && quest.maxCompletableDeps > 0) {
-					long completed = quest.getDependants().stream().filter(teamData::isCompleted).count();
-					if (completed >= quest.maxCompletableDeps && !teamData.isCompleted(this)) {
+			if (qo instanceof Quest dependency) {
+				if (!dependency.dependantIDs.isEmpty() && dependency.maxCompletableDeps > 0) {
+					long completed = dependency.getDependants().stream().filter(teamData::isCompleted).count();
+					if (completed >= dependency.maxCompletableDeps && !teamData.isCompleted(this)) {
 						return true;
 					}
 				}
 				// note: this effectively recurses, but the results are cached in TeamData to avoid excessive recursion
-				return teamData.isExcludedByOtherQuestline(qo);
+				if (teamData.isExcludedByOtherQuestline(dependency)) {
+					nExcluded++;
+				}
 			}
 		}
 
-		return false;
+		return nExcluded == dependencies.size();
 	}
 
 	public boolean isExclusiveQuest() {
