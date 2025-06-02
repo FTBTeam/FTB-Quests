@@ -6,9 +6,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [2101.1.10]
 
+### Added
+* Added "Hide Quests in excluded questlines" top-level (file) setting
+  * False by default, so excluded quests will be shown as unavailable
+  * Set to true to hide excluded quests completely
+
 ### Changed
 * Loot crate items with no stored loot crate ID no longer display an "unknown loot crate" error in the tooltip
   * This is mainly for the benefit of JEI display for uninitialised loot crates where the error is unnecessary and misleading
+
+### Fixed
+* Fixed quest exclusion wrongly being detected under some circumstances (branching and merging questlines)
 
 ## [2101.1.9]
 
