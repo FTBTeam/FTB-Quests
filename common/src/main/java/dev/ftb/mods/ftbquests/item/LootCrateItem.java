@@ -31,9 +31,6 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 
-/**
- * @author LatvianModder
- */
 public class LootCrateItem extends Item {
 	public LootCrateItem() {
 		super(ModItems.defaultProps()
@@ -114,14 +111,17 @@ public class LootCrateItem extends Item {
 		if (crate != null) {
 			if (crate.getItemName().isEmpty()) {
 				// if crate doesn't have an item name, show the reward table's name in the tooltip
-				tooltip.add(crate.getTable().getMutableTitle().withStyle(ChatFormatting.YELLOW));
+				tooltip.add(Component.literal(crate.getStringID()).withStyle(ChatFormatting.YELLOW));
 				tooltip.add(Component.empty());
 			}
 			tooltip.add(Component.translatable("item.ftbquests.lootcrate.tooltip_1").withStyle(ChatFormatting.GRAY));
 			tooltip.add(Component.translatable("item.ftbquests.lootcrate.tooltip_2").withStyle(ChatFormatting.GRAY));
 		} else {
 			String name = stack.getOrDefault(ModDataComponents.LOOT_CRATE.get(), "");
-			tooltip.add(Component.translatable("item.ftbquests.lootcrate.missing", name).withStyle(ChatFormatting.RED));
+			// stay quiet if there's no loot crate ID at all
+			if (!name.isEmpty()) {
+				tooltip.add(Component.translatable("item.ftbquests.lootcrate.missing", name).withStyle(ChatFormatting.RED));
+			}
 		}
 	}
 }
