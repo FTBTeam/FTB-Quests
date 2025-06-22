@@ -68,6 +68,7 @@ public class ViewQuestPanel extends ModalPanel {
 	private Button buttonOpenDependencies;
 	private BlankPanel panelContent;
 	private BlankPanel panelTasks;
+	private BlankPanel panelRewards;
 	private BlankPanel panelText;
 	private TextField titleField;
 	private final List<Pair<Integer,Integer>> pageIndices = new ArrayList<>();
@@ -172,7 +173,6 @@ public class ViewQuestPanel extends ModalPanel {
 
 		add(panelContent = new BlankPanel(this, "ContentPanel"));
 		panelContent.add(panelTasks = new BlankPanel(panelContent, "TasksPanel"));
-		BlankPanel panelRewards;
 		panelContent.add(panelRewards = new BlankPanel(panelContent, "RewardsPanel"));
 		panelContent.add(panelText = new BlankPanel(panelContent, "TextPanel"));
 
@@ -584,31 +584,70 @@ public class ViewQuestPanel extends ModalPanel {
 
 		if (quest == null) return;
 
-		if (questScreen.file.canEdit()) {
-			if (key.is(GLFW.GLFW_KEY_S)) {
-				editSubtitle();
-			} else if (key.is(GLFW.GLFW_KEY_T)) {
-				editTitle();
-			} else if (key.is(GLFW.GLFW_KEY_D)) {
-				editDescription();
-			} else if (key.is(GLFW.GLFW_KEY_P)) {
-				addPageBreak();
-			} else if (key.is(GLFW.GLFW_KEY_L)) {
-				editDescLine0(this, -1, null);
-			} else if (key.is(GLFW.GLFW_KEY_I)) {
-				editDescLine0(this, -1, new ImageComponent());
-			} else if (key.is(GLFW.GLFW_KEY_Q)) {
-				quest.onEditButtonClicked(questScreen);
+		if(questScreen.file.canEdit()){
+			switch (key.keyCode) {
+				case GLFW.GLFW_KEY_S -> editSubtitle();
+				case GLFW.GLFW_KEY_T -> editTitle();
+				case GLFW.GLFW_KEY_D -> editDescription();
+				case GLFW.GLFW_KEY_P -> addPageBreak();
+				case GLFW.GLFW_KEY_L -> editDescLine0(this, -1, null);
+				case GLFW.GLFW_KEY_I -> editDescLine0(this, -1, new ImageComponent());
+				case GLFW.GLFW_KEY_Q -> quest.onEditButtonClicked(questScreen);
+				case GLFW.GLFW_KEY_LEFT -> {
+					for (Panel panel : List.of(panelTasks, panelRewards)) {
+						for (Widget w : panel.getWidgets()) {
+							if (w instanceof TaskButton b && b.isMouseOver()) {
+								quest.moveTaskLeft(b.task);
+								refreshWidgets();
+								return;
+							} else if (w instanceof RewardButton b && b.isMouseOver()) {
+								quest.moveRewardLeft(b.reward);
+								refreshWidgets();
+								return;
+							}
+						}
+					}
+					setCurrentPage(Math.max(0, getCurrentPage() - 1));
+					refreshWidgets();
+
+				}
+				case GLFW.GLFW_KEY_RIGHT -> {
+					for (Panel panel : List.of(panelTasks, panelRewards)) {
+						for (Widget w : panel.getWidgets()) {
+							if (w instanceof TaskButton b && b.isMouseOver()) {
+								quest.moveTaskRight(b.task);
+								refreshWidgets();
+								return;
+							} else if (w instanceof RewardButton b && b.isMouseOver()) {
+								quest.moveRewardRight(b.reward);
+								refreshWidgets();
+								return;
+							}
+						}
+					}
+					setCurrentPage(Math.min(pageIndices.size() - 1, getCurrentPage() + 1));
+					refreshWidgets();
+				}
+			}
+		} else {
+			switch (key.keyCode) {
+				case GLFW.GLFW_KEY_PAGE_UP:
+				case GLFW.GLFW_KEY_LEFT: {
+					setCurrentPage(Math.max(0, getCurrentPage() - 1));
+					refreshWidgets();
+					break;
+				}
+				case GLFW.GLFW_KEY_PAGE_DOWN:
+				case GLFW.GLFW_KEY_RIGHT: {
+					setCurrentPage(Math.min(pageIndices.size() - 1, getCurrentPage() + 1));
+					refreshWidgets();
+					break;
+				}
 			}
 		}
 
-		if (key.is(GLFW.GLFW_KEY_PAGE_UP) || key.is(GLFW.GLFW_KEY_LEFT)) {
-			setCurrentPage(Math.max(0, getCurrentPage() - 1));
-			refreshWidgets();
-		} else if (key.is(GLFW.GLFW_KEY_PAGE_DOWN) || key.is(GLFW.GLFW_KEY_RIGHT)) {
-			setCurrentPage(Math.min(pageIndices.size() - 1, getCurrentPage() + 1));
-			refreshWidgets();
-		}
+
+
 	}
 
 	private void editTitle() {
