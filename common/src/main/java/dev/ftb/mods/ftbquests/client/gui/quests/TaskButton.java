@@ -30,9 +30,7 @@ import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 
-import java.util.Comparator;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public class TaskButton extends Button {
@@ -72,6 +70,19 @@ public class TaskButton extends Button {
 			playClickSound();
 
 			ContextMenuBuilder builder = ContextMenuBuilder.create(task, questScreen);
+
+			builder.insertAtTop(List.of(new ContextMenuItem(Component.translatable("ftbquests.gui.move_left"), Icons.LEFT,
+					b -> {
+						task.getQuest().moveTaskLeft(task);
+						EditObjectMessage.sendToServer(task.getQuest());
+					}
+			)));
+			builder.insertAtTop(List.of(new ContextMenuItem(Component.translatable("ftbquests.gui.move_right"), Icons.RIGHT,
+					b -> {
+						task.getQuest().moveTaskRight(task);
+						EditObjectMessage.sendToServer(task.getQuest());
+					}
+			)));
 
 			if (task instanceof ItemTask itemTask && !itemTask.getItemStack().isEmpty()) {
 				var tags = itemTask.getItemStack().getItem().builtInRegistryHolder().tags().toList();
