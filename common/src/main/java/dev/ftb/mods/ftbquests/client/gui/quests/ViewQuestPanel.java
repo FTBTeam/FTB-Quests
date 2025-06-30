@@ -58,6 +58,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.*;
 import java.util.function.BiConsumer;
+import java.util.function.Consumer;
 
 public class ViewQuestPanel extends ModalPanel {
 	public static final Icon PAGEBREAK_ICON = Icon.getIcon(FTBQuestsAPI.rl("textures/gui/pagebreak.png"));
@@ -407,20 +408,7 @@ public class ViewQuestPanel extends ModalPanel {
 
 			ImageComponent img = findImageComponent(component);
 			if (img != null) {
-				ImageComponentWidget cw = new ImageComponentWidget(this, panelText, img, i);
-
-				if (cw.getComponent().isFit()) {
-					double scale = panelText.width / (double) cw.width;
-					cw.setSize((int) (cw.width * scale), (int) (cw.height * scale));
-				} else if (cw.getComponent().getAlign() == ImageComponent.ImageAlign.CENTER) {
-					cw.setX((panelText.width - cw.width) / 2);
-				} else if (cw.getComponent().getAlign() == ImageComponent.ImageAlign.RIGHT) {
-					cw.setX(panelText.width - cw.width);
-				} else {
-					cw.setX(0);
-				}
-
-				panelText.add(cw);
+				panelText.add(makeImageComponentWidget(img, i));
 			} else {
 				final int line = i;
 				TextField field = new QuestDescriptionField(panelText, canEdit, TranslationKey.QUEST_DESC, (context, clickedW) -> editDescLine(clickedW, line, context, null))
@@ -429,6 +417,22 @@ public class ViewQuestPanel extends ModalPanel {
 				panelText.add(field);
 			}
 		}
+	}
+
+	private @NotNull ImageComponentWidget makeImageComponentWidget(ImageComponent img, int idx) {
+		ImageComponentWidget cw = new ImageComponentWidget(this, panelText, img, idx);
+
+		if (cw.getComponent().isFit()) {
+			double scale = panelText.width / (double) cw.width;
+			cw.setSize((int) (cw.width * scale), (int) (cw.height * scale));
+		} else if (cw.getComponent().getAlign() == ImageComponent.ImageAlign.CENTER) {
+			cw.setX((panelText.width - cw.width) / 2);
+		} else if (cw.getComponent().getAlign() == ImageComponent.ImageAlign.RIGHT) {
+			cw.setX(panelText.width - cw.width);
+		} else {
+			cw.setX(0);
+		}
+		return cw;
 	}
 
 	private void addButtonBar(boolean canEdit) {
@@ -584,7 +588,7 @@ public class ViewQuestPanel extends ModalPanel {
 
 		if (quest == null) return;
 
-		if(questScreen.file.canEdit()){
+		if (questScreen.file.canEdit()) {
 			switch (key.keyCode) {
 				case GLFW.GLFW_KEY_S -> editSubtitle();
 				case GLFW.GLFW_KEY_T -> editTitle();
@@ -593,61 +597,41 @@ public class ViewQuestPanel extends ModalPanel {
 				case GLFW.GLFW_KEY_L -> editDescLine0(this, -1, null);
 				case GLFW.GLFW_KEY_I -> editDescLine0(this, -1, new ImageComponent());
 				case GLFW.GLFW_KEY_Q -> quest.onEditButtonClicked(questScreen);
-				case GLFW.GLFW_KEY_LEFT -> {
-					for (Panel panel : List.of(panelTasks, panelRewards)) {
-						for (Widget w : panel.getWidgets()) {
-							if (w instanceof TaskButton b && b.isMouseOver()) {
-								quest.moveTaskLeft(b.task);
-								refreshWidgets();
-								return;
-							} else if (w instanceof RewardButton b && b.isMouseOver()) {
-								quest.moveRewardLeft(b.reward);
-								refreshWidgets();
-								return;
-							}
-						}
-					}
-					setCurrentPage(Math.max(0, getCurrentPage() - 1));
-					refreshWidgets();
-
-				}
-				case GLFW.GLFW_KEY_RIGHT -> {
-					for (Panel panel : List.of(panelTasks, panelRewards)) {
-						for (Widget w : panel.getWidgets()) {
-							if (w instanceof TaskButton b && b.isMouseOver()) {
-								quest.moveTaskRight(b.task);
-								refreshWidgets();
-								return;
-							} else if (w instanceof RewardButton b && b.isMouseOver()) {
-								quest.moveRewardRight(b.reward);
-								refreshWidgets();
-								return;
-							}
-						}
-					}
-					setCurrentPage(Math.min(pageIndices.size() - 1, getCurrentPage() + 1));
-					refreshWidgets();
-				}
+				case GLFW.GLFW_KEY_LEFT -> moveTasksAndRewards(quest::moveTaskLeft, quest::moveRewardLeft, -1);
+				case GLFW.GLFW_KEY_RIGHT -> moveTasksAndRewards(quest::moveTaskRight, quest::moveRewardRight, 1);
 			}
 		} else {
-			switch (key.keyCode) {
-				case GLFW.GLFW_KEY_PAGE_UP:
-				case GLFW.GLFW_KEY_LEFT: {
-					setCurrentPage(Math.max(0, getCurrentPage() - 1));
+            switch (key.keyCode) {
+                case GLFW.GLFW_KEY_PAGE_UP, GLFW.GLFW_KEY_LEFT -> {
+                    setCurrentPage(Math.max(0, getCurrentPage() - 1));
+                    refreshWidgets();
+                }
+                case GLFW.GLFW_KEY_PAGE_DOWN, GLFW.GLFW_KEY_RIGHT -> {
+                    setCurrentPage(Math.min(pageIndices.size() - 1, getCurrentPage() + 1));
+                    refreshWidgets();
+                }
+            }
+		}
+	}
+
+	private void moveTasksAndRewards(Consumer<Task> taskConsumer, Consumer<Reward> rewardConsumer, int offset) {
+		for (Panel panel : List.of(panelTasks, panelRewards)) {
+			for (Widget w : panel.getWidgets()) {
+				if (w instanceof TaskButton b && b.isMouseOver()) {
+					taskConsumer.accept(b.task);
 					refreshWidgets();
-					break;
-				}
-				case GLFW.GLFW_KEY_PAGE_DOWN:
-				case GLFW.GLFW_KEY_RIGHT: {
-					setCurrentPage(Math.min(pageIndices.size() - 1, getCurrentPage() + 1));
+					return;
+				} else if (w instanceof RewardButton b && b.isMouseOver()) {
+					rewardConsumer.accept(b.reward);
 					refreshWidgets();
-					break;
+					return;
 				}
 			}
 		}
-
-
-
+		// mouse not over a task or reward? just do a page forward/backward as normal
+		int newPage = Mth.clamp(getCurrentPage() + offset, 0, pageIndices.size() - 1);
+		setCurrentPage(newPage);
+		refreshWidgets();
 	}
 
 	private void editTitle() {
