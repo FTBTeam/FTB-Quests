@@ -4,6 +4,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2101.1.11]
+
+### Added
+* Added ability to move tasks and rewards left or right in the quest view panel (in edit mode)
+  * Added "Move Left" and "Move Right" context menu entries when right-clicking tasks & rewards
+  * Pressing cursor left or right while hovering tasks & rewards also moves the item left or right
+
 ## [2101.1.10]
 
 ### Added
