@@ -92,6 +92,7 @@
 	"ftbquests.file.allow_take_quest_blocks": "Allow to Take Quest Blocks",
 	"ftbquests.file.allow_take_quest_blocks.tooltip": "Allow to obtain Quest Blocks from the Quests GUI.",
 	"ftbquests.file.emergency_items": "Emergency Items",
+	"ftbquests.file.emergency_items.get_items": "Get Items",
 	"ftbquests.file.emergency_items_cooldown": "Emergency Items Cooldown",
 	"ftbquests.file.emergency_items_cooldown.tooltip": "Cooldown timer for emergency items to respawn.",
 	"ftbquests.file.defaults": "Defaults",
