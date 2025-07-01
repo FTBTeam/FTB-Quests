@@ -554,15 +554,13 @@ public final class Quest extends QuestObject implements Movable, Excludable {
 	private void checkForDependantCompletion(TeamData data) {
 		getDependants().forEach(questObject -> {
 			if (questObject instanceof Quest quest) {
-				if (quest.getProgressionMode() == ProgressionMode.FLEXIBLE) {
-					if (quest.streamDependencies().allMatch(data::isCompleted)) {
-						quest.tasks.forEach(task -> {
-							if (data.getProgress(task.id) >= task.getMaxProgress()) {
-								data.markTaskCompleted(task);
-							}
-						});
-					}
-				}
+                if (quest.getProgressionMode() == ProgressionMode.FLEXIBLE && quest.checkDependencies(data::isCompleted)) {
+                    quest.tasks.forEach(task -> {
+                        if (data.getProgress(task.id) >= task.getMaxProgress()) {
+                            data.markTaskCompleted(task);
+                        }
+                    });
+                }
 
 				data.checkAutoCompletion(quest);
 			}
@@ -1152,5 +1150,32 @@ public final class Quest extends QuestObject implements Movable, Excludable {
 
 	public boolean isExclusiveQuest() {
 		return dependencies.stream().anyMatch(qo -> qo instanceof Quest q && q.maxCompletableDeps > 0);
+	}
+
+	private <T> void moveItem(List<T> list, T item, int direction) {
+		int currentIndex = list.indexOf(item);
+		int targetIndex = currentIndex + direction;
+
+		if (currentIndex >= 0 && targetIndex >= 0 && targetIndex < list.size()) {
+			T targetItem = list.get(targetIndex);
+			list.set(targetIndex, item);
+			list.set(currentIndex, targetItem);
+		}
+	}
+
+	public void moveTaskLeft(Task task) {
+		moveItem(tasks, task, -1);
+	}
+
+	public void moveTaskRight(Task task) {
+		moveItem(tasks, task, 1);
+	}
+
+	public void moveRewardLeft(Reward reward) {
+		moveItem(rewards, reward, -1);
+	}
+
+	public void moveRewardRight(Reward reward) {
+		moveItem(rewards, reward, 1);
 	}
 }

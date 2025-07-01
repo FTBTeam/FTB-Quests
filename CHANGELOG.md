@@ -4,6 +4,20 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2101.1.11]
+
+### Added
+* Added ability to move tasks and rewards left or right in the quest view panel (in edit mode)
+  * Added "Move Left" and "Move Right" context menu entries when right-clicking tasks & rewards
+  * Pressing cursor left or right while hovering tasks & rewards also moves the item left or right
+* The Kill task now has the ability to use entity type tags (in addition to simple entity types)
+  * If the Entity Type Tag field of the task is non-empty, it's used in preference to the entity type
+* The Emergency Items screen is now a lot more player-friendly
+  * Instead of forcing the player to sit at the emergency items screen for the entire countdown, the timer now counts down while the player is outside the screen
+
+### Fixed
+* Fixed issue where quests in flexible mode with multiple dependencies and not all dependencies required for completion were not getting completed
+
 ## [2101.1.10]
 
 ### Added
