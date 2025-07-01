@@ -4,6 +4,7 @@ import dev.architectury.registry.registries.RegistrarManager;
 import dev.ftb.mods.ftblibrary.config.ConfigGroup;
 import dev.ftb.mods.ftblibrary.config.NameMap;
 import dev.ftb.mods.ftblibrary.icon.Icon;
+import dev.ftb.mods.ftblibrary.icon.IconAnimation;
 import dev.ftb.mods.ftblibrary.icon.Icons;
 import dev.ftb.mods.ftblibrary.icon.ItemIcon;
 import dev.ftb.mods.ftblibrary.ui.Button;
@@ -20,6 +21,7 @@ import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.tags.TagKey;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
@@ -28,6 +30,7 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.SpawnEggItem;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -37,10 +40,13 @@ import java.util.Map;
 public class KillTask extends Task {
 	private static final ResourceLocation ZOMBIE = ResourceLocation.withDefaultNamespace("zombie");
 
+	private static NameMap<ResourceLocation> entityNameMap = null;
+	private static NameMap<String> entityTagMap = null;
+
 	private ResourceLocation entityTypeId = ZOMBIE;
+	private TagKey<EntityType<?>> entityTypeTag = null;
 	private long value = 100L;
 	private String customName = "";
-	private NameMap<ResourceLocation> entityNameMap = null;
 	private static final Map<ResourceLocation,Icon> entityIcons = new HashMap<>();
 
 	public KillTask(long id, Quest quest) {
@@ -61,6 +67,7 @@ public class KillTask extends Task {
 	public void writeData(CompoundTag nbt, HolderLookup.Provider provider) {
 		super.writeData(nbt, provider);
 		nbt.putString("entity", entityTypeId.toString());
+		if (entityTypeTag != null) nbt.putString("entityTypeTag", entityTypeTag.location().toString());
 		nbt.putLong("value", value);
 		if (!customName.isEmpty()) nbt.putString("custom_name", customName);
 	}
@@ -69,6 +76,7 @@ public class KillTask extends Task {
 	public void readData(CompoundTag nbt, HolderLookup.Provider provider) {
 		super.readData(nbt, provider);
 		entityTypeId = ResourceLocation.tryParse(nbt.getString("entity"));
+		entityTypeTag = parseTypeTag(nbt.getString("entityTypeTag"));
 		value = nbt.getLong("value");
 		customName = nbt.getString("custom_name");
 	}
@@ -76,7 +84,8 @@ public class KillTask extends Task {
 	@Override
 	public void writeNetData(RegistryFriendlyByteBuf buffer) {
 		super.writeNetData(buffer);
-		buffer.writeUtf(entityTypeId.toString(), Short.MAX_VALUE);
+		buffer.writeUtf(entityTypeId.toString());
+		buffer.writeUtf(entityTypeTag == null ? "" : entityTypeTag.location().toString());
 		buffer.writeVarLong(value);
 		buffer.writeUtf(customName);
 	}
@@ -84,10 +93,22 @@ public class KillTask extends Task {
 	@Override
 	public void readNetData(RegistryFriendlyByteBuf buffer) {
 		super.readNetData(buffer);
-		entityTypeId = ResourceLocation.tryParse(buffer.readUtf(Short.MAX_VALUE));
+		entityTypeId = ResourceLocation.tryParse(buffer.readUtf());
+		entityTypeTag = parseTypeTag(buffer.readUtf());
 		value = buffer.readVarInt();
 		customName = buffer.readUtf();
 	}
+
+	private static @Nullable TagKey<EntityType<?>> parseTypeTag(String tag) {
+		if (tag == null || tag.isEmpty()) {
+			return null;
+		}
+		if (tag.startsWith("#")) {
+			tag = tag.substring(1);
+		}
+		ResourceLocation rl = ResourceLocation.tryParse(tag);
+        return rl == null || rl.getPath().isEmpty() ? null : TagKey.create(Registries.ENTITY_TYPE, rl);
+    }
 
 	@Override
 	@Environment(EnvType.CLIENT)
@@ -101,10 +122,21 @@ public class KillTask extends Task {
 					.icon(KillTask::getIconForEntityType)
 					.create();
 		}
+		if (entityTagMap == null) {
+			List<String> tags = new ArrayList<>();
+			tags.add("");
+			tags.addAll(BuiltInRegistries.ENTITY_TYPE.getTags().map(pair -> pair.getFirst().location().toString()).sorted().toList());
+			entityTagMap = NameMap.of("minecraft:zombies", tags).create();
+		}
 
 		config.addEnum("entity", entityTypeId, v -> entityTypeId = v, entityNameMap, ZOMBIE);
+		config.addEnum("entity_type_tag", getTypeTagStr(), v -> entityTypeTag = parseTypeTag(v), entityTagMap);
 		config.addLong("value", value, v -> value = v, 100L, 1L, Long.MAX_VALUE);
 		config.addString("custom_name", customName, v -> customName = v, "");
+	}
+
+	private String getTypeTagStr() {
+		return entityTypeTag == null ? "" : entityTypeTag.location().toString();
 	}
 
 	private static Icon getIconForEntityType(ResourceLocation typeId) {
@@ -130,25 +162,38 @@ public class KillTask extends Task {
 		super.clearCachedData();
 
 		entityNameMap = null;
+		entityTagMap = null;
 		entityIcons.clear();
 	}
 
 	@Override
 	@Environment(EnvType.CLIENT)
 	public MutableComponent getAltTitle() {
+		MutableComponent name = entityTypeTag == null ?
+				Component.translatable("entity." + entityTypeId.toLanguageKey()) :
+				Component.literal("#" + getTypeTagStr());
 		if (!customName.isEmpty()) {
-			return Component.translatable("ftbquests.task.ftbquests.kill.title_named", formatMaxProgress(),
-					Component.translatable("entity." + entityTypeId.toLanguageKey()), Component.literal(customName));
+			return Component.translatable("ftbquests.task.ftbquests.kill.title_named", formatMaxProgress(), name, Component.literal(customName));
 		} else {
-			return Component.translatable("ftbquests.task.ftbquests.kill.title", formatMaxProgress(),
-					Component.translatable("entity." + entityTypeId.toLanguageKey()));
+			return Component.translatable("ftbquests.task.ftbquests.kill.title", formatMaxProgress(), name);
 		}
 	}
 
 	@Override
 	@Environment(EnvType.CLIENT)
 	public Icon getAltIcon() {
-		return getIconForEntityType(entityTypeId);
+		if (entityTypeTag == null) {
+			return getIconForEntityType(entityTypeId);
+		}
+
+		List<Icon> icons = new ArrayList<>();
+		BuiltInRegistries.ENTITY_TYPE.getTag(entityTypeTag)
+				.ifPresent(set ->
+						set.forEach(holder ->
+								holder.unwrapKey().map(k -> icons.add(getIconForEntityType(k.location())))
+						)
+				);
+		return icons.isEmpty() ? Icons.BARRIER : IconAnimation.fromList(icons, false);
 	}
 
 	@Override
@@ -157,9 +202,15 @@ public class KillTask extends Task {
 	}
 
 	public void kill(TeamData teamData, LivingEntity e) {
-		if (!teamData.isCompleted(this) && entityTypeId.equals(RegistrarManager.getId(e.getType(), Registries.ENTITY_TYPE)) && nameMatchOK(e)) {
+		if (!teamData.isCompleted(this) && match(e)) {
 			teamData.addProgress(this, 1L);
 		}
+	}
+
+	private boolean match(LivingEntity e) {
+		return entityTypeTag == null ?
+				entityTypeId.equals(RegistrarManager.getId(e.getType(), Registries.ENTITY_TYPE)) && nameMatchOK(e) :
+				e.getType().is(entityTypeTag) && nameMatchOK(e);
 	}
 
 	private boolean nameMatchOK(LivingEntity e) {
