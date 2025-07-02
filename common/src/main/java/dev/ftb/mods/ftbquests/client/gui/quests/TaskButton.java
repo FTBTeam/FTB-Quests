@@ -16,6 +16,7 @@ import dev.ftb.mods.ftbquests.client.gui.ContextMenuBuilder;
 import dev.ftb.mods.ftbquests.integration.item_filtering.ItemMatchingSystem;
 import dev.ftb.mods.ftbquests.net.EditObjectMessage;
 import dev.ftb.mods.ftbquests.net.GiveItemToPlayerMessage;
+import dev.ftb.mods.ftbquests.net.ReorderItemMessage;
 import dev.ftb.mods.ftbquests.quest.task.ItemTask;
 import dev.ftb.mods.ftbquests.quest.task.Task;
 import dev.ftb.mods.ftbquests.quest.theme.property.ThemeProperties;
@@ -30,7 +31,9 @@ import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 
-import java.util.*;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 public class TaskButton extends Button {
@@ -72,16 +75,10 @@ public class TaskButton extends Button {
 			ContextMenuBuilder builder = ContextMenuBuilder.create(task, questScreen);
 
 			builder.insertAtTop(List.of(new ContextMenuItem(Component.translatable("ftbquests.gui.move_left"), Icons.LEFT,
-					b -> {
-						task.getQuest().moveTaskLeft(task);
-						EditObjectMessage.sendToServer(task.getQuest());
-					}
+					b -> NetworkManager.sendToServer(new ReorderItemMessage(task.getId(), false))
 			)));
 			builder.insertAtTop(List.of(new ContextMenuItem(Component.translatable("ftbquests.gui.move_right"), Icons.RIGHT,
-					b -> {
-						task.getQuest().moveTaskRight(task);
-						EditObjectMessage.sendToServer(task.getQuest());
-					}
+					b -> NetworkManager.sendToServer(new ReorderItemMessage(task.getId(), true))
 			)));
 
 			if (task instanceof ItemTask itemTask && !itemTask.getItemStack().isEmpty()) {

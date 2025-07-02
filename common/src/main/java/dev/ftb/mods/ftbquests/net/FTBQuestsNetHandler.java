@@ -21,6 +21,7 @@ public class FTBQuestsNetHandler {
 		NetworkHelper.registerC2S(MoveChapterGroupMessage.TYPE, MoveChapterGroupMessage.STREAM_CODEC, MoveChapterGroupMessage::handle);
 		NetworkHelper.registerC2S(MoveChapterMessage.TYPE, MoveChapterMessage.STREAM_CODEC, MoveChapterMessage::handle);
 		NetworkHelper.registerC2S(MoveMovableMessage.TYPE, MoveMovableMessage.STREAM_CODEC, MoveMovableMessage::handle);
+		NetworkHelper.registerC2S(ReorderItemMessage.TYPE, ReorderItemMessage.STREAM_CODEC, ReorderItemMessage::handle);
 		NetworkHelper.registerC2S(RequestTeamDataMessage.TYPE, RequestTeamDataMessage.STREAM_CODEC, RequestTeamDataMessage::handle);
 		NetworkHelper.registerC2S(RequestTranslationTableMessage.TYPE, RequestTranslationTableMessage.STREAM_CODEC, RequestTranslationTableMessage::handle);
 		NetworkHelper.registerC2S(SetCustomImageMessage.TYPE, SetCustomImageMessage.STREAM_CODEC, SetCustomImageMessage::handle);
@@ -49,6 +50,7 @@ public class FTBQuestsNetHandler {
 		NetworkHelper.registerS2C(ObjectStartedMessage.TYPE, ObjectStartedMessage.STREAM_CODEC, ObjectStartedMessage::handle);
 		NetworkHelper.registerS2C(ObjectStartedResetMessage.TYPE, ObjectStartedResetMessage.STREAM_CODEC, ObjectStartedResetMessage::handle);
 		NetworkHelper.registerS2C(OpenQuestBookMessage.TYPE, OpenQuestBookMessage.STREAM_CODEC, OpenQuestBookMessage::handle);
+		NetworkHelper.registerS2C(ReorderItemResponseMessage.TYPE, ReorderItemResponseMessage.STREAM_CODEC, ReorderItemResponseMessage::handle);
 		NetworkHelper.registerS2C(ResetRewardMessage.TYPE, ResetRewardMessage.STREAM_CODEC, ResetRewardMessage::handle);
 		NetworkHelper.registerS2C(SyncEditingModeMessage.TYPE, SyncEditingModeMessage.STREAM_CODEC, SyncEditingModeMessage::handle);
 		NetworkHelper.registerS2C(SyncEditorPermissionMessage.TYPE, SyncEditorPermissionMessage.STREAM_CODEC, SyncEditorPermissionMessage::handle);
