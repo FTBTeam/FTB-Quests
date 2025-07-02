@@ -4,6 +4,11 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2101.1.12]
+
+### Fixed
+* Fixed task/reward reordering (added in last release) not always saving correctly on the server
+
 ## [2101.1.11]
 
 ### Added
