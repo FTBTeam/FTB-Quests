@@ -1070,6 +1070,16 @@ public final class Quest extends QuestObject implements Movable, Excludable {
 		rewards.remove(reward);
 	}
 
+	public void setTaskList(List<Task> tasks) {
+		this.tasks.clear();
+		this.tasks.addAll(tasks);
+	}
+
+	public void setRewardList(List<Reward> rewards) {
+		this.rewards.clear();
+		this.rewards.addAll(rewards);
+	}
+
 	@FunctionalInterface
 	private interface DependencyChecker {
 		default boolean check(QuestObject questObject) {
@@ -1161,6 +1171,8 @@ public final class Quest extends QuestObject implements Movable, Excludable {
 			list.set(targetIndex, item);
 			list.set(currentIndex, targetItem);
 		}
+
+		getQuestFile().markDirty();
 	}
 
 	public void moveTaskLeft(Task task) {

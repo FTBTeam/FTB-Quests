@@ -24,6 +24,7 @@ import dev.ftb.mods.ftbquests.client.FTBQuestsClientConfig;
 import dev.ftb.mods.ftbquests.client.gui.ImageComponentWidget;
 import dev.ftb.mods.ftbquests.client.gui.MultilineTextEditorScreen;
 import dev.ftb.mods.ftbquests.net.EditObjectMessage;
+import dev.ftb.mods.ftbquests.net.ReorderItemMessage;
 import dev.ftb.mods.ftbquests.net.TogglePinnedMessage;
 import dev.ftb.mods.ftbquests.quest.Quest;
 import dev.ftb.mods.ftbquests.quest.QuestLink;
@@ -58,7 +59,6 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.*;
 import java.util.function.BiConsumer;
-import java.util.function.Consumer;
 
 public class ViewQuestPanel extends ModalPanel {
 	public static final Icon PAGEBREAK_ICON = Icon.getIcon(FTBQuestsAPI.rl("textures/gui/pagebreak.png"));
@@ -597,8 +597,8 @@ public class ViewQuestPanel extends ModalPanel {
 				case GLFW.GLFW_KEY_L -> editDescLine0(this, -1, null);
 				case GLFW.GLFW_KEY_I -> editDescLine0(this, -1, new ImageComponent());
 				case GLFW.GLFW_KEY_Q -> quest.onEditButtonClicked(questScreen);
-				case GLFW.GLFW_KEY_LEFT -> moveTasksAndRewards(quest::moveTaskLeft, quest::moveRewardLeft, -1);
-				case GLFW.GLFW_KEY_RIGHT -> moveTasksAndRewards(quest::moveTaskRight, quest::moveRewardRight, 1);
+				case GLFW.GLFW_KEY_LEFT -> moveTasksAndRewards(false);
+				case GLFW.GLFW_KEY_RIGHT -> moveTasksAndRewards(true);
 			}
 		} else {
             switch (key.keyCode) {
@@ -614,22 +614,20 @@ public class ViewQuestPanel extends ModalPanel {
 		}
 	}
 
-	private void moveTasksAndRewards(Consumer<Task> taskConsumer, Consumer<Reward> rewardConsumer, int offset) {
+	private void moveTasksAndRewards(boolean moveRight) {
 		for (Panel panel : List.of(panelTasks, panelRewards)) {
 			for (Widget w : panel.getWidgets()) {
 				if (w instanceof TaskButton b && b.isMouseOver()) {
-					taskConsumer.accept(b.task);
-					refreshWidgets();
+					NetworkManager.sendToServer(new ReorderItemMessage(b.task.getId(), moveRight));
 					return;
 				} else if (w instanceof RewardButton b && b.isMouseOver()) {
-					rewardConsumer.accept(b.reward);
-					refreshWidgets();
+					NetworkManager.sendToServer(new ReorderItemMessage(b.reward.getId(), moveRight));
 					return;
 				}
 			}
 		}
 		// mouse not over a task or reward? just do a page forward/backward as normal
-		int newPage = Mth.clamp(getCurrentPage() + offset, 0, pageIndices.size() - 1);
+		int newPage = Mth.clamp(getCurrentPage() + (moveRight ? 1 : -1), 0, pageIndices.size() - 1);
 		setCurrentPage(newPage);
 		refreshWidgets();
 	}
