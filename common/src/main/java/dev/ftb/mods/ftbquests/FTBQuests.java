@@ -4,11 +4,9 @@ import dev.architectury.registry.ReloadListenerRegistry;
 import dev.architectury.utils.Env;
 import dev.architectury.utils.EnvExecutor;
 import dev.architectury.utils.GameInstance;
-import dev.ftb.mods.ftblibrary.config.manager.ConfigManager;
 import dev.ftb.mods.ftbquests.api.FTBQuestsAPI;
 import dev.ftb.mods.ftbquests.client.FTBQClientProxy;
 import dev.ftb.mods.ftbquests.client.FTBQuestsClient;
-import dev.ftb.mods.ftbquests.client.FTBQuestsClientConfig;
 import dev.ftb.mods.ftbquests.integration.RecipeModHelper;
 import dev.ftb.mods.ftbquests.net.ClearDisplayCacheMessage;
 import dev.ftb.mods.ftbquests.net.FTBQuestsNetHandler;
@@ -38,8 +36,6 @@ public class FTBQuests {
 
 	public FTBQuests() {
 		FTBQuestsAPI._init(FTBQuestsAPIImpl.INSTANCE);
-
-		ConfigManager.getInstance().registerClientConfig(FTBQuestsClientConfig.CONFIG, FTBQuestsAPI.MOD_ID);
 
 		PROXY = EnvExecutor.getEnvSpecific(() -> FTBQClientProxy::new, () -> FTBQServerProxy::new);
 
