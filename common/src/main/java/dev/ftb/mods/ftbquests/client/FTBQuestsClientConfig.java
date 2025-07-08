@@ -20,7 +20,12 @@ public interface FTBQuestsClientConfig {
     BooleanValue BACKSPACE_HISTORY = UI.addBoolean("backspace_history", true);
     BooleanValue CHAPTER_PANEL_PINNED = UI.addBoolean("chapter_panel_pinned", false);
 
-    SNBTConfig XLATE = CONFIG.addGroup("xlate", 1);
+    SNBTConfig NOTIFICATIONS = CONFIG.addGroup("notifications", 1);
+    EnumValue<NotificationStyle> COMPLETION_STYLE = NOTIFICATIONS.addEnum("completion_style", NotificationStyle.NAME_MAP);
+    EnumValue<NotificationStyle> REWARD_STYLE = NOTIFICATIONS.addEnum("reward_style", NotificationStyle.NAME_MAP);
+    BooleanValue COMPLETION_SOUNDS = NOTIFICATIONS.addBoolean("completion_sounds", true);
+
+    SNBTConfig XLATE = CONFIG.addGroup("xlate", 2);
     StringValue EDITING_LOCALE = XLATE.add(new LocaleValue(XLATE,"editing_locale", ""));
     BooleanValue HILITE_MISSING = XLATE.addBoolean("hilite_missing", true);
 

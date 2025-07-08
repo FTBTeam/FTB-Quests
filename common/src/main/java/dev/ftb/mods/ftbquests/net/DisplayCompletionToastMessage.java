@@ -22,6 +22,6 @@ public record DisplayCompletionToastMessage(long id) implements CustomPacketPayl
 	}
 
 	public static void handle(DisplayCompletionToastMessage message, NetworkManager.PacketContext context) {
-		context.queue(() -> FTBQuestsNetClient.displayCompletionToast(message.id));
+		context.queue(() -> FTBQuestsNetClient.notifyPlayerOfCompletion(message.id));
 	}
 }

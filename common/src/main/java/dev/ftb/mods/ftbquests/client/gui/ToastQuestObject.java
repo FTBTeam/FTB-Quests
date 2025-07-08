@@ -2,6 +2,8 @@ package dev.ftb.mods.ftbquests.client.gui;
 
 import dev.ftb.mods.ftblibrary.icon.Icon;
 import dev.ftb.mods.ftblibrary.ui.misc.SimpleToast;
+import dev.ftb.mods.ftbquests.client.FTBQuestsClientConfig;
+import dev.ftb.mods.ftbquests.client.NotificationStyle;
 import dev.ftb.mods.ftbquests.quest.Chapter;
 import dev.ftb.mods.ftbquests.quest.QuestObject;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
@@ -38,7 +40,7 @@ public class ToastQuestObject extends SimpleToast {
 
 	@Override
 	public void playSound(SoundManager handler) {
-		if (object instanceof Chapter) {
+		if (object instanceof Chapter && FTBQuestsClientConfig.COMPLETION_STYLE.get() != NotificationStyle.NONE) {
 			handler.play(SimpleSoundInstance.forUI(SoundEvents.UI_TOAST_CHALLENGE_COMPLETE, 1F, 1F));
 		}
 	}
