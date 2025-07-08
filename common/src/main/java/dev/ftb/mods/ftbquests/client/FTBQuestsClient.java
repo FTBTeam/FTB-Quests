@@ -44,13 +44,18 @@ import java.util.Optional;
 public class FTBQuestsClient {
 	public static KeyMapping KEY_QUESTS;
 
-	public static void init() {
+	@SuppressWarnings("ConstantValue")
+    public static void init() {
 		FTBQuestsClientConfig.init();
 
 		ClientLifecycleEvent.CLIENT_SETUP.register(FTBQuestsClient::onClientSetup);
-		ReloadListenerRegistry.register(PackType.CLIENT_RESOURCES, new QuestFileCacheReloader());
-		ReloadListenerRegistry.register(PackType.CLIENT_RESOURCES, new ThemeLoader());
-		KeyMappingRegistry.register(KEY_QUESTS = new KeyMapping("key.ftbquests.quests", InputConstants.Type.KEYSYM, -1, "key.categories.ftbquests"));
+
+		// Minecraft.getInstance() might not exist here (datagen in particular)
+		if (Minecraft.getInstance() != null) {
+			ReloadListenerRegistry.register(PackType.CLIENT_RESOURCES, new QuestFileCacheReloader());
+			ReloadListenerRegistry.register(PackType.CLIENT_RESOURCES, new ThemeLoader());
+			KeyMappingRegistry.register(KEY_QUESTS = new KeyMapping("key.ftbquests.quests", InputConstants.Type.KEYSYM, -1, "key.categories.ftbquests"));
+		}
 
 		new FTBQuestsClientEventHandler().init();
 	}
