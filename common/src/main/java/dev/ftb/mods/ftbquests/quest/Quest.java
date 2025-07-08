@@ -541,7 +541,7 @@ public final class Quest extends QuestObject implements Movable, Excludable {
 				data.notifyPlayers(id);
 			}
 
-			if (chapter.isCompletedRaw(data.getTeamData())) {
+			if (!data.getTeamData().isCompleted(chapter) && chapter.isCompletedRaw(data.getTeamData())) {
 				chapter.onCompleted(data.withObject(chapter));
 			}
 
