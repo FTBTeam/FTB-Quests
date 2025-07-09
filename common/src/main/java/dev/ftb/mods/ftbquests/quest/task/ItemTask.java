@@ -18,6 +18,7 @@ import dev.ftb.mods.ftbquests.item.MissingItem;
 import dev.ftb.mods.ftbquests.quest.Quest;
 import dev.ftb.mods.ftbquests.quest.TeamData;
 import dev.ftb.mods.ftbquests.registry.ModItems;
+import dev.ftb.mods.ftbquests.util.FTBQuestsInventoryListener;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.ChatFormatting;
@@ -33,6 +34,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.function.Predicate;
 
@@ -290,6 +292,17 @@ public class ItemTask extends Task implements Predicate<ItemStack> {
 		return stack;
 	}
 
+	private long countMatchingItems(Collection<ItemStack> toCheck) {
+		long total = 0;
+		for (ItemStack stack : toCheck) {
+			if (test(stack)) {
+				total += stack.getCount();
+				if (total >= count) break;
+			}
+		}
+		return Math.min(total, count);
+	}
+
 	@Override
 	public void submitTask(TeamData teamData, ServerPlayer player, ItemStack craftedItem) {
 		if (taskScreenOnly || !checkTaskSequence(teamData) || teamData.isCompleted(this) || itemStack.getItem() instanceof MissingItem || craftedItem.getItem() instanceof MissingItem) {
@@ -302,9 +315,12 @@ public class ItemTask extends Task implements Predicate<ItemStack> {
 					teamData.addProgress(this, craftedItem.getCount());
 				}
 			} else {
-				long c = Math.min(count, player.getInventory().items.stream().filter(this).mapToLong(ItemStack::getCount).sum());
-				if (c > teamData.getProgress(this)) {
-					teamData.setProgress(this, c);
+				var toCheck = ItemMatchingSystem.INSTANCE.isItemFilter(itemStack) ?
+						FTBQuestsInventoryListener.getAllNonEmptyStacksForPlayer() :
+						FTBQuestsInventoryListener.getStacksForPlayerOfType(itemStack.getItem());
+				long matchCount = countMatchingItems(toCheck);
+				if (matchCount > teamData.getProgress(this)) {
+					teamData.setProgress(this, matchCount);
 				}
 			}
 		} else if (craftedItem.isEmpty()) {

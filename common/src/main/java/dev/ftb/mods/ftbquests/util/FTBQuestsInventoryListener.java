@@ -9,12 +9,16 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.util.Mth;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.ContainerListener;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 
-import java.util.List;
+import java.util.*;
 
 public class FTBQuestsInventoryListener implements ContainerListener {
 	public final ServerPlayer player;
+
+	private static final Map<Item, List<ItemStack>> inventorySummaryCache = new HashMap<>();
+	private static final List<ItemStack> nonEmptyStacks = new ArrayList<>();
 
 	public FTBQuestsInventoryListener(ServerPlayer p) {
 		player = p;
@@ -29,21 +33,41 @@ public class FTBQuestsInventoryListener implements ContainerListener {
 
 		List<Task> tasksToCheck = craftedItem.isEmpty() ? file.getSubmitTasks() : file.getCraftingTasks();
 
-        if (!tasksToCheck.isEmpty()) {
-            FTBTeamsAPI.api().getManager().getTeamForPlayer(player).ifPresent(team -> {
-                TeamData data = file.getNullableTeamData(team.getId());
-                if (data != null && !data.isLocked()) {
-                    file.withPlayerContext(player, () -> {
-                        for (Task task : tasksToCheck) {
-                            if (task.id != sourceTask && data.canStartTasks(task.getQuest())) {
-                                task.submitTask(data, player, craftedItem);
-                            }
-                        }
-                    });
-                }
-            });
-        }
-    }
+		if (!tasksToCheck.isEmpty()) {
+			FTBTeamsAPI.api().getManager().getTeamForPlayer(player).ifPresent(team -> {
+				TeamData data = file.getNullableTeamData(team.getId());
+				if (data != null && !data.isLocked()) {
+					file.withPlayerContext(player, () -> {
+						buildInventorySummary(player);
+						for (Task task : tasksToCheck) {
+							if (task.id != sourceTask && data.canStartTasks(task.getQuest())) {
+								task.submitTask(data, player, craftedItem);
+							}
+						}
+						inventorySummaryCache.clear();
+						nonEmptyStacks.clear();
+					});
+				}
+			});
+		}
+	}
+
+	private static void buildInventorySummary(ServerPlayer player) {
+		player.getInventory().items.forEach(stack -> {
+			if (!stack.isEmpty()) {
+				inventorySummaryCache.computeIfAbsent(stack.getItem(), k -> new ArrayList<>()).add(stack);
+				nonEmptyStacks.add(stack);
+			}
+		});
+	}
+
+	public static Collection<ItemStack> getStacksForPlayerOfType(Item item) {
+		return inventorySummaryCache.getOrDefault(item, List.of());
+	}
+
+	public static Collection<ItemStack> getAllNonEmptyStacksForPlayer() {
+		return nonEmptyStacks;
+	}
 
 	@Override
 	public void dataChanged(AbstractContainerMenu abstractContainerMenu, int i, int j) {
