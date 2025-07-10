@@ -328,10 +328,6 @@ public class ItemTask extends Task implements Predicate<ItemStack> {
 		return Math.min(total, count);
 	}
 
-	private long countMatchingItemsFilter(ServerPlayer player) {
-		return Math.min(count, player.getInventory().items.stream().filter(this).mapToLong(ItemStack::getCount).sum());
-	}
-
 	@Override
 	public void submitTask(TeamData teamData, ServerPlayer player, ItemStack craftedItem) {
 		if (taskScreenOnly || !checkTaskSequence(teamData) || teamData.isCompleted(this) || itemStack.getItem() instanceof MissingItem || craftedItem.getItem() instanceof MissingItem) {
@@ -344,7 +340,6 @@ public class ItemTask extends Task implements Predicate<ItemStack> {
 					teamData.addProgress(this, craftedItem.getCount());
 				}
 			} else {
-//				long c = Math.min(count, player.getInventory().items.stream().filter(this).mapToLong(ItemStack::getCount).sum());
 				var toCheck = ItemMatchingSystem.INSTANCE.isItemFilter(itemStack) ?
 						FTBQuestsInventoryListener.getAllNonEmptyStacksForPlayer() :
 						FTBQuestsInventoryListener.getStacksForPlayerOfType(itemStack.getItem());
