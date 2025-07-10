@@ -18,7 +18,7 @@ import dev.ftb.mods.ftbquests.item.MissingItem;
 import dev.ftb.mods.ftbquests.quest.Quest;
 import dev.ftb.mods.ftbquests.quest.TeamData;
 import dev.ftb.mods.ftbquests.registry.ModItems;
-import dev.ftb.mods.ftbquests.util.FTBQuestsInventoryListener;
+import dev.ftb.mods.ftbquests.util.PlayerInventorySummary;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.ChatFormatting;
@@ -315,10 +315,7 @@ public class ItemTask extends Task implements Predicate<ItemStack> {
 					teamData.addProgress(this, craftedItem.getCount());
 				}
 			} else {
-				var toCheck = ItemMatchingSystem.INSTANCE.isItemFilter(itemStack) ?
-						FTBQuestsInventoryListener.getAllNonEmptyStacksForPlayer() :
-						FTBQuestsInventoryListener.getStacksForPlayerOfType(itemStack.getItem());
-				long matchCount = countMatchingItems(toCheck);
+				long matchCount = countMatchingItems(PlayerInventorySummary.getRelevantItems(itemStack));
 				if (matchCount > teamData.getProgress(this)) {
 					teamData.setProgress(this, matchCount);
 				}
