@@ -1,7 +1,7 @@
 package dev.ftb.mods.ftbquests.events;
 
 import dev.architectury.networking.NetworkManager;
-import dev.ftb.mods.ftbquests.net.DisplayCompletionToastMessage;
+import dev.ftb.mods.ftbquests.net.NotifyCompletionMessage;
 import dev.ftb.mods.ftbquests.quest.QuestObject;
 import dev.ftb.mods.ftbquests.quest.TeamData;
 import net.minecraft.server.level.ServerPlayer;
@@ -35,7 +35,7 @@ public final class QuestProgressEventData<T extends QuestObject> {
 	}
 
 	public void notifyPlayers(long id) {
-		notifiedPlayers.forEach(player -> NetworkManager.sendToPlayer(player, new DisplayCompletionToastMessage(id)));
+		notifiedPlayers.forEach(player -> NetworkManager.sendToPlayer(player, new NotifyCompletionMessage(id)));
 	}
 
 	public Date getTime() {

@@ -8,7 +8,7 @@ import dev.ftb.mods.ftblibrary.icon.ItemIcon;
 import dev.ftb.mods.ftblibrary.ui.Widget;
 import dev.ftb.mods.ftblibrary.util.client.PositionedIngredient;
 import dev.ftb.mods.ftbquests.FTBQuests;
-import dev.ftb.mods.ftbquests.net.DisplayItemRewardToastMessage;
+import dev.ftb.mods.ftbquests.net.NotifyItemRewardMessage;
 import dev.ftb.mods.ftbquests.quest.Quest;
 import dev.ftb.mods.ftbquests.registry.ModItems;
 import io.netty.handler.codec.EncoderException;
@@ -154,7 +154,7 @@ public class ItemReward extends Reward {
 		}
 
 		if (notify) {
-			NetworkManager.sendToPlayer(player, new DisplayItemRewardToastMessage(item, size, disableRewardScreenBlur));
+			NetworkManager.sendToPlayer(player, new NotifyItemRewardMessage(item, size, disableRewardScreenBlur));
 		}
 	}
 

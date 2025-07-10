@@ -1,12 +1,15 @@
 package dev.ftb.mods.ftbquests.quest.reward;
 
+import dev.architectury.networking.NetworkManager;
 import dev.ftb.mods.ftblibrary.config.ConfigGroup;
+import dev.ftb.mods.ftbquests.net.CustomToastMessage;
 import dev.ftb.mods.ftbquests.quest.Quest;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 
 public class ToastReward extends Reward {
@@ -55,5 +58,6 @@ public class ToastReward extends Reward {
 
 	@Override
 	public void claim(ServerPlayer player, boolean notify) {
+		NetworkManager.sendToPlayer(player, new CustomToastMessage(getTitle(), Component.translatable(description), getIcon()));
 	}
 }
