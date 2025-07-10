@@ -13,7 +13,6 @@ import dev.ftb.mods.ftbquests.quest.Quest;
 import dev.ftb.mods.ftbquests.quest.TeamData;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.client.Minecraft;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
@@ -119,7 +118,7 @@ public class KillTask extends Task {
 		if (entityNameMap == null) {
 			List<ResourceLocation> ids = new ArrayList<>();
 			BuiltInRegistries.ENTITY_TYPE.forEach(type -> {
-				if (type.create(Minecraft.getInstance().level) instanceof LivingEntity) {
+				if (type.create(FTBQuestsClient.getClientLevel()) instanceof LivingEntity) {
 					ids.add(type.arch$registryName());
 				}
 			});
