@@ -9,6 +9,7 @@ import dev.ftb.mods.ftbquests.FTBQuests;
 import dev.ftb.mods.ftbquests.client.gui.IRewardListenerScreen;
 import dev.ftb.mods.ftbquests.client.gui.QuestObjectUpdateListener;
 import dev.ftb.mods.ftbquests.client.gui.RewardKey;
+import dev.ftb.mods.ftbquests.client.gui.RewardToast;
 import dev.ftb.mods.ftbquests.client.gui.quests.QuestScreen;
 import dev.ftb.mods.ftbquests.net.TeamDataUpdate;
 import dev.ftb.mods.ftbquests.quest.*;
@@ -267,5 +268,9 @@ public class FTBQuestsNetClient {
 		if (ClientQuestFile.exists()) {
 			ClientQuestFile.INSTANCE.setEditorPermission(hasPermission);
 		}
+	}
+
+	public static void displayCustomToast(Component title, Component text, Icon icon) {
+		Minecraft.getInstance().getToasts().addToast(new RewardToast(title, text, icon));
 	}
 }

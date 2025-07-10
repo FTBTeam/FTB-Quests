@@ -3,7 +3,7 @@ package dev.ftb.mods.ftbquests.quest.reward;
 import dev.architectury.networking.NetworkManager;
 import dev.ftb.mods.ftblibrary.config.ConfigGroup;
 import dev.ftb.mods.ftblibrary.icon.Icon;
-import dev.ftb.mods.ftbquests.net.DisplayRewardToastMessage;
+import dev.ftb.mods.ftbquests.net.NotifyRewardMessage;
 import dev.ftb.mods.ftbquests.quest.Quest;
 import dev.ftb.mods.ftbteams.api.FTBTeamsAPI;
 import net.fabricmc.api.EnvType;
@@ -135,7 +135,7 @@ public class CommandReward extends Reward {
 
 		if (notify) {
 			String key = feedbackMessage.isEmpty() ? "ftbquests.reward.ftbquests.command.success" : feedbackMessage;
-			NetworkManager.sendToPlayer(player, new DisplayRewardToastMessage(id, Component.translatable(key), REWARD_ICON, disableRewardScreenBlur));
+			NetworkManager.sendToPlayer(player, new NotifyRewardMessage(id, Component.translatable(key), REWARD_ICON, disableRewardScreenBlur));
 		}
 	}
 

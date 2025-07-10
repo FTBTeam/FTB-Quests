@@ -3,7 +3,7 @@ package dev.ftb.mods.ftbquests.quest.reward;
 import dev.architectury.networking.NetworkManager;
 import dev.ftb.mods.ftblibrary.config.ConfigGroup;
 import dev.ftb.mods.ftblibrary.icon.Color4I;
-import dev.ftb.mods.ftbquests.net.DisplayRewardToastMessage;
+import dev.ftb.mods.ftbquests.net.NotifyRewardMessage;
 import dev.ftb.mods.ftbquests.quest.Quest;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -70,7 +70,7 @@ public class XPReward extends Reward {
 		if (notify) {
 			Component text = Component.translatable("ftbquests.reward.ftbquests.xp").append(": ")
 					.append(Component.literal("+" + xp).withStyle(ChatFormatting.GREEN));
-			NetworkManager.sendToPlayer(player, new DisplayRewardToastMessage(id, text, Color4I.empty(), disableRewardScreenBlur));
+			NetworkManager.sendToPlayer(player, new NotifyRewardMessage(id, text, Color4I.empty(), disableRewardScreenBlur));
 		}
 	}
 

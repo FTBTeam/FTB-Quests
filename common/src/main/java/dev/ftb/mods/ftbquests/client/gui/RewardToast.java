@@ -4,21 +4,26 @@ import dev.ftb.mods.ftblibrary.icon.Icon;
 import dev.ftb.mods.ftblibrary.ui.misc.SimpleToast;
 import net.minecraft.network.chat.Component;
 
-/**
- * @author LatvianModder
- */
+import java.util.Objects;
+
 public class RewardToast extends SimpleToast {
+	private final Component title;
 	private final Component text;
 	private final Icon icon;
 
-	public RewardToast(Component t, Icon i) {
-		text = t;
-		icon = i;
+	public RewardToast(Component text, Icon icon) {
+		this(null, text, icon);
+	}
+
+	public RewardToast(Component title, Component text, Icon icon) {
+		this.title = title;
+		this.text = text;
+		this.icon = icon;
 	}
 
 	@Override
 	public Component getTitle() {
-		return Component.translatable("ftbquests.reward.collected");
+		return Objects.requireNonNullElse(title, Component.translatable("ftbquests.reward.collected"));
 	}
 
 	@Override

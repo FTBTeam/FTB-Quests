@@ -37,14 +37,15 @@ public class FTBQuestsNetHandler {
 		NetworkHelper.registerS2C(ClearDisplayCacheMessage.TYPE, ClearDisplayCacheMessage.STREAM_CODEC, ClearDisplayCacheMessage::handle);
 		NetworkHelper.registerS2C(CreateObjectResponseMessage.TYPE, CreateObjectResponseMessage.STREAM_CODEC, CreateObjectResponseMessage::handle);
 		NetworkHelper.registerS2C(CreateOtherTeamDataMessage.TYPE, CreateOtherTeamDataMessage.STREAM_CODEC, CreateOtherTeamDataMessage::handle);
+		NetworkHelper.registerS2C(CustomToastMessage.TYPE, CustomToastMessage.STREAM_CODEC, CustomToastMessage::handle);
 		NetworkHelper.registerS2C(DeleteObjectResponseMessage.TYPE, DeleteObjectResponseMessage.STREAM_CODEC, DeleteObjectResponseMessage::handle);
-		NetworkHelper.registerS2C(DisplayCompletionToastMessage.TYPE, DisplayCompletionToastMessage.STREAM_CODEC, DisplayCompletionToastMessage::handle);
-		NetworkHelper.registerS2C(DisplayItemRewardToastMessage.TYPE, DisplayItemRewardToastMessage.STREAM_CODEC, DisplayItemRewardToastMessage::handle);
-		NetworkHelper.registerS2C(DisplayRewardToastMessage.TYPE, DisplayRewardToastMessage.STREAM_CODEC, DisplayRewardToastMessage::handle);
 		NetworkHelper.registerS2C(EditObjectResponseMessage.TYPE, EditObjectResponseMessage.STREAM_CODEC, EditObjectResponseMessage::handle);
 		NetworkHelper.registerS2C(MoveChapterGroupResponseMessage.TYPE, MoveChapterGroupResponseMessage.STREAM_CODEC, MoveChapterGroupResponseMessage::handle);
 		NetworkHelper.registerS2C(MoveChapterResponseMessage.TYPE, MoveChapterResponseMessage.STREAM_CODEC, MoveChapterResponseMessage::handle);
 		NetworkHelper.registerS2C(MoveMovableResponseMessage.TYPE, MoveMovableResponseMessage.STREAM_CODEC, MoveMovableResponseMessage::handle);
+		NetworkHelper.registerS2C(NotifyCompletionMessage.TYPE, NotifyCompletionMessage.STREAM_CODEC, NotifyCompletionMessage::handle);
+		NetworkHelper.registerS2C(NotifyItemRewardMessage.TYPE, NotifyItemRewardMessage.STREAM_CODEC, NotifyItemRewardMessage::handle);
+		NetworkHelper.registerS2C(NotifyRewardMessage.TYPE, NotifyRewardMessage.STREAM_CODEC, NotifyRewardMessage::handle);
 		NetworkHelper.registerS2C(ObjectCompletedMessage.TYPE, ObjectCompletedMessage.STREAM_CODEC, ObjectCompletedMessage::handle);
 		NetworkHelper.registerS2C(ObjectCompletedResetMessage.TYPE, ObjectCompletedResetMessage.STREAM_CODEC, ObjectCompletedResetMessage::handle);
 		NetworkHelper.registerS2C(ObjectStartedMessage.TYPE, ObjectStartedMessage.STREAM_CODEC, ObjectStartedMessage::handle);
