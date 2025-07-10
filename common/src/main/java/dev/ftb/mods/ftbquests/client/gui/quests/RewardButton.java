@@ -108,9 +108,12 @@ public class RewardButton extends Button {
 	@Override
 	public void onClicked(MouseButton button) {
 		if (button.isLeft()) {
-			if (ClientQuestFile.exists()) {
-				reward.onButtonClicked(this, ClientQuestFile.INSTANCE.selfTeamData.getClaimType(Minecraft.getInstance().player.getUUID(), reward).canClaim());
-			}
+			if (reward.getQuestFile().canEdit() && ScreenWrapper.hasAltDown()) {
+				reward.onEditButtonClicked(this);
+			} else if (ClientQuestFile.exists()) {
+				boolean canClick = questScreen.file.selfTeamData.getClaimType(FTBQuestsClient.getClientPlayer().getUUID(), reward).canClaim();
+				reward.onButtonClicked(this, canClick);
+            }
 		} else if (button.isRight() && ClientQuestFile.exists() && ClientQuestFile.INSTANCE.canEdit()) {
 			playClickSound();
 			ContextMenuBuilder.create(reward, questScreen).openContextMenu(getGui());
