@@ -18,6 +18,7 @@ import dev.ftb.mods.ftbquests.quest.task.TaskType;
 import dev.ftb.mods.ftbquests.quest.task.TaskTypes;
 import dev.ftb.mods.ftbquests.util.FTBQuestsInventoryListener;
 import dev.ftb.mods.ftbquests.util.FileUtils;
+import dev.ftb.mods.ftbquests.util.PlayerInventorySummary;
 import dev.ftb.mods.ftbteams.api.FTBTeamsAPI;
 import dev.ftb.mods.ftbteams.api.Team;
 import dev.ftb.mods.ftbteams.api.event.PlayerChangedTeamEvent;
@@ -204,6 +205,7 @@ public class ServerQuestFile extends BaseQuestFile {
 				var onlineMembers = data.getOnlineMembers();
 				var pList = List.of(player);
 				Date now = new Date();
+				PlayerInventorySummary.build(player);
 				forAllQuests(quest -> {
 					if (!data.isCompleted(quest) && quest.isCompletedRaw(data)) {
 						// Handles possible situation where quest book has been modified to remove a task from a quest
