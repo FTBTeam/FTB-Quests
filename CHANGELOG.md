@@ -13,8 +13,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   * In addition to toast notifications, players can now use the chat window, action bar or disable notifications entirely  
 
 ### Changed
-* FTB Quests now logs a warning if the third party "FTB Quests Optimizer" is detected
-  * This is mod is _not_ recommended by FTB for use with FTB Quests; it will not improve performance, and may cause stability issues
+* FTB Quests now logs a warning if the third party "FTB Quests Optimizer" mod is detected
+  * This mod is _not_ recommended by FTB for use with FTB Quests; it will not improve performance, and may cause stability issues
 * The entity selection screen for the Kill Task now only shows living entities, and sorts them nicely by display name
 
 ### Fixed
