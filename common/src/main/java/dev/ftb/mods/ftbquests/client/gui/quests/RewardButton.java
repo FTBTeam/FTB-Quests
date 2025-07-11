@@ -97,15 +97,6 @@ public class RewardButton extends Button {
 	}
 
 	@Override
-	public WidgetType getWidgetType() {
-		if (!ClientQuestFile.exists() || !ClientQuestFile.INSTANCE.selfTeamData.isCompleted(reward.getQuest())) {
-			return WidgetType.DISABLED;
-		}
-
-		return super.getWidgetType();
-	}
-
-	@Override
 	public void onClicked(MouseButton button) {
 		if (button.isLeft()) {
 			if (reward.getQuestFile().canEdit() && ScreenWrapper.hasAltDown()) {
