@@ -6,8 +6,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [2101.1.13]
 
+### Added
+* Alt + Left-Click on reward buttons in the quest view panels now open the reward properties (edit mode)
+* Notification styles for completed quests & rewards can now be configured client-side
+  * Use the "Player Preferences" button (bottom right) and see the new "Notifications" section
+  * In addition to toast notifications, players can now use the chat window, action bar or disable notifications entirely  
+
+### Changed
+* FTB Quests now logs a warning if the third party "FTB Quests Optimizer" is detected
+  * This is mod is _not_ recommended by FTB for use with FTB Quests; it will not improve performance, and may cause stability issues
+* The entity selection screen for the Kill Task now only shows living entities, and sorts them nicely by display name
+
 ### Fixed
 * Fixed players getting a chapter-completed notification for already-completed chapters when an optional quest in that chapter is completed
+* The Toast Reward now actually works again
+* Fixed some performance issues related to scanning quests & tasks after player inventory changes and on player login
+  * This should use significantly less server CPU now, good for your TPS
+* (Mod developers only) Fixed crash when using FTB Quests as dependency in a data generation environment
 
 ## [2101.1.12]
 
