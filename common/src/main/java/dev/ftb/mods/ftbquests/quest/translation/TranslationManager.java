@@ -5,6 +5,7 @@ import dev.ftb.mods.ftblibrary.snbt.SNBT;
 import dev.ftb.mods.ftbquests.FTBQuests;
 import dev.ftb.mods.ftbquests.client.FTBQuestsClientConfig;
 import dev.ftb.mods.ftbquests.net.SyncTranslationTableMessage;
+import dev.ftb.mods.ftbquests.quest.BaseQuestFile;
 import dev.ftb.mods.ftbquests.quest.QuestObjectBase;
 import dev.ftb.mods.ftbquests.quest.ServerQuestFile;
 import net.minecraft.Util;
@@ -24,10 +25,9 @@ public class TranslationManager {
 
     private final Map<String, TranslationTable> map = new HashMap<>();
 
-    private final String fallbackLocale = "en_us";
+    public static final String DEFAULT_FALLBACK_LOCALE = "en_us";
 
     public TranslationManager() {
-        map.put(fallbackLocale, new TranslationTable());
     }
 
     public static void syncTable(ServerPlayer player, String language) {
@@ -37,7 +37,11 @@ public class TranslationManager {
         }
     }
 
-    public void loadFromNBT(Path langFolder) {
+    private static String getFallbackLocale(QuestObjectBase object) {
+        return object.getQuestFile().getFallbackLocale();
+    }
+
+    public void loadFromNBT(BaseQuestFile file, Path langFolder) {
         map.clear();
 
         if (!Files.exists(langFolder)) {
@@ -60,8 +64,8 @@ public class TranslationManager {
                     FTBQuests.LOGGER.error("can't read lang file {}", path);
                 }
             });
-            if (!map.containsKey(fallbackLocale)) {
-                map.put(fallbackLocale, new TranslationTable());
+            if (!map.containsKey(file.getFallbackLocale())) {
+                map.put(file.getFallbackLocale(), new TranslationTable());
             }
             FTBQuests.LOGGER.info("loaded translation tables for {} language(s)", map.size());
         } catch (IOException e) {
@@ -93,7 +97,7 @@ public class TranslationManager {
         if (table != null && table.contains(key)) {
             return table.getStringTranslation(key);
         } else {
-            return map.get(fallbackLocale).getStringTranslation(key);
+            return map.computeIfAbsent(getFallbackLocale(object), k -> new TranslationTable()).getStringTranslation(key);
         }
     }
 
@@ -103,25 +107,26 @@ public class TranslationManager {
         if (table != null && table.contains(key)) {
             return table.getStringListTranslation(key);
         } else {
-            return map.get(fallbackLocale).getStringListTranslation(key);
+            return map.computeIfAbsent(getFallbackLocale(object), k -> new TranslationTable()).getStringListTranslation(key);
         }
     }
 
-    private Optional<TranslationTable> getTable(String locale) {
+    private Optional<TranslationTable> getTable(QuestObjectBase object, String locale) {
         return Optional.ofNullable(map.get(locale))
-                .or(() -> Optional.ofNullable(map.get(fallbackLocale)));
+                .or(() -> Optional.ofNullable(map.get(getFallbackLocale(object))));
     }
 
     private boolean hasTranslationForLocale(QuestObjectBase object, String locale, TranslationKey subKey) {
-        return map.containsKey(locale) ? getTable(locale).map(t -> t.contains(makeKey(object, subKey))).orElse(false) : false;
+        return map.containsKey(locale) ? getTable(object, locale).map(t -> t.contains(makeKey(object, subKey))).orElse(false) : false;
     }
 
     public boolean hasMissingTranslation(QuestObjectBase object, TranslationKey key) {
-        String locale = object.getQuestFile().getLocale();
-        return object.getQuestFile().canEdit()
+        BaseQuestFile file = object.getQuestFile();
+        String locale = file.getLocale();
+        return file.canEdit()
                 && FTBQuestsClientConfig.HILITE_MISSING.get()
-                && !locale.equals("en_us")
-                && hasTranslationForLocale(object, "en_us", key)
+                && !locale.equals(file.getFallbackLocale())
+                && hasTranslationForLocale(object, file.getFallbackLocale(), key)
                 && !hasTranslationForLocale(object, locale, key);
     }
 
@@ -159,13 +164,14 @@ public class TranslationManager {
     }
 
     public void sendTranslationsToPlayer(ServerPlayer player) {
-        // make sure player always has the fallback en_us translations
-        sendTableToPlayer(player, "en_us");
+        Set<String> toSend = new HashSet<>();
+        String fallback = ServerQuestFile.INSTANCE.getFallbackLocale();
 
-        String lang = player.clientInformation().language();
-        if (!lang.equals("en_us")) {
-            sendTableToPlayer(player, lang);
-        }
+        toSend.add(DEFAULT_FALLBACK_LOCALE);
+        toSend.add(fallback);
+        toSend.add(player.clientInformation().language());
+
+        toSend.forEach(lang -> sendTableToPlayer(player, lang));
     }
 
     public void sendTableToPlayer(ServerPlayer player, String locale) {

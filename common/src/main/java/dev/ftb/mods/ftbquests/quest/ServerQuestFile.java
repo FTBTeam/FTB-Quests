@@ -288,7 +288,6 @@ public class ServerQuestFile extends BaseQuestFile {
 
 	@Override
 	public String getLocale() {
-		return "en_us";
+		return getFallbackLocale();
 	}
-
 }

@@ -156,6 +156,7 @@ public class ClientQuestFile extends BaseQuestFile {
 	@Override
 	public void clearCachedData() {
 		super.clearCachedData();
+
 		QuestTheme.instance.clearCache();
 	}
 
@@ -204,6 +205,12 @@ public class ClientQuestFile extends BaseQuestFile {
 		return locale.isEmpty() ? Minecraft.getInstance().options.languageCode : locale;
 	}
 
+	@Override
+	public String getFallbackLocale() {
+		String fallback = FTBQuestsClientConfig.FALLBACK_LOCALE.get();
+		return fallback.isEmpty() ? super.getFallbackLocale() : fallback;
+	}
+
 	public void setEditorPermission(boolean hasPermission) {
 		editorPermission = hasPermission;
 	}
@@ -238,7 +245,7 @@ public class ClientQuestFile extends BaseQuestFile {
 						ClientQuestFile.INSTANCE.getLocale())
 				.withStyle(ChatFormatting.GRAY, ChatFormatting.ITALIC)
 		);
-		list.add(Component.translatable("ftbquests.message.missing_xlate_2")
+		list.add(Component.translatable("ftbquests.message.missing_xlate_2", INSTANCE.getFallbackLocale())
 				.withStyle(ChatFormatting.GRAY, ChatFormatting.ITALIC));
 	}
 }
