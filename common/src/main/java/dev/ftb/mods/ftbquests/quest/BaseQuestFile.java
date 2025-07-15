@@ -11,6 +11,7 @@ import dev.ftb.mods.ftblibrary.util.NetworkHelper;
 import dev.ftb.mods.ftbquests.FTBQuests;
 import dev.ftb.mods.ftbquests.api.QuestFile;
 import dev.ftb.mods.ftbquests.client.FTBQuestsClient;
+import dev.ftb.mods.ftbquests.client.config.LocaleConfig;
 import dev.ftb.mods.ftbquests.events.*;
 import dev.ftb.mods.ftbquests.integration.RecipeModHelper;
 import dev.ftb.mods.ftbquests.net.DeleteObjectResponseMessage;
@@ -105,6 +106,7 @@ public abstract class BaseQuestFile extends QuestObject implements QuestFile {
 	private int detectionDelay;
 	private boolean showLockIcons;
 	private boolean dropBookOnDeath;
+	private String fallbackLocale;
 
 	private List<Task> allTasks;
 	private List<Task> submitTasks;
@@ -149,6 +151,7 @@ public abstract class BaseQuestFile extends QuestObject implements QuestFile {
 		allTasks = null;
 
 		translationManager = new TranslationManager();
+		fallbackLocale = TranslationManager.DEFAULT_FALLBACK_LOCALE;
 	}
 
 	public abstract Env getSide();
@@ -447,6 +450,7 @@ public abstract class BaseQuestFile extends QuestObject implements QuestFile {
 		nbt.putBoolean("show_lock_icons", showLockIcons);
 		nbt.putBoolean("drop_book_on_death", dropBookOnDeath);
 		nbt.putBoolean("hide_excluded_quests", hideExcludedQuests);
+		nbt.putString("fallback_locale", fallbackLocale);
 	}
 
 	@Override
@@ -488,6 +492,7 @@ public abstract class BaseQuestFile extends QuestObject implements QuestFile {
 		showLockIcons = !nbt.contains("show_lock_icons") || nbt.getBoolean("show_lock_icons");
 		dropBookOnDeath = nbt.getBoolean("drop_book_on_death");
 		hideExcludedQuests = nbt.getBoolean("hide_excluded_quests");
+		fallbackLocale = nbt.getString("fallback_locale");
 	}
 
 	public final void writeDataFull(Path folder, HolderLookup.Provider provider) {
@@ -594,7 +599,7 @@ public abstract class BaseQuestFile extends QuestObject implements QuestFile {
 			handleLegacyFileNBT(fileNBT);
 		}
 
-		translationManager.loadFromNBT(folder.resolve("lang"));
+		translationManager.loadFromNBT(this, folder.resolve("lang"));
 
 		Path groupsFile = folder.resolve("chapter_groups.snbt");
 		if (Files.exists(groupsFile)) {
@@ -863,6 +868,7 @@ public abstract class BaseQuestFile extends QuestObject implements QuestFile {
 		buffer.writeBoolean(showLockIcons);
 		buffer.writeBoolean(dropBookOnDeath);
 		buffer.writeBoolean(hideExcludedQuests);
+		buffer.writeUtf(fallbackLocale);
 	}
 
 	@Override
@@ -888,6 +894,7 @@ public abstract class BaseQuestFile extends QuestObject implements QuestFile {
 		showLockIcons = buffer.readBoolean();
 		dropBookOnDeath = buffer.readBoolean();
 		hideExcludedQuests = buffer.readBoolean();
+		fallbackLocale = buffer.readUtf();
 	}
 
 	public final void writeNetDataFull(RegistryFriendlyByteBuf buffer) {
@@ -1172,6 +1179,7 @@ public abstract class BaseQuestFile extends QuestObject implements QuestFile {
 		config.addBool("show_lock_icons", showLockIcons, v -> showLockIcons = v, true).setNameKey("ftbquests.ui.show_lock_icon");
 		config.addBool("drop_book_on_death", dropBookOnDeath, v -> dropBookOnDeath = v, true);
 		config.addBool("hide_excluded_quests", hideExcludedQuests, v -> hideExcludedQuests = v, false);
+		config.add("fallback_locale", new LocaleConfig(), fallbackLocale, v -> fallbackLocale = v, "");
 
 		ConfigGroup defaultsGroup = config.getOrCreateSubgroup("defaults");
 		defaultsGroup.addBool("reward_team", defaultPerTeamReward, v -> defaultPerTeamReward = v, false);
@@ -1577,6 +1585,10 @@ public abstract class BaseQuestFile extends QuestObject implements QuestFile {
 	}
 
 	public abstract String getLocale();
+
+	public String getFallbackLocale() {
+		return fallbackLocale.isEmpty() ? TranslationManager.DEFAULT_FALLBACK_LOCALE : fallbackLocale;
+	}
 
 	public boolean dropBookOnDeath() {
 		return dropBookOnDeath;

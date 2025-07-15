@@ -14,6 +14,6 @@ public class LocaleValue extends StringValue {
     @Override
     @Environment(EnvType.CLIENT)
     public void createClientConfig(ConfigGroup group) {
-        group.add(key, new LocaleConfig(this), get(), this::set, defaultValue);
+        group.add(key, new LocaleConfig(), get(), this::set, defaultValue);
     }
 }

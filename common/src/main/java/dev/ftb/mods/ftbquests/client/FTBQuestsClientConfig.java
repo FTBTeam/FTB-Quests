@@ -27,6 +27,7 @@ public interface FTBQuestsClientConfig {
 
     SNBTConfig XLATE = CONFIG.addGroup("xlate", 2);
     StringValue EDITING_LOCALE = XLATE.add(new LocaleValue(XLATE,"editing_locale", ""));
+    StringValue FALLBACK_LOCALE = XLATE.add(new LocaleValue(XLATE,"fallback_locale", ""));
     BooleanValue HILITE_MISSING = XLATE.addBoolean("hilite_missing", true);
 
     // TODO migrate chapter-pinned and pinned-quests data out of per-player team data into here
@@ -41,5 +42,9 @@ public interface FTBQuestsClientConfig {
             CHAPTER_PANEL_PINNED.set(pinned);
             ConfigManager.getInstance().save(KEY);
         }
+    }
+
+    static void onEdited(boolean ignoredClientSide) {
+        ClientQuestFile.INSTANCE.clearCachedData();
     }
 }
