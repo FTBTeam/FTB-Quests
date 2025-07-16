@@ -7,7 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [2101.1.13]
 
 ### Added
-* Alt + Left-Click on reward buttons in the quest view panels now open the reward properties (edit mode)
+* The fallback locale for missing translations can now be configured in the quest book properties; no longer hardcoded to `en_us`
+  * If you're developing a modpack and your primary language files are in a locale other than `en_us`, you should update the fallback to that locale
+  * The setting can also optionally be overridden on the client with "Fallback Locale" in the Player Preferences screen
+* Alt + Left-Click (edit mode) now works to quick-open the properties editor for _all_ quest objects
+  * Images, chapters, chapter groups, and also the quest book button at the very top of the chapter panel
+* Improved title line for all properties editor screens (no longer just says "FTB Quests" in ugly bold text)
 * Notification styles for completed quests & rewards can now be configured client-side
   * Use the "Player Preferences" button (bottom right) and see the new "Notifications" section
   * In addition to toast notifications, players can now use the chat window, action bar or disable notifications entirely  
@@ -23,6 +28,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 * Fixed some performance issues related to scanning quests & tasks after player inventory changes and on player login
   * This should use significantly less server CPU now, good for your TPS
 * (Mod developers only) Fixed crash when using FTB Quests as dependency in a data generation environment
+* The message displayed in client chat when quest files are saved locally can once more be clicked to open a file browser window
 
 ## [2101.1.12]
 
