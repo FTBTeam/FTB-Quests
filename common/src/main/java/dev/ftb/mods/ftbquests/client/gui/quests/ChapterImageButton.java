@@ -20,6 +20,7 @@ import net.minecraft.Util;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;
 import org.jetbrains.annotations.NotNull;
 
 import java.lang.ref.WeakReference;
@@ -99,7 +100,7 @@ public class ChapterImageButton extends Button implements QuestPositionableButto
 			onClicked(button);
 			// returning false on left button click allows click-through for panning behaviour
 			//  (also, images with a click action defined should swallow the mouse click)
-			return !button.isLeft() || !chapterImage.getClick().isEmpty();
+			return !button.isLeft() || button.isLeft() && Screen.hasAltDown() || !chapterImage.getClick().isEmpty();
 		}
 		return false;
 	}
@@ -112,17 +113,7 @@ public class ChapterImageButton extends Button implements QuestPositionableButto
 			contextMenu.add(ContextMenuItem.title(Component.literal("\"").append(chapterImage.getTitle()).append(Component.literal("\""))));
 			contextMenu.add(ContextMenuItem.SEPARATOR);
 
-			contextMenu.add(new ContextMenuItem(Component.translatable("selectServer.edit"), ThemeProperties.EDIT_ICON.get(), b -> {
-				String name = chapterImage.getImage() instanceof Color4I ? chapterImage.getColor().toString() : chapterImage.getImage().toString();
-				ConfigGroup group = new ConfigGroup(FTBQuestsAPI.MOD_ID, accepted -> {
-					if (accepted) {
-						EditObjectMessage.sendToServer(chapterImage.getChapter());
-					}
-					run();
-				}).setNameKey("Img: " + name);
-				chapterImage.fillConfigGroup(group.getOrCreateSubgroup("chapter").getOrCreateSubgroup("image"));
-				new EditConfigScreen(group).openGui();
-			}));
+			contextMenu.add(new ContextMenuItem(Component.translatable("selectServer.edit"), ThemeProperties.EDIT_ICON.get(), b -> openEditScreen()));
 
 			contextMenu.add(new ContextMenuItem(Component.translatable("gui.move"), ThemeProperties.MOVE_UP_ICON.get(chapterImage.getChapter()),
 					b -> questScreen.initiateMoving(chapterImage)) {
@@ -155,6 +146,8 @@ public class ChapterImageButton extends Button implements QuestPositionableButto
 		} else if (button.isLeft()) {
 			if (Screen.hasControlDown() && questScreen.file.canEdit()) {
 				questScreen.toggleSelected(chapterImage);
+			} else if (Screen.hasAltDown() && questScreen.file.canEdit()) {
+				openEditScreen();
 			} else if (!chapterImage.getClick().isEmpty()) {
 				playClickSound();
 				handleClick(chapterImage.getClick());
@@ -168,7 +161,33 @@ public class ChapterImageButton extends Button implements QuestPositionableButto
 		}
 	}
 
-    @Override
+	private void openEditScreen() {
+		String name = chapterImage.getImage() instanceof Color4I ? chapterImage.getColor().toString() : chapterImage.getImage().toString();
+		ConfigGroup group = new ConfigGroup(FTBQuestsAPI.MOD_ID, accepted -> {
+			if (accepted) {
+				EditObjectMessage.sendToServer(chapterImage.getChapter());
+			}
+			run();
+		}) {
+			@Override
+			public Component getName() {
+				MutableComponent type = Component.literal(" [")
+						.append(Component.translatable("ftbquests.chapter.image"))
+						.append("]")
+						.withStyle(ChatFormatting.AQUA);
+				return Component.empty().append(Component.literal(name).withStyle(ChatFormatting.UNDERLINE)).append(type);
+			}
+		};
+		chapterImage.fillConfigGroup(group.getOrCreateSubgroup("chapter").getOrCreateSubgroup("image"));
+		new EditConfigScreen(group) {
+			@Override
+			public Component getTitle() {
+				return group.getName();
+			}
+		}.openGui();
+	}
+
+	@Override
     public boolean collidesWith(int x, int y, int w, int h) {
         // small kludge: always try to render rotated images, even if they're off-screen
         // while it's possible to do extra calculations to determine the effective bounding area of a rotated image,

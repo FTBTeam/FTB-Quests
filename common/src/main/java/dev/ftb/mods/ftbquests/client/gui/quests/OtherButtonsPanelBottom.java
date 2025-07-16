@@ -21,6 +21,7 @@ import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.network.chat.ClickEvent;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.Style;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -157,9 +158,10 @@ public class OtherButtonsPanelBottom extends OtherButtonsPanel {
 				ClientQuestFile.INSTANCE.writeDataFull(file.toPath(), ClientQuestFile.INSTANCE.holderLookup());
 				ClientQuestFile.INSTANCE.getTranslationManager().saveToNBT(file.toPath().resolve("lang"), true);
 
-				Component component = Component.translatable("ftbquests.gui.saved_as_file", "." + file.getPath().replace(Minecraft.getInstance().gameDirectory.getCanonicalFile().getAbsolutePath(), ""));
-				component.getStyle().withClickEvent(new ClickEvent(ClickEvent.Action.OPEN_FILE, file.getAbsolutePath()));
-				Minecraft.getInstance().player.sendSystemMessage(component);
+                String p = "." + file.getPath().replace(Minecraft.getInstance().gameDirectory.getCanonicalFile().getAbsolutePath(), "");
+				Component component = Component.translatable("ftbquests.gui.saved_as_file", p)
+						.withStyle(Style.EMPTY.withClickEvent(new ClickEvent(ClickEvent.Action.OPEN_FILE, p)));
+				Minecraft.getInstance().player.displayClientMessage(component, false);
 			} catch (Exception ex) {
 				ex.printStackTrace();
 			}
