@@ -74,7 +74,7 @@ public class ValidItemsScreen extends BaseScreen {
 			}
 		};
 
-		submitButton = new SimpleTextButton(this, Component.literal("Submit"), Color4I.empty()) {
+		submitButton = new SimpleTextButton(this, Component.translatable("ftbquests.gui.submit"), Color4I.empty()) {
 			@Override
 			public void onClicked(MouseButton button) {
 				playClickSound();

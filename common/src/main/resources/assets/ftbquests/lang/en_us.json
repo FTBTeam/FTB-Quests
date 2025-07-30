@@ -332,6 +332,7 @@
 	"ftbquests.gui.restore": "Restore",
 	"ftbquests.gui.move_left": "Move Left",
 	"ftbquests.gui.move_right": "Move Right",
+	"ftbquests.gui.submit": "Submit",
 	"ftbquests.task": "Task",
 	"ftbquests.tasks": "Tasks",
 	"ftbquests.task.completed": "Task completed!",
