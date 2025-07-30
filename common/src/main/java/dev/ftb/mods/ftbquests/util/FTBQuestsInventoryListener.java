@@ -29,21 +29,22 @@ public class FTBQuestsInventoryListener implements ContainerListener {
 
 		List<Task> tasksToCheck = craftedItem.isEmpty() ? file.getSubmitTasks() : file.getCraftingTasks();
 
-        if (!tasksToCheck.isEmpty()) {
-            FTBTeamsAPI.api().getManager().getTeamForPlayer(player).ifPresent(team -> {
-                TeamData data = file.getNullableTeamData(team.getId());
-                if (data != null && !data.isLocked()) {
-                    file.withPlayerContext(player, () -> {
-                        for (Task task : tasksToCheck) {
-                            if (task.id != sourceTask && data.canStartTasks(task.getQuest())) {
-                                task.submitTask(data, player, craftedItem);
-                            }
-                        }
-                    });
-                }
-            });
-        }
-    }
+		if (!tasksToCheck.isEmpty()) {
+			FTBTeamsAPI.api().getManager().getTeamForPlayer(player).ifPresent(team -> {
+				TeamData data = file.getNullableTeamData(team.getId());
+				if (data != null && !data.isLocked()) {
+					file.withPlayerContext(player, () -> {
+						PlayerInventorySummary.build(player);
+						for (Task task : tasksToCheck) {
+							if (task.id != sourceTask && data.canStartTasks(task.getQuest())) {
+								task.submitTask(data, player, craftedItem);
+							}
+						}
+					});
+				}
+			});
+		}
+	}
 
 	@Override
 	public void dataChanged(AbstractContainerMenu abstractContainerMenu, int i, int j) {

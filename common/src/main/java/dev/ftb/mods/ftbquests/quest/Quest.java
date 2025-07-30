@@ -541,7 +541,7 @@ public final class Quest extends QuestObject implements Movable, Excludable {
 				data.notifyPlayers(id);
 			}
 
-			if (chapter.isCompletedRaw(data.getTeamData())) {
+			if (!data.getTeamData().isCompleted(chapter) && chapter.isCompletedRaw(data.getTeamData())) {
 				chapter.onCompleted(data.withObject(chapter));
 			}
 
@@ -878,6 +878,8 @@ public final class Quest extends QuestObject implements Movable, Excludable {
 				}
 				if (dependency instanceof Quest q) {
 					q._verify(original, visited, depth + 1);
+				} else if (dependency instanceof Chapter c) {
+					c.getQuests().forEach(q -> q._verify(original, visited, depth + 1));
 				}
 			}
 		}

@@ -24,6 +24,7 @@ import dev.ftb.mods.ftbquests.util.ProgressChange;
 import dev.ftb.mods.ftbquests.util.TextUtils;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.ChatFormatting;
 import net.minecraft.Util;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.*;
@@ -448,10 +449,22 @@ public abstract class QuestObjectBase implements Comparable<QuestObjectBase> {
 			if (accepted && validateEditedConfig()) {
 				NetworkManager.sendToServer(EditObjectMessage.forQuestObject(this));
 			}
-		});
+		}) {
+			@Override
+			public Component getName() {
+				MutableComponent type = Component.literal(" [").append(Component.translatable("ftbquests." + getObjectType().getId())).append("]").withStyle(getObjectType().getColor());
+				return Component.empty().append(getTitle().copy().withStyle(ChatFormatting.UNDERLINE)).append(type);
+			}
+		};
+
 		fillConfigGroup(createSubGroup(group));
 
-		new EditConfigScreen(group).openGui();
+		new EditConfigScreen(group) {
+			@Override
+			public Component getTitle() {
+				return group.getName();
+			}
+		}.openGui();
 	}
 
 	protected boolean validateEditedConfig() {

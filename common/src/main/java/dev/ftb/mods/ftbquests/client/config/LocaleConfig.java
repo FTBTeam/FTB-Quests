@@ -21,15 +21,9 @@ import java.util.List;
 public class LocaleConfig extends ConfigValue<String> {
     public static final Color4I COLOR = Color4I.rgb(0xFFAA49);
 
-    private final LocaleValue localeValue;
-
-    public LocaleConfig(LocaleValue localeValue) {
-        this.localeValue = localeValue;
-    }
-
     @Override
     public void onClicked(Widget clickedWidget, MouseButton button, ConfigCallback callback) {
-        var gui = new LocaleSelectorScreen(localeValue, callback);
+        var gui = new LocaleSelectorScreen(callback);
 
         gui.setTitle(Component.translatable("ftbquests.xlate.editing_locale"));
         gui.showBottomPanel(false);  // no need for accept/cancel buttons here
@@ -48,13 +42,11 @@ public class LocaleConfig extends ConfigValue<String> {
     }
 
     private class LocaleSelectorScreen extends AbstractButtonListScreen {
-        private final LocaleValue localeValue;
         private final ConfigCallback callback;
         private final List<Pair<String,Component>> entries = new ArrayList<>();
         private final int widest;
 
-        public LocaleSelectorScreen(LocaleValue localeValue, ConfigCallback callback) {
-            this.localeValue = localeValue;
+        public LocaleSelectorScreen(ConfigCallback callback) {
             this.callback = callback;
 
             MutableInt widestM = new MutableInt(0);

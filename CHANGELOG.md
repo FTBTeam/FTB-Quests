@@ -4,6 +4,40 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2101.1.13]
+
+### Added
+* The fallback locale for missing translations can now be configured in the quest book properties; no longer hardcoded to `en_us`
+  * If you're developing a modpack and your primary language files are in a locale other than `en_us`, you should update the fallback to that locale
+  * The setting can also optionally be overridden on the client with "Fallback Locale" in the Player Preferences screen
+* Alt + Left-Click (edit mode) now works to quick-open the properties editor for _all_ quest objects
+  * Images, chapters, chapter groups, and also the quest book button at the very top of the chapter panel
+* Improved title line for all properties editor screens (no longer just says "FTB Quests" in ugly bold text)
+* Notification styles for completed quests & rewards can now be configured client-side
+  * Use the "Player Preferences" button (bottom right) and see the new "Notifications" section
+  * In addition to toast notifications, players can now use the chat window, action bar or disable notifications entirely  
+* Improved the auto-pinned quests panel UI
+  * When auto-pinning is enabled (the pushpin at the top right of the GUI), only quests in the last-viewed chapter are tracked on the game screen
+  * Previously all quests in the quest book were tracked, which can become unmanageable in large quest books
+  * Added "Pinned Quests" section to Player Preferences, with a couple of new settings:
+    * Allow scaling of the pinned quests panel to be adjusted here (default: 0.75, as before; range 0.25 -> 2.0)
+    * "Auto-pin Follows" setting to track entire quest book (if previous functionality is desired)
+* Ctrl-P in the quests GUI is now a shortcut to open the Player Preferences screen
+
+### Changed
+* FTB Quests now logs a warning if the third party "FTB Quests Optimizer" mod is detected
+  * This mod is _not_ recommended by FTB for use with FTB Quests; it will not improve performance, and may cause stability issues
+* The entity selection screen for the Kill Task now only shows living entities, and sorts them nicely by display name
+* Updated `pt_br` translation (thanks @Xlr11)
+
+### Fixed
+* Fixed players getting a chapter-completed notification for already-completed chapters when an optional quest in that chapter is completed
+* The Toast Reward now actually works again
+* Fixed some performance issues related to scanning quests & tasks after player inventory changes and on player login
+  * This should use significantly less server CPU now, good for your TPS
+* (Mod developers only) Fixed crash when using FTB Quests as dependency in a data generation environment
+* The message displayed in client chat when quest files are saved locally can once more be clicked to open a file browser window
+
 ## [2101.1.12]
 
 ### Fixed

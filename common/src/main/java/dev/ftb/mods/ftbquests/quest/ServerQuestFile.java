@@ -18,6 +18,7 @@ import dev.ftb.mods.ftbquests.quest.task.TaskType;
 import dev.ftb.mods.ftbquests.quest.task.TaskTypes;
 import dev.ftb.mods.ftbquests.util.FTBQuestsInventoryListener;
 import dev.ftb.mods.ftbquests.util.FileUtils;
+import dev.ftb.mods.ftbquests.util.PlayerInventorySummary;
 import dev.ftb.mods.ftbteams.api.FTBTeamsAPI;
 import dev.ftb.mods.ftbteams.api.Team;
 import dev.ftb.mods.ftbteams.api.event.PlayerChangedTeamEvent;
@@ -32,8 +33,8 @@ import net.minecraft.world.level.storage.LevelResource;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.Collections;
 import java.util.Date;
+import java.util.List;
 import java.util.UUID;
 import java.util.stream.Stream;
 
@@ -77,7 +78,7 @@ public class ServerQuestFile extends BaseQuestFile {
 
 		if (quests) {
 			if (Files.exists(folder)) {
-                FTBQuests.LOGGER.info("Loading quests from {}", folder);
+				FTBQuests.LOGGER.info("Loading quests from {}", folder);
 				isLoading = true;
 				readDataFull(folder, server.registryAccess());
 				isLoading = false;
@@ -195,22 +196,32 @@ public class ServerQuestFile extends BaseQuestFile {
 
 		player.inventoryMenu.addSlotListener(new FTBQuestsInventoryListener(player));
 
+		checkQuestBookOnLogin(data, player);
+	}
+
+	private void checkQuestBookOnLogin(TeamData data, ServerPlayer player) {
 		if (!data.isLocked()) {
-			withPlayerContext(player, () -> forAllQuests(quest -> {
-				if (!data.isCompleted(quest) && quest.isCompletedRaw(data)) {
-					// Handles possible situation where quest book has been modified to remove a task from a quest
-					// It can leave a player having completed all the other tasks, but unable to complete the quest
-					//   since quests are normally marked completed when the last task in that quest is completed
-					// https://github.com/FTBBeta/Beta-Testing-Issues/issues/755
-					quest.onCompleted(new QuestProgressEventData<>(new Date(), data, quest, data.getOnlineMembers(), Collections.singletonList(player)));
-				}
+			withPlayerContext(player, () -> {
+				var onlineMembers = data.getOnlineMembers();
+				var pList = List.of(player);
+				Date now = new Date();
+				PlayerInventorySummary.build(player);
+				forAllQuests(quest -> {
+					if (!data.isCompleted(quest) && quest.isCompletedRaw(data)) {
+						// Handles possible situation where quest book has been modified to remove a task from a quest
+						// It can leave a player having completed all the other tasks, but unable to complete the quest
+						//   since quests are normally marked completed when the last task in that quest is completed
+						// https://github.com/FTBBeta/Beta-Testing-Issues/issues/755
+						quest.onCompleted(new QuestProgressEventData<>(now, data, quest, onlineMembers, pList));
+					}
 
-				data.checkAutoCompletion(quest);
+					data.checkAutoCompletion(quest);
 
-				if (data.canStartTasks(quest)) {
-					quest.getTasks().stream().filter(Task::checkOnLogin).forEach(task -> task.submitTask(data, player));
-				}
-			}));
+					if (data.canStartTasks(quest)) {
+						quest.getTasks().stream().filter(Task::checkOnLogin).forEach(task -> task.submitTask(data, player));
+					}
+				});
+			});
 		}
 	}
 
@@ -277,7 +288,6 @@ public class ServerQuestFile extends BaseQuestFile {
 
 	@Override
 	public String getLocale() {
-		return "en_us";
+		return getFallbackLocale();
 	}
-
 }

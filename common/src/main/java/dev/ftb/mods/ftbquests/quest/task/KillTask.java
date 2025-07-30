@@ -114,17 +114,26 @@ public class KillTask extends Task {
 	@Environment(EnvType.CLIENT)
 	public void fillConfigGroup(ConfigGroup config) {
 		super.fillConfigGroup(config);
-		List<ResourceLocation> ids = new ArrayList<>(BuiltInRegistries.ENTITY_TYPE.keySet());
 
 		if (entityNameMap == null) {
+			List<ResourceLocation> ids = new ArrayList<>();
+			BuiltInRegistries.ENTITY_TYPE.forEach(type -> {
+				if (type.create(FTBQuestsClient.getClientLevel()) instanceof LivingEntity) {
+					ids.add(type.arch$registryName());
+				}
+			});
+			ids.sort((r1, r2) -> {
+				Component c1 = Component.translatable("entity." + r1.toLanguageKey());
+				Component c2 = Component.translatable("entity." + r2.toLanguageKey());
+				return c1.getString().compareTo(c2.getString());
+			});
 			entityNameMap = NameMap.of(ZOMBIE, ids)
 					.nameKey(id -> "entity." + id.toLanguageKey())
 					.icon(KillTask::getIconForEntityType)
 					.create();
 		}
 		if (entityTagMap == null) {
-			List<String> tags = new ArrayList<>();
-			tags.add("");
+			List<String> tags = new ArrayList<>(List.of(""));
 			tags.addAll(BuiltInRegistries.ENTITY_TYPE.getTags().map(pair -> pair.getFirst().location().toString()).sorted().toList());
 			entityTagMap = NameMap.of("minecraft:zombies", tags).create();
 		}

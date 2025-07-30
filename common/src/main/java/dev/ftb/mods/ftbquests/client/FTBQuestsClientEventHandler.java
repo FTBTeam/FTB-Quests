@@ -22,16 +22,12 @@ import dev.ftb.mods.ftbquests.item.LootCrateItem;
 import dev.ftb.mods.ftbquests.net.RequestTranslationTableMessage;
 import dev.ftb.mods.ftbquests.net.SubmitTaskMessage;
 import dev.ftb.mods.ftbquests.quest.BaseQuestFile;
-import dev.ftb.mods.ftbquests.quest.Quest;
 import dev.ftb.mods.ftbquests.quest.TeamData;
 import dev.ftb.mods.ftbquests.quest.loot.LootCrate;
 import dev.ftb.mods.ftbquests.quest.task.ObservationTask;
 import dev.ftb.mods.ftbquests.quest.task.StructureTask;
-import dev.ftb.mods.ftbquests.quest.task.Task;
-import dev.ftb.mods.ftbquests.quest.theme.property.ThemeProperties;
 import dev.ftb.mods.ftbquests.registry.ModBlockEntityTypes;
 import dev.ftb.mods.ftbquests.registry.ModItems;
-import it.unimi.dsi.fastutil.longs.LongSet;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.DeltaTracker;
 import net.minecraft.client.Minecraft;
@@ -40,20 +36,14 @@ import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
 import net.minecraft.client.renderer.texture.TextureAtlas;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
-import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.FormattedText;
 import net.minecraft.network.chat.MutableComponent;
-import net.minecraft.network.chat.Style;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.world.inventory.InventoryMenu;
 import net.minecraft.world.phys.HitResult;
 import org.jetbrains.annotations.Nullable;
 import org.lwjgl.glfw.GLFW;
 
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 
 import static dev.ftb.mods.ftbquests.client.TaskScreenRenderer.*;
 
@@ -65,7 +55,6 @@ public class FTBQuestsClientEventHandler {
     private List<ObservationTask> observationTasks = null;
     private ObservationTask currentlyObserving = null;
     private long currentlyObservingTicks = 0L;
-    private final List<FormattedCharSequence> pinnedQuestText = new ArrayList<>();
 
     public static TextureAtlasSprite inputOnlySprite;
     public static TextureAtlasSprite tankSprite;
@@ -167,7 +156,7 @@ public class FTBQuestsClientEventHandler {
 
     private void onClientTick(Minecraft mc) {
         if (mc.level != null && ClientQuestFile.exists() && mc.player != null) {
-            collectPinnedQuests(ClientQuestFile.INSTANCE);
+            PinnedQuestsTracker.INSTANCE.tick(ClientQuestFile.INSTANCE);
 
             if (observationTasks == null) {
                 observationTasks = ClientQuestFile.INSTANCE.collect(ObservationTask.class);
@@ -223,59 +212,6 @@ public class FTBQuestsClientEventHandler {
         StructureTask.syncKnownStructureList(List.of());
     }
 
-    private void collectPinnedQuests(ClientQuestFile file) {
-        TeamData data = file.selfTeamData;
-
-        List<Quest> pinnedQuests = new ArrayList<>();
-        LongSet pinnedIds = data.getPinnedQuestIds(FTBQuestsClient.getClientPlayer());
-        if (!pinnedIds.isEmpty()) {
-            if (pinnedIds.contains(TeamData.AUTO_PIN_ID)) {
-                // special auto-pin value: collect all quests which can be done now
-                file.forAllQuests(quest -> {
-                    if (!data.isCompleted(quest) && data.canStartTasks(quest)) {
-                        pinnedQuests.add(quest);
-                    }
-                });
-            } else {
-                pinnedIds.longStream()
-                        .mapToObj(file::getQuest)
-                        .filter(Objects::nonNull)
-                        .forEach(pinnedQuests::add);
-            }
-        }
-
-        Minecraft mc = Minecraft.getInstance();
-
-        pinnedQuestText.clear();
-
-        for (int i = 0; i < pinnedQuests.size(); i++) {
-            Quest quest = pinnedQuests.get(i);
-
-            if (i > 0) pinnedQuestText.add(FormattedCharSequence.EMPTY);  // separator line between quests
-
-            pinnedQuestText.addAll(mc.font.split(FormattedText.composite(
-                    mc.font.getSplitter().headByWidth(quest.getTitle(), 160, Style.EMPTY.withBold(true)),
-                    Component.literal(" ")
-                            .withStyle(ChatFormatting.DARK_AQUA)
-                            .append(data.getRelativeProgress(quest) + "%")
-            ), 500));
-
-            for (Task task : quest.getTasks()) {
-                if (!data.isCompleted(task)) {
-                    pinnedQuestText.addAll(mc.font.split(FormattedText.composite(
-                            mc.font.getSplitter().headByWidth(task.getMutableTitle().withStyle(ChatFormatting.GRAY), 160, Style.EMPTY.applyFormat(ChatFormatting.GRAY)),
-                            Component.literal(" ")
-                                    .withStyle(ChatFormatting.GREEN)
-                                    .append(task.formatProgress(data, data.getProgress(task)))
-                                    .append("/")
-                                    .append(task.formatMaxProgress())
-                    ), 500));
-                }
-            }
-        }
-
-    }
-
     private void onScreenRender(GuiGraphics graphics, DeltaTracker tickDelta) {
         if (!ClientQuestFile.exists()) {
             return;
@@ -285,9 +221,7 @@ public class FTBQuestsClientEventHandler {
             renderCurrentlyObserving(Minecraft.getInstance(), graphics, tickDelta);
         }
 
-        if (!pinnedQuestText.isEmpty()) {
-            renderPinnedQuestPanel(Minecraft.getInstance(), graphics);
-        }
+        PinnedQuestsTracker.INSTANCE.render(Minecraft.getInstance(), graphics);
     }
 
     private void renderCurrentlyObserving(Minecraft mc, GuiGraphics graphics, DeltaTracker tickDelta) {
@@ -309,44 +243,5 @@ public class FTBQuestsClientEventHandler {
 
         String pctTxt = (currentlyObservingTicks * 100L / currentlyObserving.getTimer()) + "%";
         graphics.drawString(mc.font, pctTxt, cx - mc.font.width(pctTxt) / 2, cy - 47, 0xFFFFFF);
-    }
-
-    private void renderPinnedQuestPanel(Minecraft mc, GuiGraphics graphics) {
-        Component title = Component.translatable("ftbquests.ui.pinned_quests");
-
-        int titleWidth = mc.font.width(title);
-        int width = titleWidth;
-        for (FormattedCharSequence s : pinnedQuestText) {
-            width = Math.max(width, (int) mc.font.getSplitter().stringWidth(s));
-        }
-        width += 8;
-        int height = mc.font.lineHeight * (pinnedQuestText.size() + 1) + 11;
-
-        float scale = ThemeProperties.PINNED_QUEST_SIZE.get(ClientQuestFile.INSTANCE).floatValue();
-
-        int insetX = FTBQuestsClientConfig.PINNED_QUESTS_INSET_X.get();
-        int insetY = FTBQuestsClientConfig.PINNED_QUESTS_INSET_Y.get();
-        var pos = FTBQuestsClientConfig.PINNED_QUESTS_POS.get().getPanelPos(
-                mc.getWindow().getGuiScaledWidth(), mc.getWindow().getGuiScaledHeight(),
-                (int) (width * scale), (int) (height * scale),
-                insetX, insetY
-        );
-
-        graphics.pose().pushPose();
-        graphics.pose().translate(pos.x(), pos.y(), 100);
-        graphics.pose().scale(scale, scale, 1F);
-
-        GuiHelper.drawHollowRect(graphics, 0, 0, width, height, Color4I.BLACK.withAlpha(100), false);
-        Color4I.BLACK.withAlpha(100).draw(graphics, 0, 0, width, height);
-        Color4I.GRAY.withAlpha(50).draw(graphics, 1, 1, width - 2, mc.font.lineHeight + 4);
-        Color4I.BLACK.draw(graphics, 0, mc.font.lineHeight + 4, width, 1);
-
-        graphics.pose().translate(4, 4, 0);
-        graphics.drawString(mc.font, title, (width - titleWidth) / 2, 0, 0xFFFFFF00);
-        for (int i = 0; i < pinnedQuestText.size(); i++) {
-            graphics.drawString(mc.font, pinnedQuestText.get(i), 0, 4 + (i + 1) * mc.font.lineHeight, 0xFFFFFFFF);
-        }
-
-        graphics.pose().popPose();
     }
 }

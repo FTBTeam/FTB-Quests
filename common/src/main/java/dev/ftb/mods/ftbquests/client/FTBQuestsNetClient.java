@@ -6,7 +6,10 @@ import dev.ftb.mods.ftblibrary.icon.ItemIcon;
 import dev.ftb.mods.ftblibrary.ui.Panel;
 import dev.ftb.mods.ftblibrary.util.client.ClientUtils;
 import dev.ftb.mods.ftbquests.FTBQuests;
-import dev.ftb.mods.ftbquests.client.gui.*;
+import dev.ftb.mods.ftbquests.client.gui.IRewardListenerScreen;
+import dev.ftb.mods.ftbquests.client.gui.QuestObjectUpdateListener;
+import dev.ftb.mods.ftbquests.client.gui.RewardKey;
+import dev.ftb.mods.ftbquests.client.gui.RewardToast;
 import dev.ftb.mods.ftbquests.client.gui.quests.QuestScreen;
 import dev.ftb.mods.ftbquests.net.TeamDataUpdate;
 import dev.ftb.mods.ftbquests.quest.*;
@@ -99,18 +102,14 @@ public class FTBQuestsNetClient {
 		}
 	}
 
-	public static void displayCompletionToast(long id) {
-		QuestObject object = ClientQuestFile.INSTANCE.get(id);
-
-		if (object != null) {
-			Minecraft.getInstance().getToasts().addToast(new ToastQuestObject(object));
-		}
-
-		QuestScreen questScreen = ClientUtils.getCurrentGuiAs(QuestScreen.class);
-		if (questScreen != null) {
-			questScreen.refreshQuestPanel();
-			questScreen.refreshChapterPanel();
-			questScreen.refreshViewQuestPanel();
+	public static void notifyPlayerOfCompletion(long id) {
+		if (FTBQuestsClientConfig.COMPLETION_STYLE.get().notifyCompletion(id)) {
+			QuestScreen questScreen = ClientUtils.getCurrentGuiAs(QuestScreen.class);
+			if (questScreen != null) {
+				questScreen.refreshQuestPanel();
+				questScreen.refreshChapterPanel();
+				questScreen.refreshViewQuestPanel();
+			}
 		}
 	}
 
@@ -122,15 +121,15 @@ public class FTBQuestsNetClient {
 			MutableComponent comp = count > 1 ?
 					Component.literal(count + "x ").append(stack.getHoverName()) :
 					stack.getHoverName().copy();
-			Minecraft.getInstance().getToasts().addToast(new RewardToast(comp.withStyle(stack.getRarity().color()), icon));
+			FTBQuestsClientConfig.REWARD_STYLE.get().notifyReward(comp.withStyle(stack.getRarity().color()), icon);
 		}
 	}
 
 	public static void displayRewardToast(long id, Component text, Icon icon, boolean disableBlur) {
-		Icon i = icon.isEmpty() ? ClientQuestFile.INSTANCE.getBase(id).getIcon() : icon;
+		Icon actualIcon = icon.isEmpty() ? ClientQuestFile.INSTANCE.getBase(id).getIcon() : icon;
 
-		if (!IRewardListenerScreen.add(new RewardKey(text.getString(), i, disableBlur), 1)) {
-			Minecraft.getInstance().getToasts().addToast(new RewardToast(text, i));
+		if (!IRewardListenerScreen.add(new RewardKey(text.getString(), actualIcon, disableBlur), 1)) {
+			FTBQuestsClientConfig.REWARD_STYLE.get().notifyReward(text, actualIcon);
 		}
 	}
 
@@ -269,5 +268,9 @@ public class FTBQuestsNetClient {
 		if (ClientQuestFile.exists()) {
 			ClientQuestFile.INSTANCE.setEditorPermission(hasPermission);
 		}
+	}
+
+	public static void displayCustomToast(Component title, Component text, Icon icon) {
+		Minecraft.getInstance().getToasts().addToast(new RewardToast(title, text, icon));
 	}
 }

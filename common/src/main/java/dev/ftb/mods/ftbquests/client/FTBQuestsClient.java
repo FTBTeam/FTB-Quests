@@ -9,14 +9,20 @@ import dev.architectury.registry.client.keymappings.KeyMappingRegistry;
 import dev.architectury.registry.client.rendering.RenderTypeRegistry;
 import dev.ftb.mods.ftblibrary.FTBLibrary;
 import dev.ftb.mods.ftblibrary.config.ImageResourceConfig;
+import dev.ftb.mods.ftblibrary.config.manager.ConfigManager;
 import dev.ftb.mods.ftblibrary.config.ui.EditConfigScreen;
+import dev.ftb.mods.ftblibrary.icon.Icon;
 import dev.ftb.mods.ftblibrary.ui.Widget;
 import dev.ftb.mods.ftblibrary.ui.input.MouseButton;
 import dev.ftb.mods.ftbquests.FTBQuests;
+import dev.ftb.mods.ftbquests.api.FTBQuestsAPI;
 import dev.ftb.mods.ftbquests.block.entity.TaskScreenBlockEntity;
+import dev.ftb.mods.ftbquests.client.gui.RewardToast;
+import dev.ftb.mods.ftbquests.client.gui.ToastQuestObject;
 import dev.ftb.mods.ftbquests.item.CustomIconItem;
 import dev.ftb.mods.ftbquests.net.SetCustomImageMessage;
 import dev.ftb.mods.ftbquests.quest.BaseQuestFile;
+import dev.ftb.mods.ftbquests.quest.QuestObject;
 import dev.ftb.mods.ftbquests.quest.QuestObjectBase;
 import dev.ftb.mods.ftbquests.quest.TeamData;
 import dev.ftb.mods.ftbquests.quest.theme.ThemeLoader;
@@ -31,6 +37,7 @@ import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.HolderLookup;
+import net.minecraft.network.chat.Component;
 import net.minecraft.server.packs.PackType;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.InteractionHand;
@@ -50,13 +57,20 @@ import java.util.Optional;
 public class FTBQuestsClient {
 	public static KeyMapping KEY_QUESTS;
 
-	public static void init() {
+    public static void init() {
 		maybeMigrateClientConfig();
 
+		ConfigManager.getInstance().registerClientConfig(FTBQuestsClientConfig.CONFIG, FTBQuestsAPI.MOD_ID, FTBQuestsClientConfig::onEdited);
+
 		ClientLifecycleEvent.CLIENT_SETUP.register(FTBQuestsClient::onClientSetup);
-		ReloadListenerRegistry.register(PackType.CLIENT_RESOURCES, new QuestFileCacheReloader());
-		ReloadListenerRegistry.register(PackType.CLIENT_RESOURCES, new ThemeLoader());
-		KeyMappingRegistry.register(KEY_QUESTS = new KeyMapping("key.ftbquests.quests", InputConstants.Type.KEYSYM, -1, "key.categories.ftbquests"));
+
+		// Minecraft.getInstance() might not exist here (datagen in particular)
+        //noinspection ConstantValue
+        if (Minecraft.getInstance() != null) {
+			ReloadListenerRegistry.register(PackType.CLIENT_RESOURCES, new QuestFileCacheReloader());
+			ReloadListenerRegistry.register(PackType.CLIENT_RESOURCES, new ThemeLoader());
+			KeyMappingRegistry.register(KEY_QUESTS = new KeyMapping("key.ftbquests.quests", InputConstants.Type.KEYSYM, -1, "key.categories.ftbquests"));
+		}
 
 		new FTBQuestsClientEventHandler().init();
 	}
@@ -190,5 +204,13 @@ public class FTBQuestsClient {
 
 	public static void copyToClipboard(QuestObjectBase qo) {
 		Widget.setClipboardString(qo.getCodeString());
+	}
+
+	static void showCompletionToast(QuestObject qo) {
+		Minecraft.getInstance().getToasts().addToast(new ToastQuestObject(qo));
+	}
+
+	static void showRewardToast(Component text, Icon icon) {
+		Minecraft.getInstance().getToasts().addToast(new RewardToast(text, icon));
 	}
 }
