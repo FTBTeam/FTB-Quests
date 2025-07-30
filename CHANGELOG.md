@@ -16,6 +16,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 * Notification styles for completed quests & rewards can now be configured client-side
   * Use the "Player Preferences" button (bottom right) and see the new "Notifications" section
   * In addition to toast notifications, players can now use the chat window, action bar or disable notifications entirely  
+* Improved the auto-pinned quests panel UI
+  * When auto-pinning is enabled (the pushpin at the top right of the GUI), only quests in the last-viewed chapter are tracked on the game screen
+  * Previously all quests in the quest book were tracked, which can become unmanageable in large quest books
+  * Added "Pinned Quests" section to Player Preferences, with a couple of new settings:
+    * Allow scaling of the pinned quests panel to be adjusted here (default: 0.75, as before; range 0.25 -> 2.0)
+    * "Auto-pin Follows" setting to track entire quest book (if previous functionality is desired)
+* Ctrl-P in the quests GUI is now a shortcut to open the Player Preferences screen
 
 ### Changed
 * FTB Quests now logs a warning if the third party "FTB Quests Optimizer" mod is detected
