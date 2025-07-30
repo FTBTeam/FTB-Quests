@@ -2,10 +2,7 @@ package dev.ftb.mods.ftbquests.client.gui;
 
 import dev.ftb.mods.ftblibrary.config.ConfigCallback;
 import dev.ftb.mods.ftblibrary.icon.Color4I;
-import dev.ftb.mods.ftblibrary.ui.GuiHelper;
-import dev.ftb.mods.ftblibrary.ui.Panel;
-import dev.ftb.mods.ftblibrary.ui.SimpleTextButton;
-import dev.ftb.mods.ftblibrary.ui.Theme;
+import dev.ftb.mods.ftblibrary.ui.*;
 import dev.ftb.mods.ftblibrary.ui.input.Key;
 import dev.ftb.mods.ftblibrary.ui.input.MouseButton;
 import dev.ftb.mods.ftblibrary.ui.misc.AbstractButtonListScreen;
@@ -90,6 +87,15 @@ public class SelectQuestObjectScreen<T extends QuestObjectBase> extends Abstract
 		for (T objectBase : list) {
 			panel.add(new QuestObjectButton(panel, objectBase));
 		}
+
+		int width = panel.getWidgets().stream().map(Widget::getWidth).max(Integer::compare).orElse(200);
+		panel.getWidgets().forEach(w -> w.setWidth(width));
+	}
+
+	@Override
+	public boolean onInit() {
+		setWidth(mainPanel.getWidgets().isEmpty() ? 200 : mainPanel.getWidgets().get(0).width + 20);
+		return super.onInit();
 	}
 
 	@Override
@@ -102,17 +108,27 @@ public class SelectQuestObjectScreen<T extends QuestObjectBase> extends Abstract
 		callback.save(true);
 	}
 
+	private Component defaultFormatter(T qo) {
+		return ConfigQuestObject.formatEntry(qo);
+	}
+
 	private class QuestObjectButton extends SimpleTextButton {
 		public final T object;
 
-		public QuestObjectButton(Panel panel, @Nullable T o) {
-			super(panel, o == null ? Component.translatable("ftbquests.null") : o.getMutableTitle().withStyle(o.getObjectType().getColor()), o == null ? Color4I.empty() : o.getIcon());
-			object = o;
-			setSize(200, 14);
+		public QuestObjectButton(Panel panel, @Nullable T questObject) {
+			super(panel,
+					questObject == null ? Component.translatable("ftbquests.null") : formatter.apply(questObject),
+					questObject == null ? Color4I.empty() : questObject.getIcon()
+			);
+			object = questObject;
+			setHeight(getTheme().getFontHeight() + 4);
 		}
 
 		private void addObject(TooltipList list, QuestObjectBase o) {
-			list.add(QuestObjectType.NAME_MAP.getDisplayName(o.getObjectType()).copy().withStyle(ChatFormatting.GRAY).append(": ").append(o.getMutableTitle().withStyle(o.getObjectType().getColor())));
+			list.add(QuestObjectType.NAME_MAP.getDisplayName(o.getObjectType()).copy().withStyle(ChatFormatting.GRAY)
+					.append(": ")
+					.append(o.getMutableTitle().withStyle(o.getObjectType().getColor()))
+			);
 		}
 
 		@Override
@@ -122,30 +138,32 @@ public class SelectQuestObjectScreen<T extends QuestObjectBase> extends Abstract
 			}
 
 			list.add(object.getTitle());
-			list.add(Component.literal("ID: ").withStyle(ChatFormatting.GRAY).append(Component.literal(object.toString()).withStyle(ChatFormatting.DARK_GRAY)));
-			list.add(Component.literal("Type: ").withStyle(ChatFormatting.GRAY).append(QuestObjectType.NAME_MAP.getDisplayName(object.getObjectType()).copy().withStyle(object.getObjectType().getColor())));
+			list.add(Component.literal("ID: ").withStyle(ChatFormatting.GRAY)
+					.append(Component.literal(object.toString()).withStyle(ChatFormatting.DARK_GRAY)));
+			list.add(Component.literal("Type: ").withStyle(ChatFormatting.GRAY)
+					.append(QuestObjectType.NAME_MAP.getDisplayName(object.getObjectType()).copy().withStyle(object.getObjectType().getColor())));
 
-			if (object instanceof Quest quest) {
-				addObject(list, quest.getChapter());
-				addRewardTooltip(list, quest);
-			} else if (object instanceof QuestLink link) {
-				link.getQuest().ifPresent(quest -> {
-					addObject(list, link.getChapter());
-					list.add(Component.translatable("ftbquests.gui.linked_quest_id", Component.literal(quest.getCodeString()).withStyle(ChatFormatting.DARK_GRAY)).withStyle(ChatFormatting.GRAY));
-					addObject(list, quest.getChapter());
-				});
-			} else if (object instanceof Task task) {
-				Quest quest = task.getQuest();
-				addObject(list, quest.getChapter());
-				addObject(list, quest);
-				addRewardTooltip(list, quest);
-			} else if (object instanceof Reward reward) {
-				Quest quest = reward.getQuest();
-				addObject(list, quest.getChapter());
-				addObject(list, quest);
-			} else if (object instanceof RewardTable rewardTable) {
-				rewardTable.addMouseOverText(list, true, true);
-			}
+            if (object instanceof Quest quest) {
+                addObject(list, quest.getChapter());
+                addRewardTooltip(list, quest);
+            } else if (object instanceof QuestLink link) {
+                link.getQuest().ifPresent(quest -> {
+                    addObject(list, link.getChapter());
+                    list.add(Component.translatable("ftbquests.gui.linked_quest_id", Component.literal(quest.getCodeString()).withStyle(ChatFormatting.DARK_GRAY)).withStyle(ChatFormatting.GRAY));
+                    addObject(list, quest.getChapter());
+                });
+            } else if (object instanceof Task task) {
+                Quest quest = task.getQuest();
+                addObject(list, quest.getChapter());
+                addObject(list, quest);
+                addRewardTooltip(list, quest);
+            } else if (object instanceof Reward reward) {
+                Quest quest = reward.getQuest();
+                addObject(list, quest.getChapter());
+                addObject(list, quest);
+            } else if (object instanceof RewardTable rewardTable) {
+                rewardTable.addMouseOverText(list, true, true);
+            }
 		}
 
 		private void addRewardTooltip(TooltipList list, Quest quest) {
