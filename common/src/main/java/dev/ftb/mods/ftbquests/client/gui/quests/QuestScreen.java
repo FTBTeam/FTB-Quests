@@ -17,6 +17,7 @@ import dev.ftb.mods.ftbquests.api.FTBQuestsAPI;
 import dev.ftb.mods.ftbquests.client.ClientQuestFile;
 import dev.ftb.mods.ftbquests.client.FTBQuestsClient;
 import dev.ftb.mods.ftbquests.client.FTBQuestsClientConfig;
+import dev.ftb.mods.ftbquests.client.PinnedQuestsTracker;
 import dev.ftb.mods.ftbquests.client.gui.CustomToast;
 import dev.ftb.mods.ftbquests.client.gui.FTBQuestsTheme;
 import dev.ftb.mods.ftbquests.client.gui.RewardTablesScreen;
@@ -147,6 +148,8 @@ public class QuestScreen extends BaseScreen {
 	@Override
 	public void onClosed() {
 		file.setPersistedScreenInfo(getPersistedScreenData());
+		PinnedQuestsTracker.INSTANCE.refresh();
+
 		super.onClosed();
 	}
 
@@ -508,6 +511,10 @@ public class QuestScreen extends BaseScreen {
 			return true;
 		}
 
+		if (key.is(GLFW.GLFW_KEY_P) && key.modifiers.onlyControl()) {
+			FTBQuestsClientConfig.openSettings(doesGuiPauseGame());
+		}
+
 		if (!file.canEdit()) {
 			return false;
 		}
@@ -826,6 +833,14 @@ public class QuestScreen extends BaseScreen {
 		movingObjects = true;
 		selectedObjects.clear();
 		toggleSelected(movable);
+	}
+
+	public boolean isChapterSelected(Chapter chapter) {
+		return selectedChapter != null && chapter.id == selectedChapter.id;
+	}
+
+	public Optional<Chapter> getSelectedChapter() {
+		return Optional.ofNullable(selectedChapter);
 	}
 
 	/**

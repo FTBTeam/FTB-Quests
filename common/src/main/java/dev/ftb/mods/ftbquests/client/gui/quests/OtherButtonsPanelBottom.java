@@ -6,6 +6,7 @@ import dev.ftb.mods.ftblibrary.ui.ContextMenuItem;
 import dev.ftb.mods.ftblibrary.ui.Panel;
 import dev.ftb.mods.ftblibrary.ui.WidgetLayout;
 import dev.ftb.mods.ftblibrary.ui.input.MouseButton;
+import dev.ftb.mods.ftblibrary.util.TooltipList;
 import dev.ftb.mods.ftbquests.client.ClientQuestFile;
 import dev.ftb.mods.ftbquests.client.FTBQuestsClient;
 import dev.ftb.mods.ftbquests.client.FTBQuestsClientConfig;
@@ -90,6 +91,13 @@ public class OtherButtonsPanelBottom extends OtherButtonsPanel {
 		@Override
 		public void onClicked(MouseButton button) {
 			FTBQuestsClientConfig.openSettings(questScreen.doesGuiPauseGame());
+		}
+
+		@Override
+		public void addMouseOverText(TooltipList list) {
+			super.addMouseOverText(list);
+
+			list.add(Component.literal("[Ctrl + P]").withStyle(ChatFormatting.DARK_GRAY));
 		}
 	}
 
