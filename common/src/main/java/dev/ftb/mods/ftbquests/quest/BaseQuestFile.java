@@ -107,6 +107,7 @@ public abstract class BaseQuestFile extends QuestObject implements QuestFile {
 	private boolean showLockIcons;
 	private boolean dropBookOnDeath;
 	private String fallbackLocale;
+	private boolean verifyOnLoad;
 
 	private List<Task> allTasks;
 	private List<Task> submitTasks;
@@ -147,6 +148,7 @@ public abstract class BaseQuestFile extends QuestObject implements QuestFile {
 		detectionDelay = 20;
 		dropBookOnDeath = false;
 		hideExcludedQuests = false;
+		verifyOnLoad = false;
 
 		allTasks = null;
 
@@ -451,6 +453,7 @@ public abstract class BaseQuestFile extends QuestObject implements QuestFile {
 		nbt.putBoolean("drop_book_on_death", dropBookOnDeath);
 		nbt.putBoolean("hide_excluded_quests", hideExcludedQuests);
 		nbt.putString("fallback_locale", fallbackLocale);
+		nbt.putBoolean("verify_on_load", verifyOnLoad);
 	}
 
 	@Override
@@ -470,9 +473,9 @@ public abstract class BaseQuestFile extends QuestObject implements QuestFile {
 		emergencyItems.clear();
 
 		ListTag emergencyItemsTag = nbt.getList("emergency_items", Tag.TAG_COMPOUND);
-		for (int i = 0; i < emergencyItemsTag.size(); i++) {
-			emergencyItems.add(itemOrMissingFromNBT(emergencyItemsTag.get(i), provider));
-		}
+        for (Tag tag : emergencyItemsTag) {
+            emergencyItems.add(itemOrMissingFromNBT(tag, provider));
+        }
 
 		emergencyItemsCooldown = nbt.getInt("emergency_items_cooldown");
 		dropLootCrates = nbt.getBoolean("drop_loot_crates");
@@ -493,6 +496,7 @@ public abstract class BaseQuestFile extends QuestObject implements QuestFile {
 		dropBookOnDeath = nbt.getBoolean("drop_book_on_death");
 		hideExcludedQuests = nbt.getBoolean("hide_excluded_quests");
 		fallbackLocale = nbt.getString("fallback_locale");
+		verifyOnLoad = nbt.getBoolean("verify_on_load");
 	}
 
 	public final void writeDataFull(Path folder, HolderLookup.Provider provider) {
@@ -754,15 +758,10 @@ public abstract class BaseQuestFile extends QuestObject implements QuestFile {
 		updateLootCrates();
 
 		refreshRewardTableRewardIDs();
-        /*
-		for (Chapter chapter : chapters)
-		{
-			for (Quest quest : chapter.quests)
-			{
-				quest.verifyDependencies(true);
-			}
+
+		if (verifyOnLoad) {
+			forAllQuests(q -> q.verifyDependencies(false));
 		}
-		*/
 
 		for (QuestObjectBase object : getAllObjects()) {
 			if (object instanceof CustomTask) {
