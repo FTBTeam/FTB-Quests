@@ -11,9 +11,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 * Updated es_es and es_mx translations (thanks @ArrivedBog593)
+* FTB Quests now logs a warning if the third party "FTB Quests Optimizer" mod is detected
+  * This mod is _not_ recommended by FTB for use with FTB Quests; it will not improve performance, and may cause stability issues
 
 ### Fixed
 * Tooltip on optional tasks now reads "Optional Task" instead of "Optional Quest"
+* Fixed some performance issues related to scanning quests & tasks after player inventory changes and on player login
+  * This should use significantly less server CPU now, good for your TPS
+* (Mod developers only) Fixed crash when using FTB Quests as dependency in a data generation environment
 
 ## [2001.4.13]
 
