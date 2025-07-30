@@ -10,10 +10,7 @@ import dev.ftb.mods.ftbquests.FTBQuests;
 import dev.ftb.mods.ftbquests.client.gui.CustomToast;
 import dev.ftb.mods.ftbquests.client.gui.quests.QuestScreen;
 import dev.ftb.mods.ftbquests.net.DeleteObjectMessage;
-import dev.ftb.mods.ftbquests.quest.BaseQuestFile;
-import dev.ftb.mods.ftbquests.quest.Quest;
-import dev.ftb.mods.ftbquests.quest.QuestObject;
-import dev.ftb.mods.ftbquests.quest.TeamData;
+import dev.ftb.mods.ftbquests.quest.*;
 import dev.ftb.mods.ftbquests.quest.task.StructureTask;
 import dev.ftb.mods.ftbquests.quest.theme.QuestTheme;
 import dev.ftb.mods.ftbquests.quest.translation.TranslationKey;
@@ -238,7 +235,6 @@ public class ClientQuestFile extends BaseQuestFile {
 		}
 	}
 
-
 	public static void addTranslationWarning(TooltipList list, TranslationKey key) {
 		list.add(Component.translatable("ftbquests.message.missing_xlate_1",
 						Component.translatable(key.getTranslationKey()),
@@ -247,5 +243,9 @@ public class ClientQuestFile extends BaseQuestFile {
 		);
 		list.add(Component.translatable("ftbquests.message.missing_xlate_2", INSTANCE.getFallbackLocale())
 				.withStyle(ChatFormatting.GRAY, ChatFormatting.ITALIC));
+	}
+
+	public boolean isChapterSelected(Chapter chapter) {
+		return getQuestScreen().map(screen -> screen.isChapterSelected(chapter)).orElse(false);
 	}
 }
