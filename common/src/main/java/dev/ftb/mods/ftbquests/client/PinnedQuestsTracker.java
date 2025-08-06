@@ -52,7 +52,7 @@ public enum PinnedQuestsTracker {
                 // special auto-pin value: collect all quests which can be done now
                 boolean wholeBook = FTBQuestsClientConfig.AUTO_PIN_FOLLOWS.get() == AutoPinTarget.QUEST_BOOK;
                 file.forAllQuests(quest -> {
-                    if (!data.isCompleted(quest) && data.canStartTasks(quest) && (wholeBook || file.isChapterSelected(quest.getChapter()))) {
+                    if (!data.isCompleted(quest) && quest.isVisible(data) && data.canStartTasks(quest) && (wholeBook || file.isChapterSelected(quest.getChapter()))) {
                         pinnedQuests.add(quest);
                     }
                 });
