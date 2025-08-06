@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixes
 * Fixed quests marked as invisible still showing on the pinned quests tracker
+* Fixed chapter groups in the chapter side panel not being expandanle/collapsible while in edit mode
 
 ## [2101.1.13]
 
