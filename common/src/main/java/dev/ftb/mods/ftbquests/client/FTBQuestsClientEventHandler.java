@@ -216,7 +216,7 @@ public class FTBQuestsClientEventHandler {
 			if (pinnedIds.contains(TeamData.AUTO_PIN_ID)) {
 				// special auto-pin value: collect all quests which can be done now
 				file.forAllQuests(quest -> {
-					if (!data.isCompleted(quest) && data.canStartTasks(quest)) {
+					if (!data.isCompleted(quest) && data.canStartTasks(quest) && quest.isVisible(data)) {
 						pinnedQuests.add(quest);
 					}
 				});
