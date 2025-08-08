@@ -1,6 +1,8 @@
 package dev.ftb.mods.ftbquests.item;
 
+import dev.ftb.mods.ftbquests.block.entity.BaseBarrierBlockEntity;
 import dev.ftb.mods.ftbquests.registry.ModBlocks;
+import dev.ftb.mods.ftbquests.registry.ModDataComponents;
 import dev.ftb.mods.ftbquests.registry.ModItems;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
@@ -17,7 +19,12 @@ public class StageBarrierBlockItem extends BlockItem {
 
 	@Override
 	public void appendHoverText(ItemStack stack, TooltipContext context, List<Component> tooltip, TooltipFlag flag) {
-		tooltip.add(Component.translatable("item.ftbquests.barrier.nogui").withStyle(ChatFormatting.DARK_GRAY, ChatFormatting.ITALIC));
-		tooltip.add(Component.translatable("item.ftbquests.stage_barrier.config").withStyle(ChatFormatting.GRAY));
+		if (context.registries() != null) {
+			tooltip.add(Component.translatable("item.ftbquests.barrier.rightclick").withStyle(ChatFormatting.DARK_GRAY, ChatFormatting.ITALIC));
+			BaseBarrierBlockEntity.BarrierSavedData data = stack.get(ModDataComponents.BARRIER_SAVED.get());
+			if (data != null) {
+				data.addTooltipInfo(data, tooltip, "stage_barrier");
+			}
+		}
 	}
 }

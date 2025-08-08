@@ -6,7 +6,7 @@ import org.jetbrains.annotations.NotNull;
 import java.util.Optional;
 import java.util.UUID;
 
-public interface ITaskScreen {
+public interface ITaskScreen extends IEditable {
     Optional<TaskScreenBlockEntity> getCoreScreen();
 
     @NotNull

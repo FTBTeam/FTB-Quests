@@ -2,9 +2,8 @@ package dev.ftb.mods.ftbquests.item;
 
 import dev.architectury.networking.NetworkManager;
 import dev.ftb.mods.ftbquests.FTBQuests;
-import dev.ftb.mods.ftbquests.block.TaskScreenBlock;
 import dev.ftb.mods.ftbquests.block.entity.ITaskScreen;
-import dev.ftb.mods.ftbquests.net.TaskScreenConfigRequestMessage;
+import dev.ftb.mods.ftbquests.net.BlockConfigRequestMessage;
 import dev.ftb.mods.ftbquests.registry.ModDataComponents;
 import dev.ftb.mods.ftbquests.registry.ModItems;
 import net.minecraft.ChatFormatting;
@@ -76,9 +75,9 @@ public class TaskScreenConfiguratorItem extends Item {
                 return false;
             }
             if (level.getBlockEntity(gPos.pos()) instanceof ITaskScreen taskScreen) {
-                if (TaskScreenBlock.hasPermissionToEdit(player, taskScreen)) {
+                if (taskScreen.hasPermissionToEdit(player)) {
                     taskScreen.getCoreScreen().ifPresent(coreScreen ->
-                            NetworkManager.sendToPlayer(player, new TaskScreenConfigRequestMessage(coreScreen.getBlockPos())));
+                            NetworkManager.sendToPlayer(player, new BlockConfigRequestMessage(coreScreen.getBlockPos(), BlockConfigRequestMessage.BlockType.TASK_SCREEN)));
                     return true;
                 } else {
                     player.displayClientMessage(Component.translatable("block.ftbquests.screen.no_permission").withStyle(ChatFormatting.RED), true);

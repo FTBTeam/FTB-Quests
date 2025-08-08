@@ -1,7 +1,8 @@
 package dev.ftb.mods.ftbquests.item;
 
-import dev.ftb.mods.ftbquests.client.ClientQuestFile;
+import dev.ftb.mods.ftbquests.block.entity.BaseBarrierBlockEntity;
 import dev.ftb.mods.ftbquests.registry.ModBlocks;
+import dev.ftb.mods.ftbquests.registry.ModDataComponents;
 import dev.ftb.mods.ftbquests.registry.ModItems;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
@@ -19,12 +20,11 @@ public class QuestBarrierBlockItem extends BlockItem {
 	@Override
 	public void appendHoverText(ItemStack stack, TooltipContext context, List<Component> tooltip, TooltipFlag flag) {
 		if (context.registries() != null) {
-			tooltip.add(Component.translatable("item.ftbquests.barrier.nogui").withStyle(ChatFormatting.DARK_GRAY, ChatFormatting.ITALIC));
-			if (ClientQuestFile.exists() && !ClientQuestFile.INSTANCE.canEdit()) {
-				tooltip.add(Component.translatable("item.ftbquests.barrier.disabled").withStyle(ChatFormatting.RED));
-			} else {
-				tooltip.add(Component.translatable("item.ftbquests.barrier.config").withStyle(ChatFormatting.GRAY));
-			}
+			tooltip.add(Component.translatable("item.ftbquests.barrier.rightclick").withStyle(ChatFormatting.DARK_GRAY, ChatFormatting.ITALIC));
+		}
+		BaseBarrierBlockEntity.BarrierSavedData data = stack.get(ModDataComponents.BARRIER_SAVED.get());
+		if (data != null) {
+			data.addTooltipInfo(data, tooltip, "quest_barrier");
 		}
 	}
 }
