@@ -16,6 +16,7 @@ import dev.ftb.mods.ftblibrary.ui.Widget;
 import dev.ftb.mods.ftblibrary.ui.input.MouseButton;
 import dev.ftb.mods.ftbquests.FTBQuests;
 import dev.ftb.mods.ftbquests.api.FTBQuestsAPI;
+import dev.ftb.mods.ftbquests.block.entity.BaseBarrierBlockEntity;
 import dev.ftb.mods.ftbquests.block.entity.TaskScreenBlockEntity;
 import dev.ftb.mods.ftbquests.client.gui.RewardToast;
 import dev.ftb.mods.ftbquests.client.gui.ToastQuestObject;
@@ -152,9 +153,15 @@ public class FTBQuestsClient {
 		});
 	}
 
-	public static void openScreenConfigGui(BlockPos pos) {
+	public static void openTaskScreenConfigGui(BlockPos pos) {
 		if (Minecraft.getInstance().level.getBlockEntity(pos) instanceof TaskScreenBlockEntity coreScreen) {
 			new EditConfigScreen(coreScreen.fillConfigGroup(ClientQuestFile.INSTANCE.getOrCreateTeamData(coreScreen.getTeamId()))).setAutoclose(true).openGui();
+		}
+	}
+
+	public static void openBarrierConfigGui(BlockPos pos) {
+		if (Minecraft.getInstance().level.getBlockEntity(pos) instanceof BaseBarrierBlockEntity barrier) {
+			new EditConfigScreen(barrier.fillConfigGroup()).setAutoclose(true).openGui();
 		}
 	}
 
