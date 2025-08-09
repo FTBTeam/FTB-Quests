@@ -9,7 +9,6 @@ import net.fabricmc.api.Environment;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.RegistryFriendlyByteBuf;
-import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 
 public class ToastReward extends Reward {
@@ -18,6 +17,10 @@ public class ToastReward extends Reward {
 	public ToastReward(long id, Quest quest) {
 		super(id, quest);
 		description = "";
+	}
+
+	public String getDescription() {
+		return description;
 	}
 
 	@Override
@@ -58,6 +61,6 @@ public class ToastReward extends Reward {
 
 	@Override
 	public void claim(ServerPlayer player, boolean notify) {
-		NetworkManager.sendToPlayer(player, new CustomToastMessage(getTitle(), Component.translatable(description), getIcon()));
+		NetworkManager.sendToPlayer(player, new CustomToastMessage(getId()));
 	}
 }
