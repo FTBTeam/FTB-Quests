@@ -14,6 +14,7 @@ import dev.ftb.mods.ftbquests.client.gui.quests.QuestScreen;
 import dev.ftb.mods.ftbquests.net.TeamDataUpdate;
 import dev.ftb.mods.ftbquests.quest.*;
 import dev.ftb.mods.ftbquests.quest.reward.Reward;
+import dev.ftb.mods.ftbquests.quest.reward.ToastReward;
 import dev.ftb.mods.ftbquests.quest.task.Task;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
@@ -270,7 +271,7 @@ public class FTBQuestsNetClient {
 		}
 	}
 
-	public static void displayCustomToast(Component title, Component text, Icon icon) {
-		Minecraft.getInstance().getToasts().addToast(new RewardToast(title, text, icon));
+	public static void displayCustomToast(ToastReward t) {
+		Minecraft.getInstance().getToasts().addToast(new RewardToast(t.getTitle(), Component.translatable(t.getDescription()), t.getIcon()));
 	}
 }
