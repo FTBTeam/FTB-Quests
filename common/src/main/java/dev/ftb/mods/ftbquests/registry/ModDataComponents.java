@@ -4,6 +4,7 @@ import com.mojang.serialization.Codec;
 import dev.architectury.registry.registries.DeferredRegister;
 import dev.architectury.registry.registries.RegistrySupplier;
 import dev.ftb.mods.ftbquests.api.FTBQuestsAPI;
+import dev.ftb.mods.ftbquests.block.entity.BaseBarrierBlockEntity.BarrierSavedData;
 import dev.ftb.mods.ftbquests.block.entity.TaskScreenBlockEntity.TaskScreenSaveData;
 import net.minecraft.core.GlobalPos;
 import net.minecraft.core.component.DataComponentType;
@@ -50,6 +51,12 @@ public class ModDataComponents {
             = COMPONENT_TYPES.register("task_screen_saved", () -> new DataComponentType.Builder<TaskScreenSaveData>()
             .persistent(TaskScreenSaveData.CODEC)
             .networkSynchronized(TaskScreenSaveData.STREAM_CODEC)
+            .build());
+
+    public static RegistrySupplier<DataComponentType<BarrierSavedData>> BARRIER_SAVED
+            = COMPONENT_TYPES.register("barrier_saved", () -> new DataComponentType.Builder<BarrierSavedData>()
+            .persistent(BarrierSavedData.CODEC)
+            .networkSynchronized(BarrierSavedData.STREAM_CODEC)
             .build());
 
     public static void register() {

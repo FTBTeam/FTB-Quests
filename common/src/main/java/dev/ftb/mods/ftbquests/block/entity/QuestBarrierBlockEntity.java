@@ -1,73 +1,63 @@
 package dev.ftb.mods.ftbquests.block.entity;
 
+import dev.ftb.mods.ftblibrary.config.ConfigGroup;
 import dev.ftb.mods.ftbquests.api.FTBQuestsAPI;
 import dev.ftb.mods.ftbquests.quest.BaseQuestFile;
-import dev.ftb.mods.ftbquests.quest.QuestObject;
-import dev.ftb.mods.ftbquests.quest.QuestObjectBase;
-import dev.ftb.mods.ftbquests.quest.ServerQuestFile;
+import dev.ftb.mods.ftbquests.quest.Quest;
+import dev.ftb.mods.ftbquests.quest.QuestObjectType;
 import dev.ftb.mods.ftbquests.registry.ModBlockEntityTypes;
+import dev.ftb.mods.ftbquests.util.ConfigQuestObject;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.HolderLookup;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.network.protocol.Packet;
-import net.minecraft.network.protocol.game.ClientGamePacketListener;
-import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
-import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
-import org.jetbrains.annotations.Nullable;
 
-public class QuestBarrierBlockEntity extends BlockEntity implements BarrierBlockEntity {
-	private long objId = 0L;
+public class QuestBarrierBlockEntity extends BaseBarrierBlockEntity {
+	private Quest cachedQuest = null;
 
 	public QuestBarrierBlockEntity(BlockPos blockPos, BlockState blockState) {
 		super(ModBlockEntityTypes.BARRIER.get(), blockPos, blockState);
 	}
 
 	@Override
-	public void loadAdditional(CompoundTag tag, HolderLookup.Provider provider) {
-		super.loadAdditional(tag, provider);
-		objId = QuestObjectBase.parseCodeString(tag.getString("Object"));
+	protected void applySavedData(BarrierSavedData data) {
+		super.applySavedData(data);
+
+		cachedQuest = null;  // force recalc
 	}
 
 	@Override
-	public void saveAdditional(CompoundTag tag, HolderLookup.Provider provider) {
-		super.saveAdditional(tag, provider);
-		tag.putString("Object", QuestObjectBase.getCodeString(objId));
-	}
+	public void updateFromString(String objStr) {
+		super.updateFromString(objStr);
 
-	@Nullable
-	@Override
-	public Packet<ClientGamePacketListener> getUpdatePacket() {
-		return ClientboundBlockEntityDataPacket.create(this);
-	}
-
-	@Override
-	public CompoundTag getUpdateTag(HolderLookup.Provider provider) {
-		return saveWithoutMetadata(provider);
-	}
-
-	@Override
-	public void setChanged() {
-		super.setChanged();
-		if (level instanceof ServerLevel serverLevel) {
-			serverLevel.getChunkSource().blockChanged(getBlockPos());
-		}
-	}
-
-	@Override
-	public void update(String s) {
-		objId = ServerQuestFile.INSTANCE.getID(s);
+		cachedQuest = null;
 		setChanged();
 	}
 
 	@Override
 	public boolean isOpen(Player player) {
-		BaseQuestFile file = FTBQuestsAPI.api().getQuestFile(player.level().isClientSide());
-		QuestObject qo = file.get(objId);
-		return qo != null && file.getTeamData(player)
-				.map(d -> d.isCompleted(qo))
-				.orElse(false);
+		Quest quest = getQuest();
+		return quest != null &&
+				quest.getQuestFile().getTeamData(player).map(d -> d.isCompleted(quest)).orElse(false);
+	}
+
+	@Override
+	protected void addConfigEntries(ConfigGroup cg) {
+		cg.add("quest", new ConfigQuestObject<>(QuestObjectType.QUEST), getQuest(), this::setQuest, null)
+				.setNameKey("ftbquests.quest");
+	}
+
+	public Quest getQuest() {
+		if (cachedQuest == null && !objStr.isEmpty() || cachedQuest != null && !cachedQuest.getCodeString().equals(objStr)) {
+			long objId = BaseQuestFile.parseCodeString(objStr);
+			cachedQuest = FTBQuestsAPI.api().getQuestFile(level.isClientSide).getQuest(objId);
+		}
+
+		return cachedQuest;
+	}
+
+	public void setQuest(Quest quest) {
+		this.cachedQuest = quest;
+		objStr = quest == null ? "" : quest.getCodeString();
+		setChanged();
 	}
 }

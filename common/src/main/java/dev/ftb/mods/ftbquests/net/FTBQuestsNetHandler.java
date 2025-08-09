@@ -28,7 +28,7 @@ public class FTBQuestsNetHandler {
 		NetworkHelper.registerC2S(SubmitTaskMessage.TYPE, SubmitTaskMessage.STREAM_CODEC, SubmitTaskMessage::handle);
 		NetworkHelper.registerC2S(SyncStructuresRequestMessage.TYPE, SyncStructuresRequestMessage.STREAM_CODEC, SyncStructuresRequestMessage::handle);
 		NetworkHelper.registerC2S(SyncTranslationMessageToServer.TYPE, SyncTranslationMessageToServer.STREAM_CODEC, SyncTranslationMessageToServer::handle);
-		NetworkHelper.registerC2S(TaskScreenConfigResponseMessage.TYPE, TaskScreenConfigResponseMessage.STREAM_CODEC, TaskScreenConfigResponseMessage::handle);
+		NetworkHelper.registerC2S(BlockConfigResponseMessage.TYPE, BlockConfigResponseMessage.STREAM_CODEC, BlockConfigResponseMessage::handle);
 		NetworkHelper.registerC2S(ToggleEditingModeMessage.TYPE, ToggleEditingModeMessage.STREAM_CODEC, ToggleEditingModeMessage::handle);
 		NetworkHelper.registerC2S(TogglePinnedMessage.TYPE, TogglePinnedMessage.STREAM_CODEC, TogglePinnedMessage::handle);
 
@@ -62,7 +62,7 @@ public class FTBQuestsNetHandler {
 		NetworkHelper.registerS2C(SyncTeamDataMessage.TYPE, SyncTeamDataMessage.STREAM_CODEC, SyncTeamDataMessage::handle);
 		NetworkHelper.registerS2C(SyncTranslationMessageToClient.TYPE, SyncTranslationMessageToClient.STREAM_CODEC, SyncTranslationMessageToClient::handle);
 		NetworkHelper.registerS2C(SyncTranslationTableMessage.TYPE, SyncTranslationTableMessage.STREAM_CODEC, SyncTranslationTableMessage::handle);
-		NetworkHelper.registerS2C(TaskScreenConfigRequestMessage.TYPE, TaskScreenConfigRequestMessage.STREAM_CODEC, TaskScreenConfigRequestMessage::handle);
+		NetworkHelper.registerS2C(BlockConfigRequestMessage.TYPE, BlockConfigRequestMessage.STREAM_CODEC, BlockConfigRequestMessage::handle);
 		NetworkHelper.registerS2C(TeamDataChangedMessage.TYPE, TeamDataChangedMessage.STREAM_CODEC, TeamDataChangedMessage::handle);
 		NetworkHelper.registerS2C(TogglePinnedResponseMessage.TYPE, TogglePinnedResponseMessage.STREAM_CODEC, TogglePinnedResponseMessage::handle);
 		NetworkHelper.registerS2C(UpdateTaskProgressMessage.TYPE, UpdateTaskProgressMessage.STREAM_CODEC, UpdateTaskProgressMessage::handle);

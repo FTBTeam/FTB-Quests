@@ -315,11 +315,12 @@ public class ChapterPanel extends Panel {
 				if (button.isLeft()) {
 					if (Screen.hasAltDown()) {
 						group.onEditButtonClicked(chapterPanel.questScreen);
+						return;
 					} else if (getMouseX() > getX() + width - 15) {
 						// the add "button" on the right
 						showAddChapterDialog();
+						return;
 					}
-					return;
 				} else if (button.isRight() && !group.isDefaultGroup()) {
 					ContextMenuBuilder.create(group, chapterPanel.questScreen).insertAtTop(List.of(
 							new ContextMenuItem(Component.translatable("gui.move"), ThemeProperties.MOVE_UP_ICON.get(),

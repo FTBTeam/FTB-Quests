@@ -4,6 +4,20 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2101.1.14]
+
+### Added
+* Big overhaul of quest and stage barrier blocks
+  * Can now be GUI-configured to select a quest by right-clicking, in edit mode
+  * Creative pick-block copies current settings for easy replication
+  * Renaming in Anvil still works, but is not the recommended way; easier to place one, configure and then creative-pick it to place more
+  * (NeoForge only) Can also GUI-configure block camouflage and/or hide completely when open
+  * Extra Jade support to conceal barrier info from non-editing players added to FTB XMod Compat 2101.1.5+
+
+### Fixes
+* Fixed quests marked as invisible still showing on the pinned quests tracker
+* Fixed chapter groups in the chapter side panel not being expandable/collapsible while in edit mode
+
 ## [2101.1.13]
 
 ### Added

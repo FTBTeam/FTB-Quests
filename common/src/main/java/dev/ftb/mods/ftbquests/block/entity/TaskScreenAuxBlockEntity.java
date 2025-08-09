@@ -8,6 +8,7 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtUtils;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.Nameable;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
@@ -85,6 +86,11 @@ public class TaskScreenAuxBlockEntity extends BlockEntity implements ITaskScreen
     @Override
     public ItemStack getSkin() {
         return getCoreScreen().map(TaskScreenBlockEntity::getSkin).orElse(ItemStack.EMPTY);
+    }
+
+    @Override
+    public boolean hasPermissionToEdit(Player player) {
+        return getCoreScreen().map(s -> s.hasPermissionToEdit(player)).orElse(false);
     }
 
     @NotNull

@@ -10,12 +10,12 @@ import dev.ftb.mods.ftbquests.block.entity.TaskScreenAuxBlockEntity;
 import dev.ftb.mods.ftbquests.block.entity.TaskScreenBlockEntity;
 import dev.ftb.mods.ftbquests.client.FTBQuestsClient;
 import dev.ftb.mods.ftbquests.item.ScreenBlockItem;
-import dev.ftb.mods.ftbquests.net.TaskScreenConfigRequestMessage;
+import dev.ftb.mods.ftbquests.net.BlockConfigRequestMessage;
+import dev.ftb.mods.ftbquests.net.BlockConfigRequestMessage.BlockType;
 import dev.ftb.mods.ftbquests.quest.BaseQuestFile;
 import dev.ftb.mods.ftbquests.quest.ServerQuestFile;
 import dev.ftb.mods.ftbquests.quest.task.Task;
 import dev.ftb.mods.ftbquests.registry.ModBlocks;
-import dev.ftb.mods.ftbteams.api.FTBTeamsAPI;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -172,9 +172,9 @@ public class TaskScreenBlock extends BaseEntityBlock {
     @Override
     protected InteractionResult useWithoutItem(BlockState blockState, Level level, BlockPos blockPos, Player player, BlockHitResult blockHitResult) {
         if (player instanceof ServerPlayer sp && level.getBlockEntity(blockPos) instanceof ITaskScreen taskScreen) {
-            if (hasPermissionToEdit(sp, taskScreen)) {
+            if (taskScreen.hasPermissionToEdit(sp)) {
                 taskScreen.getCoreScreen().ifPresent(coreScreen ->
-                        NetworkManager.sendToPlayer(sp, new TaskScreenConfigRequestMessage(coreScreen.getBlockPos())));
+                        NetworkManager.sendToPlayer(sp, new BlockConfigRequestMessage(coreScreen.getBlockPos(), BlockType.TASK_SCREEN)));
             } else {
                 sp.displayClientMessage(Component.translatable("block.ftbquests.screen.no_permission").withStyle(ChatFormatting.RED), true);
                 return InteractionResult.FAIL;
@@ -201,18 +201,6 @@ public class TaskScreenBlock extends BaseEntityBlock {
                 }
             }
         }
-    }
-
-    public static boolean hasPermissionToEdit(ServerPlayer player, ITaskScreen screen) {
-        // either the player must be the owner of the screen...
-        if (player.getUUID().equals(screen.getTeamId())) {
-            return true;
-        }
-
-        // ...or in the same team as the owner of the screen
-        return FTBTeamsAPI.api().getManager().getTeamByID(screen.getTeamId())
-                .map(team -> team.getRankForPlayer(player.getUUID()).isMemberOrBetter())
-                .orElse(false);
     }
 
     /**
