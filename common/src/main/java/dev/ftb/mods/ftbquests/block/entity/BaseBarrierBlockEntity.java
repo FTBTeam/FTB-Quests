@@ -145,7 +145,9 @@ public abstract class BaseBarrierBlockEntity extends EditableBlockEntity {
 
 		if (Platform.isForgeLike()) {
 			ConfigGroup appearance = group.getOrCreateSubgroup("appearance").setNameKey("ftbquests.quest.appearance");
-			appearance.add("skin", new ItemStackConfig(true, true), getSkin(), this::setSkin, ItemStack.EMPTY).setNameKey("block.ftbquests.screen.skin");
+			appearance.add("skin", new ItemStackConfig(true, true), getSkin(), this::setSkin, ItemStack.EMPTY)
+					.withFilter(stack -> stack.getItem() instanceof BlockItem)
+					.setNameKey("block.ftbquests.screen.skin");
 			appearance.addBool("invis_when_open", isInvisibleWhenOpen(), this::setInvisibleWhenOpen, false).setNameKey("block.ftbquests.barrier.invis_when_open");
 		}
 
