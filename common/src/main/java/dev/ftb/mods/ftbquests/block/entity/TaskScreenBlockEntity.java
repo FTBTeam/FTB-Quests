@@ -9,7 +9,7 @@ import dev.ftb.mods.ftblibrary.config.ItemStackConfig;
 import dev.ftb.mods.ftbquests.api.FTBQuestsAPI;
 import dev.ftb.mods.ftbquests.block.TaskScreenBlock;
 import dev.ftb.mods.ftbquests.client.FTBQuestsClient;
-import dev.ftb.mods.ftbquests.net.TaskScreenConfigResponseMessage;
+import dev.ftb.mods.ftbquests.net.BlockConfigResponseMessage;
 import dev.ftb.mods.ftbquests.quest.BaseQuestFile;
 import dev.ftb.mods.ftbquests.quest.QuestObjectBase;
 import dev.ftb.mods.ftbquests.quest.TeamData;
@@ -18,6 +18,7 @@ import dev.ftb.mods.ftbquests.registry.ModBlockEntityTypes;
 import dev.ftb.mods.ftbquests.registry.ModBlocks;
 import dev.ftb.mods.ftbquests.registry.ModDataComponents;
 import dev.ftb.mods.ftbquests.util.ConfigQuestObject;
+import dev.ftb.mods.ftbteams.api.FTBTeamsAPI;
 import net.minecraft.ChatFormatting;
 import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
@@ -33,9 +34,9 @@ import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientGamePacketListener;
 import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import org.jetbrains.annotations.NotNull;
@@ -46,7 +47,7 @@ import java.util.UUID;
 
 import static dev.ftb.mods.ftbquests.block.TaskScreenBlock.FACING;
 
-public class TaskScreenBlockEntity extends BlockEntity implements ITaskScreen {
+public class TaskScreenBlockEntity extends EditableBlockEntity implements ITaskScreen {
     private long taskId = 0L;
     private Task task = null;
     private boolean indestructible = false;
@@ -219,7 +220,7 @@ public class TaskScreenBlockEntity extends BlockEntity implements ITaskScreen {
     public ConfigGroup fillConfigGroup(TeamData data) {
         ConfigGroup cg0 = new ConfigGroup("task_screen", accepted -> {
             if (accepted) {
-                NetworkManager.sendToServer(new TaskScreenConfigResponseMessage(getBlockPos(), saveWithoutMetadata(getLevel().registryAccess())));
+                NetworkManager.sendToServer(new BlockConfigResponseMessage(getBlockPos(), saveWithoutMetadata(getLevel().registryAccess())));
             }
         });
 
@@ -262,6 +263,19 @@ public class TaskScreenBlockEntity extends BlockEntity implements ITaskScreen {
             }
         }
         return fakeTextureUV;
+    }
+
+    @Override
+    public boolean hasPermissionToEdit(Player player) {
+        // either the player must be the owner of the screen...
+        if (player.getUUID().equals(getTeamId())) {
+            return true;
+        }
+
+        // ...or in the same team as the owner of the screen
+        return FTBTeamsAPI.api().getManager().getTeamByID(getTeamId())
+                .map(team -> team.getRankForPlayer(player.getUUID()).isMemberOrBetter())
+                .orElse(false);
     }
 
     public record TaskScreenSaveData(long taskId, ItemStack skin, boolean indestructible, boolean inputOnly, ItemStack inputModeIcon, boolean textShadow) {

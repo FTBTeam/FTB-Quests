@@ -22,6 +22,7 @@
 	"block.ftbquests.barrier": "Quest Barrier",
 	"block.ftbquests.stage_barrier": "Stage Barrier",
 	"block.ftbquests.barrier.object": "Object ID",
+	"block.ftbquests.barrier.invis_when_open": "Invisible When Open",
 	"block.ftbquests.detector": "Quest Detector",
 	"block.ftbquests.detector.task": "Task",
 	"block.ftbquests.detector.notifications": "Notifications",
@@ -43,10 +44,11 @@
 	"block.ftbquests.loot_crate_opener.rightclick": "Stored items: %d",
 	"item.ftbquests.book": "Quest Book",
 	"item.ftbquests.missing_item": "Missing Item",
-	"item.ftbquests.barrier.nogui": "GUI is still work in progress",
-	"item.ftbquests.barrier.disabled": "Only works in Editing Mode!",
-	"item.ftbquests.barrier.config": "Rename in anvil to set the Quest ID",
-	"item.ftbquests.stage_barrier.config": "Rename in anvil to set the Stage",
+	"item.ftbquests.barrier.rightclick": "Right-click to configure settings\nMiddle-click to pick a copy, including settings",
+	"item.ftbquests.barrier.object.quest_barrier": "Configured Quest: %s",
+	"item.ftbquests.barrier.object.stage_barrier": "Configured Stage: %s",
+	"item.ftbquests.barrier.skin": "Appears As: %s",
+	"item.ftbquests.barrier.invis_when_open": "Invisible when open: %s",
 	"item.ftbquests.book.tooltip": "Right-click to open quest window",
 	"item.ftbquests.book.disabled": "Quest Book GUI is disabled!",
 	"item.ftbquests.lootcrate": "Loot Crate",
@@ -606,5 +608,6 @@
 	"ftbquests.translation_key.quest_subtitle": "quest subtitle",
 	"ftbquests.translation_key.chapter_subtitle": "chapter subtitle",
 	"ftbquests.translation_key.quest_desc": "quest description",
-	"ftbquests.gui.use_default_lang": "[Use Default Language]"
+	"ftbquests.gui.use_default_lang": "[Use Default Language]",
+	"config.jade.plugin_ftbquests.barrier": "Barriers"
 }
