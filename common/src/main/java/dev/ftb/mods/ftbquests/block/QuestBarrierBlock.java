@@ -10,6 +10,7 @@ import dev.ftb.mods.ftbquests.client.ClientQuestFile;
 import dev.ftb.mods.ftbquests.net.BlockConfigRequestMessage;
 import dev.ftb.mods.ftbquests.net.BlockConfigRequestMessage.BlockType;
 import dev.ftb.mods.ftbquests.registry.ModDataComponents;
+import dev.ftb.mods.ftbquests.util.NetUtils;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.core.BlockPos;
@@ -90,10 +91,7 @@ public class QuestBarrierBlock extends BaseEntityBlock {
 
 	@Override
 	protected VoxelShape getShape(BlockState blockState, BlockGetter bg, BlockPos pos, CollisionContext ctx) {
-		if (EntityHooks.fromCollision(ctx) instanceof Player player
-				&& bg.getBlockEntity(pos) instanceof BaseBarrierBlockEntity barrier
-				&& barrier.isOpen(player)
-				&& !barrier.hasPermissionToEdit(player)) {
+		if (EntityHooks.fromCollision(ctx) instanceof Player player && blockState.getValue(OPEN) && !NetUtils.canEdit(player)) {
 			return Shapes.empty();
 		}
 
@@ -137,11 +135,11 @@ public class QuestBarrierBlock extends BaseEntityBlock {
 
 	@Override
 	protected ItemInteractionResult useItemOn(ItemStack itemStack, BlockState blockState, Level level, BlockPos blockPos, Player player, InteractionHand interactionHand, BlockHitResult blockHitResult) {
-        if (player instanceof ServerPlayer sp) {
-            if (level.getBlockEntity(blockPos) instanceof BaseBarrierBlockEntity barrier && barrier.hasPermissionToEdit(sp)) {
-                NetworkManager.sendToPlayer(sp, new BlockConfigRequestMessage(blockPos, BlockType.BARRIER));
-                return ItemInteractionResult.sidedSuccess(level.isClientSide);
-            }
+		if (player instanceof ServerPlayer sp) {
+			if (level.getBlockEntity(blockPos) instanceof BaseBarrierBlockEntity barrier && barrier.hasPermissionToEdit(sp)) {
+				NetworkManager.sendToPlayer(sp, new BlockConfigRequestMessage(blockPos, BlockType.BARRIER));
+				return ItemInteractionResult.sidedSuccess(level.isClientSide);
+			}
 			return ItemInteractionResult.FAIL;
 		} else {
 			return ItemInteractionResult.SUCCESS;
