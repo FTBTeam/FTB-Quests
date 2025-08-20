@@ -195,7 +195,7 @@ public abstract class BaseBarrierBlockEntity extends EditableBlockEntity {
 
 	@Override
 	public boolean hasPermissionToEdit(Player player) {
-		return FTBQuestsAPI.api().getQuestFile(false).getTeamData(player)
+		return FTBQuestsAPI.api().getQuestFile(level.isClientSide).getTeamData(player)
 				.map(team -> team.getCanEdit(player))
 				.orElse(false);
 	}
