@@ -323,10 +323,10 @@
 	"ftbquests.task": "Tarea",
 	"ftbquests.tasks": "Tareas",
 	"ftbquests.task.completed": "¡Tarea completada!",
-	"ftbquests.task.click_to_submit": "Clic para enviar",
+	"ftbquests.task.click_to_submit": "Haz clic para enviar",
 	"ftbquests.task.task_screen_only": "¡Los objetos SOLO pueden enviarse a través de una Pantalla de tareas!",
 	"ftbquests.task.auto_detected": "Los objetos serán detectados automáticamente",
-	"ftbquests.task.click_to_submit_all": "Clic para enviar todos los objetos",
+	"ftbquests.task.click_to_submit_all": "Haz clic para enviar todos los objetos",
 	"ftbquests.task.max_input": "Tasa máxima de entrada",
 	"ftbquests.task.ftbquests.item": "Objeto",
 	"ftbquests.task.ftbquests.item.count": "Cantidad",
@@ -337,9 +337,9 @@
 	"ftbquests.task.ftbquests.item.consume_false": "No consume el objeto",
 	"ftbquests.task.ftbquests.item.hide_valid_items": "Ocultar objetos válidos",
 	"ftbquests.task.ftbquests.item.valid_items": "Objetos válidos:",
-	"ftbquests.task.ftbquests.item.view_items": "Clic para ver objetos válidos",
+	"ftbquests.task.ftbquests.item.view_items": "Haz clic para ver objetos válidos",
 	"ftbquests.task.ftbquests.item.valid_for": "Objetos válidos para %s",
-	"ftbquests.task.ftbquests.item.click_recipe": "Clic para ver receta(s)",
+	"ftbquests.task.ftbquests.item.click_recipe": "Haz clic para ver receta(s)",
 	"ftbquests.task.ftbquests.item.convert_tag": "Convertir a filtro de etiqueta '%s'",
 	"ftbquests.task.ftbquests.item.select_tag": "Seleccionar una etiqueta de objeto",
 	"ftbquests.task.ftbquests.item.only_from_crafting": "Solo detectar desde fabricación",
@@ -549,4 +549,5 @@
 	"ftbquests.message.configurator_bound": "Configurador vinculado: %s",
 	"ftbquests.message.task_screen_inaccessible": "¡La pantalla de tareas no es accesible desde aquí!",
 	"ftbquests.message.missing_task_screen": "¡Pantalla de tareas faltante!"
+
 }
