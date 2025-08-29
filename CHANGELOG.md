@@ -4,6 +4,15 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2101.1.15]
+
+### Added
+* Quest and Stage Barrier blocks can now optionally teleport players who walk into them (once the related quest/stage is completed)
+  * Right-click the block in edit mode to configure teleportation settings
+
+### Fixed
+* Fixed a crash with barrier shape checking
+
 ## [2101.1.14]
 
 ### Added
