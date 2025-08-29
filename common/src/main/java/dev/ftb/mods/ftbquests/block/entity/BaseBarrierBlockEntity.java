@@ -167,6 +167,7 @@ public abstract class BaseBarrierBlockEntity extends EditableBlockEntity {
 
 		ConfigGroup teleport = group.getOrCreateSubgroup("teleport").setNameKey("ftbquests.barrier.teleport");
 		teleport.addBool("enabled", teleportData.enabled, v -> teleportData = teleportData.withEnabled(v), false);
+		teleport.addBool("relative", teleportData.relative, v -> teleportData = teleportData.withRelative(v), false);
 		teleport.addInt("dest_x", teleportData.dest.getX(), v -> teleportData = teleportData.withDestX(v), 0, Integer.MIN_VALUE, Integer.MAX_VALUE);
 		teleport.addInt("dest_y", teleportData.dest.getY(), v -> teleportData = teleportData.withDestY(v), 0, Integer.MIN_VALUE, Integer.MAX_VALUE);
 		teleport.addInt("dest_z", teleportData.dest.getZ(), v -> teleportData = teleportData.withDestZ(v), 0, Integer.MIN_VALUE, Integer.MAX_VALUE);
@@ -259,9 +260,10 @@ public abstract class BaseBarrierBlockEntity extends EditableBlockEntity {
 		}
 	}
 
-	public record TeleportData(boolean enabled, BlockPos dest, float pitch, float yaw, Optional<ResourceKey<Level>> dimId) {
+	public record TeleportData(boolean enabled, boolean relative, BlockPos dest, float pitch, float yaw, Optional<ResourceKey<Level>> dimId) {
 		public static final Codec<TeleportData> CODEC = RecordCodecBuilder.create(builder -> builder.group(
 				Codec.BOOL.optionalFieldOf("enabled", false).forGetter(TeleportData::enabled),
+				Codec.BOOL.optionalFieldOf("relative", false).forGetter(TeleportData::relative),
 				BlockPos.CODEC.fieldOf("dest").forGetter(TeleportData::dest),
 				Codec.FLOAT.fieldOf("pitch").forGetter(TeleportData::pitch),
 				Codec.FLOAT.fieldOf("yaw").forGetter(TeleportData::yaw),
@@ -269,6 +271,7 @@ public abstract class BaseBarrierBlockEntity extends EditableBlockEntity {
 		).apply(builder, TeleportData::new));
 		public static final StreamCodec<RegistryFriendlyByteBuf, TeleportData> STREAM_CODEC = StreamCodec.composite(
 				ByteBufCodecs.BOOL, TeleportData::enabled,
+				ByteBufCodecs.BOOL, TeleportData::relative,
 				BlockPos.STREAM_CODEC, TeleportData::dest,
 				ByteBufCodecs.FLOAT, TeleportData::pitch,
 				ByteBufCodecs.FLOAT, TeleportData::yaw,
@@ -276,19 +279,23 @@ public abstract class BaseBarrierBlockEntity extends EditableBlockEntity {
 				TeleportData::new
 		);
 		public static final TeleportData NONE = new TeleportData(
-				false, BlockPos.ZERO, 0f, 0f, Optional.empty()
+				false, false, BlockPos.ZERO, 0f, 0f, Optional.empty()
 		);
 
 		public TeleportData withEnabled(boolean enabled) {
-			return new TeleportData(enabled, dest, pitch, yaw, dimId);
+			return new TeleportData(enabled, relative, dest, pitch, yaw, dimId);
+		}
+
+		public TeleportData withRelative(boolean relative) {
+			return new TeleportData(enabled, relative, dest, pitch, yaw, dimId);
 		}
 
 		public TeleportData withPitch(float pitch) {
-			return new TeleportData(enabled, dest, pitch, yaw, dimId);
+			return new TeleportData(enabled, relative, dest, pitch, yaw, dimId);
 		}
 
 		public TeleportData withYaw(float yaw) {
-			return new TeleportData(enabled, dest, pitch, yaw, dimId);
+			return new TeleportData(enabled, relative, dest, pitch, yaw, dimId);
 		}
 
 		public TeleportData withDimId(String dimStr) {
@@ -298,17 +305,20 @@ public abstract class BaseBarrierBlockEntity extends EditableBlockEntity {
 		}
 
 		public TeleportData withDimId(@Nullable ResourceKey<Level> dimId) {
-			return new TeleportData(enabled, dest, pitch, yaw, Optional.ofNullable(dimId));
+			return new TeleportData(enabled, relative, dest, pitch, yaw, Optional.ofNullable(dimId));
 		}
 
+		public TeleportData withDestPos(BlockPos pos) {
+			return new TeleportData(enabled, relative, pos, pitch, yaw, dimId);
+		}
 		public TeleportData withDestX(int x) {
-			return new TeleportData(enabled, new BlockPos(x, dest.getY(), dest.getY()), pitch, yaw, dimId);
+			return withDestPos(new BlockPos(x, dest.getY(), dest.getY()));
 		}
 		public TeleportData withDestY(int y) {
-			return new TeleportData(enabled, new BlockPos(dest.getX(), y, dest.getY()), pitch, yaw, dimId);
+			return withDestPos(new BlockPos(dest.getX(), y, dest.getY()));
 		}
 		public TeleportData withDestZ(int z) {
-			return new TeleportData(enabled, new BlockPos(dest.getX(), dest.getY(), z), pitch, yaw, dimId);
+			return withDestPos(new BlockPos(dest.getX(), dest.getY(), z));
 		}
 
 		public String dimStr() {
@@ -318,6 +328,10 @@ public abstract class BaseBarrierBlockEntity extends EditableBlockEntity {
 		@Nullable
 		public Level getLevel(MinecraftServer server) {
 			return dimId.map(server::getLevel).orElse(null);
+		}
+
+		public TeleportData effectiveDest(BlockPos basePos) {
+			return relative ? this.withDestPos(basePos.offset(dest)) : this;
 		}
 
 		public void teleportPlayer(ServerPlayer player) {

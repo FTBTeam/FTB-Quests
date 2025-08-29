@@ -169,7 +169,7 @@ public class QuestBarrierBlock extends BaseEntityBlock {
 		if (entity instanceof ServerPlayer player && player.getServer() != null && level.getBlockEntity(blockPos) instanceof BaseBarrierBlockEntity b) {
 			b.optionalTeleportData().ifPresent(teleportData -> {
 				if (teleportData.enabled() && b.isOpen(player)) {
-					TeleportTicker.addPending(player, teleportData);
+					TeleportTicker.addPending(player, teleportData.effectiveDest(b.getBlockPos()));
 				}
 			});
 		}
