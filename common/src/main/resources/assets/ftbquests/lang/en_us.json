@@ -529,6 +529,8 @@
 	"ftbquests.leaderboard_progress": "FTB Quests Progress",
 	"ftbquests.barrier.teleport":  "Teleportation",
 	"ftbquests.barrier.teleport.enabled":  "Teleportation Enabled",
+	"ftbquests.barrier.teleport.relative":  "Relative Dest Coordinates",
+	"ftbquests.barrier.teleport.relative.tooltip":  "When true, destination is relative to Barrier block position",
 	"ftbquests.barrier.teleport.dest_x":  "Destination X",
 	"ftbquests.barrier.teleport.dest_y":  "Destination Y",
 	"ftbquests.barrier.teleport.dest_z":  "Destination Z",
