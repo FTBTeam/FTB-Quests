@@ -12,8 +12,12 @@ import java.util.function.Supplier;
 public interface RewardTypes {
 	Map<ResourceLocation, RewardType> TYPES = new LinkedHashMap<>();
 
-	static RewardType register(ResourceLocation name, RewardType.Provider p, Supplier<Icon> i) {
-		return TYPES.computeIfAbsent(name, id -> new RewardType(id, p, i));
+	static RewardType register(ResourceLocation name, RewardType.Provider typeProvider, Supplier<Icon> iconSupplier, boolean availableByDefault) {
+		return TYPES.computeIfAbsent(name, id -> new RewardType(id, typeProvider, iconSupplier, availableByDefault));
+	}
+
+	static RewardType register(ResourceLocation name, RewardType.Provider typeProvider, Supplier<Icon> iconSupplier) {
+		return register(name, typeProvider, iconSupplier, true);
 	}
 
 	RewardType ITEM = register(FTBQuestsAPI.rl("item"), ItemReward::new, () -> Icon.getIcon("minecraft:item/diamond"));
@@ -28,6 +32,7 @@ public interface RewardTypes {
 	RewardType ADVANCEMENT = register(FTBQuestsAPI.rl("advancement"), AdvancementReward::new, () -> Icon.getIcon("minecraft:item/wheat"));
 	RewardType TOAST = register(FTBQuestsAPI.rl("toast"), ToastReward::new, () -> Icon.getIcon("minecraft:item/oak_sign"));
 	RewardType STAGE = RewardTypes.register(FTBQuestsAPI.rl("gamestage"), StageReward::new, () -> Icons.CONTROLLER);
+	RewardType CURRENCY = RewardTypes.register(FTBQuestsAPI.rl("currency"), CurrencyReward::new, () -> Icons.MONEY, false);
 
 	static void init() {
 	}

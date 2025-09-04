@@ -244,17 +244,19 @@ public class QuestButton extends Button implements QuestPositionableButton {
 		List<ContextMenuItem> contextMenu2 = new ArrayList<>();
 
 		for (RewardType type : RewardTypes.TYPES.values()) {
-			contextMenu2.add(new ContextMenuItem(type.getDisplayName(), type.getIconSupplier(), b -> {
-				playClickSound();
-				type.getGuiProvider().openCreationGui(parent, quest, reward -> questScreen.getSelectedQuests().forEach(quest -> {
-					Reward newReward = QuestObjectBase.copy(reward, () -> type.createReward(0L, quest));
-					if (newReward != null) {
-						CompoundTag extra = new CompoundTag();
-						extra.putString("type", type.getTypeForNBT());
-						NetworkManager.sendToServer(CreateObjectMessage.create(newReward, extra));
-					}
+			if (type.getGuiProvider() != null) {
+				contextMenu2.add(new ContextMenuItem(type.getDisplayName(), type.getIconSupplier(), b -> {
+					playClickSound();
+					type.getGuiProvider().openCreationGui(parent, quest, reward -> questScreen.getSelectedQuests().forEach(quest -> {
+						Reward newReward = QuestObjectBase.copy(reward, () -> type.createReward(0L, quest));
+						if (newReward != null) {
+							CompoundTag extra = new CompoundTag();
+							extra.putString("type", type.getTypeForNBT());
+							NetworkManager.sendToServer(CreateObjectMessage.create(newReward, extra));
+						}
+					}));
 				}));
-			}));
+			}
 		}
 
 		getGui().openContextMenu(contextMenu2);
