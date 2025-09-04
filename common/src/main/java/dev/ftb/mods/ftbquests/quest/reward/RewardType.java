@@ -25,13 +25,17 @@ public final class RewardType {
 	private boolean excludeFromListRewards = false;
 	public int intId;
 
-	public RewardType(ResourceLocation typeId, Provider provider, Supplier<Icon> iconSupplier) {
+	public RewardType(ResourceLocation typeId, Provider provider, Supplier<Icon> iconSupplier, boolean availableByDefault) {
 		this.typeId = typeId;
 		this.provider = provider;
 		this.iconSupplier = iconSupplier;
 
 		displayName = null;
-		guiProvider = GuiProviders.defaultRewardGuiProvider(provider);
+		guiProvider = availableByDefault ? GuiProviders.defaultRewardGuiProvider(provider) : null;
+	}
+
+	public RewardType(ResourceLocation typeId, Provider provider, Supplier<Icon> iconSupplier) {
+		this(typeId, provider, iconSupplier, true);
 	}
 
 	@Nullable
@@ -85,6 +89,7 @@ public final class RewardType {
 		return this;
 	}
 
+	@Nullable
 	public GuiProvider getGuiProvider() {
 		return guiProvider;
 	}
@@ -97,7 +102,6 @@ public final class RewardType {
 	public boolean getExcludeFromListRewards() {
 		return excludeFromListRewards;
 	}
-
 
 	@FunctionalInterface
 	public interface Provider {
