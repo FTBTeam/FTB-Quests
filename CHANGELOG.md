@@ -10,7 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 * Quest and Stage Barrier blocks can now optionally teleport players who walk into them (once the related quest/stage is completed)
   * Right-click the block in edit mode to configure teleportation settings
 * Added a Currency Reward, transfers an amount of some currency directly to player's wallet
-  * FTB Library 2101.1.20+ and FTB XMod Compat 2101.1.5+ required
+  * FTB Library 2101.1.20+ and FTB XMod Compat 2101.1.6+ required
   * Currently only Magic Coins is supported as an implementation but others may be added in future
 
 ### Fixed
