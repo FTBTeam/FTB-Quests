@@ -171,7 +171,7 @@ public class EditRewardTableScreen extends AbstractButtonListScreen {
 
 			List<ContextMenuItem> contextMenu = new ArrayList<>();
 			for (RewardType type : RewardTypes.TYPES.values()) {
-				if (!type.getExcludeFromListRewards()) {
+				if (type.getGuiProvider() != null && !type.getExcludeFromListRewards()) {
 					contextMenu.add(new ContextMenuItem(type.getDisplayName(), type.getIconSupplier(), b -> {
 						playClickSound();
 						type.getGuiProvider().openCreationGui(parent, editedTable.getFakeQuest(), reward -> {

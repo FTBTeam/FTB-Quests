@@ -16,9 +16,11 @@ import net.fabricmc.api.Environment;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.component.DataComponents;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.ItemInteractionResult;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
@@ -41,6 +43,10 @@ import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
 import org.jetbrains.annotations.Nullable;
+
+import java.util.HashMap;
+import java.util.Map;
+import java.util.UUID;
 
 public class QuestBarrierBlock extends BaseEntityBlock {
 	private static final MapCodec<QuestBarrierBlock> CODEC = simpleCodec(QuestBarrierBlock::new);
@@ -158,10 +164,21 @@ public class QuestBarrierBlock extends BaseEntityBlock {
 		return stack;
 	}
 
+	@Override
+	protected void entityInside(BlockState blockState, Level level, BlockPos blockPos, Entity entity) {
+		if (entity instanceof ServerPlayer player && player.getServer() != null && level.getBlockEntity(blockPos) instanceof BaseBarrierBlockEntity b) {
+			b.optionalTeleportData().ifPresent(teleportData -> {
+				if (teleportData.enabled() && b.isOpen(player)) {
+					TeleportTicker.addPending(player, teleportData.effectiveDest(b.getBlockPos()));
+				}
+			});
+		}
+	}
+
 	@Nullable
 	@Override
 	public <T extends BlockEntity> BlockEntityTicker<T> getTicker(Level level, BlockState blockState, BlockEntityType<T> blockEntityType) {
-		return (level != null && level.isClientSide()) ? BaseBarrierBlockEntity::tick : null;
+		return level != null && level.isClientSide ? BaseBarrierBlockEntity::tick : null;
 	}
 
 	@Nullable
@@ -173,5 +190,22 @@ public class QuestBarrierBlock extends BaseEntityBlock {
 	@ExpectPlatform
 	public static BlockEntityType.BlockEntitySupplier<QuestBarrierBlockEntity> questBlockEntityProvider() {
 		throw new AssertionError();
+	}
+
+	public static class TeleportTicker {
+		private static final Map<UUID, BaseBarrierBlockEntity.TeleportData> pendingTeleports = new HashMap<>();
+
+		public static void tick(MinecraftServer server) {
+			if (!pendingTeleports.isEmpty()) {
+				pendingTeleports.forEach((id, teleportData) ->
+						teleportData.teleportPlayer(server.getPlayerList().getPlayer(id))
+				);
+				pendingTeleports.clear();
+			}
+		}
+
+		public static void addPending(ServerPlayer player, BaseBarrierBlockEntity.TeleportData teleportData) {
+			pendingTeleports.put(player.getUUID(), teleportData);
+		}
 	}
 }

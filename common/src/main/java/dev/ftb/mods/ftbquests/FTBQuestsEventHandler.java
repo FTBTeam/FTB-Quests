@@ -4,6 +4,7 @@ import com.mojang.brigadier.CommandDispatcher;
 import dev.architectury.event.EventResult;
 import dev.architectury.event.events.common.*;
 import dev.architectury.hooks.level.entity.PlayerHooks;
+import dev.ftb.mods.ftbquests.block.QuestBarrierBlock;
 import dev.ftb.mods.ftbquests.command.FTBQuestsCommands;
 import dev.ftb.mods.ftbquests.events.ClearFileCacheEvent;
 import dev.ftb.mods.ftbquests.quest.BaseQuestFile;
@@ -68,6 +69,7 @@ public enum FTBQuestsEventHandler {
 		PlayerEvent.CHANGE_DIMENSION.register(this::changedDimension);
 		PlayerEvent.OPEN_MENU.register(this::containerOpened);
 		TickEvent.SERVER_POST.register(DeferredInventoryDetection::tick);
+		TickEvent.SERVER_POST.register(QuestBarrierBlock.TeleportTicker::tick);
 	}
 
 	private void serverAboutToStart(MinecraftServer server) {

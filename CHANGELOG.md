@@ -4,6 +4,18 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2101.1.15]
+
+### Added
+* Quest and Stage Barrier blocks can now optionally teleport players who walk into them (once the related quest/stage is completed)
+  * Right-click the block in edit mode to configure teleportation settings
+* Added a Currency Reward, transfers an amount of some currency directly to player's wallet
+  * FTB Library 2101.1.20+ and FTB XMod Compat 21.1.6+ required
+  * Currently only Magic Coins is supported as an implementation but others may be added in future
+
+### Fixed
+* Fixed a crash with barrier shape checking
+
 ## [2101.1.14]
 
 ### Added
@@ -12,7 +24,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   * Creative pick-block copies current settings for easy replication
   * Renaming in Anvil still works, but is not the recommended way; easier to place one, configure and then creative-pick it to place more
   * (NeoForge only) Can also GUI-configure block camouflage and/or hide completely when open
-  * Extra Jade support to conceal barrier info from non-editing players added to FTB XMod Compat 2101.1.5+
+  * Extra Jade support to conceal barrier info from non-editing players added to FTB XMod Compat 21.1.5+
 
 ### Fixes
 * Fixed quests marked as invisible still showing on the pinned quests tracker

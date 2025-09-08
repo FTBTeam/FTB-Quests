@@ -5,14 +5,17 @@ import dev.ftb.mods.ftblibrary.config.ui.EditConfigScreen;
 import dev.ftb.mods.ftblibrary.config.ui.EditStringConfigOverlay;
 import dev.ftb.mods.ftblibrary.config.ui.SelectFluidScreen;
 import dev.ftb.mods.ftblibrary.config.ui.SelectItemStackScreen;
+import dev.ftb.mods.ftblibrary.integration.currency.CurrencyHelper;
 import dev.ftb.mods.ftbquests.api.FTBQuestsAPI;
 import dev.ftb.mods.ftbquests.client.gui.SelectQuestObjectScreen;
+import dev.ftb.mods.ftbquests.quest.Quest;
 import dev.ftb.mods.ftbquests.quest.QuestObjectType;
 import dev.ftb.mods.ftbquests.quest.loot.RewardTable;
 import dev.ftb.mods.ftbquests.quest.reward.*;
 import dev.ftb.mods.ftbquests.quest.task.*;
 import dev.ftb.mods.ftbquests.quest.translation.TranslationKey;
 import dev.ftb.mods.ftbquests.util.ConfigQuestObject;
+import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
@@ -182,43 +185,27 @@ public class GuiProviders {
             }).openGui();
         });
 
-        RewardTypes.XP.setGuiProvider((panel, quest, callback) -> {
-            IntConfig c = new IntConfig(1, Integer.MAX_VALUE);
-            c.setValue(100);
+        simpleRewardProvider(RewardTypes.XP, XPReward::new, Util.make(new IntConfig(1, Integer.MAX_VALUE), c -> c.setValue(100)));
+        simpleRewardProvider(RewardTypes.XP_LEVELS, XPReward::new, Util.make(new IntConfig(1, Integer.MAX_VALUE), c -> c.setValue(5)));
+        simpleRewardProvider(RewardTypes.STAGE, StageReward::new, new StringConfig());
+        if (CurrencyHelper.getInstance().getProvider().isValidProvider()) {
+            simpleRewardProvider(RewardTypes.CURRENCY, CurrencyReward::new, Util.make(new IntConfig(1, Integer.MAX_VALUE), c -> c.setValue(1)));
+        }
+    }
 
-            EditStringConfigOverlay<Integer> overlay = new EditStringConfigOverlay<>(panel.getGui(), c, accepted -> {
+    private static <T> void simpleRewardProvider(RewardType type, RewardFactory<T> factory, ConfigFromString<T> cfg) {
+        type.setGuiProvider((panel, quest, callback) -> {
+            EditStringConfigOverlay<T> overlay = new EditStringConfigOverlay<>(panel.getGui(), cfg, accepted -> {
                 if (accepted) {
-                    callback.accept(new XPReward(0L, quest, c.getValue()));
-                }
-
-                panel.run();
-            }, RewardTypes.XP.getDisplayName()).atMousePosition();
-            panel.getGui().pushModalPanel(overlay);
-        });
-
-        RewardTypes.XP_LEVELS.setGuiProvider((panel, quest, callback) -> {
-            IntConfig c = new IntConfig(1, Integer.MAX_VALUE);
-            c.setValue(5);
-
-            EditStringConfigOverlay<Integer> overlay = new EditStringConfigOverlay<>(panel.getGui(), c, accepted -> {
-                if (accepted) {
-                    callback.accept(new XPLevelsReward(0L, quest, c.getValue()));
+                    callback.accept(factory.create(0L, quest, cfg.getValue()));
                 }
                 panel.run();
-            }, RewardTypes.XP_LEVELS.getDisplayName()).atMousePosition();
+            }, type.getDisplayName()).atMousePosition();
             panel.getGui().pushModalPanel(overlay);
         });
+    }
 
-        RewardTypes.STAGE.setGuiProvider((panel, quest, callback) -> {
-            StringConfig c = new StringConfig();
-
-            EditStringConfigOverlay<String> overlay = new EditStringConfigOverlay<>(panel.getGui(), c, accepted -> {
-                if (accepted) {
-                    callback.accept(new StageReward(0L, quest, c.getValue()));
-                }
-                panel.run();
-            }, RewardTypes.STAGE.getDisplayName()).atMousePosition();
-            panel.getGui().pushModalPanel(overlay);
-        });
+    private interface RewardFactory<T> {
+        Reward create(long id, Quest quest, T val);
     }
 }
