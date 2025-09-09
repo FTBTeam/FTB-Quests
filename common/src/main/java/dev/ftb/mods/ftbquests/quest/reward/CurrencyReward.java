@@ -7,6 +7,7 @@ import dev.ftb.mods.ftblibrary.integration.currency.CurrencyHelper;
 import dev.ftb.mods.ftblibrary.integration.currency.CurrencyProvider;
 import dev.ftb.mods.ftbquests.net.NotifyRewardMessage;
 import dev.ftb.mods.ftbquests.quest.Quest;
+import net.minecraft.ChatFormatting;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.RegistryFriendlyByteBuf;
@@ -56,9 +57,7 @@ public class CurrencyReward extends Reward {
 
     @Override
     public Component getAltTitle() {
-        CurrencyProvider provider = CurrencyHelper.getInstance().getProvider();
-
-        return Component.literal(String.valueOf(coinAmount)).append(" ").append(provider.coinName(coinAmount != 1));
+        return Component.empty().append(Component.literal("⬤ ").withStyle(ChatFormatting.YELLOW)).append(String.valueOf(coinAmount));
     }
 
     @Override
