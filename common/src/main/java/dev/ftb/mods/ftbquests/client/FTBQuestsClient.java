@@ -7,8 +7,11 @@ import dev.architectury.platform.Platform;
 import dev.architectury.registry.ReloadListenerRegistry;
 import dev.architectury.registry.client.keymappings.KeyMappingRegistry;
 import dev.architectury.registry.client.rendering.RenderTypeRegistry;
+import dev.architectury.registry.registries.RegistrarManager;
 import dev.ftb.mods.ftblibrary.FTBLibrary;
+import dev.ftb.mods.ftblibrary.config.EntityFaceConfig;
 import dev.ftb.mods.ftblibrary.config.ImageResourceConfig;
+import dev.ftb.mods.ftblibrary.config.ResourceConfigValue;
 import dev.ftb.mods.ftblibrary.config.manager.ConfigManager;
 import dev.ftb.mods.ftblibrary.config.ui.EditConfigScreen;
 import dev.ftb.mods.ftblibrary.icon.Icon;
@@ -30,6 +33,7 @@ import dev.ftb.mods.ftbquests.quest.theme.ThemeLoader;
 import dev.ftb.mods.ftbquests.registry.ModBlocks;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.block.model.BakedQuad;
@@ -38,10 +42,13 @@ import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.HolderLookup;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.PackType;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.InteractionHand;
+import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.CreativeModeTabs;
@@ -137,18 +144,18 @@ public class FTBQuestsClient {
 	}
 
 	public static void openCustomIconGui(Player player, InteractionHand hand) {
-		ImageResourceConfig config = new ImageResourceConfig();
+		ResourceConfigValue<?> config = Screen.hasShiftDown() ? new EntityFaceConfig() : new ImageResourceConfig();
 		config.onClicked(null, MouseButton.LEFT, accepted -> {
 			if (accepted) {
-				if (config.isEmpty()) {
-					CustomIconItem.setIcon(player.getItemInHand(hand), null);
-				} else {
-					CustomIconItem.setIcon(player.getItemInHand(hand), config.getValue());
+				// TODO minor code smell here
+				if (config.getValue() instanceof ResourceLocation rl) {
+					CustomIconItem.setIcon(player.getItemInHand(hand), config.isEmpty() ? null : rl);
+					NetworkManager.sendToServer(new SetCustomImageMessage(hand, false, rl));
+				} else if (config.getValue() instanceof EntityType<?> et) {
+					CustomIconItem.setFaceIcon(player.getItemInHand(hand), config.isEmpty() ? null : et);
+					NetworkManager.sendToServer(new SetCustomImageMessage(hand, true, RegistrarManager.getId(et, Registries.ENTITY_TYPE)));
 				}
-
-				NetworkManager.sendToServer(new SetCustomImageMessage(hand, config.getValue()));
 			}
-
 			Minecraft.getInstance().setScreen(null);
 		});
 	}

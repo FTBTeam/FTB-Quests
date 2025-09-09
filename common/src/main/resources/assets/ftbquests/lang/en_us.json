@@ -623,5 +623,7 @@
 	"ftbquests.translation_key.chapter_subtitle": "chapter subtitle",
 	"ftbquests.translation_key.quest_desc": "quest description",
 	"ftbquests.gui.use_default_lang": "[Use Default Language]",
+	"ftbquests.custom_icon.texture": "Texture: %s",
+	"ftbquests.custom_icon.entity": "Entity: %s",
 	"config.jade.plugin_ftbquests.barrier": "Barriers"
 }

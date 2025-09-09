@@ -23,6 +23,12 @@ public class ModDataComponents {
             .networkSynchronized(ResourceLocation.STREAM_CODEC)
             .build());
 
+    public static RegistrySupplier<DataComponentType<ResourceLocation>> ENTITY_FACE_ICON
+            = COMPONENT_TYPES.register("entity_face", () -> new DataComponentType.Builder<ResourceLocation>()
+            .persistent(ResourceLocation.CODEC)
+            .networkSynchronized(ResourceLocation.STREAM_CODEC)
+            .build());
+
     public static RegistrySupplier<DataComponentType<String>> LOOT_CRATE
             = COMPONENT_TYPES.register("loot_crate", () -> new DataComponentType.Builder<String>()
             .persistent(Codec.STRING)
