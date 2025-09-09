@@ -55,6 +55,13 @@ public class CurrencyReward extends Reward {
     }
 
     @Override
+    public Component getAltTitle() {
+        CurrencyProvider provider = CurrencyHelper.getInstance().getProvider();
+
+        return Component.literal(String.valueOf(coinAmount)).append(" ").append(provider.coinName(coinAmount != 1));
+    }
+
+    @Override
     public void fillConfigGroup(ConfigGroup config) {
         super.fillConfigGroup(config);
 
