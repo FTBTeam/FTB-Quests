@@ -4,7 +4,7 @@ import com.mojang.datafixers.util.Either;
 import dev.architectury.registry.registries.RegistrarManager;
 import dev.ftb.mods.ftblibrary.config.EntityFaceConfig;
 import dev.ftb.mods.ftblibrary.config.ImageResourceConfig;
-import dev.ftb.mods.ftblibrary.icon.EntityIcons;
+import dev.ftb.mods.ftblibrary.icon.EntityIconLoader;
 import dev.ftb.mods.ftblibrary.icon.Icon;
 import dev.ftb.mods.ftblibrary.icon.ItemIcon;
 import dev.ftb.mods.ftbquests.FTBQuests;
@@ -73,7 +73,7 @@ public class CustomIconItem extends Item {
 
 	public static Icon getIcon(ItemStack stack) {
 		return getCustomComponent(stack)
-				.map(res -> res.map(Icon::getIcon, EntityIcons::getIcon))
+				.map(res -> res.map(Icon::getIcon, EntityIconLoader::getIcon))
 				.orElse(stack.getItem() instanceof CustomIconItem ? Icon.getIcon(FALLBACK_ICON) : ItemIcon.getItemIcon(stack));
 	}
 
