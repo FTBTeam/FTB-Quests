@@ -26,6 +26,10 @@ public class CurrencyReward extends Reward {
         this.coinAmount = coinAmount;
     }
 
+    public int getCoinAmount() {
+        return coinAmount;
+    }
+
     @Override
     public RewardType getType() {
         return RewardTypes.CURRENCY;
