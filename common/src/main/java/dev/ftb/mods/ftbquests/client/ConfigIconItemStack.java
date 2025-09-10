@@ -4,10 +4,10 @@ import dev.ftb.mods.ftblibrary.config.ConfigCallback;
 import dev.ftb.mods.ftblibrary.config.EntityFaceConfig;
 import dev.ftb.mods.ftblibrary.config.ImageResourceConfig;
 import dev.ftb.mods.ftblibrary.config.ItemStackConfig;
-import dev.ftb.mods.ftblibrary.config.ui.SelectEntityFaceScreen;
-import dev.ftb.mods.ftblibrary.config.ui.SelectImageResourceScreen;
-import dev.ftb.mods.ftblibrary.config.ui.SelectItemStackScreen;
-import dev.ftb.mods.ftblibrary.icon.EntityIcons;
+import dev.ftb.mods.ftblibrary.config.ui.resource.SelectEntityFaceScreen;
+import dev.ftb.mods.ftblibrary.config.ui.resource.SelectImageResourceScreen;
+import dev.ftb.mods.ftblibrary.config.ui.resource.SelectItemStackScreen;
+import dev.ftb.mods.ftblibrary.icon.EntityIconLoader;
 import dev.ftb.mods.ftblibrary.icon.Icons;
 import dev.ftb.mods.ftblibrary.icon.ItemIcon;
 import dev.ftb.mods.ftblibrary.ui.BaseScreen;
@@ -88,7 +88,7 @@ public class ConfigIconItemStack extends ItemStackConfig {
 		return List.of(
 				new ContextMenuItem(Component.literal("Item Icon"), ItemIcon.getItemIcon(Items.DIAMOND),b -> new SelectItemStackScreen(this, callback).openGui()),
 				new ContextMenuItem(Component.literal("Image Icon"), Icons.ART, b -> openImageSelector(callback)),
-				new ContextMenuItem(Component.literal("Entity Face Icon"), EntityIcons.getIcon(EntityType.PIG), b -> openEntitySelector(callback))
+				new ContextMenuItem(Component.literal("Entity Face Icon"), EntityIconLoader.getIcon(EntityType.PIG), b -> openEntitySelector(callback))
 		);
 	}
 }
