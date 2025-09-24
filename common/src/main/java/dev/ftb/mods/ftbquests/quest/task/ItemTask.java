@@ -84,7 +84,7 @@ public class ItemTask extends Task implements Predicate<ItemStack> {
 	public void writeData(CompoundTag nbt, HolderLookup.Provider provider) {
 		super.writeData(nbt, provider);
 
-		nbt.put("item", saveItemSingleLine(itemStack));
+		nbt.put("item", saveItemSingleLine(itemStack.copyWithCount(1)));
 
 		if (count > 1) {
 			nbt.putLong("count", count);

@@ -7,6 +7,7 @@ import dev.ftb.mods.ftblibrary.integration.currency.CurrencyHelper;
 import dev.ftb.mods.ftblibrary.integration.currency.CurrencyProvider;
 import dev.ftb.mods.ftbquests.net.NotifyRewardMessage;
 import dev.ftb.mods.ftbquests.quest.Quest;
+import net.minecraft.ChatFormatting;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.RegistryFriendlyByteBuf;
@@ -23,6 +24,10 @@ public class CurrencyReward extends Reward {
     public CurrencyReward(long id, Quest q, int coinAmount) {
         super(id, q);
         this.coinAmount = coinAmount;
+    }
+
+    public int getCoinAmount() {
+        return coinAmount;
     }
 
     @Override
@@ -52,6 +57,11 @@ public class CurrencyReward extends Reward {
     public void readNetData(RegistryFriendlyByteBuf buffer) {
         super.readNetData(buffer);
         coinAmount = buffer.readVarInt();
+    }
+
+    @Override
+    public Component getAltTitle() {
+        return Component.empty().append(Component.literal("⬤ ").withStyle(ChatFormatting.YELLOW)).append(String.valueOf(coinAmount));
     }
 
     @Override
