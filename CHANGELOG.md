@@ -6,8 +6,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [2101.1.16]
 
+### Added
+* Quest icons (as selected by the "Icon" field in config screens) can now also use entity faces (similar to the faces used on the FTB Chunks map)
+  * Clicking the "Icon" field now shows a context menu with the option to choose an item texture, image texture or entity face texture
+  * Shortcuts: shift-click for items, ctrl-click for images, alt-click for entity faces
+
 ### Changed
 * Currency reward type now has a default title of "⬤ <amount>"
+
+### Fixed
+* Fixed crash when creating an item task with a large (> 99) item count
 
 ## [2101.1.15]
 
