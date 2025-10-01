@@ -1373,26 +1373,29 @@ public abstract class BaseQuestFile extends QuestObject implements QuestFile {
 		return null;
 	}
 
-	public <T extends QuestObjectBase> List<T> collect(Predicate<QuestObjectBase> filter) {
+	public <T extends QuestObjectBase> List<T> collect(Class<T> cls, Predicate<T> filter) {
 		List<T> list = new ArrayList<>();
 
 		for (QuestObjectBase base : getAllObjects()) {
-			if (filter.test(base)) {
-				list.add((T) base);
-			}
+            if (cls.isAssignableFrom(base.getClass())) {
+				T casted = cls.cast(base);
+				if (filter.test(casted)) {
+					list.add(casted);
+                }
+            }
 		}
 
 		if (list.isEmpty()) {
 			return Collections.emptyList();
 		} else if (list.size() == 1) {
-			return Collections.singletonList(list.get(0));
+			return Collections.singletonList(list.getFirst());
 		}
 
 		return list;
 	}
 
 	public <T extends QuestObjectBase> List<T> collect(Class<T> clazz) {
-		return collect(o -> clazz.isAssignableFrom(o.getClass()));
+		return collect(clazz, o -> true);
 	}
 
 	public String getDefaultQuestShape() {
