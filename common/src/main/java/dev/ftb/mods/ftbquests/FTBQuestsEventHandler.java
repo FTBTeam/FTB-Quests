@@ -85,6 +85,8 @@ public enum FTBQuestsEventHandler {
 	}
 
 	private void serverStopped(MinecraftServer server) {
+		clearCachedData();
+
 		ServerQuestFile.INSTANCE.saveNow();
 		ServerQuestFile.INSTANCE.unload();
 		ServerQuestFile.INSTANCE = null;
@@ -98,9 +100,13 @@ public enum FTBQuestsEventHandler {
 
 	private void fileCacheClear(BaseQuestFile file) {
 		if (file.isServerSide()) {
-			killTasks = null;
-			autoSubmitTasks = null;
+			clearCachedData();
 		}
+	}
+
+	private void clearCachedData() {
+		killTasks = null;
+		autoSubmitTasks = null;
 	}
 
 	private void playerLoggedIn(PlayerLoggedInAfterTeamEvent event) {
@@ -147,7 +153,7 @@ public enum FTBQuestsEventHandler {
 
 		if (player instanceof ServerPlayer serverPlayer && file != null && !PlayerHooks.isFake(player)) {
 			if (autoSubmitTasks == null) {
-				autoSubmitTasks = file.collect(o -> o instanceof Task t && t.autoSubmitOnPlayerTick() > 0);
+				autoSubmitTasks = file.collect(Task.class, t -> t.autoSubmitOnPlayerTick() > 0);
 			}
 
 			// Don't be deceived, it's somehow possible to be null here
