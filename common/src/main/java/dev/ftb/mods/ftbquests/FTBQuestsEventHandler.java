@@ -82,6 +82,8 @@ public enum FTBQuestsEventHandler {
 	}
 
 	private void serverStopped(MinecraftServer server) {
+		clearCachedData();
+
 		ServerQuestFile.INSTANCE.saveNow();
 		ServerQuestFile.INSTANCE.unload();
 		ServerQuestFile.INSTANCE = null;
@@ -95,9 +97,13 @@ public enum FTBQuestsEventHandler {
 
 	private void fileCacheClear(BaseQuestFile file) {
 		if (file.isServerSide()) {
-			killTasks = null;
-			autoSubmitTasks = null;
+			clearCachedData();
 		}
+	}
+
+	private void clearCachedData() {
+		killTasks = null;
+		autoSubmitTasks = null;
 	}
 
 	private void playerLoggedIn(PlayerLoggedInAfterTeamEvent event) {
