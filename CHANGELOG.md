@@ -6,6 +6,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [2101.1.17]
 
+### Added
+* Support for the color picker widget when using the Multiline Text editor. Click the color swatch button on the dropdown to open the color picker. This will insert a special color code `&#RRGGBB` into the text at the current cursor position.
+
 ### Fixed
 * Fixed potential memory leak on server shutdown (incorporated from All The Leaks, credit to them)
 * Fixed bug causing chapters to not display if all quests or all quest links are currently invisible ("or" should be "and" there!)
