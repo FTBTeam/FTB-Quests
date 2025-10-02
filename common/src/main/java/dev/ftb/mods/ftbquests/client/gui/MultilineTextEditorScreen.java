@@ -278,13 +278,21 @@ public class MultilineTextEditorScreen extends BaseScreen {
 	}
 
 	private void insertFormatting(ChatFormatting c) {
-		if (textBox.hasSelection()) {
-			textBox.insertText("&" + c.getChar() + textBox.getSelectedText() + "&r");
-		} else {
-			textBox.insertText("&" + c.getChar());
-		}
-		textBox.setFocused(true);
+        insertFormatting(String.valueOf(c.getChar()));
 	}
+
+    private void insertFormatting(ColorConfig color) {
+        insertFormatting(color.getValue().toString());
+    }
+
+    private void insertFormatting(String formatting) {
+        if (textBox.hasSelection()) {
+            textBox.insertText("&" + formatting + textBox.getSelectedText() + "&r");
+        } else {
+            textBox.insertText("&" + formatting);
+        }
+        textBox.setFocused(true);
+    }
 
 	private void resetFormatting() {
 		if (textBox.hasSelection()) {
@@ -434,6 +442,14 @@ public class MultilineTextEditorScreen extends BaseScreen {
 					items.add(new ContextMenuItem(Component.empty(), Color4I.rgb(cf.getColor()), b -> insertFormatting(cf)));
 				}
 			}
+
+            var colorConfig = new ColorConfig();
+            items.add(new ContextMenuItem(Component.empty(), Icons.COLOR_HSB, btn -> ColorSelectorPanel.popupAtMouse(this.parent.getGui(), colorConfig, (b) -> {
+                if (b) {
+                    insertFormatting(colorConfig);
+                }
+            })));
+
 			ContextMenu cMenu = new ContextMenu(MultilineTextEditorScreen.this, items);
 			cMenu.setMaxRows(4);
 			cMenu.setDrawVerticalSeparators(false);
