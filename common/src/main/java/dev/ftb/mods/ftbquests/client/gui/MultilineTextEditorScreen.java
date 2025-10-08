@@ -7,6 +7,7 @@ import dev.ftb.mods.ftblibrary.icon.Color4I;
 import dev.ftb.mods.ftblibrary.icon.Icon;
 import dev.ftb.mods.ftblibrary.icon.Icons;
 import dev.ftb.mods.ftblibrary.ui.*;
+import dev.ftb.mods.ftblibrary.ui.MultilineTextBox.StringExtents;
 import dev.ftb.mods.ftblibrary.ui.input.Key;
 import dev.ftb.mods.ftblibrary.ui.input.KeyModifiers;
 import dev.ftb.mods.ftblibrary.ui.input.MouseButton;
@@ -29,6 +30,7 @@ import net.minecraft.network.chat.Component;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
+import java.util.function.BooleanSupplier;
 import java.util.regex.Pattern;
 
 public class MultilineTextEditorScreen extends BaseScreen {
@@ -205,37 +207,60 @@ public class MultilineTextEditorScreen extends BaseScreen {
 	}
 
 	private void doLinkInsertion(long questID) {
-		if (textBox.hasSelection()) {
-			String text = textBox.getSelectedText();
-			if (!text.contains("\n")) {
-				// a selection which doesn't extend over multiple lines; replace the selection in a smart way
-				MultilineTextBox.StringExtents lineExtents = textBox.getLineView();
-				MultilineTextBox.StringExtents selectionExtents = textBox.getSelected();
+		String text = textBox.getSelectedText();
+		if (!text.contains("\n")) {
+			// a selection which doesn't extend over multiple physical lines; replace the selection in a smart way
+			StringExtents lineExtents = getPhysicalLineExtents();
+			StringExtents selectionExtents = textBox.getSelected();
 
-				List<String> parts = new ArrayList<>();
-				parts.add(textBox.getText().substring(lineExtents.start(), selectionExtents.start()));
-				parts.add(textBox.getText().substring(selectionExtents.start(), selectionExtents.end()));
-				parts.add(textBox.getText().substring(selectionExtents.end(), lineExtents.end()));
-
-				StringBuilder builder = new StringBuilder("[ ");
-				if (!parts.get(0).isEmpty()) builder.append("\"").append(parts.get(0)).append("\", ");
-				builder.append(String.format(LINK_TEXT_TEMPLATE, parts.get(1), questID));
-				if (!parts.get(2).isEmpty()) builder.append(", ").append("\"").append(parts.get(2)).append("\"");
-				builder.append(" ]");
-
-				textBox.selectCurrentLine();
-				textBox.insertText(builder.toString());
-
+			if (lineExtents.start() == lineExtents.end() || selectionExtents.start() == selectionExtents.end()) {
 				return;
 			}
+
+			String thisLine = textBox.getText().substring(lineExtents.start(), lineExtents.end());
+			if (thisLine.startsWith("[") && thisLine.endsWith("]")) {
+				errorToPlayer("ftbquests.gui.error.already_component");
+				return;
+			}
+
+			List<String> parts = List.of(
+					textBox.getText().substring(lineExtents.start(), selectionExtents.start()),
+					textBox.getText().substring(selectionExtents.start(), selectionExtents.end()),
+					textBox.getText().substring(selectionExtents.end(), lineExtents.end())
+			);
+
+			StringBuilder builder = new StringBuilder("[ ");
+			if (!parts.get(0).isEmpty()) builder.append("\"").append(parts.get(0)).append("\", ");
+			builder.append(String.format(LINK_TEXT_TEMPLATE, parts.get(1).isEmpty() ? "EDIT HERE" : parts.get(1), questID));
+			if (!parts.get(2).isEmpty()) builder.append(", ").append("\"").append(parts.get(2)).append("\"");
+			builder.append(" ]");
+
+			textBox.setSelecting(false);
+			textBox.seekCursor(Whence.ABSOLUTE, lineExtents.start());
+			textBox.setSelecting(true);
+			textBox.seekCursor(Whence.ABSOLUTE, lineExtents.end());
+			textBox.insertText(builder.toString());
+		} else {
+			errorToPlayer("ftbquests.gui.error.selection_multiple_lines");
+		}
+	}
+
+	private StringExtents getPhysicalLineExtents() {
+		int pos = 0;
+		String thisLine = "";
+		for (String line : textBox.getText().split("\\n")) {
+			if (textBox.cursorPos() >= pos && textBox.cursorPos() < pos + line.length()) {
+				thisLine = line;
+				break;
+			}
+			pos += line.length() + 1;
 		}
 
-		// no selection; just insert a new line
-		insertAtEndOfLine(String.format("\n" + LINK_TEXT_TEMPLATE, "EDIT HERE", questID));
+		return new StringExtents(pos, pos + thisLine.length());
 	}
 
 	private void errorToPlayer(String msg, Object... args) {
-		QuestScreen.displayError(Component.literal(String.format(msg, args)).withStyle(ChatFormatting.RED));
+		QuestScreen.displayError(Component.translatable(String.format(msg, args)).withStyle(ChatFormatting.RED));
 	}
 
 	private void openImageSelector() {
@@ -278,21 +303,21 @@ public class MultilineTextEditorScreen extends BaseScreen {
 	}
 
 	private void insertFormatting(ChatFormatting c) {
-        insertFormatting(String.valueOf(c.getChar()));
+		insertFormatting(String.valueOf(c.getChar()));
 	}
 
-    private void insertFormatting(ColorConfig color) {
-        insertFormatting(color.getValue().toString());
-    }
+	private void insertFormatting(ColorConfig color) {
+		insertFormatting(color.getValue().toString());
+	}
 
-    private void insertFormatting(String formatting) {
-        if (textBox.hasSelection()) {
-            textBox.insertText("&" + formatting + textBox.getSelectedText() + "&r");
-        } else {
-            textBox.insertText("&" + formatting);
-        }
-        textBox.setFocused(true);
-    }
+	private void insertFormatting(String formatting) {
+		if (textBox.hasSelection()) {
+			textBox.insertText("&" + formatting + textBox.getSelectedText() + "&r");
+		} else {
+			textBox.insertText("&" + formatting);
+		}
+		textBox.setFocused(true);
+	}
 
 	private void resetFormatting() {
 		if (textBox.hasSelection()) {
@@ -415,7 +440,8 @@ public class MultilineTextEditorScreen extends BaseScreen {
 					this::openColorContextMenu);
 			linkButton = new ToolbarButton(this, Component.literal("L"),
 					() -> executeHotkey(InputConstants.KEY_L, false))
-					.withTooltip(Component.translatable("ftbquests.gui.insert_link"), hotkey("Alt + L"));
+					.withTooltip(Component.translatable("ftbquests.gui.insert_link"), hotkey("Alt + L"))
+					.withActivePredicate(this::isOkForLinkInsertion);
 			resetButton = new ToolbarButton(this, Component.literal("r"),
 					() -> executeHotkey(InputConstants.KEY_R, false))
 					.withTooltip(Component.translatable("ftbquests.gui.clear_formatting"), hotkey("Alt + R"));
@@ -430,6 +456,10 @@ public class MultilineTextEditorScreen extends BaseScreen {
 					.withTooltip(Component.translatable("ftbquests.gui.undo"), hotkey("Ctrl + Z"));
 		}
 
+		private boolean isOkForLinkInsertion() {
+            return textBox.hasSelection() && !textBox.getSelectedText().contains("\n");
+        }
+
 		private static Component hotkey(String str) {
 			return Component.literal("[" + str + "]").withStyle(ChatFormatting.DARK_GRAY);
 		}
@@ -443,12 +473,12 @@ public class MultilineTextEditorScreen extends BaseScreen {
 				}
 			}
 
-            var colorConfig = new ColorConfig();
-            items.add(new ContextMenuItem(Component.empty(), Icons.COLOR_HSB, btn -> ColorSelectorPanel.popupAtMouse(this.parent.getGui(), colorConfig, (b) -> {
-                if (b) {
-                    insertFormatting(colorConfig);
-                }
-            })));
+			var colorConfig = new ColorConfig();
+			items.add(new ContextMenuItem(Component.empty(), Icons.COLOR_HSB, btn -> ColorSelectorPanel.popupAtMouse(this.parent.getGui(), colorConfig, (b) -> {
+				if (b) {
+					insertFormatting(colorConfig);
+				}
+			})));
 
 			ContextMenu cMenu = new ContextMenu(MultilineTextEditorScreen.this, items);
 			cMenu.setMaxRows(4);
@@ -508,6 +538,7 @@ public class MultilineTextEditorScreen extends BaseScreen {
 		private final Runnable onClick;
 		private final List<Component> tooltip = new ArrayList<>();
 		private boolean visible = true;
+		private BooleanSupplier activePredicate = () -> true;
 
 		public ToolbarButton(Panel panel, Component txt, Icon icon, Runnable onClick) {
 			super(panel, txt, icon);
@@ -518,13 +549,18 @@ public class MultilineTextEditorScreen extends BaseScreen {
 			this(panel, txt, Color4I.empty(), onClick);
 		}
 
+		@Override
+		public Component getTitle() {
+			return activePredicate.getAsBoolean() ? super.getTitle() : super.getTitle().copy().withStyle(ChatFormatting.DARK_GRAY);
+		}
+
 		public void setVisible(boolean visible) {
 			this.visible = visible;
 		}
 
 		@Override
 		public void onClicked(MouseButton button) {
-			if (visible) {
+			if (visible && activePredicate.getAsBoolean()) {
 				onClick.run();
 			}
 		}
@@ -548,6 +584,11 @@ public class MultilineTextEditorScreen extends BaseScreen {
 
 		public ToolbarButton withTooltip(Component... lines) {
 			tooltip.addAll(Arrays.asList(lines));
+			return this;
+		}
+
+		public ToolbarButton withActivePredicate(BooleanSupplier predicate) {
+			this.activePredicate = predicate;
 			return this;
 		}
 	}
