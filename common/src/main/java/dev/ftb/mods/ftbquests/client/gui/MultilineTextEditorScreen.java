@@ -469,8 +469,8 @@ public class MultilineTextEditorScreen extends BaseScreen {
 		private static Component hotkey(String key, @Nullable String modifier) {
             boolean isMac = Util.getPlatform() == Util.OS.OSX;
 
-            String systemAdaptedModifier = modifier != null && modifier.equalsIgnoreCase("alt") ? (isMac ? "Ctrl" : "Alt") : modifier;
-            String modifierDisplay = modifier == null ? "" : (systemAdaptedModifier + " + ");
+            String adaptedModifier = modifier != null && modifier.equalsIgnoreCase("alt") ? (isMac ? "Ctrl" : "Alt") : modifier;
+            String modifierDisplay = modifier == null ? "" : (adaptedModifier + " + ");
 
 			return Component.literal("[" + modifierDisplay + key + "]").withStyle(ChatFormatting.DARK_GRAY);
 		}
