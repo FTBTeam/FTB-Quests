@@ -6,6 +6,7 @@ import dev.ftb.mods.ftblibrary.config.ui.EditConfigScreen;
 import dev.ftb.mods.ftblibrary.icon.Color4I;
 import dev.ftb.mods.ftblibrary.icon.Icon;
 import dev.ftb.mods.ftblibrary.icon.Icons;
+import dev.ftb.mods.ftblibrary.icon.RainbowIcon;
 import dev.ftb.mods.ftblibrary.ui.*;
 import dev.ftb.mods.ftblibrary.ui.MultilineTextBox.StringExtents;
 import dev.ftb.mods.ftblibrary.ui.input.Key;
@@ -22,19 +23,24 @@ import dev.ftb.mods.ftbquests.quest.QuestObject;
 import dev.ftb.mods.ftbquests.quest.QuestObjectType;
 import dev.ftb.mods.ftbquests.util.ConfigQuestObject;
 import net.minecraft.ChatFormatting;
+import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Whence;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 import java.util.function.BooleanSupplier;
 import java.util.regex.Pattern;
 
 public class MultilineTextEditorScreen extends BaseScreen {
-	private static final Pattern STRIP_FORMATTING_PATTERN = Pattern.compile("(?i)&[0-9A-FK-OR]");
+    public static final Icon LINK_ICON = Icon.getIcon(FTBQuestsAPI.rl("textures/gui/chain_link.png")).withPadding(2);
+    public static final Icon CLEAR_FORMATTING_ICON = Icon.getIcon(FTBQuestsAPI.rl("textures/gui/eraser.png")).withPadding(2);
+
+	private static final Pattern STRIP_FORMATTING_PATTERN = Pattern.compile("(?i)([&\\u00A7])([0-9A-FK-ORZ]|#[0-9A-Fa-f]{6})");
 	private static final int MAX_UNDO = 10;
 	protected static final String LINK_TEXT_TEMPLATE = "{ \"text\": \"%s\", \"underlined\": true, \"clickEvent\": { \"action\": \"change_page\", \"value\": \"%016X\" } }";
 
@@ -186,7 +192,7 @@ public class MultilineTextEditorScreen extends BaseScreen {
 	}
 
 	private static boolean isHotKeyModifierPressed(int keycode) {
-		return keycode == InputConstants.KEY_Z ? Screen.hasControlDown() : Screen.hasAltDown();
+		return keycode == InputConstants.KEY_Z || Util.getPlatform() == Util.OS.OSX ? Screen.hasControlDown() : Screen.hasAltDown();
 	}
 
 	@Override
@@ -419,49 +425,54 @@ public class MultilineTextEditorScreen extends BaseScreen {
 
 			acceptButton = new ToolbarButton(this, Component.translatable("gui.accept"), Icons.ACCEPT,
 					MultilineTextEditorScreen.this::saveAndExit)
-					.withTooltip(hotkey("Shift + Enter"));
+					.withTooltip(hotkey("Enter", "Shift"));
 			cancelButton = new ToolbarButton(this, Component.translatable("gui.cancel"), Icons.CANCEL,
 					MultilineTextEditorScreen.this::cancel)
-					.withTooltip(hotkey("Escape"));
+					.withTooltip(hotkey("Escape", null));
 
 			boldButton = new ToolbarButton(this, Component.literal("B").withStyle(ChatFormatting.BOLD),
 					() -> executeHotkey(InputConstants.KEY_B, false))
-					.withTooltip(hotkey("Alt + B"));
+					.withTooltip(hotkey("B", "Alt"));
 			italicButton = new ToolbarButton(this, Component.literal("I").withStyle(ChatFormatting.ITALIC),
 					() -> executeHotkey(InputConstants.KEY_I, false))
-					.withTooltip(hotkey("Alt + I"));
+					.withTooltip(hotkey("I", "Alt"));
 			underlineButton = new ToolbarButton(this, Component.literal("U").withStyle(ChatFormatting.UNDERLINE),
 					() -> executeHotkey(InputConstants.KEY_U, false))
-					.withTooltip(hotkey("Alt + U"));
+					.withTooltip(hotkey("U", "Alt"));
 			strikethroughButton = new ToolbarButton(this, Component.literal("S").withStyle(ChatFormatting.STRIKETHROUGH),
 					() -> executeHotkey(InputConstants.KEY_S, false))
-					.withTooltip(hotkey("Alt + S"));
-			colorButton = new ToolbarButton(this, Component.empty(), Icons.COLOR_RGB,
+					.withTooltip(hotkey("S", "Alt"));
+			colorButton = new ToolbarButton(this, Component.empty(), Icons.COLOR_RGB.withPadding(2),
 					this::openColorContextMenu);
-			linkButton = new ToolbarButton(this, Component.literal("L"),
+			linkButton = new ToolbarButton(this, Component.empty(), LINK_ICON,
 					() -> executeHotkey(InputConstants.KEY_L, false))
-					.withTooltip(Component.translatable("ftbquests.gui.insert_link"), hotkey("Alt + L"))
+					.withTooltip(Component.translatable("ftbquests.gui.insert_link"), hotkey("L", "Alt"))
 					.withActivePredicate(this::isOkForLinkInsertion);
-			resetButton = new ToolbarButton(this, Component.literal("r"),
+			resetButton = new ToolbarButton(this, Component.empty(), CLEAR_FORMATTING_ICON,
 					() -> executeHotkey(InputConstants.KEY_R, false))
-					.withTooltip(Component.translatable("ftbquests.gui.clear_formatting"), hotkey("Alt + R"));
-			pageBreakButton = new ToolbarButton(this, Component.empty(), ViewQuestPanel.PAGEBREAK_ICON,
+					.withTooltip(Component.translatable("ftbquests.gui.clear_formatting"), hotkey("R", "Alt"));
+			pageBreakButton = new ToolbarButton(this, Component.empty(), ViewQuestPanel.PAGEBREAK_ICON.withPadding(2),
 					() -> executeHotkey(InputConstants.KEY_P, false))
-					.withTooltip(Component.translatable("ftbquests.gui.page_break"), hotkey("Alt + P"));
-			imageButton = new ToolbarButton(this, Component.empty(), Icons.ART,
+					.withTooltip(Component.translatable("ftbquests.gui.page_break"), hotkey("P", "Alt"));
+			imageButton = new ToolbarButton(this, Component.empty(), Icons.ART.withPadding(2),
 					() -> executeHotkey(InputConstants.KEY_M, false))
-					.withTooltip(Component.translatable("ftbquests.chapter.image"), hotkey("Alt + M"));
+					.withTooltip(Component.translatable("ftbquests.chapter.image"), hotkey("M", "Alt"));
 			undoButton = new ToolbarButton(this, Component.empty(), Icons.REFRESH,
 					() -> executeHotkey(InputConstants.KEY_Z, false))
-					.withTooltip(Component.translatable("ftbquests.gui.undo"), hotkey("Ctrl + Z"));
+					.withTooltip(Component.translatable("ftbquests.gui.undo"), hotkey("Z", "Ctrl"));
 		}
 
 		private boolean isOkForLinkInsertion() {
             return textBox.hasSelection() && !textBox.getSelectedText().contains("\n");
         }
 
-		private static Component hotkey(String str) {
-			return Component.literal("[" + str + "]").withStyle(ChatFormatting.DARK_GRAY);
+		private static Component hotkey(String key, @Nullable String modifier) {
+            boolean isMac = Util.getPlatform() == Util.OS.OSX;
+
+            String adaptedModifier = modifier != null && modifier.equalsIgnoreCase("alt") ? (isMac ? "Ctrl" : "Alt") : modifier;
+            String modifierDisplay = modifier == null ? "" : (adaptedModifier + " + ");
+
+			return Component.literal("[" + modifierDisplay + key + "]").withStyle(ChatFormatting.DARK_GRAY);
 		}
 
 		private void openColorContextMenu() {
@@ -479,6 +490,8 @@ public class MultilineTextEditorScreen extends BaseScreen {
 					insertFormatting(colorConfig);
 				}
 			})));
+
+            items.add(new ContextMenuItem(Component.empty(), new RainbowIcon(), btn -> insertFormatting("z")));
 
 			ContextMenu cMenu = new ContextMenu(MultilineTextEditorScreen.this, items);
 			cMenu.setMaxRows(4);
