@@ -2,13 +2,19 @@ package dev.ftb.mods.ftbquests.quest.task;
 
 import dev.architectury.networking.NetworkManager;
 import dev.ftb.mods.ftblibrary.ui.Button;
+import dev.ftb.mods.ftblibrary.util.NetworkHelper;
+import dev.ftb.mods.ftbquests.net.EditObjectResponseMessage;
 import dev.ftb.mods.ftbquests.net.SubmitTaskMessage;
 import dev.ftb.mods.ftbquests.quest.Quest;
 import dev.ftb.mods.ftbquests.quest.QuestObjectBase;
+import dev.ftb.mods.ftbquests.quest.ServerQuestFile;
 import dev.ftb.mods.ftbquests.quest.TeamData;
+import it.unimi.dsi.fastutil.longs.LongOpenHashSet;
+import it.unimi.dsi.fastutil.longs.LongSet;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.item.ItemStack;
 
@@ -46,15 +52,24 @@ public class CustomTask extends Task {
 	}
 
 	public void setCheckTimer(int checkTimer) {
-		this.checkTimer = checkTimer;
+		if (this.checkTimer != checkTimer) {
+			this.checkTimer = checkTimer;
+			TaskSync.toSync.add(id);
+		}
 	}
 
 	public void setMaxProgress(long maxProgress) {
-		this.maxProgress = maxProgress;
+		if (this.maxProgress != maxProgress) {
+			this.maxProgress = maxProgress;
+			TaskSync.toSync.add(id);
+		}
 	}
 
 	public void setEnableButton(boolean enableButton) {
-		this.enableButton = enableButton;
+		if (this.enableButton != enableButton) {
+			this.enableButton = enableButton;
+			TaskSync.toSync.add(id);
+		}
 	}
 
 	@Override
@@ -118,4 +133,18 @@ public class CustomTask extends Task {
 		void check(CustomTask.Data taskData, ServerPlayer player);
 	}
 
+	public static class TaskSync {
+		private static final LongSet toSync = new LongOpenHashSet();
+
+		public static void tick(MinecraftServer server) {
+			if (!toSync.isEmpty() && ServerQuestFile.INSTANCE != null) {
+				toSync.forEach(id -> {
+					if (ServerQuestFile.INSTANCE.get(id) instanceof CustomTask c) {
+						NetworkHelper.sendToAll(server, new EditObjectResponseMessage(c));
+					}
+                });
+				toSync.clear();
+			}
+		}
+	}
 }
