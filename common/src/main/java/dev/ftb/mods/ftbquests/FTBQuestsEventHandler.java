@@ -12,6 +12,7 @@ import dev.ftb.mods.ftbquests.item.FTBQuestsItems;
 import dev.ftb.mods.ftbquests.quest.BaseQuestFile;
 import dev.ftb.mods.ftbquests.quest.ServerQuestFile;
 import dev.ftb.mods.ftbquests.quest.TeamData;
+import dev.ftb.mods.ftbquests.quest.task.CustomTask;
 import dev.ftb.mods.ftbquests.quest.task.DimensionTask;
 import dev.ftb.mods.ftbquests.quest.task.KillTask;
 import dev.ftb.mods.ftbquests.quest.task.Task;
@@ -67,6 +68,7 @@ public enum FTBQuestsEventHandler {
 		PlayerEvent.CHANGE_DIMENSION.register(this::changedDimension);
 		PlayerEvent.OPEN_MENU.register(this::containerOpened);
 		TickEvent.SERVER_POST.register(DeferredInventoryDetection::tick);
+		TickEvent.SERVER_POST.register(CustomTask.TaskSync::tick);
 	}
 
 	private void serverAboutToStart(MinecraftServer server) {
