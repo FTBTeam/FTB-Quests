@@ -373,7 +373,7 @@ public final class Chapter extends QuestObject {
 		// filename should have been suggested by the client and available here
 		// but in case not, fall back to the chapter's hex object id
 		if (filename.isEmpty()) {
-            filename = getCodeString();
+			filename = getCodeString();
 		}
 
 		// ensure the filename is actually unique (same chapter name could appear in multiple groups...)
@@ -436,9 +436,10 @@ public final class Chapter extends QuestObject {
 
 	@Override
 	public boolean isVisible(TeamData data) {
-		return !alwaysInvisible
-				&& (quests.isEmpty() || quests.stream().anyMatch(quest -> quest.isVisible(data)))
-				&& (questLinks.isEmpty() || questLinks.stream().anyMatch(link -> link.isVisible(data)));
+		return !alwaysInvisible &&
+				(quests.isEmpty() && questLinks.isEmpty() ||
+						quests.stream().anyMatch(quest -> quest.isVisible(data)) ||
+						questLinks.stream().anyMatch(link -> link.isVisible(data)));
 	}
 
 	@Override
