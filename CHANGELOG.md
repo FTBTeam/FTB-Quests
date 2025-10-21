@@ -8,6 +8,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 * Support for the color picker widget when using the Multiline Text editor. Click the color swatch button on the dropdown to open the color picker. This will insert a special color code `&#RRGGBB` into the text at the current cursor position.
+  * Also added support for our rainbow text color under `§z` or `&z` (both work). This will make the text cycle through rainbow colors.
+
+### Changed
+* Updated a couple of icons on the multiline text editor toolbar for better clarity
 
 ### Fixed
 * Fixed potential memory leak on server shutdown (incorporated from All The Leaks, credit to them)
@@ -15,6 +19,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 * Fixed inserting links in the multiline quest description editor sometimes causing a client crash
 * Fixed custom task data not always getting sync'd to the client when necessary
 * Pending autoclaim rewards are now checked for when a player joins a team
+* Multiline text editor not always clearing all formatting
 
 ## [2101.1.16]
 
