@@ -464,7 +464,11 @@ public class ChapterPanel extends Panel {
 			if (xlateWarningTitle || xlateWarningSubtitle) {
 				Color4I.RED.withAlpha(40).draw(graphics, x, y, w, h);
 			}
-			if (isMouseOver()) {
+			if (chapterPanel.questScreen.selectedChapter != null && chapter.id == chapterPanel.questScreen.selectedChapter.id) {
+				// current chapter highlighting
+				GuiHelper.drawGradientRect(graphics, x + 1, y, w - 2, h, Color4I.GRAY.withAlpha(96), Color4I.GRAY.withAlpha(40));
+				GuiHelper.drawHollowRect(graphics, x + 1, y, w - 2, h, Color4I.GRAY.withAlpha(192), false);
+			} else if (isMouseOver()) {
 				Color4I.WHITE.withAlpha(40).draw(graphics, x + 1, y, w - 2, h);
 			}
 
@@ -473,9 +477,6 @@ public class ChapterPanel extends Panel {
 
 			icon.draw(graphics, x + 2 + xOff, y + 1, 12, 12);
 			MutableComponent text = Component.literal("").append(title).withStyle(Style.EMPTY.withColor(TextColor.fromRgb(c.rgb())));
-			if (chapterPanel.questScreen.selectedChapter != null && chapter.id == chapterPanel.questScreen.selectedChapter.id) {
-				text.append(Component.literal(" ◀").withStyle(ChatFormatting.GRAY));
-			}
 			theme.drawString(graphics, text, x + 16 + xOff, y + 3);
 
 			GuiHelper.setupDrawing();
