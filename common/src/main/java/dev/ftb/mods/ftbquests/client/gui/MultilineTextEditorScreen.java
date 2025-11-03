@@ -273,7 +273,7 @@ public class MultilineTextEditorScreen extends BaseScreen {
 		int cursor = textBox.cursorPos();
 
 		ImageComponent component = new ImageComponent();
-		ConfigGroup group = new ConfigGroup(FTBQuestsAPI.MOD_ID, accepted -> {
+		ConfigGroup group = new ConfigGroup(FTBQuestsAPI.MOD_ID + ".gui.image", accepted -> {
 			openGui();
 			if (accepted) {
 				textBox.seekCursor(Whence.ABSOLUTE, cursor);
@@ -282,7 +282,7 @@ public class MultilineTextEditorScreen extends BaseScreen {
 		});
 
 		group.add("image", new ImageResourceConfig(), ImageResourceConfig.getResourceLocation(component.getImage()),
-				v -> component.setImage(Icon.getIcon(v)), ImageResourceConfig.NONE);
+				v -> component.setImage(Icon.getIcon(v)), ImageResourceConfig.NONE).setOrder(-127);
 		group.addInt("width", component.getWidth(), component::setWidth, 0, 1, 1000);
 		group.addInt("height", component.getHeight(), component::setHeight, 0, 1, 1000);
 		group.addEnum("align", component.getAlign(), component::setAlign, ImageComponent.ImageAlign.NAME_MAP, ImageComponent.ImageAlign.CENTER);
