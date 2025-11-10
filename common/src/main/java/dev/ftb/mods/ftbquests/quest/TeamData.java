@@ -25,11 +25,13 @@ import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.StringTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.chat.Component;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import org.apache.commons.lang3.function.ToBooleanBiFunction;
+import org.apache.commons.lang3.time.DurationFormatUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -79,6 +81,7 @@ public class TeamData {
 	private final Long2ByteMap areDependenciesVisibleCache;
 	private final Object2ByteMap<QuestKey> unclaimedRewardsCache;
 	private final Long2BooleanMap exclusionCache;
+	private final Long2LongMap questRepeatableTime;  // for repeatable quests with cooldowns
 
 	public TeamData(UUID teamId, BaseQuestFile file) {
 		this(teamId, file, "");
@@ -104,6 +107,7 @@ public class TeamData {
 		areDependenciesVisibleCache = new Long2ByteOpenHashMap();
 		unclaimedRewardsCache = new Object2ByteOpenHashMap<>();
 		exclusionCache = new Long2BooleanOpenHashMap();
+		questRepeatableTime = new Long2LongOpenHashMap();
 	}
 
 	public UUID getTeamId() {
@@ -260,6 +264,22 @@ public class TeamData {
 		return getRewardClaimTime(player, reward).isPresent();
 	}
 
+	/**
+	 * Return the number of seconds until this quest can be progressed again.
+	 *
+	 * @param quest the quest to check
+	 * @return 0 if quest is not repeatable, has no cooldown, or is off cooldown, or a positive value if quest
+	 * is still on cooldown
+	 */
+	public long getMilliSecondsUntilRepeatable(Quest quest) {
+		if (!quest.canBeRepeated() || quest.getRepeatCooldown() == 0) {
+			return 0L;
+		}
+		long now = System.currentTimeMillis();
+		long when = questRepeatableTime.getOrDefault(quest.getId(), 0L);
+		return now >= when ? 0 : when - now;
+	}
+
 	public boolean hasUnclaimedRewards(UUID player, QuestObject object) {
 		QuestKey key = QuestKey.create(player, object.id);
 		byte b = unclaimedRewardsCache.getOrDefault(key, BOOL_UNKNOWN);
@@ -287,7 +307,9 @@ public class TeamData {
 				NetworkManager.sendToPlayers(getOnlineMembers(), new ClaimRewardResponseMessage(teamId, player, reward.id));
 			}
 
-			reward.getQuest().checkRepeatable(this, player);
+			if (reward.getQuest().checkRepeatable(this, player)) {
+				questRepeatableTime.put(reward.getQuest().getId(), System.currentTimeMillis() + reward.getQuest().getRepeatCooldown() * 1000L);
+			}
 
 			return true;
 		}
@@ -332,27 +354,10 @@ public class TeamData {
 		nbt.putBoolean("lock", locked);
 		nbt.putBoolean("rewards_blocked", rewardsBlocked);
 
-		SNBTCompoundTag taskProgressNBT = new SNBTCompoundTag();
-		for (Long2LongMap.Entry entry : taskProgress.long2LongEntrySet()) {
-			if (entry.getLongValue() <= Integer.MAX_VALUE) {
-				taskProgressNBT.putInt(QuestObjectBase.getCodeString(entry.getLongKey()), (int) entry.getLongValue());
-			} else {
-				taskProgressNBT.putLong(QuestObjectBase.getCodeString(entry.getLongKey()), entry.getLongValue());
-			}
-		}
-		nbt.put("task_progress", taskProgressNBT);
-
-		SNBTCompoundTag startedNBT = new SNBTCompoundTag();
-		for (Long2LongMap.Entry entry : started.long2LongEntrySet().stream().sorted(LONG2LONG_COMPARATOR).toList()) {
-			startedNBT.putLong(QuestObjectBase.getCodeString(entry.getLongKey()), entry.getLongValue());
-		}
-		nbt.put("started", startedNBT);
-
-		SNBTCompoundTag completedNBT = new SNBTCompoundTag();
-		for (Long2LongMap.Entry entry : completed.long2LongEntrySet().stream().sorted(LONG2LONG_COMPARATOR).toList()) {
-			completedNBT.putLong(QuestObjectBase.getCodeString(entry.getLongKey()), entry.getLongValue());
-		}
-		nbt.put("completed", completedNBT);
+		writeLongLongHash(nbt, taskProgress, "task_progress");
+		writeLongLongHash(nbt, started, "started");
+		writeLongLongHash(nbt, completed, "completed");
+		writeLongLongHash(nbt, questRepeatableTime, "repeatable");
 
 		SNBTCompoundTag claimedRewardsNBT = new SNBTCompoundTag();
 		for (Object2LongMap.Entry<QuestKey> entry : claimedRewards.object2LongEntrySet().stream().sorted(OBJECT2LONG_COMPARATOR).toList()) {
@@ -371,6 +376,14 @@ public class TeamData {
 		return nbt;
 	}
 
+	private void writeLongLongHash(CompoundTag tag, Long2LongMap map, String key) {
+		SNBTCompoundTag subTag = new SNBTCompoundTag();
+		for (Long2LongMap.Entry entry : map.long2LongEntrySet().stream().sorted(LONG2LONG_COMPARATOR).toList()) {
+			subTag.putLong(QuestObjectBase.getCodeString(entry.getLongKey()), entry.getLongValue());
+		}
+		tag.put(key, subTag);
+	}
+
 	public void deserializeNBT(SNBTCompoundTag nbt) {
 		int fileVersion = nbt.getInt("version");
 
@@ -385,25 +398,16 @@ public class TeamData {
 		taskProgress.clear();
 		claimedRewards.clear();
 		perPlayerData.clear();
+		questRepeatableTime.clear();
+
+		readLongLongHash(nbt, taskProgress, "task_progress");
+		readLongLongHash(nbt, started, "started");
+		readLongLongHash(nbt, completed, "completed");
+		readLongLongHash(nbt, questRepeatableTime, "repeatable");
 
 		CompoundTag claimedRewardsNBT = nbt.getCompound("claimed_rewards");
 		for (String s : claimedRewardsNBT.getAllKeys()) {
 			claimedRewards.put(QuestKey.fromString(s), claimedRewardsNBT.getLong(s));
-		}
-
-		CompoundTag taskProgressNBT = nbt.getCompound("task_progress");
-		for (String s : taskProgressNBT.getAllKeys()) {
-			taskProgress.put(file.getID(s), taskProgressNBT.getLong(s));
-		}
-
-		CompoundTag startedNBT = nbt.getCompound("started");
-		for (String s : startedNBT.getAllKeys()) {
-			started.put(file.getID(s), startedNBT.getLong(s));
-		}
-
-		CompoundTag completedNBT = nbt.getCompound("completed");
-		for (String s : completedNBT.getAllKeys()) {
-			completed.put(file.getID(s), completedNBT.getLong(s));
 		}
 
 		CompoundTag ppdTag = nbt.getCompound("player_data");
@@ -414,6 +418,13 @@ public class TeamData {
 			} catch (IllegalArgumentException e) {
 				FTBQuests.LOGGER.error("ignoring invalid player ID {} while loading per-player data for team {}", key, teamId);
 			}
+		}
+	}
+
+	private void readLongLongHash(CompoundTag tag, Long2LongMap map, String key) {
+		CompoundTag subTag = tag.getCompound(key);
+		for (String s : subTag.getAllKeys()) {
+			map.put(file.getID(s), subTag.getLong(s));
 		}
 	}
 
@@ -548,7 +559,8 @@ public class TeamData {
 
 	public boolean canStartTasks(Quest quest) {
 		return (quest.getProgressionMode() == ProgressionMode.FLEXIBLE || areDependenciesComplete(quest))
-				&& !isExcludedByOtherQuestline(quest);
+				&& !isExcludedByOtherQuestline(quest)
+				&& getMilliSecondsUntilRepeatable(quest) == 0L;
 	}
 
 	public void claimReward(ServerPlayer player, Reward reward, boolean notify) {
@@ -790,6 +802,20 @@ public class TeamData {
 
 		}
 		return false;
+	}
+
+	public Component getCannotStartReason(Quest quest) {
+		long ms = getMilliSecondsUntilRepeatable(quest);
+		if (ms > 0L) {
+			return Component.translatable("ftbquests.quest.locked.cooldown", DurationFormatUtils.formatDuration(ms, "[d'd'H'h'm'm']s's'"));
+		} else {
+			return Component.translatable(isExcludedByOtherQuestline(quest) ? "ftbquests.quest.locked.excluded" : "ftbquests.quest.locked");
+		}
+	}
+
+	public void clearRepeatCooldown(Quest q) {
+		questRepeatableTime.remove(q.getId());
+		markDirty();
 	}
 
 	private static class PerPlayerData {

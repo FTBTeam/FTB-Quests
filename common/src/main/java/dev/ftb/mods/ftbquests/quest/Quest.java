@@ -73,6 +73,7 @@ public final class Quest extends QuestObject implements Movable, Excludable {
 	private double iconScale;
 	private boolean hideLockIcon;
 	private int maxCompletableDeps;
+	private int repeatCooldown; // seconds
 
 	private Component cachedSubtitle = null;
 	private List<Component> cachedDescription = null;
@@ -114,6 +115,7 @@ public final class Quest extends QuestObject implements Movable, Excludable {
 		iconScale = 1d;
 		hideLockIcon = false;
 		maxCompletableDeps = 0;
+		repeatCooldown = 0;
 	}
 
 	@Override
@@ -317,6 +319,10 @@ public final class Quest extends QuestObject implements Movable, Excludable {
 		if (maxCompletableDeps > 0) {
 			nbt.putInt("max_completable_dependents", maxCompletableDeps);
 		}
+
+		if (repeatCooldown > 0) {
+			nbt.putInt("repeat_cooldown", repeatCooldown);
+		}
 	}
 
 	@Override
@@ -381,6 +387,7 @@ public final class Quest extends QuestObject implements Movable, Excludable {
 		requireSequentialTasks = Tristate.read(nbt, "require_sequential_tasks");
 		hideLockIcon = nbt.getBoolean("hide_lock_icon");
 		maxCompletableDeps = nbt.getInt("max_completable_dependents");
+		repeatCooldown = nbt.getInt("repeat_cooldown");
 	}
 
 	@Override
@@ -449,6 +456,9 @@ public final class Quest extends QuestObject implements Movable, Excludable {
 		ProgressionMode.NAME_MAP.write(buffer, progressionMode);
 
 		buffer.writeVarInt(maxCompletableDeps);
+		if (canRepeat.isTrue()) {
+			buffer.writeInt(repeatCooldown);
+		}
 	}
 
 	@Override
@@ -494,6 +504,7 @@ public final class Quest extends QuestObject implements Movable, Excludable {
 		hideLockIcon = Bits.getFlag(flags, 0x40000);
 		progressionMode = ProgressionMode.NAME_MAP.read(buffer);
 		maxCompletableDeps = buffer.readVarInt();
+		repeatCooldown = canRepeat.isTrue() ? buffer.readInt() : 0;
 	}
 
 	@Override
@@ -676,7 +687,7 @@ public final class Quest extends QuestObject implements Movable, Excludable {
 		visibility.addTristate("hide_text_until_complete", hideTextUntilComplete, v -> hideTextUntilComplete = v);
 		visibility.addBool("hide_lock_icon", hideLockIcon, v -> hideLockIcon = v, false);
 
-		Predicate<QuestObjectBase> depTypes = object -> object != chapter.file && object != chapter && object instanceof QuestObject;// && !(object instanceof Task);
+		Predicate<QuestObjectBase> depTypes = object -> object != chapter.file && object != chapter && object instanceof QuestObject;
 		removeInvalidDependencies();
 		ConfigGroup deps = config.getOrCreateSubgroup("dependencies");
 		deps.addList("dependencies", dependencies, new ConfigQuestObject<>(depTypes), null).setNameKey("ftbquests.dependencies");
@@ -690,6 +701,7 @@ public final class Quest extends QuestObject implements Movable, Excludable {
 		misc.addString("guide_page", guidePage, v -> guidePage = v, "");
 		misc.addEnum("disable_jei", disableJEI, v -> disableJEI = v, Tristate.NAME_MAP);
 		misc.addTristate("can_repeat", canRepeat, v -> canRepeat = v);
+		misc.addInt("repeat_cooldown", repeatCooldown, v -> repeatCooldown = v, 0, 0, Integer.MAX_VALUE);
 		misc.addBool("optional", optional, v -> optional = v, false);
 		misc.addBool("ignore_reward_blocking", ignoreRewardBlocking, v -> ignoreRewardBlocking = v, false);
 		misc.addEnum("progression_mode", progressionMode, v -> progressionMode = v, ProgressionMode.NAME_MAP);
@@ -937,10 +949,12 @@ public final class Quest extends QuestObject implements Movable, Excludable {
 				.toList();
 	}
 
-	public void checkRepeatable(TeamData data, UUID player) {
+	public boolean checkRepeatable(TeamData data, UUID player) {
 		if (canBeRepeated() && rewards.stream().allMatch(r -> data.isRewardClaimed(player, r))) {
 			forceProgress(data, new ProgressChange(this, player));
+			return true;
 		}
+		return false;
 	}
 
 	@Override
@@ -1080,6 +1094,13 @@ public final class Quest extends QuestObject implements Movable, Excludable {
 	public void setRewardList(List<Reward> rewards) {
 		this.rewards.clear();
 		this.rewards.addAll(rewards);
+	}
+
+	/**
+	 * {@return the number of seconds until the quest can be repeated, counting from when all rewards have been claimed}
+	 */
+	public int getRepeatCooldown() {
+		return repeatCooldown;
 	}
 
 	@FunctionalInterface
