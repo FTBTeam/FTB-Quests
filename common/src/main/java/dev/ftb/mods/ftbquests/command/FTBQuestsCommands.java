@@ -348,7 +348,7 @@ public class FTBQuestsCommands {
 				questObject.forceProgress(data, progressChange);
 				if (questObject instanceof Quest quest && reset) {
                     data.clearRepeatCooldown(quest);
-					ClearRepeatCooldownMessage.sendToAll(source.getServer(), quest);
+					ClearRepeatCooldownMessage.sendToTeam(quest, data.getTeamId());
 				}
 			});
 		}

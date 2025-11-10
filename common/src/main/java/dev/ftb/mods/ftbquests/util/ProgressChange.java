@@ -50,7 +50,7 @@ public class ProgressChange {
 			origin.forceProgressRaw(data, this);
 			if (origin instanceof Quest quest && reset) {
 				data.clearRepeatCooldown(quest);
-				ClearRepeatCooldownMessage.sendToAll(ServerQuestFile.INSTANCE.server, quest);
+				ClearRepeatCooldownMessage.sendToTeam(quest, data.getTeamId());
 			}
 		}
 	}
