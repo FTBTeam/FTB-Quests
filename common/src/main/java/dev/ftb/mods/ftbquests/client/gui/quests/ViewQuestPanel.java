@@ -601,16 +601,16 @@ public class ViewQuestPanel extends ModalPanel {
 				case GLFW.GLFW_KEY_RIGHT -> moveTasksAndRewards(true);
 			}
 		} else {
-            switch (key.keyCode) {
-                case GLFW.GLFW_KEY_PAGE_UP, GLFW.GLFW_KEY_LEFT -> {
-                    setCurrentPage(Math.max(0, getCurrentPage() - 1));
-                    refreshWidgets();
-                }
-                case GLFW.GLFW_KEY_PAGE_DOWN, GLFW.GLFW_KEY_RIGHT -> {
-                    setCurrentPage(Math.min(pageIndices.size() - 1, getCurrentPage() + 1));
-                    refreshWidgets();
-                }
-            }
+			switch (key.keyCode) {
+				case GLFW.GLFW_KEY_PAGE_UP, GLFW.GLFW_KEY_LEFT -> {
+					setCurrentPage(Math.max(0, getCurrentPage() - 1));
+					refreshWidgets();
+				}
+				case GLFW.GLFW_KEY_PAGE_DOWN, GLFW.GLFW_KEY_RIGHT -> {
+					setCurrentPage(Math.min(pageIndices.size() - 1, getCurrentPage() + 1));
+					refreshWidgets();
+				}
+			}
 		}
 	}
 
@@ -827,6 +827,9 @@ public class ViewQuestPanel extends ModalPanel {
 			int iconSize = Math.min(16, titleField.height + 2);
 			icon.draw(graphics, x + 4, y + 4, iconSize, iconSize);
 			ThemeProperties.QUEST_VIEW_BORDER.get().draw(graphics, x + 1, panelContent.getY(), w - 2, 1);
+			if (questScreen.file.selfTeamData.getMilliSecondsUntilRepeatable(quest) > 0L) {
+				Icons.TIME.draw(graphics,x + 6 + iconSize, y + 4, iconSize, iconSize);
+			}
 		}
 	}
 

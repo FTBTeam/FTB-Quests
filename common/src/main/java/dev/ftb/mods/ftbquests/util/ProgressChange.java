@@ -1,5 +1,7 @@
 package dev.ftb.mods.ftbquests.util;
 
+import dev.ftb.mods.ftbquests.net.ClearRepeatCooldownMessage;
+import dev.ftb.mods.ftbquests.quest.Quest;
 import dev.ftb.mods.ftbquests.quest.QuestObjectBase;
 import dev.ftb.mods.ftbquests.quest.ServerQuestFile;
 import dev.ftb.mods.ftbquests.quest.TeamData;
@@ -44,8 +46,12 @@ public class ProgressChange {
 
 	public void maybeForceProgress(UUID teamId) {
 		if (origin != null) {
-			TeamData t = ServerQuestFile.INSTANCE.getOrCreateTeamData(teamId);
-			origin.forceProgressRaw(t, this);
+			TeamData data = ServerQuestFile.INSTANCE.getOrCreateTeamData(teamId);
+			origin.forceProgressRaw(data, this);
+			if (origin instanceof Quest quest && reset) {
+				data.clearRepeatCooldown(quest);
+				ClearRepeatCooldownMessage.sendToAll(ServerQuestFile.INSTANCE.server, quest);
+			}
 		}
 	}
 
