@@ -5,11 +5,13 @@ import dev.ftb.mods.ftblibrary.util.NetworkHelper;
 import dev.ftb.mods.ftbquests.api.FTBQuestsAPI;
 import dev.ftb.mods.ftbquests.client.ClientQuestFile;
 import dev.ftb.mods.ftbquests.quest.Quest;
+import dev.ftb.mods.ftbteams.api.FTBTeamsAPI;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
-import net.minecraft.server.MinecraftServer;
+
+import java.util.UUID;
 
 public record ClearRepeatCooldownMessage(long id) implements CustomPacketPayload {
 	public static final Type<ClearRepeatCooldownMessage> TYPE = new Type<>(FTBQuestsAPI.rl("clear_repeat_cooldown"));
@@ -32,7 +34,10 @@ public record ClearRepeatCooldownMessage(long id) implements CustomPacketPayload
 		});
 	}
 
-	public static void sendToAll(MinecraftServer server, Quest quest) {
-		NetworkHelper.sendToAll(server, new ClearRepeatCooldownMessage(quest.getId()));
+	public static void sendToTeam(Quest quest, UUID teamId) {
+		FTBTeamsAPI.api().getManager().getTeamByID(teamId).ifPresent(team -> {
+			ClearRepeatCooldownMessage msg = new ClearRepeatCooldownMessage(quest.getId());
+			team.getOnlineMembers().forEach(player -> NetworkHelper.sendTo(player, msg));
+		});
 	}
 }
