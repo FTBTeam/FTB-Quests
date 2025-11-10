@@ -466,7 +466,7 @@ public class ChapterPanel extends Panel {
 			}
 			if (chapterPanel.questScreen.selectedChapter != null && chapter.id == chapterPanel.questScreen.selectedChapter.id) {
 				// current chapter highlighting
-				GuiHelper.drawGradientRect(graphics, x + 1, y, w - 2, h, Color4I.GRAY.withAlpha(96), Color4I.GRAY.withAlpha(40));
+				GuiHelper.drawGradientRect(graphics, x + 1, y, w - 2, h, ThemeProperties.SELECTED_HILITE_1.get(), ThemeProperties.SELECTED_HILITE_2.get());
 				GuiHelper.drawHollowRect(graphics, x + 1, y, w - 2, h, Color4I.GRAY.withAlpha(192), false);
 			} else if (isMouseOver()) {
 				Color4I.WHITE.withAlpha(40).draw(graphics, x + 1, y, w - 2, h);

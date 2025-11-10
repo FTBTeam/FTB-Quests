@@ -18,6 +18,8 @@ public interface ThemeProperties {
 	IconProperty CHAPTER_PANEL_BACKGROUND = new IconProperty("chapter_panel_background");
 	IconProperty KEY_REFERENCE_BACKGROUND = new IconProperty("key_reference_background");
 	StringProperty EXTRA_QUEST_SHAPES = new StringProperty("extra_quest_shapes");
+	ColorProperty SELECTED_HILITE_1 = new ColorProperty("selected_chapter_highlight_1");
+	ColorProperty SELECTED_HILITE_2 = new ColorProperty("selected_chapter_highlight_2");
 
 	// Text Color //
 	ColorProperty TEXT_COLOR = new ColorProperty("text_color");
