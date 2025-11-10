@@ -430,8 +430,8 @@ public class TeamData {
 
 	private void write(FriendlyByteBuf buffer) {
 		buffer.writeUtf(name, Short.MAX_VALUE);
-		buffer.writeVarInt(taskProgress.size());
 
+		buffer.writeVarInt(taskProgress.size());
 		for (Long2LongMap.Entry entry : taskProgress.long2LongEntrySet()) {
 			buffer.writeLong(entry.getLongKey());
 			buffer.writeVarLong(entry.getLongValue());
@@ -440,15 +440,19 @@ public class TeamData {
 		long now = System.currentTimeMillis();
 
 		buffer.writeVarInt(started.size());
-
 		for (Long2LongOpenHashMap.Entry entry : started.long2LongEntrySet()) {
 			buffer.writeLong(entry.getLongKey());
 			buffer.writeVarLong(now - entry.getLongValue());
 		}
 
 		buffer.writeVarInt(completed.size());
-
 		for (Long2LongOpenHashMap.Entry entry : completed.long2LongEntrySet()) {
+			buffer.writeLong(entry.getLongKey());
+			buffer.writeVarLong(now - entry.getLongValue());
+		}
+
+		buffer.writeVarInt(questRepeatableTime.size());
+		for (Long2LongOpenHashMap.Entry entry : questRepeatableTime.long2LongEntrySet()) {
 			buffer.writeLong(entry.getLongKey());
 			buffer.writeVarLong(now - entry.getLongValue());
 		}
@@ -491,6 +495,12 @@ public class TeamData {
 		int cs = buffer.readVarInt();
 		for (int i = 0; i < cs; i++) {
 			completed.put(buffer.readLong(), now - buffer.readVarLong());
+		}
+
+		questRepeatableTime.clear();
+		int qs = buffer.readVarInt();
+		for (int i = 0; i < qs; i++) {
+			questRepeatableTime.put(buffer.readLong(), now - buffer.readVarLong());
 		}
 
 		locked = buffer.readBoolean();
