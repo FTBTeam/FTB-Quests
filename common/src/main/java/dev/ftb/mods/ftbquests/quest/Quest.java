@@ -20,7 +20,6 @@ import dev.ftb.mods.ftbquests.events.QuestProgressEventData;
 import dev.ftb.mods.ftbquests.integration.RecipeModHelper;
 import dev.ftb.mods.ftbquests.net.MoveMovableMessage;
 import dev.ftb.mods.ftbquests.quest.reward.Reward;
-import dev.ftb.mods.ftbquests.quest.reward.RewardClaimType;
 import dev.ftb.mods.ftbquests.quest.reward.RewardType;
 import dev.ftb.mods.ftbquests.quest.task.Task;
 import dev.ftb.mods.ftbquests.quest.task.TaskType;
@@ -949,7 +948,7 @@ public final class Quest extends QuestObject implements Movable, Excludable {
 				.toList();
 	}
 
-	public boolean checkRepeatable(TeamData data, UUID player) {
+	public boolean resetProgressIfRepeatable(TeamData data, UUID player) {
 		if (canBeRepeated() && rewards.stream().allMatch(r -> data.isRewardClaimed(player, r))) {
 			forceProgress(data, new ProgressChange(this, player));
 			return true;
@@ -971,7 +970,7 @@ public final class Quest extends QuestObject implements Movable, Excludable {
 	public boolean hasUnclaimedRewardsRaw(TeamData teamData, UUID player) {
 		if (teamData.isCompleted(this)) {
 			for (Reward reward : rewards) {
-				if (!teamData.isRewardBlocked(reward) && teamData.getClaimType(player, reward) == RewardClaimType.CAN_CLAIM) {
+				if (!teamData.isRewardBlocked(reward) && teamData.getClaimType(player, reward).canClaim()) {
 					return true;
 				}
 			}
