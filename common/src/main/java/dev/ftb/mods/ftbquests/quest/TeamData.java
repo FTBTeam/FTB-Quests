@@ -307,9 +307,9 @@ public class TeamData {
 				NetworkManager.sendToPlayers(getOnlineMembers(), new ClaimRewardResponseMessage(teamId, player, reward.id));
 			}
 
-			if (reward.getQuest().checkRepeatable(this, player)) {
-				questRepeatableTime.put(reward.getQuest().getId(), System.currentTimeMillis() + reward.getQuest().getRepeatCooldown() * 1000L);
-			}
+            if (reward.getQuest().resetProgressIfRepeatable(this, player) && reward.getQuest().getRepeatCooldown() > 0) {
+                questRepeatableTime.put(reward.getQuest().getId(), System.currentTimeMillis() + reward.getQuest().getRepeatCooldown() * 1000L);
+            }
 
 			return true;
 		}
@@ -616,15 +616,13 @@ public class TeamData {
 	}
 
 	public RewardClaimType getClaimType(UUID player, Reward reward) {
-		boolean r = isRewardClaimed(player, reward);
-
-		if (r) {
+		if (isRewardClaimed(player, reward)) {
 			return RewardClaimType.CLAIMED;
 		} else if (isCompleted(reward.getQuest())) {
 			return RewardClaimType.CAN_CLAIM;
+		} else {
+			return RewardClaimType.CANT_CLAIM;
 		}
-
-		return RewardClaimType.CANT_CLAIM;
 	}
 
 	public void resetProgress(Task task) {
