@@ -10,9 +10,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 * Added configurable repeat cooldowns for repeatable quests
   * See the new "Quest Repeat Cooldown" field in the Misc section of the quests properties screen
   * Repeat cooldown is triggered when the first player on the team claims the quest reward for the quest
-
-### Changed
 * More visually attractive highlighting of the currently-selected chapter
+  * Also added two new fields to `ftb_quest_theme.txt` resource pack file: `selected_chapter_highlight_1` and `selected_chapter_highlight_2`
 
 ## [2101.1.17]
 
