@@ -9,9 +9,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-/**
- * @author LatvianModder
- */
 public class QuestTheme {
 	public static QuestTheme instance;
 	public static QuestObjectBase currentObject;

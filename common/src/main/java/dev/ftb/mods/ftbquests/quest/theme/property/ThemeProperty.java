@@ -4,9 +4,6 @@ import dev.ftb.mods.ftbquests.quest.QuestObjectBase;
 import dev.ftb.mods.ftbquests.quest.theme.QuestTheme;
 import org.jetbrains.annotations.Nullable;
 
-/**
- * @author LatvianModder
- */
 public abstract class ThemeProperty<T> {
 	private final String name;
 	private final T defaultValue;

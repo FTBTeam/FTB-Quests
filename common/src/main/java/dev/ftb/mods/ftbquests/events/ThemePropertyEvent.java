@@ -7,9 +7,6 @@ import dev.ftb.mods.ftbquests.quest.theme.property.ThemeProperty;
 import java.util.Map;
 import java.util.function.Consumer;
 
-/**
- * @author LatvianModder
- */
 public class ThemePropertyEvent {
 	public static final Event<Consumer<ThemePropertyEvent>> EVENT = EventFactory.createConsumerLoop(ThemePropertyEvent.class);
 	private final Map<String, ThemeProperty<?>> map;

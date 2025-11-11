@@ -2,17 +2,15 @@ package dev.ftb.mods.ftbquests.quest.theme.property;
 
 import net.minecraft.util.Mth;
 
-/**
- * @author LatvianModder
- */
 public class DoubleProperty extends ThemeProperty<Double> {
-	public final double min;
-	public final double max;
+	private final double min;
+	private final double max;
 
-	public DoubleProperty(String n, double mn, double mx) {
-		super(n, 0D);
-		min = mn;
-		max = mx;
+	public DoubleProperty(String name, double min, double max) {
+		super(name, 0D);
+
+		this.min = min;
+		this.max = max;
 	}
 
 	public DoubleProperty(String n) {

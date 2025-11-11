@@ -16,9 +16,6 @@ import net.minecraft.util.Mth;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.StructureBlockEntity;
 
-/**
- * @author LatvianModder
- */
 public class LocationTask extends AbstractBooleanTask {
 	private ResourceKey<Level> dimension;
 	private boolean ignoreDimension;

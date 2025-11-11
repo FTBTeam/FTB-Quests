@@ -2,9 +2,6 @@ package dev.ftb.mods.ftbquests.quest.theme.selector;
 
 import dev.ftb.mods.ftbquests.quest.QuestObjectBase;
 
-/**
- * @author LatvianModder
- */
 public class AllSelector extends ThemeSelector {
 	public static final AllSelector INSTANCE = new AllSelector();
 

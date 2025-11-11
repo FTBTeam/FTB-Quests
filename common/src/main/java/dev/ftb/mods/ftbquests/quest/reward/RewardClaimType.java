@@ -1,8 +1,5 @@
 package dev.ftb.mods.ftbquests.quest.reward;
 
-/**
- * @author LatvianModder
- */
 public enum RewardClaimType {
 	CAN_CLAIM,
 	CANT_CLAIM,

@@ -3,9 +3,6 @@ package dev.ftb.mods.ftbquests.quest.theme.selector;
 import dev.ftb.mods.ftbquests.quest.QuestObjectBase;
 import dev.ftb.mods.ftbquests.quest.QuestObjectType;
 
-/**
- * @author LatvianModder
- */
 public class TypeSelector extends ThemeSelector {
 	public final QuestObjectType type;
 

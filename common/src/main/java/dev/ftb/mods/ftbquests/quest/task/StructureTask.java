@@ -27,9 +27,6 @@ import net.minecraft.world.level.levelgen.structure.Structure;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * @author MaxNeedsSnacks
- */
 public class StructureTask extends AbstractBooleanTask {
 	private static final ResourceLocation DEFAULT_STRUCTURE = ResourceLocation.withDefaultNamespace("mineshaft");
 
