@@ -4,9 +4,6 @@ import dev.ftb.mods.ftblibrary.config.NameMap;
 
 import java.util.Arrays;
 
-/**
- * @author LatvianModder
- */
 public enum RewardAutoClaim {
 	DEFAULT("default"),
 	DISABLED("disabled"),

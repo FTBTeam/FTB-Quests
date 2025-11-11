@@ -2,7 +2,6 @@ package dev.ftb.mods.ftbquests.api.event;
 
 import dev.architectury.event.Event;
 import dev.architectury.event.EventFactory;
-import dev.ftb.mods.ftbquests.FTBQuests;
 import net.minecraft.world.item.ItemStack;
 
 import java.util.Collection;

@@ -6,9 +6,6 @@ import dev.architectury.event.EventFactory;
 import dev.ftb.mods.ftbquests.quest.reward.CustomReward;
 import net.minecraft.server.level.ServerPlayer;
 
-/**
- * @author LatvianModder
- */
 public class CustomRewardEvent {
 	public static final Event<EventActor<CustomRewardEvent>> EVENT = EventFactory.createEventActorLoop();
 

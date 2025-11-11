@@ -29,9 +29,6 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 
-/**
- * @author LatvianModder
- */
 public abstract class Reward extends QuestObjectBase {
 	protected final Quest quest;
 

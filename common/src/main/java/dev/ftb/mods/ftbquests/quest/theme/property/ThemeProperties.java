@@ -9,9 +9,6 @@ import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.renderer.GameRenderer;
 import org.joml.Matrix4f;
 
-/**
- * @author LatvianModder
- */
 public interface ThemeProperties {
 	// Main GUI //
 	IconProperty BACKGROUND = new IconProperty("background");

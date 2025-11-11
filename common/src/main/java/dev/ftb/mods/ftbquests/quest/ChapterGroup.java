@@ -13,9 +13,6 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 
-/**
- * @author LatvianModder
- */
 public class ChapterGroup extends QuestObject {
 	protected final BaseQuestFile file;
 	private final List<Chapter> chapters;

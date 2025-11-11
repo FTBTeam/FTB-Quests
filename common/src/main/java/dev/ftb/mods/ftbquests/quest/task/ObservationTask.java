@@ -33,9 +33,6 @@ import net.minecraft.world.phys.HitResult;
 
 import java.util.Optional;
 
-/**
- * @author LatvianModder
- */
 public class ObservationTask extends AbstractBooleanTask {
 	private long timer;
 	private ObserveType observeType;

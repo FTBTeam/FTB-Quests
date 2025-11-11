@@ -20,9 +20,6 @@ import net.minecraft.world.item.ItemStack;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * @author LatvianModder
- */
 public class StatTask extends Task {
 	private ResourceLocation stat;
 	private int value = 1;
