@@ -9,9 +9,6 @@ import dev.ftb.mods.ftbquests.quest.Quest;
 import dev.ftb.mods.ftbquests.quest.QuestObject;
 import dev.ftb.mods.ftbquests.quest.task.Task;
 
-/**
- * @author LatvianModder
- */
 public class ObjectCompletedEvent<T extends QuestObject> extends ObjectProgressEvent<T> {
 	public static final Event<EventActor<ObjectCompletedEvent<?>>> GENERIC = EventFactory.createEventActorLoop();
 	public static final Event<EventActor<FileEvent>> FILE = EventFactory.createEventActorLoop();

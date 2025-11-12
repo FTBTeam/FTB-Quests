@@ -19,11 +19,9 @@ import java.io.InputStream;
 import java.util.*;
 import java.util.regex.Pattern;
 
-/**
- * @author LatvianModder
- */
 public class ThemeLoader implements ResourceManagerReloadListener {
 	private static final Logger LOGGER = LoggerFactory.getLogger(ThemeLoader.class);
+	public static final String THEME_TXT = "ftb_quests_theme.txt";
 
 	@Override
 	public void onResourceManagerReload(ResourceManager resourceManager) {
@@ -31,17 +29,15 @@ public class ThemeLoader implements ResourceManagerReloadListener {
 	}
 
 	public static void loadTheme(ResourceManager resourceManager) {
-		//Map<String, ThemeProperty> propertyMap = new HashMap<>();
-		//new ThemePropertyEvent(propertyMap).post();
 		Map<ThemeSelector, SelectorProperties> map = new HashMap<>();
 
 		try {
-			ResourceLocation rl = FTBQuestsAPI.rl("ftb_quests_theme.txt");
+			ResourceLocation rl = FTBQuestsAPI.rl(THEME_TXT);
 			for (Resource resource : resourceManager.getResourceStack(rl)) {
 				try (InputStream in = resource.open()) {
 					parse(map, FileUtils.read(in));
 				} catch (Exception ex) {
-					LOGGER.error("Failed to load FTB Quests theme file from " + rl, ex);
+                    LOGGER.error("Failed to load FTB Quests theme file from {}", rl, ex);
 				}
 			}
 		} catch (Exception ex) {
@@ -68,15 +64,15 @@ public class ThemeLoader implements ResourceManagerReloadListener {
 		LOGGER.debug("[*]");
 
 		for (Map.Entry<String, String> entry : theme.defaults.properties.entrySet()) {
-			LOGGER.debug(entry.getKey() + ": " + theme.replaceVariables(entry.getValue(), 0));
+            LOGGER.debug("{}: {}", entry.getKey(), theme.replaceVariables(entry.getValue(), 0));
 		}
 
 		for (SelectorProperties selectorProperties : theme.selectors) {
 			LOGGER.debug("");
-			LOGGER.debug("[" + selectorProperties.selector + "]");
+            LOGGER.debug("[{}]", selectorProperties.selector);
 
 			for (Map.Entry<String, String> entry : selectorProperties.properties.entrySet()) {
-				LOGGER.debug(entry.getKey() + ": " + theme.replaceVariables(entry.getValue(), 0));
+                LOGGER.debug("{}: {}", entry.getKey(), theme.replaceVariables(entry.getValue(), 0));
 			}
 		}
 
@@ -121,7 +117,7 @@ public class ThemeLoader implements ResourceManagerReloadListener {
 					}
 
 					if (!andSelector.selectors.isEmpty()) {
-						ThemeSelector selector = andSelector.selectors.size() == 1 ? andSelector.selectors.get(0) : andSelector;
+						ThemeSelector selector = andSelector.selectors.size() == 1 ? andSelector.selectors.getFirst() : andSelector;
 						current.add(selectorPropertyMap.computeIfAbsent(selector, SelectorProperties::new));
 					}
 				}

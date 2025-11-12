@@ -5,9 +5,6 @@ import dev.ftb.mods.ftbquests.quest.QuestObjectBase;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * @author LatvianModder
- */
 public class AndSelector extends ThemeSelector {
 	public final List<ThemeSelector> selectors;
 

@@ -346,6 +346,10 @@ public class FTBQuestsCommands {
 			ServerQuestFile.INSTANCE.getTeamData(player).ifPresent(data -> {
 				ProgressChange progressChange = new ProgressChange(questObject, player.getUUID()).setReset(reset);
 				questObject.forceProgress(data, progressChange);
+				if (questObject instanceof Quest quest && reset) {
+                    data.clearRepeatCooldown(quest);
+					ClearRepeatCooldownMessage.sendToTeam(quest, data.getTeamId());
+				}
 			});
 		}
 

@@ -2,9 +2,6 @@ package dev.ftb.mods.ftbquests.quest.theme.selector;
 
 import dev.ftb.mods.ftbquests.quest.QuestObjectBase;
 
-/**
- * @author LatvianModder
- */
 public class DirectParentSelector extends ThemeSelector {
 	public final ThemeSelector parent;
 	public final ThemeSelector child;

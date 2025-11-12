@@ -330,8 +330,8 @@ public class QuestButton extends Button implements QuestPositionableButton {
 			list.add(Component.translatable("ftbquests.quest.misc.can_repeat").withStyle(ChatFormatting.GRAY));
 		}
 		if (teamData != null && !teamData.canStartTasks(quest)) {
-			String key = teamData.isExcludedByOtherQuestline(quest) ? "ftbquests.quest.locked.excluded" : "ftbquests.quest.locked";
-			list.add(Component.literal("[").withStyle(ChatFormatting.DARK_GRAY).append(Component.translatable(key)).append("]"));
+			Component reason = teamData.getCannotStartReason(this.quest);
+			list.add(Component.literal("[").withStyle(ChatFormatting.DARK_GRAY).append(reason).append("]"));
 		}
 		if (quest.isExclusiveQuest()) {
 			list.add(Component.translatable("ftbquests.quest.misc.exclusive").withStyle(ChatFormatting.GOLD));
@@ -349,7 +349,7 @@ public class QuestButton extends Button implements QuestPositionableButton {
 		TeamData teamData = questScreen.file.selfTeamData;
 		boolean isCompleted = teamData.isCompleted(quest);
 		boolean isStarted = isCompleted || teamData.isStarted(quest);
-		boolean canStart = /*isCompleted || isStarted ||*/ teamData.areDependenciesComplete(quest) && !teamData.isExcludedByOtherQuestline(quest);
+		boolean canStart = teamData.areDependenciesComplete(quest) && !teamData.isExcludedByOtherQuestline(quest) && teamData.getMilliSecondsUntilRepeatable(quest) == 0L;
 		Player player = Minecraft.getInstance().player;
 
 		if (canStart) {

@@ -1,8 +1,6 @@
 package dev.ftb.mods.ftbquests.quest.task;
 
-/**
- * @author LatvianModder
- */
+@FunctionalInterface
 public interface ISingleLongValueTask {
 	default long getDefaultConfigValue() {
 		return 1L;

@@ -3,9 +3,6 @@ package dev.ftb.mods.ftbquests.quest.theme.property;
 import dev.ftb.mods.ftblibrary.icon.Color4I;
 import dev.ftb.mods.ftblibrary.icon.Icon;
 
-/**
- * @author LatvianModder
- */
 public class IconProperty extends ThemeProperty<Icon> {
 	public final Icon builtin;
 

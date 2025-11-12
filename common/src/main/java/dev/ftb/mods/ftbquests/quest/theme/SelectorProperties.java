@@ -5,9 +5,6 @@ import dev.ftb.mods.ftbquests.quest.theme.selector.ThemeSelector;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-/**
- * @author LatvianModder
- */
 public class SelectorProperties implements Comparable<SelectorProperties> {
 	public final ThemeSelector selector;
 	public final Map<String, String> properties;

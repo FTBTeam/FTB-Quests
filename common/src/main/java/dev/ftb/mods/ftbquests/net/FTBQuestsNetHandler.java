@@ -35,6 +35,7 @@ public class FTBQuestsNetHandler {
 		NetworkHelper.registerS2C(ChangeChapterGroupResponseMessage.TYPE, ChangeChapterGroupResponseMessage.STREAM_CODEC, ChangeChapterGroupResponseMessage::handle);
 		NetworkHelper.registerS2C(ClaimRewardResponseMessage.TYPE, ClaimRewardResponseMessage.STREAM_CODEC, ClaimRewardResponseMessage::handle);
 		NetworkHelper.registerS2C(ClearDisplayCacheMessage.TYPE, ClearDisplayCacheMessage.STREAM_CODEC, ClearDisplayCacheMessage::handle);
+		NetworkHelper.registerS2C(ClearRepeatCooldownMessage.TYPE, ClearRepeatCooldownMessage.STREAM_CODEC, ClearRepeatCooldownMessage::handle);
 		NetworkHelper.registerS2C(CreateObjectResponseMessage.TYPE, CreateObjectResponseMessage.STREAM_CODEC, CreateObjectResponseMessage::handle);
 		NetworkHelper.registerS2C(CreateOtherTeamDataMessage.TYPE, CreateOtherTeamDataMessage.STREAM_CODEC, CreateOtherTeamDataMessage::handle);
 		NetworkHelper.registerS2C(CustomToastMessage.TYPE, CustomToastMessage.STREAM_CODEC, CustomToastMessage::handle);
