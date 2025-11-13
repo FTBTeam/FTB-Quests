@@ -40,7 +40,7 @@ public class FTBQuestsNetClient {
 		}
 
 		TeamData data = ClientQuestFile.INSTANCE.getOrCreateTeamData(teamId);
-		data.claimReward(player, reward, System.currentTimeMillis());
+		data.markRewardAsClaimed(player, reward, System.currentTimeMillis());
 
 		if (data == ClientQuestFile.INSTANCE.selfTeamData) {
 			QuestScreen treeGui = ClientUtils.getCurrentGuiAs(QuestScreen.class);
