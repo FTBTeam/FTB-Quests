@@ -75,13 +75,13 @@ public class TeamData {
 	private final Object2LongMap<QuestKey> claimedRewards;
 	private final Long2LongMap started;
 	private final Long2LongMap completed;
+	private final Long2LongMap questRepeatableTime;  // for repeatable quests with cooldowns
 	private final Object2ObjectMap<UUID,PerPlayerData> perPlayerData;
 
 	private final Long2ByteMap areDependenciesCompleteCache;
 	private final Long2ByteMap areDependenciesVisibleCache;
 	private final Object2ByteMap<QuestKey> unclaimedRewardsCache;
 	private final Long2BooleanMap exclusionCache;
-	private final Long2LongMap questRepeatableTime;  // for repeatable quests with cooldowns
 
 	public TeamData(UUID teamId, BaseQuestFile file) {
 		this(teamId, file, "");
@@ -291,7 +291,7 @@ public class TeamData {
 		return b == BOOL_TRUE;
 	}
 
-	public boolean claimReward(UUID player, Reward reward, long date) {
+	public boolean markRewardAsClaimed(UUID player, Reward reward, long date) {
 		if (locked || isRewardBlocked(reward)) {
 			return false;
 		}
@@ -573,10 +573,14 @@ public class TeamData {
 				&& getMilliSecondsUntilRepeatable(quest) == 0L;
 	}
 
-	public void claimReward(ServerPlayer player, Reward reward, boolean notify) {
-		if (claimReward(player.getUUID(), reward, System.currentTimeMillis())) {
+	public void claimReward(ServerPlayer player, Reward reward, boolean notify, long when) {
+		if (markRewardAsClaimed(player.getUUID(), reward, when)) {
 			reward.claim(player, notify);
 		}
+	}
+
+	public void claimReward(ServerPlayer player, Reward reward, boolean notify) {
+		claimReward(player, reward, notify, System.currentTimeMillis());
 	}
 
 	public Collection<ServerPlayer> getOnlineMembers() {
