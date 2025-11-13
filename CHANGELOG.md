@@ -6,8 +6,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [2001.4.15]
 
-### Fixes
+### Fixed
 * Fixed quests marked as invisible still showing on the pinned quests tracker
+* Fixed completing quests via `/ftbquests force_progress` not handling autoclaim rewards
+* Pending autoclaim rewards are now checked for when a player joins a team
 
 ## [2001.4.14]
 
