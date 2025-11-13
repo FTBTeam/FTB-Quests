@@ -252,7 +252,7 @@ public class TeamData {
 		return b == BOOL_TRUE;
 	}
 
-	public boolean claimReward(UUID player, Reward reward, long date) {
+	public boolean markRewardAsClaimed(UUID player, Reward reward, long date) {
 		if (locked || isRewardBlocked(reward)) {
 			return false;
 		}
@@ -537,10 +537,14 @@ public class TeamData {
 				&& !isExcludedByOtherQuestline(quest);
 	}
 
-	public void claimReward(ServerPlayer player, Reward reward, boolean notify) {
-		if (claimReward(player.getUUID(), reward, System.currentTimeMillis())) {
+	public void claimReward(ServerPlayer player, Reward reward, boolean notify, long when) {
+		if (markRewardAsClaimed(player.getUUID(), reward, when)) {
 			reward.claim(player, notify);
 		}
+	}
+
+	public void claimReward(ServerPlayer player, Reward reward, boolean notify) {
+		claimReward(player, reward, notify, System.currentTimeMillis());
 	}
 
 	public Collection<ServerPlayer> getOnlineMembers() {

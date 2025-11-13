@@ -221,9 +221,18 @@ public abstract class Reward extends QuestObjectBase {
 	public final void forceProgress(TeamData teamData, ProgressChange progressChange) {
 		if (progressChange.shouldReset()) {
 			teamData.resetReward(progressChange.getPlayerId(), this);
-		} else {
-			teamData.claimReward(progressChange.getPlayerId(), this, progressChange.getDate().getTime());
-		}
+		} else if (getQuestFile() instanceof ServerQuestFile sqf && getAutoClaimType() != RewardAutoClaim.DISABLED) {
+            if (isTeamReward()) {
+                ServerPlayer player = sqf.server.getPlayerList().getPlayer(progressChange.getPlayerId());
+                if (player != null) {
+					teamData.claimReward(player, this,getAutoClaimType() == RewardAutoClaim.ENABLED, progressChange.getDate().getTime());
+                }
+            } else {
+                teamData.getOnlineMembers().forEach(player ->
+						teamData.claimReward(player, this,getAutoClaimType() == RewardAutoClaim.ENABLED, progressChange.getDate().getTime())
+				);
+            }
+        }
 	}
 
 	@Override

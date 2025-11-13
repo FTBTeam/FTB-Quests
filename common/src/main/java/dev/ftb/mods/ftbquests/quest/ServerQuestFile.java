@@ -228,6 +228,8 @@ public class ServerQuestFile extends BaseQuestFile {
 			if (prevTeam.isPlayerTeam() && curTeam.isPartyTeam() && !curTeam.getOwner().equals(event.getPlayerId())) {
 				// player is joining an existing party team; merge all of their progress data into the party
 				newTeamData.mergeData(oldTeamData);
+				// also check if the party team has any outstanding auto-claim rewards that the player can claim
+				withPlayerContext(event.getPlayer(), () -> forAllQuests(newTeamData::checkAutoCompletion));
 			} else if (prevTeam.isPartyTeam() && curTeam.isPlayerTeam()) {
 				// player is leaving an existing party team; they get their old progress back
 				// EXCEPT any rewards they've already claimed stay claimed! no claiming the reward again

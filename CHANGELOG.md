@@ -4,6 +4,17 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2001.4.15]
+
+### Fixed
+* Fixed quests marked as invisible still showing on the pinned quests tracker
+* Fixed completing quests via `/ftbquests force_progress` not handling autoclaim rewards
+* Pending autoclaim rewards are now checked for when a player joins a team
+* Fixed bug causing chapters to not display if all quests or all quest links are currently invisible ("or" should be "and" there!)
+* Fixed potential memory leak on server shutdown (incorporated from All The Leaks, credit to them)
+* Fixed custom task data not always getting sync'd to the client when necessary
+* Fixed inserting links in the multiline quest description editor sometimes causing a client crash
+
 ## [2001.4.14]
 
 ### Added
@@ -11,9 +22,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 * Updated es_es and es_mx translations (thanks @ArrivedBog593)
+* FTB Quests now logs a warning if the third party "FTB Quests Optimizer" mod is detected
+  * This mod is _not_ recommended by FTB for use with FTB Quests; it will not improve performance, and may cause stability issues
 
 ### Fixed
 * Tooltip on optional tasks now reads "Optional Task" instead of "Optional Quest"
+* Fixed some performance issues related to scanning quests & tasks after player inventory changes and on player login
+  * This should use significantly less server CPU now, good for your TPS
+* (Mod developers only) Fixed crash when using FTB Quests as dependency in a data generation environment
 
 ## [2001.4.13]
 

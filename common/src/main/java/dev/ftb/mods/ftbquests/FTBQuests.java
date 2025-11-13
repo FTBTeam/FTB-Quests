@@ -1,5 +1,6 @@
 package dev.ftb.mods.ftbquests;
 
+import dev.architectury.platform.Platform;
 import dev.architectury.registry.ReloadListenerRegistry;
 import dev.architectury.utils.Env;
 import dev.architectury.utils.EnvExecutor;
@@ -43,6 +44,12 @@ public class FTBQuests {
 		ReloadListenerRegistry.register(PackType.SERVER_DATA, new TagReloadListener());
 
 		EnvExecutor.runInEnv(Env.CLIENT, () -> FTBQuestsClient::init);
+
+		if (Platform.isModLoaded("ftbqoptimizer")) {
+			LOGGER.warn("WARNING: FTB Quests Optimizer detected!");
+			LOGGER.warn("         FTB recommends against the use of this third party mod with FTB Quests");
+			LOGGER.warn("         It is likely to *reduce* mod performance and may cause server stability issues");
+		}
 	}
 
 	public static RecipeModHelper getRecipeModHelper() {
