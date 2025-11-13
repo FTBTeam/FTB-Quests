@@ -10,6 +10,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 * Fixed quests marked as invisible still showing on the pinned quests tracker
 * Fixed completing quests via `/ftbquests force_progress` not handling autoclaim rewards
 * Pending autoclaim rewards are now checked for when a player joins a team
+* Fixed bug causing chapters to not display if all quests or all quest links are currently invisible ("or" should be "and" there!)
+* Fixed potential memory leak on server shutdown (incorporated from All The Leaks, credit to them)
+* Fixed custom task data not always getting sync'd to the client when necessary
+* Fixed inserting links in the multiline quest description editor sometimes causing a client crash
 
 ## [2001.4.14]
 
