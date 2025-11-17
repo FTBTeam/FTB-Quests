@@ -460,10 +460,9 @@ public final class Chapter extends QuestObject {
 	@Override
 	public boolean isVisible(TeamData data) {
 		return !alwaysInvisible &&
-				(quests.isEmpty() || questLinks.isEmpty()
-						|| quests.stream().anyMatch(quest -> quest.isVisible(data))
-						|| questLinks.stream().anyMatch(link -> link.isVisible(data))
-				);
+				(quests.isEmpty() && questLinks.isEmpty() ||
+						quests.stream().anyMatch(quest -> quest.isVisible(data)) ||
+						questLinks.stream().anyMatch(link -> link.isVisible(data)));
 	}
 
 	@Override
