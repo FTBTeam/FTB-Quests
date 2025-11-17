@@ -356,11 +356,17 @@ public class ViewQuestPanel extends ModalPanel {
 					.setText(Component.empty().withStyle(ChatFormatting.ITALIC,ChatFormatting.GRAY).append(subtitle)));
 		}
 
-		boolean showText = !quest.getHideTextUntilComplete().get(false) || questScreen.file.selfTeamData != null && questScreen.file.selfTeamData.isCompleted(quest);
+		boolean showText = !quest.getHideTextUntilComplete().get(quest.getChapter().isHideTextUntilComplete())
+				|| questScreen.file.selfTeamData != null && questScreen.file.selfTeamData.isCompleted(quest);
 
 		buildPageIndices();
 
-		if (showText) {
+		if (showText || canEdit) {
+			if (!showText) {
+				SimpleButton btn = new SimpleButton(panelText, List.of(Component.translatable("ftbquests.quest.text_hidden_outside_edit_mode")), ThemeProperties.HIDDEN_ICON.get().withTint(Color4I.rgb(0xA0A0A0)), (b, mb) -> {});
+				btn.setSize(12, 12);
+				panelText.add(btn);
+			}
 			if (!pageIndices.isEmpty()) {
 				addDescriptionText(canEdit, subtitle);
 			}
