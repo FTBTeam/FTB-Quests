@@ -6,8 +6,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [2101.1.19]
 
+### Changed
+* Updated `pt_br` translation (thanks @PrincessStellar)
+
 ### Fixed
 * Fixed completing quests via `/ftbquests force_progress` not handling autoclaim rewards
+* Fixed third party mods being able to crash FTB Quests during entity scanning for kill task entity selection
+* Added missing chapter default setting for "Hide Text Until Quest Complete" tristate setting in quest properties
+  * Additionally, if this is true, then description text will now be shown when in edit mode along with an "eye" icon indicating it would otherwise be hidden
 
 ## [2101.1.18]
 
