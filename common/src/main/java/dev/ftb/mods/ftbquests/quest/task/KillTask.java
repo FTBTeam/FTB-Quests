@@ -8,6 +8,8 @@ import dev.ftb.mods.ftblibrary.icon.IconAnimation;
 import dev.ftb.mods.ftblibrary.icon.Icons;
 import dev.ftb.mods.ftblibrary.icon.ItemIcon;
 import dev.ftb.mods.ftblibrary.ui.Button;
+import dev.ftb.mods.ftblibrary.util.Lazy;
+import dev.ftb.mods.ftbquests.FTBQuests;
 import dev.ftb.mods.ftbquests.client.FTBQuestsClient;
 import dev.ftb.mods.ftbquests.quest.Quest;
 import dev.ftb.mods.ftbquests.quest.TeamData;
@@ -30,6 +32,7 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.SpawnEggItem;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
@@ -40,8 +43,8 @@ import java.util.Map;
 public class KillTask extends Task {
 	private static final ResourceLocation ZOMBIE = ResourceLocation.withDefaultNamespace("zombie");
 
-	private static NameMap<ResourceLocation> entityNameMap = null;
-	private static NameMap<String> entityTagMap = null;
+	private static final Lazy<NameMap<ResourceLocation>> entityNameMap = Lazy.of(KillTask::scanEntityTypes);
+	private static final Lazy<NameMap<String>> entityTagMap = Lazy.of(KillTask::scanEntityTags);
 
 	private ResourceLocation entityTypeId = ZOMBIE;
 	private TagKey<EntityType<?>> entityTypeTag = null;
@@ -115,31 +118,8 @@ public class KillTask extends Task {
 	public void fillConfigGroup(ConfigGroup config) {
 		super.fillConfigGroup(config);
 
-		if (entityNameMap == null) {
-			List<ResourceLocation> ids = new ArrayList<>();
-			BuiltInRegistries.ENTITY_TYPE.forEach(type -> {
-				if (type.create(FTBQuestsClient.getClientLevel()) instanceof LivingEntity) {
-					ids.add(type.arch$registryName());
-				}
-			});
-			ids.sort((r1, r2) -> {
-				Component c1 = Component.translatable("entity." + r1.toLanguageKey());
-				Component c2 = Component.translatable("entity." + r2.toLanguageKey());
-				return c1.getString().compareTo(c2.getString());
-			});
-			entityNameMap = NameMap.of(ZOMBIE, ids)
-					.nameKey(id -> "entity." + id.toLanguageKey())
-					.icon(KillTask::getIconForEntityType)
-					.create();
-		}
-		if (entityTagMap == null) {
-			List<String> tags = new ArrayList<>(List.of(""));
-			tags.addAll(BuiltInRegistries.ENTITY_TYPE.getTags().map(pair -> pair.getFirst().location().toString()).sorted().toList());
-			entityTagMap = NameMap.of("minecraft:zombies", tags).create();
-		}
-
-		config.addEnum("entity", entityTypeId, v -> entityTypeId = v, entityNameMap, ZOMBIE);
-		config.addEnum("entity_type_tag", getTypeTagStr(), v -> entityTypeTag = parseTypeTag(v), entityTagMap);
+		config.addEnum("entity", entityTypeId, v -> entityTypeId = v, entityNameMap.get(), ZOMBIE);
+		config.addEnum("entity_type_tag", getTypeTagStr(), v -> entityTypeTag = parseTypeTag(v), entityTagMap.get());
 		config.addLong("value", value, v -> value = v, 100L, 1L, Long.MAX_VALUE);
 		config.addString("custom_name", customName, v -> customName = v, "");
 	}
@@ -170,8 +150,8 @@ public class KillTask extends Task {
 	public void clearCachedData() {
 		super.clearCachedData();
 
-		entityNameMap = null;
-		entityTagMap = null;
+		entityNameMap.invalidate();
+		entityTagMap.invalidate();
 		entityIcons.clear();
 	}
 
@@ -227,5 +207,33 @@ public class KillTask extends Task {
 				(e instanceof Player p ?
 						p.getGameProfile().getName().equals(customName) :
 						e.getName().getString().equals(customName));
+	}
+
+	private static @NotNull NameMap<ResourceLocation> scanEntityTypes() {
+		List<ResourceLocation> ids = new ArrayList<>();
+		BuiltInRegistries.ENTITY_TYPE.forEach(type -> {
+			try {
+				if (type.create(FTBQuestsClient.getClientLevel()) instanceof LivingEntity) {
+					ids.add(type.arch$registryName());
+				}
+			} catch (Exception e) {
+				FTBQuests.LOGGER.warn("Entity creation failed during kill task scanning for {}: {}", type.arch$registryName(), e.getMessage());
+			}
+		});
+		ids.sort((r1, r2) -> {
+			Component c1 = Component.translatable("entity." + r1.toLanguageKey());
+			Component c2 = Component.translatable("entity." + r2.toLanguageKey());
+			return c1.getString().compareTo(c2.getString());
+		});
+		return NameMap.of(ZOMBIE, ids)
+				.nameKey(id -> "entity." + id.toLanguageKey())
+				.icon(KillTask::getIconForEntityType)
+				.create();
+	}
+
+	private static @NotNull NameMap<String> scanEntityTags() {
+		List<String> tags = new ArrayList<>(List.of(""));
+		tags.addAll(BuiltInRegistries.ENTITY_TYPE.getTags().map(pair -> pair.getFirst().location().toString()).sorted().toList());
+		return NameMap.of("minecraft:zombies", tags).create();
 	}
 }
