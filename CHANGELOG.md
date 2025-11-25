@@ -4,6 +4,15 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2001.4.17]
+
+* Added "Hide Quests in excluded questlines" top-level (file) setting
+  * False by default, so excluded quests will be shown as unavailable
+  * Set to true to hide excluded quests completely
+
+### Fixed
+* Fixed quest exclusion wrongly being detected under some circumstances (branching and merging questlines)
+
 ## [2001.4.16]
 
 ### Fixed
