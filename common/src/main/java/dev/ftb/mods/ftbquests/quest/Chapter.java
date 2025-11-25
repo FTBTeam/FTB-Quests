@@ -44,6 +44,7 @@ public final class Chapter extends QuestObject {
 	private boolean hideQuestDetailsUntilStartable;
 	private boolean hideQuestUntilDepsComplete;
 	private boolean hideQuestUntilDepsVisible;
+	private boolean hideTextUntilComplete;
 	private boolean defaultRepeatable;
 	private Tristate consumeItems;
 	private boolean requireSequentialTasks;
@@ -119,6 +120,10 @@ public final class Chapter extends QuestObject {
 		return requireSequentialTasks;
 	}
 
+	public boolean isHideTextUntilComplete() {
+		return hideTextUntilComplete;
+	}
+
 	public List<Quest> getQuests() {
 		return Collections.unmodifiableList(quests);
 	}
@@ -179,6 +184,7 @@ public final class Chapter extends QuestObject {
 		if (hideQuestDetailsUntilStartable) nbt.putBoolean("hide_quest_details_until_startable", true);
 		if (hideQuestUntilDepsVisible) nbt.putBoolean("hide_quest_until_deps_visible", true);
 		if (hideQuestUntilDepsComplete) nbt.putBoolean("hide_quest_until_deps_complete", true);
+		if (hideTextUntilComplete) nbt.putBoolean("hide_text_until_complete", true);
 		if (defaultRepeatable) nbt.putBoolean("default_repeatable_quest", true);
 		if (requireSequentialTasks) nbt.putBoolean("require_sequential_tasks", true);
 
@@ -219,6 +225,7 @@ public final class Chapter extends QuestObject {
 		hideQuestDetailsUntilStartable = nbt.getBoolean("hide_quest_details_until_startable");
 		hideQuestUntilDepsVisible = nbt.getBoolean("hide_quest_until_deps_visible");
 		hideQuestUntilDepsComplete = nbt.getBoolean("hide_quest_until_deps_complete");
+		hideTextUntilComplete = nbt.getBoolean("hide_text_until_complete");
 		defaultRepeatable = nbt.getBoolean("default_repeatable_quest");
 		requireSequentialTasks = nbt.getBoolean("require_sequential_tasks");
 		autoFocusId = nbt.getString("autofocus_id");
@@ -245,6 +252,7 @@ public final class Chapter extends QuestObject {
 		flags = Bits.setFlag(flags, 0x80, requireSequentialTasks);
 		flags = Bits.setFlag(flags, 0x100, !autoFocusId.isEmpty());
 		flags = Bits.setFlag(flags, 0x200, hideQuestUntilDepsVisible);
+		flags = Bits.setFlag(flags, 0x400, hideTextUntilComplete);
 		buffer.writeVarInt(flags);
 
 		if (!autoFocusId.isEmpty()) buffer.writeLong(QuestObjectBase.parseHexId(autoFocusId).orElse(0L));
@@ -269,6 +277,7 @@ public final class Chapter extends QuestObject {
 		consumeItems = Bits.getFlag(flags, 0x20) ? Bits.getFlag(flags, 0x40) ? Tristate.TRUE : Tristate.FALSE : Tristate.DEFAULT;
 		requireSequentialTasks = Bits.getFlag(flags, 0x80);
 		hideQuestUntilDepsVisible = Bits.getFlag(flags, 0x200);
+		hideTextUntilComplete = Bits.getFlag(flags, 0x400);
 
 		autoFocusId = Bits.getFlag(flags, 0x100) ? QuestObjectBase.getCodeString(buffer.readLong()) : "";
 	}
@@ -291,7 +300,7 @@ public final class Chapter extends QuestObject {
 		int count = 0;
 
 		for (Quest quest : quests) {
-			if (!quest.isProgressionIgnored(data)) {
+			if (!quest.isOptionalForProgression(data)) {
 				progress += data.getRelativeProgress(quest);
 				count++;
 			}
@@ -425,6 +434,7 @@ public final class Chapter extends QuestObject {
 		visibility.addBool("hide_quest_details_until_startable", hideQuestDetailsUntilStartable, v -> hideQuestDetailsUntilStartable = v, false);
 		visibility.addBool("hide_quest_until_deps_visible", hideQuestUntilDepsVisible, v -> hideQuestUntilDepsVisible = v, false);
 		visibility.addBool("hide_quest_until_deps_complete", hideQuestUntilDepsComplete, v -> hideQuestUntilDepsComplete = v, false);
+		visibility.addBool("hide_text_until_complete", hideTextUntilComplete, v -> hideTextUntilComplete = v, false);
 
 		ConfigGroup misc = config.getOrCreateSubgroup("misc").setNameKey("ftbquests.quest.misc");
 		misc.addString("autofocus_id", autoFocusId, v -> autoFocusId = v, "", HEX_STRING);

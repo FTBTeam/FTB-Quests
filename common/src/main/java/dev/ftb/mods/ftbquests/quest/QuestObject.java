@@ -131,7 +131,7 @@ public abstract class QuestObject extends QuestObjectBase {
         for (QuestObject child : getChildren()) {
 			boolean uncompleted = !data.isCompleted(child) && !data.isExcludedByOtherQuestline(child);
 			if (uncompleted) {
-				if (child.isOptionalForProgression()) {
+				if (child.isOptionalForProgression(data)) {
 					nOptional++;
 				} else {
 					return false;
@@ -145,7 +145,7 @@ public abstract class QuestObject extends QuestObjectBase {
         return getChildren().isEmpty() || nOptional < getChildren().size() || nCompleted > 0;
 	}
 
-	public boolean isOptionalForProgression() {
+	public boolean isOptionalForProgression(TeamData teamData) {
 		return false;
 	}
 
