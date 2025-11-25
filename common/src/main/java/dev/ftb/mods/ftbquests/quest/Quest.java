@@ -222,8 +222,8 @@ public final class Quest extends QuestObject implements Movable, Excludable {
 	}
 
 	@Override
-	public boolean isOptionalForProgression() {
-		return isOptional();
+	public boolean isOptionalForProgression(TeamData teamData) {
+		return isOptional() || canBeRepeated() || teamData.isExcludedByOtherQuestline(this);
 	}
 
 	public boolean getRequireSequentialTasks() {
@@ -508,10 +508,9 @@ public final class Quest extends QuestObject implements Movable, Excludable {
 
 	@Override
 	public int getRelativeProgressFromChildren(TeamData data) {
-        /*if (data.getTimesCompleted(this) > 0)
-		{
+		if (data.getCompletionCount(this) > 0) {
 			return 100;
-		}*/
+		}
 
 		if (tasks.isEmpty()) {
 			return data.areDependenciesComplete(this) ? 100 : 0;
@@ -933,9 +932,9 @@ public final class Quest extends QuestObject implements Movable, Excludable {
 		FTBQuestsClient.copyToClipboard(this);
 	}
 
-	public boolean isProgressionIgnored(TeamData data) {
-		return canBeRepeated() || optional || data.isExcludedByOtherQuestline(this);
-	}
+//	public boolean isProgressionIgnored(TeamData data) {
+//		return canBeRepeated() || optional || data.isExcludedByOtherQuestline(this);
+//	}
 
 	/**
 	 * Get a collection of dependent quest ID's; quests which can't be progressed until this quest is completed.
