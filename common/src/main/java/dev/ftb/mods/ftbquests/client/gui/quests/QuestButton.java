@@ -328,6 +328,13 @@ public class QuestButton extends Button implements QuestPositionableButton {
 		}
 		if (quest.canBeRepeated()) {
 			list.add(Component.translatable("ftbquests.quest.misc.can_repeat").withStyle(ChatFormatting.GRAY));
+			if (teamData != null) {
+				int completionCount = teamData.getCompletionCount(quest);
+				if (completionCount > 0) {
+					String key = completionCount > 1 ? "ftbquests.quest.misc.completion_count.plural" : "ftbquests.quest.misc.completion_count";
+					list.add(Component.translatable(key, completionCount).withStyle(ChatFormatting.GRAY));
+				}
+			}
 		}
 		if (teamData != null && !teamData.canStartTasks(quest)) {
 			Component reason = teamData.getCannotStartReason(this.quest);

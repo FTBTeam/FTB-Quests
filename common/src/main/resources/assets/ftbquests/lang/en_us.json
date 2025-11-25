@@ -199,6 +199,8 @@
 	"ftbquests.quest.shape.gear": "Gear",
 	"ftbquests.quest.shape.none": "<None>",
 	"ftbquests.quest.misc.can_repeat": "Repeatable Quest",
+	"ftbquests.quest.misc.completion_count": "Completed %s time",
+	"ftbquests.quest.misc.completion_count.plural": "Completed %s times",
 	"ftbquests.quest.misc.repeat_cooldown": "Quest Repeat Cooldown",
 	"ftbquests.quest.misc.repeat_cooldown.tooltip": "Only applies if 'Repeatable Quest' is true.\nThe delay in seconds between claiming all the rewards for the quest and being able to redo the quest's tasks.",
 	"ftbquests.quest.misc.exclusive": "Exclusive Quest Branch",
