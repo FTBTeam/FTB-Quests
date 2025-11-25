@@ -932,10 +932,6 @@ public final class Quest extends QuestObject implements Movable, Excludable {
 		FTBQuestsClient.copyToClipboard(this);
 	}
 
-//	public boolean isProgressionIgnored(TeamData data) {
-//		return canBeRepeated() || optional || data.isExcludedByOtherQuestline(this);
-//	}
-
 	/**
 	 * Get a collection of dependent quest ID's; quests which can't be progressed until this quest is completed.
 	 * @return a collection of quest objects, checked for validity
