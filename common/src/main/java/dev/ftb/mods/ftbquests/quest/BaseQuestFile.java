@@ -75,7 +75,7 @@ public abstract class BaseQuestFile extends QuestObject implements QuestFile {
 	private RewardAutoClaim defaultRewardAutoClaim;
 	private String defaultQuestShape;
 	private boolean defaultQuestDisableJEI;
-
+	private boolean hideExcludedQuests;
 	private boolean dropLootCrates;
 	private final EntityWeight lootCrateNoDrop;
 	private boolean disableGui;
@@ -125,6 +125,7 @@ public abstract class BaseQuestFile extends QuestObject implements QuestFile {
 		progressionMode = ProgressionMode.LINEAR;
 		detectionDelay = 20;
 		dropBookOnDeath = false;
+		hideExcludedQuests = false;
 
 		allTasks = null;
 	}
@@ -405,6 +406,7 @@ public abstract class BaseQuestFile extends QuestObject implements QuestFile {
 		nbt.putInt("detection_delay", detectionDelay);
 		nbt.putBoolean("drop_book_on_death", dropBookOnDeath);
 		nbt.putBoolean("show_lock_icons", showLockIcons);
+		nbt.putBoolean("hide_excluded_quests", hideExcludedQuests);
 	}
 
 	@Override
@@ -449,6 +451,7 @@ public abstract class BaseQuestFile extends QuestObject implements QuestFile {
 		}
 		dropBookOnDeath = nbt.getBoolean("drop_book_on_death");
 		showLockIcons = !nbt.contains("show_lock_icons") || nbt.getBoolean("show_lock_icons");
+		hideExcludedQuests = nbt.getBoolean("hide_excluded_quests");
 	}
 
 	public final void writeDataFull(Path folder) {
@@ -760,6 +763,7 @@ public abstract class BaseQuestFile extends QuestObject implements QuestFile {
 		buffer.writeVarInt(detectionDelay);
 		buffer.writeBoolean(dropBookOnDeath);
 		buffer.writeBoolean(showLockIcons);
+		buffer.writeBoolean(hideExcludedQuests);
 	}
 
 	@Override
@@ -782,6 +786,7 @@ public abstract class BaseQuestFile extends QuestObject implements QuestFile {
 		detectionDelay = buffer.readVarInt();
 		dropBookOnDeath = buffer.readBoolean();
 		showLockIcons = buffer.readBoolean();
+		hideExcludedQuests = buffer.readBoolean();
 	}
 
 	public final void writeNetDataFull(FriendlyByteBuf buffer) {
@@ -1059,6 +1064,7 @@ public abstract class BaseQuestFile extends QuestObject implements QuestFile {
 		config.addBool("pause_game", pauseGame, v -> pauseGame = v, false);
 		config.addBool("drop_book_on_death", dropBookOnDeath, v -> dropBookOnDeath = v, true);
 		config.addBool("show_lock_icons", showLockIcons, v -> showLockIcons = v, true).setNameKey("ftbquests.ui.show_lock_icon");
+		config.addBool("hide_excluded_quests", hideExcludedQuests, v -> hideExcludedQuests = v, false);
 
 		ConfigGroup defaultsGroup = config.getOrCreateSubgroup("defaults");
 		defaultsGroup.addBool("reward_team", defaultPerTeamReward, v -> defaultPerTeamReward = v, false);
@@ -1320,6 +1326,10 @@ public abstract class BaseQuestFile extends QuestObject implements QuestFile {
 
 	public boolean isDropLootCrates() {
 		return dropLootCrates;
+	}
+
+	public boolean isHideExcludedQuests() {
+		return hideExcludedQuests;
 	}
 
 	public boolean isDefaultPerTeamReward() {
