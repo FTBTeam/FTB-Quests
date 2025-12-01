@@ -152,14 +152,16 @@ public class ServerQuestFile extends BaseQuestFile {
 	}
 
 	public void saveNow() {
-		if (shouldSave) {
-			writeDataFull(getFolder(), server.registryAccess());
-			shouldSave = false;
+		if (getFolder() != null) {
+			if (shouldSave) {
+				writeDataFull(getFolder(), server.registryAccess());
+				shouldSave = false;
+			}
+
+			getTranslationManager().saveToNBT(getFolder().resolve("lang"), false);
+
+			getAllTeamData().forEach(TeamData::saveIfChanged);
 		}
-
-		getTranslationManager().saveToNBT(getFolder().resolve("lang"), false);
-
-		getAllTeamData().forEach(TeamData::saveIfChanged);
 	}
 
 	public void unload() {
