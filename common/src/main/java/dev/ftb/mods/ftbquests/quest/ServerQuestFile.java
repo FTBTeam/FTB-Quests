@@ -135,12 +135,14 @@ public class ServerQuestFile extends BaseQuestFile {
 	}
 
 	public void saveNow() {
-		if (shouldSave) {
-			writeDataFull(getFolder());
-			shouldSave = false;
-		}
+		if (getFolder() != null) {
+			if (shouldSave) {
+				writeDataFull(getFolder());
+				shouldSave = false;
+			}
 
-		getAllTeamData().forEach(TeamData::saveIfChanged);
+			getAllTeamData().forEach(TeamData::saveIfChanged);
+		}
 	}
 
 	public void unload() {
