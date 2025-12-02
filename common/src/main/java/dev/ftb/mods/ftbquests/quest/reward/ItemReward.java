@@ -178,7 +178,13 @@ public class ItemReward extends Reward {
 	@Override
 	@Environment(EnvType.CLIENT)
 	public MutableComponent getAltTitle() {
-		return Component.literal((count > 1 ? (randomBonus > 0 ? (count + "-" + (count + randomBonus) + "x ") : (count + "x ")) : "")).append(item.getHoverName());
+		if (randomBonus > 0) {
+			return Component.literal(count + "-" + (count + randomBonus) + "x ").append(item.getHoverName());
+		} else if (count > 1) {
+			return Component.literal(count + "x ").append(item.getHoverName());
+		} else {
+			return item.getHoverName().copy();
+		}
 	}
 
 	@Override
