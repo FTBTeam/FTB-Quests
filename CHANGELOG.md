@@ -4,8 +4,24 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2001.4.18]
+
+### Added
+* Backported several QoL features from 1.21...
+* Added ability to move tasks and rewards left or right in the quest view panel (in edit mode)
+  * Added "Move Left" and "Move Right" context menu entries when right-clicking tasks & rewards
+  * Pressing cursor left or right while hovering tasks & rewards also moves the item left or right
+* Alt-Left-Click and Alt-Right-Click now work on all GUI objects, not just tasks
+  * Alt-Left-Click to quick-open the editor screen for any object
+  * Alt-Right-Click to copy the hex object ID for any object to the clipboard
+* Added a new "Grab Copy of Item" context menu entry for item tasks in the quest view panel
+  * This is intended to allow getting copies of items with custom components (e.g. FTB Filter System filters) if you don't have a copy of the item to hand
+* More visually attractive highlighting of the currently-selected chapter
+  * Also added two new fields to `ftb_quest_theme.txt` resource pack file: `selected_chapter_highlight_1` and `selected_chapter_highlight_2`
+
 ## [2001.4.17]
 
+### Added
 * Added "Hide Quests in excluded questlines" top-level (file) setting
   * False by default, so excluded quests will be shown as unavailable
   * Set to true to hide excluded quests completely
