@@ -360,13 +360,18 @@ public abstract class QuestObjectBase implements Comparable<QuestObjectBase> {
 		}) {
 			@Override
 			public Component getName() {
-				MutableComponent c = getObjectType().getDescription().copy().withStyle(ChatFormatting.YELLOW);
-				return Component.empty().append(c).append(": ").append(getTitle());
+				MutableComponent type = Component.literal(" [").append(Component.translatable("ftbquests." + getObjectType().getId())).append("]").withStyle(getObjectType().getColor());
+				return Component.empty().append(getTitle().copy().withStyle(ChatFormatting.UNDERLINE)).append(type);
 			}
 		};
 		fillConfigGroup(createSubGroup(group));
 
-		new EditConfigScreen(group).openGui();
+		new EditConfigScreen(group) {
+			@Override
+			public Component getTitle() {
+				return group.getName();
+			}
+		}.openGui();
 	}
 
 	protected boolean validateEditedConfig() {

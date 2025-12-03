@@ -27,11 +27,13 @@ import dev.ftb.mods.ftbquests.util.TextUtils;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.Style;
 import net.minecraft.network.chat.TextColor;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -41,6 +43,8 @@ import java.util.regex.Pattern;
 public class ChapterPanel extends Panel {
 	public static final Icon ARROW_COLLAPSED = Icon.getIcon("ftbquests:textures/gui/arrow_collapsed.png");
 	public static final Icon ARROW_EXPANDED = Icon.getIcon("ftbquests:textures/gui/arrow_expanded.png");
+	private static final @Nullable Pattern NON_EMPTY_PAT = Pattern.compile("^.+$");
+
 	public static final int Z_LEVEL = 300;
 
 	private final QuestScreen questScreen;
@@ -186,48 +190,59 @@ public class ChapterPanel extends Panel {
 			if (getMouseX() > getX() + width - 18) {
 				playClickSound();
 				new ToggleChapterPinnedMessage().sendToServer();
-			} else if (chapterPanel.questScreen.file.canEdit() && getMouseX() > getX() + width - 34) {
-				playClickSound();
-
-				List<ContextMenuItem> contextMenu = new ArrayList<>();
-				contextMenu.add(new ContextMenuItem(Component.translatable("ftbquests.chapter"), ThemeProperties.ADD_ICON.get(), b -> {
-					StringConfig c = new StringConfig(Pattern.compile("^.+$"));
-					EditStringConfigOverlay<String> overlay = new EditStringConfigOverlay<>(parent, c, accepted -> {
-						chapterPanel.questScreen.openGui();
-
-						if (accepted && !c.getValue().isEmpty()) {
-							Chapter chapter = new Chapter(0L, chapterPanel.questScreen.file, chapterPanel.questScreen.file.getDefaultChapterGroup());
-							chapter.setRawTitle(c.getValue());
-							CompoundTag extra = new CompoundTag();
-							extra.putLong("group", 0L);
-							new CreateObjectMessage(chapter, extra).sendToServer();
-						}
-
-						run();
-					}, b.getTitle()).atMousePosition();
-					overlay.setWidth(150);
-					overlay.setExtraZlevel(Z_LEVEL + 10);
-					getGui().pushModalPanel(overlay);
-				}));
-
-				contextMenu.add(new ContextMenuItem(Component.translatable("ftbquests.chapter_group"), ThemeProperties.ADD_ICON.get(), b -> {
-					StringConfig c = new StringConfig(Pattern.compile("^.+$"));
-					EditStringConfigOverlay<String> overlay = new EditStringConfigOverlay<>(parent, c, accepted -> {
-						chapterPanel.questScreen.openGui();
-
-						if (accepted) {
-							ChapterGroup group = new ChapterGroup(0L, ClientQuestFile.INSTANCE);
-							group.setRawTitle(c.getValue());
-							new CreateObjectMessage(group, null).sendToServer();
-						}
-					}, b.getTitle()).atMousePosition();
-					overlay.setWidth(150);
-					overlay.setExtraZlevel(Z_LEVEL + 10);
-					getGui().pushModalPanel(overlay);
-				}));
-
-				chapterPanel.questScreen.openContextMenu(contextMenu);
+			} else {
+				ClientQuestFile file = chapterPanel.questScreen.file;
+				if (file.canEdit()) {
+					if (getMouseX() > getX() + width - 34) {
+						showAddChapterOrGroupDialog(file);
+					} else if (button.isLeft() && Screen.hasAltDown()) {
+						file.onEditButtonClicked(chapterPanel.questScreen);
+					}
+				}
 			}
+		}
+
+		private void showAddChapterOrGroupDialog(ClientQuestFile file) {
+			playClickSound();
+
+			List<ContextMenuItem> contextMenu = new ArrayList<>();
+			contextMenu.add(new ContextMenuItem(Component.translatable("ftbquests.chapter"), ThemeProperties.ADD_ICON.get(), b -> {
+				StringConfig c = new StringConfig(NON_EMPTY_PAT);
+				EditStringConfigOverlay<String> overlay = new EditStringConfigOverlay<>(parent.getParent(), c, accepted -> {
+					chapterPanel.questScreen.openGui();
+
+					if (accepted && !c.getValue().isEmpty()) {
+						Chapter chapter = new Chapter(0L, chapterPanel.questScreen.file, chapterPanel.questScreen.file.getDefaultChapterGroup());
+						chapter.setRawTitle(c.getValue());
+						CompoundTag extra = new CompoundTag();
+						extra.putLong("group", 0L);
+						new CreateObjectMessage(chapter, extra).sendToServer();
+					}
+
+					run();
+				}, b.getTitle()).atMousePosition();
+				overlay.setWidth(150);
+				overlay.setExtraZlevel(Z_LEVEL + 10);
+				getGui().pushModalPanel(overlay);
+			}));
+
+			contextMenu.add(new ContextMenuItem(Component.translatable("ftbquests.chapter_group"), ThemeProperties.ADD_ICON.get(), b -> {
+				StringConfig c = new StringConfig(NON_EMPTY_PAT);
+				EditStringConfigOverlay<String> overlay = new EditStringConfigOverlay<>(parent.getParent(), c, accepted -> {
+					chapterPanel.questScreen.openGui();
+
+					if (accepted) {
+						ChapterGroup group = new ChapterGroup(0L, ClientQuestFile.INSTANCE);
+						group.setRawTitle(c.getValue());
+						new CreateObjectMessage(group, null).sendToServer();
+					}
+				}, b.getTitle()).atMousePosition();
+				overlay.setWidth(150);
+				overlay.setExtraZlevel(Z_LEVEL + 10);
+				getGui().pushModalPanel(overlay);
+			}));
+
+			chapterPanel.questScreen.openContextMenu(contextMenu);
 		}
 
 		@Override
@@ -285,46 +300,57 @@ public class ChapterPanel extends Panel {
 
 		@Override
 		public void onClicked(MouseButton button) {
-			if (chapterPanel.questScreen.file.canEdit() && getMouseX() > getX() + width - 15) {
-				playClickSound();
+			ClientQuestFile file = chapterPanel.questScreen.file;
 
-				StringConfig c = new StringConfig(Pattern.compile("^.+$"));
-				EditStringConfigOverlay<String> overlay = new EditStringConfigOverlay<>(parent, c, accepted -> {
-					chapterPanel.questScreen.openGui();
-
-					if (accepted && !c.getValue().isEmpty()) {
-						Chapter chapter = new Chapter(0L, chapterPanel.questScreen.file, chapterPanel.questScreen.file.getDefaultChapterGroup());
-						chapter.setRawTitle(c.getValue());
-						CompoundTag extra = new CompoundTag();
-						extra.putLong("group", group.id);
-						new CreateObjectMessage(chapter, extra).sendToServer();
+			if (file.canEdit()) {
+				if (button.isLeft()) {
+					if (Screen.hasAltDown()) {
+						group.onEditButtonClicked(chapterPanel.questScreen);
+						return;
+					} else if (getMouseX() > getX() + width - 15) {
+						// the add "button" on the right
+						showAddChapterDialog();
+						return;
 					}
-
-					run();
-				}, Component.translatable("ftbquests.chapter")).atMousePosition();
-				overlay.setWidth(150);
-				overlay.setExtraZlevel(Z_LEVEL + 10);
-				getGui().pushModalPanel(overlay);
-
-				return;
-			}
-
-			if (chapterPanel.questScreen.file.canEdit() && button.isRight() && !group.isDefaultGroup()) {
-				ContextMenuBuilder.create(group, chapterPanel.questScreen).insertAtTop(List.of(
-						new ContextMenuItem(Component.translatable("gui.move"), ThemeProperties.MOVE_UP_ICON.get(),
-								b -> new MoveChapterGroupMessage(group.id, true).sendToServer())
-								.setEnabled(!group.isFirstGroup())
-								.setCloseMenu(false),
-						new ContextMenuItem(Component.translatable("gui.move"), ThemeProperties.MOVE_DOWN_ICON.get(),
-								b -> new MoveChapterGroupMessage(group.id, false).sendToServer())
-								.setEnabled(!group.isLastGroup())
-								.setCloseMenu(false)
-				)).openContextMenu(chapterPanel.questScreen);
-				return;
+				} else if (button.isRight() && !group.isDefaultGroup()) {
+					ContextMenuBuilder.create(group, chapterPanel.questScreen).insertAtTop(List.of(
+							new ContextMenuItem(Component.translatable("gui.move"), ThemeProperties.MOVE_UP_ICON.get(),
+									b -> new MoveChapterGroupMessage(group.id, true).sendToServer())
+									.setEnabled(!group.isFirstGroup())
+									.setCloseMenu(false),
+							new ContextMenuItem(Component.translatable("gui.move"), ThemeProperties.MOVE_DOWN_ICON.get(),
+									b -> new MoveChapterGroupMessage(group.id, false).sendToServer())
+									.setEnabled(!group.isLastGroup())
+									.setCloseMenu(false)
+					)).openContextMenu(chapterPanel.questScreen);
+					return;
+				}
 			}
 
 			group.toggleCollapsed();
 			parent.refreshWidgets();
+		}
+
+		private void showAddChapterDialog() {
+			playClickSound();
+
+			StringConfig c = new StringConfig(NON_EMPTY_PAT);
+			EditStringConfigOverlay<String> overlay = new EditStringConfigOverlay<>(parent.getParent(), c, accepted -> {
+				chapterPanel.questScreen.openGui();
+
+				if (accepted && !c.getValue().isEmpty()) {
+					Chapter chapter = new Chapter(0L, chapterPanel.questScreen.file, chapterPanel.questScreen.file.getDefaultChapterGroup());
+					chapter.setRawTitle(c.getValue());
+					CompoundTag extra = new CompoundTag();
+					extra.putLong("group", group.id);
+					new CreateObjectMessage(chapter, extra).sendToServer();
+				}
+
+				run();
+			}, Component.translatable("ftbquests.chapter")).atMousePosition();
+			overlay.setWidth(150);
+			overlay.setExtraZlevel(Z_LEVEL + 10);
+			getGui().pushModalPanel(overlay);
 		}
 
 		@Override
