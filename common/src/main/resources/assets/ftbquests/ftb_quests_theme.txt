@@ -1,6 +1,8 @@
 [*]
 background:          ftblibrary:textures/gui/background_squares.png; color=#DCFFFFFF; tile_size=64
 extra_quest_shapes:  diamond, pentagon, hexagon, octagon, heart, gear
+selected_chapter_highlight_1: #60999999
+selected_chapter_highlight_2: #28999999
 
 text_color:          #FFFFFF
 hover_text_color:    #FFFFA0

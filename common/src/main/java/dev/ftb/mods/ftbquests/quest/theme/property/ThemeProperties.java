@@ -19,6 +19,8 @@ public interface ThemeProperties {
 	// Main GUI //
 	IconProperty BACKGROUND = new IconProperty("background");
 	StringProperty EXTRA_QUEST_SHAPES = new StringProperty("extra_quest_shapes");
+	ColorProperty SELECTED_HILITE_1 = new ColorProperty("selected_chapter_highlight_1");
+	ColorProperty SELECTED_HILITE_2 = new ColorProperty("selected_chapter_highlight_2");
 
 	// Text Color //
 	ColorProperty TEXT_COLOR = new ColorProperty("text_color");
