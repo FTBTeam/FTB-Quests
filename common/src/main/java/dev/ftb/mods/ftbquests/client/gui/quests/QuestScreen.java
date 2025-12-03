@@ -262,11 +262,11 @@ public class QuestScreen extends BaseScreen {
 				};
 		if (selectedChapter != null) {
 			if (selectedChapter.isAutofocus(object.id)) {
-				contextMenu.add(new ContextMenuItem(Component.translatable("ftbquest.gui.clear_autofocused"),
+				contextMenu.add(new ContextMenuItem(Component.translatable("ftbquests.gui.clear_autofocused"),
 						Icons.MARKER,
 						b -> setAutofocusedId(0L)));
 			} else if (object instanceof Quest || object instanceof QuestLink) {
-				contextMenu.add(new ContextMenuItem(Component.translatable("ftbquest.gui.set_autofocused"),
+				contextMenu.add(new ContextMenuItem(Component.translatable("ftbquests.gui.set_autofocused"),
 						Icons.MARKER,
 						b -> setAutofocusedId(object.id)));
 			}
