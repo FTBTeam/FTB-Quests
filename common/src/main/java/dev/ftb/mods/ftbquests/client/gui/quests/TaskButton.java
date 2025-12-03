@@ -15,6 +15,7 @@ import dev.ftb.mods.ftbquests.client.gui.ContextMenuBuilder;
 import dev.ftb.mods.ftbquests.integration.item_filtering.ItemMatchingSystem;
 import dev.ftb.mods.ftbquests.net.EditObjectMessage;
 import dev.ftb.mods.ftbquests.net.GiveItemToPlayerMessage;
+import dev.ftb.mods.ftbquests.net.ReorderItemMessage;
 import dev.ftb.mods.ftbquests.quest.task.ItemTask;
 import dev.ftb.mods.ftbquests.quest.task.Task;
 import dev.ftb.mods.ftbquests.quest.theme.property.ThemeProperties;
@@ -68,6 +69,13 @@ public class TaskButton extends Button {
 			playClickSound();
 
 			ContextMenuBuilder builder = ContextMenuBuilder.create(task, questScreen);
+
+			builder.insertAtTop(List.of(new ContextMenuItem(Component.translatable("ftbquests.gui.move_left"), Icons.LEFT,
+					b -> new ReorderItemMessage(task.getId(), false).sendToServer()
+			)));
+			builder.insertAtTop(List.of(new ContextMenuItem(Component.translatable("ftbquests.gui.move_right"), Icons.RIGHT,
+					b -> new ReorderItemMessage(task.getId(), true).sendToServer()
+			)));
 
 			if (task instanceof ItemTask itemTask && !itemTask.getItemStack().isEmpty()) {
 				var tags = itemTask.getItemStack().getItem().builtInRegistryHolder().tags().toList();

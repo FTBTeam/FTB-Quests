@@ -42,6 +42,7 @@ public interface FTBQuestsNetHandler {
 	MessageType TASK_SCREEN_CONFIG_REQ = NET.registerS2C("task_screen_config_req", TaskScreenConfigRequest::new);
 	MessageType TASK_SCREEN_CONFIG_RESP = NET.registerC2S("task_screen_config_resp", TaskScreenConfigResponse::new);
 	MessageType GIVE_ITEM_TO_PLAYER = NET.registerC2S("give_item_to_player", GiveItemToPlayerMessage::new);
+	MessageType REORDER_ITEM = NET.registerC2S("reorder_item", ReorderItemMessage::new);
 
 	MessageType CHANGE_PROGRESS = NET.registerC2S("change_progress", ChangeProgressMessage::new);
 	MessageType CREATE_OBJECT = NET.registerC2S("create_object", CreateObjectMessage::new);
@@ -68,6 +69,7 @@ public interface FTBQuestsNetHandler {
 	MessageType SYNC_EDITOR_PERMISSION = NET.registerS2C("sync_editor_permission", SyncEditorPermissionMessage::new);
 	MessageType OPEN_QUEST_BOOK = NET.registerS2C("open_quest_book", OpenQuestBookMessage::new);
 	MessageType CLEAR_DISPLAY_CACHE = NET.registerS2C("clear_display_cache", ClearDisplayCacheMessage::new);
+	MessageType REORDER_ITEM_RESPONSE = NET.registerS2C("reorder_item_response", ReorderItemResponseMessage::new);
 
 	static void init() {
 	}

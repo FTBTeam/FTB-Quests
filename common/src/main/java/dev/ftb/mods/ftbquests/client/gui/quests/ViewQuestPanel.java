@@ -23,6 +23,7 @@ import dev.ftb.mods.ftbquests.client.ClientQuestFile;
 import dev.ftb.mods.ftbquests.client.gui.ImageComponentWidget;
 import dev.ftb.mods.ftbquests.client.gui.MultilineTextEditorScreen;
 import dev.ftb.mods.ftbquests.net.EditObjectMessage;
+import dev.ftb.mods.ftbquests.net.ReorderItemMessage;
 import dev.ftb.mods.ftbquests.net.TogglePinnedMessage;
 import dev.ftb.mods.ftbquests.quest.Quest;
 import dev.ftb.mods.ftbquests.quest.QuestLink;
@@ -64,6 +65,7 @@ public class ViewQuestPanel extends ModalPanel {
 	private Button buttonOpenDependencies;
 	private BlankPanel panelContent;
 	private BlankPanel panelTasks;
+	private BlankPanel panelRewards;
 	private BlankPanel panelText;
 	private TextField titleField;
 	private final List<Pair<Integer,Integer>> pageIndices = new ArrayList<>();
@@ -165,7 +167,6 @@ public class ViewQuestPanel extends ModalPanel {
 
 		add(panelContent = new BlankPanel(this, "ContentPanel"));
 		panelContent.add(panelTasks = new BlankPanel(panelContent, "TasksPanel"));
-		BlankPanel panelRewards;
 		panelContent.add(panelRewards = new BlankPanel(panelContent, "RewardsPanel"));
 		panelContent.add(panelText = new BlankPanel(panelContent, "TextPanel"));
 
@@ -585,16 +586,38 @@ public class ViewQuestPanel extends ModalPanel {
 				editDescLine0(this, -1, new ImageComponent());
 			} else if (key.is(GLFW.GLFW_KEY_Q)) {
 				quest.onEditButtonClicked(questScreen);
+			} else if (key.is(GLFW.GLFW_KEY_LEFT)) {
+				moveTasksAndRewards(false);
+			} else if (key.is(GLFW.GLFW_KEY_RIGHT)) {
+				moveTasksAndRewards(true);
+			}
+		} else {
+			if (key.is(GLFW.GLFW_KEY_PAGE_UP) || key.is(GLFW.GLFW_KEY_LEFT)) {
+				setCurrentPage(Math.max(0, getCurrentPage() - 1));
+				refreshWidgets();
+			} else if (key.is(GLFW.GLFW_KEY_PAGE_DOWN) || key.is(GLFW.GLFW_KEY_RIGHT)) {
+				setCurrentPage(Math.min(pageIndices.size() - 1, getCurrentPage() + 1));
+				refreshWidgets();
 			}
 		}
+	}
 
-		if (key.is(GLFW.GLFW_KEY_PAGE_UP) || key.is(GLFW.GLFW_KEY_LEFT)) {
-			setCurrentPage(Math.max(0, getCurrentPage() - 1));
-			refreshWidgets();
-		} else if (key.is(GLFW.GLFW_KEY_PAGE_DOWN) || key.is(GLFW.GLFW_KEY_RIGHT)) {
-			setCurrentPage(Math.min(pageIndices.size() - 1, getCurrentPage() + 1));
-			refreshWidgets();
+	private void moveTasksAndRewards(boolean moveRight) {
+		for (Panel panel : List.of(panelTasks, panelRewards)) {
+			for (Widget w : panel.getWidgets()) {
+				if (w instanceof TaskButton b && b.isMouseOver()) {
+					new ReorderItemMessage(b.task.getId(), moveRight).sendToServer();
+					return;
+				} else if (w instanceof RewardButton b && b.isMouseOver()) {
+					new ReorderItemMessage(b.reward.getId(), moveRight).sendToServer();
+					return;
+				}
+			}
 		}
+		// mouse not over a task or reward? just do a page forward/backward as normal
+		int newPage = Mth.clamp(getCurrentPage() + (moveRight ? 1 : -1), 0, pageIndices.size() - 1);
+		setCurrentPage(newPage);
+		refreshWidgets();
 	}
 
 	private void editTitle() {
