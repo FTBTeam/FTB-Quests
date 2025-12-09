@@ -1156,23 +1156,54 @@ public final class Quest extends QuestObject implements Movable, Excludable {
 			return false;
 		}
 
-		int nExcluded = 0;
+		int nValidPaths = 0;
+		int nQuestDeps = 0;
+
 		for (QuestObject qo : dependencies) {
 			if (qo instanceof Quest dependency) {
+				nQuestDeps++;
+
+				// If this dependency is completed, we have a valid path through it
+				if (teamData.isCompleted(dependency)) {
+					nValidPaths++;
+					continue;
+				}
+
+				// Check if this dependency is blocked by maxCompletableDeps
+				boolean blockedByMaxCompletable = false;
 				if (!dependency.dependantIDs.isEmpty() && dependency.maxCompletableDeps > 0) {
 					long completed = dependency.getDependants().stream().filter(teamData::isCompleted).count();
-					if (completed >= dependency.maxCompletableDeps && !teamData.isCompleted(this)) {
-						return true;
+					if (completed >= dependency.maxCompletableDeps) {
+						blockedByMaxCompletable = true;
 					}
 				}
-				// note: this effectively recurses, but the results are cached in TeamData to avoid excessive recursion
-				if (teamData.isExcludedByOtherQuestline(dependency)) {
-					nExcluded++;
+
+				// If not blocked by maxCompletableDeps and not excluded by other questline, it's a valid path
+				// note: isExcludedByOtherQuestline effectively recurses, but results are cached in TeamData
+				if (!blockedByMaxCompletable && !teamData.isExcludedByOtherQuestline(dependency)) {
+					nValidPaths++;
 				}
 			}
 		}
 
-		return nExcluded == dependencies.size();
+		// If there are no quest dependencies, we're not excluded
+		if (nQuestDeps == 0) {
+			return false;
+		}
+
+		// Determine how many valid paths we need
+		// minRequiredDependencies takes priority if set, otherwise check dependencyRequirement
+		int requiredPaths;
+		if (minRequiredDependencies > 0) {
+			requiredPaths = minRequiredDependencies;
+		} else if (dependencyRequirement.needOnlyOne()) {
+			requiredPaths = 1;
+		} else {
+			requiredPaths = nQuestDeps;
+		}
+
+		// We're excluded if we don't have enough valid paths
+		return nValidPaths < requiredPaths;
 	}
 
 	public boolean isExclusiveQuest() {
