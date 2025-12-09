@@ -1156,23 +1156,52 @@ public final class Quest extends QuestObject implements Movable, Excludable {
 			return false;
 		}
 
-		int nExcluded = 0;
+		int nValidPaths = 0;
+		int nQuestDeps = 0;
+
 		for (QuestObject qo : dependencies) {
 			if (qo instanceof Quest dependency) {
+				nQuestDeps++;
+
+				// Check if this dependency is blocked by maxCompletableDeps
+				boolean blockedByMaxCompletable = false;
 				if (!dependency.dependantIDs.isEmpty() && dependency.maxCompletableDeps > 0) {
 					long completed = dependency.getDependants().stream().filter(teamData::isCompleted).count();
 					if (completed >= dependency.maxCompletableDeps && !teamData.isCompleted(this)) {
-						return true;
+						blockedByMaxCompletable = true;
 					}
 				}
-				// note: this effectively recurses, but the results are cached in TeamData to avoid excessive recursion
-				if (teamData.isExcludedByOtherQuestline(dependency)) {
-					nExcluded++;
+
+				if (blockedByMaxCompletable) {
+					continue;
+				}
+
+				if (teamData.isCompleted(dependency)) {
+					nValidPaths++;
+					continue;
+				}
+
+				// note: isExcludedByOtherQuestline effectively recurses, but results are cached in TeamData
+				if (!teamData.isExcludedByOtherQuestline(dependency)) {
+					nValidPaths++;
 				}
 			}
 		}
 
-		return nExcluded == dependencies.size();
+		if (nQuestDeps == 0) {
+			return false;
+		}
+
+		int requiredPaths;
+		if (minRequiredDependencies > 0) {
+			requiredPaths = minRequiredDependencies;
+		} else if (dependencyRequirement.needOnlyOne()) {
+			requiredPaths = 1;
+		} else {
+			requiredPaths = nQuestDeps;
+		}
+
+		return nValidPaths < requiredPaths;
 	}
 
 	public boolean isExclusiveQuest() {

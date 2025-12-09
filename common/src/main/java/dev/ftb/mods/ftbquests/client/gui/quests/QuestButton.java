@@ -356,7 +356,7 @@ public class QuestButton extends Button implements QuestPositionableButton {
 		TeamData teamData = questScreen.file.selfTeamData;
 		boolean isCompleted = teamData.isCompleted(quest);
 		boolean isStarted = isCompleted || teamData.isStarted(quest);
-		boolean canStart = teamData.areDependenciesComplete(quest) && !teamData.isExcludedByOtherQuestline(quest) && teamData.getMilliSecondsUntilRepeatable(quest) == 0L;
+		boolean canStart = teamData.canStartTasks(quest);
 		Player player = Minecraft.getInstance().player;
 
 		if (canStart) {
