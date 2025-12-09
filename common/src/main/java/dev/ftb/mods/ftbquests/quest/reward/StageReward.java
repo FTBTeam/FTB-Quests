@@ -3,6 +3,8 @@ package dev.ftb.mods.ftbquests.quest.reward;
 import dev.ftb.mods.ftblibrary.config.ConfigGroup;
 import dev.ftb.mods.ftblibrary.integration.stages.StageHelper;
 import dev.ftb.mods.ftbquests.quest.Quest;
+import dev.ftb.mods.ftbteams.api.FTBTeamsAPI;
+import dev.ftb.mods.ftbteams.api.TeamStagesHelper;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.ChatFormatting;
@@ -74,17 +76,24 @@ public class StageReward extends Reward {
 	@Override
 	public void claim(ServerPlayer player, boolean notify) {
 		if (remove) {
-			StageHelper.INSTANCE.getProvider().remove(player, stage);
+			if (isTeamReward()) {
+				FTBTeamsAPI.api().getManager().getTeamForPlayer(player)
+						.ifPresent(team -> TeamStagesHelper.removeTeamStage(team, stage));
+			} else {
+				StageHelper.INSTANCE.getProvider().remove(player, stage);
+			}
 		} else {
-			StageHelper.INSTANCE.getProvider().add(player, stage);
+			if (isTeamReward()) {
+				FTBTeamsAPI.api().getManager().getTeamForPlayer(player)
+						.ifPresent(team -> TeamStagesHelper.addTeamStage(team, stage));
+			} else {
+				StageHelper.INSTANCE.getProvider().add(player, stage);
+			}
 		}
 
 		if (notify) {
-			if (remove) {
-				player.sendSystemMessage(Component.translatable("commands.gamestage.remove.target", stage), true);
-			} else {
-				player.sendSystemMessage(Component.translatable("commands.gamestage.add.target", stage), true);
-			}
+			String key = (remove ? "removed" : "added") + (isTeamReward() ? "_team" : "");
+			player.sendSystemMessage(Component.translatable("ftbquests.reward.ftbquests.gamestage." + key, stage), true);
 		}
 	}
 
