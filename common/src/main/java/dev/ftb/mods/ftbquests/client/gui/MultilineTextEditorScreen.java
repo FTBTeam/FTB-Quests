@@ -380,6 +380,7 @@ public class MultilineTextEditorScreen extends BaseScreen {
 			super(outerPanel);
 		}
 		private int cursorPos;
+		private int lastWidth = -1;
 
 		@Override
 		public void addWidgets() {
@@ -395,8 +396,14 @@ public class MultilineTextEditorScreen extends BaseScreen {
 
 		@Override
 		public void alignWidgets() {
-			textBox.setWidth(width - 3);  // also forces height recalculation based on contents
-			setScrollY(0);
+			int newWidth = width - 3;
+			// Only update width if it actually changed - calling setWidth() recreates the internal
+			// MultilineTextField which can cause text to disappear when word wrapping occurs
+			if (newWidth != lastWidth) {
+				lastWidth = newWidth;
+				textBox.setWidth(newWidth);
+				setScrollY(0);
+			}
 			textBox.seekCursor(Whence.ABSOLUTE, cursorPos);
 		}
 
