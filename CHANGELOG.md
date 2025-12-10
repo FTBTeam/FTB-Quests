@@ -12,6 +12,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   * Added "Team Stage" boolean option (default false) for Stage Tasks to check for a team stage instead of player-based game stage
   * Stage Reward now grants a team stage if "Team Reward" is true
 
+### Fixed
+* Fixed some logic errors related to quest exclusion and flexible mode
+* Fixed UI bug causing multiline text boxes to sometimes go blank
+
 ## [2101.1.19]
 
 ### Changed
