@@ -11,6 +11,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   * These are like gamestages, but per-team instead of per-player
   * Added "Team Stage" boolean option (default false) for Stage Tasks to check for a team stage instead of player-based game stage
   * Stage Reward now grants a team stage if "Team Reward" is true
+* The text color for not-started chapters in the left-hand chapter panel is now themable
+  * It uses the `quest_not_started_color` value from `ftb_quests_theme.txt` (default is white as before)
 
 ### Fixed
 * Fixed some logic errors related to quest exclusion and flexible mode
