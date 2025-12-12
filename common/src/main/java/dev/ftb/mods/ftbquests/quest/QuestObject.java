@@ -112,7 +112,7 @@ public abstract class QuestObject extends QuestObjectBase {
 			return ThemeProperties.QUEST_STARTED_COLOR.get();
 		}
 
-		return Color4I.WHITE;
+		return ThemeProperties.QUEST_NOT_STARTED_COLOR.get();
 	}
 
 	@Environment(EnvType.CLIENT)
