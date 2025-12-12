@@ -6,6 +6,8 @@ import dev.ftb.mods.ftblibrary.integration.stages.StageHelper;
 import dev.ftb.mods.ftbquests.quest.Quest;
 import dev.ftb.mods.ftbquests.quest.ServerQuestFile;
 import dev.ftb.mods.ftbquests.quest.TeamData;
+import dev.ftb.mods.ftbteams.api.FTBTeamsAPI;
+import dev.ftb.mods.ftbteams.api.TeamStagesHelper;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.ChatFormatting;
@@ -18,6 +20,7 @@ import net.minecraft.server.level.ServerPlayer;
 
 public class StageTask extends AbstractBooleanTask {
 	private String stage = "";
+	private boolean teamStage = false;
 
 	public StageTask(long id, Quest quest) {
 		super(id, quest);
@@ -32,24 +35,30 @@ public class StageTask extends AbstractBooleanTask {
 	public void writeData(CompoundTag nbt, HolderLookup.Provider provider) {
 		super.writeData(nbt, provider);
 		nbt.putString("stage", stage);
+		if (teamStage) {
+			nbt.putBoolean("team_stage", true);
+		}
 	}
 
 	@Override
 	public void readData(CompoundTag nbt, HolderLookup.Provider provider) {
 		super.readData(nbt, provider);
 		stage = nbt.getString("stage");
+		teamStage = nbt.getBoolean("team_stage");
 	}
 
 	@Override
 	public void writeNetData(RegistryFriendlyByteBuf buffer) {
 		super.writeNetData(buffer);
 		buffer.writeUtf(stage, Short.MAX_VALUE);
+		buffer.writeBoolean(teamStage);
 	}
 
 	@Override
 	public void readNetData(RegistryFriendlyByteBuf buffer) {
 		super.readNetData(buffer);
 		stage = buffer.readUtf(Short.MAX_VALUE);
+		teamStage = buffer.readBoolean();
 	}
 
 	@Override
@@ -57,6 +66,7 @@ public class StageTask extends AbstractBooleanTask {
 	public void fillConfigGroup(ConfigGroup config) {
 		super.fillConfigGroup(config);
 		config.addString("stage", stage, v -> stage = v, "").setNameKey("ftbquests.task.ftbquests.gamestage");
+		config.addBool("team_stage", teamStage, v -> teamStage = v, false);
 	}
 
 	@Override
@@ -72,8 +82,14 @@ public class StageTask extends AbstractBooleanTask {
 
 	@Override
 	public boolean canSubmit(TeamData teamData, ServerPlayer player) {
-		return StageHelper.INSTANCE.getProvider().has(player, stage);
-	}
+        if (teamStage) {
+			return FTBTeamsAPI.api().getManager().getTeamByID(teamData.getTeamId())
+					.map(team -> TeamStagesHelper.hasTeamStage(team, stage))
+					.orElse(false);
+		} else {
+			return StageHelper.INSTANCE.getProvider().has(player, stage);
+		}
+    }
 
 	@SuppressWarnings("unused")
 	public static void checkStages(ServerPlayer player) {
