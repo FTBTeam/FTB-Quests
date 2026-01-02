@@ -147,7 +147,7 @@ public class ItemTask extends Task implements Predicate<ItemStack> {
 	}
 
 	public List<ItemStack> getValidDisplayItems() {
-		return ItemMatchingSystem.INSTANCE.getAllMatchingStacks(itemStack);
+		return ItemMatchingSystem.INSTANCE.getAllMatchingStacks(itemStack, getQuestFile().holderLookup());
 	}
 
 	@Override
@@ -188,7 +188,7 @@ public class ItemTask extends Task implements Predicate<ItemStack> {
 			return true;
 		}
 
-		return ItemMatchingSystem.INSTANCE.doesItemMatch(itemStack, stack, matchComponents);
+		return ItemMatchingSystem.INSTANCE.doesItemMatch(itemStack, stack, matchComponents, getQuestFile().holderLookup());
 	}
 
 	@Override

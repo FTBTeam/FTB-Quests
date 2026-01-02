@@ -6,6 +6,7 @@ import dev.ftb.mods.ftbquests.api.ItemFilterAdapter;
 import dev.ftb.mods.ftbquests.api.event.CustomFilterDisplayItemsEvent;
 import dev.ftb.mods.ftbquests.client.FTBQuestsClient;
 import it.unimi.dsi.fastutil.ints.Int2ObjectLinkedOpenHashMap;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.world.item.CreativeModeTabs;
 import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.NotNull;
@@ -18,12 +19,12 @@ public class DisplayStacksCache {
     private static List<ItemStack> extraCache = null;
 
     @NotNull
-    public static List<ItemStack> getCachedDisplayStacks(ItemStack filterStack, ItemFilterAdapter adapter) {
+    public static List<ItemStack> getCachedDisplayStacks(ItemStack filterStack, ItemFilterAdapter adapter, HolderLookup.Provider registryAccess) {
         int key = ItemStack.hashItemAndComponents(filterStack);
 
         List<ItemStack> result = cache.getAndMoveToFirst(key);
         if (result == null) {
-            result = computeMatchingStacks(adapter.getMatcher(filterStack));
+            result = computeMatchingStacks(adapter.getMatcher(filterStack, registryAccess));
             cache.put(key, result);
             if (cache.size() >= MAX_CACHE_SIZE) {
                 cache.removeLast();
