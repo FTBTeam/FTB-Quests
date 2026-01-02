@@ -1,5 +1,6 @@
 package dev.ftb.mods.ftbquests.api;
 
+import net.minecraft.core.HolderLookup;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
@@ -35,7 +36,7 @@ public interface ItemFilterAdapter {
      * @param toCheck the itemstack to check
      * @return true if the first item is a filter stack AND the second item is matched by it
      */
-    boolean doesItemMatch(ItemStack filterStack, ItemStack toCheck);
+    boolean doesItemMatch(ItemStack filterStack, ItemStack toCheck, HolderLookup.Provider registryAccess);
 
     /**
      * Retrieve the actual item matcher from this filter implementation, which is basically a predicate that can
@@ -45,7 +46,7 @@ public interface ItemFilterAdapter {
      * @param filterStack the filter item (note: the filter, not the item to be tested!)
      * @return a matcher object
      */
-    Matcher getMatcher(ItemStack filterStack);
+    Matcher getMatcher(ItemStack filterStack,  HolderLookup.Provider registryAccess);
 
     /**
      * Does this filter mod provide a way to filter items by item tag?
