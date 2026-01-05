@@ -13,10 +13,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   * Stage Reward now grants a team stage if "Team Reward" is true
 * The text color for not-started chapters in the left-hand chapter panel is now themable
   * It uses the `quest_not_started_color` value from `ftb_quests_theme.txt` (default is white as before)
+* Added a "Copy ID" menu item to the context menu in the Reward Table editor screen
+
+### Changed
+* FTB XMod Compat 21.1.7+ is now required, if that mod is in your instance
+* The entity selector screen for the Kill task now shows entity ID's as well as the display name
+  * It's entirely possible for two mods to use the same display name for two different entities, leading to confusion
+* The `/ftbquests generate_chapter_with_all_items_in_game` command has been overhauled and improved:
+  * `/ftbquests generate_chapter from_entire_creative_list` - replaces the above command.  Beware: this command can cause a lot of server lag!
+  * `/ftbquests generate_chapter from_inventory` - creates a new chapter with an item task & quest for each item in the inventory a player is looking at
+  * `/ftbquests generate_chapter from_player_inventory` - creates a new chapter with an item task & quest for each item in the player's inventory/hotbar (not armor slots)
 
 ### Fixed
 * Fixed some logic errors related to quest exclusion and flexible mode
-* Fixed UI bug causing multiline text boxes to sometimes go blank
+* Fixed UI bug causing the multiline text box editor to occasionally go blank
 
 ## [2101.1.19]
 
