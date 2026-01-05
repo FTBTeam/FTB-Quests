@@ -37,6 +37,7 @@ import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.block.model.BakedQuad;
+import net.minecraft.client.renderer.chunk.ChunkSectionLayer;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.core.BlockPos;
@@ -44,7 +45,7 @@ import net.minecraft.core.Direction;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.packs.PackType;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.InteractionHand;
@@ -99,13 +100,13 @@ public class FTBQuestsClient {
 	}
 
 	private static void onClientSetup(Minecraft minecraft) {
-		RenderTypeRegistry.register(RenderType.translucent(), ModBlocks.BARRIER.get());
-		RenderTypeRegistry.register(RenderType.translucent(), ModBlocks.STAGE_BARRIER.get());
-		RenderTypeRegistry.register(RenderType.solid(), ModBlocks.TASK_SCREEN_1.get());
-		RenderTypeRegistry.register(RenderType.solid(), ModBlocks.TASK_SCREEN_3.get());
-		RenderTypeRegistry.register(RenderType.solid(), ModBlocks.TASK_SCREEN_5.get());
-		RenderTypeRegistry.register(RenderType.solid(), ModBlocks.TASK_SCREEN_7.get());
-		RenderTypeRegistry.register(RenderType.solid(), ModBlocks.AUX_SCREEN.get());
+		RenderTypeRegistry.register(ChunkSectionLayer.TRANSLUCENT, ModBlocks.BARRIER.get());
+		RenderTypeRegistry.register(ChunkSectionLayer.TRANSLUCENT, ModBlocks.STAGE_BARRIER.get());
+		RenderTypeRegistry.register(ChunkSectionLayer.SOLID, ModBlocks.TASK_SCREEN_1.get());
+		RenderTypeRegistry.register(ChunkSectionLayer.SOLID, ModBlocks.TASK_SCREEN_3.get());
+		RenderTypeRegistry.register(ChunkSectionLayer.SOLID, ModBlocks.TASK_SCREEN_5.get());
+		RenderTypeRegistry.register(ChunkSectionLayer.SOLID, ModBlocks.TASK_SCREEN_7.get());
+		RenderTypeRegistry.register(ChunkSectionLayer.SOLID, ModBlocks.AUX_SCREEN.get());
 		GuiProviders.setTaskGuiProviders();
 		GuiProviders.setRewardGuiProviders();
 	}
@@ -148,7 +149,7 @@ public class FTBQuestsClient {
 		config.onClicked(null, MouseButton.LEFT, accepted -> {
 			if (accepted) {
 				// TODO minor code smell here
-				if (config.getValue() instanceof ResourceLocation rl) {
+				if (config.getValue() instanceof Identifier rl) {
 					CustomIconItem.setIcon(player.getItemInHand(hand), config.isEmpty() ? null : rl);
 					NetworkManager.sendToServer(new SetCustomImageMessage(hand, false, rl));
 				} else if (config.getValue() instanceof EntityType<?> et) {
@@ -221,10 +222,10 @@ public class FTBQuestsClient {
 	}
 
 	static void showCompletionToast(QuestObject qo) {
-		Minecraft.getInstance().getToasts().addToast(new ToastQuestObject(qo));
+		Minecraft.getInstance().getToastManager().addToast(new ToastQuestObject(qo));
 	}
 
 	static void showRewardToast(Component text, Icon icon) {
-		Minecraft.getInstance().getToasts().addToast(new RewardToast(text, icon));
+		Minecraft.getInstance().getToastManager().addToast(new RewardToast(text, icon));
 	}
 }

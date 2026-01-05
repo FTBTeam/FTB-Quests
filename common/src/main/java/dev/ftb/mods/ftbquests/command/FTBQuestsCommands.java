@@ -22,7 +22,8 @@ import dev.ftb.mods.ftbquests.quest.translation.TranslationKey;
 import dev.ftb.mods.ftbquests.util.InventoryUtil;
 import dev.ftb.mods.ftbquests.util.ProgressChange;
 import net.minecraft.ChatFormatting;
-import net.minecraft.Util;
+import net.minecraft.server.permissions.Permissions;
+import net.minecraft.util.Util;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.arguments.EntityArgument;
 import net.minecraft.commands.arguments.coordinates.BlockPosArgument;
@@ -31,7 +32,7 @@ import net.minecraft.core.Direction;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.item.CreativeModeTabs;
@@ -198,7 +199,7 @@ public class FTBQuestsCommands {
 
 	private static boolean hasEditorPermission(CommandSourceStack stack) {
 		//noinspection DataFlowIssue
-		return stack.hasPermission(2)
+		return stack.permissions().hasPermission(Permissions.COMMANDS_GAMEMASTER)
 				|| stack.isPlayer() && PermissionsHelper.hasEditorPermission(stack.getPlayer(), false);
 	}
 
@@ -427,7 +428,7 @@ public class FTBQuestsCommands {
 		String modid = null;
 
 		for (ItemStack stack : list) {
-			ResourceLocation id = RegistrarManager.getId(stack.getItem(), Registries.ITEM);
+			Identifier id = RegistrarManager.getId(stack.getItem(), Registries.ITEM);
 			if (modid == null) {
 				modid = id.getNamespace();
 			}

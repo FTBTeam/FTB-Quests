@@ -37,8 +37,8 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.InventoryMenu;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.gamerules.GameRules;
 
 import java.util.List;
 
@@ -199,16 +199,16 @@ public enum FTBQuestsEventHandler {
 			return;
 		}
 
-		if (PlayerHooks.isFake(newPlayer) || newPlayer.level().getGameRules().getBoolean(GameRules.RULE_KEEPINVENTORY)) {
+		if (PlayerHooks.isFake(newPlayer) || newPlayer.level().getGameRules().get(GameRules.KEEP_INVENTORY)) {
 			return;
 		}
 
 		if (!ServerQuestFile.INSTANCE.dropBookOnDeath()) {
-			for (int i = 0; i < oldPlayer.getInventory().items.size(); i++) {
-				ItemStack stack = oldPlayer.getInventory().items.get(i);
+			for (int i = 0; i < oldPlayer.getInventory().getContainerSize(); i++) {
+				ItemStack stack = oldPlayer.getInventory().getItem(i);
 
 				if (stack.getItem() == ModItems.BOOK.get() && newPlayer.addItem(stack)) {
-					oldPlayer.getInventory().items.set(i, ItemStack.EMPTY);
+					oldPlayer.getInventory().setItem(i, ItemStack.EMPTY);
 				}
 			}
 		}

@@ -12,7 +12,7 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.stats.Stats;
 import net.minecraft.world.item.ItemStack;
@@ -21,7 +21,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class StatTask extends Task {
-	private ResourceLocation stat;
+	private Identifier stat;
 	private int value = 1;
 
 	public StatTask(long id, Quest quest) {
@@ -59,21 +59,21 @@ public class StatTask extends Task {
 	@Override
 	public void readData(CompoundTag nbt, HolderLookup.Provider provider) {
 		super.readData(nbt, provider);
-		stat = ResourceLocation.tryParse(nbt.getString("stat"));
+		stat = Identifier.tryParse(nbt.getString("stat"));
 		value = nbt.getInt("value");
 	}
 
 	@Override
 	public void writeNetData(RegistryFriendlyByteBuf buffer) {
 		super.writeNetData(buffer);
-		buffer.writeResourceLocation(stat);
+		buffer.writeIdentifier(stat);
 		buffer.writeVarInt(value);
 	}
 
 	@Override
 	public void readNetData(RegistryFriendlyByteBuf buffer) {
 		super.readNetData(buffer);
-		stat = buffer.readResourceLocation();
+		stat = buffer.readIdentifier();
 		value = buffer.readVarInt();
 	}
 
@@ -82,7 +82,7 @@ public class StatTask extends Task {
 	public void fillConfigGroup(ConfigGroup config) {
 		super.fillConfigGroup(config);
 
-		List<ResourceLocation> list = new ArrayList<>();
+		List<Identifier> list = new ArrayList<>();
 		Stats.CUSTOM.iterator().forEachRemaining(s -> list.add(s.getValue()));
 		config.addEnum("stat", stat, v -> stat = v, NameMap.of(Stats.MOB_KILLS, list).name(v -> Component.translatable("stat." + v.getNamespace() + "." + v.getPath())).create());
 		config.addInt("value", value, v -> value = v, 1, 1, Integer.MAX_VALUE);
@@ -105,11 +105,11 @@ public class StatTask extends Task {
 			return;
 		}
 
-		ResourceLocation statId = BuiltInRegistries.CUSTOM_STAT.get(stat);
+		Identifier statId = BuiltInRegistries.CUSTOM_STAT.get(stat);
 
 		// workaround for a bug where mods might register a modded stat in the vanilla namespace
 		//  https://github.com/FTBTeam/FTB-Mods-Issues/issues/724
-		if (statId == null) statId = BuiltInRegistries.CUSTOM_STAT.get(ResourceLocation.tryParse(stat.getPath()));
+		if (statId == null) statId = BuiltInRegistries.CUSTOM_STAT.get(Identifier.tryParse(stat.getPath()));
 
 		if (statId != null) {
 			// could be null, if someone brought an FTB Quests save from a different world and the stat's missing here

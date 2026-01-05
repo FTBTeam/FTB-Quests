@@ -7,6 +7,8 @@ import dev.ftb.mods.ftbquests.registry.ModBlockEntityTypes;
 import dev.ftb.mods.ftbquests.registry.ModDataComponents;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.HolderLookup;
+import net.minecraft.core.UUIDUtil;
+import net.minecraft.core.component.DataComponentGetter;
 import net.minecraft.core.component.DataComponentMap;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
@@ -16,6 +18,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.component.ItemContainerContents;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.storage.ValueOutput;
 
 import java.util.*;
 
@@ -48,27 +51,28 @@ public class LootCrateOpenerBlockEntity extends BlockEntity {
     }
 
     @Override
-    protected void saveAdditional(CompoundTag compoundTag, HolderLookup.Provider provider) {
-        super.saveAdditional(compoundTag, provider);
+    protected void saveAdditional(ValueOutput valueOutput) {
+        super.saveAdditional(valueOutput);
 
         ListTag itemTag = new ListTag();
         outputs.forEach((item, amount) -> {
             CompoundTag tag = new CompoundTag();
-            tag.put("item", item.stack.save(provider, new CompoundTag()));
+            tag.store("item", ItemStack.CODEC, item.stack);
             tag.putInt("amount", amount);
             itemTag.add(tag);
         });
-        if (!itemTag.isEmpty()) compoundTag.put("Items", itemTag);
 
-        if (owner != null) compoundTag.putUUID("Owner", owner);
+        // TODO: @since 21.11 figure out how we write lists.
+        if (!itemTag.isEmpty()) valueOutput.list("Items", itemTag);
+        if (owner != null) valueOutput.store("Owner", UUIDUtil.CODEC, owner);
     }
 
     @Override
-    protected void applyImplicitComponents(DataComponentInput dataComponentInput) {
-        super.applyImplicitComponents(dataComponentInput);
+    protected void applyImplicitComponents(DataComponentGetter dataComponentGetter) {
+        super.applyImplicitComponents(dataComponentGetter);
 
         outputs.clear();
-        dataComponentInput.getOrDefault(ModDataComponents.LOOT_CRATE_ITEMS.get(), ItemContainerContents.EMPTY)
+        dataComponentGetter.getOrDefault(ModDataComponents.LOOT_CRATE_ITEMS.get(), ItemContainerContents.EMPTY)
                 .stream().forEach(stack -> outputs.put(new ItemEntry(stack), stack.getCount()));
     }
 

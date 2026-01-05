@@ -3,20 +3,20 @@ package dev.ftb.mods.ftbquests.quest.reward;
 import dev.ftb.mods.ftblibrary.icon.Icon;
 import dev.ftb.mods.ftblibrary.icon.Icons;
 import dev.ftb.mods.ftbquests.api.FTBQuestsAPI;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.function.Supplier;
 
 public interface RewardTypes {
-	Map<ResourceLocation, RewardType> TYPES = new LinkedHashMap<>();
+	Map<Identifier, RewardType> TYPES = new LinkedHashMap<>();
 
-	static RewardType register(ResourceLocation name, RewardType.Provider typeProvider, Supplier<Icon> iconSupplier, boolean availableByDefault) {
+	static RewardType register(Identifier name, RewardType.Provider typeProvider, Supplier<Icon> iconSupplier, boolean availableByDefault) {
 		return TYPES.computeIfAbsent(name, id -> new RewardType(id, typeProvider, iconSupplier, availableByDefault));
 	}
 
-	static RewardType register(ResourceLocation name, RewardType.Provider typeProvider, Supplier<Icon> iconSupplier) {
+	static RewardType register(Identifier name, RewardType.Provider typeProvider, Supplier<Icon> iconSupplier) {
 		return register(name, typeProvider, iconSupplier, true);
 	}
 

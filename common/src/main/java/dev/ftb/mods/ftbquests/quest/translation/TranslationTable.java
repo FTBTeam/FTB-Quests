@@ -2,7 +2,7 @@ package dev.ftb.mods.ftbquests.quest.translation;
 
 import com.google.common.collect.Maps;
 import com.mojang.datafixers.util.Either;
-import net.minecraft.Util;
+import net.minecraft.util.Util;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.StringTag;

@@ -23,9 +23,10 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
@@ -42,16 +43,16 @@ import java.util.List;
 import java.util.Map;
 
 public class KillTask extends Task {
-	private static final ResourceLocation ZOMBIE = ResourceLocation.withDefaultNamespace("zombie");
+	private static final Identifier ZOMBIE = Identifier.withDefaultNamespace("zombie");
 
-	private static final Lazy<NameMap<ResourceLocation>> entityNameMap = Lazy.of(KillTask::scanEntityTypes);
+	private static final Lazy<NameMap<Identifier>> entityNameMap = Lazy.of(KillTask::scanEntityTypes);
 	private static final Lazy<NameMap<String>> entityTagMap = Lazy.of(KillTask::scanEntityTags);
 
-	private ResourceLocation entityTypeId = ZOMBIE;
+	private Identifier entityTypeId = ZOMBIE;
 	private TagKey<EntityType<?>> entityTypeTag = null;
 	private long value = 100L;
 	private String customName = "";
-	private static final Map<ResourceLocation,Icon> entityIcons = new HashMap<>();
+	private static final Map<Identifier,Icon> entityIcons = new HashMap<>();
 
 	public KillTask(long id, Quest quest) {
 		super(id, quest);
@@ -79,10 +80,10 @@ public class KillTask extends Task {
 	@Override
 	public void readData(CompoundTag nbt, HolderLookup.Provider provider) {
 		super.readData(nbt, provider);
-		entityTypeId = ResourceLocation.tryParse(nbt.getString("entity"));
-		entityTypeTag = parseTypeTag(nbt.getString("entityTypeTag"));
-		value = nbt.getLong("value");
-		customName = nbt.getString("custom_name");
+		entityTypeId = Identifier.tryParse(nbt.getString("entity").orElse(""));
+		entityTypeTag = parseTypeTag(nbt.getString("entityTypeTag").orElse(""));
+		value = nbt.getLong("value").orElse(0L);
+		customName = nbt.getString("custom_name").orElse("");
 	}
 
 	@Override
@@ -97,7 +98,7 @@ public class KillTask extends Task {
 	@Override
 	public void readNetData(RegistryFriendlyByteBuf buffer) {
 		super.readNetData(buffer);
-		entityTypeId = ResourceLocation.tryParse(buffer.readUtf());
+		entityTypeId = Identifier.tryParse(buffer.readUtf());
 		entityTypeTag = parseTypeTag(buffer.readUtf());
 		value = buffer.readVarInt();
 		customName = buffer.readUtf();
@@ -110,7 +111,7 @@ public class KillTask extends Task {
 		if (tag.startsWith("#")) {
 			tag = tag.substring(1);
 		}
-		ResourceLocation rl = ResourceLocation.tryParse(tag);
+		Identifier rl = Identifier.tryParse(tag);
         return rl == null || rl.getPath().isEmpty() ? null : TagKey.create(Registries.ENTITY_TYPE, rl);
     }
 
@@ -129,7 +130,7 @@ public class KillTask extends Task {
 		return entityTypeTag == null ? "" : entityTypeTag.location().toString();
 	}
 
-	private static Icon getIconForEntityType(ResourceLocation typeId) {
+	private static Icon getIconForEntityType(Identifier typeId) {
 		return entityIcons.computeIfAbsent(typeId, k -> {
 			EntityType<?> entityType = BuiltInRegistries.ENTITY_TYPE.get(typeId);
 			if (entityType.equals(EntityType.PLAYER)) {
@@ -137,7 +138,7 @@ public class KillTask extends Task {
 			}
 			Item item = SpawnEggItem.byId(entityType);
 			if (item == null) {
-				Entity e = entityType.create(FTBQuestsClient.getClientLevel());
+				Entity e = entityType.create(FTBQuestsClient.getClientLevel(), EntitySpawnReason.TRIGGERED);
 				if (e != null) {
 					ItemStack stack = e.getPickResult();
 					if (stack != null) item = stack.getItem();
@@ -177,10 +178,10 @@ public class KillTask extends Task {
 		}
 
 		List<Icon> icons = new ArrayList<>();
-		BuiltInRegistries.ENTITY_TYPE.getTag(entityTypeTag)
+		BuiltInRegistries.ENTITY_TYPE.get(entityTypeTag)
 				.ifPresent(set ->
 						set.forEach(holder ->
-								holder.unwrapKey().map(k -> icons.add(getIconForEntityType(k.location())))
+								holder.unwrapKey().map(k -> icons.add(getIconForEntityType(k.identifier())))
 						)
 				);
 		return icons.isEmpty() ? Icons.BARRIER : IconAnimation.fromList(icons, false);
@@ -206,15 +207,15 @@ public class KillTask extends Task {
 	private boolean nameMatchOK(LivingEntity e) {
 		return customName.isEmpty() ||
 				(e instanceof Player p ?
-						p.getGameProfile().getName().equals(customName) :
+						p.getGameProfile().name().equals(customName) :
 						e.getName().getString().equals(customName));
 	}
 
-	private static @NotNull NameMap<ResourceLocation> scanEntityTypes() {
-		List<ResourceLocation> ids = new ArrayList<>();
+	private static @NotNull NameMap<Identifier> scanEntityTypes() {
+		List<Identifier> ids = new ArrayList<>();
 		BuiltInRegistries.ENTITY_TYPE.forEach(type -> {
 			try {
-				if (type.create(FTBQuestsClient.getClientLevel()) instanceof LivingEntity) {
+				if (type.create(FTBQuestsClient.getClientLevel(), EntitySpawnReason.TRIGGERED) instanceof LivingEntity) {
 					ids.add(type.arch$registryName());
 				}
 			} catch (Exception e) {
@@ -236,7 +237,8 @@ public class KillTask extends Task {
 
 	private static @NotNull NameMap<String> scanEntityTags() {
 		List<String> tags = new ArrayList<>(List.of(""));
-		tags.addAll(BuiltInRegistries.ENTITY_TYPE.getTags().map(pair -> pair.getFirst().location().toString()).sorted().toList());
+        // TODO: @since 21.11 this has unsafe access to the location.
+		tags.addAll(BuiltInRegistries.ENTITY_TYPE.getTags().map(pair -> pair.unwrap().left().get().location().toString()).sorted().toList());
 		return NameMap.of("minecraft:zombies", tags).create();
 	}
 }

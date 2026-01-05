@@ -19,7 +19,7 @@ import dev.ftb.mods.ftbteams.api.FTBTeamsAPI;
 import dev.ftb.mods.ftbteams.api.Team;
 import it.unimi.dsi.fastutil.longs.*;
 import it.unimi.dsi.fastutil.objects.*;
-import net.minecraft.Util;
+import net.minecraft.util.Util;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.StringTag;
@@ -122,7 +122,8 @@ public class TeamData {
 
 	@NotNull
 	public static TeamData get(Player player) {
-		return FTBQuestsAPI.api().getQuestFile(player.getCommandSenderWorld().isClientSide()).getTeamData(player).orElseThrow();
+        // TODO: @since 21.11: verify if this is a good replacement for ".getCommandSenderWorld().isClientSide()"
+		return FTBQuestsAPI.api().getQuestFile(player.level().isClientSide()).getTeamData(player).orElseThrow();
 	}
 
 	public void markDirty() {
@@ -384,15 +385,15 @@ public class TeamData {
 	}
 
 	public void deserializeNBT(SNBTCompoundTag nbt) {
-		int fileVersion = nbt.getInt("version");
+		int fileVersion = nbt.getInt("version").orElse(VERSION);
 
 		if (fileVersion != VERSION) {
 			markDirty();
 		}
 
-		name = nbt.getString("name");
-		locked = nbt.getBoolean("lock");
-		rewardsBlocked = nbt.getBoolean("rewards_blocked");
+		name = nbt.getString("name").orElseThrow();
+		locked = nbt.getBoolean("lock").orElseThrow();
+		rewardsBlocked = nbt.getBoolean("rewards_blocked").orElseThrow();
 
 		readLongLongMap(nbt, taskProgress, "task_progress");
 		readLongLongMap(nbt, started, "started");
@@ -401,17 +402,17 @@ public class TeamData {
 		readLongIntMap(nbt, completionCount, "completion_count");
 
 		claimedRewards.clear();
-		CompoundTag claimedRewardsNBT = nbt.getCompound("claimed_rewards");
-		for (String s : claimedRewardsNBT.getAllKeys()) {
-			claimedRewards.put(QuestKey.fromString(s), claimedRewardsNBT.getLong(s));
+		CompoundTag claimedRewardsNBT = nbt.getCompound("claimed_rewards").orElse(new CompoundTag());
+		for (String s : claimedRewardsNBT.keySet()) {
+			claimedRewards.put(QuestKey.fromString(s), claimedRewardsNBT.getLong(s).orElse(0L));
 		}
 
 		perPlayerData.clear();
-		CompoundTag ppdTag = nbt.getCompound("player_data");
-		for (String key : ppdTag.getAllKeys()) {
+		CompoundTag ppdTag = nbt.getCompound("player_data").orElse(new CompoundTag());
+		for (String key : ppdTag.keySet()) {
 			try {
 				UUID id = UndashedUuid.fromString(key);
-				perPlayerData.put(id, PerPlayerData.fromNBT(ppdTag.getCompound(key), file));
+				perPlayerData.put(id, PerPlayerData.fromNBT(ppdTag.getCompound(key).orElseThrow(), file));
 			} catch (IllegalArgumentException e) {
 				FTBQuests.LOGGER.error("ignoring invalid player ID {} while loading per-player data for team {}", key, teamId);
 			}
@@ -428,9 +429,9 @@ public class TeamData {
 
 	private void readLongLongMap(CompoundTag tag, Long2LongMap map, String key) {
 		map.clear();
-		CompoundTag subTag = tag.getCompound(key);
-		for (String subKey : subTag.getAllKeys()) {
-			map.put(file.getID(subKey), subTag.getLong(subKey));
+		CompoundTag subTag = tag.getCompound(key).orElse(new CompoundTag());
+		for (String subKey : subTag.keySet()) {
+			map.put(file.getID(subKey), (long) subTag.getLong(subKey).orElse(0L));
 		}
 	}
 
@@ -444,9 +445,9 @@ public class TeamData {
 
 	private void readLongIntMap(CompoundTag tag, Long2IntMap map, String key) {
 		map.clear();
-		CompoundTag subTag = tag.getCompound(key);
-		for (String subKey : subTag.getAllKeys()) {
-			map.put(file.getID(subKey), subTag.getInt(subKey));
+		CompoundTag subTag = tag.getCompound(key).orElse(new CompoundTag());
+		for (String subKey : subTag.keySet()) {
+			map.put(file.getID(subKey), (int) subTag.getInt(subKey).orElse(0));
 		}
 	}
 
@@ -774,7 +775,7 @@ public class TeamData {
 		// used when leaving a party team - copy claimed-reward data from to player team
 		from.claimedRewards.forEach((questKey, data) -> {
 			if (questKey.uuid().equals(teamId)) {
-				claimedRewards.put(questKey, data.longValue());
+				claimedRewards.put(questKey, data);
 			}
 		});
 	}
@@ -888,10 +889,10 @@ public class TeamData {
 		}
 
 		public static PerPlayerData fromNBT(CompoundTag nbt, BaseQuestFile file) {
-			boolean canEdit = nbt.getBoolean("can_edit");
-			boolean autoPin = nbt.getBoolean("auto_pin");
-			LongSet pq = nbt.getList("pinned_quests", Tag.TAG_STRING).stream()
-					.map(tag -> file.getID(tag.getAsString()))
+			boolean canEdit = nbt.getBoolean("can_edit").orElse(false);
+			boolean autoPin = nbt.getBoolean("auto_pin").orElse(false);
+			LongSet pq = nbt.getList("pinned_quests").stream()
+					.map(tag -> file.getID(tag.asString()))
 					.collect(Collectors.toCollection(LongOpenHashSet::new));
 			return new PerPlayerData(canEdit, autoPin, pq);
 		}

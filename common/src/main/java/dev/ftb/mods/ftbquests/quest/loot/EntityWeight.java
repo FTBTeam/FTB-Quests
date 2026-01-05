@@ -11,7 +11,6 @@ public class EntityWeight {
 	public int boss = 0;
 
 	public int getWeight(Entity entity) {
-		// NOTE: (mikey | porting to 1.21): This looks right but it could be wrong. This is what the nether portal changed to using for the same check
 		if (!entity.canUsePortal(false)) {
 			return boss;
 		} else if (entity instanceof Enemy) {
@@ -28,9 +27,9 @@ public class EntityWeight {
 	}
 
 	public void readData(CompoundTag nbt) {
-		passive = nbt.getInt("passive");
-		monster = nbt.getInt("monster");
-		boss = nbt.getInt("boss");
+		passive = nbt.getInt("passive").orElseThrow();
+		monster = nbt.getInt("monster").orElseThrow();
+		boss = nbt.getInt("boss").orElseThrow();
 	}
 
 	public void writeNetData(FriendlyByteBuf data) {

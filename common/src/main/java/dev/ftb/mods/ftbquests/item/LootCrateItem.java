@@ -19,17 +19,18 @@ import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
-import net.minecraft.world.InteractionResultHolder;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Rarity;
 import net.minecraft.world.item.TooltipFlag;
+import net.minecraft.world.item.component.TooltipDisplay;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
+import java.util.function.Consumer;
 
 public class LootCrateItem extends Item {
 	public LootCrateItem() {
@@ -51,18 +52,19 @@ public class LootCrateItem extends Item {
 		return getCrate(stack, Platform.getEnv() == EnvType.CLIENT);
 	}
 
+
 	@Override
-	public InteractionResultHolder<ItemStack> use(Level world, Player player, InteractionHand hand) {
+	public InteractionResult use(Level world, Player player, InteractionHand hand) {
 		ItemStack stack = player.getItemInHand(hand);
 		LootCrate crate = getCrate(stack, player.level().isClientSide);
 
 		if (crate == null) {
-			return new InteractionResultHolder<>(InteractionResult.FAIL, stack);
+			return InteractionResult.FAIL;
 		}
 
 		int nItems = player.isCrouching() ? stack.getCount() : 1;
 
-		if (!world.isClientSide) {
+		if (!world.isClientSide()) {
 			for (WeightedReward wr : crate.getTable().generateWeightedRandomRewards(player.getRandom(), nItems, true)) {
 				wr.getReward().claim((ServerPlayer) player, true);
 			}
@@ -85,7 +87,7 @@ public class LootCrateItem extends Item {
 		}
 
 		stack.shrink(nItems);
-		return new InteractionResultHolder<>(InteractionResult.SUCCESS, stack);
+		return InteractionResult.SUCCESS;
 	}
 
 	@Override
@@ -100,28 +102,27 @@ public class LootCrateItem extends Item {
 		return crate != null && !crate.getItemName().isEmpty() ? Component.translatable(crate.getItemName()) : super.getName(stack);
 	}
 
-	@Override
-	@Environment(EnvType.CLIENT)
-	public void appendHoverText(ItemStack stack, TooltipContext context, List<Component> tooltip, TooltipFlag flag) {
-		if (context.registries() == null || !ClientQuestFile.exists()) {
-			return;
-		}
+    @Override
+    public void appendHoverText(ItemStack stack, TooltipContext context, TooltipDisplay tooltipDisplay, Consumer<Component> consumer, TooltipFlag flag) {
+        if (context.registries() == null || !ClientQuestFile.exists()) {
+            return;
+        }
 
-		LootCrate crate = getCrate(stack, true);
-		if (crate != null) {
-			if (crate.getItemName().isEmpty()) {
-				// if crate doesn't have an item name, show the reward table's name in the tooltip
-				tooltip.add(Component.literal(crate.getStringID()).withStyle(ChatFormatting.YELLOW));
-				tooltip.add(Component.empty());
-			}
-			tooltip.add(Component.translatable("item.ftbquests.lootcrate.tooltip_1").withStyle(ChatFormatting.GRAY));
-			tooltip.add(Component.translatable("item.ftbquests.lootcrate.tooltip_2").withStyle(ChatFormatting.GRAY));
-		} else {
-			String name = stack.getOrDefault(ModDataComponents.LOOT_CRATE.get(), "");
-			// stay quiet if there's no loot crate ID at all
-			if (!name.isEmpty()) {
-				tooltip.add(Component.translatable("item.ftbquests.lootcrate.missing", name).withStyle(ChatFormatting.RED));
-			}
-		}
-	}
+        LootCrate crate = getCrate(stack, true);
+        if (crate != null) {
+            if (crate.getItemName().isEmpty()) {
+                // if crate doesn't have an item name, show the reward table's name in the tooltip
+                consumer.accept(Component.literal(crate.getStringID()).withStyle(ChatFormatting.YELLOW));
+                consumer.accept(Component.empty());
+            }
+            consumer.accept(Component.translatable("item.ftbquests.lootcrate.tooltip_1").withStyle(ChatFormatting.GRAY));
+            consumer.accept(Component.translatable("item.ftbquests.lootcrate.tooltip_2").withStyle(ChatFormatting.GRAY));
+        } else {
+            String name = stack.getOrDefault(ModDataComponents.LOOT_CRATE.get(), "");
+            // stay quiet if there's no loot crate ID at all
+            if (!name.isEmpty()) {
+                consumer.accept(Component.translatable("item.ftbquests.lootcrate.missing", name).withStyle(ChatFormatting.RED));
+            }
+        }
+    }
 }

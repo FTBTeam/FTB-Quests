@@ -14,7 +14,7 @@ import dev.ftb.mods.ftbquests.util.ConfigQuestObject;
 import dev.ftb.mods.ftbquests.util.NetUtils;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.Util;
+import net.minecraft.util.Util;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
@@ -23,7 +23,7 @@ import net.minecraft.nbt.Tag;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.codec.StreamCodec;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.util.Mth;
 
 import java.lang.ref.WeakReference;
@@ -219,8 +219,8 @@ public final class ChapterImage implements Movable {
 		config.addDouble("width", width, v -> width = v, 1, 0, Double.POSITIVE_INFINITY);
 		config.addDouble("height", height, v -> height = v, 1, 0, Double.POSITIVE_INFINITY);
 		config.addDouble("rotation", rotation, v -> rotation = v, 0, -180, 180);
-		config.add("image", new ImageResourceConfig(), ImageResourceConfig.getResourceLocation(image),
-				v -> setImage(Icon.getIcon(v)), ResourceLocation.withDefaultNamespace("textures/gui/presets/isles.png"));
+		config.add("image", new ImageResourceConfig(), ImageResourceConfig.getIdentifier(image),
+				v -> setImage(Icon.getIcon(v)), Identifier.withDefaultNamespace("textures/gui/presets/isles.png"));
 		config.addColor("color", color, v -> color = v, Color4I.WHITE);
 		config.addInt("order", order, v -> order = v, 0, Integer.MIN_VALUE, Integer.MAX_VALUE);
 		config.addInt("alpha", alpha, v -> alpha = v, 255, 0, 255);
@@ -292,9 +292,9 @@ public final class ChapterImage implements Movable {
 	@Override
 	@Environment(EnvType.CLIENT)
 	public void drawMoved(GuiGraphics graphics) {
-		PoseStack poseStack = graphics.pose();
+		var poseStack = graphics.pose();
 
-		poseStack.pushPose();
+		poseStack.pushMatrix();
 
 		if (alignToCorner) {
 			image.withColor(Color4I.WHITE.withAlpha(50)).draw(graphics, 0, 0, 1, 1);

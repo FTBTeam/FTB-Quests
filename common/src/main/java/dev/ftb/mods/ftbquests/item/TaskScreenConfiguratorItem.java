@@ -15,16 +15,17 @@ import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
-import net.minecraft.world.InteractionResultHolder;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
+import net.minecraft.world.item.component.TooltipDisplay;
 import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.Level;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.function.Consumer;
 
 public class TaskScreenConfiguratorItem extends Item {
     public TaskScreenConfiguratorItem() {
@@ -47,29 +48,29 @@ public class TaskScreenConfiguratorItem extends Item {
     }
 
     @Override
-    public InteractionResultHolder<ItemStack> use(Level level, Player player, InteractionHand hand) {
+    public InteractionResult use(Level level, Player player, InteractionHand hand) {
         ItemStack stack = player.getItemInHand(hand);
         if (player instanceof ServerPlayer sp) {
-            return tryUseOn(sp, stack) ? InteractionResultHolder.consume(stack) : InteractionResultHolder.fail(stack);
+            return tryUseOn(sp, stack) ? InteractionResult.CONSUME : InteractionResult.FAIL;
         }
-        return InteractionResultHolder.success(stack);
+        return InteractionResult.SUCCESS;
     }
 
     @Override
-    public void appendHoverText(ItemStack itemStack, TooltipContext context, List<Component> list, TooltipFlag tooltipFlag) {
+    public void appendHoverText(ItemStack itemStack, TooltipContext context, TooltipDisplay tooltipDisplay, Consumer<Component> consumer, TooltipFlag tooltipFlag) {
         if (context.registries() != null) {
-            list.add(Component.translatable("item.ftbquests.task_screen_configurator.tooltip").withStyle(ChatFormatting.GRAY));
+            consumer.accept(Component.translatable("item.ftbquests.task_screen_configurator.tooltip").withStyle(ChatFormatting.GRAY));
 
             readBlockPos(itemStack).ifPresent(gPos -> {
-                String str = gPos.dimension().location() + " / " + posToString(gPos.pos());
-                list.add(Component.translatable("ftbquests.message.configurator_bound", str).withStyle(ChatFormatting.DARK_AQUA));
+                String str = gPos.dimension().identifier() + " / " + posToString(gPos.pos());
+                consumer.accept(Component.translatable("ftbquests.message.configurator_bound", str).withStyle(ChatFormatting.DARK_AQUA));
             });
         }
     }
 
     private boolean tryUseOn(ServerPlayer player, ItemStack stack) {
         return readBlockPos(stack).map(gPos -> {
-            Level level = player.getServer().getLevel(gPos.dimension());
+            Level level = player.level().getServer().getLevel(gPos.dimension());
             if (level != player.level() || !player.level().isLoaded(gPos.pos())) {
                 player.displayClientMessage(Component.translatable("ftbquests.message.task_screen_inaccessible").withStyle(ChatFormatting.RED), true);
                 return false;

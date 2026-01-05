@@ -19,13 +19,14 @@ import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.renderer.MultiBufferSource;
-import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderer;
 import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
+import net.minecraft.client.renderer.rendertype.RenderTypes;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
+import net.minecraft.data.AtlasIds;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.inventory.InventoryMenu;
 import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.level.block.WallSignBlock;
@@ -33,12 +34,12 @@ import net.minecraft.world.phys.Vec3;
 import org.joml.Matrix4f;
 
 public class TaskScreenRenderer implements BlockEntityRenderer<TaskScreenBlockEntity> {
-    public static final ResourceLocation INPUT_ONLY_TEXTURE = FTBQuestsAPI.rl("tasks/input_only");
-    public static final ResourceLocation TANK_TEXTURE = FTBQuestsAPI.rl("tasks/tank");
-    public static final ResourceLocation FE_ENERGY_EMPTY_TEXTURE = FTBQuestsAPI.rl("tasks/fe_empty");
-    public static final ResourceLocation FE_ENERGY_FULL_TEXTURE = FTBQuestsAPI.rl("tasks/fe_full");
-    public static final ResourceLocation TR_ENERGY_EMPTY_TEXTURE = FTBQuestsAPI.rl("tasks/ic2_empty");
-    public static final ResourceLocation TR_ENERGY_FULL_TEXTURE = FTBQuestsAPI.rl("tasks/ic2_full");
+    public static final Identifier INPUT_ONLY_TEXTURE = FTBQuestsAPI.rl("tasks/input_only");
+    public static final Identifier TANK_TEXTURE = FTBQuestsAPI.rl("tasks/tank");
+    public static final Identifier FE_ENERGY_EMPTY_TEXTURE = FTBQuestsAPI.rl("tasks/fe_empty");
+    public static final Identifier FE_ENERGY_FULL_TEXTURE = FTBQuestsAPI.rl("tasks/fe_full");
+    public static final Identifier TR_ENERGY_EMPTY_TEXTURE = FTBQuestsAPI.rl("tasks/ic2_empty");
+    public static final Identifier TR_ENERGY_FULL_TEXTURE = FTBQuestsAPI.rl("tasks/ic2_full");
 
     private final BlockEntityRendererProvider.Context context;
 
@@ -76,7 +77,7 @@ public class TaskScreenRenderer implements BlockEntityRenderer<TaskScreenBlockEn
         poseStack.translate(-size, -size * 2F, -0.02F);
         poseStack.scale(size * 2F + 1F, size * 2F + 1F, 1F);
 
-        Font font = context.getFont();
+        Font font = context.font();
         double iconY = 0.5D;
 
         // render quest and task title at top of screen
@@ -108,7 +109,7 @@ public class TaskScreenRenderer implements BlockEntityRenderer<TaskScreenBlockEn
         }
         poseStack.popPose();
 
-        VertexConsumer vertexConsumer = multiBufferSource.getBuffer(RenderType.text(InventoryMenu.BLOCK_ATLAS));
+        VertexConsumer vertexConsumer = multiBufferSource.getBuffer(RenderTypes.text(InventoryMenu.BLOCK_ATLAS));
 
         // render skin, if needed
         float[] f = taskScreen.getFakeTextureUV();
@@ -134,7 +135,7 @@ public class TaskScreenRenderer implements BlockEntityRenderer<TaskScreenBlockEn
 
     // FIXME: FTB Library should handle this, but its 3d icon rendering needs rewriting (it doesn't properly use MultiBufferSource)
     private void drawTaskIcon(TaskScreenBlockEntity taskScreen, TeamData data, Icon icon, PoseStack poseStack, MultiBufferSource buffer) {
-        VertexConsumer vertexConsumer = buffer.getBuffer(RenderType.text(InventoryMenu.BLOCK_ATLAS));
+        VertexConsumer vertexConsumer = buffer.getBuffer(RenderTypes.text(InventoryMenu.BLOCK_ATLAS));
 
         Task task = taskScreen.getTask();
         long progress = data.getProgress(task);
@@ -147,7 +148,7 @@ public class TaskScreenRenderer implements BlockEntityRenderer<TaskScreenBlockEn
         }
 
         if (task instanceof FluidTask fluidTask && fluidTask.getIcon() instanceof AtlasSpriteIcon as && FTBQuestsClientEventHandler.tankSprite != null) {
-            TextureAtlasSprite sprite = Minecraft.getInstance().getModelManager().getAtlas(InventoryMenu.BLOCK_ATLAS).getSprite(as.getId());
+            TextureAtlasSprite sprite = Minecraft.getInstance().getAtlasManager().getAtlasOrThrow(AtlasIds.BLOCKS).getSprite(as.getId());
             // fluid texture (interpolated according to task progress)
             if (progress > 0L) {
                 float interpolatedProgress = (float) ((double) progress / task.getMaxProgress());

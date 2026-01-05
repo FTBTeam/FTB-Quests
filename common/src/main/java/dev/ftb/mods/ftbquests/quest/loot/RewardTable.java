@@ -30,14 +30,14 @@ import dev.ftb.mods.ftbquests.quest.translation.TranslationKey;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.ChatFormatting;
-import net.minecraft.Util;
+import net.minecraft.util.Util;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.item.ItemStack;
@@ -57,7 +57,7 @@ public class RewardTable extends QuestObjectBase {
 	private boolean hideTooltip;
 	private boolean useTitle;
 	private LootCrate lootCrate;
-	private ResourceLocation lootTableId;
+	private Identifier lootTableId;
 	private String filename;
 
 	public RewardTable(long id, BaseQuestFile file) {
@@ -212,25 +212,30 @@ public class RewardTable extends QuestObjectBase {
 	@Override
 	public void readData(CompoundTag nbt, HolderLookup.Provider provider) {
 		super.readData(nbt, provider);
-		emptyWeight = nbt.getFloat("empty_weight");
-		lootSize = nbt.getInt("loot_size");
-		hideTooltip = nbt.getBoolean("hide_tooltip");
-		useTitle = nbt.getBoolean("use_title");
+		emptyWeight = nbt.getFloat("empty_weight").orElse(0f);
+		lootSize = nbt.getInt("loot_size").orElse(0);
+		hideTooltip = nbt.getBoolean("hide_tooltip").orElse(true);
+		useTitle = nbt.getBoolean("use_title").orElse(true);
 
 		Set<Long> prevRewards = weightedRewards.stream().map(wr -> wr.getReward().getId()).collect(Collectors.toSet());
 		weightedRewards.clear();
 
 		boolean refreshIds = false;
 
-		ListTag list = nbt.getList("rewards", Tag.TAG_COMPOUND);
+		ListTag list = nbt.getList("rewards").orElse(new ListTag());
 		for (int i = 0; i < list.size(); i++) {
 			boolean newReward = false;
-			CompoundTag rewardTag = list.getCompound(i);
+			Optional<CompoundTag> rewardTagOptional = list.getCompound(i);
+            if (rewardTagOptional.isEmpty()) {
+                continue;
+            }
+
+            CompoundTag rewardTag = rewardTagOptional.get();
 			if (!rewardTag.contains("id") && file.isServerSide()) {
 				// can happen on server when reading in an older quest book where reward table rewards didn't have IDs
 				rewardTag.putString("id", QuestObjectBase.getCodeString(file.newID()));
 			}
-			long rewardId = QuestObjectBase.parseCodeString(rewardTag.getString("id"));
+			long rewardId = QuestObjectBase.parseCodeString(rewardTag.getString("id").orElse("0"));
 			if (rewardId == 0L && file.isServerSide()) {
 				// Can happen on server when the client has sent a reward table with new reward(s)
 				// Note: can also happen on client when copying rewards that haven't been sent to server yet (reward editor screen)
@@ -240,11 +245,11 @@ public class RewardTable extends QuestObjectBase {
 				newReward = refreshIds = true;
 			}
 
-			Reward reward = RewardType.createReward(rewardId, fakeQuest, rewardTag.getString("type"));
+			Reward reward = RewardType.createReward(rewardId, fakeQuest, rewardTag.getString("type").orElse(""));
 			if (reward != null) {
 				getQuestFile().getTranslationManager().processInitialTranslation(rewardTag, reward);
 				reward.readData(rewardTag, provider);
-				weightedRewards.add(new WeightedReward(reward, rewardTag.contains("weight") ? rewardTag.getFloat("weight") : 1));
+				weightedRewards.add(new WeightedReward(reward, rewardTag.contains("weight") ? rewardTag.getFloat("weight").orElse(0f) : 1));
 				prevRewards.remove(rewardId);
 				if (newReward && getFile() instanceof ServerQuestFile sqf) {
 					NetworkHelper.sendToAll(sqf.server, CreateObjectResponseMessage.create(reward, rewardTag));
@@ -261,14 +266,13 @@ public class RewardTable extends QuestObjectBase {
 			prevRewards.forEach(id -> getFile().deleteObject(id));
 		}
 
-		if (nbt.contains("loot_crate")) {
-			lootCrate = new LootCrate(this, false);
-			lootCrate.readData(nbt.getCompound("loot_crate"));
-		} else {
-			lootCrate = null;
-		}
+        lootCrate = nbt.getCompound("loot_crate").map(e -> {
+            LootCrate crate = new LootCrate(this, false);
+            crate.readData(e);
+            return crate;
+        }).orElse(null);
 
-		lootTableId = nbt.contains("loot_table_id") ? ResourceLocation.tryParse(nbt.getString("loot_table_id")) : null;
+		lootTableId = nbt.getString("loot_table_id").map(Identifier::tryParse).orElse(null);
 	}
 
 	@Override
@@ -297,7 +301,7 @@ public class RewardTable extends QuestObjectBase {
 		}
 
 		if (lootTableId != null) {
-			buffer.writeResourceLocation(lootTableId);
+			buffer.writeIdentifier(lootTableId);
 		}
 	}
 
@@ -331,7 +335,7 @@ public class RewardTable extends QuestObjectBase {
 			lootCrate.readNetData(buffer);
 		}
 
-		lootTableId = hasLootTableId ? buffer.readResourceLocation() : null;
+		lootTableId = hasLootTableId ? buffer.readIdentifier() : null;
 	}
 
 	@Override

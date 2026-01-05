@@ -19,8 +19,9 @@ import net.minecraft.core.component.DataComponents;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionHand;
-import net.minecraft.world.ItemInteractionResult;
+import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.InsideBlockEffectApplier;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
@@ -115,12 +116,12 @@ public class QuestBarrierBlock extends BaseEntityBlock {
 		return 1.0F;
 	}
 
-	@Override
-	public boolean propagatesSkylightDown(BlockState state, BlockGetter bg, BlockPos pos) {
-		return true;
-	}
+    @Override
+    protected boolean propagatesSkylightDown(BlockState blockState) {
+        return true;
+    }
 
-	@Override
+    @Override
 	@Environment(EnvType.CLIENT)
 	public boolean skipRendering(BlockState state, BlockState state2, Direction dir) {
 		return state2.is(this) || super.skipRendering(state, state2, dir);
@@ -140,45 +141,46 @@ public class QuestBarrierBlock extends BaseEntityBlock {
 	}
 
 	@Override
-	protected ItemInteractionResult useItemOn(ItemStack itemStack, BlockState blockState, Level level, BlockPos blockPos, Player player, InteractionHand interactionHand, BlockHitResult blockHitResult) {
+	protected InteractionResult useItemOn(ItemStack itemStack, BlockState blockState, Level level, BlockPos blockPos, Player player, InteractionHand interactionHand, BlockHitResult blockHitResult) {
 		if (player instanceof ServerPlayer sp) {
 			if (level.getBlockEntity(blockPos) instanceof BaseBarrierBlockEntity barrier && barrier.hasPermissionToEdit(sp)) {
 				NetworkManager.sendToPlayer(sp, new BlockConfigRequestMessage(blockPos, BlockType.BARRIER));
-				return ItemInteractionResult.sidedSuccess(level.isClientSide);
+                return InteractionResult.SUCCESS;
+//				return ItemInteractionResult.sidedSuccess(level.isClientSide);
 			}
-			return ItemInteractionResult.FAIL;
+			return InteractionResult.FAIL;
 		} else {
-			return ItemInteractionResult.SUCCESS;
+			return InteractionResult.SUCCESS;
 		}
 	}
 
-	@Override
-	public ItemStack getCloneItemStack(LevelReader levelReader, BlockPos blockPos, BlockState blockState) {
-		ItemStack stack = super.getCloneItemStack(levelReader, blockPos, blockState);
-		if (levelReader.getBlockEntity(blockPos) instanceof BaseBarrierBlockEntity barrier) {
-			stack.set(ModDataComponents.BARRIER_SAVED.get(), BaseBarrierBlockEntity.BarrierSavedData.fromBlockEntity(barrier));
-			if (!barrier.getSkin().isEmpty() && !ClientQuestFile.canClientPlayerEdit()) {
-				stack.set(DataComponents.ITEM_NAME, barrier.getSkin().getHoverName());
-			}
-		}
-		return stack;
-	}
+    @Override
+    protected ItemStack getCloneItemStack(LevelReader levelReader, BlockPos blockPos, BlockState blockState, boolean bl) {
+        ItemStack stack = super.getCloneItemStack(levelReader, blockPos, blockState, bl);
+        if (levelReader.getBlockEntity(blockPos) instanceof BaseBarrierBlockEntity barrier) {
+            stack.set(ModDataComponents.BARRIER_SAVED.get(), BaseBarrierBlockEntity.BarrierSavedData.fromBlockEntity(barrier));
+            if (!barrier.getSkin().isEmpty() && !ClientQuestFile.canClientPlayerEdit()) {
+                stack.set(DataComponents.ITEM_NAME, barrier.getSkin().getHoverName());
+            }
+        }
+        return stack;
+    }
 
-	@Override
-	protected void entityInside(BlockState blockState, Level level, BlockPos blockPos, Entity entity) {
-		if (entity instanceof ServerPlayer player && player.getServer() != null && level.getBlockEntity(blockPos) instanceof BaseBarrierBlockEntity b) {
-			b.optionalTeleportData().ifPresent(teleportData -> {
-				if (teleportData.enabled() && b.isOpen(player)) {
-					TeleportTicker.addPending(player, teleportData.effectiveDest(b.getBlockPos()));
-				}
-			});
-		}
-	}
+    @Override
+    protected void entityInside(BlockState blockState, Level level, BlockPos blockPos, Entity entity, InsideBlockEffectApplier insideBlockEffectApplier, boolean bl) {
+        if (entity instanceof ServerPlayer player && player.level().getServer() != null && level.getBlockEntity(blockPos) instanceof BaseBarrierBlockEntity b) {
+            b.optionalTeleportData().ifPresent(teleportData -> {
+                if (teleportData.enabled() && b.isOpen(player)) {
+                    TeleportTicker.addPending(player, teleportData.effectiveDest(b.getBlockPos()));
+                }
+            });
+        }
+    }
 
 	@Nullable
 	@Override
 	public <T extends BlockEntity> BlockEntityTicker<T> getTicker(Level level, BlockState blockState, BlockEntityType<T> blockEntityType) {
-		return level != null && level.isClientSide ? BaseBarrierBlockEntity::tick : null;
+		return level != null && level.isClientSide() ? BaseBarrierBlockEntity::tick : null;
 	}
 
 	@Nullable

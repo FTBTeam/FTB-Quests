@@ -20,7 +20,9 @@ import dev.ftb.mods.ftbquests.registry.ModDataComponents;
 import dev.ftb.mods.ftbquests.util.ConfigQuestObject;
 import dev.ftb.mods.ftbteams.api.FTBTeamsAPI;
 import net.minecraft.ChatFormatting;
-import net.minecraft.Util;
+import net.minecraft.core.UUIDUtil;
+import net.minecraft.core.component.DataComponentGetter;
+import net.minecraft.util.Util;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.HolderLookup;
@@ -39,6 +41,8 @@ import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
+import net.minecraft.world.level.storage.ValueInput;
+import net.minecraft.world.level.storage.ValueOutput;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -66,7 +70,7 @@ public class TaskScreenBlockEntity extends EditableBlockEntity implements ITaskS
 
     public Task getTask() {
         if (task == null && taskId != 0L || task != null && task.id != taskId) {
-            task = FTBQuestsAPI.api().getQuestFile(level.isClientSide).getTask(taskId);
+            task = FTBQuestsAPI.api().getQuestFile(level.isClientSide()).getTask(taskId);
         }
 
         return task;
@@ -138,7 +142,7 @@ public class TaskScreenBlockEntity extends EditableBlockEntity implements ITaskS
 
     public TeamData getCachedTeamData() {
         if (cachedTeamData == null) {
-            BaseQuestFile f = FTBQuestsAPI.api().getQuestFile(level.isClientSide);
+            BaseQuestFile f = FTBQuestsAPI.api().getQuestFile(level.isClientSide());
             cachedTeamData = f.getNullableTeamData(getTeamId());
         }
         return cachedTeamData;
@@ -171,31 +175,29 @@ public class TaskScreenBlockEntity extends EditableBlockEntity implements ITaskS
     }
 
     @Override
-    public void loadAdditional(CompoundTag compoundTag, HolderLookup.Provider provider) {
-        super.loadAdditional(compoundTag, provider);
+    public void loadAdditional(ValueInput valueInput) {
+        super.loadAdditional(valueInput);
 
-        teamId = compoundTag.hasUUID("TeamID") ? compoundTag.getUUID("TeamID") : Util.NIL_UUID;
+        teamId = valueInput.read("TeamID", UUIDUtil.CODEC)
+                .orElse(Util.NIL_UUID);
 
-        TaskScreenSaveData data = TaskScreenSaveData.CODEC.parse(NbtOps.INSTANCE, compoundTag.getCompound("savedData"))
-                .result().orElse(TaskScreenSaveData.DEFAULT);
-        applySavedData(data);
+        valueInput.read("savedData", TaskScreenSaveData.CODEC)
+                .ifPresentOrElse(this::applySavedData, () -> applySavedData(TaskScreenSaveData.DEFAULT));
 
         task = null;
         fakeTextureUV = null;  // force recalc
     }
 
     @Override
-    protected void saveAdditional(CompoundTag compoundTag, HolderLookup.Provider provider) {
-        super.saveAdditional(compoundTag, provider);
+    protected void saveAdditional(ValueOutput valueOutput) {
+        super.saveAdditional(valueOutput);
 
-        if (teamId != Util.NIL_UUID) compoundTag.putUUID("TeamID", teamId);
-
-        TaskScreenSaveData.CODEC.encodeStart(NbtOps.INSTANCE, TaskScreenSaveData.fromBlockEntity(this))
-                .ifSuccess(tag -> compoundTag.put("savedData", tag));
+        if (teamId != Util.NIL_UUID) valueOutput.store("TeamID", UUIDUtil.CODEC, teamId);
+        valueOutput.store("savedData", TaskScreenSaveData.CODEC, TaskScreenSaveData.fromBlockEntity(this));
     }
 
     @Override
-    protected void applyImplicitComponents(DataComponentInput dataComponentInput) {
+    protected void applyImplicitComponents(DataComponentGetter dataComponentInput) {
         super.applyImplicitComponents(dataComponentInput);
 
         applySavedData(dataComponentInput.getOrDefault(ModDataComponents.TASK_SCREEN_SAVED.get(), TaskScreenSaveData.DEFAULT));

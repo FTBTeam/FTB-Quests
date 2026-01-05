@@ -20,7 +20,7 @@ import net.minecraft.nbt.Tag;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.material.Fluids;
 import org.jetbrains.annotations.Nullable;
@@ -28,7 +28,7 @@ import org.jetbrains.annotations.Nullable;
 import java.util.Optional;
 
 public class FluidTask extends Task {
-	public static final ResourceLocation TANK_TEXTURE = FTBQuestsAPI.rl("textures/tasks/tank.png");
+	public static final Identifier TANK_TEXTURE = FTBQuestsAPI.rl("textures/tasks/tank.png");
 	private static final FluidStack WATER = FluidStack.create(Fluids.WATER, FluidStack.bucketAmount());
 
 	private FluidStack fluidStack = FluidStack.create(Fluids.WATER, FluidStack.bucketAmount());
@@ -92,7 +92,7 @@ public class FluidTask extends Task {
 
 		if (nbt.contains("fluid", Tag.TAG_STRING)) {
 			// legacy - fluid stored as string ID
-			ResourceLocation id = ResourceLocation.tryParse(nbt.getString("fluid"));
+			Identifier id = Identifier.tryParse(nbt.getString("fluid"));
 			if (id == null) {
 				fluidStack = FluidStack.create(Fluids.WATER, 1000L);
 			} else {

@@ -18,11 +18,11 @@ import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerPlayer;
 
 public class AdvancementTask extends AbstractBooleanTask {
-	private ResourceLocation advancement = ResourceLocation.parse("minecraft:story/root");
+	private Identifier advancement = Identifier.parse("minecraft:story/root");
 	private String criterion = "";
 
 	public AdvancementTask(long id, Quest quest) {
@@ -44,21 +44,21 @@ public class AdvancementTask extends AbstractBooleanTask {
 	@Override
 	public void readData(CompoundTag nbt, HolderLookup.Provider provider) {
 		super.readData(nbt, provider);
-		advancement = ResourceLocation.tryParse(nbt.getString("advancement"));
+		advancement = Identifier.tryParse(nbt.getString("advancement"));
 		criterion = nbt.getString("criterion");
 	}
 
 	@Override
 	public void writeNetData(RegistryFriendlyByteBuf buffer) {
 		super.writeNetData(buffer);
-		buffer.writeResourceLocation(advancement);
+		buffer.writeIdentifier(advancement);
 		buffer.writeUtf(criterion, Short.MAX_VALUE);
 	}
 
 	@Override
 	public void readNetData(RegistryFriendlyByteBuf buffer) {
 		super.readNetData(buffer);
-		advancement = buffer.readResourceLocation();
+		advancement = buffer.readIdentifier();
 		criterion = buffer.readUtf(Short.MAX_VALUE);
 	}
 
@@ -71,12 +71,12 @@ public class AdvancementTask extends AbstractBooleanTask {
 			var advancements = KnownServerRegistries.client.advancements();
 			KnownServerRegistries.AdvancementInfo def = advancements.values().iterator().next();
 			config.addEnum("advancement", advancement, v -> advancement = v,
-					NameMap.of(def.id(), advancements.keySet().toArray(new ResourceLocation[0]))
+					NameMap.of(def.id(), advancements.keySet().toArray(new Identifier[0]))
 							.icon(id -> ItemIcon.getItemIcon(advancements.getOrDefault(id, def).icon()))
 							.name(id -> advancements.getOrDefault(id, def).name())
 							.create()).setNameKey("ftbquests.task.ftbquests.advancement");
 		} else {
-			config.addString("advancement", advancement.toString(), v -> advancement = ResourceLocation.tryParse(v), "minecraft:story/root").setNameKey("ftbquests.task.ftbquests.advancement");
+			config.addString("advancement", advancement.toString(), v -> advancement = Identifier.tryParse(v), "minecraft:story/root").setNameKey("ftbquests.task.ftbquests.advancement");
 		}
 
 		config.addString("criterion", criterion, v -> criterion = v, "");

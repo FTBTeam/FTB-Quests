@@ -6,7 +6,7 @@ import dev.ftb.mods.ftblibrary.icon.Icon;
 import dev.ftb.mods.ftblibrary.icon.Icons;
 import dev.ftb.mods.ftblibrary.util.client.ClientUtils;
 import dev.ftb.mods.ftbquests.api.FTBQuestsAPI;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.level.material.Fluids;
 
 import java.util.LinkedHashMap;
@@ -15,9 +15,9 @@ import java.util.Optional;
 import java.util.function.Supplier;
 
 public interface TaskTypes {
-	Map<ResourceLocation, TaskType> TYPES = new LinkedHashMap<>();
+	Map<Identifier, TaskType> TYPES = new LinkedHashMap<>();
 
-	static TaskType register(ResourceLocation name, TaskType.Provider provider, Supplier<Icon> iconSupplier) {
+	static TaskType register(Identifier name, TaskType.Provider provider, Supplier<Icon> iconSupplier) {
 		return TYPES.computeIfAbsent(name, id -> new TaskType(id, provider, iconSupplier));
 	}
 
@@ -49,7 +49,7 @@ public interface TaskTypes {
 			() -> Icons.CONTROLLER);
 	TaskType FLUID = TaskTypes.register(FTBQuestsAPI.rl("fluid"), FluidTask::new,
 			() -> Icon.getIcon(Optional.ofNullable(ClientUtils.getStillTexture(FluidStack.create(Fluids.WATER, 1000L)))
-							.map(ResourceLocation::toString)
+							.map(Identifier::toString)
 							.orElse("missingno")).withTint(Color4I.rgb(0x8080FF))
 					.combineWith(Icon.getIcon(FluidTask.TANK_TEXTURE.toString()))
 	);

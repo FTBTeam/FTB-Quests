@@ -1,7 +1,7 @@
 package dev.ftb.mods.ftbquests.block.entity;
 
 import dev.ftb.mods.ftbquests.registry.ModBlockEntityTypes;
-import net.minecraft.Util;
+import net.minecraft.util.Util;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;

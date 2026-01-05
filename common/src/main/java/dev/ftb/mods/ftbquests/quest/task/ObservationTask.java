@@ -10,7 +10,7 @@ import dev.ftb.mods.ftbquests.quest.TeamData;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.ChatFormatting;
-import net.minecraft.ResourceLocationException;
+import net.minecraft.IdentifierException;
 import net.minecraft.commands.arguments.blocks.BlockInput;
 import net.minecraft.commands.arguments.blocks.BlockStateParser;
 import net.minecraft.core.HolderLookup;
@@ -19,7 +19,7 @@ import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.entity.player.Player;
@@ -174,10 +174,10 @@ public class ObservationTask extends AbstractBooleanTask {
 		return false;
 	}
 
-	private Optional<ResourceLocation> asTagRL(String str) {
+	private Optional<Identifier> asTagRL(String str) {
 		try {
-			return Optional.ofNullable(ResourceLocation.tryParse(str.startsWith("#") ? str.substring(1) : str));
-		} catch (ResourceLocationException e) {
+			return Optional.ofNullable(Identifier.tryParse(str.startsWith("#") ? str.substring(1) : str));
+		} catch (IdentifierException e) {
 			return Optional.empty();
 		}
 	}
