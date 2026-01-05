@@ -31,5 +31,6 @@
 		"ftbteams": ">=${ftbteamsversion}"
 	},
 	"breaks": {
+		"ftbxmodcompat": "<21.1.7"
 	}
 }
