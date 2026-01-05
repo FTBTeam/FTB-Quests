@@ -236,7 +236,9 @@ public class RewardTablesScreen extends AbstractButtonListScreen {
 					new ContextMenuItem(Component.translatable(pendingDeleteIndexes.contains(idx) ? "ftbquests.gui.restore" : "gui.remove"), Icons.BIN,
 							b -> deleteRewardTable()),
 					new ContextMenuItem(getLootCrateText(), ItemIcon.getItemIcon(ModItems.LOOTCRATE.get()),
-							b -> toggleLootCrate())
+							b -> toggleLootCrate()),
+					new ContextMenuItem(Component.translatable("ftbquests.gui.copy_id"), Icons.SETTINGS,
+							b -> QuestScreen.setClipboardString(table.getCodeString()))
 			);
 			getGui().openContextMenu(menu);
 		}
