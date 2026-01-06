@@ -22,6 +22,8 @@ import net.minecraft.core.Direction;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.LivingEntity;
@@ -57,7 +59,10 @@ public class TaskScreenBlock extends BaseEntityBlock {
     );
 
     public static final EnumProperty<Direction> FACING = HorizontalDirectionalBlock.FACING;
-    public static final Properties PROPS = Properties.of().mapColor(DyeColor.BLACK).strength(0.3f);
+
+    public static Properties createProps(ResourceKey<Block> id) {
+        return Properties.of().mapColor(DyeColor.BLACK).strength(0.3f).setId(id);
+    }
 
     private final int size;
 
@@ -147,19 +152,35 @@ public class TaskScreenBlock extends BaseEntityBlock {
     }
 
     @Override
-    public void onRemove(BlockState blockState, Level level, BlockPos blockPos, BlockState newState, boolean isMoving) {
-        if (blockState.getBlock() != newState.getBlock() && level.getBlockEntity(blockPos) instanceof ITaskScreen taskScreen) {
+    protected void affectNeighborsAfterRemoval(BlockState blockState, ServerLevel serverLevel, BlockPos blockPos, boolean bl) {
+        if (serverLevel.getBlockEntity(blockPos) instanceof ITaskScreen taskScreen) {
             taskScreen.getCoreScreen().ifPresent(coreScreen -> {
                 coreScreen.removeAllAuxScreens();
                 if (coreScreen != taskScreen) {
                     // we're breaking an auxiliary screen; also need to break the core screen, and drop a block
-                    level.destroyBlock(coreScreen.getBlockPos(), true, null);
+                    serverLevel.destroyBlock(coreScreen.getBlockPos(), true, null);
                 }
             });
-
-            super.onRemove(blockState, level, blockPos, newState, isMoving);
         }
+
+        super.affectNeighborsAfterRemoval(blockState, serverLevel, blockPos, bl);
     }
+
+// TODO: @since 21.11: Figure out if the above is the correct replacement for onRemove
+//    @Override
+//    public void onRemove(BlockState blockState, Level level, BlockPos blockPos, BlockState newState, boolean isMoving) {
+//        if (blockState.getBlock() != newState.getBlock() && level.getBlockEntity(blockPos) instanceof ITaskScreen taskScreen) {
+//            taskScreen.getCoreScreen().ifPresent(coreScreen -> {
+//                coreScreen.removeAllAuxScreens();
+//                if (coreScreen != taskScreen) {
+//                    // we're breaking an auxiliary screen; also need to break the core screen, and drop a block
+//                    level.destroyBlock(coreScreen.getBlockPos(), true, null);
+//                }
+//            });
+//
+//            super.onRemove(blockState, level, blockPos, newState, isMoving);
+//        }
+//    }
 
     @Override
     public float getDestroyProgress(BlockState blockState, Player player, BlockGetter blockGetter, BlockPos blockPos) {

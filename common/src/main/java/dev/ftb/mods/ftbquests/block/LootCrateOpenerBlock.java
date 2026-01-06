@@ -21,10 +21,9 @@ import org.jetbrains.annotations.Nullable;
 
 public class LootCrateOpenerBlock extends BaseEntityBlock {
     private static final MapCodec<LootCrateOpenerBlock> CODEC = simpleCodec(LootCrateOpenerBlock::new);
-    public static final Properties PROPS = Properties.of().mapColor(MapColor.WOOD).strength(1.8f);
 
     public LootCrateOpenerBlock(Properties props) {
-        super(PROPS);
+        super(props);
     }
 
     @Nullable

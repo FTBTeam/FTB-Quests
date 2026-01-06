@@ -10,6 +10,7 @@ import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.GlobalPos;
 import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
@@ -28,8 +29,8 @@ import java.util.Optional;
 import java.util.function.Consumer;
 
 public class TaskScreenConfiguratorItem extends Item {
-    public TaskScreenConfiguratorItem() {
-        super(ModItems.defaultProps());
+    public TaskScreenConfiguratorItem(ResourceKey<Item> id) {
+        super(ModItems.defaultProps().setId(id));
     }
 
     @Override

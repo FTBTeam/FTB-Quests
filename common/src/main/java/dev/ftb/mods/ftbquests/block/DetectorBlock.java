@@ -20,7 +20,6 @@ import org.jspecify.annotations.Nullable;
 
 public class DetectorBlock extends BaseEntityBlock {
 	private static final MapCodec<DetectorBlock> CODEC = simpleCodec(DetectorBlock::new);
-	public static final Properties PROPS = Properties.of().strength(0.3F);
 
 	public DetectorBlock(BlockBehaviour.Properties props) {
 		super(props);

@@ -6,6 +6,7 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
@@ -15,8 +16,8 @@ import java.util.List;
 import java.util.function.Consumer;
 
 public class MissingItem extends Item {
-	public MissingItem() {
-		super(ModItems.defaultProps().stacksTo(1));
+	public MissingItem(ResourceKey<Item> id) {
+		super(ModItems.defaultProps().stacksTo(1).setId(id));
 	}
 
 	@Override

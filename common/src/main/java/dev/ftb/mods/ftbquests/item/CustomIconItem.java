@@ -18,6 +18,7 @@ import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.EntityType;
@@ -36,8 +37,9 @@ import java.util.function.Consumer;
 public class CustomIconItem extends Item {
 	private static final Identifier FALLBACK_ICON = Identifier.withDefaultNamespace("textures/misc/unknown_pack.png");
 
-	public CustomIconItem() {
+	public CustomIconItem(ResourceKey<Item> id) {
 		super(ModItems.defaultProps().stacksTo(1)
+				.setId(id)
 				.component(ModDataComponents.CUSTOM_ICON.get(), FALLBACK_ICON)
 		);
 	}

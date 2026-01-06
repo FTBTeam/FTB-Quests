@@ -138,14 +138,14 @@ public class OtherButtonsPanelBottom extends OtherButtonsPanel {
 					b -> saveLocally()));
 
 			contextMenu.add(new ContextMenuItem(Component.translatable("ftbquests.gui.reload_theme"), ThemeProperties.RELOAD_ICON.get(),
-					b -> reload_theme()));
+					b -> reloadTheme()));
 			contextMenu.add(new ContextMenuItem(Component.translatable("ftbquests.gui.wiki"), Icons.INFO,
 					b -> handleClick(WIKI_URL)));
 
 			questScreen.openContextMenu(contextMenu);
 		}
 
-		private void reload_theme() {
+		private void reloadTheme() {
 			Minecraft mc = Minecraft.getInstance();
 			//FIXME: mc.getTextureManager().onResourceManagerReload(mc.getResourceManager());
 			ThemeLoader.loadTheme(mc.getResourceManager());

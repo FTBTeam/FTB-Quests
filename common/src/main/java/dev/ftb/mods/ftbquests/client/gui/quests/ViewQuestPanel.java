@@ -905,7 +905,6 @@ public class ViewQuestPanel extends ModalPanel {
 					editCallback.accept(true, this);
 					return true;
 				} else if (button.isLeft() && Minecraft.getInstance().screen != null) {
-					// TODO: @since 21.11: I'm unsure on how to port this. MC appears to have removed this functionality entirely.
 //					Optional<Style> style = getComponentStyleAt(questScreen.getTheme(), getMouseX(), getMouseY());
 //					if (style.isPresent()) {
 //						return handleCustomClickEvent(style.get()) || Minecraft.getInstance().screen.handleComponentClicked(style.get());
@@ -917,49 +916,49 @@ public class ViewQuestPanel extends ModalPanel {
 		}
 
 		private boolean handleCustomClickEvent(Style style) {
-			if (style == null) return false;
-
-			ClickEvent clickEvent = style.getClickEvent();
-			if (clickEvent == null) return false;
-
-			if (clickEvent.action() == ClickEvent.Action.CHANGE_PAGE) {
-				String[] fields = clickEvent.getValue().split("/");
-				QuestObjectBase.parseHexId(fields[0]).ifPresentOrElse(questId -> {
-					QuestObject qo = quest.getQuestFile().get(questId);
-					if (qo != null) {
-						if (qo instanceof Quest && fields.length >= 2 && StringUtils.isNumeric(fields[1])) {
-							currentPages.put(questId.longValue(), Integer.parseInt(fields[1]) - 1);
-						}
-						questScreen.open(qo, false);
-					} else {
-						errorToPlayer("Unknown quest object id: %s", clickEvent.getValue());
-					}
-				}, () -> errorToPlayer("Invalid quest object id: %s", clickEvent.getValue()));
-				return true;
-			} else if (clickEvent.getAction() == ClickEvent.Action.OPEN_URL) {
-				try {
-					URI uri = new URI(clickEvent.getValue());
-					String scheme = uri.getScheme();
-					if (scheme == null) {
-						throw new URISyntaxException(clickEvent.getValue(), "Missing protocol");
-					}
-					if (!scheme.equalsIgnoreCase("http") && !scheme.equalsIgnoreCase("https")) {
-						throw new URISyntaxException(clickEvent.getValue(), "Unsupported protocol: " + scheme.toLowerCase(Locale.ROOT));
-					}
-
-					final Screen curScreen = Minecraft.getInstance().screen;
-					Minecraft.getInstance().setScreen(new ConfirmLinkScreen(accepted -> {
-						if (accepted) {
-							Util.getPlatform().openUri(uri);
-						}
-						Minecraft.getInstance().setScreen(curScreen);
-					}, clickEvent.getValue(), false));
-					return true;
-				} catch (URISyntaxException e) {
-					errorToPlayer("Can't open url for %s (%s)", clickEvent.getValue(), e.getMessage());
-				}
-				return true;
-			}
+//			if (style == null) return false;
+//
+//			ClickEvent clickEvent = style.getClickEvent();
+//			if (clickEvent == null) return false;
+//
+//			if (clickEvent.action() == ClickEvent.Action.CHANGE_PAGE) {
+//				String[] fields = clickEvent.getValue().split("/");
+//				QuestObjectBase.parseHexId(fields[0]).ifPresentOrElse(questId -> {
+//					QuestObject qo = quest.getQuestFile().get(questId);
+//					if (qo != null) {
+//						if (qo instanceof Quest && fields.length >= 2 && StringUtils.isNumeric(fields[1])) {
+//							currentPages.put(questId.longValue(), Integer.parseInt(fields[1]) - 1);
+//						}
+//						questScreen.open(qo, false);
+//					} else {
+//						errorToPlayer("Unknown quest object id: %s", clickEvent.getValue());
+//					}
+//				}, () -> errorToPlayer("Invalid quest object id: %s", clickEvent.getValue()));
+//				return true;
+//			} else if (clickEvent.getAction() == ClickEvent.Action.OPEN_URL) {
+//				try {
+//					URI uri = new URI(clickEvent.getValue());
+//					String scheme = uri.getScheme();
+//					if (scheme == null) {
+//						throw new URISyntaxException(clickEvent.getValue(), "Missing protocol");
+//					}
+//					if (!scheme.equalsIgnoreCase("http") && !scheme.equalsIgnoreCase("https")) {
+//						throw new URISyntaxException(clickEvent.getValue(), "Unsupported protocol: " + scheme.toLowerCase(Locale.ROOT));
+//					}
+//
+//					final Screen curScreen = Minecraft.getInstance().screen;
+//					Minecraft.getInstance().setScreen(new ConfirmLinkScreen(accepted -> {
+//						if (accepted) {
+//							Util.getPlatform().openUri(uri);
+//						}
+//						Minecraft.getInstance().setScreen(curScreen);
+//					}, clickEvent.getValue(), false));
+//					return true;
+//				} catch (URISyntaxException e) {
+//					errorToPlayer("Can't open url for %s (%s)", clickEvent.getValue(), e.getMessage());
+//				}
+//				return true;
+//			}
 			return false;
 		}
 
@@ -989,29 +988,29 @@ public class ViewQuestPanel extends ModalPanel {
 
 			super.addMouseOverText(list);
 
-			getComponentStyleAt(questScreen.getTheme(), getMouseX(), getMouseY()).ifPresent(style -> {
-				if (style.getHoverEvent() != null) {
-					HoverEvent hoverevent = style.getHoverEvent();
-					HoverEvent.ItemStackInfo stackInfo = hoverevent.getValue(HoverEvent.Action.SHOW_ITEM);
-					Minecraft mc = Minecraft.getInstance();
-					TooltipFlag flag = mc.options.advancedItemTooltips ? TooltipFlag.Default.ADVANCED : TooltipFlag.Default.NORMAL;
-					if (stackInfo != null) {
-						stackInfo.getItemStack().getTooltipLines(Item.TooltipContext.of(mc.level), mc.player, flag).forEach(list::add);
-					} else {
-						HoverEvent.EntityTooltipInfo entityInfo = hoverevent.getValue(HoverEvent.Action.SHOW_ENTITY);
-						if (entityInfo != null) {
-							if (flag.isAdvanced()) {
-								entityInfo.getTooltipLines().forEach(list::add);
-							}
-						} else {
-							Component component = hoverevent.getValue(HoverEvent.Action.SHOW_TEXT);
-							if (component != null) {
-								list.add(component);
-							}
-						}
-					}
-				}
-			});
+//			getComponentStyleAt(questScreen.getTheme(), getMouseX(), getMouseY()).ifPresent(style -> {
+//				if (style.getHoverEvent() != null) {
+//					HoverEvent hoverevent = style.getHoverEvent();
+//					HoverEvent.ItemStackInfo stackInfo = hoverevent.getValue(HoverEvent.Action.SHOW_ITEM);
+//					Minecraft mc = Minecraft.getInstance();
+//					TooltipFlag flag = mc.options.advancedItemTooltips ? TooltipFlag.Default.ADVANCED : TooltipFlag.Default.NORMAL;
+//					if (stackInfo != null) {
+//						stackInfo.getItemStack().getTooltipLines(Item.TooltipContext.of(mc.level), mc.player, flag).forEach(list::add);
+//					} else {
+//						HoverEvent.EntityTooltipInfo entityInfo = hoverevent.getValue(HoverEvent.Action.SHOW_ENTITY);
+//						if (entityInfo != null) {
+//							if (flag.isAdvanced()) {
+//								entityInfo.getTooltipLines().forEach(list::add);
+//							}
+//						} else {
+//							Component component = hoverevent.getValue(HoverEvent.Action.SHOW_TEXT);
+//							if (component != null) {
+//								list.add(component);
+//							}
+//						}
+//					}
+//				}
+//			});
 
 			if (xlateWarning) {
 				ClientQuestFile.addTranslationWarning(list, key);

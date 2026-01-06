@@ -5,33 +5,42 @@ import dev.architectury.registry.registries.RegistrySupplier;
 import dev.ftb.mods.ftbquests.api.FTBQuestsAPI;
 import dev.ftb.mods.ftbquests.block.*;
 import net.minecraft.core.registries.Registries;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.state.BlockBehaviour;
+import net.minecraft.world.level.material.MapColor;
+
+import java.util.function.Function;
 
 public class ModBlocks {
 	public static final DeferredRegister<Block> BLOCKS = DeferredRegister.create(FTBQuestsAPI.MOD_ID, Registries.BLOCK);
 
 	public static final RegistrySupplier<Block> BARRIER
-			= BLOCKS.register("barrier", () -> new QuestBarrierBlock(QuestBarrierBlock.PROPS));
+			= register("barrier", (id) -> new QuestBarrierBlock(QuestBarrierBlock.createProps(id)));
 	public static final RegistrySupplier<Block> STAGE_BARRIER
-			= BLOCKS.register("stage_barrier", () -> new StageBarrierBlock(QuestBarrierBlock.PROPS));
+			= register("stage_barrier", (id) -> new StageBarrierBlock(QuestBarrierBlock.createProps(id)));
 	public static final RegistrySupplier<Block> DETECTOR
-			= BLOCKS.register("detector", () -> new DetectorBlock(DetectorBlock.PROPS));
+			= register("detector", (id) -> new DetectorBlock(BlockBehaviour.Properties.of().strength(0.3F).setId(id)));
 	public static final RegistrySupplier<Block> LOOT_CRATE_OPENER
-			= BLOCKS.register("loot_crate_opener", () -> new LootCrateOpenerBlock(LootCrateOpenerBlock.PROPS));
+			= register("loot_crate_opener", (id) -> new LootCrateOpenerBlock(BlockBehaviour.Properties.of().mapColor(MapColor.WOOD).strength(1.8f).setId(id)));
 
 	public static final RegistrySupplier<Block> TASK_SCREEN_1
-			= BLOCKS.register("screen_1", () -> new TaskScreenBlock(TaskScreenBlock.PROPS, 1));
+			= register("screen_1", (id) -> new TaskScreenBlock(TaskScreenBlock.createProps(id), 1));
 	public static final RegistrySupplier<Block> TASK_SCREEN_3
-			= BLOCKS.register("screen_3", () -> new TaskScreenBlock(TaskScreenBlock.PROPS, 3));
+			= register("screen_3", (id) -> new TaskScreenBlock(TaskScreenBlock.createProps(id), 3));
 	public static final RegistrySupplier<Block> TASK_SCREEN_5
-			= BLOCKS.register("screen_5", () -> new TaskScreenBlock(TaskScreenBlock.PROPS, 5));
+			= register("screen_5", (id) -> new TaskScreenBlock(TaskScreenBlock.createProps(id), 5));
 	public static final RegistrySupplier<Block> TASK_SCREEN_7
-			= BLOCKS.register("screen_7", () -> new TaskScreenBlock(TaskScreenBlock.PROPS, 7));
+			= register("screen_7", (id) -> new TaskScreenBlock(TaskScreenBlock.createProps(id), 7));
 	public static final RegistrySupplier<Block> AUX_SCREEN
-			= BLOCKS.register("aux_task_screen", () -> new TaskScreenBlock.Aux(TaskScreenBlock.PROPS));
+			= register("aux_task_screen", (id) -> new TaskScreenBlock.Aux(TaskScreenBlock.createProps(id)));
 
 	public static void register() {
 		BLOCKS.register();
 	}
 
+	private static RegistrySupplier<Block> register(String name, Function<ResourceKey<Block>, Block> block) {
+		var id = ResourceKey.create(Registries.BLOCK, FTBQuestsAPI.id(name));
+		return BLOCKS.register(name, () -> block.apply(id));
+	}
 }

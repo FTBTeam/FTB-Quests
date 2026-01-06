@@ -33,7 +33,7 @@ dependencies {
 		exclude(group: "net.fabricmc.fabric-api")
 	}
 
-	modApi("dev.ftb.mods:ftb-library-fabric:${rootProject.ftb_library_version}") { transitive false }
+	modApi("dev.ftb.mods:ftb-library-fabric:${rootProject.ftb_library_version}")
 
 	modApi("dev.ftb.mods:ftb-teams-fabric:${rootProject.ftb_teams_version}") { transitive false }
 

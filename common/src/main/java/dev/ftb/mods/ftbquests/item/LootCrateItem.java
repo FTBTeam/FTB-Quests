@@ -19,6 +19,7 @@ import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.particles.ItemParticleOption;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
@@ -41,8 +42,9 @@ import java.util.List;
 import java.util.function.Consumer;
 
 public class LootCrateItem extends Item {
-	public LootCrateItem() {
+	public LootCrateItem(ResourceKey<Item> id) {
 		super(ModItems.defaultProps()
+				.setId(id)
 				.rarity(Rarity.UNCOMMON)
 				.component(ModDataComponents.LOOT_CRATE.get(), "")
 				.component(DataComponents.CUSTOM_MODEL_DATA, new CustomModelData(List.of(), List.of(), List.of(), List.of()))

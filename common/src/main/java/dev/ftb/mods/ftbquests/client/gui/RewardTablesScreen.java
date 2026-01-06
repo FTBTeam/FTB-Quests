@@ -115,7 +115,7 @@ public class RewardTablesScreen extends AbstractButtonListScreen {
 		);
 
 		setWidth(maxW);
-		setHeight(getGui().getScreen().getGuiScaledHeight() * 4 / 5);
+		setHeight(getGui().getWindow().getGuiScaledHeight() * 4 / 5);
 
 		return true;
 	}

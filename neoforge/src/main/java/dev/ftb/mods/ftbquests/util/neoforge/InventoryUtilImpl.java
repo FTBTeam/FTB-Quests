@@ -13,38 +13,40 @@ import java.util.List;
 
 public class InventoryUtilImpl {
     public static NonNullList<ItemStack> getItemsInInventory(Level level, BlockPos pos, Direction side) {
-        IItemHandler handler = level.getCapability(Capabilities.ItemHandler.BLOCK, pos, side);
-        NonNullList<ItemStack> items = NonNullList.create();
+        // TODO: @since 21.11: Come back to this
+//        IItemHandler handler = level.getCapability(Capabilities.ItemHandler.BLOCK, pos, side);
+//        NonNullList<ItemStack> items = NonNullList.create();
+//
+//        if (handler != null) {
+//            for (int i = 0; i < handler.getSlots(); i++) {
+//                ItemStack stack = handler.getStackInSlot(i);
+//                if (!stack.isEmpty()) {
+//                    items.add(stack);
+//                }
+//            }
+//        }
 
-        if (handler != null) {
-            for (int i = 0; i < handler.getSlots(); i++) {
-                ItemStack stack = handler.getStackInSlot(i);
-                if (!stack.isEmpty()) {
-                    items.add(stack);
-                }
-            }
-        }
-
-        return items;
+        return NonNullList.create();// items;
     }
 
     public static boolean putItemsInInventory(List<ItemStack> items, Level level, BlockPos pos, Direction side, boolean clearFirst) {
-        IItemHandler handler = level.getCapability(Capabilities.ItemHandler.BLOCK, pos, side);
-        if (handler == null) {
-            throw new IllegalArgumentException("No item handler at that blockpos & side");
-        }
-
-        if (clearFirst) {
-            for (int i = 0; i < handler.getSlots(); i++) {
-                handler.extractItem(i, Integer.MAX_VALUE, false);
-            }
-        }
-        for (ItemStack stack : items) {
-            ItemStack excess = ItemHandlerHelper.insertItem(handler, stack.copy(), false);
-            if (!excess.isEmpty()) {
-                return false;
-            }
-        }
+        // TODO: @since 21.11: Come back to this
+//        IItemHandler handler = level.getCapability(Capabilities.ItemHandler.BLOCK, pos, side);
+//        if (handler == null) {
+//            throw new IllegalArgumentException("No item handler at that blockpos & side");
+//        }
+//
+//        if (clearFirst) {
+//            for (int i = 0; i < handler.getSlots(); i++) {
+//                handler.extractItem(i, Integer.MAX_VALUE, false);
+//            }
+//        }
+//        for (ItemStack stack : items) {
+//            ItemStack excess = ItemHandlerHelper.insertItem(handler, stack.copy(), false);
+//            if (!excess.isEmpty()) {
+//                return false;
+//            }
+//        }
 
         return true;
     }

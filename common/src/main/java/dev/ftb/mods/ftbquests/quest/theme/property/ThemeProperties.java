@@ -6,6 +6,7 @@ import com.mojang.datafixers.util.Either;
 import dev.ftb.mods.ftblibrary.client.icon.IconRenderer;
 import dev.ftb.mods.ftblibrary.icon.Color4I;
 import dev.ftb.mods.ftblibrary.icon.Icon;
+import dev.ftb.mods.ftblibrary.icon.Icons;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.renderer.GameRenderer;
 import org.joml.Matrix4f;
@@ -41,8 +42,8 @@ public interface ThemeProperties {
 	IconProperty TEXT_BOX = new IconProperty("text_box");
 
 	//Icons
-	IconProperty CHECK_ICON = new IconProperty("check_icon", new CheckIcon(ThemeProperties.SYMBOL_OUT, ThemeProperties.SYMBOL_IN));
-	IconProperty ADD_ICON = new IconProperty("add_icon", new AddIcon());
+	IconProperty CHECK_ICON = new IconProperty("check_icon", Icons.CHECK);// new CheckIcon(ThemeProperties.SYMBOL_OUT, ThemeProperties.SYMBOL_IN));
+	IconProperty ADD_ICON = new IconProperty("add_icon", Icons.ADD);// new AddIcon());
 
 	IconProperty ALERT_ICON = new IconProperty("alert_icon");
 	IconProperty SUPPORT_ICON = new IconProperty("support_icon");

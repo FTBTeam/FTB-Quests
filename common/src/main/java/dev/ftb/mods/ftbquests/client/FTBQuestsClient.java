@@ -1,7 +1,9 @@
 package dev.ftb.mods.ftbquests.client;
 
 import com.mojang.blaze3d.platform.InputConstants;
+import com.mojang.serialization.Lifecycle;
 import dev.architectury.event.events.client.ClientLifecycleEvent;
+import dev.architectury.event.events.common.LifecycleEvent;
 import dev.architectury.networking.NetworkManager;
 import dev.architectury.platform.Platform;
 import dev.architectury.registry.ReloadListenerRegistry;
@@ -72,14 +74,9 @@ public class FTBQuestsClient {
 		ConfigManager.getInstance().registerClientConfig(FTBQuestsClientConfig.CONFIG, FTBQuestsAPI.MOD_ID, FTBQuestsClientConfig::onEdited);
 
 		ClientLifecycleEvent.CLIENT_SETUP.register(FTBQuestsClient::onClientSetup);
-
-		// Minecraft.getInstance() might not exist here (datagen in particular)
-        //noinspection ConstantValue
-        if (Minecraft.getInstance() != null) {
-			ReloadListenerRegistry.register(PackType.CLIENT_RESOURCES, new QuestFileCacheReloader(), FTBQuestsAPI.id("file_cache"));
-			ReloadListenerRegistry.register(PackType.CLIENT_RESOURCES, new ThemeLoader(), FTBQuestsAPI.id("themes"));
-			KeyMappingRegistry.register(KEY_QUESTS = new KeyMapping("key.ftbquests.quests", InputConstants.Type.KEYSYM, -1, FTB_QUESTS_KEY_CATEGORY));
-		}
+		ReloadListenerRegistry.register(PackType.CLIENT_RESOURCES, new QuestFileCacheReloader(), FTBQuestsAPI.id("file_cache"));
+		ReloadListenerRegistry.register(PackType.CLIENT_RESOURCES, new ThemeLoader(), FTBQuestsAPI.id("themes"));
+		KeyMappingRegistry.register(KEY_QUESTS = new KeyMapping("key.ftbquests.quests", InputConstants.Type.KEYSYM, -1, FTB_QUESTS_KEY_CATEGORY));
 
 		new FTBQuestsClientEventHandler().init();
 	}

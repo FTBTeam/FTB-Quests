@@ -16,6 +16,7 @@ import net.fabricmc.api.Environment;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.component.DataComponents;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionHand;
@@ -54,15 +55,18 @@ public class QuestBarrierBlock extends BaseEntityBlock {
 
 	public static final BooleanProperty OPEN = BooleanProperty.create("open");
 
-	public static final Properties PROPS = Properties.of()
-			.mapColor(MapColor.COLOR_LIGHT_BLUE)
-			.pushReaction(PushReaction.BLOCK)
-			.noOcclusion()
-			.isViewBlocking((blockState, blockGetter, blockPos) -> false)
-			.isSuffocating((blockState, blockGetter, blockPos) -> false)
-			.strength(-1, 6000000F)
-			.lightLevel(blockState -> 3)
-			.emissiveRendering((blockState, blockGetter, blockPos) -> true);
+	public static Properties createProps(ResourceKey<Block> key) {
+		return Properties.of()
+				.setId(key)
+				.mapColor(MapColor.COLOR_LIGHT_BLUE)
+				.pushReaction(PushReaction.BLOCK)
+				.noOcclusion()
+				.isViewBlocking((blockState, blockGetter, blockPos) -> false)
+				.isSuffocating((blockState, blockGetter, blockPos) -> false)
+				.strength(-1, 6000000F)
+				.lightLevel(blockState -> 3)
+				.emissiveRendering((blockState, blockGetter, blockPos) -> true);
+	}
 
 	public QuestBarrierBlock(Properties props) {
 		super(props);

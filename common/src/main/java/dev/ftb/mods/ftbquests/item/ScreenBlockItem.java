@@ -8,7 +8,9 @@ import net.minecraft.ChatFormatting;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.item.BlockItem;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.item.component.CustomData;
@@ -39,8 +41,8 @@ public class ScreenBlockItem extends BlockItem {
 
     private final ScreenSize size;
 
-    public ScreenBlockItem(Block block, ScreenSize size) {
-        super(block, ModItems.defaultProps());
+    public ScreenBlockItem(ResourceKey<Item> id, Block block, ScreenSize size) {
+        super(block, ModItems.defaultProps().setId(id));
 
         this.size = size;
     }

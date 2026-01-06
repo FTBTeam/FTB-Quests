@@ -266,6 +266,8 @@ public class QuestPanel extends Panel {
 
 		GpuBufferSlice projectionMatrixBuffer = RenderSystem.getProjectionMatrixBuffer();
 
+		// TODO: @since 21.11: This doesn't work :joy:
+		// java.lang.IllegalArgumentException: Cannot write more data than the slice allows (attempting to write 96 bytes into a slice of length 64)
 		VertexFormat vertexformat = DefaultVertexFormat.POSITION_TEX_COLOR;
 		try (ByteBufferBuilder bytebufferbuilder = ByteBufferBuilder.exactlySized(4 * vertexformat.getVertexSize())) {
 			BufferBuilder buffer = new BufferBuilder(bytebufferbuilder, VertexFormat.Mode.QUADS, vertexformat);

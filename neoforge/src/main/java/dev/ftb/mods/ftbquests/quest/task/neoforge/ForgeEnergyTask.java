@@ -8,12 +8,12 @@ import dev.ftb.mods.ftbquests.quest.task.EnergyTask;
 import dev.ftb.mods.ftbquests.quest.task.TaskType;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 
 public class ForgeEnergyTask extends EnergyTask {
 	public static TaskType TYPE;
-	public static final ResourceLocation EMPTY_TEXTURE = FTBQuestsAPI.id("textures/tasks/fe_empty.png");
-	public static final ResourceLocation FULL_TEXTURE = FTBQuestsAPI.id("textures/tasks/fe_full.png");
+	public static final Identifier EMPTY_TEXTURE = FTBQuestsAPI.id("textures/tasks/fe_empty.png");
+	public static final Identifier FULL_TEXTURE = FTBQuestsAPI.id("textures/tasks/fe_full.png");
 
 	public ForgeEnergyTask(long id, Quest quest) {
 		super(id, quest);

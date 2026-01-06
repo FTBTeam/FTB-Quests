@@ -6,7 +6,9 @@ import dev.ftb.mods.ftbquests.registry.ModDataComponents;
 import dev.ftb.mods.ftbquests.registry.ModItems;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.item.BlockItem;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.item.component.TooltipDisplay;
@@ -15,8 +17,8 @@ import java.util.List;
 import java.util.function.Consumer;
 
 public class QuestBarrierBlockItem extends BlockItem {
-	public QuestBarrierBlockItem() {
-		super(ModBlocks.BARRIER.get(), ModItems.defaultProps());
+	public QuestBarrierBlockItem(ResourceKey<Item> id) {
+		super(ModBlocks.BARRIER.get(), ModItems.defaultProps().setId(id));
 	}
 
 	@Override

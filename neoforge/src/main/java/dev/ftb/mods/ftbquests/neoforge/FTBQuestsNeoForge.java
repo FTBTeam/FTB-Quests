@@ -17,7 +17,7 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.level.GameRules;
+import net.minecraft.world.level.gamerules.GameRules;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.EventPriority;
 import net.neoforged.bus.api.IEventBus;
@@ -44,7 +44,7 @@ public class FTBQuestsNeoForge {
 
 		modEventBus.<FMLCommonSetupEvent>addListener(event -> quests.setup());
 
-		if (FMLEnvironment.dist == Dist.CLIENT) {
+		if (FMLEnvironment.getDist() == Dist.CLIENT) {
 			ClientSetup.init(modEventBus);
 		}
 
@@ -57,7 +57,7 @@ public class FTBQuestsNeoForge {
 	private static void livingDrops(LivingDropsEvent event) {
 		LivingEntity living = event.getEntity();
 
-		if (living.level().isClientSide || living instanceof Player || living.getType().is(FTBQuestsTags.EntityTypes.NO_LOOT_CRATES)) {
+		if (living.level().isClientSide() || living instanceof Player || living.getType().is(FTBQuestsTags.EntityTypes.NO_LOOT_CRATES)) {
 			return;
 		}
 		if (ServerQuestFile.INSTANCE == null || !ServerQuestFile.INSTANCE.isDropLootCrates()) {
@@ -74,7 +74,7 @@ public class FTBQuestsNeoForge {
 	private static void dropsEvent(LivingDropsEvent event) {
 		if (!(event.getEntity() instanceof ServerPlayer player)
 				|| player instanceof FakePlayer
-				|| player.level().getGameRules().getBoolean(GameRules.RULE_KEEPINVENTORY)
+				|| player.level().getGameRules().get(GameRules.KEEP_INVENTORY)
 				|| ServerQuestFile.INSTANCE.dropBookOnDeath()) {
 			return;
 		}
@@ -92,21 +92,22 @@ public class FTBQuestsNeoForge {
 	}
 
 	public static void registerCaps(RegisterCapabilitiesEvent event) {
-		event.registerBlockEntity(Capabilities.ItemHandler.BLOCK, ModBlockEntityTypes.CORE_TASK_SCREEN.get(),
-				(be, side) -> ((NeoForgeTaskScreenBlockEntity) be).getItemHandler());
-		event.registerBlockEntity(Capabilities.FluidHandler.BLOCK, ModBlockEntityTypes.CORE_TASK_SCREEN.get(),
-				(be, side) -> ((NeoForgeTaskScreenBlockEntity) be).getFluidHandler());
-		event.registerBlockEntity(Capabilities.EnergyStorage.BLOCK, ModBlockEntityTypes.CORE_TASK_SCREEN.get(),
-				(be, side) -> ((NeoForgeTaskScreenBlockEntity) be).getEnergyHandler());
-
-		event.registerBlockEntity(Capabilities.ItemHandler.BLOCK, ModBlockEntityTypes.AUX_TASK_SCREEN.get(),
-				(be, side) -> ((NeoForgeTaskScreenAuxBlockEntity) be).getItemHandler());
-		event.registerBlockEntity(Capabilities.FluidHandler.BLOCK, ModBlockEntityTypes.AUX_TASK_SCREEN.get(),
-				(be, side) -> ((NeoForgeTaskScreenAuxBlockEntity) be).getFluidHandler());
-		event.registerBlockEntity(Capabilities.EnergyStorage.BLOCK, ModBlockEntityTypes.AUX_TASK_SCREEN.get(),
-				(be, side) -> ((NeoForgeTaskScreenAuxBlockEntity) be).getEnergyHandler());
-
-		event.registerBlockEntity(Capabilities.ItemHandler.BLOCK, ModBlockEntityTypes.LOOT_CRATE_OPENER.get(),
-				(be, side) -> ((NeoForgeLootCrateOpenerBlockEntity) be).getLootCrateHandler());
+		// TODO: @since 21.11: Come back to this
+//		event.registerBlockEntity(Capabilities.ItemHandler.BLOCK, ModBlockEntityTypes.CORE_TASK_SCREEN.get(),
+//				(be, side) -> ((NeoForgeTaskScreenBlockEntity) be).getItemHandler());
+//		event.registerBlockEntity(Capabilities.FluidHandler.BLOCK, ModBlockEntityTypes.CORE_TASK_SCREEN.get(),
+//				(be, side) -> ((NeoForgeTaskScreenBlockEntity) be).getFluidHandler());
+//		event.registerBlockEntity(Capabilities.EnergyStorage.BLOCK, ModBlockEntityTypes.CORE_TASK_SCREEN.get(),
+//				(be, side) -> ((NeoForgeTaskScreenBlockEntity) be).getEnergyHandler());
+//
+//		event.registerBlockEntity(Capabilities.ItemHandler.BLOCK, ModBlockEntityTypes.AUX_TASK_SCREEN.get(),
+//				(be, side) -> ((NeoForgeTaskScreenAuxBlockEntity) be).getItemHandler());
+//		event.registerBlockEntity(Capabilities.FluidHandler.BLOCK, ModBlockEntityTypes.AUX_TASK_SCREEN.get(),
+//				(be, side) -> ((NeoForgeTaskScreenAuxBlockEntity) be).getFluidHandler());
+//		event.registerBlockEntity(Capabilities.EnergyStorage.BLOCK, ModBlockEntityTypes.AUX_TASK_SCREEN.get(),
+//				(be, side) -> ((NeoForgeTaskScreenAuxBlockEntity) be).getEnergyHandler());
+//
+//		event.registerBlockEntity(Capabilities.ItemHandler.BLOCK, ModBlockEntityTypes.LOOT_CRATE_OPENER.get(),
+//				(be, side) -> ((NeoForgeLootCrateOpenerBlockEntity) be).getLootCrateHandler());
 	}
 }
