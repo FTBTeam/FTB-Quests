@@ -24,12 +24,12 @@ import dev.ftb.mods.ftbquests.quest.QuestObject;
 import dev.ftb.mods.ftbquests.quest.QuestObjectType;
 import dev.ftb.mods.ftbquests.util.ConfigQuestObject;
 import net.minecraft.ChatFormatting;
+import net.minecraft.client.input.CharacterEvent;
 import net.minecraft.client.input.KeyEvent;
 import net.minecraft.util.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Whence;
-import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -154,7 +154,7 @@ public class MultilineTextEditorScreen extends BaseScreen {
 		if (key.esc()) {
 			cancel();
 			return true;
-		} else if (key.enter() && key.originalEvent().hasShiftDown()) {
+		} else if (key.enter() && key.event().hasShiftDown()) {
 			saveAndExit();
 			return true;
 		} else if (textBox.isFocused()) {
@@ -166,31 +166,34 @@ public class MultilineTextEditorScreen extends BaseScreen {
 	}
 
 	@Override
-	public void keyReleased(Key key) {
+	public boolean keyReleased(Key key) {
 		// need to do this on keyReleased() so keypress doesn't pass through to any opened sub-screen
-		executeHotkey(key.keyCode(), true);
+		return executeHotkey(key.event().key(), true);
 	}
 
-	private void executeHotkey(int keycode, boolean checkModifier) {
+	private boolean executeHotkey(int keycode, boolean checkModifier) {
 		if (hotKeys.containsKey(keycode) && (!checkModifier || isHotKeyModifierPressed(keycode))) {
 			hotKeys.get(keycode).run();
 			textBox.setFocused(true);
+			return true;
 		}
+
+		return false;
 	}
 
 	@Override
-	public boolean charTyped(char c, KeyModifiers modifiers) {
+	public boolean charTyped(CharacterEvent event) {
 		if (ticksOpen < 2) {
 			// small kludge to avoid 'e' being inserted if image select screen is exited by pressing E
 			return true;
 		}
 
 		// need to intercept this, or the character is sent on to the text box
-		int keyCode = Character.toUpperCase(c);
+		int keyCode = Character.toUpperCase(event.codepoint());
 		if (isHotKeyModifierPressed(keyCode) && hotKeys.containsKey(keyCode)) {
 			return false;
 		}
-		return super.charTyped(c, modifiers);
+		return super.charTyped(event);
 	}
 
 	private static boolean isHotKeyModifierPressed(int keycode) {
@@ -340,7 +343,7 @@ public class MultilineTextEditorScreen extends BaseScreen {
 	}
 
 	private void insertAtEndOfLine(String toInsert) {
-		textBox.keyPressed(new Key(InputConstants.KEY_END, -1, 0, new KeyEvent(InputConstants.KEY_END, -1, 0)));
+		textBox.keyPressed(new Key(new KeyEvent(InputConstants.KEY_END, -1, 0)));
 		textBox.insertText(toInsert);
 	}
 

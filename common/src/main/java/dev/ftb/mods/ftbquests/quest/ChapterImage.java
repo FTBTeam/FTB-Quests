@@ -326,15 +326,16 @@ public final class ChapterImage implements Movable {
 	}
 
 	public boolean isAspectRatioOff() {
-		return !Mth.equal(image.aspectRatio(), width / height);
+		return !Mth.equal(IconHelper.aspectRatio(image), width / height);
 	}
 
 	public void fixupAspectRatio(boolean adjustWidth) {
 		if (isAspectRatioOff()) {
+			var aspect = IconHelper.aspectRatio(image);
 			if (adjustWidth) {
-				width = height * image.aspectRatio();
+				width = height * aspect;
 			} else {
-				height = width / image.aspectRatio();
+				height = width / aspect;
 			}
 			NetworkManager.sendToServer(EditObjectMessage.forQuestObject(chapter));
 		}

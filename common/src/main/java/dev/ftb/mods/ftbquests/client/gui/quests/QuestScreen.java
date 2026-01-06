@@ -465,7 +465,7 @@ public class QuestScreen extends BaseScreen {
 	public boolean keyPressed(Key key) {
 		if (super.keyPressed(key)) {
 			return true;
-		} else if (FTBQuestsClient.KEY_QUESTS.matches(key.originalEvent())) {
+		} else if (FTBQuestsClient.KEY_QUESTS.matches(key.event())) {
 			closeGui(true);
 			return true;
 		}
@@ -501,8 +501,8 @@ public class QuestScreen extends BaseScreen {
 			return true;
 		}
 
-		if (key.keyCode() >= GLFW.GLFW_KEY_1 && key.keyCode() <= GLFW.GLFW_KEY_9) {
-			int i = key.keyCode() - GLFW.GLFW_KEY_1;
+		if (key.event().key() >= GLFW.GLFW_KEY_1 && key.event().key() <= GLFW.GLFW_KEY_9) {
+			int i = key.event().key() - GLFW.GLFW_KEY_1;
 
 			if (i < visibleChapters.size()) {
 				selectChapter(visibleChapters.get(i));
@@ -532,7 +532,7 @@ public class QuestScreen extends BaseScreen {
 		} else if (key.modifiers().control()) {
 			double step = key.modifiers().shift() ? 0.1D : 0.5D;
 
-			switch (key.keyCode()) {
+			switch (key.event().key()) {
 				case GLFW.GLFW_KEY_A -> {
 					if (selectedChapter != null) {
 						selectedObjects.addAll(selectedChapter.getQuests());

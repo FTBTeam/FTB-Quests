@@ -73,9 +73,12 @@ public class CustomIconItem extends Item {
     }
 
 	public static Icon<?> getIcon(ItemStack stack) {
-		return getCustomComponent(stack)
-				.map(res -> res.map(Icon::getIcon, EntityIconLoader::getIcon))
-				.orElse(stack.getItem() instanceof CustomIconItem ? Icon.getIcon(FALLBACK_ICON) : ItemIcon.ofItemStack(stack));
+		Optional<Either<Identifier, EntityType<?>>> customComponent = getCustomComponent(stack);
+		if (customComponent.isPresent()) {
+			return customComponent.get().map(Icon::getIcon, EntityIconLoader::getIcon);
+		}
+
+		return stack.getItem() instanceof CustomIconItem ? Icon.getIcon(FALLBACK_ICON) : ItemIcon.ofItemStack(stack);
 	}
 
 	public static void setIcon(ItemStack stack, @Nullable Identifier texture) {
@@ -100,11 +103,11 @@ public class CustomIconItem extends Item {
 		setFaceIcon(stack, RegistrarManager.getId(value, Registries.ENTITY_TYPE));
 	}
 
-	private static Optional<Either<Identifier,EntityType<?>>> getCustomComponent(ItemStack stack) {
+	private static Optional<Either<Identifier, EntityType<?>>> getCustomComponent(ItemStack stack) {
 		if (stack.has(ModDataComponents.CUSTOM_ICON.get())) {
 			return Optional.of(Either.left(stack.get(ModDataComponents.CUSTOM_ICON.get())));
 		} else if (stack.has(ModDataComponents.ENTITY_FACE_ICON.get())) {
-			return Optional.of(Either.right(BuiltInRegistries.ENTITY_TYPE.get(stack.get(ModDataComponents.ENTITY_FACE_ICON.get()))));
+			return Optional.of(Either.right(BuiltInRegistries.ENTITY_TYPE.get(stack.get(ModDataComponents.ENTITY_FACE_ICON.get())).orElseThrow().value()));
 		}
 		return Optional.empty();
 	}

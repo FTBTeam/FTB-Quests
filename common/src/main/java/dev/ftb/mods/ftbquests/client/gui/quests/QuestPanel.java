@@ -1,5 +1,6 @@
 package dev.ftb.mods.ftbquests.client.gui.quests;
 
+import com.mojang.blaze3d.buffers.GpuBufferSlice;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.*;
 import com.mojang.math.Axis;
@@ -25,12 +26,16 @@ import dev.ftb.mods.ftbquests.quest.task.TaskTypes;
 import dev.ftb.mods.ftbquests.quest.theme.property.ThemeProperties;
 import dev.ftb.mods.ftbquests.quest.translation.TranslationKey;
 import net.minecraft.ChatFormatting;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.client.renderer.GameRenderer;
+import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.client.renderer.RenderPipelines;
+import net.minecraft.client.renderer.rendertype.RenderTypes;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.Mth;
 import org.jetbrains.annotations.Nullable;
-import org.joml.Matrix4f;
+import org.jetbrains.annotations.UnknownNullability;
+import org.joml.Matrix3x2fStack;
 import org.lwjgl.glfw.GLFW;
 
 import java.util.ArrayList;
@@ -167,11 +172,11 @@ public class QuestPanel extends Panel {
 		Tesselator tesselator = Tesselator.getInstance();
 
 		Icon<?> icon = ThemeProperties.DEPENDENCY_LINE_TEXTURE.get(questScreen.selectedChapter);
-		if (icon instanceof ImageIcon img) {
-			img.bindTexture();
-		} else {
-			DEFAULT_DEPENDENCY_LINE_TEXTURE.bindTexture();
-		}
+//		if (icon instanceof ImageIcon img) {
+//			img.bindTexture();
+//		} else {
+//			DEFAULT_DEPENDENCY_LINE_TEXTURE.bindTexture();
+//		}
 
 		Quest selectedQuest = questScreen.getViewedQuest();
 		if (selectedQuest == null) {
@@ -184,8 +189,8 @@ public class QuestPanel extends Panel {
 		double mt = -(System.currentTimeMillis() * 0.001D);
 		float lineWidth = (float) (questScreen.getZoom() * ThemeProperties.DEPENDENCY_LINE_THICKNESS.get(questScreen.selectedChapter) / 4D * 3D);
 
-		RenderSystem.setShader(GameRenderer::getPositionTexColorShader);
-		RenderSystem.setShaderColor(1F, 1F, 1F, 1F);
+//		RenderSystem.setShader(GameRenderer::getPositionTexColorShader);
+//		RenderSystem.setShaderColor(1F, 1F, 1F, 1F);
 
 		// pass 1: render connections for all visible quests
 		float mu = (float) ((mt * ThemeProperties.DEPENDENCY_LINE_UNSELECTED_SPEED.get(questScreen.selectedChapter)) % 1D);
@@ -248,26 +253,33 @@ public class QuestPanel extends Panel {
 		});
 	}
 
-	private void renderConnection(Widget widget, QuestButton button, PoseStack poseStack, float s, int r, int g, int b, int a, int a1, float mu, Tesselator tesselator) {
+	private void renderConnection(Widget widget, QuestButton button, @UnknownNullability Matrix3x2fStack poseStack, float s, int r, int g, int b, int a, int a1, float mu, Tesselator tesselator) {
 		double sx = widget.getX() + widget.width / 2.0;
 		double sy = widget.getY() + widget.height / 2.0;
 		double ex = button.getX() + button.width / 2.0;
 		double ey = button.getY() + button.height / 2.0;
 		float len = (float) MathUtils.dist(sx, sy, ex, ey);
 
-		poseStack.pushPose();
-		poseStack.translate(sx, sy, 0);
-		poseStack.mulPose(Axis.ZP.rotation((float) Math.atan2(ey - sy, ex - sx)));
-		Matrix4f m = poseStack.last().pose();
+		poseStack.pushMatrix();
+		poseStack.translate((float) sx, (float) sy);
+		poseStack.rotate((float) Math.atan2(ey - sy, ex - sx));
 
-		BufferBuilder buffer = tesselator.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX_COLOR);
-		buffer.addVertex(m, 0, -s, 0).setColor(r, g, b, a).setUv(len / s / 2F + mu, 0);
-		buffer.addVertex(m, 0, s, 0).setColor(r, g, b, a).setUv(len / s / 2F + mu, 1);
-		buffer.addVertex(m, len, s, 0).setColor(r * 3 / 4, g * 3 / 4, b * 3 / 4, a1).setUv(mu, 1);
-		buffer.addVertex(m, len, -s, 0).setColor(r * 3 / 4, g * 3 / 4, b * 3 / 4, a1).setUv(mu, 0);
-		BufferUploader.drawWithShader(buffer.buildOrThrow());
+		GpuBufferSlice projectionMatrixBuffer = RenderSystem.getProjectionMatrixBuffer();
 
-		poseStack.popPose();
+		VertexFormat vertexformat = DefaultVertexFormat.POSITION_TEX_COLOR;
+		try (ByteBufferBuilder bytebufferbuilder = ByteBufferBuilder.exactlySized(4 * vertexformat.getVertexSize())) {
+			BufferBuilder buffer = new BufferBuilder(bytebufferbuilder, VertexFormat.Mode.QUADS, vertexformat);
+			buffer.addVertex(0, -s, 0).setColor(r, g, b, a).setUv(len / s / 2F + mu, 0);
+			buffer.addVertex(0, s, 0).setColor(r, g, b, a).setUv(len / s / 2F + mu, 1);
+			buffer.addVertex(len, s, 0).setColor(r * 3 / 4, g * 3 / 4, b * 3 / 4, a1).setUv(mu, 1);
+			buffer.addVertex(len, -s, 0).setColor(r * 3 / 4, g * 3 / 4, b * 3 / 4, a1).setUv(mu, 0);
+
+			try (MeshData meshdata = buffer.buildOrThrow()) {
+				RenderSystem.getDevice().createCommandEncoder().writeToBuffer(projectionMatrixBuffer, meshdata.vertexBuffer());
+			}
+		}
+
+		poseStack.popMatrix();
 	}
 
 	@Override
@@ -302,7 +314,7 @@ public class QuestPanel extends Panel {
 			}
 
 			if (questScreen.file.canEdit()) {
-				PoseStack poseStack = graphics.pose();
+				Matrix3x2fStack poseStack = graphics.pose();
 
 				drawStatusBar(graphics, theme, poseStack);
 
@@ -323,20 +335,20 @@ public class QuestPanel extends Panel {
 						double oy = m.getY() - ominY;
 						double sx = (questX + ox - questMinX) / dx * questScreen.scrollWidth + px;
 						double sy = (questY + oy - questMinY) / dy * questScreen.scrollHeight + py;
-						poseStack.pushPose();
+						poseStack.pushMatrix();
 						// translate/rotate order is highly dependent on whether the object aligns at center or corner.  fun fun fun
 						if (m.isAlignToCorner()) {
-							poseStack.translate(sx - bs * m.getWidth() / 2D, sy - bs * m.getHeight() / 2D, 0D);
+							poseStack.translate((float) (sx - bs * m.getWidth() / 2D), (float) (sy - bs * m.getHeight() / 2D));
 						} else {
-							poseStack.translate(sx, sy, 0D);
+							poseStack.translate((float) sx, (float) sy);
 						}
-						poseStack.mulPose(Axis.ZP.rotationDegrees((float) m.getRotation()));
+						poseStack.rotate((float) m.getRotation());
 						if (!m.isAlignToCorner()) {
-							poseStack.translate(-bs * m.getWidth() / 2D, -bs * m.getHeight() / 2D, 0D);
+							poseStack.translate((float) (-bs * m.getWidth() / 2D), (float) (-bs * m.getHeight() / 2D));
 						}
-						poseStack.scale((float) (bs * m.getWidth()), (float) (bs * m.getHeight()), 1F);
+						poseStack.scale((float) (bs * m.getWidth()), (float) (bs * m.getHeight()));
 						m.drawMoved(graphics);
-						poseStack.popPose();
+						poseStack.popMatrix();
 					}
 
 					if (QuestScreen.grid && !questScreen.isViewingQuest()) {
@@ -345,41 +357,41 @@ public class QuestPanel extends Panel {
 						double boxW = omaxX / dx * questScreen.scrollWidth + px - boxX;
 						double boxH = omaxY / dy * questScreen.scrollHeight + py - boxY;
 
-						poseStack.pushPose();
-						poseStack.translate(0, 0, 200);
+						poseStack.pushMatrix();
+						poseStack.translate(0, 0);//, 200);
 						GuiHelper.drawHollowRect(graphics, (int) Math.round(boxX), (int) Math.round(boxY), (int) Math.round(boxW), (int) Math.round(boxH), Color4I.WHITE.withAlpha(30), false);
-						poseStack.popPose();
+						poseStack.popMatrix();
 					}
 				} else if (!questScreen.isViewingQuest() || !questScreen.viewQuestPanel.isMouseOver()) {
 					//int z = treeGui.getZoom();
 					double sx = (questX - questMinX) / dx * questScreen.scrollWidth + px;
 					double sy = (questY - questMinY) / dy * questScreen.scrollHeight + py;
-					poseStack.pushPose();
-					poseStack.translate(sx - bs / 2D, sy - bs / 2D, 0D);
-					poseStack.scale((float) bs, (float) bs, 1F);
-					GuiHelper.setupDrawing();
-					RenderSystem.enableDepthTest();
+					poseStack.pushMatrix();
+					poseStack.translate((float) (sx - bs / 2D), (float) (sy - bs / 2D));
+					poseStack.scale((float) bs, (float) bs);
+//					GuiHelper.setupDrawing();
+//					RenderSystem.enableDepthTest();
 					// TODO: custom shader to implement alphaFunc? for now however, rendering outline at alpha 30 works well
 					//RenderSystem.alphaFunc(GL11.GL_GREATER, 0.01F);
 					IconHelper.renderIcon(QuestShape.get(questScreen.selectedChapter.getDefaultQuestShape()).getOutline().withColor(Color4I.WHITE.withAlpha(30)), graphics, 0, 0, 1, 1);
 					//RenderSystem.defaultAlphaFunc();
-					poseStack.popPose();
+					poseStack.popMatrix();
 
 					if (QuestScreen.grid && !questScreen.isViewingQuest()) {
-						poseStack.pushPose();
-						poseStack.translate(0, 0, 1000);
+						poseStack.pushMatrix();
+						poseStack.translate(0, 0);//, 1000);
 						IconHelper.renderIcon(Color4I.WHITE, graphics, (int) Math.round(sx), (int) Math.round(sy), 1, 1);
 						IconHelper.renderIcon(Color4I.WHITE.withAlpha(30), graphics, getX(), (int) sy, width, 1);
 						IconHelper.renderIcon(Color4I.WHITE.withAlpha(30), graphics, (int) Math.round(sx), getY(), 1, height);
-						poseStack.popPose();
+						poseStack.popMatrix();
 					}
 				}
 			}
 		}
 	}
 
-	private void drawStatusBar(GuiGraphics graphics, Theme theme, PoseStack poseStack) {
-		poseStack.pushPose();
+	private void drawStatusBar(GuiGraphics graphics, Theme theme, @UnknownNullability Matrix3x2fStack poseStack) {
+		poseStack.pushMatrix();
 
 		int statusX = questScreen.chapterPanel.expanded ? questScreen.chapterPanel.width : questScreen.expandChaptersButton.width;
 		int statusWidth = questScreen.chapterPanel.expanded ? width - statusX + questScreen.expandChaptersButton.width : width;
@@ -387,8 +399,8 @@ public class QuestPanel extends Panel {
 		IconHelper.renderIcon(Color4I.DARK_GRAY, graphics, statusX, height - 9, statusWidth, 1);
 		IconHelper.renderIcon(statPanelBg, graphics, statusX, height - 9, statusWidth, 10);
 
-		poseStack.translate(statusX, height - 6, 600);
-		poseStack.scale(0.5f, 0.5f, 0.5f);
+		poseStack.translate(statusX, height - 6);//, 600);
+		poseStack.scale(0.5f, 0.5f);//;, 0.5f);
 
 		String curStr = String.format("Cursor: [%+.2f, %+.2f]", questX, questY);
 		int pos = theme.drawString(graphics, curStr, 6, 0, Theme.SHADOW) + 25;
@@ -405,7 +417,7 @@ public class QuestPanel extends Panel {
 		String cStr = String.format("Center: [%.2f, %.2f]", centerQuestX, centerQuestY);
 		theme.drawString(graphics, cStr, statusWidth * 2 - theme.getStringWidth(cStr) - 6, 0, Theme.SHADOW);
 
-		poseStack.popPose();
+		poseStack.popMatrix();
 	}
 
 	@Override

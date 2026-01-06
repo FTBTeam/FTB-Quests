@@ -183,28 +183,6 @@ public class TaskScreenBlock extends BaseEntityBlock {
         return level.isClientSide() ? InteractionResult.SUCCESS : InteractionResult.SUCCESS_SERVER;
     }
 
-
-
-    @Override
-    public void appendHoverText(ItemStack itemStack, Item.TooltipContext context, List<Component> list, TooltipFlag tooltipFlag) {
-        super.appendHoverText(itemStack, context, list, tooltipFlag);
-
-        CustomData data = itemStack.get(DataComponents.BLOCK_ENTITY_DATA);
-        if (data != null) {
-            CompoundTag subTag = data.copyTag();
-            BaseQuestFile questFile = FTBQuestsClient.getClientQuestFile();
-            if (questFile != null) {
-                Task task = questFile.getTask(subTag.getLong("TaskID"));
-                if (task != null) {
-                    list.add(Component.translatable("ftbquests.chapter").append(": ")
-                            .append(task.getQuest().getChapter().getTitle().copy().withStyle(ChatFormatting.YELLOW)));
-                    list.add(Component.translatable("ftbquests.quest").append(": ").append(task.getQuest().getMutableTitle().withStyle(ChatFormatting.YELLOW)));
-                    list.add(Component.translatable("ftbquests.task").append(": ").append(task.getMutableTitle().withStyle(ChatFormatting.YELLOW)));
-                }
-            }
-        }
-    }
-
     /**
      * Get the overall bounds of the multiblock, given the core screen pos
      * @param corePos bottom middle block of the screen

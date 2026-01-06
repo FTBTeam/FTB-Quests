@@ -22,8 +22,12 @@ public class CheckmarkTask extends AbstractBooleanTask {
 	@Override
 	@Environment(EnvType.CLIENT)
 	public void drawGUI(TeamData teamData, GuiGraphics graphics, int x, int y, int w, int h) {
-		IconHelper.renderIcon((teamData.isCompleted(this) ? ThemeProperties.CHECKMARK_TASK_ACTIVE.get(this) : ThemeProperties.CHECKMARK_TASK_INACTIVE.get(this))
-				, graphics, x, y, w, h);
+		var icon = ThemeProperties.CHECKMARK_TASK_INACTIVE.get(this);
+		if (teamData.isCompleted(this)) {
+			icon = ThemeProperties.CHECKMARK_TASK_ACTIVE.get(this);
+		}
+
+		IconHelper.renderIcon(icon, graphics, x, y, w, h);
 	}
 
 	@Override

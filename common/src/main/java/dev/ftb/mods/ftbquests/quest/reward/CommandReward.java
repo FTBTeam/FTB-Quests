@@ -17,6 +17,8 @@ import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.server.permissions.LevelBasedPermissionSet;
+import net.minecraft.server.permissions.PermissionSet;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -128,7 +130,7 @@ public class CommandReward extends Reward {
 		String cmd = format(command.trim(), overrides);
 
 		CommandSourceStack source = player.createCommandSourceStack();
-		if (permissionLevel > 0) source = source.withPermission(permissionLevel);
+		if (permissionLevel > 0) source = source.withPermission(idToPermissionSet(permissionLevel));
 		if (silent) source = source.withSuppressedOutput();
 		
 		player.level().getServer().getCommands().performPrefixedCommand(source, cmd);
@@ -137,6 +139,17 @@ public class CommandReward extends Reward {
 			String key = feedbackMessage.isEmpty() ? "ftbquests.reward.ftbquests.command.success" : feedbackMessage;
 			NetworkManager.sendToPlayer(player, new NotifyRewardMessage(id, Component.translatable(key), REWARD_ICON, disableRewardScreenBlur));
 		}
+	}
+
+	private static PermissionSet idToPermissionSet(int level) {
+		return switch (level) {
+			case 0 -> PermissionSet.NO_PERMISSIONS;
+			case 1 -> LevelBasedPermissionSet.MODERATOR;
+			case 2 -> LevelBasedPermissionSet.GAMEMASTER;
+			case 3 -> LevelBasedPermissionSet.ADMIN;
+			case 4 -> LevelBasedPermissionSet.OWNER;
+			default -> throw new IllegalArgumentException("Unknown level: " + level);
+		};
 	}
 
 	@Override

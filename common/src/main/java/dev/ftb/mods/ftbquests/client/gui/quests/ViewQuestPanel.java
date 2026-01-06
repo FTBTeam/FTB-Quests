@@ -590,13 +590,13 @@ public class ViewQuestPanel extends ModalPanel {
 	}
 
 	@Override
-	public void keyReleased(Key key) {
+	public boolean keyReleased(Key key) {
 		// released rather than pressed; if we used pressed, keypress would be picked up by the next screen
 
-		if (quest == null) return;
+		if (quest == null) return false;
 
 		if (questScreen.file.canEdit()) {
-			switch (key.keyCode()) {
+			switch (key.event().key()) {
 				case GLFW.GLFW_KEY_S -> editSubtitle();
 				case GLFW.GLFW_KEY_T -> editTitle();
 				case GLFW.GLFW_KEY_D -> editDescription();
@@ -608,7 +608,7 @@ public class ViewQuestPanel extends ModalPanel {
 				case GLFW.GLFW_KEY_RIGHT -> moveTasksAndRewards(true);
 			}
 		} else {
-			switch (key.keyCode()) {
+			switch (key.event().key()) {
 				case GLFW.GLFW_KEY_PAGE_UP, GLFW.GLFW_KEY_LEFT -> {
 					setCurrentPage(Math.max(0, getCurrentPage() - 1));
 					refreshWidgets();
@@ -619,6 +619,9 @@ public class ViewQuestPanel extends ModalPanel {
 				}
 			}
 		}
+
+		// TODO: @since 21.11: We should handle correctly if the key release was handled by one of the above actions
+		return false;
 	}
 
 	private void moveTasksAndRewards(boolean moveRight) {

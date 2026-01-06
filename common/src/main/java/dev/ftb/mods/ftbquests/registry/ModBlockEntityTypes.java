@@ -6,24 +6,27 @@ import dev.ftb.mods.ftbquests.api.FTBQuestsAPI;
 import dev.ftb.mods.ftbquests.block.LootCrateOpenerBlock;
 import dev.ftb.mods.ftbquests.block.TaskScreenBlock;
 import dev.ftb.mods.ftbquests.block.entity.*;
+import net.minecraft.core.BlockPos;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
+import net.minecraft.world.level.block.state.BlockState;
 
 import java.util.Collection;
 import java.util.Set;
 import java.util.function.Supplier;
+import java.util.stream.Collectors;
 
 public class ModBlockEntityTypes {
 	public static final DeferredRegister<BlockEntityType<?>> BLOCK_ENTITIES = DeferredRegister.create(FTBQuestsAPI.MOD_ID, Registries.BLOCK_ENTITY_TYPE);
 
 	public static <T extends BlockEntity> RegistrySupplier<BlockEntityType<T>> register(String id, BlockEntityType.BlockEntitySupplier<T> factory, Collection<RegistrySupplier<Block>> blocks) {
-		return BLOCK_ENTITIES.register(id, () -> BlockEntityType.Builder.of(factory, blocks.stream().map(Supplier::get).toArray(Block[]::new)).build(null));
+		return BLOCK_ENTITIES.register(id, () -> new BlockEntityType<T>(factory, blocks.stream().map(Supplier::get).collect(Collectors.toSet())));
 	}
 
 	public static <T extends BlockEntity> RegistrySupplier<BlockEntityType<T>> register(String id, BlockEntityType.BlockEntitySupplier<T> factory, Supplier<Block> block) {
-		return BLOCK_ENTITIES.register(id, () -> BlockEntityType.Builder.of(factory, block.get()).build(null));
+		return BLOCK_ENTITIES.register(id, () -> new BlockEntityType<T>(factory, Set.of(block.get())));
 	}
 
 	public static final RegistrySupplier<BlockEntityType<QuestBarrierBlockEntity>> BARRIER

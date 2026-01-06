@@ -33,12 +33,12 @@ import dev.ftb.mods.ftbquests.quest.theme.ThemeLoader;
 import dev.ftb.mods.ftbquests.registry.ModBlocks;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.client.renderer.block.model.BakedQuad;
+import net.minecraft.client.renderer.block.model.BlockModelPart;
+import net.minecraft.client.renderer.block.model.BlockStateModel;
 import net.minecraft.client.renderer.chunk.ChunkSectionLayer;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
-import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.HolderLookup;
@@ -64,6 +64,7 @@ import java.util.Optional;
 
 public class FTBQuestsClient {
 	public static KeyMapping KEY_QUESTS;
+	private static final KeyMapping.Category FTB_QUESTS_KEY_CATEGORY = new KeyMapping.Category(FTBQuestsAPI.id("keys"));
 
     public static void init() {
 		maybeMigrateClientConfig();
@@ -77,7 +78,7 @@ public class FTBQuestsClient {
         if (Minecraft.getInstance() != null) {
 			ReloadListenerRegistry.register(PackType.CLIENT_RESOURCES, new QuestFileCacheReloader(), FTBQuestsAPI.id("file_cache"));
 			ReloadListenerRegistry.register(PackType.CLIENT_RESOURCES, new ThemeLoader(), FTBQuestsAPI.id("themes"));
-			KeyMappingRegistry.register(KEY_QUESTS = new KeyMapping("key.ftbquests.quests", InputConstants.Type.KEYSYM, -1, "key.categories.ftbquests"));
+			KeyMappingRegistry.register(KEY_QUESTS = new KeyMapping("key.ftbquests.quests", InputConstants.Type.KEYSYM, -1, FTB_QUESTS_KEY_CATEGORY));
 		}
 
 		new FTBQuestsClientEventHandler().init();
@@ -174,10 +175,11 @@ public class FTBQuestsClient {
 
 	public static float[] getTextureUV(BlockState state, Direction face) {
 		if (state == null) return null;
-		BakedModel model = Minecraft.getInstance().getBlockRenderer().getBlockModel(state);
-		List<BakedQuad> quads = model.getQuads(state, face, RandomSource.create());
+		BlockStateModel model = Minecraft.getInstance().getBlockRenderer().getBlockModel(state);
+		List<BlockModelPart> blockModelParts = model.collectParts(RandomSource.create());
+		List<BakedQuad> quads = blockModelParts.getFirst().getQuads(face);
 		if (!quads.isEmpty()) {
-			TextureAtlasSprite sprite = quads.get(0).getSprite();
+			TextureAtlasSprite sprite = quads.getFirst().sprite();
 			return new float[] { sprite.getU0(), sprite.getV0(), sprite.getU1(), sprite.getV1() };
 		} else {
 			return new float[0];
