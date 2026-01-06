@@ -15,6 +15,7 @@ import dev.ftb.mods.ftbquests.quest.Quest;
 import dev.ftb.mods.ftbquests.quest.TeamData;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.ChatFormatting;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
@@ -226,7 +227,9 @@ public class KillTask extends Task {
 			return c1.getString().compareTo(c2.getString());
 		});
 		return NameMap.of(ZOMBIE, ids)
-				.nameKey(id -> "entity." + id.toLanguageKey())
+				.name(id -> Component.translatable("entity." + id.toLanguageKey())
+						.append(Component.empty().withStyle(ChatFormatting.GRAY).append(" [").append(Component.literal(id.toString())).append("]"))
+				)
 				.icon(KillTask::getIconForEntityType)
 				.create();
 	}

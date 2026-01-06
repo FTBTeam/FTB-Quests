@@ -2,6 +2,7 @@ package dev.ftb.mods.ftbquests.integration.item_filtering;
 
 import dev.ftb.mods.ftblibrary.config.NameMap;
 import dev.ftb.mods.ftbquests.api.ItemFilterAdapter;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.core.component.DataComponentMap;
 import net.minecraft.world.item.ItemStack;
 
@@ -25,18 +26,18 @@ public enum ItemMatchingSystem {
         return adapters.stream().filter(adapter -> adapter.isFilterStack(stack)).findFirst();
     }
 
-    public boolean doesItemMatch(ItemStack filterStack, ItemStack toCheck, ComponentMatchType matchType) {
+    public boolean doesItemMatch(ItemStack filterStack, ItemStack toCheck, ComponentMatchType matchType, HolderLookup.Provider registryAccess) {
         return getFilterAdapter(filterStack)
-                .map(adapter -> adapter.doesItemMatch(filterStack, toCheck))
+                .map(adapter -> adapter.doesItemMatch(filterStack, toCheck, registryAccess))
                 .orElse(areItemStacksEqual(filterStack, toCheck,  matchType));
     }
 
-    public List<ItemStack> getAllMatchingStacks(ItemStack filterStack) {
+    public List<ItemStack> getAllMatchingStacks(ItemStack filterStack, HolderLookup.Provider registryAccess) {
         List<ItemStack> res = new ArrayList<>();
 
         adapters.forEach(adapter -> {
             if (adapter.isFilterStack(filterStack)) {
-                res.addAll(DisplayStacksCache.getCachedDisplayStacks(filterStack, adapter));
+                res.addAll(DisplayStacksCache.getCachedDisplayStacks(filterStack, adapter, registryAccess));
             }
         });
 

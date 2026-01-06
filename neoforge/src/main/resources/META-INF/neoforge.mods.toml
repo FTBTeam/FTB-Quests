@@ -49,3 +49,9 @@ type = "required"
 versionRange = "[${ftbteamsversion},)"
 ordering = "AFTER"
 side = "BOTH"
+
+[[dependencies.ftbquests]]
+modId = "ftbxmodcompat"
+type = "optional"
+versionRange = "[21.1.7,)"
+side = "BOTH"
