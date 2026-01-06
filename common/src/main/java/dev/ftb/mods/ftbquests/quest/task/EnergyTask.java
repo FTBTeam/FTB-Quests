@@ -38,13 +38,13 @@ public abstract class EnergyTask extends Task implements ISingleLongValueTask {
 	@Override
 	public void readData(CompoundTag nbt, HolderLookup.Provider provider) {
 		super.readData(nbt, provider);
-		value = nbt.getLong("value");
+		value = nbt.getLong("value").orElseThrow();
 
 		if (value < 1L) {
 			value = 1L;
 		}
 
-		maxInput = nbt.getLong("max_input");
+		maxInput = nbt.getLongOr("max_input", 1000L);
 	}
 
 	@Override

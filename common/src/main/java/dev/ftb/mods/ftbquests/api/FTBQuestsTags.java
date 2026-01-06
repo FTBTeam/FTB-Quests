@@ -7,10 +7,10 @@ import net.minecraft.world.item.Item;
 
 public class FTBQuestsTags {
     public static class EntityTypes {
-        public static final TagKey<EntityType<?>> NO_LOOT_CRATES = TagKey.create(Registries.ENTITY_TYPE, FTBQuestsAPI.rl("no_loot_crates"));
+        public static final TagKey<EntityType<?>> NO_LOOT_CRATES = TagKey.create(Registries.ENTITY_TYPE, FTBQuestsAPI.id("no_loot_crates"));
     }
 
     public static class Items {
-        public static final TagKey<Item> CHECK_NBT = TagKey.create(Registries.ITEM, FTBQuestsAPI.rl("match_nbt"));
+        public static final TagKey<Item> CHECK_NBT = TagKey.create(Registries.ITEM, FTBQuestsAPI.id("match_nbt"));
     }
 }

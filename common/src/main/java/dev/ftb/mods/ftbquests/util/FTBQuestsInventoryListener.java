@@ -54,7 +54,7 @@ public class FTBQuestsInventoryListener implements ContainerListener {
 	public void slotChanged(AbstractContainerMenu menu, int index, ItemStack stack) {
 		if (!stack.isEmpty() && menu.getSlot(index).container == player.getInventory()) {
 			int slotNum = menu.getSlot(index).getContainerSlot();
-			if (slotNum >= 0 && slotNum < player.getInventory().items.size()) {
+			if (slotNum >= 0 && slotNum < player.getInventory().getContainerSize()) {
 				// Only checking for items in the main inventory & hotbar
 				// Armor slots can contain items with rapidly changing NBT (especially powered modded armor)
 				//  which can trigger a lot of unnecessary inventory scans

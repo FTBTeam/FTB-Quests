@@ -10,7 +10,7 @@ import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 
 public record CopyChapterImageMessage(ChapterImage img) implements CustomPacketPayload {
-    public static final Type<CopyChapterImageMessage> TYPE = new Type<>(FTBQuestsAPI.rl("copy_chapter_image_message"));
+    public static final Type<CopyChapterImageMessage> TYPE = new Type<>(FTBQuestsAPI.id("copy_chapter_image_message"));
 
     public static final StreamCodec<FriendlyByteBuf, CopyChapterImageMessage> STREAM_CODEC = StreamCodec.composite(
             ChapterImage.STREAM_CODEC, CopyChapterImageMessage::img,
@@ -31,7 +31,7 @@ public record CopyChapterImageMessage(ChapterImage img) implements CustomPacketP
             Chapter chapter = message.img.getChapter();
             chapter.addImage(message.img);
             chapter.file.markDirty();
-            NetworkHelper.sendToAll(context.getPlayer().getServer(), new EditObjectResponseMessage(chapter));
+            NetworkHelper.sendToAll(context.getPlayer().level().getServer(), new EditObjectResponseMessage(chapter));
         });
     }
 

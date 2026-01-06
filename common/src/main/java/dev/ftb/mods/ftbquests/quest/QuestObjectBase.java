@@ -25,7 +25,7 @@ import dev.ftb.mods.ftbquests.util.TextUtils;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.ChatFormatting;
-import net.minecraft.Util;
+import net.minecraft.util.Util;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.*;
 import net.minecraft.network.RegistryFriendlyByteBuf;
@@ -89,8 +89,8 @@ public abstract class QuestObjectBase implements Comparable<QuestObjectBase> {
 		CompoundTag compoundTag = processItemTagData(tag);
 		return compoundTag.isEmpty() ?
 				ItemStack.EMPTY :
-				ItemStack.parse(provider, compoundTag)
-						.orElse(createMissing(compoundTag));
+				ItemStack.CODEC.parse(provider.createSerializationContext(NbtOps.INSTANCE), compoundTag).result()
+								.orElse(createMissing(compoundTag));
 	}
 
 	public static ItemStack singleItemOrMissingFromNBT(Tag tag, HolderLookup.Provider provider) {
@@ -105,13 +105,13 @@ public abstract class QuestObjectBase implements Comparable<QuestObjectBase> {
 	private static CompoundTag processItemTagData(Tag tag) {
 		if (tag instanceof StringTag s) {
 			// 1.20 or earlier, item name only
-			return Util.make(new CompoundTag(), t -> t.putString("id", s.getAsString()));
+			return Util.make(new CompoundTag(), t -> t.putString("id", s.asString().orElseThrow()));
 		} else if (tag instanceof CompoundTag c) {
 			if (c.contains("Count") || c.contains("tag")) {
 				// 1.20 or earlier with count and/or NBT data; migrate, but no NBT -> component data conversion
 				return Util.make(new CompoundTag(), t -> {
-					t.putString("id", c.getString("id"));
-					int count = c.getInt("Count");
+					t.putString("id", c.getString("id").orElseThrow());
+					int count = c.getInt("Count").orElse(1);
 					if (count != 0) t.putInt("count", count);
 				});
 			} else {
@@ -125,8 +125,8 @@ public abstract class QuestObjectBase implements Comparable<QuestObjectBase> {
 	}
 
 	private static ItemStack createMissing(CompoundTag tag) {
-		String id = tag.getString("id");
-		int count = Math.max(1, tag.getInt("count"));
+		String id = tag.getString("id").orElse("unknown");
+		int count = Math.max(1, tag.getInt("count").orElse(1));
 		String text = count == 1 ? id : count + "x " + id;
 
 		return Util.make(new ItemStack(ModItems.MISSING_ITEM.get()),
@@ -305,18 +305,18 @@ public abstract class QuestObjectBase implements Comparable<QuestObjectBase> {
 	}
 
 	public void readData(CompoundTag nbt, HolderLookup.Provider provider) {
-		rawIcon = singleItemOrMissingFromNBT(nbt.getCompound("icon"), provider);
+		nbt.getCompound("icon").ifPresent(icon -> rawIcon = singleItemOrMissingFromNBT(icon, provider));
 
-		ListTag tagsList = nbt.getList("tags", Tag.TAG_STRING);
+		ListTag tagsList = nbt.getList("tags").orElse(new ListTag());
 
 		tags = new ArrayList<>(tagsList.size());
 
 		for (int i = 0; i < tagsList.size(); i++) {
-			tags.add(tagsList.getString(i));
+			tags.add(tagsList.getString(i).orElse(""));
 		}
 
 		if (nbt.contains("custom_id")) {
-			tags.add(nbt.getString("custom_id"));
+			tags.add(nbt.getString("custom_id").orElse(""));
 		}
 	}
 
@@ -503,6 +503,6 @@ public abstract class QuestObjectBase implements Comparable<QuestObjectBase> {
 			return new SNBTCompoundTag();
 		}
 
-		return Util.make(SNBTCompoundTag.of(stack.save(holderLookup())), SNBTCompoundTag::singleLine);
+		return Util.make(SNBTCompoundTag.of(ItemStack.CODEC.encodeStart(holderLookup().createSerializationContext(NbtOps.INSTANCE), stack).getOrThrow()), SNBTCompoundTag::singleLine);
 	}
 }

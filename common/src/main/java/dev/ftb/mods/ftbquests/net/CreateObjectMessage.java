@@ -7,7 +7,7 @@ import dev.ftb.mods.ftbquests.quest.QuestObjectBase;
 import dev.ftb.mods.ftbquests.quest.QuestObjectType;
 import dev.ftb.mods.ftbquests.quest.ServerQuestFile;
 import dev.ftb.mods.ftbquests.util.NetUtils;
-import net.minecraft.Util;
+import net.minecraft.util.Util;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
@@ -30,7 +30,7 @@ import java.util.Optional;
  * @param extra extra data related to the object type (e.g. task type, reward type, chapter group...)
  */
 public record CreateObjectMessage(long parent, QuestObjectType questObjectType, boolean openScreen, CompoundTag nbt, Optional<CompoundTag> extra) implements CustomPacketPayload {
-	public static final Type<CreateObjectMessage> TYPE = new Type<>(FTBQuestsAPI.rl("create_object_message"));
+	public static final Type<CreateObjectMessage> TYPE = new Type<>(FTBQuestsAPI.id("create_object_message"));
 
 	public static final StreamCodec<FriendlyByteBuf, CreateObjectMessage> STREAM_CODEC = StreamCodec.composite(
 			ByteBufCodecs.VAR_LONG, CreateObjectMessage::parent,
@@ -76,7 +76,7 @@ public record CreateObjectMessage(long parent, QuestObjectType questObjectType, 
 
 				object.getQuestFile().getTranslationManager().processInitialTranslation(extra, object);
 
-				NetworkHelper.sendToAll(sp.getServer(), CreateObjectResponseMessage.create(object, message.extra.orElse(null), message.openScreen ? sp.getUUID() : null));
+				NetworkHelper.sendToAll(sp.level().getServer(), CreateObjectResponseMessage.create(object, message.extra.orElse(null), message.openScreen ? sp.getUUID() : null));
 			}
 		});
 	}

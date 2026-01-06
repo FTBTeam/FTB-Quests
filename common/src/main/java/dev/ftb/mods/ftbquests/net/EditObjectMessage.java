@@ -8,7 +8,7 @@ import dev.ftb.mods.ftbquests.client.ClientQuestFile;
 import dev.ftb.mods.ftbquests.quest.QuestObjectBase;
 import dev.ftb.mods.ftbquests.quest.ServerQuestFile;
 import dev.ftb.mods.ftbquests.util.NetUtils;
-import net.minecraft.Util;
+import net.minecraft.util.Util;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
@@ -16,7 +16,7 @@ import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 
 public record EditObjectMessage(long id, CompoundTag nbt) implements CustomPacketPayload {
-	public static final Type<EditObjectMessage> TYPE = new Type<>(FTBQuestsAPI.rl("edit_object_message"));
+	public static final Type<EditObjectMessage> TYPE = new Type<>(FTBQuestsAPI.id("edit_object_message"));
 
 	public static final StreamCodec<FriendlyByteBuf, EditObjectMessage> STREAM_CODEC = StreamCodec.composite(
 			ByteBufCodecs.VAR_LONG, EditObjectMessage::id,
@@ -48,7 +48,7 @@ public record EditObjectMessage(long id, CompoundTag nbt) implements CustomPacke
 					object.readData(message.nbt, context.registryAccess());
 					ServerQuestFile.INSTANCE.clearCachedData();
 					ServerQuestFile.INSTANCE.markDirty();
-					NetworkHelper.sendToAll(context.getPlayer().getServer(), new EditObjectResponseMessage(object));
+					NetworkHelper.sendToAll(context.getPlayer().level().getServer(), new EditObjectResponseMessage(object));
 					object.editedFromGUIOnServer();
 				}
 			}

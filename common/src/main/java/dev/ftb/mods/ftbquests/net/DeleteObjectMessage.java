@@ -11,7 +11,7 @@ import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 
 public record DeleteObjectMessage(long id) implements CustomPacketPayload {
-	public static final Type<DeleteObjectMessage> TYPE = new Type<>(FTBQuestsAPI.rl("delete_object_message"));
+	public static final Type<DeleteObjectMessage> TYPE = new Type<>(FTBQuestsAPI.id("delete_object_message"));
 
 	public static final StreamCodec<FriendlyByteBuf, DeleteObjectMessage> STREAM_CODEC = StreamCodec.composite(
 			ByteBufCodecs.VAR_LONG, DeleteObjectMessage::id,

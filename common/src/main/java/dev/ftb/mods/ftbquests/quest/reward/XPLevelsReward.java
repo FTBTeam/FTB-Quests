@@ -41,7 +41,7 @@ public class XPLevelsReward extends Reward {
 	@Override
 	public void readData(CompoundTag nbt, HolderLookup.Provider provider) {
 		super.readData(nbt, provider);
-		xpLevels = nbt.getInt("xp_levels");
+		xpLevels = nbt.getIntOr("xp_levels", 5);
 	}
 
 	@Override

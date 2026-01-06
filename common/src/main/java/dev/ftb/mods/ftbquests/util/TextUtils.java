@@ -1,11 +1,14 @@
 package dev.ftb.mods.ftbquests.util;
 
 import com.google.gson.JsonParseException;
+import com.google.gson.JsonParser;
+import com.mojang.serialization.JsonOps;
 import dev.ftb.mods.ftblibrary.util.client.ClientTextComponentUtils;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.ComponentSerialization;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.contents.PlainTextContents;
 import org.apache.commons.lang3.text.translate.UnicodeUnescaper;
@@ -30,7 +33,8 @@ public class TextUtils {
         if (str2.startsWith("[") && str2.endsWith("]") || str2.startsWith("{") && str2.endsWith("}")) {
             // could be JSON raw text, but not for definite...
             try {
-                MutableComponent res = Component.Serializer.fromJson(UNESCAPER.translate(str2), provider);
+                var jsonData = JsonParser.parseString(UNESCAPER.translate(str2));
+                MutableComponent res = ComponentSerialization.CODEC.parse(provider.createSerializationContext(JsonOps.INSTANCE), jsonData).getOrThrow().copy();
                 if (res != null) {
                     return res;
                 }
@@ -44,7 +48,7 @@ public class TextUtils {
         List<String> res = new ArrayList<>();
         tag.forEach(el -> {
             if (el.getId() == Tag.TAG_STRING) {
-                res.add(el.getAsString());
+                res.add(el.asString().orElseThrow());
             }
         });
         return res;

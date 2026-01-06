@@ -1,7 +1,7 @@
 plugins {
 	id "architectury-plugin" version "3.4-SNAPSHOT"
-	id "dev.architectury.loom" version "1.10-SNAPSHOT" apply false
-	id "me.modmuss50.mod-publish-plugin" version "0.5.1"
+	id "dev.architectury.loom" version "1.13-SNAPSHOT" apply false
+	id "me.modmuss50.mod-publish-plugin" version "1.1.0"
 }
 
 apply from: 'https://raw.githubusercontent.com/FTBTeam/mods-meta/main/gradle/changelog.gradle'

@@ -7,7 +7,7 @@ import dev.ftb.mods.ftbquests.quest.QuestShape;
 import dev.ftb.mods.ftbquests.quest.theme.property.ThemeProperties;
 import dev.ftb.mods.ftbquests.quest.theme.selector.*;
 import dev.ftb.mods.ftbquests.util.FileUtils;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.packs.resources.Resource;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.server.packs.resources.ResourceManagerReloadListener;
@@ -32,7 +32,7 @@ public class ThemeLoader implements ResourceManagerReloadListener {
 		Map<ThemeSelector, SelectorProperties> map = new HashMap<>();
 
 		try {
-			ResourceLocation rl = FTBQuestsAPI.rl(THEME_TXT);
+			Identifier rl = FTBQuestsAPI.id(THEME_TXT);
 			for (Resource resource : resourceManager.getResourceStack(rl)) {
 				try (InputStream in = resource.open()) {
 					parse(map, FileUtils.read(in));

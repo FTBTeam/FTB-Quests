@@ -12,8 +12,8 @@ import net.minecraft.resources.ResourceLocation;
 
 public class ForgeEnergyTask extends EnergyTask {
 	public static TaskType TYPE;
-	public static final ResourceLocation EMPTY_TEXTURE = FTBQuestsAPI.rl("textures/tasks/fe_empty.png");
-	public static final ResourceLocation FULL_TEXTURE = FTBQuestsAPI.rl("textures/tasks/fe_full.png");
+	public static final ResourceLocation EMPTY_TEXTURE = FTBQuestsAPI.id("textures/tasks/fe_empty.png");
+	public static final ResourceLocation FULL_TEXTURE = FTBQuestsAPI.id("textures/tasks/fe_full.png");
 
 	public ForgeEnergyTask(long id, Quest quest) {
 		super(id, quest);

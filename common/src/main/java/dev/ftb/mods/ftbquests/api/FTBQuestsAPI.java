@@ -1,7 +1,7 @@
 package dev.ftb.mods.ftbquests.api;
 
 import dev.ftb.mods.ftbquests.quest.BaseQuestFile;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import org.jetbrains.annotations.ApiStatus;
 
 import java.util.Objects;
@@ -33,8 +33,8 @@ public class FTBQuestsAPI {
      * @param path the resource location path component
      * @return a new resource location
      */
-    public static ResourceLocation rl(String path) {
-        return ResourceLocation.fromNamespaceAndPath(MOD_ID, path);
+    public static Identifier id(String path) {
+        return Identifier.fromNamespaceAndPath(MOD_ID, path);
     }
 
     /**

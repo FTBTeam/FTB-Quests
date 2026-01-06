@@ -38,12 +38,12 @@ public class CollectRewardsButton extends TabButton {
 		super.draw(graphics, theme, x, y, w, h);
 
 		if (questScreen.file.selfTeamData.hasUnclaimedRewards(Minecraft.getInstance().player.getUUID(), questScreen.file)) {
-			GuiHelper.setupDrawing();
+//			GuiHelper.setupDrawing();
 			int s = w / 2;//(int) (treeGui.getZoom() / 2 * quest.size);
-			graphics.pose().pushPose();
-			graphics.pose().translate(x + w - s, y, 200);
+			graphics.pose().pushMatrix();
+			graphics.pose().translate(x + w - s, y);
 			ThemeProperties.ALERT_ICON.get(questScreen.file).draw(graphics, 0, 0, s, s);
-			graphics.pose().popPose();
+			graphics.pose().popMatrix();
 		}
 	}
 }

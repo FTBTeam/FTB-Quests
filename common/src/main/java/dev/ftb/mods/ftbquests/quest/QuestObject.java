@@ -34,7 +34,7 @@ public abstract class QuestObject extends QuestObjectBase {
 	@Override
 	public void readData(CompoundTag nbt, HolderLookup.Provider provider) {
 		super.readData(nbt, provider);
-		disableToast = nbt.getBoolean("disable_toast");
+		disableToast = nbt.getBoolean("disable_toast").orElse(false);
 	}
 
 	@Override

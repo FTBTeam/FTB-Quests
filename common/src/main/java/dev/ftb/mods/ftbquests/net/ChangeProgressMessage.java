@@ -16,7 +16,7 @@ import java.util.UUID;
 import java.util.function.Consumer;
 
 public record ChangeProgressMessage(UUID teamId, ProgressChange progressChange) implements CustomPacketPayload {
-	public static final Type<ChangeProgressMessage> TYPE = new Type<>(FTBQuestsAPI.rl("change_progress_message"));
+	public static final Type<ChangeProgressMessage> TYPE = new Type<>(FTBQuestsAPI.id("change_progress_message"));
 
 	public static final StreamCodec<FriendlyByteBuf, ChangeProgressMessage> STREAM_CODEC = StreamCodec.composite(
 			UUIDUtil.STREAM_CODEC, ChangeProgressMessage::teamId,

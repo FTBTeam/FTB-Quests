@@ -9,7 +9,7 @@ import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.server.level.ServerPlayer;
 
 public class ClaimAllRewardsMessage implements CustomPacketPayload {
-	public static final Type<ClaimAllRewardsMessage> TYPE = new Type<>(FTBQuestsAPI.rl("claim_all_rewards_message"));
+	public static final Type<ClaimAllRewardsMessage> TYPE = new Type<>(FTBQuestsAPI.id("claim_all_rewards_message"));
 
 	public static final ClaimAllRewardsMessage INSTANCE = new ClaimAllRewardsMessage();
 

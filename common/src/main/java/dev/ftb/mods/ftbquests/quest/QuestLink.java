@@ -129,14 +129,14 @@ public class QuestLink extends QuestObject implements Movable, Excludable {
     public void readData(CompoundTag nbt, HolderLookup.Provider provider) {
         super.readData(nbt, provider);
 
-        linkId = Long.parseLong(nbt.getString("linked_quest"), 16);
-        x = nbt.getDouble("x");
-        y = nbt.getDouble("y");
-        shape = nbt.getString("shape");
+        linkId = Long.parseLong(nbt.getString("linked_quest").orElseThrow(), 16);
+        x = nbt.getDouble("x").orElseThrow();
+        y = nbt.getDouble("y").orElseThrow();
+        shape = nbt.getStringOr("shape", "");
         if (shape.equals("default")) {
             shape = "";
         }
-        size = nbt.contains("size") ? nbt.getDouble("size") : 1D;
+        size = nbt.getDoubleOr("size", 1D);
     }
 
     @Override

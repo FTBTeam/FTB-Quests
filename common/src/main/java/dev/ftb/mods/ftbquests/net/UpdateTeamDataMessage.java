@@ -12,7 +12,7 @@ import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import java.util.UUID;
 
 public record UpdateTeamDataMessage(UUID teamId, String name) implements CustomPacketPayload {
-	public static final Type<UpdateTeamDataMessage> TYPE = new Type<>(FTBQuestsAPI.rl("update_team_data_message"));
+	public static final Type<UpdateTeamDataMessage> TYPE = new Type<>(FTBQuestsAPI.id("update_team_data_message"));
 
 	public static final StreamCodec<FriendlyByteBuf, UpdateTeamDataMessage> STREAM_CODEC = StreamCodec.composite(
 			UUIDUtil.STREAM_CODEC, UpdateTeamDataMessage::teamId,

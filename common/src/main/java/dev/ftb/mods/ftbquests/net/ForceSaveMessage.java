@@ -11,7 +11,7 @@ import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.server.level.ServerPlayer;
 
 public class ForceSaveMessage implements CustomPacketPayload {
-	public static final Type<ForceSaveMessage> TYPE = new Type<>(FTBQuestsAPI.rl("force_save_message"));
+	public static final Type<ForceSaveMessage> TYPE = new Type<>(FTBQuestsAPI.id("force_save_message"));
 
 	public static final ForceSaveMessage INSTANCE = new ForceSaveMessage();
 

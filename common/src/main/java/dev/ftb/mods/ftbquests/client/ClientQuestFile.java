@@ -18,7 +18,7 @@ import dev.ftb.mods.ftbquests.util.TextUtils;
 import dev.ftb.mods.ftbteams.api.FTBTeamsAPI;
 import dev.ftb.mods.ftbteams.api.client.KnownClientPlayer;
 import net.minecraft.ChatFormatting;
-import net.minecraft.Util;
+import net.minecraft.util.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.network.chat.Component;
@@ -88,7 +88,7 @@ public class ClientQuestFile extends BaseQuestFile {
 				Minecraft.getInstance().setScreen(null);  // ensures prevScreen is null, so we can close correctly
 				questScreen = new QuestScreen(this, persistedData);
 				questScreen.openGui();
-				InputConstants.grabOrReleaseMouse(Minecraft.getInstance().getWindow().getWindow(), GLFW.GLFW_CURSOR_NORMAL, mx, my);
+				InputConstants.grabOrReleaseMouse(Minecraft.getInstance().getWindow(), GLFW.GLFW_CURSOR_NORMAL, mx, my);
 			}
 		}
 	}
@@ -118,10 +118,10 @@ public class ClientQuestFile extends BaseQuestFile {
 	private QuestScreen openQuestGui() {
 		if (exists()) {
 			if (isDisableGui() && !canEdit()) {
-				Minecraft.getInstance().getToasts().addToast(new CustomToast(Component.translatable("item.ftbquests.book.disabled"), Icons.BARRIER, Component.empty()));
+				Minecraft.getInstance().getToastManager().addToast(new CustomToast(Component.translatable("item.ftbquests.book.disabled"), Icons.BARRIER, Component.empty()));
 			} else if (selfTeamData.isLocked()) {
 				Component msg = lockMessage.isEmpty() ? Component.literal("Quests locked!") : TextUtils.parseRawText(lockMessage, holderLookup());
-				Minecraft.getInstance().getToasts().addToast(new CustomToast(msg, Icons.BARRIER, Component.empty()));
+				Minecraft.getInstance().getToastManager().addToast(new CustomToast(msg, Icons.BARRIER, Component.empty()));
 			} else {
 				if (canEdit()) {
 					StructureTask.maybeRequestStructureSync();

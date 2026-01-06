@@ -23,6 +23,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.network.chat.ClickEvent;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.Style;
+import net.minecraft.server.permissions.Permissions;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -42,7 +43,7 @@ public class OtherButtonsPanelBottom extends OtherButtonsPanel {
 			add(new EditSettingsButton(this));
 		}
 
-		if (FTBQuestsClient.getClientPlayer().hasPermissions(2) || ClientQuestFile.INSTANCE.hasEditorPermission()) {
+		if (FTBQuestsClient.getClientPlayer().permissions().hasPermission(Permissions.COMMANDS_GAMEMASTER) || ClientQuestFile.INSTANCE.hasEditorPermission()) {
 			// note: single player owner can't use the GUI button but can use the /ftbquests editing_mode command
 			// this is intentional, since there should not be an obvious "cheat" button for single player questing
 			add(new ToggleEditModeButton(this));
@@ -149,7 +150,7 @@ public class OtherButtonsPanelBottom extends OtherButtonsPanel {
 			//FIXME: mc.getTextureManager().onResourceManagerReload(mc.getResourceManager());
 			ThemeLoader.loadTheme(mc.getResourceManager());
 			ClientQuestFile.INSTANCE.refreshGui();
-			Minecraft.getInstance().getToasts().addToast(new CustomToast(Component.translatable("ftbquests.gui.reload_theme"), Icons.ACCEPT, Component.translatable("gui.done")));
+			Minecraft.getInstance().getToastManager().addToast(new CustomToast(Component.translatable("ftbquests.gui.reload_theme"), Icons.ACCEPT, Component.translatable("gui.done")));
 		}
 
 		private void saveLocally() {
@@ -168,7 +169,7 @@ public class OtherButtonsPanelBottom extends OtherButtonsPanel {
 
                 String p = "." + file.getPath().replace(Minecraft.getInstance().gameDirectory.getCanonicalFile().getAbsolutePath(), "");
 				Component component = Component.translatable("ftbquests.gui.saved_as_file", p)
-						.withStyle(Style.EMPTY.withClickEvent(new ClickEvent(ClickEvent.Action.OPEN_FILE, p)));
+						.withStyle(Style.EMPTY.withClickEvent(new ClickEvent.OpenFile(p)));
 				Minecraft.getInstance().player.displayClientMessage(component, false);
 			} catch (Exception ex) {
 				ex.printStackTrace();

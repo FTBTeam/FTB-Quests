@@ -9,7 +9,7 @@ import dev.ftb.mods.ftbquests.quest.ServerQuestFile;
 import dev.ftb.mods.ftbquests.quest.task.Task;
 import dev.ftb.mods.ftbquests.quest.task.TaskType;
 import dev.ftb.mods.ftbquests.util.NetUtils;
-import net.minecraft.Util;
+import net.minecraft.util.Util;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
@@ -20,7 +20,7 @@ import net.minecraft.server.level.ServerPlayer;
 import java.util.Optional;
 
 public record CreateTaskAtMessage(long chapterId, double x, double y, int taskTypeId, CompoundTag nbt, Optional<CompoundTag> extra) implements CustomPacketPayload {
-	public static final Type<CreateTaskAtMessage> TYPE = new Type<>(FTBQuestsAPI.rl("create_task_at_message"));
+	public static final Type<CreateTaskAtMessage> TYPE = new Type<>(FTBQuestsAPI.id("create_task_at_message"));
 
 	public static final StreamCodec<FriendlyByteBuf, CreateTaskAtMessage> STREAM_CODEC = StreamCodec.composite(
 			ByteBufCodecs.VAR_LONG, CreateTaskAtMessage::chapterId,
@@ -56,7 +56,7 @@ public record CreateTaskAtMessage(long chapterId, double x, double y, int taskTy
 					quest.setX(message.x);
 					quest.setY(message.y);
 					quest.onCreated();
-					NetworkHelper.sendToAll(sp.getServer(), CreateObjectResponseMessage.create(quest, null));
+					NetworkHelper.sendToAll(sp.level().getServer(), CreateObjectResponseMessage.create(quest, null));
 
 					Task task = taskType.createTask(file.newID(), quest);
 					task.readData(message.nbt, context.registryAccess());
@@ -64,7 +64,7 @@ public record CreateTaskAtMessage(long chapterId, double x, double y, int taskTy
 					CompoundTag extra = message.extra.orElse(new CompoundTag());
 					file.getTranslationManager().processInitialTranslation(extra, task);
 					extra.putString("type", taskType.getTypeForNBT());
-					NetworkHelper.sendToAll(sp.getServer(), CreateObjectResponseMessage.create(task, extra, sp.getUUID()));
+					NetworkHelper.sendToAll(sp.level().getServer(), CreateObjectResponseMessage.create(task, extra, sp.getUUID()));
 
 					file.refreshIDMap();
 					file.clearCachedData();

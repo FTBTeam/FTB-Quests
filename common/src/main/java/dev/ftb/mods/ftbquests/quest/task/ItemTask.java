@@ -105,11 +105,11 @@ public class ItemTask extends Task implements Predicate<ItemStack> {
 	public void readData(CompoundTag nbt, HolderLookup.Provider provider) {
 		super.readData(nbt, provider);
 		itemStack = itemOrMissingFromNBT(nbt.get("item"), provider);
-		count = Math.max(nbt.getLong("count"), 1L);
+		count = Math.max(nbt.getLongOr("count", 1), 1L);
 		consumeItems = Tristate.read(nbt, "consume_items");
 		onlyFromCrafting = Tristate.read(nbt, "only_from_crafting");
-		matchComponents = ComponentMatchType.NAME_MAP.get(nbt.getString("match_components"));
-		taskScreenOnly = nbt.getBoolean("task_screen_only");
+		matchComponents = nbt.getString("match_components").map(ComponentMatchType.NAME_MAP::get).orElse(ComponentMatchType.NONE);
+		taskScreenOnly = nbt.getBooleanOr("task_screen_only", false);
 	}
 
 	@Override
@@ -228,7 +228,7 @@ public class ItemTask extends Task implements Predicate<ItemStack> {
 		if (!consumesResources() && validItems.size() == 1 && FTBQuests.getRecipeModHelper().isRecipeModAvailable()) {
 			FTBQuests.getRecipeModHelper().showRecipes(validItems.get(0));
 		} else if (validItems.isEmpty()) {
-			Minecraft.getInstance().getToasts().addToast(new CustomToast(Component.literal("No valid items!"), ItemIcon.getItemIcon(ModItems.MISSING_ITEM.get()), Component.literal("Report this bug to modpack author!")));
+			Minecraft.getInstance().getToastManager().addToast(new CustomToast(Component.literal("No valid items!"), ItemIcon.getItemIcon(ModItems.MISSING_ITEM.get()), Component.literal("Report this bug to modpack author!")));
 		} else {
 			new ValidItemsScreen(this, validItems, canClick).openGui();
 		}
@@ -323,13 +323,13 @@ public class ItemTask extends Task implements Predicate<ItemStack> {
 		} else if (craftedItem.isEmpty()) {
 			boolean changed = false;
 
-			for (int i = 0; i < player.getInventory().items.size(); i++) {
-				ItemStack stack = player.getInventory().items.get(i);
+			for (int i = 0; i < player.getInventory().getContainerSize(); i++) {
+				ItemStack stack = player.getInventory().getItem(i);
 				ItemStack stack1 = insert(teamData, stack, false);
 
 				if (stack != stack1) {
 					changed = true;
-					player.getInventory().items.set(i, stack1.isEmpty() ? ItemStack.EMPTY : stack1);
+					player.getInventory().setItem(i, stack1.isEmpty() ? ItemStack.EMPTY : stack1);
 				}
 			}
 

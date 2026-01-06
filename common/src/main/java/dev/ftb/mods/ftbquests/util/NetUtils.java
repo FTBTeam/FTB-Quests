@@ -17,7 +17,7 @@ public class NetUtils {
 
 	public static boolean canEdit(Player player) {
 		return player != null &&
-				FTBQuestsAPI.api().getQuestFile(player.level().isClientSide).getTeamData(player)
+				FTBQuestsAPI.api().getQuestFile(player.level().isClientSide()).getTeamData(player)
 						.map(d -> d.getCanEdit(player))
 						.orElse(false);
 	}

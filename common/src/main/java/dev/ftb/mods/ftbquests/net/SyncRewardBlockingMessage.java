@@ -12,7 +12,7 @@ import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import java.util.UUID;
 
 public record SyncRewardBlockingMessage(UUID teamId, boolean rewardsBlocked) implements CustomPacketPayload {
-    public static final Type<SyncRewardBlockingMessage> TYPE = new Type<>(FTBQuestsAPI.rl("sync_reward_blocking_message"));
+    public static final Type<SyncRewardBlockingMessage> TYPE = new Type<>(FTBQuestsAPI.id("sync_reward_blocking_message"));
 
     public static final StreamCodec<FriendlyByteBuf, SyncRewardBlockingMessage> STREAM_CODEC = StreamCodec.composite(
             UUIDUtil.STREAM_CODEC, SyncRewardBlockingMessage::teamId,

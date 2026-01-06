@@ -20,7 +20,7 @@ public class PlayerInventorySummary {
         nonEmptyStacks.clear();
         stacksByItem.clear();
 
-        player.getInventory().items.forEach(stack -> {
+        player.getInventory().forEach(stack -> {
             if (!stack.isEmpty()) {
                 nonEmptyStacks.add(stack);
                 stacksByItem.computeIfAbsent(stack.getItem(), k -> new ArrayList<>()).add(stack);

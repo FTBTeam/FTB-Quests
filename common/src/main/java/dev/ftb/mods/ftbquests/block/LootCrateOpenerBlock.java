@@ -50,13 +50,13 @@ public class LootCrateOpenerBlock extends BaseEntityBlock {
 
     @Override
     protected InteractionResult useWithoutItem(BlockState blockState, Level level, BlockPos blockPos, Player player, BlockHitResult blockHitResult) {
-        if (!level.isClientSide) {
+        if (!level.isClientSide()) {
             if (level.getBlockEntity(blockPos) instanceof LootCrateOpenerBlockEntity opener) {
                 player.displayClientMessage(Component.translatable("block.ftbquests.loot_crate_opener.rightclick", opener.getOutputCount()), true);
             }
         }
 
-        return InteractionResult.sidedSuccess(level.isClientSide);
+        return level.isClientSide() ? InteractionResult.SUCCESS : InteractionResult.SUCCESS_SERVER;
     }
 
     @Override

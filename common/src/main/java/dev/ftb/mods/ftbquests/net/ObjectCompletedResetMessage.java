@@ -12,7 +12,7 @@ import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import java.util.UUID;
 
 public record ObjectCompletedResetMessage(UUID teamId, long id) implements CustomPacketPayload {
-	public static final Type<ObjectCompletedResetMessage> TYPE = new Type<>(FTBQuestsAPI.rl("object_completed_reset_message"));
+	public static final Type<ObjectCompletedResetMessage> TYPE = new Type<>(FTBQuestsAPI.id("object_completed_reset_message"));
 
 	public static final StreamCodec<FriendlyByteBuf, ObjectCompletedResetMessage> STREAM_CODEC = StreamCodec.composite(
 			UUIDUtil.STREAM_CODEC, ObjectCompletedResetMessage::teamId,

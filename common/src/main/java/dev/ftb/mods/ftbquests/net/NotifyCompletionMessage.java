@@ -9,7 +9,7 @@ import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 
 public record NotifyCompletionMessage(long id) implements CustomPacketPayload {
-	public static final Type<NotifyCompletionMessage> TYPE = new Type<>(FTBQuestsAPI.rl("notify_completion_message"));
+	public static final Type<NotifyCompletionMessage> TYPE = new Type<>(FTBQuestsAPI.id("notify_completion_message"));
 
 	public static final StreamCodec<FriendlyByteBuf, NotifyCompletionMessage> STREAM_CODEC = StreamCodec.composite(
 			ByteBufCodecs.VAR_LONG, NotifyCompletionMessage::id,

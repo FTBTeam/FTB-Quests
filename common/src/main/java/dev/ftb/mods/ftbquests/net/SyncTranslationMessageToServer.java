@@ -26,7 +26,7 @@ import java.util.List;
  * @param val the content; a string or list of string, depending on the subkey
  */
 public record SyncTranslationMessageToServer(long id, String locale, TranslationKey subKey, Either<String, List<String>> val) implements CustomPacketPayload {
-    public static final Type<SyncTranslationMessageToServer> TYPE = new Type<>(FTBQuestsAPI.rl("sync_translation_to_server"));
+    public static final Type<SyncTranslationMessageToServer> TYPE = new Type<>(FTBQuestsAPI.id("sync_translation_to_server"));
 
     public static StreamCodec<FriendlyByteBuf, SyncTranslationMessageToServer> STREAM_CODEC = StreamCodec.composite(
             ByteBufCodecs.VAR_LONG, SyncTranslationMessageToServer::id,

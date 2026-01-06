@@ -328,23 +328,23 @@ public final class Quest extends QuestObject implements Movable, Excludable {
 	public void readData(CompoundTag nbt, HolderLookup.Provider provider) {
 		super.readData(nbt, provider);
 
-		x = nbt.getDouble("x");
-		y = nbt.getDouble("y");
-		shape = nbt.getString("shape");
-
+		x = nbt.getDouble("x").orElseThrow();
+		y = nbt.getDouble("y").orElseThrow();
+		shape = nbt.getStringOr("shape", "");
 		if (shape.equals("default")) {
 			shape = "";
 		}
 
-		guidePage = nbt.getString("guide_page");
+		guidePage = nbt.getStringOr("guide_page", "");
 		hideDependencyLines = Tristate.read(nbt, "hide_dependency_lines");
-		hideDependentLines = nbt.getBoolean("hide_dependent_lines");
-		minRequiredDependencies = nbt.getInt("min_required_dependencies");
+		hideDependentLines = nbt.getBooleanOr("hide_dependent_lines", false);
+		minRequiredDependencies = nbt.getIntOr("min_required_dependencies", 0);
 
 		clearDependencies();
 
-		if (nbt.contains("dependencies", 11)) {
-			for (int i : nbt.getIntArray("dependencies")) {
+		Optional<int[]> depsAsIntArray = nbt.getIntArray("dependencies");
+		if (depsAsIntArray.isPresent()) {
+			for (int i : depsAsIntArray.get()) {
 				QuestObject object = chapter.file.get(i);
 
 				if (object != null) {
@@ -352,7 +352,7 @@ public final class Quest extends QuestObject implements Movable, Excludable {
 				}
 			}
 		} else {
-			ListTag deps = nbt.getList("dependencies", Tag.TAG_STRING);
+			ListTag deps = nbt.getList("dependencies").orElse(new ListTag());
 
 			for (int i = 0; i < deps.size(); i++) {
 				QuestObject object = chapter.file.get(chapter.file.getID(deps.getString(i)));
@@ -363,30 +363,25 @@ public final class Quest extends QuestObject implements Movable, Excludable {
 			}
 		}
 
-		if (nbt.contains("hide", Tag.TAG_BYTE)) {
-			// TODO legacy; remove in 1.22
-			hideUntilDepsVisible = Tristate.read(nbt, "hide");
-		} else {
-			hideUntilDepsVisible = Tristate.read(nbt, "hide_until_deps_visible");
-		}
+		hideUntilDepsVisible = Tristate.read(nbt, "hide_until_deps_visible");
 		hideUntilDepsComplete = Tristate.read(nbt, "hide_until_deps_complete");
 		disableJEI = Tristate.read(nbt, "disable_recipe_mod");
-		dependencyRequirement = DependencyRequirement.NAME_MAP.get(nbt.getString("dependency_requirement"));
+		dependencyRequirement = nbt.getString("dependency_requirement").map(DependencyRequirement.NAME_MAP::get).orElse(DependencyRequirement.ALL_COMPLETED);
 		hideTextUntilComplete = Tristate.read(nbt, "hide_text_until_complete");
-		size = nbt.getDouble("size");
-		iconScale = nbt.contains("icon_scale", Tag.TAG_DOUBLE) ? nbt.getDouble("icon_scale") : 1f;
-		optional = nbt.getBoolean("optional");
-		minWidth = nbt.getInt("min_width");
+		size = nbt.getDoubleOr("size", 0D);
+		iconScale = nbt.getDoubleOr("icon_scale", 1F);
+		optional = nbt.getBooleanOr("optional", false);
+		minWidth = nbt.getIntOr("min_width", 0);
 		canRepeat = Tristate.read(nbt, "can_repeat");
-		invisibleUntilCompleted = nbt.getBoolean("invisible");
-		invisibleUntilTasks = nbt.getInt("invisible_until_tasks");
-		ignoreRewardBlocking = nbt.getBoolean("ignore_reward_blocking");
-		progressionMode = ProgressionMode.NAME_MAP.get(nbt.getString("progression_mode"));
+		invisibleUntilCompleted = nbt.getBooleanOr("invisible", false);
+		invisibleUntilTasks = nbt.getIntOr("invisible_until_tasks", 0);
+		ignoreRewardBlocking = nbt.getBooleanOr("ignore_reward_blocking", false);
+		progressionMode = nbt.getString("progression_mode").map(ProgressionMode.NAME_MAP::get).orElse(ProgressionMode.DEFAULT);
 		hideDetailsUntilStartable = Tristate.read(nbt, "hide_details_until_startable");
 		requireSequentialTasks = Tristate.read(nbt, "require_sequential_tasks");
-		hideLockIcon = nbt.getBoolean("hide_lock_icon");
-		maxCompletableDeps = nbt.getInt("max_completable_dependents");
-		repeatCooldown = nbt.getInt("repeat_cooldown");
+		hideLockIcon = nbt.getBooleanOr("hide_lock_icon", false);
+		maxCompletableDeps = nbt.getIntOr("max_completable_dependents", 0);
+		repeatCooldown = nbt.getIntOr("repeat_cooldown", 0);
 	}
 
 	@Override

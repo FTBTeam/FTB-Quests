@@ -10,23 +10,23 @@ import net.minecraft.core.GlobalPos;
 import net.minecraft.core.component.DataComponentType;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.codec.ByteBufCodecs;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.component.ItemContainerContents;
 
 public class ModDataComponents {
     public static final DeferredRegister<DataComponentType<?>> COMPONENT_TYPES
             = DeferredRegister.create(FTBQuestsAPI.MOD_ID, Registries.DATA_COMPONENT_TYPE);
 
-    public static RegistrySupplier<DataComponentType<ResourceLocation>> CUSTOM_ICON
-            = COMPONENT_TYPES.register("icon", () -> new DataComponentType.Builder<ResourceLocation>()
-            .persistent(ResourceLocation.CODEC)
-            .networkSynchronized(ResourceLocation.STREAM_CODEC)
+    public static RegistrySupplier<DataComponentType<Identifier>> CUSTOM_ICON
+            = COMPONENT_TYPES.register("icon", () -> new DataComponentType.Builder<Identifier>()
+            .persistent(Identifier.CODEC)
+            .networkSynchronized(Identifier.STREAM_CODEC)
             .build());
 
-    public static RegistrySupplier<DataComponentType<ResourceLocation>> ENTITY_FACE_ICON
-            = COMPONENT_TYPES.register("entity_face", () -> new DataComponentType.Builder<ResourceLocation>()
-            .persistent(ResourceLocation.CODEC)
-            .networkSynchronized(ResourceLocation.STREAM_CODEC)
+    public static RegistrySupplier<DataComponentType<Identifier>> ENTITY_FACE_ICON
+            = COMPONENT_TYPES.register("entity_face", () -> new DataComponentType.Builder<Identifier>()
+            .persistent(Identifier.CODEC)
+            .networkSynchronized(Identifier.STREAM_CODEC)
             .build());
 
     public static RegistrySupplier<DataComponentType<String>> LOOT_CRATE

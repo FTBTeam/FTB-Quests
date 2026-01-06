@@ -44,49 +44,51 @@ public interface ThemeProperties {
 	IconProperty ADD_ICON = new IconProperty("add_icon", new Icon() {
 		@Override
 		public void draw(GuiGraphics graphics, int x, int y, int w, int h) {
-			Matrix4f m = graphics.pose().last().pose();
-			Tesselator tesselator = Tesselator.getInstance();
-			BufferBuilder buffer = tesselator.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_COLOR);
-
-			RenderSystem.enableBlend();
-			RenderSystem.setShader(GameRenderer::getPositionColorShader);
-
-			float dw = w / 16F;
-			float dh = h / 16F;
-
-			Color4I out = ThemeProperties.SYMBOL_OUT.get();
-			int r = out.redi();
-			int g = out.greeni();
-			int b = out.bluei();
-			int a = out.alphai();
-
-			buffer.addVertex(m, x + dw * 6, y + dh * 2, 0).setColor(r, g, b, a);
-			buffer.addVertex(m, x + dw * 6, y + dh * 14, 0).setColor(r, g, b, a);
-			buffer.addVertex(m, x + dw * 10, y + dh * 14, 0).setColor(r, g, b, a);
-			buffer.addVertex(m, x + dw * 10, y + dh * 2, 0).setColor(r, g, b, a);
-
-			buffer.addVertex(m, x + dw * 2, y + dh * 6, 0).setColor(r, g, b, a);
-			buffer.addVertex(m, x + dw * 2, y + dh * 10, 0).setColor(r, g, b, a);
-			buffer.addVertex(m, x + dw * 14, y + dh * 10, 0).setColor(r, g, b, a);
-			buffer.addVertex(m, x + dw * 14, y + dh * 6, 0).setColor(r, g, b, a);
-
-			Color4I in = ThemeProperties.SYMBOL_IN.get();
-			r = in.redi();
-			g = in.greeni();
-			b = in.bluei();
-			a = in.alphai();
-
-			buffer.addVertex(m, x + dw * 7, y + dh * 3, 0).setColor(r, g, b, a);
-			buffer.addVertex(m, x + dw * 7, y + dh * 13, 0).setColor(r, g, b, a);
-			buffer.addVertex(m, x + dw * 9, y + dh * 13, 0).setColor(r, g, b, a);
-			buffer.addVertex(m, x + dw * 9, y + dh * 3, 0).setColor(r, g, b, a);
-
-			buffer.addVertex(m, x + dw * 3, y + dh * 7, 0).setColor(r, g, b, a);
-			buffer.addVertex(m, x + dw * 3, y + dh * 9, 0).setColor(r, g, b, a);
-			buffer.addVertex(m, x + dw * 13, y + dh * 9, 0).setColor(r, g, b, a);
-			buffer.addVertex(m, x + dw * 13, y + dh * 7, 0).setColor(r, g, b, a);
-
-			BufferUploader.drawWithShader(buffer.buildOrThrow());
+			// TODO: @since 21.11: This has all changed. I'm also not sure why we're doing it like this.
+//			Matrix4f m = graphics.pose();
+//			Tesselator tesselator = Tesselator.getInstance();
+//			BufferBuilder buffer = tesselator.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_COLOR);
+//
+//			RenderSystem.enableBlend();
+//			RenderSystem.setShader(GameRenderer::getPositionColorShader);
+//
+//			float dw = w / 16F;
+//			float dh = h / 16F;
+//
+//			Color4I out = ThemeProperties.SYMBOL_OUT.get();
+//			int r = out.redi();
+//			int g = out.greeni();
+//			int b = out.bluei();
+//			int a = out.alphai();
+//
+//			buffer.addVertex(m, x + dw * 6, y + dh * 2, 0).setColor(r, g, b, a);
+//			buffer.addVertex(m, x + dw * 6, y + dh * 14, 0).setColor(r, g, b, a);
+//			buffer.addVertex(m, x + dw * 10, y + dh * 14, 0).setColor(r, g, b, a);
+//			buffer.addVertex(m, x + dw * 10, y + dh * 2, 0).setColor(r, g, b, a);
+//
+//			buffer.addVertex(m, x + dw * 2, y + dh * 6, 0).setColor(r, g, b, a);
+//			buffer.addVertex(m, x + dw * 2, y + dh * 10, 0).setColor(r, g, b, a);
+//			buffer.addVertex(m, x + dw * 14, y + dh * 10, 0).setColor(r, g, b, a);
+//			buffer.addVertex(m, x + dw * 14, y + dh * 6, 0).setColor(r, g, b, a);
+//
+//			Color4I in = ThemeProperties.SYMBOL_IN.get();
+//			r = in.redi();
+//			g = in.greeni();
+//			b = in.bluei();
+//			a = in.alphai();
+//
+//			buffer.addVertex(m, x + dw * 7, y + dh * 3, 0).setColor(r, g, b, a);
+//			buffer.addVertex(m, x + dw * 7, y + dh * 13, 0).setColor(r, g, b, a);
+//			buffer.addVertex(m, x + dw * 9, y + dh * 13, 0).setColor(r, g, b, a);
+//			buffer.addVertex(m, x + dw * 9, y + dh * 3, 0).setColor(r, g, b, a);
+//
+//			buffer.addVertex(m, x + dw * 3, y + dh * 7, 0).setColor(r, g, b, a);
+//			buffer.addVertex(m, x + dw * 3, y + dh * 9, 0).setColor(r, g, b, a);
+//			buffer.addVertex(m, x + dw * 13, y + dh * 9, 0).setColor(r, g, b, a);
+//			buffer.addVertex(m, x + dw * 13, y + dh * 7, 0).setColor(r, g, b, a);
+//
+//
+//			BufferUploader.drawWithShader(buffer.buildOrThrow());
 		}
 
 		public int hashCode() {
@@ -173,49 +175,50 @@ public interface ThemeProperties {
 
 		@Override
 		public void draw(GuiGraphics graphics, int x, int y, int w, int h) {
-			Matrix4f m = graphics.pose().last().pose();
-			Tesselator tesselator = Tesselator.getInstance();
-			BufferBuilder buffer = tesselator.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_COLOR);
-
-			RenderSystem.enableBlend();
-			RenderSystem.setShader(GameRenderer::getPositionColorShader);
-
-			float dw = w / 16F;
-			float dh = h / 16F;
-
-			Color4I cOut = out.map(col -> col, ThemeProperty::get);
-			int r = cOut.redi();
-			int g = cOut.greeni();
-			int b = cOut.bluei();
-			int a = cOut.alphai();
-
-			buffer.addVertex(m, x + dw * 0, y + dh * 8, 0).setColor(r, g, b, a);
-			buffer.addVertex(m, x + dw * 6, y + dh * 14, 0).setColor(r, g, b, a);
-			buffer.addVertex(m, x + dw * 6, y + dh * 8, 0).setColor(r, g, b, a);
-			buffer.addVertex(m, x + dw * 3, y + dh * 5, 0).setColor(r, g, b, a);
-
-			buffer.addVertex(m, x + dw * 6, y + dh * 8, 0).setColor(r, g, b, a);
-			buffer.addVertex(m, x + dw * 6, y + dh * 14, 0).setColor(r, g, b, a);
-			buffer.addVertex(m, x + dw * 16, y + dh * 4, 0).setColor(r, g, b, a);
-			buffer.addVertex(m, x + dw * 13, y + dh * 1, 0).setColor(r, g, b, a);
-
-			Color4I cIn = in.map(col -> col, ThemeProperty::get);
-			r = cIn.redi();
-			g = cIn.greeni();
-			b = cIn.bluei();
-			a = cIn.alphai();
-
-			buffer.addVertex(m, x + dw * 0 + dw, y + dh * 8, 0).setColor(r, g, b, a);
-			buffer.addVertex(m, x + dw * 6, y + dh * 14 - dh, 0).setColor(r, g, b, a);
-			buffer.addVertex(m, x + dw * 6, y + dh * 8 + dh, 0).setColor(r, g, b, a);
-			buffer.addVertex(m, x + dw * 3, y + dh * 5 + dh, 0).setColor(r, g, b, a);
-
-			buffer.addVertex(m, x + dw * 6, y + dh * 8 + dh, 0).setColor(r, g, b, a);
-			buffer.addVertex(m, x + dw * 6, y + dh * 14 - dh, 0).setColor(r, g, b, a);
-			buffer.addVertex(m, x + dw * 16 - dw, y + dh * 4, 0).setColor(r, g, b, a);
-			buffer.addVertex(m, x + dw * 13, y + dh * 1 + dh, 0).setColor(r, g, b, a);
-
-			BufferUploader.drawWithShader(buffer.buildOrThrow());
+			// TODO: @since 21.11: This has all changed. I'm also not sure why we're doing it like this.
+//			Matrix4f m = graphics.pose().last().pose();
+//			Tesselator tesselator = Tesselator.getInstance();
+//			BufferBuilder buffer = tesselator.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_COLOR);
+//
+//			RenderSystem.enableBlend();
+//			RenderSystem.setShader(GameRenderer::getPositionColorShader);
+//
+//			float dw = w / 16F;
+//			float dh = h / 16F;
+//
+//			Color4I cOut = out.map(col -> col, ThemeProperty::get);
+//			int r = cOut.redi();
+//			int g = cOut.greeni();
+//			int b = cOut.bluei();
+//			int a = cOut.alphai();
+//
+//			buffer.addVertex(m, x + dw * 0, y + dh * 8, 0).setColor(r, g, b, a);
+//			buffer.addVertex(m, x + dw * 6, y + dh * 14, 0).setColor(r, g, b, a);
+//			buffer.addVertex(m, x + dw * 6, y + dh * 8, 0).setColor(r, g, b, a);
+//			buffer.addVertex(m, x + dw * 3, y + dh * 5, 0).setColor(r, g, b, a);
+//
+//			buffer.addVertex(m, x + dw * 6, y + dh * 8, 0).setColor(r, g, b, a);
+//			buffer.addVertex(m, x + dw * 6, y + dh * 14, 0).setColor(r, g, b, a);
+//			buffer.addVertex(m, x + dw * 16, y + dh * 4, 0).setColor(r, g, b, a);
+//			buffer.addVertex(m, x + dw * 13, y + dh * 1, 0).setColor(r, g, b, a);
+//
+//			Color4I cIn = in.map(col -> col, ThemeProperty::get);
+//			r = cIn.redi();
+//			g = cIn.greeni();
+//			b = cIn.bluei();
+//			a = cIn.alphai();
+//
+//			buffer.addVertex(m, x + dw * 0 + dw, y + dh * 8, 0).setColor(r, g, b, a);
+//			buffer.addVertex(m, x + dw * 6, y + dh * 14 - dh, 0).setColor(r, g, b, a);
+//			buffer.addVertex(m, x + dw * 6, y + dh * 8 + dh, 0).setColor(r, g, b, a);
+//			buffer.addVertex(m, x + dw * 3, y + dh * 5 + dh, 0).setColor(r, g, b, a);
+//
+//			buffer.addVertex(m, x + dw * 6, y + dh * 8 + dh, 0).setColor(r, g, b, a);
+//			buffer.addVertex(m, x + dw * 6, y + dh * 14 - dh, 0).setColor(r, g, b, a);
+//			buffer.addVertex(m, x + dw * 16 - dw, y + dh * 4, 0).setColor(r, g, b, a);
+//			buffer.addVertex(m, x + dw * 13, y + dh * 1 + dh, 0).setColor(r, g, b, a);
+//
+//			BufferUploader.drawWithShader(buffer.buildOrThrow());
 		}
 
 		public int hashCode() {

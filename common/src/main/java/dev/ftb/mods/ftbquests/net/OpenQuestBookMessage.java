@@ -9,7 +9,7 @@ import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 
 public record OpenQuestBookMessage(long id) implements CustomPacketPayload {
-    public static final Type<OpenQuestBookMessage> TYPE = new Type<>(FTBQuestsAPI.rl("open_quest_book_message"));
+    public static final Type<OpenQuestBookMessage> TYPE = new Type<>(FTBQuestsAPI.id("open_quest_book_message"));
 
     public static final StreamCodec<FriendlyByteBuf, OpenQuestBookMessage> STREAM_CODEC = StreamCodec.composite(
             ByteBufCodecs.VAR_LONG, OpenQuestBookMessage::id,

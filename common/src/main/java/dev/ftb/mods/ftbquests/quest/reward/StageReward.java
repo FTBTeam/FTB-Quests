@@ -16,7 +16,7 @@ import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.server.level.ServerPlayer;
 
 public class StageReward extends Reward {
-	private String stage = "";
+	private String stage;
 	private boolean remove = false;
 
 	public StageReward(long id, Quest quest, String stage) {
@@ -47,8 +47,8 @@ public class StageReward extends Reward {
 	@Override
 	public void readData(CompoundTag nbt, HolderLookup.Provider provider) {
 		super.readData(nbt, provider);
-		stage = nbt.getString("stage");
-		remove = nbt.getBoolean("remove");
+		stage = nbt.getString("stage").orElseThrow();
+		remove = nbt.getBooleanOr("remove", false);
 	}
 
 	@Override

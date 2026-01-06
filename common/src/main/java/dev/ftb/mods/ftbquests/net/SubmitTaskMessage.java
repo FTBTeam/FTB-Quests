@@ -11,7 +11,7 @@ import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.server.level.ServerPlayer;
 
 public record SubmitTaskMessage(long taskId) implements CustomPacketPayload {
-	public static final Type<SubmitTaskMessage> TYPE = new Type<>(FTBQuestsAPI.rl("submit_task_message"));
+	public static final Type<SubmitTaskMessage> TYPE = new Type<>(FTBQuestsAPI.id("submit_task_message"));
 
 	public static final StreamCodec<FriendlyByteBuf, SubmitTaskMessage> STREAM_CODEC = StreamCodec.composite(
 			ByteBufCodecs.VAR_LONG, SubmitTaskMessage::taskId,

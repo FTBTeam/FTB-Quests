@@ -11,7 +11,7 @@ import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.server.level.ServerPlayer;
 
 public record SyncEditorPermissionMessage(boolean hasPermission) implements CustomPacketPayload {
-    public static final Type<SyncEditorPermissionMessage> TYPE = new Type<>(FTBQuestsAPI.rl("sync_editor_permission_message"));
+    public static final Type<SyncEditorPermissionMessage> TYPE = new Type<>(FTBQuestsAPI.id("sync_editor_permission_message"));
 
     public static final StreamCodec<FriendlyByteBuf, SyncEditorPermissionMessage> STREAM_CODEC = StreamCodec.composite(
             ByteBufCodecs.BOOL, SyncEditorPermissionMessage::hasPermission,

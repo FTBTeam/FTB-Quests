@@ -44,7 +44,7 @@ public class CurrencyReward extends Reward {
     @Override
     public void readData(CompoundTag nbt, HolderLookup.Provider provider) {
         super.readData(nbt, provider);
-        coinAmount = nbt.getInt("amount");
+        coinAmount = nbt.getIntOr("amount", 0);
     }
 
     @Override

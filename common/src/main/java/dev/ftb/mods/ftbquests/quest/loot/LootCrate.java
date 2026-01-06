@@ -101,11 +101,11 @@ public final class LootCrate {
 	}
 
 	public void readData(CompoundTag nbt) {
-		stringID = nbt.getString("string_id");
-		itemName = nbt.getString("item_name");
-		color = Color4I.rgb(nbt.getInt("color"));
-		glow = nbt.getBoolean("glow");
-		drops.readData(nbt.getCompound("drops"));
+		stringID = nbt.getString("string_id").orElseThrow();
+		color = Color4I.rgb(nbt.getInt("color").orElseThrow());
+		nbt.getString("item_name").ifPresent(s -> itemName = s);
+		nbt.getBoolean("glow").ifPresent(bool -> glow = bool);
+		nbt.getCompound("drops").ifPresent(drops::writeData);
 	}
 
 	public void writeNetData(FriendlyByteBuf data) {

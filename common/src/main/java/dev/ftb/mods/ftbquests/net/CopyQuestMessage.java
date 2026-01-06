@@ -18,7 +18,7 @@ import net.minecraft.server.MinecraftServer;
 import java.util.Objects;
 
 public record CopyQuestMessage(long id, long chapterId, double qx, double qy, boolean copyDeps) implements CustomPacketPayload {
-    public static final Type<CopyQuestMessage> TYPE = new Type<>(FTBQuestsAPI.rl("copy_quest_message"));
+    public static final Type<CopyQuestMessage> TYPE = new Type<>(FTBQuestsAPI.id("copy_quest_message"));
 
     public static final StreamCodec<FriendlyByteBuf, CopyQuestMessage> STREAM_CODEC = StreamCodec.composite(
             ByteBufCodecs.VAR_LONG, CopyQuestMessage::id,
@@ -64,7 +64,7 @@ public record CopyQuestMessage(long id, long chapterId, double qx, double qy, bo
                 }
 
                 // sync new objects to clients
-                MinecraftServer server = context.getPlayer().getServer();
+                MinecraftServer server = context.getPlayer().level().getServer();
                 NetworkHelper.sendToAll(server, CreateObjectResponseMessage.create(newQuest, null));
                 newQuest.getTasks().forEach(task -> {
                     CompoundTag extra = new CompoundTag();

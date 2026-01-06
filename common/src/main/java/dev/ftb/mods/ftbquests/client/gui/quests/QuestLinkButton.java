@@ -31,11 +31,11 @@ public class QuestLinkButton extends QuestButton {
 
         if (questScreen.file.canEdit()) {
             float s = w / 8F * 3F;
-            graphics.pose().pushPose();
-            graphics.pose().translate(x, y + h - s, 200);
-            graphics.pose().scale(s, s, 1F);
+            graphics.pose().pushMatrix();
+            graphics.pose().translate(x, y + h - s);
+            graphics.pose().scale(s, s);
             ThemeProperties.LINK_ICON.get().draw(graphics, 0, 0, 1, 1);
-            graphics.pose().popPose();
+            graphics.pose().popMatrix();
         }
     }
 

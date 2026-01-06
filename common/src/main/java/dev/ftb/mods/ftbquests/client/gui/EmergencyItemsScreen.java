@@ -13,11 +13,12 @@ import dev.ftb.mods.ftbquests.client.ClientQuestFile;
 import dev.ftb.mods.ftbquests.net.GetEmergencyItemsMessage;
 import dev.ftb.mods.ftbquests.quest.QuestShape;
 import net.minecraft.ChatFormatting;
-import net.minecraft.Util;
+import net.minecraft.util.Util;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.world.item.ItemStack;
+import org.joml.Matrix3x2fStack;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -74,18 +75,18 @@ public class EmergencyItemsScreen extends BaseScreen {
 
 	@Override
 	public void drawBackground(GuiGraphics graphics, Theme theme, int x, int y, int w, int h) {
-		PoseStack poseStack = graphics.pose();
+		Matrix3x2fStack poseStack = graphics.pose();
 
-		poseStack.pushPose();
-		poseStack.translate((int) (w / 2D), (int) (h / 5D), 0);
-		poseStack.scale(2F, 2F, 1F);
+		poseStack.pushMatrix();
+		poseStack.translate((int) (w / 2D), (int) (h / 5D));
+		poseStack.scale(2F, 2F);
 		Component titleMsg = Component.translatable("ftbquests.file.emergency_items");
 		theme.drawString(graphics, titleMsg, -theme.getStringWidth(titleMsg) / 2, 0, Color4I.WHITE, 0);
-		poseStack.popPose();
+		poseStack.popMatrix();
 
-		poseStack.pushPose();
-		poseStack.translate((int) (w / 2D), (int) (h / 2.5D), 0);
-		poseStack.scale(4F, 4F, 1F);
+		poseStack.pushMatrix();
+		poseStack.translate((int) (w / 2D), (int) (h / 2.5D));
+		poseStack.scale(4F, 4F);
 		long timeLeft = endTime - Util.getEpochMillis();
 		String timeStr = timeLeft <= 0L ? "00:00" : TimeUtils.getTimeString(timeLeft / 1000L * 1000L + 1000L);
 		int x1 = -theme.getStringWidth(timeStr) / 2;
@@ -94,7 +95,7 @@ public class EmergencyItemsScreen extends BaseScreen {
 		theme.drawString(graphics, timeStr, x1, 1, Color4I.BLACK, 0);
 		theme.drawString(graphics, timeStr, x1, -1, Color4I.BLACK, 0);
 		theme.drawString(graphics, timeStr, x1, 0, Color4I.WHITE, 0);
-		poseStack.popPose();
+		poseStack.popMatrix();
 	}
 
 	@Override
@@ -123,12 +124,12 @@ public class EmergencyItemsScreen extends BaseScreen {
 
 		@Override
 		public void draw(GuiGraphics graphics, Theme theme, int x, int y, int w, int h) {
-			GuiHelper.setupDrawing();
+//			GuiHelper.setupDrawing();
 			QuestShape.get("rsquare").getOutline().draw(graphics, x - 3, y - 3, w + 6, h + 6);
-			graphics.pose().pushPose();
-			graphics.pose().translate(x + w / 2D, y + h / 2D, 100);
-			GuiHelper.drawItem(graphics, stack, 0, true, null);
-			graphics.pose().popPose();
+			graphics.pose().pushMatrix();
+			graphics.pose().translate((float) (x + w / 2D), (float) (y + h / 2D));
+			GuiHelper.drawItem(graphics, stack, true, null);
+			graphics.pose().popMatrix();
 		}
 
 		@Override

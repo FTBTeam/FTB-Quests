@@ -23,7 +23,8 @@ import dev.ftb.mods.ftbquests.quest.QuestObject;
 import dev.ftb.mods.ftbquests.quest.QuestObjectType;
 import dev.ftb.mods.ftbquests.util.ConfigQuestObject;
 import net.minecraft.ChatFormatting;
-import net.minecraft.Util;
+import net.minecraft.client.input.KeyEvent;
+import net.minecraft.util.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Whence;
@@ -37,8 +38,8 @@ import java.util.function.BooleanSupplier;
 import java.util.regex.Pattern;
 
 public class MultilineTextEditorScreen extends BaseScreen {
-    public static final Icon LINK_ICON = Icon.getIcon(FTBQuestsAPI.rl("textures/gui/chain_link.png")).withPadding(2);
-    public static final Icon CLEAR_FORMATTING_ICON = Icon.getIcon(FTBQuestsAPI.rl("textures/gui/eraser.png")).withPadding(2);
+    public static final Icon LINK_ICON = Icon.getIcon(FTBQuestsAPI.id("textures/gui/chain_link.png")).withPadding(2);
+    public static final Icon CLEAR_FORMATTING_ICON = Icon.getIcon(FTBQuestsAPI.id("textures/gui/eraser.png")).withPadding(2);
 
 	private static final Pattern STRIP_FORMATTING_PATTERN = Pattern.compile("(?i)([&\\u00A7])([0-9A-FK-ORZ]|#[0-9A-Fa-f]{6})");
 	private static final int MAX_UNDO = 10;
@@ -152,7 +153,7 @@ public class MultilineTextEditorScreen extends BaseScreen {
 		if (key.esc()) {
 			cancel();
 			return true;
-		} else if (key.enter() && Screen.hasShiftDown()) {
+		} else if (key.enter() && key.originalEvent().hasShiftDown()) {
 			saveAndExit();
 			return true;
 		} else if (textBox.isFocused()) {
@@ -166,7 +167,7 @@ public class MultilineTextEditorScreen extends BaseScreen {
 	@Override
 	public void keyReleased(Key key) {
 		// need to do this on keyReleased() so keypress doesn't pass through to any opened sub-screen
-		executeHotkey(key.keyCode, true);
+		executeHotkey(key.keyCode(), true);
 	}
 
 	private void executeHotkey(int keycode, boolean checkModifier) {
@@ -192,7 +193,7 @@ public class MultilineTextEditorScreen extends BaseScreen {
 	}
 
 	private static boolean isHotKeyModifierPressed(int keycode) {
-		return keycode == InputConstants.KEY_Z || Util.getPlatform() == Util.OS.OSX ? Screen.hasControlDown() : Screen.hasAltDown();
+		return keycode == InputConstants.KEY_Z || Util.getPlatform() == Util.OS.OSX ? Minecraft.getInstance().hasControlDown() : Minecraft.getInstance().hasAltDown();
 	}
 
 	@Override
@@ -281,7 +282,7 @@ public class MultilineTextEditorScreen extends BaseScreen {
 			}
 		});
 
-		group.add("image", new ImageResourceConfig(), ImageResourceConfig.getResourceLocation(component.getImage()),
+		group.add("image", new ImageResourceConfig(), ImageResourceConfig.getIdentifier(component.getImage()),
 				v -> component.setImage(Icon.getIcon(v)), ImageResourceConfig.NONE).setOrder(-127);
 		group.addInt("width", component.getWidth(), component::setWidth, 0, 1, 1000);
 		group.addInt("height", component.getHeight(), component::setHeight, 0, 1, 1000);
@@ -338,7 +339,7 @@ public class MultilineTextEditorScreen extends BaseScreen {
 	}
 
 	private void insertAtEndOfLine(String toInsert) {
-		textBox.keyPressed(new Key(InputConstants.KEY_END, -1, 0));
+		textBox.keyPressed(new Key(InputConstants.KEY_END, -1, 0, new KeyEvent(InputConstants.KEY_END, -1, 0)));
 		textBox.insertText(toInsert);
 	}
 

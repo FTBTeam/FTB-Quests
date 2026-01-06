@@ -9,7 +9,7 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.packs.resources.Resource;
 
 import java.io.InputStream;
@@ -32,9 +32,9 @@ public final class QuestShape extends Icon {
 
 	public QuestShape(String id) {
 		this.id = id;
-		background = new ImageIcon(FTBQuestsAPI.rl("textures/shapes/" + this.id + "/background.png"));
-		outline = new ImageIcon(FTBQuestsAPI.rl("textures/shapes/" + this.id + "/outline.png"));
-		shape = new ImageIcon(FTBQuestsAPI.rl("textures/shapes/" + this.id + "/shape.png"));
+		background = new ImageIcon(FTBQuestsAPI.id("textures/shapes/" + this.id + "/background.png"));
+		outline = new ImageIcon(FTBQuestsAPI.id("textures/shapes/" + this.id + "/outline.png"));
+		shape = new ImageIcon(FTBQuestsAPI.id("textures/shapes/" + this.id + "/shape.png"));
 		shouldDraw = !id.equals("none");
 	}
 
@@ -87,7 +87,7 @@ public final class QuestShape extends Icon {
 	public PixelBuffer getShapePixels() {
 		if (shapePixels == null) {
 			try {
-				ResourceLocation shapeLoc = FTBQuestsAPI.rl("textures/shapes/" + id + "/shape.png");
+				Identifier shapeLoc = FTBQuestsAPI.id("textures/shapes/" + id + "/shape.png");
 				Resource resource = Minecraft.getInstance().getResourceManager().getResource(shapeLoc).get();
 				try (InputStream stream = resource.open()) {
 					shapePixels = PixelBuffer.from(stream);

@@ -23,6 +23,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
+import org.joml.Matrix3x2fStack;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -99,7 +100,7 @@ public class RewardButton extends Button {
 	@Override
 	public void onClicked(MouseButton button) {
 		if (button.isLeft()) {
-			if (reward.getQuestFile().canEdit() && ScreenWrapper.hasAltDown()) {
+			if (reward.getQuestFile().canEdit() && Minecraft.getInstance().hasAltDown()) {
 				reward.onEditButtonClicked(this);
 			} else if (ClientQuestFile.exists()) {
 				boolean canClick = questScreen.file.selfTeamData.getClaimType(FTBQuestsClient.getClientPlayer().getUUID(), reward).canClaim();
@@ -136,7 +137,7 @@ public class RewardButton extends Button {
 	@Override
 	public void draw(GuiGraphics graphics, Theme theme, int x, int y, int w, int h) {
 		int bs = h >= 32 ? 32 : 16;
-		GuiHelper.setupDrawing();
+//		GuiHelper.setupDrawing();
 		drawBackground(graphics, theme, x, y, w, h);
 		drawIcon(graphics, theme, x + (w - bs) / 2, y + (h - bs) / 2, bs, bs);
 
@@ -146,11 +147,11 @@ public class RewardButton extends Button {
 			//return;
 		}
 
-		PoseStack poseStack = graphics.pose();
+		Matrix3x2fStack poseStack = graphics.pose();
 
-		poseStack.pushPose();
-		poseStack.translate(0, 0, 200);
-		RenderSystem.enableBlend();
+		poseStack.pushMatrix();
+		poseStack.translate(0, 0);
+//		RenderSystem.enableBlend();
 		boolean completed = false;
 
 		if (questScreen.file.selfTeamData.getClaimType(Minecraft.getInstance().player.getUUID(), reward).isClaimed()) {
@@ -160,17 +161,17 @@ public class RewardButton extends Button {
 			ThemeProperties.ALERT_ICON.get().draw(graphics, x + w - 9, y + 1, 8, 8);
 		}
 
-		poseStack.popPose();
+		poseStack.popMatrix();
 
 		if (!completed) {
 			String s = reward.getButtonText();
 
 			if (!s.isEmpty()) {
-				poseStack.pushPose();
-				poseStack.translate(x + 19 - theme.getStringWidth(s) / 2D, y + 15, 200);
-				poseStack.scale(0.5F, 0.5F, 1F);
+				poseStack.pushMatrix();
+				poseStack.translate((float) (x + 19 - theme.getStringWidth(s) / 2D), y + 15);
+				poseStack.scale(0.5F, 0.5F);
 				theme.drawString(graphics, s, 0, 0, Color4I.WHITE, Theme.SHADOW);
-				poseStack.popPose();
+				poseStack.popMatrix();
 			}
 		}
 	}

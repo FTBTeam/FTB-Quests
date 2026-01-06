@@ -9,7 +9,7 @@ import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 
 public record SyncTeamDataMessage(TeamData teamData) implements CustomPacketPayload {
-    public static final Type<SyncTeamDataMessage> TYPE = new Type<>(FTBQuestsAPI.rl("sync_team_data_message"));
+    public static final Type<SyncTeamDataMessage> TYPE = new Type<>(FTBQuestsAPI.id("sync_team_data_message"));
 
     public static final StreamCodec<FriendlyByteBuf, SyncTeamDataMessage> STREAM_CODEC = StreamCodec.composite(
         TeamData.STREAM_CODEC, SyncTeamDataMessage::teamData,

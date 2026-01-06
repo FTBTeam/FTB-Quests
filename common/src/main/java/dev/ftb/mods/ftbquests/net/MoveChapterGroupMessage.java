@@ -10,7 +10,7 @@ import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 
 public record MoveChapterGroupMessage(long id, boolean movingUp) implements CustomPacketPayload {
-	public static final Type<MoveChapterGroupMessage> TYPE = new Type<>(FTBQuestsAPI.rl("move_chapter_group_message"));
+	public static final Type<MoveChapterGroupMessage> TYPE = new Type<>(FTBQuestsAPI.id("move_chapter_group_message"));
 
 	public static final StreamCodec<FriendlyByteBuf, MoveChapterGroupMessage> STREAM_CODEC = StreamCodec.composite(
 			ByteBufCodecs.VAR_LONG, MoveChapterGroupMessage::id,

@@ -37,7 +37,7 @@ import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
 import net.minecraft.client.renderer.texture.TextureAtlas;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.network.chat.MutableComponent;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.inventory.InventoryMenu;
 import net.minecraft.world.phys.HitResult;
 import org.jetbrains.annotations.Nullable;
@@ -48,7 +48,7 @@ import java.util.List;
 import static dev.ftb.mods.ftbquests.client.TaskScreenRenderer.*;
 
 public class FTBQuestsClientEventHandler {
-    private static final ResourceLocation QUESTS_BUTTON = FTBQuestsAPI.rl("quests");
+    private static final Identifier QUESTS_BUTTON = FTBQuestsAPI.id("quests");
 
     static boolean creativeTabRebuildPending = false;
 
@@ -146,7 +146,7 @@ public class FTBQuestsClientEventHandler {
             double my = Minecraft.getInstance().mouseHandler.ypos();
             Minecraft.getInstance().setScreen(null);
             if (ClientQuestFile.openGui() != null) {
-                InputConstants.grabOrReleaseMouse(Minecraft.getInstance().getWindow().getWindow(), GLFW.GLFW_CURSOR_NORMAL, mx, my);
+                InputConstants.grabOrReleaseMouse(Minecraft.getInstance().getWindow(), GLFW.GLFW_CURSOR_NORMAL, mx, my);
             }
             return EventResult.interruptFalse();
         }

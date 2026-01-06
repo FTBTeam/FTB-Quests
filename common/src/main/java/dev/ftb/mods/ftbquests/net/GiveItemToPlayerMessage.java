@@ -12,7 +12,7 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.item.ItemStack;
 
 public record GiveItemToPlayerMessage(ItemStack stack) implements CustomPacketPayload {
-	public static final Type<GiveItemToPlayerMessage> TYPE = new Type<>(FTBQuestsAPI.rl("give_item_to_player"));
+	public static final Type<GiveItemToPlayerMessage> TYPE = new Type<>(FTBQuestsAPI.id("give_item_to_player"));
 
 	public static final StreamCodec<RegistryFriendlyByteBuf, GiveItemToPlayerMessage> STREAM_CODEC = StreamCodec.composite(
 			ItemStack.STREAM_CODEC, GiveItemToPlayerMessage::stack,

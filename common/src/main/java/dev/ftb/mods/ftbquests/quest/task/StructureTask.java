@@ -17,7 +17,7 @@ import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.tags.TagKey;
@@ -28,7 +28,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class StructureTask extends AbstractBooleanTask {
-	private static final ResourceLocation DEFAULT_STRUCTURE = ResourceLocation.withDefaultNamespace("mineshaft");
+	private static final Identifier DEFAULT_STRUCTURE = Identifier.withDefaultNamespace("mineshaft");
 
 	private static final List<String> KNOWN_STRUCTURES = new ArrayList<>();
 
@@ -59,7 +59,7 @@ public class StructureTask extends AbstractBooleanTask {
 	@Override
 	public void readData(CompoundTag nbt, HolderLookup.Provider provider) {
 		super.readData(nbt, provider);
-		setStructure(nbt.getString("structure"));
+		setStructure(nbt.getString("structure").orElseThrow());
 	}
 
 	@Override
@@ -112,7 +112,7 @@ public class StructureTask extends AbstractBooleanTask {
 		StructureManager mgr = level.structureManager();
 		return structure.map(
 				key -> {
-					Structure structure = mgr.registryAccess().registryOrThrow(Registries.STRUCTURE).get(key);
+					Structure structure = mgr.registryAccess().getOrThrow(Registries.STRUCTURE).value().getValue(key);
 					return structure != null && mgr.getStructureWithPieceAt(player.blockPosition(), structure).isValid();
 				},
 				tag -> mgr.getStructureWithPieceAt(player.blockPosition(), tag).isValid()
@@ -127,7 +127,7 @@ public class StructureTask extends AbstractBooleanTask {
 
 	private String getStructure() {
 		return structure.map(
-				key -> key.location().toString(),
+				key -> key.identifier().toString(),
 				tag -> "#" + tag.location()
 		);
 	}

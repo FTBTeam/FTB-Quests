@@ -27,7 +27,7 @@ import dev.ftb.mods.ftbquests.quest.theme.property.ThemeProperties;
 import dev.ftb.mods.ftbquests.quest.translation.TranslationKey;
 import dev.ftb.mods.ftbquests.util.TextUtils;
 import net.minecraft.ChatFormatting;
-import net.minecraft.Util;
+import net.minecraft.util.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.Screen;
@@ -132,7 +132,7 @@ public class ChapterPanel extends Panel {
 
 	@Override
 	public int getX() {
-		return Mth.lerpInt(Minecraft.getInstance().getTimer().getGameTimeDeltaPartialTick(true), prevX, curX);
+		return Mth.lerpInt(Minecraft.getInstance().getDeltaTracker().getGameTimeDeltaPartialTick(true), prevX, curX);
 	}
 
 	@Override
@@ -151,11 +151,11 @@ public class ChapterPanel extends Panel {
 
 	@Override
 	public void draw(GuiGraphics graphics, Theme theme, int x, int y, int w, int h) {
-		graphics.pose().pushPose();
-		graphics.pose().translate(0, 0, QuestScreen.Z_LEVEL);
-		RenderSystem.enableDepthTest();
+		graphics.pose().pushMatrix();
+		graphics.pose().translate(0, 0);
+//		RenderSystem.enableDepthTest();
 		super.draw(graphics, theme, x, y, w, h);
-		graphics.pose().popPose();
+		graphics.pose().popMatrix();
 	}
 
 	public void setExpanded(boolean b) {
@@ -204,7 +204,7 @@ public class ChapterPanel extends Panel {
                 if (file.canEdit()) {
                     if (getMouseX() > getX() + width - 34) {
                         showAddChapterOrGroupDialog(file);
-                    } else if (button.isLeft() && Screen.hasAltDown()) {
+                    } else if (button.isLeft() && Minecraft.getInstance().hasAltDown()) {
 						file.onEditButtonClicked(chapterPanel.questScreen);
 					}
                 }
@@ -256,7 +256,7 @@ public class ChapterPanel extends Panel {
 
 		@Override
 		public void draw(GuiGraphics graphics, Theme theme, int x, int y, int w, int h) {
-			GuiHelper.setupDrawing();
+//			GuiHelper.setupDrawing();
 
 			if (isMouseOver()) {
 				Color4I.WHITE.withAlpha(40).draw(graphics, x + 1, y + 1, w - 2, h - 2);
@@ -313,7 +313,7 @@ public class ChapterPanel extends Panel {
 
 			if (file.canEdit()) {
 				if (button.isLeft()) {
-					if (Screen.hasAltDown()) {
+					if (Minecraft.getInstance().hasAltDown()) {
 						group.onEditButtonClicked(chapterPanel.questScreen);
 						return;
 					} else if (getMouseX() > getX() + width - 15) {
@@ -431,7 +431,7 @@ public class ChapterPanel extends Panel {
 						chapter.onEditButtonClicked(chapterPanel.questScreen);
 					} else if (isKeyDown(InputConstants.KEY_RALT)) {
 						FTBQuestsClient.copyToClipboard(chapter);
-						Minecraft.getInstance().getToasts().addToast(new CustomToast(Component.translatable("ftbquests.quest.copied"),
+						Minecraft.getInstance().getToastManager().addToast(new CustomToast(Component.translatable("ftbquests.quest.copied"),
 								Icons.INFO, Component.literal(chapter.getTitle().getString())));
 					} else if (chapterPanel.questScreen.selectedChapter != chapter) {
 						chapterPanel.questScreen.open(chapter, false);
@@ -459,7 +459,7 @@ public class ChapterPanel extends Panel {
 
 		@Override
 		public void draw(GuiGraphics graphics, Theme theme, int x, int y, int w, int h) {
-			GuiHelper.setupDrawing();
+//			GuiHelper.setupDrawing();
 
 			if (xlateWarningTitle || xlateWarningSubtitle) {
 				Color4I.RED.withAlpha(40).draw(graphics, x, y, w, h);
@@ -479,7 +479,7 @@ public class ChapterPanel extends Panel {
 			MutableComponent text = Component.literal("").append(title).withStyle(Style.EMPTY.withColor(TextColor.fromRgb(c.rgb())));
 			theme.drawString(graphics, text, x + 16 + xOff, y + 3);
 
-			GuiHelper.setupDrawing();
+//			GuiHelper.setupDrawing();
 
 			if (!chapter.hasAnyVisibleChildren()) {
 				ThemeProperties.CLOSE_ICON.get().draw(graphics, x + w - 12, y + 3, 8, 8);

@@ -40,7 +40,7 @@ import dev.ftb.mods.ftbquests.util.TextUtils;
 import it.unimi.dsi.fastutil.longs.Long2IntMap;
 import it.unimi.dsi.fastutil.longs.Long2IntOpenHashMap;
 import net.minecraft.ChatFormatting;
-import net.minecraft.Util;
+import net.minecraft.util.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.ConfirmLinkScreen;
@@ -61,7 +61,7 @@ import java.util.*;
 import java.util.function.BiConsumer;
 
 public class ViewQuestPanel extends ModalPanel {
-	public static final Icon PAGEBREAK_ICON = Icon.getIcon(FTBQuestsAPI.rl("textures/gui/pagebreak.png"));
+	public static final Icon PAGEBREAK_ICON = Icon.getIcon(FTBQuestsAPI.id("textures/gui/pagebreak.png"));
 
 	private final QuestScreen questScreen;
 	private Quest quest = null;
@@ -595,7 +595,7 @@ public class ViewQuestPanel extends ModalPanel {
 		if (quest == null) return;
 
 		if (questScreen.file.canEdit()) {
-			switch (key.keyCode) {
+			switch (key.keyCode()) {
 				case GLFW.GLFW_KEY_S -> editSubtitle();
 				case GLFW.GLFW_KEY_T -> editTitle();
 				case GLFW.GLFW_KEY_D -> editDescription();
@@ -607,7 +607,7 @@ public class ViewQuestPanel extends ModalPanel {
 				case GLFW.GLFW_KEY_RIGHT -> moveTasksAndRewards(true);
 			}
 		} else {
-			switch (key.keyCode) {
+			switch (key.keyCode()) {
 				case GLFW.GLFW_KEY_PAGE_UP, GLFW.GLFW_KEY_LEFT -> {
 					setCurrentPage(Math.max(0, getCurrentPage() - 1));
 					refreshWidgets();
@@ -775,7 +775,7 @@ public class ViewQuestPanel extends ModalPanel {
 			}
 		});
 
-		group.add("image", new ImageResourceConfig(), ImageResourceConfig.getResourceLocation(component.getImage()),
+		group.add("image", new ImageResourceConfig(), ImageResourceConfig.getIdentifier(component.getImage()),
 				v -> component.setImage(Icon.getIcon(v)), ImageResourceConfig.NONE);
 		group.addInt("width", component.getWidth(), component::setWidth, 0, 1, 1000);
 		group.addInt("height", component.getHeight(), component::setHeight, 0, 1, 1000);
@@ -901,10 +901,11 @@ public class ViewQuestPanel extends ModalPanel {
 					editCallback.accept(true, this);
 					return true;
 				} else if (button.isLeft() && Minecraft.getInstance().screen != null) {
-					Optional<Style> style = getComponentStyleAt(questScreen.getTheme(), getMouseX(), getMouseY());
-					if (style.isPresent()) {
-						return handleCustomClickEvent(style.get()) || Minecraft.getInstance().screen.handleComponentClicked(style.get());
-					}
+					// TODO: @since 21.11: I'm unsure on how to port this. MC appears to have removed this functionality entirely.
+//					Optional<Style> style = getComponentStyleAt(questScreen.getTheme(), getMouseX(), getMouseY());
+//					if (style.isPresent()) {
+//						return handleCustomClickEvent(style.get()) || Minecraft.getInstance().screen.handleComponentClicked(style.get());
+//					}
 				}
 			}
 
@@ -917,7 +918,7 @@ public class ViewQuestPanel extends ModalPanel {
 			ClickEvent clickEvent = style.getClickEvent();
 			if (clickEvent == null) return false;
 
-			if (clickEvent.getAction() == ClickEvent.Action.CHANGE_PAGE) {
+			if (clickEvent.action() == ClickEvent.Action.CHANGE_PAGE) {
 				String[] fields = clickEvent.getValue().split("/");
 				QuestObjectBase.parseHexId(fields[0]).ifPresentOrElse(questId -> {
 					QuestObject qo = quest.getQuestFile().get(questId);

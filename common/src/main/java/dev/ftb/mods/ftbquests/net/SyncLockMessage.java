@@ -12,7 +12,7 @@ import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import java.util.UUID;
 
 public record SyncLockMessage(UUID teamId, boolean lock) implements CustomPacketPayload {
-	public static final Type<SyncLockMessage> TYPE = new Type<>(FTBQuestsAPI.rl("sync_lock_message"));
+	public static final Type<SyncLockMessage> TYPE = new Type<>(FTBQuestsAPI.id("sync_lock_message"));
 
 	public static final StreamCodec<FriendlyByteBuf, SyncLockMessage> STREAM_CODEC = StreamCodec.composite(
 			UUIDUtil.STREAM_CODEC, SyncLockMessage::teamId,

@@ -5,7 +5,7 @@ import dev.ftb.mods.ftbquests.api.FTBQuestsAPI;
 import dev.ftb.mods.ftbquests.client.FTBQuestsNetClient;
 import dev.ftb.mods.ftbquests.quest.QuestObjectBase;
 import dev.ftb.mods.ftbquests.quest.QuestObjectType;
-import net.minecraft.Util;
+import net.minecraft.util.Util;
 import net.minecraft.core.UUIDUtil;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.FriendlyByteBuf;
@@ -18,7 +18,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 public record CreateObjectResponseMessage(long id, long parent, QuestObjectType questObjectType, CompoundTag nbt, Optional<CompoundTag> extra, Optional<UUID> creator) implements CustomPacketPayload {
-	public static final Type<CreateObjectResponseMessage> TYPE = new Type<>(FTBQuestsAPI.rl("create_object_response_message"));
+	public static final Type<CreateObjectResponseMessage> TYPE = new Type<>(FTBQuestsAPI.id("create_object_response_message"));
 
 	public static final StreamCodec<FriendlyByteBuf, CreateObjectResponseMessage> STREAM_CODEC = StreamCodec.composite(
 			ByteBufCodecs.VAR_LONG, CreateObjectResponseMessage::id,

@@ -3,7 +3,7 @@ package dev.ftb.mods.ftbquests.util;
 import com.mojang.util.UndashedUuid;
 import dev.ftb.mods.ftbquests.quest.QuestObjectBase;
 import dev.ftb.mods.ftbquests.quest.reward.Reward;
-import net.minecraft.Util;
+import net.minecraft.util.Util;
 import net.minecraft.network.FriendlyByteBuf;
 import org.jetbrains.annotations.NotNull;
 

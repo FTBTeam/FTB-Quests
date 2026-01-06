@@ -16,7 +16,7 @@ import java.util.List;
 import java.util.Objects;
 
 public record ReorderItemResponseMessage(long questId, List<Long> itemIds, boolean task) implements CustomPacketPayload {
-    public static final Type<ReorderItemResponseMessage> TYPE = new Type<>(FTBQuestsAPI.rl("reorder_item_response"));
+    public static final Type<ReorderItemResponseMessage> TYPE = new Type<>(FTBQuestsAPI.id("reorder_item_response"));
     public static final StreamCodec<FriendlyByteBuf, ReorderItemResponseMessage> STREAM_CODEC = StreamCodec.composite(
             ByteBufCodecs.VAR_LONG, ReorderItemResponseMessage::questId,
             ByteBufCodecs.VAR_LONG.apply(ByteBufCodecs.list()), ReorderItemResponseMessage::itemIds,

@@ -12,7 +12,7 @@ import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 
 public record NotifyRewardMessage(long id, Component text, Icon icon, boolean disableBlur) implements CustomPacketPayload {
-	public static final Type<NotifyRewardMessage> TYPE = new Type<>(FTBQuestsAPI.rl("notify_reward_message"));
+	public static final Type<NotifyRewardMessage> TYPE = new Type<>(FTBQuestsAPI.id("notify_reward_message"));
 
 	public static final StreamCodec<RegistryFriendlyByteBuf, NotifyRewardMessage> STREAM_CODEC = StreamCodec.composite(
 			ByteBufCodecs.VAR_LONG, NotifyRewardMessage::id,

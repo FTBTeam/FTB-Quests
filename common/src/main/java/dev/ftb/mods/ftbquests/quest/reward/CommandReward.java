@@ -63,15 +63,15 @@ public class CommandReward extends Reward {
 	@Override
 	public void readData(CompoundTag nbt, HolderLookup.Provider provider) {
 		super.readData(nbt, provider);
-		command = nbt.getString("command");
-		if (nbt.getBoolean("elevate_perms")) {
+		command = nbt.getString("command").orElse(DEFAULT_COMMAND);
+		if (nbt.getBooleanOr("elevate_perms", false)) {
 			// legacy migration
 			permissionLevel = 2;
 		} else {
-			permissionLevel = nbt.getInt("permission_level");
+			permissionLevel = nbt.getIntOr("permission_level", 0);
 		}
-		silent = nbt.getBoolean("silent");
-		feedbackMessage = nbt.getString("feedback_message");
+		silent = nbt.getBooleanOr("silent", false);
+		feedbackMessage = nbt.getStringOr("feedback_message", "");
 	}
 
 	@Override
@@ -105,7 +105,7 @@ public class CommandReward extends Reward {
 	@Override
 	public void claim(ServerPlayer player, boolean notify) {
 		Map<String, Object> overrides = new HashMap<>();
-		overrides.put("p", player.getGameProfile().getName());
+		overrides.put("p", player.getGameProfile().name());
 
 		BlockPos pos = player.blockPosition();
 		overrides.put("x", pos.getX());
@@ -131,7 +131,7 @@ public class CommandReward extends Reward {
 		if (permissionLevel > 0) source = source.withPermission(permissionLevel);
 		if (silent) source = source.withSuppressedOutput();
 		
-		player.server.getCommands().performPrefixedCommand(source, cmd);
+		player.level().getServer().getCommands().performPrefixedCommand(source, cmd);
 
 		if (notify) {
 			String key = feedbackMessage.isEmpty() ? "ftbquests.reward.ftbquests.command.success" : feedbackMessage;

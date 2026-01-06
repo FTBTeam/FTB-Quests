@@ -45,7 +45,7 @@ public class FTBQuests {
 		FTBQuestsNetHandler.init();
 		FTBQuestsEventHandler.INSTANCE.init();
 
-		ReloadListenerRegistry.register(PackType.SERVER_DATA, new TagReloadListener());
+		ReloadListenerRegistry.register(PackType.SERVER_DATA, new TagReloadListener(), FTBQuestsAPI.id("tag_reload"));
 
 		EnvExecutor.runInEnv(Env.CLIENT, () -> FTBQuestsClient::init);
 

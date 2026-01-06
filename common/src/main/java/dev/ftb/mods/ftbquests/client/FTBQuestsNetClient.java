@@ -272,6 +272,6 @@ public class FTBQuestsNetClient {
 	}
 
 	public static void displayCustomToast(ToastReward t) {
-		Minecraft.getInstance().getToasts().addToast(new RewardToast(t.getTitle(), Component.translatable(t.getDescription()), t.getIcon()));
+		Minecraft.getInstance().getToastManager().addToast(new RewardToast(t.getTitle(), Component.translatable(t.getDescription()), t.getIcon()));
 	}
 }

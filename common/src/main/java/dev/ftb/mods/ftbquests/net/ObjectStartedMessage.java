@@ -13,7 +13,7 @@ import java.util.Date;
 import java.util.UUID;
 
 public record ObjectStartedMessage(UUID teamId, long id) implements CustomPacketPayload {
-	public static final Type<ObjectStartedMessage> TYPE = new Type<>(FTBQuestsAPI.rl("object_started_message"));
+	public static final Type<ObjectStartedMessage> TYPE = new Type<>(FTBQuestsAPI.id("object_started_message"));
 
 	public static final StreamCodec<FriendlyByteBuf, ObjectStartedMessage> STREAM_CODEC = StreamCodec.composite(
 			UUIDUtil.STREAM_CODEC, ObjectStartedMessage::teamId,

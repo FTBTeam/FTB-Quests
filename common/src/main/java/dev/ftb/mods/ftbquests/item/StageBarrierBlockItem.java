@@ -9,8 +9,10 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
+import net.minecraft.world.item.component.TooltipDisplay;
 
 import java.util.List;
+import java.util.function.Consumer;
 
 public class StageBarrierBlockItem extends BlockItem {
 	public StageBarrierBlockItem() {
@@ -18,12 +20,12 @@ public class StageBarrierBlockItem extends BlockItem {
 	}
 
 	@Override
-	public void appendHoverText(ItemStack stack, TooltipContext context, List<Component> tooltip, TooltipFlag flag) {
+	public void appendHoverText(ItemStack stack, TooltipContext context, TooltipDisplay tooltipDisplay, Consumer<Component> consumer, TooltipFlag flag) {
 		if (context.registries() != null) {
-			tooltip.add(Component.translatable("item.ftbquests.barrier.rightclick").withStyle(ChatFormatting.DARK_GRAY, ChatFormatting.ITALIC));
+			consumer.accept(Component.translatable("item.ftbquests.barrier.rightclick").withStyle(ChatFormatting.DARK_GRAY, ChatFormatting.ITALIC));
 			BaseBarrierBlockEntity.BarrierSavedData data = stack.get(ModDataComponents.BARRIER_SAVED.get());
 			if (data != null) {
-				data.addTooltipInfo(data, tooltip, "stage_barrier");
+				data.addTooltipInfo(data, consumer, "stage_barrier");
 			}
 		}
 	}

@@ -29,7 +29,7 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.item.ItemStack;
 
@@ -316,7 +316,7 @@ public abstract class Task extends QuestObject {
 	public void readData(CompoundTag nbt, HolderLookup.Provider provider) {
 		super.readData(nbt, provider);
 
-		optionalTask = nbt.getBoolean("optional_task");
+		optionalTask = nbt.getBoolean("optional_task").orElse(false);
 	}
 
 	@Override
@@ -340,8 +340,8 @@ public abstract class Task extends QuestObject {
 		config.addBool("optional_task", optionalTask, v -> optionalTask = v, false).setNameKey("ftbquests.quest.misc.optional_task");
 	}
 
-	protected ResourceLocation safeResourceLocation(String str, ResourceLocation fallback) {
-		var location = ResourceLocation.tryParse(str);
+	protected Identifier safeResourceLocation(String str, Identifier fallback) {
+		var location = Identifier.tryParse(str);
 		if (location != null) {
 			return location;
 		}

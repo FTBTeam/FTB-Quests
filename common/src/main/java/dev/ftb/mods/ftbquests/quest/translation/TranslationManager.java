@@ -8,7 +8,7 @@ import dev.ftb.mods.ftbquests.net.SyncTranslationTableMessage;
 import dev.ftb.mods.ftbquests.quest.BaseQuestFile;
 import dev.ftb.mods.ftbquests.quest.QuestObjectBase;
 import dev.ftb.mods.ftbquests.quest.ServerQuestFile;
-import net.minecraft.Util;
+import net.minecraft.util.Util;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.level.ServerPlayer;
 import org.jetbrains.annotations.NotNull;
@@ -56,11 +56,11 @@ public class TranslationManager {
 
         try (Stream<Path> s = Files.list(langFolder)) {
             s.filter(TranslationManager::isValidLangFile).forEach(path -> {
-                CompoundTag langNBT = SNBT.read(path);
-                if (langNBT != null) {
+                try {
+                    var langNBT = SNBT.tryRead(path);
                     String locale = (path.getFileName().toString().split("\\.", 2))[0].toLowerCase(Locale.ROOT);
                     map.put(locale, TranslationTable.fromNBT(langNBT));
-                } else {
+                } catch (IOException e) {
                     FTBQuests.LOGGER.error("can't read lang file {}", path);
                 }
             });
@@ -187,13 +187,13 @@ public class TranslationManager {
 
     public void processInitialTranslation(CompoundTag extra, QuestObjectBase object) {
         if (extra.contains("locale") && extra.contains("translate")) {
-            String locale = extra.getString("locale");
+            String locale = extra.getStringOr("locale", "en_us");
             TranslationTable table = map.computeIfAbsent(locale, k -> new TranslationTable());
-            CompoundTag tag = extra.getCompound("translate");
-            for (String keyStr : tag.getAllKeys()) {
+            CompoundTag tag = extra.getCompound("translate").orElse(new CompoundTag());
+            for (String keyStr : tag.keySet()) {
                 TranslationKey key = TranslationKey.NAME_MAP.getNullable(keyStr);
                 if (key != null) {
-                    table.put(makeKey(object, key), tag.getString(keyStr));
+                    table.put(makeKey(object, key), tag.getString(keyStr).orElse(""));
                 }
             }
         }

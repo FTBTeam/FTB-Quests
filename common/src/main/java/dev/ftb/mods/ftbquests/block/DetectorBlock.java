@@ -15,7 +15,8 @@ import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
-import org.jetbrains.annotations.Nullable;
+import net.minecraft.world.level.redstone.Orientation;
+import org.jspecify.annotations.Nullable;
 
 public class DetectorBlock extends BaseEntityBlock {
 	private static final MapCodec<DetectorBlock> CODEC = simpleCodec(DetectorBlock::new);
@@ -44,7 +45,7 @@ public class DetectorBlock extends BaseEntityBlock {
 	}
 
 	@Override
-	public void neighborChanged(BlockState blockState, Level level, BlockPos blockPos, Block block, BlockPos blockPos2, boolean bl) {
+	public void neighborChanged(BlockState blockState, Level level, BlockPos blockPos, Block block, @Nullable Orientation orientation, boolean bl) {
 		if (!level.isClientSide()) {
 			boolean wasPowered = blockState.getValue(BlockStateProperties.POWERED);
 

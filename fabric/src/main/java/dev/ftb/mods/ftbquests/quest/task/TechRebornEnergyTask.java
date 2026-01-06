@@ -12,8 +12,8 @@ import net.minecraft.resources.ResourceLocation;
 
 public class TechRebornEnergyTask extends EnergyTask {
     public static TaskType TYPE;
-    public static final ResourceLocation EMPTY_TEXTURE = FTBQuestsAPI.rl("textures/tasks/ic2_empty.png");
-    public static final ResourceLocation FULL_TEXTURE = FTBQuestsAPI.rl("textures/tasks/ic2_full.png");
+    public static final ResourceLocation EMPTY_TEXTURE = FTBQuestsAPI.id("textures/tasks/ic2_empty.png");
+    public static final ResourceLocation FULL_TEXTURE = FTBQuestsAPI.id("textures/tasks/ic2_full.png");
 
     public TechRebornEnergyTask(long id, Quest quest) {
         super(id, quest);

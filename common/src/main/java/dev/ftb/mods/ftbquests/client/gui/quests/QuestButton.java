@@ -31,6 +31,7 @@ import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.player.Player;
+import org.joml.Matrix3x2fStack;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -196,7 +197,7 @@ public class QuestButton extends Button implements QuestPositionableButton {
 				quest.onEditButtonClicked(questScreen);
 			} else if (isKeyDown(InputConstants.KEY_RALT) && canEdit) {
 				quest.copyToClipboard();
-				Minecraft.getInstance().getToasts().addToast(new CustomToast(Component.translatable("ftbquests.quest.copied"),
+				Minecraft.getInstance().getToastManager().addToast(new CustomToast(Component.translatable("ftbquests.quest.copied"),
 						Icons.INFO, Component.literal(moveAndDeleteFocus().getTitle().getString())));
 			} else if (!quest.getGuidePage().isEmpty() && quest.getTasks().isEmpty() && quest.getRewards().isEmpty() && quest.getDescription().isEmpty()) {
 				handleClick("guide", quest.getGuidePage());
@@ -397,27 +398,27 @@ public class QuestButton extends Button implements QuestPositionableButton {
 			shape.getOutline().withColor(outlineColor).draw(graphics, x, y, w, h);
 		}
 
-		PoseStack poseStack = graphics.pose();
+		Matrix3x2fStack poseStack = graphics.pose();
 
 		if (!icon.isEmpty()) {
 			int s = (int) (w * (2F / 3F) * (float) quest.getIconScale());
-			poseStack.pushPose();
-			poseStack.translate(x + (w - s) / 2D, y + (h - s) / 2D, 0);
+			poseStack.pushMatrix();
+			poseStack.translate((float) (x + (w - s) / 2D), (float) (y + (h - s) / 2D));
 			icon.draw(graphics, 0, 0, s, s);
-			poseStack.popPose();
+			poseStack.popMatrix();
 		}
 
-		GuiHelper.setupDrawing();
+//		GuiHelper.setupDrawing();
 		// TODO: custom shader to implement alphaFunc?
 		//RenderSystem.alphaFunc(GL11.GL_GREATER, 0.1F);
 
 		if (questScreen.getViewedQuest() == quest || questScreen.selectedObjects.contains(moveAndDeleteFocus())) {
-			poseStack.pushPose();
-			poseStack.translate(0, 0, 1);
+			poseStack.pushMatrix();
+			poseStack.translate(0, 0);
 			Color4I col = Color4I.WHITE.withAlpha((int) (190D + Math.sin(System.currentTimeMillis() * 0.003D) * 50D));
 			shape.getOutline().withColor(col).draw(graphics, x, y, w, h);
 			shape.getBackground().withColor(col).draw(graphics, x, y, w, h);
-			poseStack.popPose();
+			poseStack.popMatrix();
 		}
 
 		if (!canStart || !teamData.areDependenciesComplete(quest)) {
@@ -435,26 +436,26 @@ public class QuestButton extends Button implements QuestPositionableButton {
 
 		if (!questIcon.isEmpty()) {
 			int s = (int) (w / 8F * 3F);
-			poseStack.pushPose();
-			poseStack.translate(x + w - s, y, QuestScreen.Z_LEVEL);
+			poseStack.pushMatrix();
+			poseStack.translate(x + w - s, y);//, QuestScreen.Z_LEVEL);
 			questIcon.draw(graphics, 0, 0, s, s);
-			poseStack.popPose();
+			poseStack.popMatrix();
 		}
 
 		if (!hiddenIcon.isEmpty()) {
 			int s = (int) (w / 8F * 3F);
-			poseStack.pushPose();
-			poseStack.translate(x, y, QuestScreen.Z_LEVEL);
+			poseStack.pushMatrix();
+			poseStack.translate(x, y);//, QuestScreen.Z_LEVEL);
 			hiddenIcon.draw(graphics, 0, 0, s, s);
-			poseStack.popPose();
+			poseStack.popMatrix();
 		}
 
 		if (!lockIcon.isEmpty() && !quest.shouldHideLockIcon()) {
 			int s = (int) (w / 8F * 3F);
-			poseStack.pushPose();
-			poseStack.translate(x + w - s, y + h - 1 - s, QuestScreen.Z_LEVEL);
+			poseStack.pushMatrix();
+			poseStack.translate(x + w - s, y + h - 1 - s);//, QuestScreen.Z_LEVEL);
 			lockIcon.draw(graphics, 0, 0, s, s);
-			poseStack.popPose();
+			poseStack.popMatrix();
 		}
 	}
 

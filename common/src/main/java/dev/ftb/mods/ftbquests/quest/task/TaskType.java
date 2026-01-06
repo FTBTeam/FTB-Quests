@@ -7,24 +7,24 @@ import dev.ftb.mods.ftbquests.client.GuiProviders;
 import dev.ftb.mods.ftbquests.quest.Quest;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.Util;
+import net.minecraft.util.Util;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.function.BiConsumer;
 import java.util.function.Supplier;
 
 public final class TaskType {
-	private final ResourceLocation typeId;
+	private final Identifier typeId;
 	private final Provider provider;
 	private final Supplier<Icon> iconSupplier;
 	private Component displayName;
 	private GuiProvider guiProvider;
 	public int internalId;
 
-	TaskType(ResourceLocation typeId, Provider provider, Supplier<Icon> iconSupplier) {
+	TaskType(Identifier typeId, Provider provider, Supplier<Icon> iconSupplier) {
 		this.typeId = typeId;
 		this.provider = provider;
 		this.iconSupplier = iconSupplier;
@@ -33,7 +33,7 @@ public final class TaskType {
 		guiProvider = GuiProviders.defaultTaskGuiProvider(provider);
 	}
 
-	public ResourceLocation getTypeId() {
+	public Identifier getTypeId() {
 		return typeId;
 	}
 
@@ -45,7 +45,7 @@ public final class TaskType {
 			typeId = FTBQuestsAPI.MOD_ID + ':' + typeId;
 		}
 
-		TaskType type = TaskTypes.TYPES.get(ResourceLocation.tryParse(typeId));
+		TaskType type = TaskTypes.TYPES.get(Identifier.tryParse(typeId));
 
 		if (type == null) {
 			return null;

@@ -13,7 +13,7 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.level.block.Block;
 
 public record BlockConfigResponseMessage(BlockPos pos, CompoundTag payload) implements CustomPacketPayload {
-    public static final Type<BlockConfigResponseMessage> TYPE = new Type<>(FTBQuestsAPI.rl("block_config_response_message"));
+    public static final Type<BlockConfigResponseMessage> TYPE = new Type<>(FTBQuestsAPI.id("block_config_response_message"));
 
     public static final StreamCodec<FriendlyByteBuf, BlockConfigResponseMessage> STREAM_CODEC = StreamCodec.composite(
             BlockPos.STREAM_CODEC, BlockConfigResponseMessage::pos,

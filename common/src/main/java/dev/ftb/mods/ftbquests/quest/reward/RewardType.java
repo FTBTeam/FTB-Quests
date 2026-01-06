@@ -7,17 +7,17 @@ import dev.ftb.mods.ftbquests.client.GuiProviders;
 import dev.ftb.mods.ftbquests.quest.Quest;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.Util;
+import net.minecraft.util.Util;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 public final class RewardType {
-	private final ResourceLocation typeId;
+	private final Identifier typeId;
 	private final Provider provider;
 	private final Supplier<Icon> iconSupplier;
 	private Component displayName;
@@ -25,7 +25,7 @@ public final class RewardType {
 	private boolean excludeFromListRewards = false;
 	public int intId;
 
-	public RewardType(ResourceLocation typeId, Provider provider, Supplier<Icon> iconSupplier, boolean availableByDefault) {
+	public RewardType(Identifier typeId, Provider provider, Supplier<Icon> iconSupplier, boolean availableByDefault) {
 		this.typeId = typeId;
 		this.provider = provider;
 		this.iconSupplier = iconSupplier;
@@ -34,7 +34,7 @@ public final class RewardType {
 		guiProvider = availableByDefault ? GuiProviders.defaultRewardGuiProvider(provider) : null;
 	}
 
-	public RewardType(ResourceLocation typeId, Provider provider, Supplier<Icon> iconSupplier) {
+	public RewardType(Identifier typeId, Provider provider, Supplier<Icon> iconSupplier) {
 		this(typeId, provider, iconSupplier, true);
 	}
 
@@ -46,12 +46,12 @@ public final class RewardType {
 			typeId = FTBQuestsAPI.MOD_ID + ':' + typeId;
 		}
 
-		RewardType type = RewardTypes.TYPES.get(ResourceLocation.tryParse(typeId));
+		RewardType type = RewardTypes.TYPES.get(Identifier.tryParse(typeId));
 
         return type == null ? null : type.provider.create(id, quest);
     }
 
-	public ResourceLocation getTypeId() {
+	public Identifier getTypeId() {
 		return typeId;
 	}
 

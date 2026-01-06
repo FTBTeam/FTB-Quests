@@ -12,7 +12,7 @@ import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import java.util.UUID;
 
 public record UpdateTaskProgressMessage(UUID teamId, long task, long progress) implements CustomPacketPayload {
-	public static final Type<UpdateTaskProgressMessage> TYPE = new Type<>(FTBQuestsAPI.rl("update_task_progress_message"));
+	public static final Type<UpdateTaskProgressMessage> TYPE = new Type<>(FTBQuestsAPI.id("update_task_progress_message"));
 
 	public static final StreamCodec<FriendlyByteBuf, UpdateTaskProgressMessage> STREAM_CODEC = StreamCodec.composite(
 			UUIDUtil.STREAM_CODEC, UpdateTaskProgressMessage::teamId,
