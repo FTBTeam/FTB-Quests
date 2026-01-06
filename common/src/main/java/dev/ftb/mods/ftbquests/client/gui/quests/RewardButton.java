@@ -3,6 +3,7 @@ package dev.ftb.mods.ftbquests.client.gui.quests;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import dev.architectury.networking.NetworkManager;
+import dev.ftb.mods.ftblibrary.client.icon.IconHelper;
 import dev.ftb.mods.ftblibrary.icon.Color4I;
 import dev.ftb.mods.ftblibrary.icon.Icons;
 import dev.ftb.mods.ftblibrary.ui.*;
@@ -155,10 +156,10 @@ public class RewardButton extends Button {
 		boolean completed = false;
 
 		if (questScreen.file.selfTeamData.getClaimType(Minecraft.getInstance().player.getUUID(), reward).isClaimed()) {
-			ThemeProperties.CHECK_ICON.get().draw(graphics, x + w - 9, y + 1, 8, 8);
+			IconHelper.renderIcon(ThemeProperties.CHECK_ICON.get(), graphics, x + w - 9, y + 1, 8, 8);
 			completed = true;
 		} else if (questScreen.file.selfTeamData.isCompleted(reward.getQuest())) {
-			ThemeProperties.ALERT_ICON.get().draw(graphics, x + w - 9, y + 1, 8, 8);
+			IconHelper.renderIcon(ThemeProperties.ALERT_ICON.get(), graphics, x + w - 9, y + 1, 8, 8);
 		}
 
 		poseStack.popMatrix();

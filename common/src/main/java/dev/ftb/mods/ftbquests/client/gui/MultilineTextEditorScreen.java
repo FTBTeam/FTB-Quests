@@ -1,6 +1,7 @@
 package dev.ftb.mods.ftbquests.client.gui;
 
 import com.mojang.blaze3d.platform.InputConstants;
+import dev.ftb.mods.ftblibrary.client.icon.IconHelper;
 import dev.ftb.mods.ftblibrary.config.*;
 import dev.ftb.mods.ftblibrary.config.ui.EditConfigScreen;
 import dev.ftb.mods.ftblibrary.icon.Color4I;
@@ -550,7 +551,7 @@ public class MultilineTextEditorScreen extends BaseScreen {
 
 		@Override
 		public void drawBackground(GuiGraphics graphics, Theme theme, int x, int y, int w, int h) {
-			NordColors.POLAR_NIGHT_0.draw(graphics, x, y, w, h);
+			IconHelper.renderIcon(NordColors.POLAR_NIGHT_0, graphics, x, y, w, h);
 			theme.drawPanelBackground(graphics, x, y, w, h);
 		}
 	}

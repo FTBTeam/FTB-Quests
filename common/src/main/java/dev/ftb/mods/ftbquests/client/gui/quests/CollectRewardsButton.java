@@ -1,6 +1,7 @@
 package dev.ftb.mods.ftbquests.client.gui.quests;
 
 import dev.architectury.networking.NetworkManager;
+import dev.ftb.mods.ftblibrary.client.icon.IconHelper;
 import dev.ftb.mods.ftblibrary.ui.GuiHelper;
 import dev.ftb.mods.ftblibrary.ui.Panel;
 import dev.ftb.mods.ftblibrary.ui.Theme;
@@ -42,7 +43,7 @@ public class CollectRewardsButton extends TabButton {
 			int s = w / 2;//(int) (treeGui.getZoom() / 2 * quest.size);
 			graphics.pose().pushMatrix();
 			graphics.pose().translate(x + w - s, y);
-			ThemeProperties.ALERT_ICON.get(questScreen.file).draw(graphics, 0, 0, s, s);
+			IconHelper.renderIcon(ThemeProperties.ALERT_ICON.get(questScreen.file), graphics, 0, 0, s, s);
 			graphics.pose().popMatrix();
 		}
 	}

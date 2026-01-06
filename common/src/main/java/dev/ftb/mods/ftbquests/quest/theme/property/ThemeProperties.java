@@ -3,6 +3,7 @@ package dev.ftb.mods.ftbquests.quest.theme.property;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.*;
 import com.mojang.datafixers.util.Either;
+import dev.ftb.mods.ftblibrary.client.icon.IconRenderer;
 import dev.ftb.mods.ftblibrary.icon.Color4I;
 import dev.ftb.mods.ftblibrary.icon.Icon;
 import net.minecraft.client.gui.GuiGraphics;
@@ -41,64 +42,7 @@ public interface ThemeProperties {
 
 	//Icons
 	IconProperty CHECK_ICON = new IconProperty("check_icon", new CheckIcon(ThemeProperties.SYMBOL_OUT, ThemeProperties.SYMBOL_IN));
-	IconProperty ADD_ICON = new IconProperty("add_icon", new Icon() {
-		@Override
-		public void draw(GuiGraphics graphics, int x, int y, int w, int h) {
-			// TODO: @since 21.11: This has all changed. I'm also not sure why we're doing it like this.
-//			Matrix4f m = graphics.pose();
-//			Tesselator tesselator = Tesselator.getInstance();
-//			BufferBuilder buffer = tesselator.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_COLOR);
-//
-//			RenderSystem.enableBlend();
-//			RenderSystem.setShader(GameRenderer::getPositionColorShader);
-//
-//			float dw = w / 16F;
-//			float dh = h / 16F;
-//
-//			Color4I out = ThemeProperties.SYMBOL_OUT.get();
-//			int r = out.redi();
-//			int g = out.greeni();
-//			int b = out.bluei();
-//			int a = out.alphai();
-//
-//			buffer.addVertex(m, x + dw * 6, y + dh * 2, 0).setColor(r, g, b, a);
-//			buffer.addVertex(m, x + dw * 6, y + dh * 14, 0).setColor(r, g, b, a);
-//			buffer.addVertex(m, x + dw * 10, y + dh * 14, 0).setColor(r, g, b, a);
-//			buffer.addVertex(m, x + dw * 10, y + dh * 2, 0).setColor(r, g, b, a);
-//
-//			buffer.addVertex(m, x + dw * 2, y + dh * 6, 0).setColor(r, g, b, a);
-//			buffer.addVertex(m, x + dw * 2, y + dh * 10, 0).setColor(r, g, b, a);
-//			buffer.addVertex(m, x + dw * 14, y + dh * 10, 0).setColor(r, g, b, a);
-//			buffer.addVertex(m, x + dw * 14, y + dh * 6, 0).setColor(r, g, b, a);
-//
-//			Color4I in = ThemeProperties.SYMBOL_IN.get();
-//			r = in.redi();
-//			g = in.greeni();
-//			b = in.bluei();
-//			a = in.alphai();
-//
-//			buffer.addVertex(m, x + dw * 7, y + dh * 3, 0).setColor(r, g, b, a);
-//			buffer.addVertex(m, x + dw * 7, y + dh * 13, 0).setColor(r, g, b, a);
-//			buffer.addVertex(m, x + dw * 9, y + dh * 13, 0).setColor(r, g, b, a);
-//			buffer.addVertex(m, x + dw * 9, y + dh * 3, 0).setColor(r, g, b, a);
-//
-//			buffer.addVertex(m, x + dw * 3, y + dh * 7, 0).setColor(r, g, b, a);
-//			buffer.addVertex(m, x + dw * 3, y + dh * 9, 0).setColor(r, g, b, a);
-//			buffer.addVertex(m, x + dw * 13, y + dh * 9, 0).setColor(r, g, b, a);
-//			buffer.addVertex(m, x + dw * 13, y + dh * 7, 0).setColor(r, g, b, a);
-//
-//
-//			BufferUploader.drawWithShader(buffer.buildOrThrow());
-		}
-
-		public int hashCode() {
-			return 1;
-		}
-
-		public boolean equals(Object o) {
-			return o == this;
-		}
-	});
+	IconProperty ADD_ICON = new IconProperty("add_icon", new AddIcon());
 
 	IconProperty ALERT_ICON = new IconProperty("alert_icon");
 	IconProperty SUPPORT_ICON = new IconProperty("support_icon");
@@ -158,8 +102,71 @@ public interface ThemeProperties {
 	IconProperty CHECKMARK_TASK_ACTIVE = new IconProperty("checkmark_task_active");
 	IconProperty CHECKMARK_TASK_INACTIVE = new IconProperty("checkmark_task_inactive");
 
+	class AddIcon extends Icon<AddIcon> {
+//		@Override
+//		public void draw(GuiGraphics graphics, int x, int y, int w, int h) {
+//			 TODO: @since 21.11: This has all changed. I'm also not sure why we're doing it like this.
+//			Matrix4f m = graphics.pose();
+//			Tesselator tesselator = Tesselator.getInstance();
+//			BufferBuilder buffer = tesselator.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_COLOR);
+//
+//			RenderSystem.enableBlend();
+//			RenderSystem.setShader(GameRenderer::getPositionColorShader);
+//
+//			float dw = w / 16F;
+//			float dh = h / 16F;
+//
+//			Color4I out = ThemeProperties.SYMBOL_OUT.get();
+//			int r = out.redi();
+//			int g = out.greeni();
+//			int b = out.bluei();
+//			int a = out.alphai();
+//
+//			buffer.addVertex(m, x + dw * 6, y + dh * 2, 0).setColor(r, g, b, a);
+//			buffer.addVertex(m, x + dw * 6, y + dh * 14, 0).setColor(r, g, b, a);
+//			buffer.addVertex(m, x + dw * 10, y + dh * 14, 0).setColor(r, g, b, a);
+//			buffer.addVertex(m, x + dw * 10, y + dh * 2, 0).setColor(r, g, b, a);
+//
+//			buffer.addVertex(m, x + dw * 2, y + dh * 6, 0).setColor(r, g, b, a);
+//			buffer.addVertex(m, x + dw * 2, y + dh * 10, 0).setColor(r, g, b, a);
+//			buffer.addVertex(m, x + dw * 14, y + dh * 10, 0).setColor(r, g, b, a);
+//			buffer.addVertex(m, x + dw * 14, y + dh * 6, 0).setColor(r, g, b, a);
+//
+//			Color4I in = ThemeProperties.SYMBOL_IN.get();
+//			r = in.redi();
+//			g = in.greeni();
+//			b = in.bluei();
+//			a = in.alphai();
+//
+//			buffer.addVertex(m, x + dw * 7, y + dh * 3, 0).setColor(r, g, b, a);
+//			buffer.addVertex(m, x + dw * 7, y + dh * 13, 0).setColor(r, g, b, a);
+//			buffer.addVertex(m, x + dw * 9, y + dh * 13, 0).setColor(r, g, b, a);
+//			buffer.addVertex(m, x + dw * 9, y + dh * 3, 0).setColor(r, g, b, a);
+//
+//			buffer.addVertex(m, x + dw * 3, y + dh * 7, 0).setColor(r, g, b, a);
+//			buffer.addVertex(m, x + dw * 3, y + dh * 9, 0).setColor(r, g, b, a);
+//			buffer.addVertex(m, x + dw * 13, y + dh * 9, 0).setColor(r, g, b, a);
+//			buffer.addVertex(m, x + dw * 13, y + dh * 7, 0).setColor(r, g, b, a);
+//
+//
+//			BufferUploader.drawWithShader(buffer.buildOrThrow());
+//		}
 
-	class CheckIcon extends Icon {
+		public int hashCode() {
+			return 1;
+		}
+
+		public boolean equals(Object o) {
+			return o == this;
+		}
+
+		@Override
+		public IconRenderer<AddIcon> getRenderer() {
+			return null;
+		}
+	}
+
+	class CheckIcon extends Icon<CheckIcon> {
 		private final Either<Color4I,ColorProperty> out;
 		private final Either <Color4I,ColorProperty> in;
 
@@ -173,9 +180,9 @@ public interface ThemeProperties {
 			this.in = Either.right(in);
 		}
 
-		@Override
-		public void draw(GuiGraphics graphics, int x, int y, int w, int h) {
-			// TODO: @since 21.11: This has all changed. I'm also not sure why we're doing it like this.
+//		@Override
+//		public void draw(GuiGraphics graphics, int x, int y, int w, int h) {
+//			// TODO: @since 21.11: This has all changed. I'm also not sure why we're doing it like this.
 //			Matrix4f m = graphics.pose().last().pose();
 //			Tesselator tesselator = Tesselator.getInstance();
 //			BufferBuilder buffer = tesselator.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_COLOR);
@@ -219,7 +226,7 @@ public interface ThemeProperties {
 //			buffer.addVertex(m, x + dw * 13, y + dh * 1 + dh, 0).setColor(r, g, b, a);
 //
 //			BufferUploader.drawWithShader(buffer.buildOrThrow());
-		}
+//		}
 
 		public int hashCode() {
 			return 1;
@@ -227,6 +234,11 @@ public interface ThemeProperties {
 
 		public boolean equals(Object o) {
 			return o == this;
+		}
+
+		@Override
+		public IconRenderer<CheckIcon> getRenderer() {
+			return null;
 		}
 	}
 }

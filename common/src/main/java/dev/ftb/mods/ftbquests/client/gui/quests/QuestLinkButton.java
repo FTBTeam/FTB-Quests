@@ -1,5 +1,6 @@
 package dev.ftb.mods.ftbquests.client.gui.quests;
 
+import dev.ftb.mods.ftblibrary.client.icon.IconHelper;
 import dev.ftb.mods.ftblibrary.ui.Theme;
 import dev.ftb.mods.ftbquests.quest.Quest;
 import dev.ftb.mods.ftbquests.quest.QuestLink;
@@ -34,7 +35,7 @@ public class QuestLinkButton extends QuestButton {
             graphics.pose().pushMatrix();
             graphics.pose().translate(x, y + h - s);
             graphics.pose().scale(s, s);
-            ThemeProperties.LINK_ICON.get().draw(graphics, 0, 0, 1, 1);
+            IconHelper.renderIcon(ThemeProperties.LINK_ICON.get(), graphics, 0, 0, 1, 1);
             graphics.pose().popMatrix();
         }
     }

@@ -2,6 +2,7 @@ package dev.ftb.mods.ftbquests.client.gui.quests;
 
 import com.mojang.datafixers.util.Pair;
 import dev.architectury.networking.NetworkManager;
+import dev.ftb.mods.ftblibrary.client.icon.IconHelper;
 import dev.ftb.mods.ftblibrary.config.ConfigGroup;
 import dev.ftb.mods.ftblibrary.config.ImageResourceConfig;
 import dev.ftb.mods.ftblibrary.config.ListConfig;
@@ -61,11 +62,11 @@ import java.util.*;
 import java.util.function.BiConsumer;
 
 public class ViewQuestPanel extends ModalPanel {
-	public static final Icon PAGEBREAK_ICON = Icon.getIcon(FTBQuestsAPI.id("textures/gui/pagebreak.png"));
+	public static final Icon<?> PAGEBREAK_ICON = Icon.getIcon(FTBQuestsAPI.id("textures/gui/pagebreak.png"));
 
 	private final QuestScreen questScreen;
 	private Quest quest = null;
-	private Icon icon = Color4I.empty();
+	private Icon<?> icon = Color4I.empty();
 	private Button buttonOpenDependencies;
 	private BlankPanel panelContent;
 	private BlankPanel panelTasks;
@@ -827,14 +828,14 @@ public class ViewQuestPanel extends ModalPanel {
 
 	@Override
 	public void drawBackground(GuiGraphics graphics, Theme theme, int x, int y, int w, int h) {
-		ThemeProperties.QUEST_VIEW_BACKGROUND.get().draw(graphics, x, y, w, h);
+		IconHelper.renderIcon(ThemeProperties.QUEST_VIEW_BACKGROUND.get(), graphics, x, y, w, h);
 
 		if (titleField != null && panelContent != null) {
 			int iconSize = Math.min(16, titleField.height + 2);
-			icon.draw(graphics, x + 4, y + 4, iconSize, iconSize);
-			ThemeProperties.QUEST_VIEW_BORDER.get().draw(graphics, x + 1, panelContent.getY(), w - 2, 1);
+			IconHelper.renderIcon(icon, graphics, x + 4, y + 4, iconSize, iconSize);
+			IconHelper.renderIcon(ThemeProperties.QUEST_VIEW_BORDER.get(), graphics, x + 1, panelContent.getY(), w - 2, 1);
 			if (questScreen.file.selfTeamData.getMilliSecondsUntilRepeatable(quest) > 0L) {
-				Icons.TIME.draw(graphics,x + 6 + iconSize, y + 4, iconSize, iconSize);
+				IconHelper.renderIcon(Icons.TIME, graphics,x + 6 + iconSize, y + 4, iconSize, iconSize);
 			}
 		}
 	}
@@ -889,7 +890,7 @@ public class ViewQuestPanel extends ModalPanel {
 		@Override
 		public void draw(GuiGraphics graphics, Theme theme, int x, int y, int w, int h) {
 			if (xlateWarning) {
-				Color4I.RED.withAlpha(40).draw(graphics, x, y, w, h);
+				IconHelper.renderIcon(Color4I.RED.withAlpha(40), graphics, x, y, w, h);
 			}
 			super.draw(graphics, theme, x, y, w, h);
 		}
@@ -1108,7 +1109,7 @@ public class ViewQuestPanel extends ModalPanel {
 		private final Quest quest;
 
 		public OpenInGuideButton(Panel panel, Quest q) {
-			super(panel, Component.translatable("ftbquests.gui.open_in_guide"), ItemIcon.getItemIcon(Items.BOOK));
+			super(panel, Component.translatable("ftbquests.gui.open_in_guide"), ItemIcon.ofItem(Items.BOOK));
 			setHeight(13);
 			setX((panel.width - width) / 2);
 			quest = q;

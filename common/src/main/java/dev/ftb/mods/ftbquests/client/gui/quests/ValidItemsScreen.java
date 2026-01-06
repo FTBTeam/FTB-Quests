@@ -1,6 +1,7 @@
 package dev.ftb.mods.ftbquests.client.gui.quests;
 
 import dev.architectury.networking.NetworkManager;
+import dev.ftb.mods.ftblibrary.client.icon.IconHelper;
 import dev.ftb.mods.ftblibrary.icon.Color4I;
 import dev.ftb.mods.ftblibrary.icon.ItemIcon;
 import dev.ftb.mods.ftblibrary.ui.*;
@@ -148,7 +149,7 @@ public class ValidItemsScreen extends BaseScreen {
 		private final ItemStack stack;
 
 		ValidItemButton(Panel panel, ItemStack stack) {
-			super(panel, Component.empty(), ItemIcon.getItemIcon(stack));
+			super(panel, Component.empty(), ItemIcon.ofItemStack(stack));
 			this.stack = stack;
 		}
 
@@ -165,7 +166,7 @@ public class ValidItemsScreen extends BaseScreen {
 		@Override
 		public void draw(GuiGraphics graphics, Theme theme, int x, int y, int w, int h) {
 			if (isMouseOver()) {
-				Color4I.WHITE.withAlpha(33).draw(graphics, x, y, w, h);
+				IconHelper.renderIcon(Color4I.WHITE.withAlpha(33), graphics, x, y, w, h);
 			}
 
 			graphics.pose().pushMatrix();

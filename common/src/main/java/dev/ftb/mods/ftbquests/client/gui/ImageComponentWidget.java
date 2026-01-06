@@ -1,5 +1,6 @@
 package dev.ftb.mods.ftbquests.client.gui;
 
+import dev.ftb.mods.ftblibrary.client.icon.IconHelper;
 import dev.ftb.mods.ftblibrary.ui.Panel;
 import dev.ftb.mods.ftblibrary.ui.Theme;
 import dev.ftb.mods.ftblibrary.ui.Widget;
@@ -35,7 +36,7 @@ public class ImageComponentWidget extends Widget {
 	}
 
 	public void draw(GuiGraphics graphics, Theme theme, int x, int y, int w, int h) {
-		component.getImage().draw(graphics, x, y, w, h);
+		IconHelper.renderIcon(component.getImage(), graphics, x, y, w, h);
 	}
 
 	public ImageComponent getComponent() {

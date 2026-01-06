@@ -73,7 +73,7 @@ public class AdvancementTask extends AbstractBooleanTask {
 			KnownServerRegistries.AdvancementInfo def = advancements.values().iterator().next();
 			config.addEnum("advancement", advancement, v -> advancement = v,
 					NameMap.of(def.id(), advancements.keySet().toArray(new Identifier[0]))
-							.icon(id -> ItemIcon.getItemIcon(advancements.getOrDefault(id, def).icon()))
+							.icon(id -> ItemIcon.ofItemStack(advancements.getOrDefault(id, def).icon()))
 							.name(id -> advancements.getOrDefault(id, def).name())
 							.create()).setNameKey("ftbquests.task.ftbquests.advancement");
 		} else {
@@ -105,7 +105,7 @@ public class AdvancementTask extends AbstractBooleanTask {
 				KnownServerRegistries.client.advancements().get(advancement);
 
 		if (info != null && !info.icon().isEmpty()) {
-			return ItemIcon.getItemIcon(info.icon());
+			return ItemIcon.ofItemStack(info.icon());
 		}
 
 		return super.getAltIcon();

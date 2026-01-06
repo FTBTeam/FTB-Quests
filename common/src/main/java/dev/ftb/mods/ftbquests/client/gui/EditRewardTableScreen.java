@@ -1,6 +1,7 @@
 package dev.ftb.mods.ftbquests.client.gui;
 
 import com.mojang.blaze3d.platform.InputConstants;
+import dev.ftb.mods.ftblibrary.client.icon.IconHelper;
 import dev.ftb.mods.ftblibrary.config.ConfigGroup;
 import dev.ftb.mods.ftblibrary.config.DoubleConfig;
 import dev.ftb.mods.ftblibrary.config.ui.EditConfigScreen;
@@ -133,7 +134,7 @@ public class EditRewardTableScreen extends AbstractButtonListScreen {
 		public void draw(GuiGraphics graphics, Theme theme, int x, int y, int w, int h) {
 			super.draw(graphics, theme, x, y, w, h);
 
-			editedTable.getIcon().draw(graphics, x + 2, y + 2, 16, 16);
+			IconHelper.renderIcon(editedTable.getIcon(), graphics, x + 2, y + 2, 16, 16);
 			theme.drawString(graphics, getGui().getTitle(), x + 20, y + 6, Theme.SHADOW);
 		}
 	}
@@ -231,9 +232,9 @@ public class EditRewardTableScreen extends AbstractButtonListScreen {
 				}
 			} else {
 				List<ContextMenuItem> contextMenu = new ArrayList<>();
-				contextMenu.add(new ContextMenuItem(Component.translatable("selectServer.edit"), ItemIcon.getItemIcon(Items.FEATHER),
+				contextMenu.add(new ContextMenuItem(Component.translatable("selectServer.edit"), ItemIcon.ofItem(Items.FEATHER),
 						b -> editRewardTableEntry()));
-				contextMenu.add(new ContextMenuItem(Component.translatable("ftbquests.reward_table.set_weight"), ItemIcon.getItemIcon(Items.ANVIL),
+				contextMenu.add(new ContextMenuItem(Component.translatable("ftbquests.reward_table.set_weight"), ItemIcon.ofItem(Items.ANVIL),
 						b -> setEntryWeight()));
 				contextMenu.add(new ContextMenuItem(Component.translatable("gui.remove"), Icons.BIN, b -> doDeletion())
 						.setYesNoText(Component.translatable("delete_item", wr.getReward().getTitle())));
@@ -280,11 +281,11 @@ public class EditRewardTableScreen extends AbstractButtonListScreen {
 		@Override
 		public void drawBackground(GuiGraphics graphics, Theme theme, int x, int y, int w, int h) {
 			if (isMouseOver) {
-				Color4I.WHITE.withAlpha(30).draw(graphics, x, y, w, h);
-				ItemIcon.getItemIcon(Items.ANVIL).draw(graphics, x + w - 26, y + 2, 12, 12);
-				Icons.BIN.draw(graphics, x + w - 13, y + 2, 12, 12);
+				IconHelper.renderIcon(Color4I.WHITE.withAlpha(30), graphics, x, y, w, h);
+				IconHelper.renderIcon(ItemIcon.ofItem(Items.ANVIL), graphics, x + w - 26, y + 2, 12, 12);
+				IconHelper.renderIcon(Icons.BIN, graphics, x + w - 13, y + 2, 12, 12);
 			}
-			Color4I.GRAY.withAlpha(40).draw(graphics, x, y + h, w, 1);
+			IconHelper.renderIcon(Color4I.GRAY.withAlpha(40), graphics, x, y + h, w, 1);
 		}
 
 		@Override

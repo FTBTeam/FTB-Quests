@@ -2,6 +2,7 @@ package dev.ftb.mods.ftbquests.client.gui.quests;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Axis;
+import dev.ftb.mods.ftblibrary.client.icon.IconHelper;
 import dev.ftb.mods.ftblibrary.config.ConfigGroup;
 import dev.ftb.mods.ftblibrary.config.ui.EditConfigScreen;
 import dev.ftb.mods.ftblibrary.icon.Color4I;
@@ -204,7 +205,7 @@ public class ChapterImageButton extends Button implements QuestPositionableButto
 
 	@Override
 	public void draw(GuiGraphics graphics, Theme theme, int x, int y, int w, int h) {
-		Icon image = chapterImage.getImage();
+		Icon<?> image = chapterImage.getImage();
 
 		// if we've got this far and the image shouldn't normally be drawn, we must be in edit mode
 		boolean transparent = !chapterImage.shouldShowImage(questScreen.file.selfTeamData);
@@ -221,19 +222,19 @@ public class ChapterImageButton extends Button implements QuestPositionableButto
 			poseStack.translate(x, y);
 			poseStack.rotate((float) chapterImage.getRotation());
 			poseStack.scale(w, h);
-			image.draw(graphics, 0, 0, 1, 1);
+			IconHelper.renderIcon(image, graphics, 0, 0, 1, 1);
 			if (questScreen.selectedObjects.contains(moveAndDeleteFocus())) {
 				Color4I col = Color4I.WHITE.withAlpha((int) (128D + Math.sin(System.currentTimeMillis() * 0.003D) * 50D));
-				col.draw(graphics, 0, 0, 1, 1);
+				IconHelper.renderIcon(col, graphics, 0, 0, 1, 1);
 			}
 		} else {
 			poseStack.translate((int) (x + w / 2D), (int) (y + h / 2D));
 			poseStack.rotate((float) chapterImage.getRotation());
 			poseStack.scale(w / 2F, h / 2F);
-			image.draw(graphics, -1, -1, 2, 2);
+			IconHelper.renderIcon(image, graphics, -1, -1, 2, 2);
 			if (questScreen.selectedObjects.contains(moveAndDeleteFocus())) {
 				Color4I col = Color4I.WHITE.withAlpha((int) (128D + Math.sin(System.currentTimeMillis() * 0.003D) * 50D));
-				col.draw(graphics, -1, -1, 2, 2);
+				IconHelper.renderIcon(col, graphics, -1, -1, 2, 2);
 			}
 		}
 

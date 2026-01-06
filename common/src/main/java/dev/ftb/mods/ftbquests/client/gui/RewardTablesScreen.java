@@ -1,6 +1,7 @@
 package dev.ftb.mods.ftbquests.client.gui;
 
 import dev.architectury.networking.NetworkManager;
+import dev.ftb.mods.ftblibrary.client.icon.IconHelper;
 import dev.ftb.mods.ftblibrary.config.StringConfig;
 import dev.ftb.mods.ftblibrary.config.ui.EditStringConfigOverlay;
 import dev.ftb.mods.ftblibrary.icon.Color4I;
@@ -231,11 +232,11 @@ public class RewardTablesScreen extends AbstractButtonListScreen {
 			}
 
 			List<ContextMenuItem> menu = List.of(
-					new ContextMenuItem(Component.translatable("ftbquests.gui.edit"), ItemIcon.getItemIcon(Items.FEATHER),
+					new ContextMenuItem(Component.translatable("ftbquests.gui.edit"), ItemIcon.ofItem(Items.FEATHER),
 							b -> editRewardTable()),
 					new ContextMenuItem(Component.translatable(pendingDeleteIndexes.contains(idx) ? "ftbquests.gui.restore" : "gui.remove"), Icons.BIN,
 							b -> deleteRewardTable()),
-					new ContextMenuItem(getLootCrateText(), ItemIcon.getItemIcon(ModItems.LOOTCRATE.get()),
+					new ContextMenuItem(getLootCrateText(), ItemIcon.ofItem(ModItems.LOOTCRATE.get()),
 							b -> toggleLootCrate()),
 					new ContextMenuItem(Component.translatable("ftbquests.gui.copy_id"), Icons.SETTINGS,
 							b -> QuestScreen.setClipboardString(table.getCodeString()))
@@ -246,16 +247,16 @@ public class RewardTablesScreen extends AbstractButtonListScreen {
 		@Override
 		public void drawBackground(GuiGraphics graphics, Theme theme, int x, int y, int w, int h) {
 			if (isMouseOver) {
-				Color4I.WHITE.withAlpha(30).draw(graphics, x, y, w, h);
-				ItemIcon.getItemIcon(ModItems.LOOTCRATE.get()).draw(graphics, x + w - 26, y + 2, 12, 12);
-				Icons.BIN.draw(graphics, x + w - 13, y + 2, 12, 12);
+				IconHelper.renderIcon(Color4I.WHITE.withAlpha(30), graphics, x, y, w, h);
+				IconHelper.renderIcon(ItemIcon.ofItem(ModItems.LOOTCRATE.get()), graphics, x + w - 26, y + 2, 12, 12);
+				IconHelper.renderIcon(Icons.BIN, graphics, x + w - 13, y + 2, 12, 12);
 			}
 			if (pendingDeleteIndexes.contains(idx)) {
-				Color4I.RED.withAlpha(64).draw(graphics, x, y, w, h);
+				IconHelper.renderIcon(Color4I.RED.withAlpha(64), graphics, x, y, w, h);
 			} else if (rewardTablesCopy.get(idx).getId() == 0) {
-				Color4I.GREEN.withAlpha(64).draw(graphics, x, y, w, h);
+				IconHelper.renderIcon(Color4I.GREEN.withAlpha(64), graphics, x, y, w, h);
 			}
-			Color4I.GRAY.withAlpha(40).draw(graphics, x, y + h, w, 1);
+			IconHelper.renderIcon(Color4I.GRAY.withAlpha(40), graphics, x, y + h, w, 1);
 		}
 
 		@Override
@@ -263,9 +264,9 @@ public class RewardTablesScreen extends AbstractButtonListScreen {
 			super.draw(graphics, theme, x, y, w, h);
 
 			if (pendingDeleteIndexes.contains(idx)) {
-				Color4I.GRAY.draw(graphics, x + 20, y + h / 2, theme.getStringWidth(title), 1);
+				IconHelper.renderIcon(Color4I.GRAY, graphics, x + 20, y + h / 2, theme.getStringWidth(title), 1);
 			}  else if (rewardTablesCopy.get(idx).getId() == 0) {
-				Icons.ADD.draw(graphics, x + 24 + theme.getStringWidth(title), y + 2, 12, 12);
+				IconHelper.renderIcon(Icons.ADD, graphics, x + 24 + theme.getStringWidth(title), y + 2, 12, 12);
 			}
 		}
 

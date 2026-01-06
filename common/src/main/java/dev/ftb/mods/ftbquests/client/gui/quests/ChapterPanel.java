@@ -3,6 +3,8 @@ package dev.ftb.mods.ftbquests.client.gui.quests;
 import com.mojang.blaze3d.platform.InputConstants;
 import com.mojang.blaze3d.systems.RenderSystem;
 import dev.architectury.networking.NetworkManager;
+import dev.ftb.mods.ftblibrary.client.icon.IconHelper;
+import dev.ftb.mods.ftblibrary.client.icon.IconRenderer;
 import dev.ftb.mods.ftblibrary.config.StringConfig;
 import dev.ftb.mods.ftblibrary.config.ui.EditStringConfigOverlay;
 import dev.ftb.mods.ftblibrary.icon.Color4I;
@@ -44,8 +46,8 @@ import java.util.Optional;
 import java.util.regex.Pattern;
 
 public class ChapterPanel extends Panel {
-	public static final Icon ARROW_COLLAPSED = Icon.getIcon("ftbquests:textures/gui/arrow_collapsed.png");
-	public static final Icon ARROW_EXPANDED = Icon.getIcon("ftbquests:textures/gui/arrow_expanded.png");
+	public static final Icon<?> ARROW_COLLAPSED = Icon.getIcon("ftbquests:textures/gui/arrow_collapsed.png");
+	public static final Icon<?> ARROW_EXPANDED = Icon.getIcon("ftbquests:textures/gui/arrow_expanded.png");
 	private static final Pattern NON_EMPTY_PAT = Pattern.compile("^.+$");
 
 	private final QuestScreen questScreen;
@@ -137,7 +139,7 @@ public class ChapterPanel extends Panel {
 
 	@Override
 	public void drawBackground(GuiGraphics graphics, Theme theme, int x, int y, int w, int h) {
-		ThemeProperties.CHAPTER_PANEL_BACKGROUND.get().draw(graphics, x, y, w, h);
+		IconHelper.renderIcon(ThemeProperties.CHAPTER_PANEL_BACKGROUND.get(), graphics, x, y, w, h);
 	}
 
 	@Override
@@ -259,22 +261,22 @@ public class ChapterPanel extends Panel {
 //			GuiHelper.setupDrawing();
 
 			if (isMouseOver()) {
-				Color4I.WHITE.withAlpha(40).draw(graphics, x + 1, y + 1, w - 2, h - 2);
+				IconHelper.renderIcon(Color4I.WHITE.withAlpha(40), graphics, x + 1, y + 1, w - 2, h - 2);
 			}
 
 			ChatFormatting f = isMouseOver() ? ChatFormatting.WHITE : ChatFormatting.GRAY;
 
-			icon.draw(graphics, x + 2, y + 3, 12, 12);
+			IconHelper.renderIcon(icon, graphics, x + 2, y + 3, 12, 12);
 			theme.drawString(graphics, Component.literal("").append(title).withStyle(f), x + 16, y + 5);
 
-			ThemeProperties.WIDGET_BORDER.get(ClientQuestFile.INSTANCE).draw(graphics, x, y + h - 1, w, 1);
+			IconHelper.renderIcon(ThemeProperties.WIDGET_BORDER.get(ClientQuestFile.INSTANCE), graphics, x, y + h - 1, w, 1);
 
 			boolean canEdit = chapterPanel.questScreen.file.canEdit();
 
-			(chapterPanel.isPinned() ? ThemeProperties.PIN_ICON_ON : ThemeProperties.PIN_ICON_OFF).get().draw(graphics, x + w - 16, y + 3, 12, 12);
+			IconHelper.renderIcon((chapterPanel.isPinned() ? ThemeProperties.PIN_ICON_ON : ThemeProperties.PIN_ICON_OFF).get(), graphics, x + w - 16, y + 3, 12, 12);
 
 			if (canEdit) {
-				ThemeProperties.ADD_ICON.get().draw(graphics, x + w - 31, y + 3, 12, 12);
+				IconHelper.renderIcon(ThemeProperties.ADD_ICON.get(), graphics, x + w - 31, y + 3, 12, 12);
 			}
 		}
 
@@ -365,24 +367,24 @@ public class ChapterPanel extends Panel {
 
 		@Override
 		public void draw(GuiGraphics graphics, Theme theme, int x, int y, int w, int h) {
-			GuiHelper.setupDrawing();
+//			GuiHelper.setupDrawing();
 
 			if (xlateWarning) {
-				Color4I.RED.withAlpha(40).draw(graphics, x, y, w, h);
+				IconHelper.renderIcon(Color4I.RED.withAlpha(40), graphics, x, y, w, h);
 			}
 			if (isMouseOver()) {
-				Color4I.WHITE.withAlpha(40).draw(graphics, x + 1, y, w - 2, h);
+				IconHelper.renderIcon(Color4I.WHITE.withAlpha(40), graphics, x + 1, y, w - 2, h);
 			}
 
 			ChatFormatting f = isMouseOver() ? ChatFormatting.WHITE : ChatFormatting.GRAY;
 
-			(group.isGuiCollapsed() ? ARROW_COLLAPSED : ARROW_EXPANDED).withColor(Color4I.getChatFormattingColor(f)).draw(graphics, x + 3, y + 5, 8, 8);
+			IconHelper.renderIcon((group.isGuiCollapsed() ? ARROW_COLLAPSED : ARROW_EXPANDED).withColor(Color4I.getChatFormattingColor(f)), graphics, x + 3, y + 5, 8, 8);
 			theme.drawString(graphics, Component.literal("").append(title).withStyle(f), x + 15, y + 5);
 
 			boolean canEdit = chapterPanel.questScreen.file.canEdit();
 
 			if (canEdit) {
-				ThemeProperties.ADD_ICON.get().draw(graphics, x + w - 14, y + 3, 12, 12);
+				IconHelper.renderIcon(ThemeProperties.ADD_ICON.get(), graphics, x + w - 14, y + 3, 12, 12);
 			}
 		}
 
@@ -462,29 +464,29 @@ public class ChapterPanel extends Panel {
 //			GuiHelper.setupDrawing();
 
 			if (xlateWarningTitle || xlateWarningSubtitle) {
-				Color4I.RED.withAlpha(40).draw(graphics, x, y, w, h);
+				IconHelper.renderIcon(Color4I.RED.withAlpha(40), graphics, x, y, w, h);
 			}
 			if (chapterPanel.questScreen.selectedChapter != null && chapter.id == chapterPanel.questScreen.selectedChapter.id) {
 				// current chapter highlighting
 				GuiHelper.drawGradientRect(graphics, x + 1, y, w - 2, h, ThemeProperties.SELECTED_HILITE_1.get(), ThemeProperties.SELECTED_HILITE_2.get());
 				GuiHelper.drawHollowRect(graphics, x + 1, y, w - 2, h, Color4I.GRAY.withAlpha(192), false);
 			} else if (isMouseOver()) {
-				Color4I.WHITE.withAlpha(40).draw(graphics, x + 1, y, w - 2, h);
+				IconHelper.renderIcon(Color4I.WHITE.withAlpha(40), graphics, x + 1, y, w - 2, h);
 			}
 
 			Color4I c = chapter.getProgressColor(chapterPanel.questScreen.file.selfTeamData, !isMouseOver());
 			int xOff = chapter.getGroup().isDefaultGroup() ? 0 : 7;
 
-			icon.draw(graphics, x + 2 + xOff, y + 1, 12, 12);
+			IconHelper.renderIcon(icon, graphics, x + 2 + xOff, y + 1, 12, 12);
 			MutableComponent text = Component.literal("").append(title).withStyle(Style.EMPTY.withColor(TextColor.fromRgb(c.rgb())));
 			theme.drawString(graphics, text, x + 16 + xOff, y + 3);
 
 //			GuiHelper.setupDrawing();
 
 			if (!chapter.hasAnyVisibleChildren()) {
-				ThemeProperties.CLOSE_ICON.get().draw(graphics, x + w - 12, y + 3, 8, 8);
+				IconHelper.renderIcon(ThemeProperties.CLOSE_ICON.get(), graphics, x + w - 12, y + 3, 8, 8);
 			} else if (chapterPanel.questScreen.file.selfTeamData.hasUnclaimedRewards(Minecraft.getInstance().player.getUUID(), chapter)) {
-				ThemeProperties.ALERT_ICON.get().draw(graphics, x + w - 12, y + 3, 8, 8);
+				IconHelper.renderIcon(ThemeProperties.ALERT_ICON.get(), graphics, x + w - 12, y + 3, 8, 8);
 			}
 		}
 

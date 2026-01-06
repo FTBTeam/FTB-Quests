@@ -70,7 +70,7 @@ public class AdvancementReward extends Reward {
 			var advancements = KnownServerRegistries.client.advancements();
 			config.addEnum("advancement", advancement, v -> advancement = v,
 					NameMap.of(advancements.keySet().iterator().next(), advancements.keySet().toArray(new Identifier[0]))
-							.icon(resourceLocation -> ItemIcon.getItemIcon(advancements.get(resourceLocation).icon()))
+							.icon(resourceLocation -> ItemIcon.ofItemStack(advancements.get(resourceLocation).icon()))
 							.name(resourceLocation -> advancements.get(resourceLocation).name())
 							.create()).setNameKey("ftbquests.reward.ftbquests.advancement");
 		} else {
@@ -117,7 +117,7 @@ public class AdvancementReward extends Reward {
 				KnownServerRegistries.client.advancements().get(advancement);
 
 		if (info != null && !info.icon().isEmpty()) {
-			return ItemIcon.getItemIcon(info.icon());
+			return ItemIcon.ofItemStack(info.icon());
 		}
 
 		return super.getAltIcon();

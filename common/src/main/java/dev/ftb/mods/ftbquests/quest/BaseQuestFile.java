@@ -504,7 +504,7 @@ public abstract class BaseQuestFile extends QuestObject implements QuestFile {
 			SNBTCompoundTag fileNBT = new SNBTCompoundTag();
 			fileNBT.putInt("version", VERSION);
 			writeData(fileNBT, provider);
-			SNBT.write(folder.resolve("data.snbt"), fileNBT);
+			SNBT.tryWrite(folder.resolve("data.snbt"), fileNBT);
 
 			for (ChapterGroup group : chapterGroups) {
 				for (int ci = 0; ci < group.getChapters().size(); ci++) {
@@ -543,7 +543,7 @@ public abstract class BaseQuestFile extends QuestObject implements QuestFile {
 					}
 					chapterNBT.put("quest_links", linkList);
 
-					SNBT.write(folder.resolve("chapters/" + chapter.getFilename() + ".snbt"), chapterNBT);
+					SNBT.tryWrite(folder.resolve("chapters/" + chapter.getFilename() + ".snbt"), chapterNBT);
 				}
 			}
 
@@ -553,7 +553,7 @@ public abstract class BaseQuestFile extends QuestObject implements QuestFile {
 				tableNBT.putString("id", table.getCodeString());
 				tableNBT.putInt("order_index", ri);
 				table.writeData(tableNBT, provider);
-				SNBT.write(folder.resolve("reward_tables/" + table.getFilename() + ".snbt"), tableNBT);
+				SNBT.tryWrite(folder.resolve("reward_tables/" + table.getFilename() + ".snbt"), tableNBT);
 			}
 
 			ListTag chapterGroupTag = new ListTag();
@@ -570,8 +570,10 @@ public abstract class BaseQuestFile extends QuestObject implements QuestFile {
 
 			SNBTCompoundTag groupNBT = new SNBTCompoundTag();
 			groupNBT.put("chapter_groups", chapterGroupTag);
-			SNBT.write(folder.resolve("chapter_groups.snbt"), groupNBT);
-		} finally {
+			SNBT.tryWrite(folder.resolve("chapter_groups.snbt"), groupNBT);
+		} catch (IOException e) {
+			LOGGER.error("Failed to save quest file.", e);
+        } finally {
 			SNBT.setShouldSortKeysOnWrite(prev);
 		}
 	}

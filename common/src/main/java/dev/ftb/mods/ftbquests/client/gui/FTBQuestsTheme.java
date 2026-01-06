@@ -1,5 +1,6 @@
 package dev.ftb.mods.ftbquests.client.gui;
 
+import dev.ftb.mods.ftblibrary.client.icon.IconHelper;
 import dev.ftb.mods.ftblibrary.icon.Color4I;
 import dev.ftb.mods.ftblibrary.ui.Theme;
 import dev.ftb.mods.ftblibrary.ui.WidgetType;
@@ -22,47 +23,47 @@ public class FTBQuestsTheme extends Theme {
 
 	@Override
 	public void drawGui(GuiGraphics graphics, int x, int y, int w, int h, WidgetType type) {
-		ThemeProperties.BACKGROUND.get().draw(graphics, x, y, w, h);
+		IconHelper.renderIcon(ThemeProperties.BACKGROUND.get(), graphics, x, y, w, h);
 	}
 
 	@Override
 	public void drawButton(GuiGraphics graphics, int x, int y, int w, int h, WidgetType type) {
 		if (type == WidgetType.DISABLED) {
-			ThemeProperties.DISABLED_BUTTON.get().draw(graphics, x, y, w, h);
+			IconHelper.renderIcon(ThemeProperties.DISABLED_BUTTON.get(), graphics, x, y, w, h);
 		} else if (type == WidgetType.MOUSE_OVER) {
-			ThemeProperties.HOVER_BUTTON.get().draw(graphics, x, y, w, h);
+			IconHelper.renderIcon(ThemeProperties.HOVER_BUTTON.get(), graphics, x, y, w, h);
 		} else {
-			ThemeProperties.BUTTON.get().draw(graphics, x, y, w, h);
+			IconHelper.renderIcon(ThemeProperties.BUTTON.get(), graphics, x, y, w, h);
 		}
 	}
 
 	@Override
 	public void drawContainerSlot(GuiGraphics graphics, int x, int y, int w, int h) {
-		ThemeProperties.CONTAINER_SLOT.get().draw(graphics, x, y, w, h);
+		IconHelper.renderIcon(ThemeProperties.CONTAINER_SLOT.get(), graphics, x, y, w, h);
 	}
 
 	@Override
 	public void drawPanelBackground(GuiGraphics graphics, int x, int y, int w, int h) {
-		ThemeProperties.PANEL.get().draw(graphics, x, y, w, h);
+		IconHelper.renderIcon(ThemeProperties.PANEL.get(), graphics, x, y, w, h);
 	}
 
 	@Override
 	public void drawContextMenuBackground(GuiGraphics graphics, int x, int y, int w, int h) {
-		ThemeProperties.CONTEXT_MENU.get().draw(graphics, x, y, w, h);
+		IconHelper.renderIcon(ThemeProperties.CONTEXT_MENU.get(), graphics, x, y, w, h);
 	}
 
 	@Override
 	public void drawScrollBarBackground(GuiGraphics graphics, int x, int y, int w, int h, WidgetType type) {
-		ThemeProperties.SCROLL_BAR_BACKGROUND.get().draw(graphics, x, y, w, h);
+		IconHelper.renderIcon(ThemeProperties.SCROLL_BAR_BACKGROUND.get(), graphics, x, y, w, h);
 	}
 
 	@Override
 	public void drawScrollBar(GuiGraphics graphics, int x, int y, int w, int h, WidgetType type, boolean vertical) {
-		ThemeProperties.SCROLL_BAR.get().draw(graphics, x, y, w, h);
+		IconHelper.renderIcon(ThemeProperties.SCROLL_BAR.get(), graphics, x, y, w, h);
 	}
 
 	@Override
 	public void drawTextBox(GuiGraphics graphics, int x, int y, int w, int h) {
-		ThemeProperties.TEXT_BOX.get().draw(graphics, x, y, w, h);
+		IconHelper.renderIcon(ThemeProperties.TEXT_BOX.get(), graphics, x, y, w, h);
 	}
 }

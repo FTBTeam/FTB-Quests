@@ -2,8 +2,8 @@ package dev.ftb.mods.ftbquests.quest.task;
 
 import dev.ftb.mods.ftblibrary.config.ConfigGroup;
 import dev.ftb.mods.ftblibrary.config.Tristate;
+import dev.ftb.mods.ftblibrary.icon.AnimatedIcon;
 import dev.ftb.mods.ftblibrary.icon.Icon;
-import dev.ftb.mods.ftblibrary.icon.IconAnimation;
 import dev.ftb.mods.ftblibrary.icon.ItemIcon;
 import dev.ftb.mods.ftblibrary.math.Bits;
 import dev.ftb.mods.ftblibrary.ui.Button;
@@ -162,13 +162,13 @@ public class ItemTask extends Task implements Predicate<ItemStack> {
 
 	@Override
 	@Environment(EnvType.CLIENT)
-	public Icon getAltIcon() {
-		List<Icon> icons = new ArrayList<>();
+	public Icon<?> getAltIcon() {
+		List<Icon<?>> icons = new ArrayList<>();
 
 		for (ItemStack stack : getValidDisplayItems()) {
 			ItemStack copy = stack.copy();
 			copy.setCount(1);
-			Icon icon = ItemIcon.getItemIcon(copy);
+			Icon<?> icon = ItemIcon.ofItemStack(copy);
 
 			if (!icon.isEmpty()) {
 				icons.add(icon);
@@ -176,10 +176,10 @@ public class ItemTask extends Task implements Predicate<ItemStack> {
 		}
 
 		if (icons.isEmpty()) {
-			return ItemIcon.getItemIcon(ModItems.MISSING_ITEM.get());
+			return ItemIcon.ofItem(ModItems.MISSING_ITEM.get());
 		}
 
-		return IconAnimation.fromList(icons, false);
+		return AnimatedIcon.fromList(icons, false);
 	}
 
 	@Override
@@ -226,9 +226,9 @@ public class ItemTask extends Task implements Predicate<ItemStack> {
 		List<ItemStack> validItems = getValidDisplayItems();
 
 		if (!consumesResources() && validItems.size() == 1 && FTBQuests.getRecipeModHelper().isRecipeModAvailable()) {
-			FTBQuests.getRecipeModHelper().showRecipes(validItems.get(0));
+			FTBQuests.getRecipeModHelper().showRecipes(validItems.getFirst());
 		} else if (validItems.isEmpty()) {
-			Minecraft.getInstance().getToastManager().addToast(new CustomToast(Component.literal("No valid items!"), ItemIcon.getItemIcon(ModItems.MISSING_ITEM.get()), Component.literal("Report this bug to modpack author!")));
+			Minecraft.getInstance().getToastManager().addToast(new CustomToast(Component.literal("No valid items!"), ItemIcon.ofItem(ModItems.MISSING_ITEM.get()), Component.literal("Report this bug to modpack author!")));
 		} else {
 			new ValidItemsScreen(this, validItems, canClick).openGui();
 		}

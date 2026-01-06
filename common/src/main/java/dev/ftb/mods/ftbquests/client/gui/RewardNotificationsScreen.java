@@ -1,5 +1,6 @@
 package dev.ftb.mods.ftbquests.client.gui;
 
+import dev.ftb.mods.ftblibrary.client.icon.IconHelper;
 import dev.ftb.mods.ftblibrary.icon.Color4I;
 import dev.ftb.mods.ftblibrary.ui.*;
 import dev.ftb.mods.ftblibrary.ui.input.MouseButton;
@@ -122,8 +123,8 @@ public class RewardNotificationsScreen extends BaseScreen implements IRewardList
 		@Override
 		public void draw(GuiGraphics graphics, Theme theme, int x, int y, int w, int h) {
 //			GuiHelper.setupDrawing();
-			QuestShape.get("rsquare").getOutline().draw(graphics, x, y, w, h);
-			key.getIcon().draw(graphics, x + 3, y + 3, 16, 16);
+			IconHelper.renderIcon(QuestShape.get("rsquare").getOutline(), graphics, x, y, w, h);
+			IconHelper.renderIcon(key.getIcon(), graphics, x + 3, y + 3, 16, 16);
 
 			int count = rewards.getInt(key);
 

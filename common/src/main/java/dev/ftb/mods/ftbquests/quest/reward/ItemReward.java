@@ -190,7 +190,7 @@ public class ItemReward extends Reward {
 	@Override
 	@Environment(EnvType.CLIENT)
 	public Icon getAltIcon() {
-		return item.isEmpty() ? super.getAltIcon() : ItemIcon.getItemIcon(ItemStackHooks.copyWithCount(item, 1));
+		return item.isEmpty() ? super.getAltIcon() : ItemIcon.ofItemStack(ItemStackHooks.copyWithCount(item, 1));
 	}
 
 	@Override

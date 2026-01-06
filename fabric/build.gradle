@@ -11,6 +11,10 @@ architectury {
 	fabric()
 }
 
+loom {
+	accessWidenerPath = project(":common").file("src/main/resources/ftbquests.accesswidener")
+}
+
 configurations {
 	common
 	shadowCommon // Don't use shadow from the shadow plugin because we don't want IDEA to index this.

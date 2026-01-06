@@ -78,8 +78,11 @@ public class TranslationManager {
             if (force || table.isSaveNeeded()) {
                 boolean prevSort = SNBT.setShouldSortKeysOnWrite(true);
                 Path savePath = langFolder.resolve(locale + ".snbt");
-                if (!SNBT.write(savePath, table.saveToNBT())) {
+                try {
+                    SNBT.tryWrite(savePath, table.saveToNBT());
+                } catch (IOException e) {
                     FTBQuests.LOGGER.error("can't write lang file {}", savePath);
+                    throw new RuntimeException(e);
                 }
                 table.setSaveNeeded(false);
                 SNBT.setShouldSortKeysOnWrite(prevSort);

@@ -2,6 +2,7 @@ package dev.ftb.mods.ftbquests.client.gui.quests;
 
 import com.mojang.datafixers.util.Pair;
 import dev.architectury.networking.NetworkManager;
+import dev.ftb.mods.ftblibrary.client.icon.IconHelper;
 import dev.ftb.mods.ftblibrary.config.ConfigGroup;
 import dev.ftb.mods.ftblibrary.config.ConfigValue;
 import dev.ftb.mods.ftblibrary.config.ConfigWithVariants;
@@ -340,7 +341,7 @@ public class QuestScreen extends BaseScreen {
 
 					@Override
 					public void drawIcon(GuiGraphics graphics, Theme theme, int x, int y, int w, int h) {
-						value.getIcon().draw(graphics, x, y, w, h);
+						IconHelper.renderIcon(value.getIcon(), graphics, x, y, w, h);
 					}
 				});
 			}
@@ -654,12 +655,12 @@ public class QuestScreen extends BaseScreen {
 		Color4I backgroundColor = ThemeProperties.WIDGET_BACKGROUND.get(selectedChapter);
 
 		if (!chapterPanel.expanded) {
-			borderColor.draw(graphics, x + pw - 1, y + 1, 1, h - 2);
-			backgroundColor.draw(graphics, x + 1, y + 1, pw - 2, h - 2);
+			IconHelper.renderIcon(borderColor, graphics, x + pw - 1, y + 1, 1, h - 2);
+			IconHelper.renderIcon(backgroundColor, graphics, x + 1, y + 1, pw - 2, h - 2);
 		}
 
-		borderColor.draw(graphics, x + w - pw, y + 1, 1, h - 2);
-		backgroundColor.draw(graphics, x + w - pw + 1, y + 1, pw - 2, h - 2);
+		IconHelper.renderIcon(borderColor, graphics, x + w - pw, y + 1, 1, h - 2);
+		IconHelper.renderIcon(backgroundColor, graphics, x + w - pw + 1, y + 1, pw - 2, h - 2);
 
 		if (grabbed != null) {
 			int mx = getMouseX();
@@ -686,7 +687,7 @@ public class QuestScreen extends BaseScreen {
 				int boxW = Math.abs(mx - prevMouseX);
 				int boxH = Math.abs(my - prevMouseY);
 				GuiHelper.drawHollowRect(graphics, boxX, boxY, boxW, boxH, Color4I.DARK_GRAY, false);
-				Color4I.DARK_GRAY.withAlpha(40).draw(graphics, boxX, boxY, boxW, boxH);
+				IconHelper.renderIcon(Color4I.DARK_GRAY.withAlpha(40), graphics, boxX, boxY, boxW, boxH);
 			}
 		}
 	}

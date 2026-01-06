@@ -1,5 +1,6 @@
 package dev.ftb.mods.ftbquests.quest;
 
+import dev.ftb.mods.ftblibrary.client.icon.IconHelper;
 import dev.ftb.mods.ftblibrary.icon.Color4I;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -57,6 +58,6 @@ public interface Movable {
 
 	@Environment(EnvType.CLIENT)
 	default void drawMoved(GuiGraphics graphics) {
-		QuestShape.get(getShape()).getShape().withColor(Color4I.WHITE.withAlpha(30)).draw(graphics, 0, 0, 1, 1);
+		IconHelper.renderIcon(QuestShape.get(getShape()).getShape().withColor(Color4I.WHITE.withAlpha(30)), graphics, 0, 0, 1, 1);
 	}
 }

@@ -3,6 +3,7 @@ package dev.ftb.mods.ftbquests.client.gui.quests;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import dev.architectury.networking.NetworkManager;
+import dev.ftb.mods.ftblibrary.client.icon.IconHelper;
 import dev.ftb.mods.ftblibrary.icon.Color4I;
 import dev.ftb.mods.ftblibrary.icon.Icons;
 import dev.ftb.mods.ftblibrary.icon.ItemIcon;
@@ -220,7 +221,7 @@ public class TaskButton extends Button {
 			poseStack.pushMatrix();
 			poseStack.translate(0, 0);
 //			RenderSystem.enableBlend();
-			ThemeProperties.CHECK_ICON.get().draw(graphics, x + w - 9, y + 1, 8, 8);
+			IconHelper.renderIcon(ThemeProperties.CHECK_ICON.get(), graphics, x + w - 9, y + 1, 8, 8);
 			poseStack.popMatrix();
 		} else {
 			MutableComponent buttonText = task.getButtonText();
@@ -296,9 +297,9 @@ public class TaskButton extends Button {
 			@Override
 			public void drawBackground(GuiGraphics graphics, Theme theme, int x, int y, int w, int h) {
 				if (isMouseOver) {
-					Color4I.WHITE.withAlpha(30).draw(graphics, x, y, w, h);
+					IconHelper.renderIcon(Color4I.WHITE.withAlpha(30), graphics, x, y, w, h);
 				}
-				Color4I.GRAY.withAlpha(40).draw(graphics, x, y + h, w, 1);
+				IconHelper.renderIcon(Color4I.GRAY.withAlpha(40), graphics, x, y + h, w, 1);
 			}
 		}
 	}

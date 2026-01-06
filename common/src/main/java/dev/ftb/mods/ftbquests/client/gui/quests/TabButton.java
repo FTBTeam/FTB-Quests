@@ -1,5 +1,6 @@
 package dev.ftb.mods.ftbquests.client.gui.quests;
 
+import dev.ftb.mods.ftblibrary.client.icon.IconHelper;
 import dev.ftb.mods.ftblibrary.icon.Color4I;
 import dev.ftb.mods.ftblibrary.icon.Icon;
 import dev.ftb.mods.ftblibrary.ui.Button;
@@ -21,11 +22,11 @@ public abstract class TabButton extends Button {
 
 	@Override
 	public void draw(GuiGraphics graphics, Theme theme, int x, int y, int w, int h) {
-		icon.draw(graphics, x + (w - 16) / 2, y + (h - 16) / 2, 16, 16);
+		IconHelper.renderIcon(icon, graphics, x + (w - 16) / 2, y + (h - 16) / 2, 16, 16);
 
 		if (isMouseOver()) {
 			Color4I backgroundColor = ThemeProperties.WIDGET_BACKGROUND.get(questScreen.selectedChapter);
-			backgroundColor.draw(graphics, x + 1, y, w - 2, h);
+			IconHelper.renderIcon(backgroundColor, graphics, x + 1, y, w - 2, h);
 		}
 	}
 }

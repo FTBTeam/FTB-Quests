@@ -2,6 +2,7 @@ package dev.ftb.mods.ftbquests.quest;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import dev.architectury.networking.NetworkManager;
+import dev.ftb.mods.ftblibrary.client.icon.IconHelper;
 import dev.ftb.mods.ftblibrary.config.ConfigGroup;
 import dev.ftb.mods.ftblibrary.config.ImageResourceConfig;
 import dev.ftb.mods.ftblibrary.config.StringConfig;
@@ -57,7 +58,7 @@ public final class ChapterImage implements Movable {
 	private double x, y;
 	private double width, height;
 	private double rotation;
-	private Icon image;
+	private Icon<?> image;
 	private Color4I color;
 	private int alpha;
 	private final List<String> hover;
@@ -299,11 +300,11 @@ public final class ChapterImage implements Movable {
 		poseStack.pushMatrix();
 
 		if (alignToCorner) {
-			image.withColor(Color4I.WHITE.withAlpha(50)).draw(graphics, 0, 0, 1, 1);
+			IconHelper.renderIcon(image.withColor(Color4I.WHITE.withAlpha(50)), graphics, 0, 0, 1, 1);
 		} else {
 			poseStack.translate(0.5f, 0.5f);
 			poseStack.scale(0.5F, 0.5F);
-			image.withColor(Color4I.WHITE.withAlpha(50)).draw(graphics, -1, -1, 2, 2);
+			IconHelper.renderIcon(image.withColor(Color4I.WHITE.withAlpha(50)), graphics, -1, -1, 2, 2);
 		}
 
 //		QuestShape.get(getShape()).getOutline()

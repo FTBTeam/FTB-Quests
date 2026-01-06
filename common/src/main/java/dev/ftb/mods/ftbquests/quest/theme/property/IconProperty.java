@@ -3,10 +3,10 @@ package dev.ftb.mods.ftbquests.quest.theme.property;
 import dev.ftb.mods.ftblibrary.icon.Color4I;
 import dev.ftb.mods.ftblibrary.icon.Icon;
 
-public class IconProperty extends ThemeProperty<Icon> {
-	public final Icon builtin;
+public class IconProperty extends ThemeProperty<Icon<?>> {
+	public final Icon<?> builtin;
 
-	public IconProperty(String n, Icon b) {
+	public IconProperty(String n, Icon<?> b) {
 		super(n, Color4I.empty());
 		builtin = b;
 	}
@@ -16,7 +16,7 @@ public class IconProperty extends ThemeProperty<Icon> {
 	}
 
 	@Override
-	public Icon parse(String string) {
+	public Icon<?> parse(String string) {
 		if (string.equals("builtin")) {
 			return builtin;
 		}

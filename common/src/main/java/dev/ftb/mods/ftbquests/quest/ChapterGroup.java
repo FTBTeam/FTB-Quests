@@ -1,8 +1,8 @@
 package dev.ftb.mods.ftbquests.quest;
 
 import dev.ftb.mods.ftblibrary.config.ConfigGroup;
+import dev.ftb.mods.ftblibrary.icon.AnimatedIcon;
 import dev.ftb.mods.ftblibrary.icon.Icon;
-import dev.ftb.mods.ftblibrary.icon.IconAnimation;
 import dev.ftb.mods.ftblibrary.util.client.ClientUtils;
 import dev.ftb.mods.ftbquests.client.gui.quests.QuestScreen;
 import dev.ftb.mods.ftbquests.events.QuestProgressEventData;
@@ -123,14 +123,14 @@ public class ChapterGroup extends QuestObject {
 
 	@Override
 	@Environment(EnvType.CLIENT)
-	public Icon getAltIcon() {
-		List<Icon> list = new ArrayList<>();
+	public Icon<?> getAltIcon() {
+		List<Icon<?>> list = new ArrayList<>();
 
 		for (Chapter chapter : chapters) {
 			list.add(chapter.getIcon());
 		}
 
-		return IconAnimation.fromList(list, false);
+		return AnimatedIcon.fromList(list, false);
 	}
 
 	public boolean isVisible(TeamData data) {

@@ -3,8 +3,8 @@ package dev.ftb.mods.ftbquests.quest.task;
 import dev.architectury.registry.registries.RegistrarManager;
 import dev.ftb.mods.ftblibrary.config.ConfigGroup;
 import dev.ftb.mods.ftblibrary.config.NameMap;
+import dev.ftb.mods.ftblibrary.icon.AnimatedIcon;
 import dev.ftb.mods.ftblibrary.icon.Icon;
-import dev.ftb.mods.ftblibrary.icon.IconAnimation;
 import dev.ftb.mods.ftblibrary.icon.Icons;
 import dev.ftb.mods.ftblibrary.icon.ItemIcon;
 import dev.ftb.mods.ftblibrary.ui.Button;
@@ -148,7 +148,7 @@ public class KillTask extends Task {
 					if (stack != null) item = stack.getItem();
 				}
 			}
-			return ItemIcon.getItemIcon(item != null ? item : Items.SPAWNER);
+			return ItemIcon.ofItem(item != null ? item : Items.SPAWNER);
 		});
 	}
 
@@ -176,19 +176,19 @@ public class KillTask extends Task {
 
 	@Override
 	@Environment(EnvType.CLIENT)
-	public Icon getAltIcon() {
+	public Icon<?> getAltIcon() {
 		if (entityTypeTag == null) {
 			return getIconForEntityType(entityTypeId);
 		}
 
-		List<Icon> icons = new ArrayList<>();
+		List<Icon<?>> icons = new ArrayList<>();
 		BuiltInRegistries.ENTITY_TYPE.get(entityTypeTag)
 				.ifPresent(set ->
 						set.forEach(holder ->
 								holder.unwrapKey().map(k -> icons.add(getIconForEntityType(k.identifier())))
 						)
 				);
-		return icons.isEmpty() ? Icons.BARRIER : IconAnimation.fromList(icons, false);
+		return icons.isEmpty() ? Icons.BARRIER : AnimatedIcon.fromList(icons, false);
 	}
 
 	@Override

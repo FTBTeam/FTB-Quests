@@ -2,8 +2,8 @@ package dev.ftb.mods.ftbquests.quest.loot;
 
 import dev.architectury.networking.NetworkManager;
 import dev.ftb.mods.ftblibrary.config.ConfigGroup;
+import dev.ftb.mods.ftblibrary.icon.AnimatedIcon;
 import dev.ftb.mods.ftblibrary.icon.Icon;
-import dev.ftb.mods.ftblibrary.icon.IconAnimation;
 import dev.ftb.mods.ftblibrary.icon.Icons;
 import dev.ftb.mods.ftblibrary.icon.ItemIcon;
 import dev.ftb.mods.ftblibrary.math.Bits;
@@ -34,7 +34,6 @@ import net.minecraft.util.Util;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
-import net.minecraft.nbt.Tag;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
@@ -428,17 +427,17 @@ public class RewardTable extends QuestObjectBase {
 
 	@Override
 	@Environment(EnvType.CLIENT)
-	public Icon getAltIcon() {
+	public Icon<?> getAltIcon() {
 		if (lootCrate != null) {
-			return ItemIcon.getItemIcon(lootCrate.createStack());
+			return ItemIcon.ofItemStack(lootCrate.createStack());
 		}
 
 		if (weightedRewards.isEmpty()) {
 			return Icons.DICE;
 		}
 
-		List<Icon> icons = weightedRewards.stream().map(reward -> reward.getReward().getIcon()).collect(Collectors.toList());
-		return IconAnimation.fromList(icons, false);
+		List<Icon<?>> icons = weightedRewards.stream().map(reward -> reward.getReward().getIcon()).collect(Collectors.toList());
+		return AnimatedIcon.fromList(icons, false);
 	}
 
 	@Override

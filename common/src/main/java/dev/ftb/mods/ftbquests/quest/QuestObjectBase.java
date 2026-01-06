@@ -371,7 +371,7 @@ public abstract class QuestObjectBase implements Comparable<QuestObjectBase> {
 	public abstract Component getAltTitle();
 
 	@Environment(EnvType.CLIENT)
-	public abstract Icon getAltIcon();
+	public abstract Icon<?> getAltIcon();
 
 	@Environment(EnvType.CLIENT)
 	public final Component getTitle() {
@@ -394,7 +394,7 @@ public abstract class QuestObjectBase implements Comparable<QuestObjectBase> {
 	}
 
 	@Environment(EnvType.CLIENT)
-	public final Icon getIcon() {
+	public final Icon<?> getIcon() {
 		if (cachedIcon == null) {
 			if (!rawIcon.isEmpty()) {
 				cachedIcon = CustomIconItem.getIcon(rawIcon);

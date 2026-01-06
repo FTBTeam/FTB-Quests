@@ -89,7 +89,7 @@ public class ConfigIconItemStack extends ItemStackConfig {
 	private List<ContextMenuItem> makeMenu(ConfigCallback callback) {
 		return List.of(
 				new ContextMenuItem(Component.translatable("ftbquests.gui.icon_menu.item"),
-						ItemIcon.getItemIcon(Items.DIAMOND),b -> new SelectItemStackScreen(this, callback).openGui()),
+						ItemIcon.ofItem(Items.DIAMOND),b -> new SelectItemStackScreen(this, callback).openGui()),
 				new ContextMenuItem(Component.translatable("ftbquests.gui.icon_menu.image"),
 						Icons.ART, b -> openImageSelector(callback)),
 				new ContextMenuItem(Component.translatable("ftbquests.gui.icon_menu.entity"),

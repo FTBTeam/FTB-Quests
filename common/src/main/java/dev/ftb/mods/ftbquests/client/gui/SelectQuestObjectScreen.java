@@ -1,5 +1,6 @@
 package dev.ftb.mods.ftbquests.client.gui;
 
+import dev.ftb.mods.ftblibrary.client.icon.IconHelper;
 import dev.ftb.mods.ftblibrary.config.ConfigCallback;
 import dev.ftb.mods.ftblibrary.icon.Color4I;
 import dev.ftb.mods.ftblibrary.ui.*;
@@ -180,9 +181,9 @@ public class SelectQuestObjectScreen<T extends QuestObjectBase> extends Abstract
 		@Override
 		public void drawBackground(GuiGraphics graphics, Theme theme, int x, int y, int w, int h) {
 			if (isMouseOver) {
-				Color4I.WHITE.withAlpha(30).draw(graphics, x, y, w, h);
+				IconHelper.renderIcon(Color4I.WHITE.withAlpha(30), graphics, x, y, w, h);
 			}
-			Color4I.GRAY.withAlpha(40).draw(graphics, x, y + h, w, 1);
+			IconHelper.renderIcon(Color4I.GRAY.withAlpha(40), graphics, x, y + h, w, 1);
 		}
 
 		@Override

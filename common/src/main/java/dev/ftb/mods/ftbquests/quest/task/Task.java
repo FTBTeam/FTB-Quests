@@ -1,6 +1,7 @@
 package dev.ftb.mods.ftbquests.quest.task;
 
 import dev.architectury.networking.NetworkManager;
+import dev.ftb.mods.ftblibrary.client.icon.IconHelper;
 import dev.ftb.mods.ftblibrary.config.ConfigGroup;
 import dev.ftb.mods.ftblibrary.icon.Icon;
 import dev.ftb.mods.ftblibrary.ui.Button;
@@ -206,7 +207,7 @@ public abstract class Task extends QuestObject {
 
 	@Environment(EnvType.CLIENT)
 	public void drawGUI(TeamData teamData, GuiGraphics graphics, int x, int y, int w, int h) {
-		getIcon().draw(graphics, x, y, w, h);
+		IconHelper.renderIcon(getIcon(), graphics, x, y, w, h);
 	}
 
 	public boolean canInsertItem() {

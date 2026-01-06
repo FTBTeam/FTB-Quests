@@ -72,10 +72,10 @@ public class CustomIconItem extends Item {
         consumer.accept(Component.literal(icon).withStyle(ChatFormatting.DARK_GRAY));
     }
 
-	public static Icon getIcon(ItemStack stack) {
+	public static Icon<?> getIcon(ItemStack stack) {
 		return getCustomComponent(stack)
 				.map(res -> res.map(Icon::getIcon, EntityIconLoader::getIcon))
-				.orElse(stack.getItem() instanceof CustomIconItem ? Icon.getIcon(FALLBACK_ICON) : ItemIcon.getItemIcon(stack));
+				.orElse(stack.getItem() instanceof CustomIconItem ? Icon.getIcon(FALLBACK_ICON) : ItemIcon.ofItemStack(stack));
 	}
 
 	public static void setIcon(ItemStack stack, @Nullable Identifier texture) {

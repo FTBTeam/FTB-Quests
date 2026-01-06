@@ -3,8 +3,8 @@ package dev.ftb.mods.ftbquests.quest;
 import com.mojang.datafixers.util.Pair;
 import dev.architectury.networking.NetworkManager;
 import dev.ftb.mods.ftblibrary.config.*;
+import dev.ftb.mods.ftblibrary.icon.AnimatedIcon;
 import dev.ftb.mods.ftblibrary.icon.Icon;
-import dev.ftb.mods.ftblibrary.icon.IconAnimation;
 import dev.ftb.mods.ftblibrary.math.Bits;
 import dev.ftb.mods.ftblibrary.snbt.SNBTCompoundTag;
 import dev.ftb.mods.ftblibrary.ui.Widget;
@@ -596,14 +596,14 @@ public final class Quest extends QuestObject implements Movable, Excludable {
 
 	@Override
 	@Environment(EnvType.CLIENT)
-	public Icon getAltIcon() {
-		List<Icon> list = new ArrayList<>();
+	public Icon<?> getAltIcon() {
+		List<Icon<?>> list = new ArrayList<>();
 
 		for (Task task : tasks) {
 			list.add(task.getIcon());
 		}
 
-		return IconAnimation.fromList(list, false);
+		return AnimatedIcon.fromList(list, false);
 	}
 
 	@Override

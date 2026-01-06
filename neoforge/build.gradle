@@ -2,6 +2,11 @@ plugins {
 	id "com.github.johnrengelman.shadow" version "7.1.0"
 }
 
+loom {
+	accessWidenerPath = project(":common").file("src/main/resources/ftbquests.accesswidener")
+}
+
+
 architectury {
 	platformSetupLoomIde()
 	neoForge()
@@ -64,6 +69,7 @@ remapJar {
 	dependsOn shadowJar
 	archiveBaseName.set "${rootProject.archives_base_name}-${project.name}"
 	archiveClassifier.set null
+	atAccessWideners.add('ftbquests.accesswidener')
 }
 
 jar {

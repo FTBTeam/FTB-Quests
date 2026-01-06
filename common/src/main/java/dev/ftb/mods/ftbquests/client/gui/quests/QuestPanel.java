@@ -4,6 +4,7 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.*;
 import com.mojang.math.Axis;
 import dev.architectury.networking.NetworkManager;
+import dev.ftb.mods.ftblibrary.client.icon.IconHelper;
 import dev.ftb.mods.ftblibrary.config.ImageResourceConfig;
 import dev.ftb.mods.ftblibrary.config.ui.resource.SelectImageResourceScreen;
 import dev.ftb.mods.ftblibrary.icon.Color4I;
@@ -165,7 +166,7 @@ public class QuestPanel extends Panel {
 
 		Tesselator tesselator = Tesselator.getInstance();
 
-		Icon icon = ThemeProperties.DEPENDENCY_LINE_TEXTURE.get(questScreen.selectedChapter);
+		Icon<?> icon = ThemeProperties.DEPENDENCY_LINE_TEXTURE.get(questScreen.selectedChapter);
 		if (icon instanceof ImageIcon img) {
 			img.bindTexture();
 		} else {
@@ -238,12 +239,12 @@ public class QuestPanel extends Panel {
 
 		}
 		toOutline.forEach(qb -> {
-			QuestShape.get(qb.quest.getShape()).getShape()
-					.withColor(Color4I.BLACK.withAlpha(30))
-					.draw(graphics, qb.getX(), qb.getY(), qb.width, qb.height);
-			QuestShape.get(qb.quest.getShape()).getOutline()
-					.withColor(Color4I.BLACK.withAlpha(90))
-					.draw(graphics, qb.getX(), qb.getY(), qb.width, qb.height);
+			IconHelper.renderIcon(QuestShape.get(qb.quest.getShape()).getShape()
+					.withColor(Color4I.BLACK.withAlpha(30)),
+					graphics, qb.getX(), qb.getY(), qb.width, qb.height);
+			IconHelper.renderIcon(QuestShape.get(qb.quest.getShape()).getOutline()
+					.withColor(Color4I.BLACK.withAlpha(90)),
+					graphics, qb.getX(), qb.getY(), qb.width, qb.height);
 		});
 	}
 
@@ -360,16 +361,16 @@ public class QuestPanel extends Panel {
 					RenderSystem.enableDepthTest();
 					// TODO: custom shader to implement alphaFunc? for now however, rendering outline at alpha 30 works well
 					//RenderSystem.alphaFunc(GL11.GL_GREATER, 0.01F);
-					QuestShape.get(questScreen.selectedChapter.getDefaultQuestShape()).getOutline().withColor(Color4I.WHITE.withAlpha(30)).draw(graphics, 0, 0, 1, 1);
+					IconHelper.renderIcon(QuestShape.get(questScreen.selectedChapter.getDefaultQuestShape()).getOutline().withColor(Color4I.WHITE.withAlpha(30)), graphics, 0, 0, 1, 1);
 					//RenderSystem.defaultAlphaFunc();
 					poseStack.popPose();
 
 					if (QuestScreen.grid && !questScreen.isViewingQuest()) {
 						poseStack.pushPose();
 						poseStack.translate(0, 0, 1000);
-						Color4I.WHITE.draw(graphics, (int) Math.round(sx), (int) Math.round(sy), 1, 1);
-						Color4I.WHITE.withAlpha(30).draw(graphics, getX(), (int) sy, width, 1);
-						Color4I.WHITE.withAlpha(30).draw(graphics, (int) Math.round(sx), getY(), 1, height);
+						IconHelper.renderIcon(Color4I.WHITE, graphics, (int) Math.round(sx), (int) Math.round(sy), 1, 1);
+						IconHelper.renderIcon(Color4I.WHITE.withAlpha(30), graphics, getX(), (int) sy, width, 1);
+						IconHelper.renderIcon(Color4I.WHITE.withAlpha(30), graphics, (int) Math.round(sx), getY(), 1, height);
 						poseStack.popPose();
 					}
 				}
@@ -383,8 +384,8 @@ public class QuestPanel extends Panel {
 		int statusX = questScreen.chapterPanel.expanded ? questScreen.chapterPanel.width : questScreen.expandChaptersButton.width;
 		int statusWidth = questScreen.chapterPanel.expanded ? width - statusX + questScreen.expandChaptersButton.width : width;
 		Color4I statPanelBg = ThemeProperties.WIDGET_BACKGROUND.get();
-		Color4I.DARK_GRAY.draw(graphics, statusX, height - 9, statusWidth, 1);
-		statPanelBg.draw(graphics, statusX, height - 9, statusWidth, 10);
+		IconHelper.renderIcon(Color4I.DARK_GRAY, graphics, statusX, height - 9, statusWidth, 1);
+		IconHelper.renderIcon(statPanelBg, graphics, statusX, height - 9, statusWidth, 10);
 
 		poseStack.translate(statusX, height - 6, 600);
 		poseStack.scale(0.5f, 0.5f, 0.5f);

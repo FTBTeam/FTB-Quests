@@ -12,6 +12,7 @@ import dev.architectury.registry.client.rendering.BlockEntityRendererRegistry;
 import dev.architectury.registry.client.rendering.ColorHandlerRegistry;
 import dev.ftb.mods.ftblibrary.api.sidebar.ButtonOverlayRender;
 import dev.ftb.mods.ftblibrary.api.sidebar.SidebarButtonCreatedEvent;
+import dev.ftb.mods.ftblibrary.client.icon.IconHelper;
 import dev.ftb.mods.ftblibrary.icon.Color4I;
 import dev.ftb.mods.ftblibrary.ui.CustomClickEvent;
 import dev.ftb.mods.ftblibrary.ui.GuiHelper;
@@ -31,11 +32,13 @@ import dev.ftb.mods.ftbquests.registry.ModItems;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.DeltaTracker;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.color.item.ItemTintSources;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
 import net.minecraft.client.renderer.texture.TextureAtlas;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
+import net.minecraft.data.AtlasIds;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.resources.Identifier;
 import net.minecraft.world.inventory.InventoryMenu;
@@ -64,7 +67,6 @@ public class FTBQuestsClientEventHandler {
     public static TextureAtlasSprite trEnergyFullSprite;
 
     public void init() {
-        ClientLifecycleEvent.CLIENT_SETUP.register(this::registerItemColors);
         ClientLifecycleEvent.CLIENT_SETUP.register(this::registerBERs);
         SidebarButtonCreatedEvent.EVENT.register(this::onSidebarButtonCreated);
         ClearFileCacheEvent.EVENT.register(this::onFileCacheClear);
@@ -74,12 +76,15 @@ public class FTBQuestsClientEventHandler {
         ClientGuiEvent.RENDER_HUD.register(this::onScreenRender);
         ClientPlayerEvent.CLIENT_PLAYER_JOIN.register(this::onPlayerLogin);
         ClientPlayerEvent.CLIENT_PLAYER_QUIT.register(this::onPlayerLogout);
+
+        ItemTintSources.ID_MAPPER.put(FTBQuestsAPI.id("loot_crate"), LootCrateItem.LootCrateItemTintSource.MAP_CODEC);
     }
 
     // Note: Architectury doesn't have a texture stitch post event anymore,
     // so this is handled by the Forge/NeoForge events, and a mixin on Fabric
     public static void onTextureStitchPost(TextureAtlas textureAtlas) {
-        if (textureAtlas.location().equals(InventoryMenu.BLOCK_ATLAS)) {
+        // TODO: @since 21.11: Verify this is the correct replacement.
+        if (textureAtlas.location().equals(AtlasIds.BLOCKS)) {//InventoryMenu.BLOCK_ATLAS)) {
             inputOnlySprite = textureAtlas.getSprite(INPUT_ONLY_TEXTURE);
             tankSprite = textureAtlas.getSprite(TANK_TEXTURE);
             feEnergyEmptySprite = textureAtlas.getSprite(FE_ENERGY_EMPTY_TEXTURE);
@@ -94,15 +99,8 @@ public class FTBQuestsClientEventHandler {
     }
 
     @ExpectPlatform
-    public static BlockEntityRendererProvider<TaskScreenBlockEntity> taskScreenRenderer() {
+    public static BlockEntityRendererProvider<TaskScreenBlockEntity, TaskScreenRenderState> taskScreenRenderer() {
         throw new AssertionError();
-    }
-
-    private void registerItemColors(Minecraft minecraft) {
-        ColorHandlerRegistry.registerItemColors((stack, tintIndex) -> {
-            LootCrate crate = LootCrateItem.getCrate(stack, true);
-            return crate == null ? 0xFFFFFFFF : (0xFF000000 | crate.getColor().rgb());
-        }, ModItems.LOOTCRATE.get());
     }
 
     private void onSidebarButtonCreated(SidebarButtonCreatedEvent event) {
@@ -232,14 +230,14 @@ public class FTBQuestsClientEventHandler {
         int txtWidth = mc.font.width(txt);
         int boxWidth = Math.max(txtWidth, 100);
 
-        Color4I.DARK_GRAY.withAlpha(130).draw(graphics, cx - boxWidth / 2 - 3, cy - 63, boxWidth + 6, 29);
+        IconHelper.renderIcon(Color4I.DARK_GRAY.withAlpha(130), graphics, cx - boxWidth / 2 - 3, cy - 63, boxWidth + 6, 29);
         GuiHelper.drawHollowRect(graphics, cx - boxWidth / 2 - 3, cy - 63, boxWidth + 6, 29, Color4I.DARK_GRAY, false);
 
         graphics.drawString(mc.font, txt, cx - txtWidth / 2, cy - 60, 0xFFFFFF);
         double completed = (currentlyObservingTicks + tickDelta.getGameTimeDeltaPartialTick(false)) / (double) currentlyObserving.getTimer();
 
         GuiHelper.drawHollowRect(graphics, cx - boxWidth / 2, cy - 49, boxWidth, 12, Color4I.DARK_GRAY, false);
-        Color4I.LIGHT_BLUE.withAlpha(130).draw(graphics, cx - boxWidth / 2 + 1, cy - 48, (int) ((boxWidth - 2D) * completed), 10);
+        IconHelper.renderIcon(Color4I.LIGHT_BLUE.withAlpha(130), graphics, cx - boxWidth / 2 + 1, cy - 48, (int) ((boxWidth - 2D) * completed), 10);
 
         String pctTxt = (currentlyObservingTicks * 100L / currentlyObserving.getTimer()) + "%";
         graphics.drawString(mc.font, pctTxt, cx - mc.font.width(pctTxt) / 2, cy - 47, 0xFFFFFF);

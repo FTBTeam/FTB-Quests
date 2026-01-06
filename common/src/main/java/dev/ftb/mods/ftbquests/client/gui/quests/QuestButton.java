@@ -3,6 +3,7 @@ package dev.ftb.mods.ftbquests.client.gui.quests;
 import com.mojang.blaze3d.platform.InputConstants;
 import com.mojang.blaze3d.vertex.PoseStack;
 import dev.architectury.networking.NetworkManager;
+import dev.ftb.mods.ftblibrary.client.icon.IconHelper;
 import dev.ftb.mods.ftblibrary.config.DoubleConfig;
 import dev.ftb.mods.ftblibrary.config.ui.EditStringConfigOverlay;
 import dev.ftb.mods.ftblibrary.icon.Color4I;
@@ -350,9 +351,9 @@ public class QuestButton extends Button implements QuestPositionableButton {
 	@Override
 	public void draw(GuiGraphics graphics, Theme theme, int x, int y, int w, int h) {
 		Color4I outlineColor = ThemeProperties.QUEST_NOT_STARTED_COLOR.get(quest);
-		Icon questIcon = Color4I.empty() ;
-		Icon hiddenIcon = Color4I.empty();
-		Icon lockIcon = Color4I.empty();
+		Icon<?> questIcon = Color4I.empty() ;
+		Icon<?> hiddenIcon = Color4I.empty();
+		Icon<?> lockIcon = Color4I.empty();
 
 		TeamData teamData = questScreen.file.selfTeamData;
 		boolean isCompleted = teamData.isCompleted(quest);
@@ -393,9 +394,9 @@ public class QuestButton extends Button implements QuestPositionableButton {
 		QuestShape shape = QuestShape.get(getShape());
 
 		if (shape.shouldDraw()) {
-			shape.getShape().withColor(Color4I.DARK_GRAY).draw(graphics, x, y, w, h);
-			shape.getBackground().withColor(Color4I.WHITE.withAlpha(150)).draw(graphics, x, y, w, h);
-			shape.getOutline().withColor(outlineColor).draw(graphics, x, y, w, h);
+			IconHelper.renderIcon(shape.getShape().withColor(Color4I.DARK_GRAY), graphics, x, y, w, h);
+			IconHelper.renderIcon(shape.getBackground().withColor(Color4I.WHITE.withAlpha(150)), graphics, x, y, w, h);
+			IconHelper.renderIcon(shape.getOutline().withColor(outlineColor), graphics, x, y, w, h);
 		}
 
 		Matrix3x2fStack poseStack = graphics.pose();
@@ -404,7 +405,7 @@ public class QuestButton extends Button implements QuestPositionableButton {
 			int s = (int) (w * (2F / 3F) * (float) quest.getIconScale());
 			poseStack.pushMatrix();
 			poseStack.translate((float) (x + (w - s) / 2D), (float) (y + (h - s) / 2D));
-			icon.draw(graphics, 0, 0, s, s);
+			IconHelper.renderIcon(icon, graphics, 0, 0, s, s);
 			poseStack.popMatrix();
 		}
 
@@ -416,14 +417,14 @@ public class QuestButton extends Button implements QuestPositionableButton {
 			poseStack.pushMatrix();
 			poseStack.translate(0, 0);
 			Color4I col = Color4I.WHITE.withAlpha((int) (190D + Math.sin(System.currentTimeMillis() * 0.003D) * 50D));
-			shape.getOutline().withColor(col).draw(graphics, x, y, w, h);
-			shape.getBackground().withColor(col).draw(graphics, x, y, w, h);
+			IconHelper.renderIcon(shape.getOutline().withColor(col), graphics, x, y, w, h);
+			IconHelper.renderIcon(shape.getBackground().withColor(col), graphics, x, y, w, h);
 			poseStack.popMatrix();
 		}
 
 		if (!canStart || !teamData.areDependenciesComplete(quest)) {
 			if (shape.shouldDraw()) {
-				shape.getShape().withColor(Color4I.BLACK.withAlpha(100)).draw(graphics, x, y, w, h);
+				IconHelper.renderIcon(shape.getShape().withColor(Color4I.BLACK.withAlpha(100)), graphics, x, y, w, h);
 			}
 			if (quest.getQuestFile().showLockIcons() && FTBQuestsClientConfig.SHOW_LOCK_ICON.get()) {
 				lockIcon = ThemeProperties.LOCK_ICON.get();
@@ -431,14 +432,14 @@ public class QuestButton extends Button implements QuestPositionableButton {
 		}
 
 		if (isMouseOver()) {
-			shape.getShape().withColor(Color4I.WHITE.withAlpha(100)).draw(graphics, x, y, w, h);
+			IconHelper.renderIcon(shape.getShape().withColor(Color4I.WHITE.withAlpha(100)), graphics, x, y, w, h);
 		}
 
 		if (!questIcon.isEmpty()) {
 			int s = (int) (w / 8F * 3F);
 			poseStack.pushMatrix();
 			poseStack.translate(x + w - s, y);//, QuestScreen.Z_LEVEL);
-			questIcon.draw(graphics, 0, 0, s, s);
+			IconHelper.renderIcon(questIcon, graphics, 0, 0, s, s);
 			poseStack.popMatrix();
 		}
 
@@ -446,7 +447,7 @@ public class QuestButton extends Button implements QuestPositionableButton {
 			int s = (int) (w / 8F * 3F);
 			poseStack.pushMatrix();
 			poseStack.translate(x, y);//, QuestScreen.Z_LEVEL);
-			hiddenIcon.draw(graphics, 0, 0, s, s);
+			IconHelper.renderIcon(hiddenIcon, graphics, 0, 0, s, s);
 			poseStack.popMatrix();
 		}
 
@@ -454,7 +455,7 @@ public class QuestButton extends Button implements QuestPositionableButton {
 			int s = (int) (w / 8F * 3F);
 			poseStack.pushMatrix();
 			poseStack.translate(x + w - s, y + h - 1 - s);//, QuestScreen.Z_LEVEL);
-			lockIcon.draw(graphics, 0, 0, s, s);
+			IconHelper.renderIcon(lockIcon, graphics, 0, 0, s, s);
 			poseStack.popMatrix();
 		}
 	}

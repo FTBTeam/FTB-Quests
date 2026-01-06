@@ -1,6 +1,9 @@
 package dev.ftb.mods.ftbquests.item;
 
+import com.mojang.serialization.MapCodec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
 import dev.architectury.platform.Platform;
+import dev.architectury.registry.client.rendering.ColorHandlerRegistry;
 import dev.ftb.mods.ftbquests.FTBQuests;
 import dev.ftb.mods.ftbquests.client.ClientQuestFile;
 import dev.ftb.mods.ftbquests.client.gui.RewardNotificationsScreen;
@@ -9,25 +12,30 @@ import dev.ftb.mods.ftbquests.quest.loot.WeightedReward;
 import dev.ftb.mods.ftbquests.registry.ModDataComponents;
 import dev.ftb.mods.ftbquests.registry.ModItems;
 import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.ChatFormatting;
+import net.minecraft.client.color.item.ItemTintSource;
+import net.minecraft.client.multiplayer.ClientLevel;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.particles.ItemParticleOption;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
+import net.minecraft.util.ExtraCodecs;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Rarity;
 import net.minecraft.world.item.TooltipFlag;
+import net.minecraft.world.item.component.CustomModelData;
 import net.minecraft.world.item.component.TooltipDisplay;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import java.util.List;
 import java.util.function.Consumer;
@@ -37,6 +45,7 @@ public class LootCrateItem extends Item {
 		super(ModItems.defaultProps()
 				.rarity(Rarity.UNCOMMON)
 				.component(ModDataComponents.LOOT_CRATE.get(), "")
+				.component(DataComponents.CUSTOM_MODEL_DATA, new CustomModelData(List.of(), List.of(), List.of(), List.of()))
 		);
 	}
 
@@ -51,6 +60,7 @@ public class LootCrateItem extends Item {
 	public static LootCrate getCrate(ItemStack stack) {
 		return getCrate(stack, Platform.getEnv() == EnvType.CLIENT);
 	}
+
 
 
 	@Override
@@ -125,4 +135,35 @@ public class LootCrateItem extends Item {
             }
         }
     }
+
+	public record LootCrateItemTintSource(int index, int defaultColor) implements ItemTintSource {
+		public static final MapCodec<LootCrateItemTintSource> MAP_CODEC = RecordCodecBuilder.mapCodec(
+				i -> i.group(
+								ExtraCodecs.NON_NEGATIVE_INT.optionalFieldOf("index", 0).forGetter(LootCrateItemTintSource::index),
+								ExtraCodecs.RGB_COLOR_CODEC.fieldOf("default").forGetter(LootCrateItemTintSource::defaultColor)
+						)
+						.apply(i, LootCrateItemTintSource::new)
+		);
+
+		@Override
+		public int calculate(ItemStack itemStack, @Nullable ClientLevel clientLevel, @Nullable LivingEntity livingEntity) {
+//			ColorHandlerRegistry.registerItemColors((stack, tintIndex) -> {
+//				LootCrate crate = LootCrateItem.getCrate(stack, true);
+//				return crate == null ? 0xFFFFFFFF : (0xFF000000 | crate.getColor().rgb());
+//			}, ModItems.LOOTCRATE.get());
+
+			// TODO: @since 21.11: We need to validate this works, and we need to ensure it's not called a lot of times.
+			if (itemStack.getItem() instanceof LootCrateItem) {
+				LootCrate crate = LootCrateItem.getCrate(itemStack, true);
+				return crate == null ? 0xFFFFFFFF : (0xFF000000 | crate.getColor().rgb());
+			}
+
+			return 0xFFFFFFFF;
+		}
+
+		@Override
+		public MapCodec<? extends ItemTintSource> type() {
+			return MAP_CODEC;
+		}
+	}
 }

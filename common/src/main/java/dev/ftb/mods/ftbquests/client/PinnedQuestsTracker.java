@@ -1,5 +1,6 @@
 package dev.ftb.mods.ftbquests.client;
 
+import dev.ftb.mods.ftblibrary.client.icon.IconHelper;
 import dev.ftb.mods.ftblibrary.icon.Color4I;
 import dev.ftb.mods.ftblibrary.ui.GuiHelper;
 import dev.ftb.mods.ftbquests.client.gui.quests.QuestScreen;
@@ -133,9 +134,9 @@ public enum PinnedQuestsTracker {
         graphics.pose().scale(scale, scale);
 
         GuiHelper.drawHollowRect(graphics, 0, 0, width, height, Color4I.BLACK.withAlpha(100), false);
-        Color4I.BLACK.withAlpha(100).draw(graphics, 0, 0, width, height);
-        Color4I.GRAY.withAlpha(50).draw(graphics, 1, 1, width - 2, mc.font.lineHeight + 4);
-        Color4I.BLACK.draw(graphics, 0, mc.font.lineHeight + 4, width, 1);
+        IconHelper.renderIcon(Color4I.BLACK.withAlpha(100), graphics, 0, 0, width, height);
+        IconHelper.renderIcon(Color4I.GRAY.withAlpha(50), graphics, 1, 1, width - 2, mc.font.lineHeight + 4);
+        IconHelper.renderIcon(Color4I.BLACK, graphics, 0, mc.font.lineHeight + 4, width, 1);
 
         graphics.drawString(mc.font, title, (width - titleWidth) / 2, 4, 0xFFFFFF00);
         int yPos = mc.font.lineHeight + 8;

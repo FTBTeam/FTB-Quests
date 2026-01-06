@@ -75,8 +75,8 @@ public class FTBQuestsClient {
 		// Minecraft.getInstance() might not exist here (datagen in particular)
         //noinspection ConstantValue
         if (Minecraft.getInstance() != null) {
-			ReloadListenerRegistry.register(PackType.CLIENT_RESOURCES, new QuestFileCacheReloader());
-			ReloadListenerRegistry.register(PackType.CLIENT_RESOURCES, new ThemeLoader());
+			ReloadListenerRegistry.register(PackType.CLIENT_RESOURCES, new QuestFileCacheReloader(), FTBQuestsAPI.id("file_cache"));
+			ReloadListenerRegistry.register(PackType.CLIENT_RESOURCES, new ThemeLoader(), FTBQuestsAPI.id("themes"));
 			KeyMappingRegistry.register(KEY_QUESTS = new KeyMapping("key.ftbquests.quests", InputConstants.Type.KEYSYM, -1, "key.categories.ftbquests"));
 		}
 
@@ -144,7 +144,7 @@ public class FTBQuestsClient {
 	}
 
 	public static void openCustomIconGui(Player player, InteractionHand hand) {
-		ResourceConfigValue<?> config = Screen.hasShiftDown() ? new EntityFaceConfig() : new ImageResourceConfig();
+		ResourceConfigValue<?> config = Minecraft.getInstance().hasShiftDown() ? new EntityFaceConfig() : new ImageResourceConfig();
 		config.onClicked(null, MouseButton.LEFT, accepted -> {
 			if (accepted) {
 				// TODO minor code smell here
@@ -211,7 +211,7 @@ public class FTBQuestsClient {
 	public static Optional<CreativeModeTab.ItemDisplayParameters> creativeTabDisplayParams() {
 		LocalPlayer player = Minecraft.getInstance().player;
 		if (player != null) {
-			return Optional.of(new CreativeModeTab.ItemDisplayParameters(player.connection.enabledFeatures(), Minecraft.getInstance().options.operatorItemsTab().get(), player.clientLevel.registryAccess()));
+			return Optional.of(new CreativeModeTab.ItemDisplayParameters(player.connection.enabledFeatures(), Minecraft.getInstance().options.operatorItemsTab().get(), player.level().registryAccess()));
 		}
 		return Optional.empty();
 	}

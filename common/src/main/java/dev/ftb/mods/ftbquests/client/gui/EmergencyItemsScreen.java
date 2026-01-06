@@ -2,6 +2,7 @@ package dev.ftb.mods.ftbquests.client.gui;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import dev.architectury.networking.NetworkManager;
+import dev.ftb.mods.ftblibrary.client.icon.IconHelper;
 import dev.ftb.mods.ftblibrary.icon.Color4I;
 import dev.ftb.mods.ftblibrary.icon.Icons;
 import dev.ftb.mods.ftblibrary.ui.*;
@@ -125,7 +126,7 @@ public class EmergencyItemsScreen extends BaseScreen {
 		@Override
 		public void draw(GuiGraphics graphics, Theme theme, int x, int y, int w, int h) {
 //			GuiHelper.setupDrawing();
-			QuestShape.get("rsquare").getOutline().draw(graphics, x - 3, y - 3, w + 6, h + 6);
+			IconHelper.renderIcon(QuestShape.get("rsquare").getOutline(), graphics, x - 3, y - 3, w + 6, h + 6);
 			graphics.pose().pushMatrix();
 			graphics.pose().translate((float) (x + w / 2D), (float) (y + h / 2D));
 			GuiHelper.drawItem(graphics, stack, true, null);

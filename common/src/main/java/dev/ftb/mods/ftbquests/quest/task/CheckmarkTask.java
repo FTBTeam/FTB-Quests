@@ -1,5 +1,6 @@
 package dev.ftb.mods.ftbquests.quest.task;
 
+import dev.ftb.mods.ftblibrary.client.icon.IconHelper;
 import dev.ftb.mods.ftbquests.quest.Quest;
 import dev.ftb.mods.ftbquests.quest.TeamData;
 import dev.ftb.mods.ftbquests.quest.theme.property.ThemeProperties;
@@ -21,8 +22,8 @@ public class CheckmarkTask extends AbstractBooleanTask {
 	@Override
 	@Environment(EnvType.CLIENT)
 	public void drawGUI(TeamData teamData, GuiGraphics graphics, int x, int y, int w, int h) {
-		(teamData.isCompleted(this) ? ThemeProperties.CHECKMARK_TASK_ACTIVE.get(this) : ThemeProperties.CHECKMARK_TASK_INACTIVE.get(this))
-				.draw(graphics, x, y, w, h);
+		IconHelper.renderIcon((teamData.isCompleted(this) ? ThemeProperties.CHECKMARK_TASK_ACTIVE.get(this) : ThemeProperties.CHECKMARK_TASK_INACTIVE.get(this))
+				, graphics, x, y, w, h);
 	}
 
 	@Override

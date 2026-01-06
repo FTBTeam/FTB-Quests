@@ -35,6 +35,7 @@ import org.apache.commons.lang3.time.DurationFormatUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.io.IOException;
 import java.nio.file.Path;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -144,8 +145,12 @@ public class TeamData {
 	public void saveIfChanged() {
 		if (shouldSave && file instanceof ServerQuestFile sqf) {
 			Path path = sqf.server.getWorldPath(ServerQuestFile.FTBQUESTS_DATA);
-			SNBT.write(path.resolve(teamId + ".snbt"), serializeNBT());
-			shouldSave = false;
+            try {
+                SNBT.tryWrite(path.resolve(teamId + ".snbt"), serializeNBT());
+            } catch (IOException e) {
+                FTBQuests.LOGGER.error("Could not save data for team {}", teamId, e);
+            }
+            shouldSave = false;
 		}
 	}
 

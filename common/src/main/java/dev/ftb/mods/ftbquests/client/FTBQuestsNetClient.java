@@ -116,7 +116,7 @@ public class FTBQuestsNetClient {
 
 	public static void displayItemRewardToast(ItemStack stack, int count, boolean disableBlur) {
 		ItemStack stack1 = ItemStackHooks.copyWithCount(stack, 1);
-		Icon icon = ItemIcon.getItemIcon(stack1);
+		Icon<?> icon = ItemIcon.ofItemStack(stack1);
 
 		if (!IRewardListenerScreen.add(new RewardKey(stack.getHoverName().getString(), icon, stack1, disableBlur), count)) {
 			MutableComponent comp = count > 1 ?
@@ -127,7 +127,7 @@ public class FTBQuestsNetClient {
 	}
 
 	public static void displayRewardToast(long id, Component text, Icon icon, boolean disableBlur) {
-		Icon actualIcon = icon.isEmpty() ? ClientQuestFile.INSTANCE.getBase(id).getIcon() : icon;
+		Icon<?> actualIcon = icon.isEmpty() ? ClientQuestFile.INSTANCE.getBase(id).getIcon() : icon;
 
 		if (!IRewardListenerScreen.add(new RewardKey(text.getString(), actualIcon, disableBlur), 1)) {
 			FTBQuestsClientConfig.REWARD_STYLE.get().notifyReward(text, actualIcon);
