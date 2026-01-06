@@ -29,8 +29,8 @@ public class ImageComponentWidget extends Widget {
 	}
 
 	public void addMouseOverText(TooltipList list) {
-		if (mutableComponent.getStyle().getHoverEvent() != null && mutableComponent.getStyle().getHoverEvent().getAction() == HoverEvent.Action.SHOW_TEXT) {
-			list.add(mutableComponent.getStyle().getHoverEvent().getValue(HoverEvent.Action.SHOW_TEXT));
+		if (mutableComponent.getStyle().getHoverEvent() != null && mutableComponent.getStyle().getHoverEvent() instanceof HoverEvent.ShowText showText) {
+			list.add(showText.value());
 		}
 	}
 

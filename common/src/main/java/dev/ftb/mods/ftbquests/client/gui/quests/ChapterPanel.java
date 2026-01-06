@@ -256,7 +256,7 @@ public class ChapterPanel extends Panel {
 
 		@Override
 		public void draw(GuiGraphics graphics, Theme theme, int x, int y, int w, int h) {
-			GuiHelper.setupDrawing();
+//			GuiHelper.setupDrawing();
 
 			if (isMouseOver()) {
 				Color4I.WHITE.withAlpha(40).draw(graphics, x + 1, y + 1, w - 2, h - 2);

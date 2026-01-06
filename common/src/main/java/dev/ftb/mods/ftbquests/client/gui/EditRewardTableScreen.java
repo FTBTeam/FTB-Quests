@@ -100,7 +100,7 @@ public class EditRewardTableScreen extends AbstractButtonListScreen {
 	public boolean keyPressed(Key key) {
 		if (super.keyPressed(key)) {
 			return true;
-		} else if ((key.is(InputConstants.KEY_RETURN) || key.is(InputConstants.KEY_NUMPADENTER)) && key.modifiers.shift()) {
+		} else if ((key.is(InputConstants.KEY_RETURN) || key.is(InputConstants.KEY_NUMPADENTER)) && key.modifiers().shift()) {
 			this.doAccept();
 			return true;
 		} else {

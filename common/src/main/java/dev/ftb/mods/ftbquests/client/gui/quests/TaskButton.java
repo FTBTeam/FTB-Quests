@@ -31,6 +31,7 @@ import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import org.joml.Matrix3x2fStack;
 
 import java.util.Comparator;
 import java.util.List;
@@ -62,7 +63,7 @@ public class TaskButton extends Button {
 	@Override
 	public void onClicked(MouseButton button) {
 		if (button.isLeft()) {
-			if (task.getQuestFile().canEdit() && ScreenWrapper.hasAltDown()) {
+			if (task.getQuestFile().canEdit() && Minecraft.getInstance().hasAltDown()) {
 				task.onEditButtonClicked(questScreen);
 			} else {
 				boolean canClick = task.isValid()
@@ -204,7 +205,7 @@ public class TaskButton extends Button {
 	@Override
 	public void draw(GuiGraphics graphics, Theme theme, int x, int y, int w, int h) {
 		int bs = h >= 32 ? 32 : 16;
-		GuiHelper.setupDrawing();
+//		GuiHelper.setupDrawing();
 		drawBackground(graphics, theme, x, y, w, h);
 		drawIcon(graphics, theme, x + (w - bs) / 2, y + (h - bs) / 2, bs, bs);
 
@@ -214,22 +215,22 @@ public class TaskButton extends Button {
 			//return;
 		}
 
-		PoseStack poseStack = graphics.pose();
+		Matrix3x2fStack poseStack = graphics.pose();
 		if (questScreen.file.selfTeamData.isCompleted(task)) {
-			poseStack.pushPose();
-			poseStack.translate(0, 0, 200);
-			RenderSystem.enableBlend();
+			poseStack.pushMatrix();
+			poseStack.translate(0, 0);
+//			RenderSystem.enableBlend();
 			ThemeProperties.CHECK_ICON.get().draw(graphics, x + w - 9, y + 1, 8, 8);
-			poseStack.popPose();
+			poseStack.popMatrix();
 		} else {
 			MutableComponent buttonText = task.getButtonText();
 			if (!TextUtils.isComponentEmpty(buttonText)) {
-				poseStack.pushPose();
-				poseStack.translate(x + 19F - theme.getStringWidth(buttonText) / 2F, y + 15F, 200F);
-				poseStack.scale(0.5F, 0.5F, 1F);
-				RenderSystem.enableBlend();
+				poseStack.pushMatrix();
+				poseStack.translate(x + 19F - theme.getStringWidth(buttonText) / 2F, y + 15F);
+				poseStack.scale(0.5F, 0.5F);
+//				RenderSystem.enableBlend();
 				theme.drawString(graphics, buttonText, 0, 0, Color4I.WHITE, Theme.SHADOW);
-				poseStack.popPose();
+				poseStack.popMatrix();
 			}
 		}
 	}

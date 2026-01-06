@@ -16,12 +16,14 @@ import dev.ftb.mods.ftbquests.quest.ChapterImage;
 import dev.ftb.mods.ftbquests.quest.Movable;
 import dev.ftb.mods.ftbquests.quest.theme.property.ThemeProperties;
 import net.minecraft.ChatFormatting;
+import net.minecraft.client.Minecraft;
 import net.minecraft.util.Util;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import org.jetbrains.annotations.NotNull;
+import org.joml.Matrix3x2fStack;
 
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
@@ -100,7 +102,7 @@ public class ChapterImageButton extends Button implements QuestPositionableButto
 			onClicked(button);
 			// returning false on left button click allows click-through for panning behaviour
 			//  (also, images with a click action defined should swallow the mouse click)
-			return !button.isLeft() || button.isLeft() && Screen.hasAltDown() || !chapterImage.getClick().isEmpty();
+			return !button.isLeft() || button.isLeft() && Minecraft.getInstance().hasAltDown() || !chapterImage.getClick().isEmpty();
 		}
 		return false;
 	}
@@ -144,9 +146,9 @@ public class ChapterImageButton extends Button implements QuestPositionableButto
 
 			getGui().openContextMenu(contextMenu);
 		} else if (button.isLeft()) {
-			if (Screen.hasControlDown() && questScreen.file.canEdit()) {
+			if (Minecraft.getInstance().hasControlDown() && questScreen.file.canEdit()) {
 				questScreen.toggleSelected(chapterImage);
-			} else if (Screen.hasAltDown() && questScreen.file.canEdit()) {
+			} else if (Minecraft.getInstance().hasAltDown() && questScreen.file.canEdit()) {
 				openEditScreen();
 			} else if (!chapterImage.getClick().isEmpty()) {
 				playClickSound();
@@ -212,22 +214,22 @@ public class ChapterImageButton extends Button implements QuestPositionableButto
 			image = image.withColor(chapterImage.getColor().withAlpha(chapterImage.getAlpha()));
 		}
 
-		PoseStack poseStack = graphics.pose();
-		poseStack.pushPose();
+		Matrix3x2fStack poseStack = graphics.pose();
+		poseStack.pushMatrix();
 
 		if (chapterImage.isAlignToCorner()) {
-			poseStack.translate(x, y, 0);
-			poseStack.mulPose(Axis.ZP.rotationDegrees((float) chapterImage.getRotation()));
-			poseStack.scale(w, h, 1);
+			poseStack.translate(x, y);
+			poseStack.rotate((float) chapterImage.getRotation());
+			poseStack.scale(w, h);
 			image.draw(graphics, 0, 0, 1, 1);
 			if (questScreen.selectedObjects.contains(moveAndDeleteFocus())) {
 				Color4I col = Color4I.WHITE.withAlpha((int) (128D + Math.sin(System.currentTimeMillis() * 0.003D) * 50D));
 				col.draw(graphics, 0, 0, 1, 1);
 			}
 		} else {
-			poseStack.translate((int) (x + w / 2D), (int) (y + h / 2D), 0);
-			poseStack.mulPose(Axis.ZP.rotationDegrees((float) chapterImage.getRotation()));
-			poseStack.scale(w / 2F, h / 2F, 1);
+			poseStack.translate((int) (x + w / 2D), (int) (y + h / 2D));
+			poseStack.rotate((float) chapterImage.getRotation());
+			poseStack.scale(w / 2F, h / 2F);
 			image.draw(graphics, -1, -1, 2, 2);
 			if (questScreen.selectedObjects.contains(moveAndDeleteFocus())) {
 				Color4I col = Color4I.WHITE.withAlpha((int) (128D + Math.sin(System.currentTimeMillis() * 0.003D) * 50D));
@@ -235,7 +237,7 @@ public class ChapterImageButton extends Button implements QuestPositionableButto
 			}
 		}
 
-		poseStack.popPose();
+		poseStack.popMatrix();
 	}
 
 	@Override

@@ -83,12 +83,12 @@ public class RewardNotificationsScreen extends BaseScreen implements IRewardList
 
 	@Override
 	public void drawBackground(GuiGraphics graphics, Theme theme, int x, int y, int w, int h) {
-		graphics.pose().pushPose();
-		graphics.pose().translate((int) (w / 2D), (int) (h / 5D), 0);
-		graphics.pose().scale(2, 2, 1);
+		graphics.pose().pushMatrix();
+		graphics.pose().translate((int) (w / 2D), (int) (h / 5D));
+		graphics.pose().scale(2, 2);
 		MutableComponent s = Component.translatable("ftbquests.rewards");
 		theme.drawString(graphics, s, -theme.getStringWidth(s) / 2, 0, Color4I.WHITE, 0);
-		graphics.pose().popPose();
+		graphics.pose().popMatrix();
 	}
 
 	@Override
@@ -121,18 +121,18 @@ public class RewardNotificationsScreen extends BaseScreen implements IRewardList
 
 		@Override
 		public void draw(GuiGraphics graphics, Theme theme, int x, int y, int w, int h) {
-			GuiHelper.setupDrawing();
+//			GuiHelper.setupDrawing();
 			QuestShape.get("rsquare").getOutline().draw(graphics, x, y, w, h);
 			key.getIcon().draw(graphics, x + 3, y + 3, 16, 16);
 
 			int count = rewards.getInt(key);
 
 			if (count > 1) {
-				graphics.pose().pushPose();
-				graphics.pose().translate(0, 0, 600);
+				graphics.pose().pushMatrix();
+				graphics.pose().translate(0, 0);//, 600);
 				Component s = Component.literal(StringUtils.formatDouble(count, true)).withStyle(ChatFormatting.YELLOW);
 				theme.drawString(graphics, s, x + 22 - theme.getStringWidth(s), y + 12, Theme.SHADOW);
-				graphics.pose().popPose();
+				graphics.pose().popMatrix();
 			}
 		}
 

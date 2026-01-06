@@ -19,6 +19,7 @@ import dev.ftb.mods.ftbquests.FTBQuests;
 import dev.ftb.mods.ftbquests.item.CustomIconItem;
 import dev.ftb.mods.ftbquests.registry.ModDataComponents;
 import dev.ftb.mods.ftbquests.registry.ModItems;
+import net.minecraft.client.Minecraft;
 import net.minecraft.util.Util;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
@@ -40,7 +41,7 @@ public class ConfigIconItemStack extends ItemStackConfig {
 				new SelectItemStackScreen(this, callback).openGui();
 			} else if (BaseScreen.isCtrlKeyDown()) {
 				openImageSelector(callback);
-			} else if (ScreenWrapper.hasAltDown()) {
+			} else if (Minecraft.getInstance().hasAltDown()) {
 				openEntitySelector(callback);
 			} else {
 				clickedWidget.getGui().openContextMenu(makeMenu(callback));
@@ -69,7 +70,8 @@ public class ConfigIconItemStack extends ItemStackConfig {
 	private void openEntitySelector(ConfigCallback callback) {
 		EntityFaceConfig faceConfig = new EntityFaceConfig();
 		FTBQuests.getComponent(getValue(), ModDataComponents.ENTITY_FACE_ICON)
-				.ifPresent(rl -> faceConfig.setCurrentValue(BuiltInRegistries.ENTITY_TYPE.get(rl)));
+				.flatMap(BuiltInRegistries.ENTITY_TYPE::get)
+				.ifPresent(value -> faceConfig.setCurrentValue(value.value()));
 
 		new SelectEntityFaceScreen(faceConfig, accepted -> {
 			if (accepted) {

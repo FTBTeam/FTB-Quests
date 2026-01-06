@@ -168,11 +168,11 @@ public class ValidItemsScreen extends BaseScreen {
 				Color4I.WHITE.withAlpha(33).draw(graphics, x, y, w, h);
 			}
 
-			graphics.pose().pushPose();
-			graphics.pose().translate(x + w / 2D, y + h / 2D, 10);
-			graphics.pose().scale(2F, 2F, 2F);
-			GuiHelper.drawItem(graphics, stack, 0, true, null);
-			graphics.pose().popPose();
+			graphics.pose().pushMatrix();
+			graphics.pose().translate((float) (x + w / 2D), (float) (y + h / 2D));
+			graphics.pose().scale(2F, 2F);
+			GuiHelper.drawItem(graphics, stack, true, null);
+			graphics.pose().popMatrix();
 		}
 	}
 }
