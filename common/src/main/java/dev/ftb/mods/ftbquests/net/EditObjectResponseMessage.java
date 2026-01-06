@@ -12,7 +12,7 @@ import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 
 public record EditObjectResponseMessage(long id, CompoundTag nbt) implements CustomPacketPayload {
-	public static final Type<EditObjectResponseMessage> TYPE = new Type<>(FTBQuestsAPI.rl("edit_object_response_message"));
+	public static final Type<EditObjectResponseMessage> TYPE = new Type<>(FTBQuestsAPI.id("edit_object_response_message"));
 
 	public static final StreamCodec<FriendlyByteBuf, EditObjectResponseMessage> STREAM_CODEC = StreamCodec.composite(
 			ByteBufCodecs.VAR_LONG, EditObjectResponseMessage::id,

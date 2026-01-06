@@ -10,7 +10,7 @@ import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 
 public record BlockConfigRequestMessage(BlockPos pos, BlockType blockType) implements CustomPacketPayload {
-    public static final Type<BlockConfigRequestMessage> TYPE = new Type<>(FTBQuestsAPI.rl("block_config_request_message"));
+    public static final Type<BlockConfigRequestMessage> TYPE = new Type<>(FTBQuestsAPI.id("block_config_request_message"));
 
     public static final StreamCodec<FriendlyByteBuf, BlockConfigRequestMessage> STREAM_CODEC = StreamCodec.composite(
             BlockPos.STREAM_CODEC, BlockConfigRequestMessage::pos,

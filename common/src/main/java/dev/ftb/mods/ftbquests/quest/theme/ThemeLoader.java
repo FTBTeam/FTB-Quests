@@ -32,7 +32,7 @@ public class ThemeLoader implements ResourceManagerReloadListener {
 		Map<ThemeSelector, SelectorProperties> map = new HashMap<>();
 
 		try {
-			Identifier rl = FTBQuestsAPI.rl(THEME_TXT);
+			Identifier rl = FTBQuestsAPI.id(THEME_TXT);
 			for (Resource resource : resourceManager.getResourceStack(rl)) {
 				try (InputStream in = resource.open()) {
 					parse(map, FileUtils.read(in));

@@ -70,7 +70,7 @@ public class ItemReward extends Reward {
 		super.writeData(nbt, provider);
 
 		if (!item.isEmpty()) {
-			nbt.put("item", item.save(provider));
+			nbt.store("item", ItemStack.CODEC, item);
 		}
 
 		if (count > 1) {
@@ -90,14 +90,14 @@ public class ItemReward extends Reward {
 
 		item = itemOrMissingFromNBT(nbt.get("item"), provider);
 
-		count = nbt.getInt("count");
+		count = nbt.getIntOr("count", 1);
 		if (count == 0) {
 			count = item.getCount();
 			item.setCount(1);
 		}
 
-		randomBonus = nbt.getInt("random_bonus");
-		onlyOne = nbt.getBoolean("only_one");
+		randomBonus = nbt.getIntOr("random_bonus", 0);
+		onlyOne = nbt.getBooleanOr("only_one", false);
 	}
 
 	@Override

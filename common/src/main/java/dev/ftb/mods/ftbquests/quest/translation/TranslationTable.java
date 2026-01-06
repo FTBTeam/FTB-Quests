@@ -35,10 +35,10 @@ public class TranslationTable {
 
     public static TranslationTable fromNBT(CompoundTag tag) {
         Map<String, Either<String, List<String>>> map = new HashMap<>();
-        tag.getAllKeys().forEach(k -> {
+        tag.keySet().forEach(k -> {
             switch (tag.get(k)) {
-                case StringTag str -> map.put(k, Either.left(str.getAsString()));
-                case ListTag list -> map.put(k, Either.right(list.stream().map(Tag::getAsString).toList()));
+                case StringTag str -> map.put(k, Either.left(str.asString().orElseThrow()));
+                case ListTag list -> map.put(k, Either.right(list.stream().map(e -> e.asString().orElseThrow()).toList()));
                 case null, default -> { }
             }
         });

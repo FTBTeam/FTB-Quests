@@ -61,7 +61,7 @@ import java.util.*;
 import java.util.function.BiConsumer;
 
 public class ViewQuestPanel extends ModalPanel {
-	public static final Icon PAGEBREAK_ICON = Icon.getIcon(FTBQuestsAPI.rl("textures/gui/pagebreak.png"));
+	public static final Icon PAGEBREAK_ICON = Icon.getIcon(FTBQuestsAPI.id("textures/gui/pagebreak.png"));
 
 	private final QuestScreen questScreen;
 	private Quest quest = null;

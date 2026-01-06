@@ -11,7 +11,7 @@ import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 
 public record CustomToastMessage(long id) implements CustomPacketPayload {
-	public static final Type<CustomToastMessage> TYPE = new Type<>(FTBQuestsAPI.rl("custom_toast_message"));
+	public static final Type<CustomToastMessage> TYPE = new Type<>(FTBQuestsAPI.id("custom_toast_message"));
 
 	public static final StreamCodec<RegistryFriendlyByteBuf, CustomToastMessage> STREAM_CODEC = StreamCodec.composite(
 			ByteBufCodecs.VAR_LONG, CustomToastMessage::id,

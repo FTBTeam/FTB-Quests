@@ -11,7 +11,7 @@ import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 
 public record MoveMovableMessage(long id, long chapterID, double x, double y) implements CustomPacketPayload {
-	public static final Type<MoveMovableMessage> TYPE = new Type<>(FTBQuestsAPI.rl("move_movable_message"));
+	public static final Type<MoveMovableMessage> TYPE = new Type<>(FTBQuestsAPI.id("move_movable_message"));
 
 	public static final StreamCodec<FriendlyByteBuf, MoveMovableMessage> STREAM_CODEC = StreamCodec.composite(
 			ByteBufCodecs.VAR_LONG, MoveMovableMessage::id,

@@ -49,7 +49,7 @@ public class QuestBarrierBlockEntity extends BaseBarrierBlockEntity {
 	public Quest getQuest() {
 		if (cachedQuest == null && !objStr.isEmpty() || cachedQuest != null && !cachedQuest.getCodeString().equals(objStr)) {
 			long objId = BaseQuestFile.parseCodeString(objStr);
-			cachedQuest = FTBQuestsAPI.api().getQuestFile(level.isClientSide).getQuest(objId);
+			cachedQuest = FTBQuestsAPI.api().getQuestFile(level.isClientSide()).getQuest(objId);
 		}
 
 		return cachedQuest;

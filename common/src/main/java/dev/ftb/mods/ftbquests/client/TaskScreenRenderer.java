@@ -34,12 +34,12 @@ import net.minecraft.world.phys.Vec3;
 import org.joml.Matrix4f;
 
 public class TaskScreenRenderer implements BlockEntityRenderer<TaskScreenBlockEntity> {
-    public static final Identifier INPUT_ONLY_TEXTURE = FTBQuestsAPI.rl("tasks/input_only");
-    public static final Identifier TANK_TEXTURE = FTBQuestsAPI.rl("tasks/tank");
-    public static final Identifier FE_ENERGY_EMPTY_TEXTURE = FTBQuestsAPI.rl("tasks/fe_empty");
-    public static final Identifier FE_ENERGY_FULL_TEXTURE = FTBQuestsAPI.rl("tasks/fe_full");
-    public static final Identifier TR_ENERGY_EMPTY_TEXTURE = FTBQuestsAPI.rl("tasks/ic2_empty");
-    public static final Identifier TR_ENERGY_FULL_TEXTURE = FTBQuestsAPI.rl("tasks/ic2_full");
+    public static final Identifier INPUT_ONLY_TEXTURE = FTBQuestsAPI.id("tasks/input_only");
+    public static final Identifier TANK_TEXTURE = FTBQuestsAPI.id("tasks/tank");
+    public static final Identifier FE_ENERGY_EMPTY_TEXTURE = FTBQuestsAPI.id("tasks/fe_empty");
+    public static final Identifier FE_ENERGY_FULL_TEXTURE = FTBQuestsAPI.id("tasks/fe_full");
+    public static final Identifier TR_ENERGY_EMPTY_TEXTURE = FTBQuestsAPI.id("tasks/ic2_empty");
+    public static final Identifier TR_ENERGY_FULL_TEXTURE = FTBQuestsAPI.id("tasks/ic2_full");
 
     private final BlockEntityRendererProvider.Context context;
 

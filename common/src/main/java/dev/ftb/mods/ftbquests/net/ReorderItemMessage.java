@@ -19,7 +19,7 @@ import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
  * @param moveRight true to move right, false to move left
  */
 public record ReorderItemMessage(long id, boolean moveRight) implements CustomPacketPayload {
-    public static final Type<ReorderItemMessage> TYPE = new Type<>(FTBQuestsAPI.rl("reorder_item"));
+    public static final Type<ReorderItemMessage> TYPE = new Type<>(FTBQuestsAPI.id("reorder_item"));
     public static final StreamCodec<FriendlyByteBuf, ReorderItemMessage> STREAM_CODEC = StreamCodec.composite(
             ByteBufCodecs.VAR_LONG, ReorderItemMessage::id,
             ByteBufCodecs.BOOL, ReorderItemMessage::moveRight,
@@ -36,14 +36,14 @@ public record ReorderItemMessage(long id, boolean moveRight) implements CustomPa
                     } else {
                         task.getQuest().moveTaskLeft(task);
                     }
-                    NetworkHelper.sendToAll(context.getPlayer().getServer(), ReorderItemResponseMessage.tasks(task.getQuest()));
+                    NetworkHelper.sendToAll(context.getPlayer().level().getServer(), ReorderItemResponseMessage.tasks(task.getQuest()));
                 } else if (object instanceof Reward reward) {
                     if (message.moveRight) {
                         reward.getQuest().moveRewardRight(reward);
                     } else {
                         reward.getQuest().moveRewardLeft(reward);
                     }
-                    NetworkHelper.sendToAll(context.getPlayer().getServer(), ReorderItemResponseMessage.rewards(reward.getQuest()));
+                    NetworkHelper.sendToAll(context.getPlayer().level().getServer(), ReorderItemResponseMessage.rewards(reward.getQuest()));
                 }
             }
         });

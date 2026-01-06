@@ -49,7 +49,7 @@ public class DimensionTask extends AbstractBooleanTask {
 	@Override
 	public void readData(CompoundTag nbt, HolderLookup.Provider provider) {
 		super.readData(nbt, provider);
-		dimension = ResourceKey.create(Registries.DIMENSION, Identifier.tryParse(nbt.getString("dimension")));
+		dimension = ResourceKey.create(Registries.DIMENSION, Identifier.tryParse(nbt.getString("dimension").orElseThrow()));
 	}
 
 	@Override

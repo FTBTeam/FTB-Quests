@@ -1,5 +1,7 @@
 package dev.ftb.mods.ftbquests.block.entity;
 
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
 import dev.ftb.mods.ftbquests.item.LootCrateItem;
 import dev.ftb.mods.ftbquests.quest.loot.LootCrate;
 import dev.ftb.mods.ftbquests.quest.loot.WeightedReward;
@@ -18,6 +20,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.component.ItemContainerContents;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.storage.ValueInput;
 import net.minecraft.world.level.storage.ValueOutput;
 
 import java.util.*;
@@ -33,37 +36,39 @@ public class LootCrateOpenerBlockEntity extends BlockEntity {
         super(ModBlockEntityTypes.LOOT_CRATE_OPENER.get(), blockPos, blockState);
     }
 
+    private record StackWithAmount(ItemStack stack, int amount) {
+        public static final Codec<StackWithAmount> CODEC = RecordCodecBuilder.create(instance -> instance.group(
+                ItemStack.CODEC.fieldOf("stack").forGetter(StackWithAmount::stack),
+                Codec.INT.fieldOf("amount").forGetter(StackWithAmount::amount)
+        ).apply(instance, StackWithAmount::new));
+    }
+
     @Override
-    public void loadAdditional(CompoundTag compoundTag, HolderLookup.Provider provider) {
-        super.loadAdditional(compoundTag, provider);
+    public void loadAdditional(ValueInput valueInput) {
+        super.loadAdditional(valueInput);
 
         outputs.clear();
-        ListTag itemTag = compoundTag.getList("Items", Tag.TAG_COMPOUND);
-        itemTag.forEach(el -> {
-            if (el instanceof CompoundTag tag) {
-                ItemStack stack = ItemStack.parseOptional(provider, tag.getCompound("item"));
-                int amount = tag.getInt("amount");
-                outputs.put(new ItemEntry(stack), amount);
-            }
+        valueInput.read("Items", StackWithAmount.CODEC).ifPresent(stack -> {
+            outputs.put(new ItemEntry(stack.stack()), stack.amount());
         });
 
-        owner = compoundTag.hasUUID("Owner") ? compoundTag.getUUID("Owner") : null;
+        owner = valueInput.read("Owner", UUIDUtil.CODEC).orElse(null);
     }
 
     @Override
     protected void saveAdditional(ValueOutput valueOutput) {
         super.saveAdditional(valueOutput);
 
-        ListTag itemTag = new ListTag();
+        List<StackWithAmount> stacks = new ArrayList<>();
         outputs.forEach((item, amount) -> {
-            CompoundTag tag = new CompoundTag();
-            tag.store("item", ItemStack.CODEC, item.stack);
-            tag.putInt("amount", amount);
-            itemTag.add(tag);
+            var entry = new StackWithAmount(item.stack, amount);
+            stacks.add(entry);
         });
 
-        // TODO: @since 21.11 figure out how we write lists.
-        if (!itemTag.isEmpty()) valueOutput.list("Items", itemTag);
+        if (!stacks.isEmpty()) {
+            valueOutput.store("Items", StackWithAmount.CODEC.listOf(), stacks);
+        }
+
         if (owner != null) valueOutput.store("Owner", UUIDUtil.CODEC, owner);
     }
 
@@ -126,7 +131,7 @@ public class LootCrateOpenerBlockEntity extends BlockEntity {
     }
 
     protected ItemStack _insertItem(int slot, ItemStack stack, boolean simulate) {
-        if (slot != 0 || level == null || level.getServer() == null || level.isClientSide || outputs.size() >= MAX_ITEM_TYPES) {
+        if (slot != 0 || level == null || level.getServer() == null || level.isClientSide() || outputs.size() >= MAX_ITEM_TYPES) {
             return stack;
         }
 
@@ -164,7 +169,7 @@ public class LootCrateOpenerBlockEntity extends BlockEntity {
     }
 
     protected boolean _isItemValid(int slot, ItemStack stack) {
-        return slot == 0 && LootCrateItem.getCrate(stack, level.isClientSide) != null;
+        return slot == 0 && LootCrateItem.getCrate(stack, level.isClientSide()) != null;
     }
 
     protected ItemStack _extractItem(int slot, int amount, boolean simulate) {
@@ -179,7 +184,7 @@ public class LootCrateOpenerBlockEntity extends BlockEntity {
         int toExtract = Math.min(count, Math.min(amount, stack1.getMaxStackSize()));
         stack1.setCount(toExtract);
 
-        if (!simulate && !level.isClientSide) {
+        if (!simulate && !level.isClientSide()) {
             count -= toExtract;
             if (count <= 0) {
                 outputs.remove(entry);

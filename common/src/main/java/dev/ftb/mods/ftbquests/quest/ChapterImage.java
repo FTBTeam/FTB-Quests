@@ -155,27 +155,29 @@ public final class ChapterImage implements Movable {
 	}
 
 	public void readData(CompoundTag nbt) {
-		x = nbt.getDouble("x");
-		y = nbt.getDouble("y");
-		width = nbt.getDouble("width");
-		height = nbt.getDouble("height");
-		rotation = nbt.getDouble("rotation");
-		setImage(Icon.getIcon(nbt.getString("image")));
-		color = nbt.contains("color") ? Color4I.rgb(nbt.getInt("color")) : Color4I.WHITE;
-		alpha = nbt.contains("alpha") ? nbt.getInt("alpha") : 255;
-		order = nbt.getInt("order");
+		x = nbt.getDouble("x").orElseThrow();
+		y = nbt.getDouble("y").orElseThrow();
+		width = nbt.getDouble("width").orElseThrow();
+		height = nbt.getDouble("height").orElseThrow();
+		rotation = nbt.getDouble("rotation").orElseThrow();
+		setImage(Icon.getIcon(nbt.getString("image").orElseThrow()));
+		color = nbt.getInt("color").map(Color4I::rgb).orElse(Color4I.WHITE);
+		alpha = nbt.getInt("alpha").orElse(255);
+		order = nbt.getInt("order").orElse(0);
 
 		hover.clear();
-		ListTag hoverTag = nbt.getList("hover", Tag.TAG_STRING);
-		for (int i = 0; i < hoverTag.size(); i++) {
-			hover.add(hoverTag.getString(i));
-		}
+		nbt.getList("hover").ifPresent(hoverList -> {
+			for (Tag t : hoverList) {
+				t.asString().ifPresent(hover::add);
+			}
+		});
 
-		click = nbt.getString("click");
-		editorsOnly = nbt.getBoolean("dev");
-		alignToCorner = nbt.getBoolean("corner");
-
-		dependency = nbt.contains("dependency") ? chapter.file.getQuest(chapter.file.getID(nbt.get("dependency"))) : null;
+		click = nbt.getStringOr("click", "");
+		editorsOnly = nbt.getBooleanOr("dev", false);
+		alignToCorner = nbt.getBooleanOr("corner", false);
+		dependency = nbt.getString("dependency")
+				.map(dependency -> chapter.file.getQuest(chapter.file.getID(dependency)))
+				.orElse(null);
 	}
 
 	public void writeNetData(FriendlyByteBuf buffer) {
@@ -299,8 +301,8 @@ public final class ChapterImage implements Movable {
 		if (alignToCorner) {
 			image.withColor(Color4I.WHITE.withAlpha(50)).draw(graphics, 0, 0, 1, 1);
 		} else {
-			poseStack.translate(0.5D, 0.5D, 0);
-			poseStack.scale(0.5F, 0.5F, 1);
+			poseStack.translate(0.5f, 0.5f);
+			poseStack.scale(0.5F, 0.5F);
 			image.withColor(Color4I.WHITE.withAlpha(50)).draw(graphics, -1, -1, 2, 2);
 		}
 
@@ -308,7 +310,7 @@ public final class ChapterImage implements Movable {
 //				.withColor(Color4I.WHITE.withAlpha(30))
 //				.draw(graphics, 0, 0, 1, 1);
 
-		poseStack.popPose();
+		poseStack.popMatrix();
 	}
 
 	@Override

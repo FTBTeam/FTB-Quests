@@ -14,7 +14,7 @@ import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import java.util.UUID;
 
 public record ClearRepeatCooldownMessage(long id) implements CustomPacketPayload {
-	public static final Type<ClearRepeatCooldownMessage> TYPE = new Type<>(FTBQuestsAPI.rl("clear_repeat_cooldown"));
+	public static final Type<ClearRepeatCooldownMessage> TYPE = new Type<>(FTBQuestsAPI.id("clear_repeat_cooldown"));
 
 	public static final StreamCodec<RegistryFriendlyByteBuf, ClearRepeatCooldownMessage> STREAM_CODEC = StreamCodec.composite(
 			ByteBufCodecs.VAR_LONG, ClearRepeatCooldownMessage::id,

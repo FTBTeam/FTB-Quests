@@ -60,10 +60,10 @@ public class LocationTask extends AbstractBooleanTask {
 	@Override
 	public void readData(CompoundTag nbt, HolderLookup.Provider provider) {
 		super.readData(nbt, provider);
-		dimension = ResourceKey.create(Registries.DIMENSION, Identifier.tryParse(nbt.getString("dimension")));
-		ignoreDimension = nbt.getBoolean("ignore_dimension");
+		dimension = ResourceKey.create(Registries.DIMENSION, Identifier.tryParse(nbt.getString("dimension").orElseThrow()));
+		ignoreDimension = nbt.getBoolean("ignore_dimension").orElseThrow();
 
-		int[] pos = nbt.getIntArray("position");
+		int[] pos = nbt.getIntArray("position").orElseThrow();
 
 		if (pos.length == 3) {
 			x = pos[0];
@@ -71,7 +71,7 @@ public class LocationTask extends AbstractBooleanTask {
 			z = pos[2];
 		}
 
-		int[] size = nbt.getIntArray("size");
+		int[] size = nbt.getIntArray("size").orElseThrow();
 
 		if (pos.length == 3) {
 			w = size[0];

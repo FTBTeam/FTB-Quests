@@ -36,15 +36,15 @@ public class AdvancementReward extends Reward {
 	@Override
 	public void writeData(CompoundTag nbt, HolderLookup.Provider provider) {
 		super.writeData(nbt, provider);
-		nbt.putString("advancement", advancement.toString());
+		nbt.store("advancement", Identifier.CODEC, advancement);
 		nbt.putString("criterion", criterion);
 	}
 
 	@Override
 	public void readData(CompoundTag nbt, HolderLookup.Provider provider) {
 		super.readData(nbt, provider);
-		advancement = Identifier.tryParse(nbt.getString("advancement"));
-		criterion = nbt.getString("criterion");
+		advancement = nbt.read("advancement", Identifier.CODEC).orElseThrow();
+		criterion = nbt.getString("criterion").orElseThrow();
 	}
 
 	@Override

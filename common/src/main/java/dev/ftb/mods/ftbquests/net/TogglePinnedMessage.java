@@ -10,7 +10,7 @@ import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.server.level.ServerPlayer;
 
 public record TogglePinnedMessage(long id) implements CustomPacketPayload {
-	public static final Type<TogglePinnedMessage> TYPE = new Type<>(FTBQuestsAPI.rl("toggle_pinned_message"));
+	public static final Type<TogglePinnedMessage> TYPE = new Type<>(FTBQuestsAPI.id("toggle_pinned_message"));
 
 	public static final StreamCodec<FriendlyByteBuf, TogglePinnedMessage> STREAM_CODEC = StreamCodec.composite(
 			ByteBufCodecs.VAR_LONG, TogglePinnedMessage::id,

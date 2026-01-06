@@ -20,6 +20,7 @@ import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.util.ExtraCodecs;
 
 public class AdvancementTask extends AbstractBooleanTask {
 	private Identifier advancement = Identifier.parse("minecraft:story/root");
@@ -37,15 +38,15 @@ public class AdvancementTask extends AbstractBooleanTask {
 	@Override
 	public void writeData(CompoundTag nbt, HolderLookup.Provider provider) {
 		super.writeData(nbt, provider);
-		nbt.putString("advancement", advancement.toString());
+		nbt.store("advancement", Identifier.CODEC, advancement);
 		nbt.putString("criterion", criterion);
 	}
 
 	@Override
 	public void readData(CompoundTag nbt, HolderLookup.Provider provider) {
 		super.readData(nbt, provider);
-		advancement = Identifier.tryParse(nbt.getString("advancement"));
-		criterion = nbt.getString("criterion");
+		advancement = nbt.read("advancement", Identifier.CODEC).orElseThrow();
+		criterion = nbt.getString("criterion").orElseThrow();
 	}
 
 	@Override
@@ -117,7 +118,7 @@ public class AdvancementTask extends AbstractBooleanTask {
 
 	@Override
 	public boolean canSubmit(TeamData teamData, ServerPlayer player) {
-		AdvancementHolder advancementHolder = player.server.getAdvancements().get(advancement);
+		AdvancementHolder advancementHolder = player.level().getServer().getAdvancements().get(advancement);
 		if (advancementHolder == null) {
 			return false;
 		}

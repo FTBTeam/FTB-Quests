@@ -43,8 +43,8 @@ public class StageTask extends AbstractBooleanTask {
 	@Override
 	public void readData(CompoundTag nbt, HolderLookup.Provider provider) {
 		super.readData(nbt, provider);
-		stage = nbt.getString("stage");
-		teamStage = nbt.getBoolean("team_stage");
+		stage = nbt.getString("stage").orElseThrow();
+		teamStage = nbt.getBooleanOr("team_stage", false);
 	}
 
 	@Override

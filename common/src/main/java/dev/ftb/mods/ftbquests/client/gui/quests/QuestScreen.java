@@ -363,7 +363,7 @@ public class QuestScreen extends BaseScreen {
 
 	public static void displayError(Component error) {
 //		Minecraft.getInstance().getToasts().addToast(new SystemToast(SystemToast.SystemToastIds.TUTORIAL_HINT, Component.translatable("ftbquests.gui.error"), error));
-		Minecraft.getInstance().getToasts().addToast(new CustomToast(Component.translatable("ftbquests.gui.error"), Icons.BARRIER, error));
+		Minecraft.getInstance().getToastManager().addToast(new CustomToast(Component.translatable("ftbquests.gui.error"), Icons.BARRIER, error));
 	}
 
 	private boolean moveSelectedQuests(double x, double y) {
@@ -395,7 +395,7 @@ public class QuestScreen extends BaseScreen {
 
 		if (toCopy != null) {
 			toCopy.copyToClipboard();
-			Minecraft.getInstance().getToasts().addToast(new CustomToast(Component.translatable("ftbquests.quest.copied"),
+			Minecraft.getInstance().getToastManager().addToast(new CustomToast(Component.translatable("ftbquests.quest.copied"),
 					Icons.INFO, Component.literal(toCopy.getTitle().getString())));
 			return true;
 		}
@@ -464,7 +464,7 @@ public class QuestScreen extends BaseScreen {
 	public boolean keyPressed(Key key) {
 		if (super.keyPressed(key)) {
 			return true;
-		} else if (FTBQuestsClient.KEY_QUESTS.matches(key.keyCode, key.scanCode)) {
+		} else if (FTBQuestsClient.KEY_QUESTS.matches(key.originalEvent())) {
 			closeGui(true);
 			return true;
 		}
@@ -485,12 +485,12 @@ public class QuestScreen extends BaseScreen {
 			return true;
 		}
 
-		if (key.is(GLFW.GLFW_KEY_R) && key.modifiers.onlyControl()) {
+		if (key.is(GLFW.GLFW_KEY_R) && key.modifiers().onlyControl()) {
 			grid = !grid;
 			return true;
 		}
 
-		if (key.is(GLFW.GLFW_KEY_F) && key.modifiers.onlyControl()) {
+		if (key.is(GLFW.GLFW_KEY_F) && key.modifiers().onlyControl()) {
 			openQuestSelectionGUI();
 			return true;
 		}
@@ -500,8 +500,8 @@ public class QuestScreen extends BaseScreen {
 			return true;
 		}
 
-		if (key.keyCode >= GLFW.GLFW_KEY_1 && key.keyCode <= GLFW.GLFW_KEY_9) {
-			int i = key.keyCode - GLFW.GLFW_KEY_1;
+		if (key.keyCode() >= GLFW.GLFW_KEY_1 && key.keyCode() <= GLFW.GLFW_KEY_9) {
+			int i = key.keyCode() - GLFW.GLFW_KEY_1;
 
 			if (i < visibleChapters.size()) {
 				selectChapter(visibleChapters.get(i));
@@ -511,7 +511,7 @@ public class QuestScreen extends BaseScreen {
 			return true;
 		}
 
-		if (key.is(GLFW.GLFW_KEY_P) && key.modifiers.onlyControl()) {
+		if (key.is(GLFW.GLFW_KEY_P) && key.modifiers().onlyControl()) {
 			FTBQuestsClientConfig.openSettings(doesGuiPauseGame());
 		}
 
@@ -528,10 +528,10 @@ public class QuestScreen extends BaseScreen {
 			} else {
 				deleteSelectedObjects();
 			}
-		} else if (key.modifiers.control()) {
-			double step = key.modifiers.shift() ? 0.1D : 0.5D;
+		} else if (key.modifiers().control()) {
+			double step = key.modifiers().shift() ? 0.1D : 0.5D;
 
-			switch (key.keyCode) {
+			switch (key.keyCode()) {
 				case GLFW.GLFW_KEY_A -> {
 					if (selectedChapter != null) {
 						selectedObjects.addAll(selectedChapter.getQuests());
@@ -560,14 +560,14 @@ public class QuestScreen extends BaseScreen {
 					return copyObjectsToClipboard();
 				}
 				case GLFW.GLFW_KEY_V -> {
-					if (key.modifiers.alt()) {
+					if (key.modifiers().alt()) {
 						return pasteSelectedQuestLinks();
 					} else {
-						return pasteSelectedQuest(!key.modifiers.shift());
+						return pasteSelectedQuest(!key.modifiers().shift());
 					}
 				}
 				case GLFW.GLFW_KEY_T -> {
-					if (key.modifiers.control()) {
+					if (key.modifiers().control()) {
 						new RewardTablesScreen(this).openGui();
 						return true;
 					}
@@ -698,7 +698,7 @@ public class QuestScreen extends BaseScreen {
 		int y2 = Math.max(prevMouseY, mouseY);
 		Rect2i rect = new Rect2i(x1, y1, x2 - x1, y2 - y1);
 
-		if (!Screen.hasControlDown()) selectedObjects.clear();
+		if (!Minecraft.getInstance().hasControlDown()) selectedObjects.clear();
 
 		questPanel.getWidgets().forEach(w -> {
 			if (w instanceof QuestPositionableButton qb && rect.contains((int) (w.getX() - scrollX), (int) (w.getY() - scrollY))) {

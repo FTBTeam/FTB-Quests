@@ -97,10 +97,13 @@ public abstract class Reward extends QuestObjectBase {
 	public void readData(CompoundTag nbt, HolderLookup.Provider provider) {
 		super.readData(nbt, provider);
 		team = Tristate.read(nbt, "team_reward");
-		autoclaim = RewardAutoClaim.NAME_MAP.get(nbt.getString("auto"));
-		excludeFromClaimAll = nbt.getBoolean("exclude_from_claim_all");
-		ignoreRewardBlocking = nbt.getBoolean("ignore_reward_blocking");
-		disableRewardScreenBlur	= nbt.getBoolean("disable_reward_screen_blur");
+		autoclaim = nbt.getString("auto")
+				.map(RewardAutoClaim.NAME_MAP::get)
+				.orElse(RewardAutoClaim.DEFAULT);
+
+		excludeFromClaimAll = nbt.getBooleanOr("exclude_from_claim_all", getType().getExcludeFromListRewards());
+		ignoreRewardBlocking = nbt.getBooleanOr("ignore_reward_blocking", false);
+		disableRewardScreenBlur	= nbt.getBooleanOr("disable_reward_screen_blur", false);
 	}
 
 	@Override

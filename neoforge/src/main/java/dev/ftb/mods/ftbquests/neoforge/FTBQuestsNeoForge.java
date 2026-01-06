@@ -39,7 +39,7 @@ public class FTBQuestsNeoForge {
 
 		FTBQuests quests = new FTBQuests();
 
-		ForgeEnergyTask.TYPE = TaskTypes.register(FTBQuestsAPI.rl("forge_energy"), ForgeEnergyTask::new,
+		ForgeEnergyTask.TYPE = TaskTypes.register(FTBQuestsAPI.id("forge_energy"), ForgeEnergyTask::new,
 				() -> Icon.getIcon(ForgeEnergyTask.EMPTY_TEXTURE.toString()).combineWith(Icon.getIcon(ForgeEnergyTask.FULL_TEXTURE.toString())));
 
 		modEventBus.<FMLCommonSetupEvent>addListener(event -> quests.setup());

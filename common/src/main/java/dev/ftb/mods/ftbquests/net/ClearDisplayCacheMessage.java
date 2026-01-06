@@ -12,7 +12,7 @@ import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.server.MinecraftServer;
 
 public class ClearDisplayCacheMessage implements CustomPacketPayload {
-    public static final Type<ClearDisplayCacheMessage> TYPE = new Type<>(FTBQuestsAPI.rl("clear_display_cache_message"));
+    public static final Type<ClearDisplayCacheMessage> TYPE = new Type<>(FTBQuestsAPI.id("clear_display_cache_message"));
 
     private static final ClearDisplayCacheMessage INSTANCE = new ClearDisplayCacheMessage();
 

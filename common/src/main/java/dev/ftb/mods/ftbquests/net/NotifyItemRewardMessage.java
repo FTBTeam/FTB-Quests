@@ -10,7 +10,7 @@ import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.world.item.ItemStack;
 
 public record NotifyItemRewardMessage(ItemStack stack, int count, boolean disableBlur) implements CustomPacketPayload {
-	public static final Type<NotifyItemRewardMessage> TYPE = new Type<>(FTBQuestsAPI.rl("notify_item_reward_message"));
+	public static final Type<NotifyItemRewardMessage> TYPE = new Type<>(FTBQuestsAPI.id("notify_item_reward_message"));
 
 	public static final StreamCodec<RegistryFriendlyByteBuf, NotifyItemRewardMessage> STREAM_CODEC = StreamCodec.composite(
 			ItemStack.OPTIONAL_STREAM_CODEC, NotifyItemRewardMessage::stack,

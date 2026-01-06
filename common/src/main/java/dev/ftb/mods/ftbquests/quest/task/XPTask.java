@@ -53,8 +53,8 @@ public class XPTask extends Task implements ISingleLongValueTask {
 	@Override
 	public void readData(CompoundTag nbt, HolderLookup.Provider provider) {
 		super.readData(nbt, provider);
-		value = nbt.getLong("value");
-		points = nbt.getBoolean("points");
+		value = nbt.getLong("value").orElseThrow();
+		points = nbt.getBoolean("points").orElseThrow();
 	}
 
 	@Override

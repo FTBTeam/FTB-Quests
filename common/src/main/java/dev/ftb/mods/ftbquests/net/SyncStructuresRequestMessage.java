@@ -8,7 +8,7 @@ import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.server.level.ServerPlayer;
 
 public record SyncStructuresRequestMessage() implements CustomPacketPayload {
-    public static final Type<SyncStructuresRequestMessage> TYPE = new Type<>(FTBQuestsAPI.rl("sync_structures_request_message"));
+    public static final Type<SyncStructuresRequestMessage> TYPE = new Type<>(FTBQuestsAPI.id("sync_structures_request_message"));
 
     public static final SyncStructuresRequestMessage INSTANCE = new SyncStructuresRequestMessage();
 
@@ -21,8 +21,8 @@ public record SyncStructuresRequestMessage() implements CustomPacketPayload {
 
     public static void handle(SyncStructuresRequestMessage message, NetworkManager.PacketContext context) {
         context.queue(() -> {
-            if (context.getPlayer() instanceof ServerPlayer sp && sp.getServer() != null) {
-                NetworkManager.sendToPlayer(sp, SyncStructuresResponseMessage.create(sp.getServer()));
+            if (context.getPlayer() instanceof ServerPlayer sp && sp.level().getServer() != null) {
+                NetworkManager.sendToPlayer(sp, SyncStructuresResponseMessage.create(sp.level().getServer()));
             }
         });
     }

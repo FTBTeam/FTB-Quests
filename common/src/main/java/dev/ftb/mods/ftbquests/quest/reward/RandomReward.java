@@ -62,16 +62,17 @@ public class RandomReward extends Reward {
 		table = null;
 		BaseQuestFile file = getQuestFile();
 
-		long id = nbt.getLong("table_id");
-		if (id != 0L) {
-			table = file.getRewardTable(id);
-		}
+		nbt.getLong("table_id").ifPresent(tableId -> {
+			if (id != 0L) {
+				table = file.getRewardTable(id);
+			}
 
-		if (table == null && nbt.contains("table_data")) {
-			table = new RewardTable(-1L, file);
-			table.readData(nbt.getCompound("table_data"), provider);
-			table.setRawTitle("Internal");
-		}
+			if (table == null) return;
+			nbt.getCompound("table_data").ifPresent(tag -> {
+				table.readData(tag, provider);
+				table.setRawTitle("Internal");
+			});
+		});
 	}
 
 	@Nullable

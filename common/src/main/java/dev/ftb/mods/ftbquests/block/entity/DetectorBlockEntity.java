@@ -12,6 +12,8 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.storage.ValueInput;
+import net.minecraft.world.level.storage.ValueOutput;
 import net.minecraft.world.phys.AABB;
 
 public class DetectorBlockEntity extends BlockEntity {
@@ -23,17 +25,17 @@ public class DetectorBlockEntity extends BlockEntity {
 	}
 
 	@Override
-	public void loadAdditional(CompoundTag tag, HolderLookup.Provider provider) {
-		super.loadAdditional(tag, provider);
+	public void loadAdditional(ValueInput input) {
+		super.loadAdditional(input);
 
-		objectId = QuestObjectBase.parseCodeString(tag.getString("Object"));
-		radius = tag.getInt("Radius");
+		objectId = QuestObjectBase.parseCodeString(input.getString("Object").orElseThrow());
+		radius = input.getIntOr("Radius", 0);
 	}
 
 	@Override
-	public void saveAdditional(CompoundTag tag, HolderLookup.Provider provider) {
-		tag.putString("Object", QuestObjectBase.getCodeString(objectId));
-		tag.putInt("Radius", radius);
+	public void saveAdditional(ValueOutput output) {
+		output.putString("Object", QuestObjectBase.getCodeString(objectId));
+		output.putInt("Radius", radius);
 	}
 
 	public void update(String idStr) {

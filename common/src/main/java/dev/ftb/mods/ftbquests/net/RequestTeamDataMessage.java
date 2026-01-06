@@ -9,7 +9,7 @@ import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.server.level.ServerPlayer;
 
 public record RequestTeamDataMessage() implements CustomPacketPayload {
-    public static final Type<RequestTeamDataMessage> TYPE = new Type<>(FTBQuestsAPI.rl("request_team_data_message"));
+    public static final Type<RequestTeamDataMessage> TYPE = new Type<>(FTBQuestsAPI.id("request_team_data_message"));
 
     public static final RequestTeamDataMessage INSTANCE = new RequestTeamDataMessage();
 

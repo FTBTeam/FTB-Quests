@@ -15,7 +15,7 @@ import net.minecraft.server.level.ServerPlayer;
 import java.util.UUID;
 
 public record GetEmergencyItemsMessage() implements CustomPacketPayload {
-	public static final Type<GetEmergencyItemsMessage> TYPE = new Type<>(FTBQuestsAPI.rl("get_emergency_items_message"));
+	public static final Type<GetEmergencyItemsMessage> TYPE = new Type<>(FTBQuestsAPI.id("get_emergency_items_message"));
 
 	public static final GetEmergencyItemsMessage INSTANCE = new GetEmergencyItemsMessage();
 

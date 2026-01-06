@@ -9,7 +9,7 @@ import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 
 public record MoveMovableResponseMessage(long id, long chapterId, double x, double y) implements CustomPacketPayload {
-	public static final Type<MoveMovableResponseMessage> TYPE = new Type<>(FTBQuestsAPI.rl("move_movable_response_message"));
+	public static final Type<MoveMovableResponseMessage> TYPE = new Type<>(FTBQuestsAPI.id("move_movable_response_message"));
 
 	public static final StreamCodec<FriendlyByteBuf, MoveMovableResponseMessage> STREAM_CODEC = StreamCodec.composite(
 			ByteBufCodecs.VAR_LONG, MoveMovableResponseMessage::id,

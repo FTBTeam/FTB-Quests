@@ -17,7 +17,7 @@ import net.minecraft.server.level.ServerPlayer;
  * @param locale the player's editing locale (from config, not necessarily the same as their minecraft language)
  */
 public record RequestTranslationTableMessage(String locale) implements CustomPacketPayload {
-    public static final Type<RequestTranslationTableMessage> TYPE = new Type<>(FTBQuestsAPI.rl("request_translation_table"));
+    public static final Type<RequestTranslationTableMessage> TYPE = new Type<>(FTBQuestsAPI.id("request_translation_table"));
 
     public static final StreamCodec<FriendlyByteBuf, RequestTranslationTableMessage> STREAM_CODEC = StreamCodec.composite(
             ByteBufCodecs.STRING_UTF8, RequestTranslationTableMessage::locale,

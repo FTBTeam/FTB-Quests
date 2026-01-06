@@ -16,6 +16,7 @@ import dev.ftb.mods.ftbquests.quest.TeamData;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.ChatFormatting;
+import net.minecraft.core.Holder;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
@@ -37,10 +38,7 @@ import net.minecraft.world.item.SpawnEggItem;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class KillTask extends Task {
 	private static final Identifier ZOMBIE = Identifier.withDefaultNamespace("zombie");
@@ -132,10 +130,16 @@ public class KillTask extends Task {
 
 	private static Icon getIconForEntityType(Identifier typeId) {
 		return entityIcons.computeIfAbsent(typeId, k -> {
-			EntityType<?> entityType = BuiltInRegistries.ENTITY_TYPE.get(typeId);
+			Optional<Holder.Reference<EntityType<?>>> entityTypeOpt = BuiltInRegistries.ENTITY_TYPE.get(typeId);
+			if (entityTypeOpt.isEmpty()) {
+				return Icons.BARRIER;
+			}
+
+			var entityType = entityTypeOpt.get().value();
 			if (entityType.equals(EntityType.PLAYER)) {
 				return Icons.PLAYER;
 			}
+
 			Item item = SpawnEggItem.byId(entityType);
 			if (item == null) {
 				Entity e = entityType.create(FTBQuestsClient.getClientLevel(), EntitySpawnReason.TRIGGERED);

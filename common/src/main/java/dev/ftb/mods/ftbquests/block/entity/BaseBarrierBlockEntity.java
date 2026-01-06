@@ -54,6 +54,7 @@ import org.jetbrains.annotations.Nullable;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.function.Consumer;
 
 import static dev.ftb.mods.ftbquests.block.QuestBarrierBlock.OPEN;
 
@@ -255,12 +256,12 @@ public abstract class BaseBarrierBlockEntity extends EditableBlockEntity {
 				BarrierSavedData::new
 		);
 
-		public void addTooltipInfo(BaseBarrierBlockEntity.BarrierSavedData data, List<Component> tooltip, String what) {
-			tooltip.add(Component.translatable("item.ftbquests.barrier.object." + what, data.objStr().isEmpty() ? "-" : data.objStr).withStyle(ChatFormatting.GRAY));
+		public void addTooltipInfo(BaseBarrierBlockEntity.BarrierSavedData data, Consumer<Component> tooltip, String what) {
+			tooltip.accept(Component.translatable("item.ftbquests.barrier.object." + what, data.objStr().isEmpty() ? "-" : data.objStr).withStyle(ChatFormatting.GRAY));
 			if (Platform.isForgeLike() && !data.skin().isEmpty()) {
-				tooltip.add(Component.translatable("item.ftbquests.barrier.skin", data.skin().getDisplayName()).withStyle(ChatFormatting.GRAY));
+				tooltip.accept(Component.translatable("item.ftbquests.barrier.skin", data.skin().getDisplayName()).withStyle(ChatFormatting.GRAY));
 			}
-			tooltip.add(Component.translatable("item.ftbquests.barrier.invis_when_open", data.invisibleWhenOpen()).withStyle(ChatFormatting.GRAY));
+			tooltip.accept(Component.translatable("item.ftbquests.barrier.invis_when_open", data.invisibleWhenOpen()).withStyle(ChatFormatting.GRAY));
 		}
 	}
 

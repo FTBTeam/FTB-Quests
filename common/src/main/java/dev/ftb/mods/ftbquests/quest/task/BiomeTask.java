@@ -17,6 +17,7 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.resources.Identifier;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.tags.TagKey;
@@ -52,7 +53,7 @@ public class BiomeTask extends AbstractBooleanTask {
 	@Override
 	public void readData(CompoundTag nbt, HolderLookup.Provider provider) {
 		super.readData(nbt, provider);
-		setBiome(nbt.getString("biome"));
+		setBiome(nbt.getString("biome").orElseThrow());
 	}
 
 	@Override
@@ -71,7 +72,7 @@ public class BiomeTask extends AbstractBooleanTask {
 	@Environment(EnvType.CLIENT)
 	public void fillConfigGroup(ConfigGroup config) {
 		super.fillConfigGroup(config);
-		config.addEnum("biome", getBiome(), this::setBiome, NameMap.of(DEFAULT_BIOME.location().toString(), getKnownBiomes()).create());
+		config.addEnum("biome", getBiome(), this::setBiome, NameMap.of(DEFAULT_BIOME.identifier().toString(), getKnownBiomes()).create());
 	}
 
 	@Override
@@ -100,23 +101,23 @@ public class BiomeTask extends AbstractBooleanTask {
 		return biome.map(
 				key -> biomeHolder.unwrapKey().map(k -> k == key).orElse(false),
 				tagKey -> {
-					var reg = player.level().registryAccess().registry(Registries.BIOME).orElseThrow();
-					return reg.getTag(tagKey).map(holderSet -> holderSet.contains(biomeHolder)).orElse(false);
+					var reg = player.level().registryAccess().getOrThrow(Registries.BIOME).value();
+					return reg.get(tagKey).map(holderSet -> holderSet.contains(biomeHolder)).orElse(false);
 				}
 		);
 	}
 
 	private String getBiome() {
 		return biome.map(
-				key -> key.location().toString(),
+				key -> key.identifier().toString(),
 				tagKey -> "#" + tagKey.location()
 		);
 	}
 
 	private void setBiome(String str) {
 		biome = str.startsWith("#") ?
-				Either.right(TagKey.create(Registries.BIOME, safeResourceLocation(str.substring(1), DEFAULT_BIOME.location()))) :
-				Either.left(ResourceKey.create(Registries.BIOME, safeResourceLocation(str, DEFAULT_BIOME.location())));
+				Either.right(TagKey.create(Registries.BIOME, safeResourceLocation(str.substring(1), DEFAULT_BIOME.identifier()))) :
+				Either.left(ResourceKey.create(Registries.BIOME, safeResourceLocation(str, DEFAULT_BIOME.identifier())));
 	}
 
 	private List<String> getKnownBiomes() {
@@ -124,13 +125,13 @@ public class BiomeTask extends AbstractBooleanTask {
 		if (KNOWN_BIOMES.isEmpty()) {
 			RegistryAccess registryAccess = FTBQuestsClient.getClientPlayer().level().registryAccess();
 			KNOWN_BIOMES.addAll(registryAccess
-					.registryOrThrow(Registries.BIOME).registryKeySet().stream()
-					.map(o -> o.location().toString())
+					.getOrThrow(Registries.BIOME).value().keySet().stream()
+					.map(Identifier::toString)
 					.sorted(String::compareTo)
 					.toList()
 			);
 			KNOWN_BIOMES.addAll(registryAccess
-					.registryOrThrow(Registries.BIOME).getTagNames()
+					.getOrThrow(Registries.BIOME).tags()
 					.map(o -> "#" + o.location())
 					.sorted(String::compareTo)
 					.toList()

@@ -316,7 +316,7 @@ public abstract class Task extends QuestObject {
 	public void readData(CompoundTag nbt, HolderLookup.Provider provider) {
 		super.readData(nbt, provider);
 
-		optionalTask = nbt.getBoolean("optional_task");
+		optionalTask = nbt.getBoolean("optional_task").orElse(false);
 	}
 
 	@Override

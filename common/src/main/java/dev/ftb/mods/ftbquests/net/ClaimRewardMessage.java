@@ -11,7 +11,7 @@ import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.server.level.ServerPlayer;
 
 public record ClaimRewardMessage(long id, boolean shouldNotify) implements CustomPacketPayload {
-	public static final Type<ClaimRewardMessage> TYPE = new Type<>(FTBQuestsAPI.rl("claim_reward_message"));
+	public static final Type<ClaimRewardMessage> TYPE = new Type<>(FTBQuestsAPI.id("claim_reward_message"));
 
 	public static final StreamCodec<FriendlyByteBuf, ClaimRewardMessage> STREAM_CODEC = StreamCodec.composite(
 			ByteBufCodecs.VAR_LONG, ClaimRewardMessage::id,

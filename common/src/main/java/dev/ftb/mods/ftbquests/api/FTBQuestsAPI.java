@@ -33,7 +33,7 @@ public class FTBQuestsAPI {
      * @param path the resource location path component
      * @return a new resource location
      */
-    public static Identifier rl(String path) {
+    public static Identifier id(String path) {
         return Identifier.fromNamespaceAndPath(MOD_ID, path);
     }
 

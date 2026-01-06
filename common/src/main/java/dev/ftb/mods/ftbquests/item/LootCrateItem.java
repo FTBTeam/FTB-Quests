@@ -56,7 +56,7 @@ public class LootCrateItem extends Item {
 	@Override
 	public InteractionResult use(Level world, Player player, InteractionHand hand) {
 		ItemStack stack = player.getItemInHand(hand);
-		LootCrate crate = getCrate(stack, player.level().isClientSide);
+		LootCrate crate = getCrate(stack, player.level().isClientSide());
 
 		if (crate == null) {
 			return InteractionResult.FAIL;

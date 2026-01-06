@@ -193,42 +193,42 @@ public final class Chapter extends QuestObject {
 
 	@Override
 	public void readData(CompoundTag nbt, HolderLookup.Provider provider) {
-		filename = nbt.getString("filename");
+		filename = nbt.getString("filename").orElseThrow();
 		super.readData(nbt, provider);
 
-		alwaysInvisible = nbt.getBoolean("always_invisible");
-		defaultQuestShape = nbt.getString("default_quest_shape");
+		alwaysInvisible = nbt.getBooleanOr("always_invisible", false);
+		defaultQuestShape = nbt.getString("default_quest_shape").orElseThrow();
 
 		if (defaultQuestShape.equals("default")) {
 			defaultQuestShape = "";
 		}
 
-		defaultQuestSize = nbt.contains("default_quest_size", SNBTCompoundTag.TAG_DOUBLE) ?
-				nbt.getDouble("default_quest_size") :
-				1D;
+		defaultQuestSize = nbt.getDoubleOr("default_quest_size", 1D);
 
-		defaultHideDependencyLines = nbt.getBoolean("default_hide_dependency_lines");
+		defaultHideDependencyLines = nbt.getBooleanOr("default_hide_dependency_lines", false);
 
-		ListTag imgs = nbt.getList("images", Tag.TAG_COMPOUND);
+		ListTag imgs = nbt.getList("images").orElse(new ListTag());
 
 		images.clear();
 
 		for (int i = 0; i < imgs.size(); i++) {
-			ChapterImage image = new ChapterImage(this);
-			image.readData(imgs.getCompound(i));
-			images.add(image);
+			imgs.getCompound(i).ifPresent(imageComp -> {
+				ChapterImage image = new ChapterImage(this);
+				image.readData(imageComp);
+				images.add(image);
+			});
 		}
 
-		defaultMinWidth = nbt.getInt("default_min_width");
-		progressionMode = ProgressionMode.NAME_MAP.get(nbt.getString("progression_mode"));
+		defaultMinWidth = nbt.getIntOr("default_min_width", 0);
+		progressionMode = nbt.getString("progression_mode").map(ProgressionMode.NAME_MAP::get).orElse(ProgressionMode.DEFAULT);
 		consumeItems = Tristate.read(nbt, "consume_items");
-		hideQuestDetailsUntilStartable = nbt.getBoolean("hide_quest_details_until_startable");
-		hideQuestUntilDepsVisible = nbt.getBoolean("hide_quest_until_deps_visible");
-		hideQuestUntilDepsComplete = nbt.getBoolean("hide_quest_until_deps_complete");
-		hideTextUntilComplete = nbt.getBoolean("hide_text_until_complete");
-		defaultRepeatable = nbt.getBoolean("default_repeatable_quest");
-		requireSequentialTasks = nbt.getBoolean("require_sequential_tasks");
-		autoFocusId = nbt.getString("autofocus_id");
+		hideQuestDetailsUntilStartable = nbt.getBooleanOr("hide_quest_details_until_startable", false);
+		hideQuestUntilDepsVisible = nbt.getBooleanOr("hide_quest_until_deps_visible", false);
+		hideQuestUntilDepsComplete = nbt.getBooleanOr("hide_quest_until_deps_complete", false);
+		hideTextUntilComplete = nbt.getBooleanOr("hide_text_until_complete", false);
+		defaultRepeatable = nbt.getBooleanOr("default_repeatable_quest", false);
+		requireSequentialTasks = nbt.getBooleanOr("require_sequential_tasks", false);
+		autoFocusId = nbt.getStringOr("autofocus_id", "");
 	}
 
 	@Override

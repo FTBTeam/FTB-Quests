@@ -128,9 +128,9 @@ public enum PinnedQuestsTracker {
                 insetX, insetY
         );
 
-        graphics.pose().pushPose();
-        graphics.pose().translate(pos.x(), pos.y(), 100);
-        graphics.pose().scale(scale, scale, 1F);
+        graphics.pose().pushMatrix();
+        graphics.pose().translate(pos.x(), pos.y());
+        graphics.pose().scale(scale, scale);
 
         GuiHelper.drawHollowRect(graphics, 0, 0, width, height, Color4I.BLACK.withAlpha(100), false);
         Color4I.BLACK.withAlpha(100).draw(graphics, 0, 0, width, height);
@@ -148,6 +148,6 @@ public enum PinnedQuestsTracker {
             }
         }
 
-        graphics.pose().popPose();
+        graphics.pose().popMatrix();
     }
 }

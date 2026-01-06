@@ -8,13 +8,14 @@ import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.MinecraftServer;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public record SyncStructuresResponseMessage(List<String> data) implements CustomPacketPayload {
-    public static final Type<SyncStructuresResponseMessage> TYPE = new Type<>(FTBQuestsAPI.rl("sync_structures_response_message"));
+    public static final Type<SyncStructuresResponseMessage> TYPE = new Type<>(FTBQuestsAPI.id("sync_structures_response_message"));
 
     public static final StreamCodec<FriendlyByteBuf, SyncStructuresResponseMessage> STREAM_CODEC = StreamCodec.composite(
             ByteBufCodecs.STRING_UTF8.apply(ByteBufCodecs.list()), SyncStructuresResponseMessage::data,
@@ -24,13 +25,13 @@ public record SyncStructuresResponseMessage(List<String> data) implements Custom
     public static SyncStructuresResponseMessage create(MinecraftServer server) {
         List<String> data = new ArrayList<>();
         data.addAll(server.registryAccess()
-                .registryOrThrow(Registries.STRUCTURE).registryKeySet().stream()
-                .map(o -> o.location().toString())
+                .getOrThrow(Registries.STRUCTURE).value().keySet().stream()
+                .map(Identifier::toString)
                 .sorted(String::compareTo)
                 .toList()
         );
         data.addAll(server.registryAccess()
-                .registryOrThrow(Registries.STRUCTURE).getTagNames()
+                .getOrThrow(Registries.STRUCTURE).tags()
                 .map(o -> "#" + o.location())
                 .sorted(String::compareTo)
                 .toList()

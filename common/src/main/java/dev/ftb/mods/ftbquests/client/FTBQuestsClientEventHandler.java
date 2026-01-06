@@ -48,7 +48,7 @@ import java.util.List;
 import static dev.ftb.mods.ftbquests.client.TaskScreenRenderer.*;
 
 public class FTBQuestsClientEventHandler {
-    private static final Identifier QUESTS_BUTTON = FTBQuestsAPI.rl("quests");
+    private static final Identifier QUESTS_BUTTON = FTBQuestsAPI.id("quests");
 
     static boolean creativeTabRebuildPending = false;
 

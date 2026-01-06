@@ -9,7 +9,7 @@ import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 
 public record ChangeChapterGroupResponseMessage(long id, long group) implements CustomPacketPayload {
-	public static final Type<ChangeChapterGroupResponseMessage> TYPE = new Type<>(FTBQuestsAPI.rl("change_chapter_group_response_message"));
+	public static final Type<ChangeChapterGroupResponseMessage> TYPE = new Type<>(FTBQuestsAPI.id("change_chapter_group_response_message"));
 
 	public static final StreamCodec<FriendlyByteBuf, ChangeChapterGroupResponseMessage> STREAM_CODEC = StreamCodec.composite(
 			ByteBufCodecs.VAR_LONG, ChangeChapterGroupResponseMessage::id,

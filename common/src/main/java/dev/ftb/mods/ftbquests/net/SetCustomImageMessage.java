@@ -12,7 +12,7 @@ import net.minecraft.resources.Identifier;
 import net.minecraft.world.InteractionHand;
 
 public record SetCustomImageMessage(InteractionHand hand, boolean isEntityFace, Identifier texture) implements CustomPacketPayload {
-	public static final Type<SetCustomImageMessage> TYPE = new Type<>(FTBQuestsAPI.rl("set_custom_image_message"));
+	public static final Type<SetCustomImageMessage> TYPE = new Type<>(FTBQuestsAPI.id("set_custom_image_message"));
 
 	public static final StreamCodec<FriendlyByteBuf, SetCustomImageMessage> STREAM_CODEC = StreamCodec.composite(
 			NetworkHelper.enumStreamCodec(InteractionHand.class), SetCustomImageMessage::hand,

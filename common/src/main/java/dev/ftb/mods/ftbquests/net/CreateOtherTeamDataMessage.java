@@ -8,7 +8,7 @@ import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 
 public record CreateOtherTeamDataMessage(TeamDataUpdate dataUpdate) implements CustomPacketPayload {
-    public static final Type<CreateOtherTeamDataMessage> TYPE = new Type<>(FTBQuestsAPI.rl("create_other_team_data_message"));
+    public static final Type<CreateOtherTeamDataMessage> TYPE = new Type<>(FTBQuestsAPI.id("create_other_team_data_message"));
 
     public static final StreamCodec<FriendlyByteBuf, CreateOtherTeamDataMessage> STREAM_CODEC = StreamCodec.composite(
 	    TeamDataUpdate.STREAM_CODEC, CreateOtherTeamDataMessage::dataUpdate,

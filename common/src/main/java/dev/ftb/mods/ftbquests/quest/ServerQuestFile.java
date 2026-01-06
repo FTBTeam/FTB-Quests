@@ -31,6 +31,7 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.storage.LevelResource;
 
+import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Date;
@@ -91,17 +92,20 @@ public class ServerQuestFile extends BaseQuestFile {
 			if (Files.exists(path)) {
 				try (Stream<Path> s = Files.list(path)) {
 					s.filter(p -> p.getFileName().toString().contains("-") && p.getFileName().toString().endsWith(".snbt")).forEach(path1 -> {
-						SNBTCompoundTag nbt = SNBT.read(path1);
-						if (nbt != null) {
+                        try {
+                            var nbt = SNBT.tryRead(path1);
+
 							try {
-								UUID uuid = UndashedUuid.fromString(nbt.getString("uuid"));
+								UUID uuid = UndashedUuid.fromString(nbt.getString("uuid").orElseThrow());
 								TeamData data = new TeamData(uuid, this);
 								addData(data, true);
 								data.deserializeNBT(nbt);
 							} catch (Exception ex) {
 								FTBQuests.LOGGER.error("can't parse progression data for {}: {}", path1, ex.getMessage());
 							}
-						}
+                        } catch (IOException e) {
+                            throw new RuntimeException(e);
+                        }
 					});
 				} catch (Exception ex) {
 					FTBQuests.LOGGER.error("can't read directory {}: {}", path, ex.getMessage());

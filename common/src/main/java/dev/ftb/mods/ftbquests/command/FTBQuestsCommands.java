@@ -22,6 +22,7 @@ import dev.ftb.mods.ftbquests.quest.translation.TranslationKey;
 import dev.ftb.mods.ftbquests.util.InventoryUtil;
 import dev.ftb.mods.ftbquests.util.ProgressChange;
 import net.minecraft.ChatFormatting;
+import net.minecraft.nbt.NbtOps;
 import net.minecraft.server.permissions.Permissions;
 import net.minecraft.util.Util;
 import net.minecraft.commands.CommandSourceStack;
@@ -382,7 +383,7 @@ public class FTBQuestsCommands {
 	}
 
 	private static int generateChapterFromPlayerInv(CommandSourceStack source) throws CommandSyntaxException {
-		return generateMultiItemChapter(source, source.getPlayerOrException().getInventory().items);
+		return generateMultiItemChapter(source, source.getPlayerOrException().getInventory().getNonEquipmentItems());
 	}
 
 	private static int generateMultiItemChapter(CommandSourceStack source, Collection<ItemStack> allItems) {
@@ -445,7 +446,7 @@ public class FTBQuestsCommands {
 			quest.onCreated();
 			quest.setX(col);
 			quest.setY(row);
-			quest.setRawSubtitle(stack.save(source.registryAccess(), new CompoundTag()).toString());
+			quest.setRawSubtitle(ItemStack.CODEC.encodeStart(source.registryAccess().createSerializationContext(NbtOps.INSTANCE), stack).getOrThrow().toString());
 
 			NetworkHelper.sendToAll(source.getServer(), CreateObjectResponseMessage.create(quest, null));
 

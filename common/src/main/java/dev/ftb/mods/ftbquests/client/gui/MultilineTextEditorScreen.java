@@ -37,8 +37,8 @@ import java.util.function.BooleanSupplier;
 import java.util.regex.Pattern;
 
 public class MultilineTextEditorScreen extends BaseScreen {
-    public static final Icon LINK_ICON = Icon.getIcon(FTBQuestsAPI.rl("textures/gui/chain_link.png")).withPadding(2);
-    public static final Icon CLEAR_FORMATTING_ICON = Icon.getIcon(FTBQuestsAPI.rl("textures/gui/eraser.png")).withPadding(2);
+    public static final Icon LINK_ICON = Icon.getIcon(FTBQuestsAPI.id("textures/gui/chain_link.png")).withPadding(2);
+    public static final Icon CLEAR_FORMATTING_ICON = Icon.getIcon(FTBQuestsAPI.id("textures/gui/eraser.png")).withPadding(2);
 
 	private static final Pattern STRIP_FORMATTING_PATTERN = Pattern.compile("(?i)([&\\u00A7])([0-9A-FK-ORZ]|#[0-9A-Fa-f]{6})");
 	private static final int MAX_UNDO = 10;

@@ -13,7 +13,7 @@ import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 
 public record ChangeChapterGroupMessage(long chapterId, long groupId) implements CustomPacketPayload {
-	public static final Type<ChangeChapterGroupMessage> TYPE = new Type<>(FTBQuestsAPI.rl("change_chapter_group_message"));
+	public static final Type<ChangeChapterGroupMessage> TYPE = new Type<>(FTBQuestsAPI.id("change_chapter_group_message"));
 
 	public static final StreamCodec<FriendlyByteBuf, ChangeChapterGroupMessage> STREAM_CODEC = StreamCodec.composite(
 			ByteBufCodecs.VAR_LONG, ChangeChapterGroupMessage::chapterId,
@@ -37,7 +37,7 @@ public record ChangeChapterGroupMessage(long chapterId, long groupId) implements
 					group.addChapter(chapter);
 					chapter.file.clearCachedData();
 					chapter.file.markDirty();
-					NetworkHelper.sendToAll(context.getPlayer().getServer(),
+					NetworkHelper.sendToAll(context.getPlayer().level().getServer(),
 							new ChangeChapterGroupResponseMessage(message.chapterId, message.groupId));
 				}
 			}

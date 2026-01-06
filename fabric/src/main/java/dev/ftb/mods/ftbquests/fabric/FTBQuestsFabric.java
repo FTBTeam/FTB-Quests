@@ -24,10 +24,10 @@ public class FTBQuestsFabric implements ModInitializer {
 	public void onInitialize() {
 		new FTBQuests().setup();
 
-		ArgumentTypeRegistry.registerArgumentType(FTBQuestsAPI.rl("change_progress"), ChangeProgressArgument.class, SingletonArgumentInfo.contextFree(ChangeProgressArgument::changeProgress));
-		ArgumentTypeRegistry.registerArgumentType(FTBQuestsAPI.rl("quest_object"), QuestObjectArgument.class, SingletonArgumentInfo.contextFree(QuestObjectArgument::new));
+		ArgumentTypeRegistry.registerArgumentType(FTBQuestsAPI.id("change_progress"), ChangeProgressArgument.class, SingletonArgumentInfo.contextFree(ChangeProgressArgument::changeProgress));
+		ArgumentTypeRegistry.registerArgumentType(FTBQuestsAPI.id("quest_object"), QuestObjectArgument.class, SingletonArgumentInfo.contextFree(QuestObjectArgument::new));
 
-		TechRebornEnergyTask.TYPE = TaskTypes.register(FTBQuestsAPI.rl("tech_reborn_energy"), TechRebornEnergyTask::new, () -> Icon.getIcon(TechRebornEnergyTask.EMPTY_TEXTURE.toString()).combineWith(Icon.getIcon(TechRebornEnergyTask.FULL_TEXTURE.toString())));
+		TechRebornEnergyTask.TYPE = TaskTypes.register(FTBQuestsAPI.id("tech_reborn_energy"), TechRebornEnergyTask::new, () -> Icon.getIcon(TechRebornEnergyTask.EMPTY_TEXTURE.toString()).combineWith(Icon.getIcon(TechRebornEnergyTask.FULL_TEXTURE.toString())));
 
 		ItemStorage.SIDED.registerForBlockEntity(
 				((blockEntity, direction) -> ((FabricTaskScreenBlockEntity) blockEntity).getItemStorage()), ModBlockEntityTypes.CORE_TASK_SCREEN.get()

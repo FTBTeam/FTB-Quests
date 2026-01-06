@@ -9,7 +9,7 @@ import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 
 public record SyncQuestsMessage(BaseQuestFile file) implements CustomPacketPayload {
-	public static final Type<SyncQuestsMessage> TYPE = new Type<>(FTBQuestsAPI.rl("sync_quests_message"));
+	public static final Type<SyncQuestsMessage> TYPE = new Type<>(FTBQuestsAPI.id("sync_quests_message"));
 
 	public static final StreamCodec<RegistryFriendlyByteBuf, SyncQuestsMessage> STREAM_CODEC = StreamCodec.composite(
 			BaseQuestFile.STREAM_CODEC, SyncQuestsMessage::file,

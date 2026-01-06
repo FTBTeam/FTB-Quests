@@ -70,9 +70,9 @@ public class ObservationTask extends AbstractBooleanTask {
 	@Override
 	public void readData(CompoundTag nbt, HolderLookup.Provider provider) {
 		super.readData(nbt, provider);
-		timer = nbt.getLong("timer");
-		observeType = ObserveType.values()[nbt.getInt("observe_type")];
-		toObserve = nbt.getString("to_observe");
+		timer = nbt.getLong("timer").orElseThrow();
+		observeType = ObserveType.values()[nbt.getInt("observe_type").orElseThrow()];
+		toObserve = nbt.getString("to_observe").orElseThrow();
 	}
 
 	@Override
@@ -184,7 +184,7 @@ public class ObservationTask extends AbstractBooleanTask {
 
 	private BlockInput tryMatchBlock(String string, boolean parseNbt) {
 		try {
-			BlockStateParser.BlockResult blockStateParser = BlockStateParser.parseForBlock(BuiltInRegistries.BLOCK.asLookup(), new StringReader(string), false);
+			BlockStateParser.BlockResult blockStateParser = BlockStateParser.parseForBlock(BuiltInRegistries.BLOCK, new StringReader(string), false);
 			return new BlockInput(blockStateParser.blockState(), blockStateParser.properties().keySet(), parseNbt ? blockStateParser.nbt() : null);
 		} catch (Exception ex) {
 			return null;

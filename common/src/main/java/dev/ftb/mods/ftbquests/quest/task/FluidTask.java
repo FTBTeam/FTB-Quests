@@ -28,7 +28,7 @@ import org.jetbrains.annotations.Nullable;
 import java.util.Optional;
 
 public class FluidTask extends Task {
-	public static final Identifier TANK_TEXTURE = FTBQuestsAPI.rl("textures/tasks/tank.png");
+	public static final Identifier TANK_TEXTURE = FTBQuestsAPI.id("textures/tasks/tank.png");
 	private static final FluidStack WATER = FluidStack.create(Fluids.WATER, FluidStack.bucketAmount());
 
 	private FluidStack fluidStack = FluidStack.create(Fluids.WATER, FluidStack.bucketAmount());
@@ -90,17 +90,26 @@ public class FluidTask extends Task {
 	public void readData(CompoundTag nbt, HolderLookup.Provider provider) {
 		super.readData(nbt, provider);
 
-		if (nbt.contains("fluid", Tag.TAG_STRING)) {
+		var stringComp = nbt.getString("fluid");
+		if (stringComp.isPresent()) {
 			// legacy - fluid stored as string ID
-			Identifier id = Identifier.tryParse(nbt.getString("fluid"));
+			Identifier id = Identifier.tryParse(stringComp.get());
 			if (id == null) {
+				// Default to water if invalid
 				fluidStack = FluidStack.create(Fluids.WATER, 1000L);
 			} else {
-				fluidStack = FluidStack.create(BuiltInRegistries.FLUID.get(id), nbt.getLong("amount"));
+				BuiltInRegistries.FLUID.get(id).ifPresentOrElse(stack -> {
+					fluidStack = FluidStack.create(stack, nbt.getLongOr("amount", 1000L));
+				}, () -> {
+					// Default to water if invalid
+					fluidStack = FluidStack.create(Fluids.WATER, 1000L);
+				});
 			}
-		} else {
-			fluidStack = FluidStack.read(provider, nbt.getCompound("fluid")).orElse(FluidStack.empty());
+			return;
 		}
+
+		nbt.getCompound("fluid")
+				.ifPresentOrElse(tag -> fluidStack = FluidStack.read(provider, tag).orElse(FluidStack.empty()), () -> fluidStack = FluidStack.empty());
 	}
 
 	@Override

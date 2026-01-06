@@ -9,7 +9,7 @@ import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 
 public record TogglePinnedResponseMessage(long id, boolean pinned) implements CustomPacketPayload {
-	public static final Type<TogglePinnedResponseMessage> TYPE = new Type<>(FTBQuestsAPI.rl("toggle_pinned_response_message"));
+	public static final Type<TogglePinnedResponseMessage> TYPE = new Type<>(FTBQuestsAPI.id("toggle_pinned_response_message"));
 
 	public static final StreamCodec<FriendlyByteBuf, TogglePinnedResponseMessage> STREAM_CODEC = StreamCodec.composite(
 			ByteBufCodecs.VAR_LONG, TogglePinnedResponseMessage::id,

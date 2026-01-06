@@ -37,7 +37,7 @@ public class ToastReward extends Reward {
 	@Override
 	public void readData(CompoundTag nbt, HolderLookup.Provider provider) {
 		super.readData(nbt, provider);
-		description = nbt.getString("description");
+		description = nbt.getString("description").orElseThrow();
 	}
 
 	@Override

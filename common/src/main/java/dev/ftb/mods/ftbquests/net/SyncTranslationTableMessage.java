@@ -18,7 +18,7 @@ import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
  * @param table the translation table itself
  */
 public record SyncTranslationTableMessage(String locale, TranslationTable table) implements CustomPacketPayload {
-    public static final Type<SyncTranslationTableMessage> TYPE = new Type<>(FTBQuestsAPI.rl("sync_translation_table"));
+    public static final Type<SyncTranslationTableMessage> TYPE = new Type<>(FTBQuestsAPI.id("sync_translation_table"));
 
     public static StreamCodec<FriendlyByteBuf, SyncTranslationTableMessage> STREAM_CODEC = StreamCodec.composite(
             ByteBufCodecs.STRING_UTF8, SyncTranslationTableMessage::locale,

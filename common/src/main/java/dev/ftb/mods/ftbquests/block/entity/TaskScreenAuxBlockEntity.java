@@ -12,6 +12,8 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.storage.ValueInput;
+import net.minecraft.world.level.storage.ValueOutput;
 import org.jetbrains.annotations.NotNull;
 
 import java.lang.ref.WeakReference;
@@ -59,21 +61,21 @@ public class TaskScreenAuxBlockEntity extends BlockEntity implements ITaskScreen
     }
 
     @Override
-    public void loadAdditional(CompoundTag compoundTag, HolderLookup.Provider provider) {
-        super.loadAdditional(compoundTag, provider);
-        corePosPending = NbtUtils.readBlockPos(compoundTag, "CorePos").orElse(null);
+    public void loadAdditional(ValueInput input) {
+        super.loadAdditional(input);
+        corePosPending = input.read("CorePos", BlockPos.CODEC).orElse(null);
     }
 
     @Override
-    protected void saveAdditional(CompoundTag compoundTag, HolderLookup.Provider provider) {
-        super.saveAdditional(compoundTag, provider);
+    protected void saveAdditional(ValueOutput output) {
+        super.saveAdditional(output);
 
         if (corePosPending != null) {
-            compoundTag.put("CorePos", NbtUtils.writeBlockPos(corePosPending));
+            output.store("CorePos", BlockPos.CODEC, corePosPending);
         } else {
             TaskScreenBlockEntity cs = coreScreen.get();
             if (cs != null) {
-                compoundTag.put("CorePos", NbtUtils.writeBlockPos(cs.getBlockPos()));
+                output.store("CorePos", BlockPos.CODEC, cs.getBlockPos());
             }
         }
     }

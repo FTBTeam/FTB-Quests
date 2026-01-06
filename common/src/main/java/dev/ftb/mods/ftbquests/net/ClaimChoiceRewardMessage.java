@@ -13,7 +13,7 @@ import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.server.level.ServerPlayer;
 
 public record ClaimChoiceRewardMessage(long id, int index) implements CustomPacketPayload {
-	public static final Type<ClaimChoiceRewardMessage> TYPE = new Type<>(FTBQuestsAPI.rl("claim_choice_reward_message"));
+	public static final Type<ClaimChoiceRewardMessage> TYPE = new Type<>(FTBQuestsAPI.id("claim_choice_reward_message"));
 
 	public static final StreamCodec<FriendlyByteBuf, ClaimChoiceRewardMessage> STREAM_CODEC = StreamCodec.composite(
 			ByteBufCodecs.VAR_LONG, ClaimChoiceRewardMessage::id,

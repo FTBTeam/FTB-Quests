@@ -6,6 +6,7 @@ import dev.ftb.mods.ftbquests.quest.Quest;
 import dev.ftb.mods.ftbquests.quest.TeamData;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.core.Holder;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
@@ -19,6 +20,7 @@ import net.minecraft.world.item.ItemStack;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 public class StatTask extends Task {
 	private Identifier stat;
@@ -59,8 +61,8 @@ public class StatTask extends Task {
 	@Override
 	public void readData(CompoundTag nbt, HolderLookup.Provider provider) {
 		super.readData(nbt, provider);
-		stat = Identifier.tryParse(nbt.getString("stat"));
-		value = nbt.getInt("value");
+		stat = Identifier.tryParse(nbt.getString("stat").orElseThrow());
+		value = nbt.getInt("value").orElseThrow();
 	}
 
 	@Override
@@ -105,15 +107,20 @@ public class StatTask extends Task {
 			return;
 		}
 
-		Identifier statId = BuiltInRegistries.CUSTOM_STAT.get(stat);
+		Optional<Holder.Reference<Identifier>> statId = BuiltInRegistries.CUSTOM_STAT.get(stat);
 
 		// workaround for a bug where mods might register a modded stat in the vanilla namespace
 		//  https://github.com/FTBTeam/FTB-Mods-Issues/issues/724
-		if (statId == null) statId = BuiltInRegistries.CUSTOM_STAT.get(Identifier.tryParse(stat.getPath()));
+		if (statId.isEmpty()) {
+			var attemptedId = Identifier.tryParse(stat.getPath());
+			if (attemptedId != null) {
+				statId = BuiltInRegistries.CUSTOM_STAT.get(attemptedId);
+			}
+		}
 
-		if (statId != null) {
+		if (statId.isPresent()) {
 			// could be null, if someone brought an FTB Quests save from a different world and the stat's missing here
-			int set = Math.min(value, player.getStats().getValue(Stats.CUSTOM.get(statId)));
+			int set = Math.min(value, player.getStats().getValue(Stats.CUSTOM.get(statId.get().value())));
 			if (set > teamData.getProgress(this)) {
 				teamData.setProgress(this, set);
 			}
