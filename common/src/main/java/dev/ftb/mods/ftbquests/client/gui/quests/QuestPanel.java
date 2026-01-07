@@ -1,13 +1,6 @@
 package dev.ftb.mods.ftbquests.client.gui.quests;
 
-import com.mojang.blaze3d.buffers.GpuBufferSlice;
-import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.BufferBuilder;
-import com.mojang.blaze3d.vertex.ByteBufferBuilder;
-import com.mojang.blaze3d.vertex.DefaultVertexFormat;
-import com.mojang.blaze3d.vertex.MeshData;
 import com.mojang.blaze3d.vertex.Tesselator;
-import com.mojang.blaze3d.vertex.VertexFormat;
 import dev.architectury.networking.NetworkManager;
 import dev.ftb.mods.ftblibrary.client.icon.IconHelper;
 import dev.ftb.mods.ftblibrary.config.ImageResourceConfig;
@@ -45,8 +38,11 @@ import dev.ftb.mods.ftbquests.quest.task.TaskTypes;
 import dev.ftb.mods.ftbquests.quest.theme.property.ThemeProperties;
 import dev.ftb.mods.ftbquests.quest.translation.TranslationKey;
 import net.minecraft.ChatFormatting;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.network.chat.Component;
+import net.minecraft.util.ARGB;
 import net.minecraft.util.Mth;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.UnknownNullability;
@@ -186,12 +182,7 @@ public class QuestPanel extends Panel {
 
 		Tesselator tesselator = Tesselator.getInstance();
 
-		Icon<?> icon = ThemeProperties.DEPENDENCY_LINE_TEXTURE.get(questScreen.selectedChapter);
-//		if (icon instanceof ImageIcon img) {
-//			img.bindTexture();
-//		} else {
-//			DEFAULT_DEPENDENCY_LINE_TEXTURE.bindTexture();
-//		}
+		Icon<?> dependencyLineTexture = ThemeProperties.DEPENDENCY_LINE_TEXTURE.get(questScreen.selectedChapter);
 
 		Quest selectedQuest = questScreen.getViewedQuest();
 		if (selectedQuest == null) {
@@ -222,7 +213,7 @@ public class QuestPanel extends Panel {
 
 				for (QuestButton button : qb.getDependencies()) {
 					if (button.shouldDraw() && button.quest != selectedQuest && qb.quest != selectedQuest && !button.quest.shouldHideDependentLines()) {
-						renderConnection(widget, button, graphics.pose(), lineWidth,
+						renderConnection(graphics, dependencyLineTexture, widget, button, graphics.pose(), lineWidth,
 								c.redi(), c.greeni(), c.bluei(), c.alphai(), c.alphai(),
 								mu, tesselator);
 					}
@@ -248,10 +239,10 @@ public class QuestPanel extends Panel {
 								a2 = 30;
 								toOutline.add(qb);
 							}
-							renderConnection(widget, button, graphics.pose(), lineWidth, c.redi(), c.greeni(), c.bluei(), a2, a, ms, tesselator);
+							renderConnection(graphics, dependencyLineTexture, widget, button, graphics.pose(), lineWidth, c.redi(), c.greeni(), c.bluei(), a2, a, ms, tesselator);
 						} else if (qb.quest == selectedQuest || qb.isMouseOver()) {
 							Color4I c = ThemeProperties.DEPENDENCY_LINE_REQUIRES_COLOR.get(questScreen.selectedChapter);
-							renderConnection(widget, button, graphics.pose(), lineWidth, c.redi(), c.greeni(), c.bluei(), c.alphai(), c.alphai(), ms, tesselator);
+							renderConnection(graphics, dependencyLineTexture, widget, button, graphics.pose(), lineWidth, c.redi(), c.greeni(), c.bluei(), c.alphai(), c.alphai(), ms, tesselator);
 						}
 					}
 				}
@@ -268,9 +259,14 @@ public class QuestPanel extends Panel {
 		});
 	}
 
-	private void renderConnection(Widget widget, QuestButton button, @UnknownNullability Matrix3x2fStack poseStack, float s, int r, int g, int b, int a, int a1, float mu, Tesselator tesselator) {
+	private void renderConnection(GuiGraphics graphics, Icon<?> dependencyLineTexture, Widget widget, QuestButton button, @UnknownNullability Matrix3x2fStack poseStack, float s, int r, int g, int b, int a, int a1, float mu, Tesselator tesselator) {
+		if (!(dependencyLineTexture instanceof ImageIcon icon)) {
+			return;
+		}
+
 		double sx = widget.getX() + widget.width / 2.0;
 		double sy = widget.getY() + widget.height / 2.0;
+
 		double ex = button.getX() + button.width / 2.0;
 		double ey = button.getY() + button.height / 2.0;
 		float len = (float) MathUtils.dist(sx, sy, ex, ey);
@@ -279,22 +275,28 @@ public class QuestPanel extends Panel {
 		poseStack.translate((float) sx, (float) sy);
 		poseStack.rotate((float) Math.atan2(ey - sy, ex - sx));
 
-		GpuBufferSlice projectionMatrixBuffer = RenderSystem.getProjectionMatrixBuffer();
+		var texture = Minecraft.getInstance().getTextureManager().getTexture(icon.texture);
+
+		graphics.submitBlit(
+				RenderPipelines.GUI_TEXTURED,
+				texture.getTextureView(),
+				texture.getSampler(),
+				0,
+				(int) -s,
+				(int) len,
+				(int) s,
+				len / s / 2F + mu,
+				mu,
+				0,
+				1,
+				ARGB.color(a, r, g, b)
+		);
 
 		// TODO: @since 21.11: This doesn't work :joy:
-		// java.lang.IllegalArgumentException: Cannot write more data than the slice allows (attempting to write 96 bytes into a slice of length 64)
-		VertexFormat vertexformat = DefaultVertexFormat.POSITION_TEX_COLOR;
-		try (ByteBufferBuilder bytebufferbuilder = new ByteBufferBuilder(4 * vertexformat.getVertexSize())) {
-			BufferBuilder buffer = new BufferBuilder(bytebufferbuilder, VertexFormat.Mode.QUADS, vertexformat);
-			buffer.addVertex(0, -s, 0).setColor(r, g, b, a).setUv(len / s / 2F + mu, 0);
-			buffer.addVertex(0, s, 0).setColor(r, g, b, a).setUv(len / s / 2F + mu, 1);
-			buffer.addVertex(len, s, 0).setColor(r * 3 / 4, g * 3 / 4, b * 3 / 4, a1).setUv(mu, 1);
-			buffer.addVertex(len, -s, 0).setColor(r * 3 / 4, g * 3 / 4, b * 3 / 4, a1).setUv(mu, 0);
-
-			try (MeshData meshdata = buffer.buildOrThrow()) {
-				RenderSystem.getDevice().createCommandEncoder().writeToBuffer(projectionMatrixBuffer, meshdata.vertexBuffer());
-			}
-		}
+//		buffer.addVertex(0, -s, 0).setColor(r, g, b, a).setUv(len / s / 2F + mu, 0);
+//		buffer.addVertex(0, s, 0).setColor(r, g, b, a).setUv(len / s / 2F + mu, 1);
+//		buffer.addVertex(len, s, 0).setColor(r * 3 / 4, g * 3 / 4, b * 3 / 4, a1).setUv(mu, 1);
+//		buffer.addVertex(len, -s, 0).setColor(r * 3 / 4, g * 3 / 4, b * 3 / 4, a1).setUv(mu, 0);
 
 		poseStack.popMatrix();
 	}

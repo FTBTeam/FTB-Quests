@@ -2,7 +2,11 @@ package dev.ftb.mods.ftbquests.quest;
 
 import com.mojang.datafixers.util.Pair;
 import dev.architectury.networking.NetworkManager;
-import dev.ftb.mods.ftblibrary.config.*;
+import dev.ftb.mods.ftblibrary.config.ConfigCallback;
+import dev.ftb.mods.ftblibrary.config.ConfigGroup;
+import dev.ftb.mods.ftblibrary.config.ListConfig;
+import dev.ftb.mods.ftblibrary.config.StringConfig;
+import dev.ftb.mods.ftblibrary.config.Tristate;
 import dev.ftb.mods.ftblibrary.icon.AnimatedIcon;
 import dev.ftb.mods.ftblibrary.icon.Icon;
 import dev.ftb.mods.ftblibrary.math.Bits;
@@ -35,11 +39,19 @@ import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.StringTag;
-import net.minecraft.nbt.Tag;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.EnumSet;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
+import java.util.UUID;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
 
@@ -355,7 +367,7 @@ public final class Quest extends QuestObject implements Movable, Excludable {
 			ListTag deps = nbt.getList("dependencies").orElse(new ListTag());
 
 			for (int i = 0; i < deps.size(); i++) {
-				QuestObject object = chapter.file.get(chapter.file.getID(deps.getString(i)));
+				QuestObject object = chapter.file.get(chapter.file.getID(deps.getString(i).orElse("")));
 
 				if (object != null) {
 					addDependency(object);
