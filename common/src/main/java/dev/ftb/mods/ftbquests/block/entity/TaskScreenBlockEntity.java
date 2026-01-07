@@ -237,7 +237,7 @@ public class TaskScreenBlockEntity extends EditableBlockEntity implements ITaskS
     }
 
     private Component formatLine(Task task) {
-        if (this.task == null) return Component.empty();
+        if (task == null) return Component.empty();
 
         Component questTxt = Component.literal(" [").append(task.getQuest().getTitle()).append("]").withStyle(ChatFormatting.GREEN);
         return ConfigQuestObject.formatEntry(task).copy().append(questTxt);
