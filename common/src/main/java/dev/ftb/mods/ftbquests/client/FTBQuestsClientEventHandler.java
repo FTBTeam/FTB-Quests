@@ -9,7 +9,6 @@ import dev.architectury.event.events.client.ClientTickEvent;
 import dev.architectury.injectables.annotations.ExpectPlatform;
 import dev.architectury.networking.NetworkManager;
 import dev.architectury.registry.client.rendering.BlockEntityRendererRegistry;
-import dev.architectury.registry.client.rendering.ColorHandlerRegistry;
 import dev.ftb.mods.ftblibrary.api.sidebar.ButtonOverlayRender;
 import dev.ftb.mods.ftblibrary.api.sidebar.SidebarButtonCreatedEvent;
 import dev.ftb.mods.ftblibrary.client.icon.IconHelper;
@@ -24,11 +23,9 @@ import dev.ftb.mods.ftbquests.net.RequestTranslationTableMessage;
 import dev.ftb.mods.ftbquests.net.SubmitTaskMessage;
 import dev.ftb.mods.ftbquests.quest.BaseQuestFile;
 import dev.ftb.mods.ftbquests.quest.TeamData;
-import dev.ftb.mods.ftbquests.quest.loot.LootCrate;
 import dev.ftb.mods.ftbquests.quest.task.ObservationTask;
 import dev.ftb.mods.ftbquests.quest.task.StructureTask;
 import dev.ftb.mods.ftbquests.registry.ModBlockEntityTypes;
-import dev.ftb.mods.ftbquests.registry.ModItems;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.DeltaTracker;
 import net.minecraft.client.Minecraft;
@@ -38,10 +35,8 @@ import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
 import net.minecraft.client.renderer.texture.TextureAtlas;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
-import net.minecraft.data.AtlasIds;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.resources.Identifier;
-import net.minecraft.world.inventory.InventoryMenu;
 import net.minecraft.world.phys.HitResult;
 import org.jetbrains.annotations.Nullable;
 import org.lwjgl.glfw.GLFW;
@@ -83,8 +78,7 @@ public class FTBQuestsClientEventHandler {
     // Note: Architectury doesn't have a texture stitch post event anymore,
     // so this is handled by the Forge/NeoForge events, and a mixin on Fabric
     public static void onTextureStitchPost(TextureAtlas textureAtlas) {
-        // TODO: @since 21.11: Verify this is the correct replacement.
-        if (textureAtlas.location().equals(AtlasIds.BLOCKS)) {//InventoryMenu.BLOCK_ATLAS)) {
+        if (textureAtlas.location().toString().equals("minecraft:textures/atlas/blocks.png")) {//InventoryMenu.BLOCK_ATLAS)) {
             inputOnlySprite = textureAtlas.getSprite(INPUT_ONLY_TEXTURE);
             tankSprite = textureAtlas.getSprite(TANK_TEXTURE);
             feEnergyEmptySprite = textureAtlas.getSprite(FE_ENERGY_EMPTY_TEXTURE);

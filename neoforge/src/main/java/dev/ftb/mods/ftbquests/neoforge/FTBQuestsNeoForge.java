@@ -92,22 +92,14 @@ public class FTBQuestsNeoForge {
 	}
 
 	public static void registerCaps(RegisterCapabilitiesEvent event) {
-		// TODO: @since 21.11: Come back to this
-//		event.registerBlockEntity(Capabilities.ItemHandler.BLOCK, ModBlockEntityTypes.CORE_TASK_SCREEN.get(),
-//				(be, side) -> ((NeoForgeTaskScreenBlockEntity) be).getItemHandler());
-//		event.registerBlockEntity(Capabilities.FluidHandler.BLOCK, ModBlockEntityTypes.CORE_TASK_SCREEN.get(),
-//				(be, side) -> ((NeoForgeTaskScreenBlockEntity) be).getFluidHandler());
-//		event.registerBlockEntity(Capabilities.EnergyStorage.BLOCK, ModBlockEntityTypes.CORE_TASK_SCREEN.get(),
-//				(be, side) -> ((NeoForgeTaskScreenBlockEntity) be).getEnergyHandler());
-//
-//		event.registerBlockEntity(Capabilities.ItemHandler.BLOCK, ModBlockEntityTypes.AUX_TASK_SCREEN.get(),
-//				(be, side) -> ((NeoForgeTaskScreenAuxBlockEntity) be).getItemHandler());
-//		event.registerBlockEntity(Capabilities.FluidHandler.BLOCK, ModBlockEntityTypes.AUX_TASK_SCREEN.get(),
-//				(be, side) -> ((NeoForgeTaskScreenAuxBlockEntity) be).getFluidHandler());
-//		event.registerBlockEntity(Capabilities.EnergyStorage.BLOCK, ModBlockEntityTypes.AUX_TASK_SCREEN.get(),
-//				(be, side) -> ((NeoForgeTaskScreenAuxBlockEntity) be).getEnergyHandler());
-//
-//		event.registerBlockEntity(Capabilities.ItemHandler.BLOCK, ModBlockEntityTypes.LOOT_CRATE_OPENER.get(),
-//				(be, side) -> ((NeoForgeLootCrateOpenerBlockEntity) be).getLootCrateHandler());
+		event.registerBlockEntity(Capabilities.Item.BLOCK, ModBlockEntityTypes.CORE_TASK_SCREEN.get(), (be, side) -> ((NeoForgeTaskScreenBlockEntity) be).getItemHandler());
+		event.registerBlockEntity(Capabilities.Fluid.BLOCK, ModBlockEntityTypes.CORE_TASK_SCREEN.get(), (be, side) -> ((NeoForgeTaskScreenBlockEntity) be).getFluidHandler());
+		event.registerBlockEntity(Capabilities.Energy.BLOCK, ModBlockEntityTypes.CORE_TASK_SCREEN.get(), (be, side) -> ((NeoForgeTaskScreenBlockEntity) be).getEnergyHandler());
+
+		event.registerBlockEntity(Capabilities.Item.BLOCK, ModBlockEntityTypes.AUX_TASK_SCREEN.get(), (be, side) -> ((NeoForgeTaskScreenAuxBlockEntity) be).getItemHandler());
+		event.registerBlockEntity(Capabilities.Fluid.BLOCK, ModBlockEntityTypes.AUX_TASK_SCREEN.get(), (be, side) -> ((NeoForgeTaskScreenAuxBlockEntity) be).getFluidHandler());
+		event.registerBlockEntity(Capabilities.Energy.BLOCK, ModBlockEntityTypes.AUX_TASK_SCREEN.get(), (be, side) -> ((NeoForgeTaskScreenAuxBlockEntity) be).getEnergyHandler());
+
+		event.registerBlockEntity(Capabilities.Item.BLOCK, ModBlockEntityTypes.LOOT_CRATE_OPENER.get(), (be, side) -> ((NeoForgeLootCrateOpenerBlockEntity) be).getLootCrateHandler());
 	}
 }

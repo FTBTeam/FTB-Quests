@@ -29,7 +29,6 @@ public class InventoryUtilImpl {
         return items;
     }
 
-    @SuppressWarnings("UnstableApiUsage")
     public static boolean putItemsInInventory(List<ItemStack> items, Level level, BlockPos pos, Direction side, boolean clearFirst) {
         Storage<ItemVariant> storage = ItemStorage.SIDED.find(level, pos, side);
         if (storage == null || !storage.supportsInsertion()) {

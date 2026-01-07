@@ -6,47 +6,66 @@ import net.minecraft.core.NonNullList;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.neoforged.neoforge.capabilities.Capabilities;
-import net.neoforged.neoforge.items.IItemHandler;
-import net.neoforged.neoforge.items.ItemHandlerHelper;
+import net.neoforged.neoforge.transfer.ResourceHandler;
+import net.neoforged.neoforge.transfer.item.ItemResource;
+import net.neoforged.neoforge.transfer.transaction.Transaction;
 
 import java.util.List;
 
 public class InventoryUtilImpl {
     public static NonNullList<ItemStack> getItemsInInventory(Level level, BlockPos pos, Direction side) {
-        // TODO: @since 21.11: Come back to this
-//        IItemHandler handler = level.getCapability(Capabilities.ItemHandler.BLOCK, pos, side);
-//        NonNullList<ItemStack> items = NonNullList.create();
-//
-//        if (handler != null) {
-//            for (int i = 0; i < handler.getSlots(); i++) {
-//                ItemStack stack = handler.getStackInSlot(i);
-//                if (!stack.isEmpty()) {
-//                    items.add(stack);
-//                }
-//            }
-//        }
+        ResourceHandler<ItemResource> capability = level.getCapability(Capabilities.Item.BLOCK, pos, side);
+        NonNullList<ItemStack> items = NonNullList.create();
+        if (capability == null) {
+            return items;
+        }
 
-        return NonNullList.create();// items;
+        for (int i = 0; i < capability.size(); i++) {
+            ItemStack stack = capability.getResource(i).toStack();
+            if (!stack.isEmpty()) {
+                items.add(stack);
+            }
+        }
+
+        return items;
     }
 
     public static boolean putItemsInInventory(List<ItemStack> items, Level level, BlockPos pos, Direction side, boolean clearFirst) {
-        // TODO: @since 21.11: Come back to this
-//        IItemHandler handler = level.getCapability(Capabilities.ItemHandler.BLOCK, pos, side);
-//        if (handler == null) {
-//            throw new IllegalArgumentException("No item handler at that blockpos & side");
-//        }
-//
-//        if (clearFirst) {
-//            for (int i = 0; i < handler.getSlots(); i++) {
-//                handler.extractItem(i, Integer.MAX_VALUE, false);
-//            }
-//        }
-//        for (ItemStack stack : items) {
-//            ItemStack excess = ItemHandlerHelper.insertItem(handler, stack.copy(), false);
-//            if (!excess.isEmpty()) {
-//                return false;
-//            }
-//        }
+        ResourceHandler<ItemResource> capability = level.getCapability(Capabilities.Item.BLOCK, pos, side);
+        if (capability == null) {
+            // TODO: @since 21.11: Is throwing really correct here?
+            throw new IllegalArgumentException("No item handler at that blockpos & side");
+        }
+
+        try (Transaction transaction = Transaction.openRoot()) {
+            if (clearFirst) {
+                try (Transaction innerTransaction = Transaction.open(transaction)) {
+                    for (int i = 0; i < capability.size(); i++) {
+                        capability.extract(capability.getResource(i), Integer.MAX_VALUE, transaction);
+                    }
+
+                    innerTransaction.commit();
+                }
+            }
+
+            try (Transaction innerTransaction = Transaction.open(transaction)) {
+                for (ItemStack stack : items) {
+                    int amountInserted = capability.insert(ItemResource.of(stack), stack.getCount(), innerTransaction);
+                    // If not all items could be inserted, abort
+                    if (amountInserted < stack.getCount()) {
+                        // Abort inner transaction and outer transaction
+                        innerTransaction.close();
+                        transaction.close();
+                        return false;
+                    }
+                }
+
+                innerTransaction.commit();
+            }
+
+            // All items inserted successfully
+            transaction.commit();
+        }
 
         return true;
     }

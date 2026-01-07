@@ -5,6 +5,8 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.state.BlockState;
 import net.neoforged.neoforge.items.IItemHandler;
+import net.neoforged.neoforge.transfer.ResourceHandler;
+import net.neoforged.neoforge.transfer.item.ItemResource;
 import org.jetbrains.annotations.NotNull;
 
 public class NeoForgeLootCrateOpenerBlockEntity extends LootCrateOpenerBlockEntity {
@@ -14,7 +16,7 @@ public class NeoForgeLootCrateOpenerBlockEntity extends LootCrateOpenerBlockEnti
         super(blockPos, blockState);
     }
 
-    public IItemHandler getLootCrateHandler() {
+    public ResourceHandler<ItemResource> getLootCrateHandler() {
         return lootCrateHandler;
     }
 

@@ -4,40 +4,52 @@ import dev.ftb.mods.ftbquests.block.TaskScreenBlock;
 import dev.ftb.mods.ftbquests.block.entity.TaskScreenBlockEntity;
 import dev.ftb.mods.ftbquests.integration.item_filtering.ItemMatchingSystem;
 import dev.ftb.mods.ftbquests.quest.TeamData;
+import dev.ftb.mods.ftbquests.quest.task.EnergyTask;
 import dev.ftb.mods.ftbquests.quest.task.FluidTask;
 import dev.ftb.mods.ftbquests.quest.task.ItemTask;
-import dev.ftb.mods.ftbquests.quest.task.neoforge.ForgeEnergyTask;
+import dev.ftb.mods.ftbquests.quest.task.Task;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.Holder;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.AABB;
-import net.neoforged.neoforge.energy.IEnergyStorage;
-import net.neoforged.neoforge.fluids.FluidStack;
-import net.neoforged.neoforge.fluids.capability.IFluidHandler;
-import net.neoforged.neoforge.items.IItemHandler;
-import org.jetbrains.annotations.NotNull;
+import net.neoforged.neoforge.transfer.ResourceHandler;
+import net.neoforged.neoforge.transfer.energy.EnergyHandler;
+import net.neoforged.neoforge.transfer.fluid.FluidResource;
+import net.neoforged.neoforge.transfer.item.ItemResource;
+import net.neoforged.neoforge.transfer.transaction.SnapshotJournal;
+import net.neoforged.neoforge.transfer.transaction.TransactionContext;
+import org.jspecify.annotations.NonNull;
 
 public class NeoForgeTaskScreenBlockEntity extends TaskScreenBlockEntity {
     private AABB cachedRenderAABB = null;
 
-    private final TaskItemHandler itemHandler = new TaskItemHandler();
-    private final TaskFluidHandler fluidHandler = new TaskFluidHandler();
-    private final TaskEnergyHandler energyHandler = new TaskEnergyHandler();
+    private final ResourceHandler<ItemResource> itemHandler = new TaskItemHandler();
+    private final ResourceHandler<FluidResource> fluidHandler = new TaskFluidHandler();
+    private final EnergyHandler energyHandler = new TaskEnergyHandler();
 
     public NeoForgeTaskScreenBlockEntity(BlockPos blockPos, BlockState blockState) {
         super(blockPos, blockState);
     }
 
-    public IItemHandler getItemHandler() {
+    @Override
+    public Task getTask() {
+        return super.getTask();
+    }
+
+    @Override
+    public void setTask(Task task) {
+        super.setTask(task);
+    }
+
+    public ResourceHandler<ItemResource> getItemHandler() {
         return itemHandler;
     }
 
-    public IFluidHandler getFluidHandler() {
+    public ResourceHandler<FluidResource> getFluidHandler() {
         return fluidHandler;
     }
 
-    public IEnergyStorage getEnergyHandler() {
+    public EnergyHandler getEnergyHandler() {
         return energyHandler;
     }
 
@@ -53,176 +65,214 @@ public class NeoForgeTaskScreenBlockEntity extends TaskScreenBlockEntity {
         return cachedRenderAABB;
     }
 
-    private class TaskItemHandler implements IItemHandler {
+    private class TaskItemHandler implements ResourceHandler<ItemResource> {
+        private long progress;
+        private final ProgressSnapshot snapshot = new ProgressSnapshot(this.progress);
+
         @Override
-        public int getSlots() {
-            // exposing 2 slots allows us to keep one slot potentially "full" and the other always empty
-            // - stops potential inserters thinking the inventory is completely full and not bothering
+        public int size() {
             return 2;
         }
 
-        @NotNull
         @Override
-        public ItemStack getStackInSlot(int slot) {
-            // slot 1 is always empty - see above
+        public ItemResource getResource(int slot) {
             return getTask() instanceof ItemTask itemTask && slot == 0 ?
-                    itemTask.getItemStack().copyWithCount((int) Math.min(getCachedTeamData().getProgress(itemTask), itemTask.getItemStack().getMaxStackSize())) :
-                    ItemStack.EMPTY;
+                    ItemResource.of(itemTask.getItemStack()) :
+                    ItemResource.EMPTY;
         }
 
-        @NotNull
         @Override
-        public ItemStack insertItem(int slot, @NotNull ItemStack stack, boolean simulate) {
+        public long getAmountAsLong(int slot) {
+            if (getTask() instanceof ItemTask itemTask) {
+                return Math.min(getCachedTeamData().getProgress(itemTask), itemTask.getItemStack().getMaxStackSize());
+            }
+
+            return 0;
+        }
+
+        @Override
+        public long getCapacityAsLong(int slot, ItemResource resource) {
+            return resource.getMaxStackSize();
+        }
+
+        @Override
+        public boolean isValid(int slot, ItemResource resource) {
+            return getTask() instanceof ItemTask itemTask && itemTask.test(resource.toStack());
+        }
+
+        @Override
+        public int insert(int index, ItemResource resource, int amount, @NonNull TransactionContext transaction) {
             TeamData data = getCachedTeamData();
+            ItemStack stack = resource.toStack();
             if (getTask() instanceof ItemTask itemTask && data.canStartTasks(itemTask.getQuest())) {
                 // task.insert() handles testing the item is valid and the task isn't already completed
-                return itemTask.insert(data, stack, simulate);
+                ItemStack res = itemTask.insert(data, stack, true);
+                int nAdded = stack.getCount() - res.getCount();
+                if (nAdded > 0) {
+                    this.snapshot.updateSnapshots(transaction);
+                    progress = getCachedTeamData().getProgress(itemTask) + nAdded;
+                }
+                return nAdded;
             }
-            return stack;
+            return 0;
         }
 
-        @NotNull
         @Override
-        public ItemStack extractItem(int slot, int count, boolean simulate) {
-            if (!isInputOnly() && getTask() instanceof ItemTask itemTask && !ItemMatchingSystem.INSTANCE.isItemFilter(itemTask.getItemStack())) {
+        public int extract(int index, ItemResource resource, int amount, TransactionContext transaction) {
+            if (getTask() instanceof ItemTask itemTask && !isInputOnly() && !ItemMatchingSystem.INSTANCE.isItemFilter(itemTask.getItemStack())) {
                 TeamData data = getCachedTeamData();
                 if (data != null && data.canStartTasks(itemTask.getQuest()) && !data.isCompleted(itemTask)) {
-                    int itemsRemoved = (int) Math.min(data.getProgress(itemTask), count);
-                    if (!simulate) {
-                        data.addProgress(itemTask, -itemsRemoved);
+                    int nRemoved = (int) Math.min(data.getProgress(itemTask), amount);
+                    if (nRemoved > 0) {
+                        this.snapshot.updateSnapshots(transaction);
+                        progress = getCachedTeamData().getProgress(itemTask) - nRemoved;
                     }
-                    return itemTask.getItemStack().copyWithCount(itemsRemoved);
+                    return nRemoved;
                 }
             }
-            return ItemStack.EMPTY;
-        }
-
-        @Override
-        public int getSlotLimit(int slot) {
-            return getTask() instanceof ItemTask itemTask ? itemTask.getItemStack().getMaxStackSize() : 0;
-        }
-
-        @Override
-        public boolean isItemValid(int slot, @NotNull ItemStack stack) {
-            return getTask() instanceof ItemTask itemTask && itemTask.test(stack);
+            return 0;
         }
     }
 
-    private class TaskFluidHandler implements IFluidHandler {
+    private class TaskFluidHandler implements ResourceHandler<FluidResource> {
+        private long progress;
+        private final ProgressSnapshot snapshot = new ProgressSnapshot(this.progress);
+
         @Override
-        public int getTanks() {
+        public int size() {
             return 1;
         }
 
-        @NotNull
         @Override
-        public FluidStack getFluidInTank(int tank) {
-            return tank == 0 && getTask() instanceof FluidTask fluidTask ?
-                    new FluidStack(fluidTask.getFluid(), (int) getCachedTeamData().getProgress(fluidTask)) :
-                    FluidStack.EMPTY;
+        public FluidResource getResource(int i) {
+            return getTask() instanceof FluidTask fluidTask ?
+                    FluidResource.of(fluidTask.getFluid(), fluidTask.getFluidDataComponentPatch()) :
+                    FluidResource.EMPTY;
         }
 
         @Override
-        public int getTankCapacity(int tank) {
-            return tank == 0 && getTask() instanceof FluidTask fluidTask ?
-                    (int) fluidTask.getMaxProgress() :
-                    0;
+        public long getAmountAsLong(int i) {
+            return getTask() instanceof FluidTask fluidTask && getCachedTeamData() != null ? getCachedTeamData().getProgress(fluidTask) : 0L;
         }
 
         @Override
-        public boolean isFluidValid(int tank, @NotNull FluidStack fluidStack) {
-            if (tank != 0 || !(getTask() instanceof FluidTask fluidTask)) {
-                return false;
-            }
-            // amount is not important here
-            FluidStack taskFluidStack = new FluidStack(Holder.direct(fluidTask.getFluid()), 1000, fluidTask.getFluidDataComponentPatch());
-            return FluidStack.isSameFluidSameComponents(taskFluidStack, fluidStack);
+        public long getCapacityAsLong(int i, FluidResource resource) {
+            return getTask() instanceof FluidTask t ? t.getMaxProgress() : 0L;
         }
 
         @Override
-        public int fill(FluidStack fluidStack, FluidAction fluidAction) {
-            if (getTask() instanceof FluidTask fluidTask && isFluidValid(0, fluidStack)) {
-                TeamData data = getCachedTeamData();
-                if (data != null && data.canStartTasks(fluidTask.getQuest()) && !data.isCompleted(fluidTask)) {
-                    long space = fluidTask.getMaxProgress() - data.getProgress(fluidTask);
-                    long toAdd = Math.min(fluidStack.getAmount(), space);
-                    if (fluidAction.execute()) {
-                        data.addProgress(fluidTask, Math.min(fluidStack.getAmount(), toAdd));
-                    }
-                    return (int) toAdd;
-                }
-            }
-            return 0;
-        }
-
-        @NotNull
-        @Override
-        public FluidStack drain(FluidStack fluidStack, FluidAction fluidAction) {
-            return getTask() instanceof FluidTask task && fluidStack.getFluid() == task.getFluid() ?
-                    drain(fluidStack.getAmount(), fluidAction) :
-                    FluidStack.EMPTY;
-        }
-
-        @NotNull
-        @Override
-        public FluidStack drain(int maxDrain, FluidAction fluidAction) {
-            if (getTask() instanceof FluidTask task) {
-                TeamData data = getCachedTeamData();
-                if (data != null && data.canStartTasks(task.getQuest()) && !data.isCompleted(task)) {
-                    long toTake = Math.min(maxDrain, data.getProgress(task));
-                    if (fluidAction.execute()) {
-                        data.addProgress(task, -toTake);
-                    }
-                    FluidStack result = new FluidStack(task.getFluid(), (int) toTake);
-                    result.applyComponents(task.getFluidDataComponents());
-//                    if (task.getFluidDataComponents() != null) result.setTag(task.getFluidDataComponents().copy());
-                    return result;
-                }
-            }
-            return FluidStack.EMPTY;
-        }
-    }
-
-    private class TaskEnergyHandler implements IEnergyStorage {
-        @Override
-        public int receiveEnergy(int amount, boolean simulate) {
-            if (getTask() instanceof ForgeEnergyTask energyTask) {
-                TeamData data = getCachedTeamData();
-                if (data != null && data.canStartTasks(energyTask.getQuest()) && !data.isCompleted(energyTask)) {
-                    long space = energyTask.getMaxProgress() - data.getProgress(energyTask);
-                    long toAdd = Math.min(energyTask.getMaxInput(), Math.min(amount, space));
-                    if (!simulate) {
-                        data.addProgress(energyTask, toAdd);
-                    }
-                    return (int) toAdd;
-                }
-            }
-            return 0;
-        }
-
-        @Override
-        public int extractEnergy(int amount, boolean simulate) {
-            return 0;
-        }
-
-        @Override
-        public int getEnergyStored() {
-            return getTask() instanceof ForgeEnergyTask energyTask ? (int) getCachedTeamData().getProgress(energyTask) : 0;
-        }
-
-        @Override
-        public int getMaxEnergyStored() {
-            return getTask() instanceof ForgeEnergyTask energyTask ? (int) energyTask.getValue() : 0;
-        }
-
-        @Override
-        public boolean canExtract() {
+        public boolean isValid(int i, FluidResource resource) {
             return false;
         }
 
         @Override
-        public boolean canReceive() {
-            return true;
+        public int insert(int i, FluidResource resource, int amount, TransactionContext transaction) {
+            if (getTask() instanceof FluidTask fluidTask) {
+                TeamData data = getCachedTeamData();
+                if (data != null && data.canStartTasks(fluidTask.getQuest()) && !data.isCompleted(fluidTask) && fluidTask.getFluid() == resource.getFluid()) {
+                    long curProgress = data.getProgress(fluidTask);
+                    long space = fluidTask.getMaxProgress() - curProgress;
+                    long toAdd = Math.min(amount, space);
+                    if (toAdd > 0L) {
+                        this.snapshot.updateSnapshots(transaction);
+                        progress = curProgress + toAdd;
+                    }
+                    return Math.toIntExact(toAdd);
+                }
+            }
+
+            return 0;
+        }
+
+        @Override
+        public int extract(int i, FluidResource resource, int amount, TransactionContext transaction) {
+            if (getTask() instanceof FluidTask fluidTask) {
+                TeamData data = getCachedTeamData();
+                if (data != null && data.canStartTasks(fluidTask.getQuest()) && !data.isCompleted(fluidTask)) {
+                    long curProgress = data.getProgress(fluidTask);
+                    long toTake = Math.min(amount, curProgress);
+                    if (toTake > 0L) {
+                        this.snapshot.updateSnapshots(transaction);
+                        progress = curProgress - toTake;
+                    }
+                    return Math.toIntExact(toTake);
+                }
+            }
+
+            return 0;
+        }
+    }
+
+    private class TaskEnergyHandler implements EnergyHandler {
+        private long progress;
+        private final ProgressSnapshot snapshot = new ProgressSnapshot(this.progress);
+
+        @Override
+        public long getAmountAsLong() {
+            return getTask() instanceof EnergyTask energyTask && getCachedTeamData() != null ? (int) getCachedTeamData().getProgress(energyTask) : 0L;
+        }
+
+        @Override
+        public long getCapacityAsLong() {
+            return getTask() instanceof EnergyTask energyTask ? energyTask.getValue() : 0L;
+        }
+
+        @Override
+        public int insert(int amount, TransactionContext transaction) {
+            if (getTask() instanceof EnergyTask energyTask) {
+                TeamData data = getCachedTeamData();
+                if (data != null && data.canStartTasks(energyTask.getQuest()) && !data.isCompleted(energyTask)) {
+                    long space = energyTask.getMaxProgress() - data.getProgress(energyTask);
+                    long toAdd = Math.min(energyTask.getMaxInput(), Math.min(amount, space));
+                    if (toAdd > 0L) {
+                        this.snapshot.updateSnapshots(transaction);
+                        progress = data.getProgress(energyTask) + toAdd;
+                    }
+                    return Math.toIntExact(toAdd);
+                }
+            }
+            return 0;
+        }
+
+        @Override
+        public int extract(int amount, TransactionContext transaction) {
+            return 0;
+        }
+    }
+
+    private class ProgressSnapshot extends SnapshotJournal<Long> {
+        private long parentProgressRef;
+
+        public ProgressSnapshot(long parentProgress) {
+            this.parentProgressRef = parentProgress;
+        }
+
+        @Override
+        protected Long createSnapshot() {
+            var teamData = getCachedTeamData();
+            if (teamData == null) {
+                return 0L;
+            }
+
+            return getCachedTeamData().getProgress(getTask());
+        }
+
+        @Override
+        protected void revertToSnapshot(Long snapshot) {
+            parentProgressRef = snapshot;
+        }
+
+        @Override
+        protected void onRootCommit(Long originalState) {
+            TeamData data = getCachedTeamData();
+            if (data == null) {
+                return;
+            }
+
+            long newState = parentProgressRef;
+            if (!originalState.equals(newState)) {
+                data.setProgress(getTask(), newState);
+            }
         }
     }
 }

@@ -225,7 +225,6 @@ public class TaskScreenRenderer implements BlockEntityRenderer<TaskScreenBlockEn
 
             poseStack.scale(scale, scale, 1F);
             collector.submitText(poseStack, -len / 2f, 0, text.getVisualOrderText(), taskScreen.textHasShadow, Font.DisplayMode.POLYGON_OFFSET, 15728880, 0xFFD8D8D8, 0, 0);
-//            font.drawInBatch(text, -len / 2f, 0, 0xFFD8D8D8, taskScreen.isTextShadow(), posMat, bufferSource, Font.DisplayMode.NORMAL, 0x0, 0x00F000F0);
             poseStack.popPose();
         }
     }
