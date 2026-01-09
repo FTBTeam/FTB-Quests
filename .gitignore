@@ -11,7 +11,12 @@ out
 *.ipr
 *.iws
 *.iml
-.idea
+
+.idea/*
+!.idea/codeStyles/
+.idea/codeStyles/*
+!.idea/codeStyles/Project.xml
+!.idea/codeStyles/codeStyleConfig.xml
 
 # gradle
 build
