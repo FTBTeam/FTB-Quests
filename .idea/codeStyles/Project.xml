@@ -6,12 +6,19 @@
       <option name="IMPORT_LAYOUT_TABLE">
         <value>
           <package name="" withSubpackages="true" static="false" module="true" />
-          <package name="" withSubpackages="true" static="false" />
+          <emptyLine />
+          <package name="net.minecraft" withSubpackages="true" static="false" />
+          <package name="com.mojang" withSubpackages="true" static="false" />
+          <emptyLine />
+          <package name="dev.architectury" withSubpackages="true" static="false" />
+          <package name="net.neoforged" withSubpackages="true" static="false" />
+          <package name="net.fabricmc" withSubpackages="true" static="false" />
           <emptyLine />
           <package name="dev.ftb.mods" withSubpackages="true" static="false" />
           <emptyLine />
           <package name="javax" withSubpackages="true" static="false" />
           <package name="java" withSubpackages="true" static="false" />
+          <package name="" withSubpackages="true" static="false" />
           <emptyLine />
           <package name="" withSubpackages="true" static="true" />
         </value>
