@@ -3,6 +3,7 @@ package dev.ftb.mods.ftbquests.net;
 import dev.architectury.networking.NetworkManager;
 import dev.ftb.mods.ftbquests.api.FTBQuestsAPI;
 import dev.ftb.mods.ftbquests.quest.task.StructureTask;
+import net.minecraft.core.Registry;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
@@ -13,6 +14,8 @@ import net.minecraft.server.MinecraftServer;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Stream;
 
 public record SyncStructuresResponseMessage(List<String> data) implements CustomPacketPayload {
     public static final Type<SyncStructuresResponseMessage> TYPE = new Type<>(FTBQuestsAPI.id("sync_structures_response_message"));
@@ -25,14 +28,19 @@ public record SyncStructuresResponseMessage(List<String> data) implements Custom
     public static SyncStructuresResponseMessage create(MinecraftServer server) {
         List<String> data = new ArrayList<>();
         data.addAll(server.registryAccess()
-                .getOrThrow(Registries.STRUCTURE).value().keySet().stream()
+                .lookup(Registries.STRUCTURE)
+                .map(Registry::keySet)
+                .orElseGet(Set::of)
+                .stream()
                 .map(Identifier::toString)
                 .sorted(String::compareTo)
                 .toList()
         );
         data.addAll(server.registryAccess()
-                .getOrThrow(Registries.STRUCTURE).tags()
-                .map(o -> "#" + o.location())
+                .lookup(Registries.STRUCTURE)
+                .map(Registry::getTags)
+                .orElseGet(Stream::of)
+                .map(o -> "#" + o.key().location())
                 .sorted(String::compareTo)
                 .toList()
         );
