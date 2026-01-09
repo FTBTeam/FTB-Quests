@@ -4,11 +4,8 @@ import com.mojang.brigadier.StringReader;
 import dev.architectury.registry.registries.RegistrarManager;
 import dev.ftb.mods.ftblibrary.config.ConfigGroup;
 import dev.ftb.mods.ftblibrary.config.NameMap;
-import dev.ftb.mods.ftblibrary.ui.Button;
 import dev.ftb.mods.ftbquests.quest.Quest;
 import dev.ftb.mods.ftbquests.quest.TeamData;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.ChatFormatting;
 import net.minecraft.IdentifierException;
 import net.minecraft.commands.arguments.blocks.BlockInput;
@@ -92,7 +89,6 @@ public class ObservationTask extends AbstractBooleanTask {
 	}
 
 	@Override
-	@Environment(EnvType.CLIENT)
 	public void fillConfigGroup(ConfigGroup config) {
 		super.fillConfigGroup(config);
 		config.addLong("timer", timer, v -> timer = v, 0L, 0L, 1200L);
@@ -107,11 +103,6 @@ public class ObservationTask extends AbstractBooleanTask {
 	}
 
 	@Override
-	@Environment(EnvType.CLIENT)
-	public void onButtonClicked(Button button, boolean canClick) {
-	}
-
-	@Override
 	public boolean canSubmit(TeamData teamData, ServerPlayer player) {
 		return true;
 	}
@@ -119,6 +110,11 @@ public class ObservationTask extends AbstractBooleanTask {
 	@Override
 	public boolean checkOnLogin() {
 		return false;
+	}
+
+	@Override
+	public TaskClient client() {
+		return TaskClient.NoOp.INSTANCE;
 	}
 
 	public boolean observe(Player player, HitResult result) {

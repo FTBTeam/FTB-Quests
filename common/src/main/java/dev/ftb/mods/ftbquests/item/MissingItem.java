@@ -2,8 +2,6 @@ package dev.ftb.mods.ftbquests.item;
 
 import dev.ftb.mods.ftbquests.registry.ModDataComponents;
 import dev.ftb.mods.ftbquests.registry.ModItems;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceKey;

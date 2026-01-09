@@ -6,8 +6,6 @@ import dev.ftb.mods.ftblibrary.config.NameMap;
 import dev.ftb.mods.ftbquests.client.FTBQuestsClient;
 import dev.ftb.mods.ftbquests.quest.Quest;
 import dev.ftb.mods.ftbquests.quest.TeamData;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.Holder;
 import net.minecraft.core.HolderLookup;
@@ -69,14 +67,12 @@ public class BiomeTask extends AbstractBooleanTask {
 	}
 
 	@Override
-	@Environment(EnvType.CLIENT)
 	public void fillConfigGroup(ConfigGroup config) {
 		super.fillConfigGroup(config);
 		config.addEnum("biome", getBiome(), this::setBiome, NameMap.of(DEFAULT_BIOME.identifier().toString(), getKnownBiomes()).create());
 	}
 
 	@Override
-	@Environment(EnvType.CLIENT)
 	public MutableComponent getAltTitle() {
 		return Component.translatable("ftbquests.task.ftbquests.biome").append(": ")
 				.append(Component.literal(getBiome())).withStyle(ChatFormatting.DARK_GREEN);

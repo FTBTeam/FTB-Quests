@@ -1,6 +1,5 @@
 package dev.ftb.mods.ftbquests.client.gui.quests;
 
-import com.mojang.blaze3d.vertex.Tesselator;
 import dev.architectury.networking.NetworkManager;
 import dev.ftb.mods.ftblibrary.client.icon.IconHelper;
 import dev.ftb.mods.ftblibrary.config.ImageResourceConfig;
@@ -180,8 +179,6 @@ public class QuestPanel extends Panel {
 			return;
 		}
 
-		Tesselator tesselator = Tesselator.getInstance();
-
 		Icon<?> dependencyLineTexture = ThemeProperties.DEPENDENCY_LINE_TEXTURE.get(questScreen.selectedChapter);
 
 		Quest selectedQuest = questScreen.getViewedQuest();
@@ -215,7 +212,7 @@ public class QuestPanel extends Panel {
 					if (button.shouldDraw() && button.quest != selectedQuest && qb.quest != selectedQuest && !button.quest.shouldHideDependentLines()) {
 						renderConnection(graphics, dependencyLineTexture, widget, button, graphics.pose(), lineWidth,
 								c.redi(), c.greeni(), c.bluei(), c.alphai(), c.alphai(),
-								mu, tesselator);
+								mu);
 					}
 				}
 			}
@@ -239,10 +236,10 @@ public class QuestPanel extends Panel {
 								a2 = 30;
 								toOutline.add(qb);
 							}
-							renderConnection(graphics, dependencyLineTexture, widget, button, graphics.pose(), lineWidth, c.redi(), c.greeni(), c.bluei(), a2, a, ms, tesselator);
+							renderConnection(graphics, dependencyLineTexture, widget, button, graphics.pose(), lineWidth, c.redi(), c.greeni(), c.bluei(), a2, a, ms);
 						} else if (qb.quest == selectedQuest || qb.isMouseOver()) {
 							Color4I c = ThemeProperties.DEPENDENCY_LINE_REQUIRES_COLOR.get(questScreen.selectedChapter);
-							renderConnection(graphics, dependencyLineTexture, widget, button, graphics.pose(), lineWidth, c.redi(), c.greeni(), c.bluei(), c.alphai(), c.alphai(), ms, tesselator);
+							renderConnection(graphics, dependencyLineTexture, widget, button, graphics.pose(), lineWidth, c.redi(), c.greeni(), c.bluei(), c.alphai(), c.alphai(), ms);
 						}
 					}
 				}
@@ -259,7 +256,7 @@ public class QuestPanel extends Panel {
 		});
 	}
 
-	private void renderConnection(GuiGraphics graphics, Icon<?> dependencyLineTexture, Widget widget, QuestButton button, @UnknownNullability Matrix3x2fStack poseStack, float s, int r, int g, int b, int a, int a1, float mu, Tesselator tesselator) {
+	private void renderConnection(GuiGraphics graphics, Icon<?> dependencyLineTexture, Widget widget, QuestButton button, Matrix3x2fStack poseStack, float s, int r, int g, int b, int a, int a1, float mu) {
 		if (!(dependencyLineTexture instanceof ImageIcon icon)) {
 			return;
 		}

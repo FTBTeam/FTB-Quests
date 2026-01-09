@@ -4,8 +4,6 @@ import dev.ftb.mods.ftblibrary.config.ConfigGroup;
 import dev.ftb.mods.ftblibrary.util.StringUtils;
 import dev.ftb.mods.ftbquests.client.EnergyTaskClientData;
 import dev.ftb.mods.ftbquests.quest.Quest;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.RegistryFriendlyByteBuf;
@@ -71,7 +69,6 @@ public abstract class EnergyTask extends Task implements ISingleLongValueTask {
 	}
 
 	@Override
-	@Environment(EnvType.CLIENT)
 	public MutableComponent getAltTitle() {
 		return Component.literal(StringUtils.formatDouble(value, true));
 	}
@@ -82,7 +79,6 @@ public abstract class EnergyTask extends Task implements ISingleLongValueTask {
 	}
 
 	@Override
-	@Environment(EnvType.CLIENT)
 	public void fillConfigGroup(ConfigGroup config) {
 		super.fillConfigGroup(config);
 		config.addLong("value", value, v -> value = v, 1000L, 1L, Long.MAX_VALUE);

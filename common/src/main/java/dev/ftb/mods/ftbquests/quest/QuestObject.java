@@ -5,8 +5,6 @@ import dev.ftb.mods.ftblibrary.icon.Color4I;
 import dev.ftb.mods.ftbquests.events.QuestProgressEventData;
 import dev.ftb.mods.ftbquests.quest.theme.property.ThemeProperties;
 import dev.ftb.mods.ftbquests.util.ProgressChange;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.RegistryFriendlyByteBuf;
@@ -50,7 +48,6 @@ public abstract class QuestObject extends QuestObjectBase {
 	}
 
 	@Override
-	@Environment(EnvType.CLIENT)
 	public void fillConfigGroup(ConfigGroup config) {
 		super.fillConfigGroup(config);
 		config.addBool("disable_toast", disableToast, v -> disableToast = v, false).setNameKey("ftbquests.disable_completion_toast").setCanEdit(getQuestChapter() == null || !getQuestChapter().isAlwaysInvisible()).setOrder(127);
@@ -104,7 +101,6 @@ public abstract class QuestObject extends QuestObjectBase {
 	protected void verifyDependenciesInternal(long original, int depth) {
 	}
 
-	@Environment(EnvType.CLIENT)
 	public Color4I getProgressColor(TeamData data) {
 		if (data.isCompleted(this)) {
 			return ThemeProperties.QUEST_COMPLETED_COLOR.get();
@@ -115,7 +111,6 @@ public abstract class QuestObject extends QuestObjectBase {
 		return ThemeProperties.QUEST_NOT_STARTED_COLOR.get();
 	}
 
-	@Environment(EnvType.CLIENT)
 	public Color4I getProgressColor(TeamData data, boolean dim) {
 		Color4I c = getProgressColor(data);
 		return dim ? c.addBrightness(-0.35F) : c;

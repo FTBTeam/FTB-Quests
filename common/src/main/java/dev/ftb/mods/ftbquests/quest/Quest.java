@@ -33,8 +33,6 @@ import dev.ftb.mods.ftbquests.util.ProgressChange;
 import dev.ftb.mods.ftbquests.util.TextUtils;
 import it.unimi.dsi.fastutil.longs.LongOpenHashSet;
 import it.unimi.dsi.fastutil.longs.LongSet;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
@@ -597,7 +595,6 @@ public final class Quest extends QuestObject implements Movable, Excludable {
 	}
 
 	@Override
-	@Environment(EnvType.CLIENT)
 	public Component getAltTitle() {
 		if (!tasks.isEmpty()) {
 			return tasks.getFirst().getTitle();
@@ -607,7 +604,6 @@ public final class Quest extends QuestObject implements Movable, Excludable {
 	}
 
 	@Override
-	@Environment(EnvType.CLIENT)
 	public Icon<?> getAltIcon() {
 		List<Icon<?>> list = new ArrayList<>();
 
@@ -662,7 +658,6 @@ public final class Quest extends QuestObject implements Movable, Excludable {
 	}
 
 	@Override
-	@Environment(EnvType.CLIENT)
 	public void fillConfigGroup(ConfigGroup config) {
 		super.fillConfigGroup(config);
 
@@ -757,7 +752,6 @@ public final class Quest extends QuestObject implements Movable, Excludable {
 	}
 
 	@Override
-	@Environment(EnvType.CLIENT)
 	public void initiateMoveClientSide(Chapter to, double x, double y) {
 		NetworkManager.sendToServer(new MoveMovableMessage(id, to.id, x, y));
 	}
@@ -807,7 +801,6 @@ public final class Quest extends QuestObject implements Movable, Excludable {
 		}
 	}
 
-	@Environment(EnvType.CLIENT)
 	public Component getSubtitle() {
 		if (cachedSubtitle == null) {
 			cachedSubtitle = TextUtils.parseRawText(getRawSubtitle(), holderLookup());
@@ -815,7 +808,6 @@ public final class Quest extends QuestObject implements Movable, Excludable {
 		return cachedSubtitle;
 	}
 
-	@Environment(EnvType.CLIENT)
 	public List<Component> getDescription() {
 		if (cachedDescription == null) {
 			cachedDescription = getRawDescription().stream().map(str -> TextUtils.parseRawText(str, holderLookup())).toList();
@@ -908,7 +900,6 @@ public final class Quest extends QuestObject implements Movable, Excludable {
 	}
 
 	@Override
-	@Environment(EnvType.CLIENT)
 	public void editedFromGUI() {
 		QuestScreen gui = ClientUtils.getCurrentGuiAs(QuestScreen.class);
 

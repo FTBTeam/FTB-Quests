@@ -1,10 +1,7 @@
 package dev.ftb.mods.ftbquests.quest.task;
 
-import dev.architectury.networking.NetworkManager;
-import dev.ftb.mods.ftblibrary.client.icon.IconHelper;
 import dev.ftb.mods.ftblibrary.config.ConfigGroup;
 import dev.ftb.mods.ftblibrary.icon.Icon;
-import dev.ftb.mods.ftblibrary.ui.Button;
 import dev.ftb.mods.ftblibrary.ui.Widget;
 import dev.ftb.mods.ftblibrary.util.StringUtils;
 import dev.ftb.mods.ftblibrary.util.TooltipList;
@@ -18,13 +15,14 @@ import dev.ftb.mods.ftbquests.events.ObjectCompletedEvent;
 import dev.ftb.mods.ftbquests.events.ObjectStartedEvent;
 import dev.ftb.mods.ftbquests.events.QuestProgressEventData;
 import dev.ftb.mods.ftbquests.integration.RecipeModHelper;
-import dev.ftb.mods.ftbquests.net.SubmitTaskMessage;
-import dev.ftb.mods.ftbquests.quest.*;
+import dev.ftb.mods.ftbquests.quest.BaseQuestFile;
+import dev.ftb.mods.ftbquests.quest.Chapter;
+import dev.ftb.mods.ftbquests.quest.Quest;
+import dev.ftb.mods.ftbquests.quest.QuestObject;
+import dev.ftb.mods.ftbquests.quest.QuestObjectType;
+import dev.ftb.mods.ftbquests.quest.TeamData;
 import dev.ftb.mods.ftbquests.util.ProgressChange;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.ChatFormatting;
-import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.RegistryFriendlyByteBuf;
@@ -166,7 +164,6 @@ public abstract class Task extends QuestObject {
 	}
 
 	@Override
-	@Environment(EnvType.CLIENT)
 	public void editedFromGUI() {
 		QuestScreen gui = ClientUtils.getCurrentGuiAs(QuestScreen.class);
 		if (gui != null) {
@@ -186,14 +183,12 @@ public abstract class Task extends QuestObject {
 	}
 
 	@Override
-	@Environment(EnvType.CLIENT)
 	public Component getAltTitle() {
 		return getType().getDisplayName();
 	}
 
 	@Override
-	@Environment(EnvType.CLIENT)
-	public Icon getAltIcon() {
+	public Icon<?> getAltIcon() {
 		return getType().getIconSupplier();
 	}
 
@@ -203,11 +198,6 @@ public abstract class Task extends QuestObject {
 		return group.getOrCreateSubgroup(getObjectType().getId())
 				.getOrCreateSubgroup(type.getTypeId().getNamespace())
 				.getOrCreateSubgroup(type.getTypeId().getPath());
-	}
-
-	@Environment(EnvType.CLIENT)
-	public void drawGUI(TeamData teamData, GuiGraphics graphics, int x, int y, int w, int h) {
-		IconHelper.renderIcon(getIcon(), graphics, x, y, w, h);
 	}
 
 	public boolean canInsertItem() {
@@ -228,7 +218,6 @@ public abstract class Task extends QuestObject {
 	 * @param teamData the team / player data
 	 * @param advanced true for advanced tooltips (when F3+H is in use)
 	 */
-	@Environment(EnvType.CLIENT)
 	public void addMouseOverHeader(TooltipList list, TeamData teamData, boolean advanced) {
 		list.add(getTitle());
 	}
@@ -238,28 +227,21 @@ public abstract class Task extends QuestObject {
 	 * @param list list to append text to
 	 * @param teamData the team / player data
 	 */
-	@Environment(EnvType.CLIENT)
 	public void addMouseOverText(TooltipList list, TeamData teamData) {
 	}
 
-	@Environment(EnvType.CLIENT)
 	public boolean addTitleInMouseOverText() {
 		return true;
 	}
 
-	@Environment(EnvType.CLIENT)
-	public void onButtonClicked(Button button, boolean canClick) {
-		if (canClick && autoSubmitOnPlayerTick() <= 0) {
-			button.playClickSound();
-			NetworkManager.sendToServer(new SubmitTaskMessage(id));
-		}
+	public TaskClient client() {
+		return TaskClient.Default.INSTANCE;
 	}
 
 	public boolean submitItemsOnInventoryChange() {
 		return false;
 	}
 
-	@Environment(EnvType.CLIENT)
 	public Optional<PositionedIngredient> getIngredient(Widget widget) {
 		if (addTitleInMouseOverText()) {
 			return PositionedIngredient.of(getIcon().getIngredient(), widget);
@@ -272,7 +254,6 @@ public abstract class Task extends QuestObject {
 		return EnumSet.of(RecipeModHelper.Components.QUESTS);
 	}
 
-	@Environment(EnvType.CLIENT)
 	public MutableComponent getButtonText() {
 		return getMaxProgress() > 1L || consumesResources() ? Component.literal(formatMaxProgress()) : Component.empty();
 	}

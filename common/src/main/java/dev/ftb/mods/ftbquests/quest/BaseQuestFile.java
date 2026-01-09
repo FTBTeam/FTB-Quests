@@ -13,14 +13,26 @@ import dev.ftb.mods.ftbquests.FTBQuests;
 import dev.ftb.mods.ftbquests.api.QuestFile;
 import dev.ftb.mods.ftbquests.client.FTBQuestsClient;
 import dev.ftb.mods.ftbquests.client.config.LocaleConfig;
-import dev.ftb.mods.ftbquests.events.*;
+import dev.ftb.mods.ftbquests.events.ClearFileCacheEvent;
+import dev.ftb.mods.ftbquests.events.CustomTaskEvent;
+import dev.ftb.mods.ftbquests.events.ObjectCompletedEvent;
+import dev.ftb.mods.ftbquests.events.ObjectStartedEvent;
+import dev.ftb.mods.ftbquests.events.QuestProgressEventData;
 import dev.ftb.mods.ftbquests.integration.RecipeModHelper;
 import dev.ftb.mods.ftbquests.net.DeleteObjectResponseMessage;
 import dev.ftb.mods.ftbquests.quest.loot.EntityWeight;
 import dev.ftb.mods.ftbquests.quest.loot.LootCrate;
 import dev.ftb.mods.ftbquests.quest.loot.RewardTable;
-import dev.ftb.mods.ftbquests.quest.reward.*;
-import dev.ftb.mods.ftbquests.quest.task.*;
+import dev.ftb.mods.ftbquests.quest.reward.CustomReward;
+import dev.ftb.mods.ftbquests.quest.reward.Reward;
+import dev.ftb.mods.ftbquests.quest.reward.RewardAutoClaim;
+import dev.ftb.mods.ftbquests.quest.reward.RewardType;
+import dev.ftb.mods.ftbquests.quest.reward.RewardTypes;
+import dev.ftb.mods.ftbquests.quest.task.CustomTask;
+import dev.ftb.mods.ftbquests.quest.task.ItemTask;
+import dev.ftb.mods.ftbquests.quest.task.Task;
+import dev.ftb.mods.ftbquests.quest.task.TaskType;
+import dev.ftb.mods.ftbquests.quest.task.TaskTypes;
 import dev.ftb.mods.ftbquests.quest.theme.property.ThemeProperties;
 import dev.ftb.mods.ftbquests.quest.translation.TranslationKey;
 import dev.ftb.mods.ftbquests.quest.translation.TranslationManager;
@@ -32,18 +44,20 @@ import dev.ftb.mods.ftbteams.api.client.ClientTeamManager;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.longs.Long2IntOpenHashMap;
 import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
-import net.minecraft.util.Util;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.core.HolderLookup;
-import net.minecraft.nbt.*;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.ListTag;
+import net.minecraft.nbt.NumericTag;
+import net.minecraft.nbt.StringTag;
+import net.minecraft.nbt.Tag;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.util.RandomSource;
+import net.minecraft.util.Util;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
@@ -56,7 +70,19 @@ import org.slf4j.Logger;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.EnumSet;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.Set;
+import java.util.UUID;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
@@ -1128,13 +1154,6 @@ public abstract class BaseQuestFile extends QuestObject implements QuestFile {
 	}
 
 	@Override
-	public TeamData getOrCreateTeamData(Entity player) {
-		return FTBTeamsAPI.api().getManager().getTeamForPlayerID(player.getUUID())
-				.map(this::getOrCreateTeamData)
-				.orElse(null);
-	}
-
-	@Override
 	public Optional<TeamData> getTeamData(Player player) {
 		return player.level().isClientSide() ?
 				getClientTeamData(player) :
@@ -1157,19 +1176,16 @@ public abstract class BaseQuestFile extends QuestObject implements QuestFile {
 	public abstract void deleteObject(long id);
 
 	@Override
-	@Environment(EnvType.CLIENT)
 	public MutableComponent getAltTitle() {
 		return Component.translatable("ftbquests.file");
 	}
 
 	@Override
-	@Environment(EnvType.CLIENT)
-	public Icon getAltIcon() {
+	public Icon<?> getAltIcon() {
 		return ThemeProperties.MODPACK_ICON.get(this);
 	}
 
 	@Override
-	@Environment(EnvType.CLIENT)
 	public void fillConfigGroup(ConfigGroup config) {
 		super.fillConfigGroup(config);
 		config.addList("emergency_items", emergencyItems, new ItemStackConfig(false, false), ItemStack.EMPTY);

@@ -11,8 +11,6 @@ import dev.ftb.mods.ftbquests.net.BlockConfigRequestMessage;
 import dev.ftb.mods.ftbquests.net.BlockConfigRequestMessage.BlockType;
 import dev.ftb.mods.ftbquests.registry.ModDataComponents;
 import dev.ftb.mods.ftbquests.util.NetUtils;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.component.DataComponents;
@@ -115,7 +113,6 @@ public class QuestBarrierBlock extends BaseEntityBlock {
 	}
 
 	@Override
-	@Environment(EnvType.CLIENT)
 	public float getShadeBrightness(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos) {
 		return 1.0F;
 	}
@@ -126,7 +123,6 @@ public class QuestBarrierBlock extends BaseEntityBlock {
     }
 
     @Override
-	@Environment(EnvType.CLIENT)
 	public boolean skipRendering(BlockState state, BlockState state2, Direction dir) {
 		return state2.is(this) || super.skipRendering(state, state2, dir);
 	}

@@ -7,8 +7,6 @@ import dev.ftb.mods.ftblibrary.icon.ItemIcon;
 import dev.ftb.mods.ftblibrary.util.KnownServerRegistries;
 import dev.ftb.mods.ftbquests.quest.Quest;
 import dev.ftb.mods.ftbquests.util.TextUtils;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.ChatFormatting;
 import net.minecraft.advancements.AdvancementHolder;
 import net.minecraft.core.HolderLookup;
@@ -62,7 +60,6 @@ public class AdvancementReward extends Reward {
 	}
 
 	@Override
-	@Environment(EnvType.CLIENT)
 	public void fillConfigGroup(ConfigGroup config) {
 		super.fillConfigGroup(config);
 
@@ -96,7 +93,6 @@ public class AdvancementReward extends Reward {
 	}
 
 	@Override
-	@Environment(EnvType.CLIENT)
 	public Component getAltTitle() {
 		KnownServerRegistries.AdvancementInfo info = KnownServerRegistries.client == null ?
 				null :
@@ -110,8 +106,7 @@ public class AdvancementReward extends Reward {
 	}
 
 	@Override
-	@Environment(EnvType.CLIENT)
-	public Icon getAltIcon() {
+	public Icon<?> getAltIcon() {
 		KnownServerRegistries.AdvancementInfo info = KnownServerRegistries.client == null ?
 				null :
 				KnownServerRegistries.client.advancements().get(advancement);

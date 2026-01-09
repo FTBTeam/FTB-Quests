@@ -22,20 +22,29 @@ import dev.ftb.mods.ftbquests.registry.ModItems;
 import dev.ftb.mods.ftbquests.util.NetUtils;
 import dev.ftb.mods.ftbquests.util.ProgressChange;
 import dev.ftb.mods.ftbquests.util.TextUtils;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.ChatFormatting;
-import net.minecraft.util.Util;
 import net.minecraft.core.HolderLookup;
-import net.minecraft.nbt.*;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.ListTag;
+import net.minecraft.nbt.NbtOps;
+import net.minecraft.nbt.StringTag;
+import net.minecraft.nbt.Tag;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.util.Util;
 import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.EnumMap;
+import java.util.EnumSet;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 import java.util.regex.Pattern;
@@ -50,7 +59,7 @@ public abstract class QuestObjectBase implements Comparable<QuestObjectBase> {
 	private ItemStack rawIcon = ItemStack.EMPTY;
 	private List<String> tags = new ArrayList<>(0);
 
-	private Icon cachedIcon = null;
+	private Icon<?> cachedIcon = null;
 	private Component cachedTitle = null;
 	private Set<String> cachedTags = null;
 
@@ -354,7 +363,6 @@ public abstract class QuestObjectBase implements Comparable<QuestObjectBase> {
 		return true;
 	}
 
-	@Environment(EnvType.CLIENT)
 	public void fillConfigGroup(ConfigGroup config) {
 		if (hasTitleConfig()) {
 			config.addString("title", getRawTitle(), this::setRawTitle, "").setNameKey("ftbquests.title").setOrder(-127);
@@ -367,13 +375,10 @@ public abstract class QuestObjectBase implements Comparable<QuestObjectBase> {
 		config.addList("tags", tags, new StringConfig(TAG_PATTERN), "").setNameKey("ftbquests.tags").setOrder(-125);
 	}
 
-	@Environment(EnvType.CLIENT)
 	public abstract Component getAltTitle();
 
-	@Environment(EnvType.CLIENT)
 	public abstract Icon<?> getAltIcon();
 
-	@Environment(EnvType.CLIENT)
 	public final Component getTitle() {
 		if (cachedTitle != null) {
 			return cachedTitle.copy();
@@ -388,12 +393,10 @@ public abstract class QuestObjectBase implements Comparable<QuestObjectBase> {
 		return cachedTitle.copy();
 	}
 
-	@Environment(EnvType.CLIENT)
 	public final MutableComponent getMutableTitle() {
 		return getTitle().copy();
 	}
 
-	@Environment(EnvType.CLIENT)
 	public final Icon<?> getIcon() {
 		if (cachedIcon == null) {
 			if (!rawIcon.isEmpty()) {
@@ -417,7 +420,6 @@ public abstract class QuestObjectBase implements Comparable<QuestObjectBase> {
 	public void deleteChildren() {
 	}
 
-	@Environment(EnvType.CLIENT)
 	public void editedFromGUI() {
 		ClientQuestFile.INSTANCE.refreshGui();
 	}
@@ -442,7 +444,6 @@ public abstract class QuestObjectBase implements Comparable<QuestObjectBase> {
 		return group.getOrCreateSubgroup(getObjectType().getId());
 	}
 
-	@Environment(EnvType.CLIENT)
 	public void onEditButtonClicked(Runnable gui) {
 		ConfigGroup group = new ConfigGroup(FTBQuestsAPI.MOD_ID, accepted -> {
 			gui.run();

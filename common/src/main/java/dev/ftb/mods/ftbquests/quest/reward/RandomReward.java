@@ -12,8 +12,6 @@ import dev.ftb.mods.ftbquests.quest.QuestObjectType;
 import dev.ftb.mods.ftbquests.quest.loot.RewardTable;
 import dev.ftb.mods.ftbquests.quest.loot.WeightedReward;
 import dev.ftb.mods.ftbquests.util.ConfigQuestObject;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.RegistryFriendlyByteBuf;
@@ -117,7 +115,6 @@ public class RandomReward extends Reward {
 	}
 
 	@Override
-	@Environment(EnvType.CLIENT)
 	public void fillConfigGroup(ConfigGroup config) {
 		super.fillConfigGroup(config);
 		config.add("table", new ConfigQuestObject<>(QuestObjectType.REWARD_TABLE), table, v -> table = v, getTable()).setNameKey("ftbquests.reward_table");
@@ -136,19 +133,16 @@ public class RandomReward extends Reward {
 	}
 
 	@Override
-	@Environment(EnvType.CLIENT)
 	public Component getAltTitle() {
 		return getTable() == null ? super.getAltTitle() : getTable().getTitleOrElse(super.getAltTitle());
 	}
 
 	@Override
-	@Environment(EnvType.CLIENT)
-	public Icon getAltIcon() {
+	public Icon<?> getAltIcon() {
 		return getTable() == null ? super.getAltIcon() : getTable().getIcon();
 	}
 
 	@Override
-	@Environment(EnvType.CLIENT)
 	public void addMouseOverText(TooltipList list) {
 		if (getTable() != null) {
 			getTable().addMouseOverText(list, true, false);
@@ -166,7 +160,6 @@ public class RandomReward extends Reward {
 	}
 
 	@Override
-    @Environment(EnvType.CLIENT)
 	public Optional<PositionedIngredient> getIngredient(Widget widget) {
 		return getTable() != null && getTable().getLootCrate() != null ?
 				PositionedIngredient.of(getTable().getLootCrate().createStack(), widget) :

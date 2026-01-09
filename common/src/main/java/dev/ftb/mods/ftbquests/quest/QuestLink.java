@@ -7,8 +7,6 @@ import dev.ftb.mods.ftblibrary.util.client.ClientUtils;
 import dev.ftb.mods.ftbquests.client.FTBQuestsClient;
 import dev.ftb.mods.ftbquests.client.gui.quests.QuestScreen;
 import dev.ftb.mods.ftbquests.net.MoveMovableMessage;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.RegistryFriendlyByteBuf;
@@ -101,7 +99,6 @@ public class QuestLink extends QuestObject implements Movable, Excludable {
     }
 
     @Override
-    @Environment(EnvType.CLIENT)
     public void editedFromGUI() {
         QuestScreen gui = ClientUtils.getCurrentGuiAs(QuestScreen.class);
         if (gui != null) {

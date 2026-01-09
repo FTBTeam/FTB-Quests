@@ -1,13 +1,16 @@
 package dev.ftb.mods.ftbquests.client.gui.quests;
 
-import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.PoseStack;
 import dev.architectury.networking.NetworkManager;
 import dev.ftb.mods.ftblibrary.client.icon.IconHelper;
 import dev.ftb.mods.ftblibrary.icon.Color4I;
 import dev.ftb.mods.ftblibrary.icon.Icons;
 import dev.ftb.mods.ftblibrary.icon.ItemIcon;
-import dev.ftb.mods.ftblibrary.ui.*;
+import dev.ftb.mods.ftblibrary.ui.Button;
+import dev.ftb.mods.ftblibrary.ui.ContextMenuItem;
+import dev.ftb.mods.ftblibrary.ui.Panel;
+import dev.ftb.mods.ftblibrary.ui.SimpleTextButton;
+import dev.ftb.mods.ftblibrary.ui.Theme;
+import dev.ftb.mods.ftblibrary.ui.WidgetType;
 import dev.ftb.mods.ftblibrary.ui.input.MouseButton;
 import dev.ftb.mods.ftblibrary.ui.misc.AbstractButtonListScreen;
 import dev.ftb.mods.ftblibrary.util.TooltipList;
@@ -19,6 +22,7 @@ import dev.ftb.mods.ftbquests.net.EditObjectMessage;
 import dev.ftb.mods.ftbquests.net.GiveItemToPlayerMessage;
 import dev.ftb.mods.ftbquests.net.ReorderItemMessage;
 import dev.ftb.mods.ftbquests.quest.TeamData;
+import dev.ftb.mods.ftbquests.quest.task.CheckmarkTask;
 import dev.ftb.mods.ftbquests.quest.task.ItemTask;
 import dev.ftb.mods.ftbquests.quest.task.Task;
 import dev.ftb.mods.ftbquests.quest.theme.property.ThemeProperties;
@@ -70,7 +74,7 @@ public class TaskButton extends Button {
 				boolean canClick = task.isValid()
 						&& questScreen.file.selfTeamData.canStartTasks(task.getQuest())
 						&& !questScreen.file.selfTeamData.isCompleted(task);
-				task.onButtonClicked(this, canClick);
+				task.client().onButtonClicked(task, this, canClick);
 			}
 		} else if (button.isRight() && questScreen.file.canEdit()) {
 			playClickSound();
@@ -200,7 +204,19 @@ public class TaskButton extends Button {
 
 	@Override
 	public void drawIcon(GuiGraphics graphics, Theme theme, int x, int y, int w, int h) {
-		task.drawGUI(questScreen.file.selfTeamData, graphics, x, y, w, h);
+		if (task instanceof CheckmarkTask) {
+			TeamData teamData = questScreen.file.selfTeamData;
+
+			var icon = ThemeProperties.CHECKMARK_TASK_INACTIVE.get(task);
+			if (teamData.isCompleted(task)) {
+				icon = ThemeProperties.CHECKMARK_TASK_ACTIVE.get(task);
+			}
+
+			IconHelper.renderIcon(icon, graphics, x, y, w, h);
+			return;
+		}
+
+		IconHelper.renderIcon(task.getIcon(), graphics, x, y, w, h);
 	}
 
 	@Override

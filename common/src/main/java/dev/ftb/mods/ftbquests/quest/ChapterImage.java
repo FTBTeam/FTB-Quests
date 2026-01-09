@@ -13,8 +13,7 @@ import dev.ftb.mods.ftblibrary.util.TooltipList;
 import dev.ftb.mods.ftbquests.net.EditObjectMessage;
 import dev.ftb.mods.ftbquests.util.ConfigQuestObject;
 import dev.ftb.mods.ftbquests.util.NetUtils;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
+
 import net.minecraft.util.Util;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.nbt.CompoundTag;
@@ -215,7 +214,6 @@ public final class ChapterImage implements Movable {
 		dependency = chapter.file.getQuest(buffer.readLong());
 	}
 
-	@Environment(EnvType.CLIENT)
 	public void fillConfigGroup(ConfigGroup config) {
 		config.addDouble("x", x, v -> x = v, 0, Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY);
 		config.addDouble("y", y, v -> y = v, 0, Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY);
@@ -293,7 +291,6 @@ public final class ChapterImage implements Movable {
 	}
 
 	@Override
-	@Environment(EnvType.CLIENT)
 	public void drawMoved(GuiGraphics graphics) {
 		var poseStack = graphics.pose();
 

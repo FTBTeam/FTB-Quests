@@ -6,12 +6,9 @@ import dev.ftb.mods.ftblibrary.icon.AnimatedIcon;
 import dev.ftb.mods.ftblibrary.icon.Icon;
 import dev.ftb.mods.ftblibrary.icon.ItemIcon;
 import dev.ftb.mods.ftblibrary.math.Bits;
-import dev.ftb.mods.ftblibrary.ui.Button;
 import dev.ftb.mods.ftblibrary.util.TooltipList;
 import dev.ftb.mods.ftbquests.FTBQuests;
 import dev.ftb.mods.ftbquests.client.FTBQuestsClient;
-import dev.ftb.mods.ftbquests.client.gui.CustomToast;
-import dev.ftb.mods.ftbquests.client.gui.quests.ValidItemsScreen;
 import dev.ftb.mods.ftbquests.integration.item_filtering.ItemMatchingSystem;
 import dev.ftb.mods.ftbquests.integration.item_filtering.ItemMatchingSystem.ComponentMatchType;
 import dev.ftb.mods.ftbquests.item.MissingItem;
@@ -19,10 +16,7 @@ import dev.ftb.mods.ftbquests.quest.Quest;
 import dev.ftb.mods.ftbquests.quest.TeamData;
 import dev.ftb.mods.ftbquests.registry.ModItems;
 import dev.ftb.mods.ftbquests.util.PlayerInventorySummary;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.ChatFormatting;
-import net.minecraft.client.Minecraft;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.RegistryFriendlyByteBuf;
@@ -151,7 +145,6 @@ public class ItemTask extends Task implements Predicate<ItemStack> {
 	}
 
 	@Override
-	@Environment(EnvType.CLIENT)
 	public MutableComponent getAltTitle() {
 		if (count > 1) {
 			return Component.literal(count + "x ").append(itemStack.getHoverName());
@@ -161,7 +154,6 @@ public class ItemTask extends Task implements Predicate<ItemStack> {
 	}
 
 	@Override
-	@Environment(EnvType.CLIENT)
 	public Icon<?> getAltIcon() {
 		List<Icon<?>> icons = new ArrayList<>();
 
@@ -192,7 +184,6 @@ public class ItemTask extends Task implements Predicate<ItemStack> {
 	}
 
 	@Override
-	@Environment(EnvType.CLIENT)
 	public void fillConfigGroup(ConfigGroup config) {
 		super.fillConfigGroup(config);
 		config.addItemStack("item", itemStack, v -> itemStack = v, ItemStack.EMPTY, true, false).setNameKey("ftbquests.task.ftbquests.item");
@@ -219,19 +210,8 @@ public class ItemTask extends Task implements Predicate<ItemStack> {
 	}
 
 	@Override
-	@Environment(EnvType.CLIENT)
-	public void onButtonClicked(Button button, boolean canClick) {
-		button.playClickSound();
-
-		List<ItemStack> validItems = getValidDisplayItems();
-
-		if (!consumesResources() && validItems.size() == 1 && FTBQuests.getRecipeModHelper().isRecipeModAvailable()) {
-			FTBQuests.getRecipeModHelper().showRecipes(validItems.getFirst());
-		} else if (validItems.isEmpty()) {
-			Minecraft.getInstance().getToastManager().addToast(new CustomToast(Component.literal("No valid items!"), ItemIcon.ofItem(ModItems.MISSING_ITEM.get()), Component.literal("Report this bug to modpack author!")));
-		} else {
-			new ValidItemsScreen(this, validItems, canClick).openGui();
-		}
+	public TaskClient client() {
+		return ItemTaskClient.INSTANCE;
 	}
 
 	@Override
@@ -257,7 +237,6 @@ public class ItemTask extends Task implements Predicate<ItemStack> {
 	}
 
 	@Override
-	@Environment(EnvType.CLIENT)
 	public void addMouseOverText(TooltipList list, TeamData teamData) {
 		if (taskScreenOnly) {
 			list.blankLine();

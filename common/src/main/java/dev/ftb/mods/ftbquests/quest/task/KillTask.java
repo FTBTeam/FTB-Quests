@@ -7,14 +7,11 @@ import dev.ftb.mods.ftblibrary.icon.AnimatedIcon;
 import dev.ftb.mods.ftblibrary.icon.Icon;
 import dev.ftb.mods.ftblibrary.icon.Icons;
 import dev.ftb.mods.ftblibrary.icon.ItemIcon;
-import dev.ftb.mods.ftblibrary.ui.Button;
 import dev.ftb.mods.ftblibrary.util.Lazy;
 import dev.ftb.mods.ftbquests.FTBQuests;
 import dev.ftb.mods.ftbquests.client.FTBQuestsClient;
 import dev.ftb.mods.ftbquests.quest.Quest;
 import dev.ftb.mods.ftbquests.quest.TeamData;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.Holder;
 import net.minecraft.core.HolderLookup;
@@ -38,7 +35,11 @@ import net.minecraft.world.item.SpawnEggItem;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 
 public class KillTask extends Task {
 	private static final Identifier ZOMBIE = Identifier.withDefaultNamespace("zombie");
@@ -114,7 +115,6 @@ public class KillTask extends Task {
     }
 
 	@Override
-	@Environment(EnvType.CLIENT)
 	public void fillConfigGroup(ConfigGroup config) {
 		super.fillConfigGroup(config);
 
@@ -124,11 +124,16 @@ public class KillTask extends Task {
 		config.addString("custom_name", customName, v -> customName = v, "");
 	}
 
+	@Override
+	public TaskClient client() {
+		return TaskClient.NoOp.INSTANCE;
+	}
+
 	private String getTypeTagStr() {
 		return entityTypeTag == null ? "" : entityTypeTag.location().toString();
 	}
 
-	private static Icon getIconForEntityType(Identifier typeId) {
+	private static Icon<?> getIconForEntityType(Identifier typeId) {
 		return entityIcons.computeIfAbsent(typeId, k -> {
 			Optional<Holder.Reference<EntityType<?>>> entityTypeOpt = BuiltInRegistries.ENTITY_TYPE.get(typeId);
 			if (entityTypeOpt.isEmpty()) {
@@ -162,7 +167,6 @@ public class KillTask extends Task {
 	}
 
 	@Override
-	@Environment(EnvType.CLIENT)
 	public MutableComponent getAltTitle() {
 		MutableComponent name = entityTypeTag == null ?
 				Component.translatable("entity." + entityTypeId.toLanguageKey()) :
@@ -175,7 +179,6 @@ public class KillTask extends Task {
 	}
 
 	@Override
-	@Environment(EnvType.CLIENT)
 	public Icon<?> getAltIcon() {
 		if (entityTypeTag == null) {
 			return getIconForEntityType(entityTypeId);
@@ -189,11 +192,6 @@ public class KillTask extends Task {
 						)
 				);
 		return icons.isEmpty() ? Icons.BARRIER : AnimatedIcon.fromList(icons, false);
-	}
-
-	@Override
-	@Environment(EnvType.CLIENT)
-	public void onButtonClicked(Button button, boolean canClick) {
 	}
 
 	public void kill(TeamData teamData, LivingEntity e) {

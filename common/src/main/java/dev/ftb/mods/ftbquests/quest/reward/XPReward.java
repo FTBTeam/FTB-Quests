@@ -5,8 +5,6 @@ import dev.ftb.mods.ftblibrary.config.ConfigGroup;
 import dev.ftb.mods.ftblibrary.icon.Color4I;
 import dev.ftb.mods.ftbquests.net.NotifyRewardMessage;
 import dev.ftb.mods.ftbquests.quest.Quest;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
@@ -57,7 +55,6 @@ public class XPReward extends Reward {
 	}
 
 	@Override
-	@Environment(EnvType.CLIENT)
 	public void fillConfigGroup(ConfigGroup config) {
 		super.fillConfigGroup(config);
 		config.addInt("xp", xp, v -> xp = v, 100, 1, Integer.MAX_VALUE).setNameKey("ftbquests.reward.ftbquests.xp");
@@ -75,13 +72,11 @@ public class XPReward extends Reward {
 	}
 
 	@Override
-	@Environment(EnvType.CLIENT)
 	public MutableComponent getAltTitle() {
 		return Component.translatable("ftbquests.reward.ftbquests.xp").append(": ").append(Component.literal("+" + xp).withStyle(ChatFormatting.GREEN));
 	}
 
 	@Override
-	@Environment(EnvType.CLIENT)
 	public String getButtonText() {
 		return "+" + xp;
 	}

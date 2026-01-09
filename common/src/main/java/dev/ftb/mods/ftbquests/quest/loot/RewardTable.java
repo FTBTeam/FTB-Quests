@@ -21,16 +21,18 @@ import dev.ftb.mods.ftbquests.integration.RecipeModHelper;
 import dev.ftb.mods.ftbquests.net.CreateObjectResponseMessage;
 import dev.ftb.mods.ftbquests.net.EditObjectMessage;
 import dev.ftb.mods.ftbquests.net.SyncTranslationMessageToClient;
-import dev.ftb.mods.ftbquests.quest.*;
+import dev.ftb.mods.ftbquests.quest.BaseQuestFile;
+import dev.ftb.mods.ftbquests.quest.Chapter;
+import dev.ftb.mods.ftbquests.quest.Quest;
+import dev.ftb.mods.ftbquests.quest.QuestObjectBase;
+import dev.ftb.mods.ftbquests.quest.QuestObjectType;
+import dev.ftb.mods.ftbquests.quest.ServerQuestFile;
 import dev.ftb.mods.ftbquests.quest.reward.ItemReward;
 import dev.ftb.mods.ftbquests.quest.reward.Reward;
 import dev.ftb.mods.ftbquests.quest.reward.RewardType;
 import dev.ftb.mods.ftbquests.quest.reward.RewardTypes;
 import dev.ftb.mods.ftbquests.quest.translation.TranslationKey;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.ChatFormatting;
-import net.minecraft.util.Util;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
@@ -39,12 +41,19 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.RandomSource;
+import net.minecraft.util.Util;
 import net.minecraft.world.item.ItemStack;
 import org.apache.commons.lang3.Validate;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.EnumSet;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 public class RewardTable extends QuestObjectBase {
@@ -338,7 +347,6 @@ public class RewardTable extends QuestObjectBase {
 	}
 
 	@Override
-	@Environment(EnvType.CLIENT)
 	public void fillConfigGroup(ConfigGroup config) {
 		super.fillConfigGroup(config);
 		config.addDouble("empty_weight", emptyWeight, v -> emptyWeight = v.floatValue(), 0, 0, Integer.MAX_VALUE);
@@ -367,7 +375,6 @@ public class RewardTable extends QuestObjectBase {
 	}
 
 	@Override
-	@Environment(EnvType.CLIENT)
 	public void editedFromGUI() {
 		QuestScreen gui = ClientUtils.getCurrentGuiAs(QuestScreen.class);
 
@@ -417,7 +424,6 @@ public class RewardTable extends QuestObjectBase {
 	}
 
 	@Override
-	@Environment(EnvType.CLIENT)
 	public Component getAltTitle() {
 		return weightedRewards.size() == 1 ?
 				weightedRewards.get(0).getReward().getTitle() :
@@ -426,7 +432,6 @@ public class RewardTable extends QuestObjectBase {
 	}
 
 	@Override
-	@Environment(EnvType.CLIENT)
 	public Icon<?> getAltIcon() {
 		if (lootCrate != null) {
 			return ItemIcon.ofItemStack(lootCrate.createStack());
@@ -441,7 +446,6 @@ public class RewardTable extends QuestObjectBase {
 	}
 
 	@Override
-	@Environment(EnvType.CLIENT)
 	public void onEditButtonClicked(Runnable gui) {
 		new EditRewardTableScreen(gui, this, editedReward -> {
 			NetworkManager.sendToServer(EditObjectMessage.forQuestObject(editedReward));

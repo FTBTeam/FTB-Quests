@@ -5,8 +5,6 @@ import dev.ftb.mods.ftblibrary.ui.Panel;
 import dev.ftb.mods.ftbquests.api.FTBQuestsAPI;
 import dev.ftb.mods.ftbquests.client.GuiProviders;
 import dev.ftb.mods.ftbquests.quest.Quest;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.util.Util;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
@@ -110,7 +108,6 @@ public final class RewardType {
 
 	@FunctionalInterface
 	public interface GuiProvider {
-		@Environment(EnvType.CLIENT)
 		void openCreationGui(Panel panel, Quest quest, Consumer<Reward> callback);
 	}
 }

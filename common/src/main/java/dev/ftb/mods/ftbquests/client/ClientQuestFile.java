@@ -10,7 +10,11 @@ import dev.ftb.mods.ftbquests.FTBQuests;
 import dev.ftb.mods.ftbquests.client.gui.CustomToast;
 import dev.ftb.mods.ftbquests.client.gui.quests.QuestScreen;
 import dev.ftb.mods.ftbquests.net.DeleteObjectMessage;
-import dev.ftb.mods.ftbquests.quest.*;
+import dev.ftb.mods.ftbquests.quest.BaseQuestFile;
+import dev.ftb.mods.ftbquests.quest.Chapter;
+import dev.ftb.mods.ftbquests.quest.Quest;
+import dev.ftb.mods.ftbquests.quest.QuestObject;
+import dev.ftb.mods.ftbquests.quest.TeamData;
 import dev.ftb.mods.ftbquests.quest.task.StructureTask;
 import dev.ftb.mods.ftbquests.quest.theme.QuestTheme;
 import dev.ftb.mods.ftbquests.quest.translation.TranslationKey;
@@ -18,11 +22,10 @@ import dev.ftb.mods.ftbquests.util.TextUtils;
 import dev.ftb.mods.ftbteams.api.FTBTeamsAPI;
 import dev.ftb.mods.ftbteams.api.client.KnownClientPlayer;
 import net.minecraft.ChatFormatting;
-import net.minecraft.util.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.network.chat.Component;
-import net.minecraft.world.entity.Entity;
+import net.minecraft.util.Util;
 import net.minecraft.world.entity.player.Player;
 import org.lwjgl.glfw.GLFW;
 
@@ -156,12 +159,13 @@ public class ClientQuestFile extends BaseQuestFile {
 
 		QuestTheme.instance.clearCache();
 	}
-
+	
 	@Override
-	public TeamData getOrCreateTeamData(Entity player) {
+	public Optional<TeamData> getTeamData(Player player) {
 		KnownClientPlayer kcp = FTBTeamsAPI.api().getClientManager().getKnownPlayer(player.getUUID())
 				.orElseThrow(() -> new RuntimeException("Unknown client player " + player.getUUID()));
-		return kcp.id().equals(Minecraft.getInstance().player.getUUID()) ? selfTeamData : getOrCreateTeamData(kcp.teamId());
+
+		return Optional.of(kcp.id().equals(Minecraft.getInstance().player.getUUID()) ? selfTeamData : getOrCreateTeamData(kcp.teamId()));
 	}
 
 	public void setPersistedScreenInfo(QuestScreen.PersistedData persistedData) {

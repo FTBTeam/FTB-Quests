@@ -12,8 +12,6 @@ import dev.ftb.mods.ftbquests.events.ObjectStartedEvent;
 import dev.ftb.mods.ftbquests.events.QuestProgressEventData;
 import dev.ftb.mods.ftbquests.quest.translation.TranslationKey;
 import dev.ftb.mods.ftbquests.util.NetUtils;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
@@ -21,7 +19,14 @@ import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
+import java.util.UUID;
 import java.util.regex.Pattern;
 
 public final class Chapter extends QuestObject {
@@ -343,13 +348,11 @@ public final class Chapter extends QuestObject {
 	}
 
 	@Override
-	@Environment(EnvType.CLIENT)
 	public MutableComponent getAltTitle() {
 		return Component.translatable("ftbquests.unnamed");
 	}
 
 	@Override
-	@Environment(EnvType.CLIENT)
 	public Icon<?> getAltIcon() {
 		List<Icon<?>> list = new ArrayList<>();
 
@@ -416,7 +419,6 @@ public final class Chapter extends QuestObject {
 	}
 
 	@Override
-	@Environment(EnvType.CLIENT)
 	public void fillConfigGroup(ConfigGroup config) {
 		super.fillConfigGroup(config);
 

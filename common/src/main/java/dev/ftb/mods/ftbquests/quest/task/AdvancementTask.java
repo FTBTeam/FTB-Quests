@@ -8,8 +8,6 @@ import dev.ftb.mods.ftblibrary.util.KnownServerRegistries;
 import dev.ftb.mods.ftbquests.quest.Quest;
 import dev.ftb.mods.ftbquests.quest.TeamData;
 import dev.ftb.mods.ftbquests.util.TextUtils;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.ChatFormatting;
 import net.minecraft.advancements.AdvancementHolder;
 import net.minecraft.advancements.AdvancementProgress;
@@ -20,7 +18,6 @@ import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.util.ExtraCodecs;
 
 public class AdvancementTask extends AbstractBooleanTask {
 	private Identifier advancement = Identifier.parse("minecraft:story/root");
@@ -64,7 +61,6 @@ public class AdvancementTask extends AbstractBooleanTask {
 	}
 
 	@Override
-	@Environment(EnvType.CLIENT)
 	public void fillConfigGroup(ConfigGroup config) {
 		super.fillConfigGroup(config);
 
@@ -84,7 +80,6 @@ public class AdvancementTask extends AbstractBooleanTask {
 	}
 
 	@Override
-	@Environment(EnvType.CLIENT)
 	public Component getAltTitle() {
 		KnownServerRegistries.AdvancementInfo info = KnownServerRegistries.client == null ?
 				null :
@@ -98,8 +93,7 @@ public class AdvancementTask extends AbstractBooleanTask {
 	}
 
 	@Override
-	@Environment(EnvType.CLIENT)
-	public Icon getAltIcon() {
+	public Icon<?> getAltIcon() {
 		KnownServerRegistries.AdvancementInfo info = KnownServerRegistries.client == null ?
 				null :
 				KnownServerRegistries.client.advancements().get(advancement);

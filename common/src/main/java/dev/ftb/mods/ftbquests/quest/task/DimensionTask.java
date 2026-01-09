@@ -5,8 +5,6 @@ import dev.ftb.mods.ftblibrary.config.NameMap;
 import dev.ftb.mods.ftblibrary.util.KnownServerRegistries;
 import dev.ftb.mods.ftbquests.quest.Quest;
 import dev.ftb.mods.ftbquests.quest.TeamData;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.registries.Registries;
@@ -14,8 +12,8 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
-import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.level.Level;
 
@@ -65,7 +63,6 @@ public class DimensionTask extends AbstractBooleanTask {
 	}
 
 	@Override
-	@Environment(EnvType.CLIENT)
 	public void fillConfigGroup(ConfigGroup config) {
 		super.fillConfigGroup(config);
 
@@ -80,7 +77,6 @@ public class DimensionTask extends AbstractBooleanTask {
 	}
 
 	@Override
-	@Environment(EnvType.CLIENT)
 	public MutableComponent getAltTitle() {
 		return Component.translatable("ftbquests.task.ftbquests.dimension").append(": ").append(Component.literal(dimension.identifier().toString()).withStyle(ChatFormatting.DARK_GREEN));
 	}

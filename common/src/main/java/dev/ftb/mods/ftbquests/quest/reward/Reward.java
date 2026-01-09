@@ -12,11 +12,15 @@ import dev.ftb.mods.ftblibrary.util.client.PositionedIngredient;
 import dev.ftb.mods.ftbquests.client.gui.quests.QuestScreen;
 import dev.ftb.mods.ftbquests.integration.RecipeModHelper;
 import dev.ftb.mods.ftbquests.net.ClaimRewardMessage;
-import dev.ftb.mods.ftbquests.quest.*;
+import dev.ftb.mods.ftbquests.quest.BaseQuestFile;
+import dev.ftb.mods.ftbquests.quest.Chapter;
+import dev.ftb.mods.ftbquests.quest.Quest;
+import dev.ftb.mods.ftbquests.quest.QuestObjectBase;
+import dev.ftb.mods.ftbquests.quest.QuestObjectType;
+import dev.ftb.mods.ftbquests.quest.ServerQuestFile;
+import dev.ftb.mods.ftbquests.quest.TeamData;
 import dev.ftb.mods.ftbquests.quest.translation.TranslationKey;
 import dev.ftb.mods.ftbquests.util.ProgressChange;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.RegistryFriendlyByteBuf;
@@ -27,7 +31,11 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.*;
+import java.util.EnumSet;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
+import java.util.UUID;
 
 public abstract class Reward extends QuestObjectBase {
 	protected final Quest quest;
@@ -127,7 +135,6 @@ public abstract class Reward extends QuestObjectBase {
 	}
 
 	@Override
-	@Environment(EnvType.CLIENT)
 	public void fillConfigGroup(ConfigGroup config) {
 		super.fillConfigGroup(config);
 		config.addEnum("team", team, v -> team = v, Tristate.NAME_MAP)
@@ -198,7 +205,6 @@ public abstract class Reward extends QuestObjectBase {
 	}
 
 	@Override
-	@Environment(EnvType.CLIENT)
 	public void editedFromGUI() {
 		QuestScreen gui = ClientUtils.getCurrentGuiAs(QuestScreen.class);
 		if (gui != null) {
@@ -247,13 +253,11 @@ public abstract class Reward extends QuestObjectBase {
 	}
 
 	@Override
-	@Environment(EnvType.CLIENT)
-	public Icon getAltIcon() {
+	public Icon<?> getAltIcon() {
 		return getType().getIconSupplier();
 	}
 
 	@Override
-	@Environment(EnvType.CLIENT)
 	public Component getAltTitle() {
 		return getType().getDisplayName();
 	}
@@ -266,16 +270,13 @@ public abstract class Reward extends QuestObjectBase {
 				.getOrCreateSubgroup(type.getTypeId().getPath());
 	}
 
-	@Environment(EnvType.CLIENT)
 	public void addMouseOverText(TooltipList list) {
 	}
 
-	@Environment(EnvType.CLIENT)
 	public boolean addTitleInMouseOverText() {
 		return true;
 	}
 
-	@Environment(EnvType.CLIENT)
 	public void onButtonClicked(Button button, boolean canClick) {
 		if (canClick) {
 			button.playClickSound();
@@ -291,7 +292,6 @@ public abstract class Reward extends QuestObjectBase {
 		return false;
 	}
 
-	@Environment(EnvType.CLIENT)
 	public Optional<PositionedIngredient> getIngredient(Widget widget) {
 		return PositionedIngredient.of(getIcon().getIngredient(), widget);
 	}
@@ -301,7 +301,6 @@ public abstract class Reward extends QuestObjectBase {
 		return EnumSet.of(RecipeModHelper.Components.QUESTS);
 	}
 
-	@Environment(EnvType.CLIENT)
 	public String getButtonText() {
 		return "";
 	}

@@ -1,18 +1,13 @@
 package dev.ftb.mods.ftbquests.quest.task;
 
-import dev.architectury.networking.NetworkManager;
-import dev.ftb.mods.ftblibrary.ui.Button;
 import dev.ftb.mods.ftblibrary.util.NetworkHelper;
 import dev.ftb.mods.ftbquests.net.EditObjectResponseMessage;
-import dev.ftb.mods.ftbquests.net.SubmitTaskMessage;
 import dev.ftb.mods.ftbquests.quest.Quest;
 import dev.ftb.mods.ftbquests.quest.QuestObjectBase;
 import dev.ftb.mods.ftbquests.quest.ServerQuestFile;
 import dev.ftb.mods.ftbquests.quest.TeamData;
 import it.unimi.dsi.fastutil.longs.LongOpenHashSet;
 import it.unimi.dsi.fastutil.longs.LongSet;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
@@ -73,12 +68,8 @@ public class CustomTask extends Task {
 	}
 
 	@Override
-	@Environment(EnvType.CLIENT)
-	public void onButtonClicked(Button button, boolean canClick) {
-		if (enableButton && canClick) {
-			button.playClickSound();
-			NetworkManager.sendToServer(new SubmitTaskMessage(id));
-		}
+	public TaskClient client() {
+		return CustomTaskClient.INSTANCE;
 	}
 
 	@Override
@@ -107,6 +98,10 @@ public class CustomTask extends Task {
 		if (check != null && checkTaskSequence(teamData) && !teamData.isCompleted(this)) {
 			check.check(new Data(this, teamData), player);
 		}
+	}
+
+	public boolean enableButton() {
+		return enableButton;
 	}
 
 	@Override

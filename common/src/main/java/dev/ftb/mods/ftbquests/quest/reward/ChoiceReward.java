@@ -4,8 +4,6 @@ import dev.ftb.mods.ftblibrary.ui.Button;
 import dev.ftb.mods.ftblibrary.util.TooltipList;
 import dev.ftb.mods.ftbquests.client.gui.SelectChoiceRewardScreen;
 import dev.ftb.mods.ftbquests.quest.Quest;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.item.ItemStack;
@@ -30,7 +28,6 @@ public class ChoiceReward extends RandomReward {
 	}
 
 	@Override
-	@Environment(EnvType.CLIENT)
 	public void addMouseOverText(TooltipList list) {
 		if (getTable() != null) {
 			getTable().addMouseOverText(list, false, false);
@@ -38,7 +35,6 @@ public class ChoiceReward extends RandomReward {
 	}
 
 	@Override
-	@Environment(EnvType.CLIENT)
 	public void onButtonClicked(Button button, boolean canClick) {
 		if (canClick) {
 			button.playClickSound();

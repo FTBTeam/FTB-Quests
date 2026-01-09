@@ -6,12 +6,15 @@ import dev.ftb.mods.ftblibrary.icon.Icon;
 import dev.ftb.mods.ftblibrary.util.client.ClientUtils;
 import dev.ftb.mods.ftbquests.client.gui.quests.QuestScreen;
 import dev.ftb.mods.ftbquests.events.QuestProgressEventData;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.network.chat.Component;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
+import java.util.UUID;
 
 public class ChapterGroup extends QuestObject {
 	protected final BaseQuestFile file;
@@ -100,13 +103,11 @@ public class ChapterGroup extends QuestObject {
 	}
 
 	@Override
-	@Environment(EnvType.CLIENT)
 	public void fillConfigGroup(ConfigGroup config) {
 		config.addString("title", getRawTitle(), this::setRawTitle, "").setNameKey("ftbquests.title").setOrder(-127);
 	}
 
 	@Override
-	@Environment(EnvType.CLIENT)
 	public void editedFromGUI() {
 		QuestScreen gui = ClientUtils.getCurrentGuiAs(QuestScreen.class);
 
@@ -116,13 +117,11 @@ public class ChapterGroup extends QuestObject {
 	}
 
 	@Override
-	@Environment(EnvType.CLIENT)
 	public Component getAltTitle() {
 		return Component.literal("Unnamed Group");
 	}
 
 	@Override
-	@Environment(EnvType.CLIENT)
 	public Icon<?> getAltIcon() {
 		List<Icon<?>> list = new ArrayList<>();
 

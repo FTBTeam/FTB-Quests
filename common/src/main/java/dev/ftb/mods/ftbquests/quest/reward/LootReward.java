@@ -6,8 +6,6 @@ import dev.ftb.mods.ftbquests.client.gui.RewardNotificationsScreen;
 import dev.ftb.mods.ftbquests.quest.Quest;
 import dev.ftb.mods.ftbquests.quest.loot.RewardTable;
 import dev.ftb.mods.ftbquests.quest.loot.WeightedReward;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.item.ItemStack;
@@ -39,7 +37,6 @@ public class LootReward extends RandomReward {
 	}
 
 	@Override
-	@Environment(EnvType.CLIENT)
 	public void addMouseOverText(TooltipList list) {
 		if (getTable() != null) {
 			getTable().addMouseOverText(list, true, true);
@@ -47,7 +44,6 @@ public class LootReward extends RandomReward {
 	}
 
 	@Override
-	@Environment(EnvType.CLIENT)
 	public void onButtonClicked(Button button, boolean canClick) {
 		if (canClick) {
 			new RewardNotificationsScreen().openGui();

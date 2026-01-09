@@ -6,8 +6,6 @@ import dev.ftb.mods.ftblibrary.icon.Icon;
 import dev.ftb.mods.ftbquests.net.NotifyRewardMessage;
 import dev.ftb.mods.ftbquests.quest.Quest;
 import dev.ftb.mods.ftbteams.api.FTBTeamsAPI;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.ChatFormatting;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.core.BlockPos;
@@ -95,7 +93,6 @@ public class CommandReward extends Reward {
 	}
 
 	@Override
-	@Environment(EnvType.CLIENT)
 	public void fillConfigGroup(ConfigGroup config) {
 		super.fillConfigGroup(config);
 		config.addString("command", command, v -> command = v, DEFAULT_COMMAND).setNameKey("ftbquests.reward.ftbquests.command");
@@ -153,7 +150,6 @@ public class CommandReward extends Reward {
 	}
 
 	@Override
-	@Environment(EnvType.CLIENT)
 	public MutableComponent getAltTitle() {
 		return Component.translatable("ftbquests.reward.ftbquests.command").append(": ").append(Component.literal(command).withStyle(ChatFormatting.RED));
 	}

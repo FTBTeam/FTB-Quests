@@ -5,7 +5,6 @@ import dev.ftb.mods.ftbquests.quest.Quest;
 import dev.ftb.mods.ftbquests.quest.QuestLink;
 import dev.ftb.mods.ftbquests.quest.TeamData;
 import dev.ftb.mods.ftbteams.api.Team;
-import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
 import org.jetbrains.annotations.Nullable;
 
@@ -44,15 +43,6 @@ public interface QuestFile {
      * @param team the team to check
      */
     TeamData getOrCreateTeamData(Team team);
-
-    /**
-     * {@return quest team data for the player, creating new progress data if necessary}
-     * @param player the player
-     * @deprecated not recommended since it can return null if player's team data isn't ready. Use {@link #getTeamData(Player)}.
-     */
-    @Nullable
-    @Deprecated(forRemoval = true)
-    TeamData getOrCreateTeamData(Entity player);
 
     /**
      * Get the FTB Quests team progress data for the given player, creating new progress data if necessary.

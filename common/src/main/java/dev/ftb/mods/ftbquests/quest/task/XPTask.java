@@ -3,8 +3,6 @@ package dev.ftb.mods.ftbquests.quest.task;
 import dev.ftb.mods.ftblibrary.config.ConfigGroup;
 import dev.ftb.mods.ftbquests.quest.Quest;
 import dev.ftb.mods.ftbquests.quest.TeamData;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
@@ -77,7 +75,6 @@ public class XPTask extends Task implements ISingleLongValueTask {
 	}
 
 	@Override
-	@Environment(EnvType.CLIENT)
 	public void fillConfigGroup(ConfigGroup config) {
 		super.fillConfigGroup(config);
 		config.addLong("value", value, v -> value = v, 1L, 1L, Long.MAX_VALUE);
@@ -85,7 +82,6 @@ public class XPTask extends Task implements ISingleLongValueTask {
 	}
 
 	@Override
-	@Environment(EnvType.CLIENT)
 	public MutableComponent getAltTitle() {
 		return Component.translatable("ftbquests.reward.ftbquests.xp_levels").append(": ").append(Component.literal(formatMaxProgress()).withStyle(ChatFormatting.RED));
 	}

@@ -12,8 +12,6 @@ import dev.ftb.mods.ftbquests.net.NotifyItemRewardMessage;
 import dev.ftb.mods.ftbquests.quest.Quest;
 import dev.ftb.mods.ftbquests.registry.ModItems;
 import io.netty.handler.codec.EncoderException;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.RegistryFriendlyByteBuf;
@@ -130,7 +128,6 @@ public class ItemReward extends Reward {
 	}
 
 	@Override
-	@Environment(EnvType.CLIENT)
 	public void fillConfigGroup(ConfigGroup config) {
 		super.fillConfigGroup(config);
 
@@ -176,7 +173,6 @@ public class ItemReward extends Reward {
 	}
 
 	@Override
-	@Environment(EnvType.CLIENT)
 	public MutableComponent getAltTitle() {
 		if (randomBonus > 0) {
 			return Component.literal(count + "-" + (count + randomBonus) + "x ").append(item.getHoverName());
@@ -188,19 +184,16 @@ public class ItemReward extends Reward {
 	}
 
 	@Override
-	@Environment(EnvType.CLIENT)
-	public Icon getAltIcon() {
+	public Icon<?> getAltIcon() {
 		return item.isEmpty() ? super.getAltIcon() : ItemIcon.ofItemStack(ItemStackHooks.copyWithCount(item, 1));
 	}
 
 	@Override
-	@Environment(EnvType.CLIENT)
 	public Optional<PositionedIngredient> getIngredient(Widget widget) {
 		return PositionedIngredient.of(item, widget, true);
 	}
 
 	@Override
-	@Environment(EnvType.CLIENT)
 	public String getButtonText() {
 		return randomBonus > 0 ? count + "-" + (count + randomBonus) : Integer.toString(count);
 	}
