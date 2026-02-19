@@ -56,7 +56,10 @@ import dev.ftb.mods.ftbquests.quest.reward.RandomReward;
 import dev.ftb.mods.ftbquests.quest.reward.Reward;
 import dev.ftb.mods.ftbquests.quest.task.Task;
 import dev.ftb.mods.ftbquests.quest.theme.QuestTheme;
+import dev.ftb.mods.ftbquests.quest.theme.ThemeLoader;
 import dev.ftb.mods.ftbquests.quest.theme.property.ThemeProperties;
+import org.jetbrains.annotations.Nullable;
+import org.lwjgl.glfw.GLFW;
 
 import java.text.DateFormat;
 import java.util.ArrayDeque;
@@ -68,8 +71,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import org.jspecify.annotations.Nullable;
-import org.lwjgl.glfw.GLFW;
 
 public class QuestScreen extends BaseScreen {
 	// A fairly large z-offset is needed to ensure various GUI elements render above drawn block items,
@@ -550,6 +551,11 @@ public class QuestScreen extends BaseScreen {
 
 		// all edit-mode keybinds handled below here
 
+		if (key.is(GLFW.GLFW_KEY_F5)) {
+			reloadTheme(!isShiftKeyDown());
+			return true;
+		}
+
 		if (key.is(GLFW.GLFW_KEY_DELETE) && !selectedObjects.isEmpty()) {
 			if (!isShiftKeyDown()) {
 				Component title = Component.translatable("delete_item", Component.translatable("ftbquests.objects", selectedObjects.size()));
@@ -829,6 +835,18 @@ public class QuestScreen extends BaseScreen {
 			}
 		});
 		return List.copyOf(questMap.values());
+	}
+
+	public static void reloadTheme() {
+		reloadTheme(true);
+	}
+
+	public static void reloadTheme(boolean announce) {
+		ThemeLoader.loadTheme(Minecraft.getInstance().getResourceManager());
+		ClientQuestFile.getInstance().refreshGui();
+		if (announce) {
+			FTBQuestsClient.showInfoToast(Component.translatable("ftbquests.gui.reload_theme"), Component.translatable("gui.done"));
+		}
 	}
 
 	public PersistedData getPersistedScreenData() {

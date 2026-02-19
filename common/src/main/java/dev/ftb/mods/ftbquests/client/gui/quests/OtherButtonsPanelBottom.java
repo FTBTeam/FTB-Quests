@@ -19,13 +19,11 @@ import dev.ftb.mods.ftblibrary.util.TooltipList;
 import dev.ftb.mods.ftbquests.client.ClientQuestFile;
 import dev.ftb.mods.ftbquests.client.FTBQuestsClient;
 import dev.ftb.mods.ftbquests.client.FTBQuestsClientConfig;
-import dev.ftb.mods.ftbquests.client.gui.CustomToast;
 import dev.ftb.mods.ftbquests.client.gui.RewardTablesScreen;
 import dev.ftb.mods.ftbquests.net.ChangeProgressMessage;
 import dev.ftb.mods.ftbquests.net.ForceSaveMessage;
 import dev.ftb.mods.ftbquests.net.ToggleEditingModeMessage;
 import dev.ftb.mods.ftbquests.quest.task.StructureTask;
-import dev.ftb.mods.ftbquests.quest.theme.ThemeLoader;
 import dev.ftb.mods.ftbquests.quest.theme.property.ThemeProperties;
 
 import java.io.File;
@@ -141,19 +139,11 @@ public class OtherButtonsPanelBottom extends OtherButtonsPanel {
 					b -> saveLocally()));
 
 			contextMenu.add(new ContextMenuItem(Component.translatable("ftbquests.gui.reload_theme"), ThemeProperties.RELOAD_ICON.get(),
-					b -> reloadTheme()));
+					b -> QuestScreen.reloadTheme()));
 			contextMenu.add(new ContextMenuItem(Component.translatable("ftbquests.gui.wiki"), Icons.INFO,
 					b -> handleClick(WIKI_URL)));
 
 			questScreen.openContextMenu(contextMenu);
-		}
-
-		private void reloadTheme() {
-			Minecraft mc = Minecraft.getInstance();
-			//FIXME: mc.getTextureManager().onResourceManagerReload(mc.getResourceManager());
-			ThemeLoader.loadTheme(mc.getResourceManager());
-			ClientQuestFile.getInstance().refreshGui();
-			Minecraft.getInstance().getToastManager().addToast(new CustomToast(Component.translatable("ftbquests.gui.reload_theme"), Icons.ACCEPT, Component.translatable("gui.done")));
 		}
 
 		private void saveLocally() {
