@@ -6,6 +6,7 @@ import dev.architectury.networking.NetworkManager;
 import dev.architectury.platform.Platform;
 import dev.ftb.mods.ftblibrary.config.ConfigGroup;
 import dev.ftb.mods.ftblibrary.config.ItemStackConfig;
+import dev.ftb.mods.ftblibrary.util.Lazy;
 import dev.ftb.mods.ftbquests.api.FTBQuestsAPI;
 import dev.ftb.mods.ftbquests.block.QuestBarrierBlock;
 import dev.ftb.mods.ftbquests.client.FTBQuestsClient;
@@ -13,6 +14,7 @@ import dev.ftb.mods.ftbquests.net.BlockConfigResponseMessage;
 import dev.ftb.mods.ftbquests.registry.ModBlocks;
 import dev.ftb.mods.ftbquests.registry.ModDataComponents;
 import net.minecraft.ChatFormatting;
+import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.component.DataComponentMap;
@@ -54,11 +56,18 @@ import java.util.Optional;
 import static dev.ftb.mods.ftbquests.block.QuestBarrierBlock.OPEN;
 
 public abstract class BaseBarrierBlockEntity extends EditableBlockEntity {
+	private static final Lazy<BlockState> OPEN_BARRIER
+			= Lazy.of(() -> ModBlocks.BARRIER.get().defaultBlockState().setValue(QuestBarrierBlock.OPEN, true));
+	private static final Lazy<BlockState> CLOSED_BARRIER
+			= Lazy.of(() -> ModBlocks.BARRIER.get().defaultBlockState().setValue(QuestBarrierBlock.OPEN, false));
+
 	protected String objStr = "";
 	protected BlockState camo = null;
 	private boolean invisibleWhenOpen = false;
 	private ItemStack skin = ItemStack.EMPTY;
 	private TeleportData teleportData = TeleportData.NONE;
+	private boolean openStatus;
+	private long lastOpenCheck = 0L;
 
 	public BaseBarrierBlockEntity(BlockEntityType<?> blockEntityType, BlockPos blockPos, BlockState blockState) {
 		super(blockEntityType, blockPos, blockState);
@@ -143,7 +152,16 @@ public abstract class BaseBarrierBlockEntity extends EditableBlockEntity {
 		setChanged();
 	}
 
-	public abstract boolean isOpen(Player player);
+	public boolean isOpen(Player player) {
+		long now = Util.getMillis();
+		if (now - lastOpenCheck > 300L) {
+			openStatus = checkIfOpen(player);
+			lastOpenCheck = now;
+		}
+		return openStatus;
+	}
+
+	protected abstract boolean checkIfOpen(Player player);
 
 	protected abstract void addConfigEntries(ConfigGroup cg);
 
@@ -204,14 +222,10 @@ public abstract class BaseBarrierBlockEntity extends EditableBlockEntity {
 
 	public BlockState getClientAppearance() {
 		if (camo == null) {
-			if (isOpen(FTBQuestsClient.getClientPlayer())) {
-				camo = invisibleWhenOpen ?
-						Blocks.AIR.defaultBlockState() :
-						ModBlocks.BARRIER.get().defaultBlockState().setValue(QuestBarrierBlock.OPEN, true);
+			if (getBlockState().hasProperty(OPEN) && getBlockState().getValue(OPEN)) {
+				camo = invisibleWhenOpen ? Blocks.AIR.defaultBlockState() : OPEN_BARRIER.get();
 			} else {
-				camo = skin.getItem() instanceof BlockItem bi ?
-						bi.getBlock().defaultBlockState() :
-						ModBlocks.BARRIER.get().defaultBlockState().setValue(QuestBarrierBlock.OPEN, false);
+				camo = skin.getItem() instanceof BlockItem bi ? bi.getBlock().defaultBlockState() : CLOSED_BARRIER.get();
 			}
 		}
 		return camo;

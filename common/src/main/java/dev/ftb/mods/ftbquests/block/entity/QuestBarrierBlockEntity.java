@@ -34,7 +34,7 @@ public class QuestBarrierBlockEntity extends BaseBarrierBlockEntity {
 	}
 
 	@Override
-	public boolean isOpen(Player player) {
+	protected boolean checkIfOpen(Player player) {
 		Quest quest = getQuest();
 		return quest != null &&
 				quest.getQuestFile().getTeamData(player).map(d -> d.isCompleted(quest)).orElse(false);

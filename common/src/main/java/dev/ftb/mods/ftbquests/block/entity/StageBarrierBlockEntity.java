@@ -3,6 +3,7 @@ package dev.ftb.mods.ftbquests.block.entity;
 import dev.ftb.mods.ftblibrary.config.ConfigGroup;
 import dev.ftb.mods.ftblibrary.integration.stages.StageHelper;
 import dev.ftb.mods.ftbquests.registry.ModBlockEntityTypes;
+import dev.ftb.mods.ftbteams.api.TeamStagesHelper;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.block.state.BlockState;
@@ -13,8 +14,9 @@ public class StageBarrierBlockEntity extends BaseBarrierBlockEntity {
 	}
 
 	@Override
-	public boolean isOpen(Player player) {
-		return !objStr.isEmpty() && StageHelper.INSTANCE.getProvider().has(player, objStr);
+	protected boolean checkIfOpen(Player player) {
+		return !objStr.isEmpty() &&
+				(StageHelper.INSTANCE.getProvider().has(player, objStr) || TeamStagesHelper.hasTeamStage(player, objStr));
 	}
 
 	@Override
