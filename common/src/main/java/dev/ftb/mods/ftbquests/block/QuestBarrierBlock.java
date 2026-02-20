@@ -86,9 +86,7 @@ public class QuestBarrierBlock extends BaseEntityBlock {
 
 	@Override
 	public VoxelShape getCollisionShape(BlockState state, BlockGetter bg, BlockPos pos, CollisionContext ctx) {
-		if (EntityHooks.fromCollision(ctx) instanceof Player player
-				&& bg.getBlockEntity(pos) instanceof BaseBarrierBlockEntity barrier
-				&& barrier.isOpen(player)) {
+		if (EntityHooks.fromCollision(ctx) instanceof Player player && isBarrierOpen(player, state, bg, pos)) {
 			return Shapes.empty();
 		}
 
@@ -97,11 +95,19 @@ public class QuestBarrierBlock extends BaseEntityBlock {
 
 	@Override
 	protected VoxelShape getShape(BlockState blockState, BlockGetter bg, BlockPos pos, CollisionContext ctx) {
-		if (EntityHooks.fromCollision(ctx) instanceof Player player && blockState.getValue(OPEN) && !NetUtils.canEdit(player)) {
+		if (EntityHooks.fromCollision(ctx) instanceof Player player && isBarrierOpen(player, blockState, bg, pos) && !NetUtils.canEdit(player)) {
 			return Shapes.empty();
 		}
 
 		return super.getShape(blockState, bg, pos, ctx);
+	}
+
+	private boolean isBarrierOpen(Player player, BlockState state, BlockGetter bg, BlockPos pos) {
+		// client-side we can do a blockstate check, which should be a bit quicker than a full blockentity check
+		// server-side we have no choice, since the OPEN blockstate prop isn't used there
+		return player.level().isClientSide() ?
+				state.getValue(OPEN) :
+				bg.getBlockEntity(pos) instanceof BaseBarrierBlockEntity be && be.isOpen(player);
 	}
 
 	@Override
