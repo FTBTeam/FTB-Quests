@@ -6,6 +6,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [2101.1.22]
 
+### Added
+* Stage Barrier blocks now check for team stages in addition to player gamestages
+  * FTB Teams 2101.1.9+ required
+
 ### Fixed
 * Fixed Task Screen setup GUI showing blank task names when configuring a new task screen for the first time
 
