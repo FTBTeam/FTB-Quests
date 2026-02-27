@@ -265,6 +265,8 @@
 	"ftbquests.gui.edit": "Edit",
 	"ftbquests.gui.edit_quest_props": "Quest Properties",
 	"ftbquests.gui.undo": "Undo",
+	"ftbquests.gui.convert_json": "Convert line to Json",
+	"ftbquests.gui.convert_json.2": "Hold Shift: convert all lines",
 	"ftbquests.gui.edit_linked_quest": "Edit Linked Quest",
 	"ftbquests.gui.edit_file": "Edit File",
 	"ftbquests.gui.save_as_file": "Download Quest Files",
