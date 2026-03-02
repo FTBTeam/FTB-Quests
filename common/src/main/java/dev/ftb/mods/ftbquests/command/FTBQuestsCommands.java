@@ -218,8 +218,8 @@ public class FTBQuestsCommands {
 			new OpenQuestBookMessage(0L).sendTo(player);
 			return Command.SINGLE_SUCCESS;
 		} else {
-			if (getQuestObjectForString(qobId) instanceof Quest quest && playerCanSeeQuestObject(player, quest)) {
-				new OpenQuestBookMessage(quest.id).sendTo(player);
+			if (getQuestObjectForString(qobId) instanceof QuestObject qo && playerCanSeeQuestObject(player, qo)) {
+				new OpenQuestBookMessage(qo.id).sendTo(player);
 				return Command.SINGLE_SUCCESS;
 			}
 		}
