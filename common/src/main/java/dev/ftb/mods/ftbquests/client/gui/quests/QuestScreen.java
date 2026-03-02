@@ -1,6 +1,5 @@
 package dev.ftb.mods.ftbquests.client.gui.quests;
 
-import com.mojang.datafixers.util.Pair;
 import dev.ftb.mods.ftblibrary.config.ConfigGroup;
 import dev.ftb.mods.ftblibrary.config.ConfigValue;
 import dev.ftb.mods.ftblibrary.config.ConfigWithVariants;
@@ -24,8 +23,10 @@ import dev.ftb.mods.ftbquests.quest.reward.RandomReward;
 import dev.ftb.mods.ftbquests.quest.reward.Reward;
 import dev.ftb.mods.ftbquests.quest.task.Task;
 import dev.ftb.mods.ftbquests.quest.theme.QuestTheme;
+import dev.ftb.mods.ftbquests.quest.theme.ThemeLoader;
 import dev.ftb.mods.ftbquests.quest.theme.property.ThemeProperties;
 import dev.ftb.mods.ftbquests.util.ConfigQuestObject;
+import com.mojang.datafixers.util.Pair;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
@@ -488,6 +489,11 @@ public class QuestScreen extends BaseScreen {
 
 		// all edit-mode keybinds handled below here
 
+		if (key.is(GLFW.GLFW_KEY_F5)) {
+			reloadTheme(!isShiftKeyDown());
+			return true;
+		}
+
 		if (key.is(GLFW.GLFW_KEY_DELETE) && !selectedObjects.isEmpty()) {
 			if (!isShiftKeyDown()) {
 				Component title = Component.translatable("delete_item", Component.translatable("ftbquests.objects", selectedObjects.size()));
@@ -763,6 +769,18 @@ public class QuestScreen extends BaseScreen {
 			}
 		});
 		return List.copyOf(questMap.values());
+	}
+
+	public static void reloadTheme() {
+		reloadTheme(true);
+	}
+
+	public static void reloadTheme(boolean announce) {
+		ThemeLoader.loadTheme(Minecraft.getInstance().getResourceManager());
+		ClientQuestFile.INSTANCE.refreshGui();
+		if (announce) {
+			Minecraft.getInstance().getToasts().addToast(new CustomToast(Component.translatable("ftbquests.gui.reload_theme"), Icons.ACCEPT, Component.translatable("gui.done")));
+		}
 	}
 
 	public PersistedData getPersistedScreenData() {
