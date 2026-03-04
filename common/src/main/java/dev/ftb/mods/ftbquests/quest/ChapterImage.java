@@ -38,21 +38,19 @@ public final class ChapterImage implements Movable {
 
 	public static WeakReference<ChapterImage> clipboard = new WeakReference<>(null);
 
-	public static StreamCodec<FriendlyByteBuf, ChapterImage> STREAM_CODEC = new StreamCodec<>() {
-        @Override
-        public ChapterImage decode(FriendlyByteBuf buf) {
-			long chapterId = buf.readLong();
-            ChapterImage img = new ChapterImage(ServerQuestFile.getInstance().getChapter(chapterId));
-            img.readNetData(buf);
-            return img;
-        }
-
-        @Override
-        public void encode(FriendlyByteBuf buf, ChapterImage chapterImage) {
-			buf.writeLong(chapterImage.getChapter().id);
-            chapterImage.writeNetData(buf);
-        }
-    };
+	public static StreamCodec<FriendlyByteBuf, ChapterImage> STREAM_CODEC = StreamCodec.of(
+            (buf, chapterImage) -> {
+                buf.writeLong(chapterImage.getChapter().id);
+                chapterImage.writeNetData(buf);
+            },
+            buf -> {
+                long chapterId = buf.readLong();
+				Chapter c = ServerQuestFile.getInstance().getChapter(chapterId);
+				ChapterImage img = new ChapterImage(c);
+                img.readNetData(buf);
+                return img;
+            }
+    );
 
 	private Chapter chapter;
 	private double x, y;

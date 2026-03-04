@@ -15,6 +15,7 @@ import net.minecraft.world.level.Level;
 import dev.ftb.mods.ftblibrary.client.config.EditableConfigGroup;
 import dev.ftb.mods.ftblibrary.util.KnownServerRegistries;
 import dev.ftb.mods.ftblibrary.util.NameMap;
+import dev.ftb.mods.ftbquests.FTBQuests;
 import dev.ftb.mods.ftbquests.quest.Quest;
 import dev.ftb.mods.ftbquests.quest.TeamData;
 
@@ -48,7 +49,14 @@ public class DimensionTask extends AbstractBooleanTask {
 	@Override
 	public void readData(CompoundTag nbt, HolderLookup.Provider provider) {
 		super.readData(nbt, provider);
-		dimension = ResourceKey.create(Registries.DIMENSION, Identifier.tryParse(nbt.getString("dimension").orElseThrow()));
+		String idStr = nbt.getString("dimension").orElseThrow();
+		Identifier dimId = Identifier.tryParse(idStr);
+		if (dimId == null) {
+			FTBQuests.LOGGER.error("bad dimension id {} in task {}", idStr, getId());
+			dimension = Level.NETHER;
+		} else {
+			dimension = ResourceKey.create(Registries.DIMENSION, dimId);
+		}
 	}
 
 	@Override

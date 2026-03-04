@@ -25,7 +25,7 @@ import dev.ftb.mods.ftbquests.quest.loot.WeightedReward;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 
 public class RandomReward extends Reward {
 	private RewardTable table;

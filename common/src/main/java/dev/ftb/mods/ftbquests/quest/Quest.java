@@ -778,7 +778,7 @@ public final class Quest extends QuestObject implements Movable, Excludable {
 	}
 
 	@Override
-	public boolean isSearchable(TeamData data) {
+	public boolean isSearchable(@Nullable TeamData data) {
 		return !chapter.isAlwaysInvisible() && super.isSearchable(data);
 	}
 
@@ -1054,7 +1054,8 @@ public final class Quest extends QuestObject implements Movable, Excludable {
 		return tasks.stream().allMatch(task -> teamData.getProgress(task) >= task.getMaxProgress());
 	}
 
-	public boolean hideDetailsUntilStartable() {
+	@SuppressWarnings("BooleanMethodIsAlwaysInverted")
+    public boolean hideDetailsUntilStartable() {
 		return hideDetailsUntilStartable.get(chapter.hideQuestDetailsUntilStartable());
 	}
 

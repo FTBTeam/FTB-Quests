@@ -12,7 +12,7 @@ import dev.ftb.mods.ftbquests.quest.Quest;
 
 import java.util.List;
 import java.util.UUID;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 
 public class ChoiceReward extends RandomReward {
 	public ChoiceReward(long id, Quest quest) {
@@ -46,10 +46,5 @@ public class ChoiceReward extends RandomReward {
 	@Override
 	public boolean getExcludeFromClaimAll() {
 		return true;
-	}
-
-	@Override
-	public boolean automatedClaimPre(BlockEntity blockEntity, List<ItemStack> items, RandomSource random, UUID playerId, @Nullable ServerPlayer player) {
-		return false;
 	}
 }

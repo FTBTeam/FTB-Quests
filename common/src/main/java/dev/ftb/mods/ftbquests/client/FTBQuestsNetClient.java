@@ -33,7 +33,7 @@ import dev.ftb.mods.ftbquests.quest.task.Task;
 
 import java.util.Date;
 import java.util.UUID;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 
 public class FTBQuestsNetClient {
 	public static void syncTeamData(TeamData data) {
@@ -86,14 +86,14 @@ public class FTBQuestsNetClient {
 
 	public static void createOtherTeamData(TeamDataUpdate dataUpdate) {
 		if (ClientQuestFile.exists()) {
-			TeamData data = new TeamData(dataUpdate.uuid(), ClientQuestFile.getInstance(), dataUpdate.name());
+			TeamData data = new TeamData(dataUpdate.uuid(), false, dataUpdate.name());
 			ClientQuestFile.getInstance().addData(data, true);
 		}
 	}
 
 	public static void teamDataChanged(TeamDataUpdate dataUpdate) {
 		if (ClientQuestFile.exists()) {
-			TeamData data = new TeamData(dataUpdate.uuid(), ClientQuestFile.getInstance(), dataUpdate.name());
+			TeamData data = new TeamData(dataUpdate.uuid(), false, dataUpdate.name());
 			ClientQuestFile.getInstance().addData(data, false);
 		}
 	}

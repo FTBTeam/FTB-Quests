@@ -15,7 +15,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.UUID;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 
 public class ChapterGroup extends QuestObject {
 	protected final BaseQuestFile file;
@@ -67,11 +67,11 @@ public class ChapterGroup extends QuestObject {
 	}
 
 	public boolean isFirstGroup() {
-		return !file.chapterGroups.isEmpty() && this == file.chapterGroups.get(0);
+		return !file.chapterGroups.isEmpty() && this == file.chapterGroups.getFirst();
 	}
 
 	public boolean isLastGroup() {
-		return !file.chapterGroups.isEmpty() && this == file.chapterGroups.get(file.chapterGroups.size() - 1);
+		return !file.chapterGroups.isEmpty() && this == file.chapterGroups.getLast();
 	}
 
 	public boolean isDefaultGroup() {
@@ -172,7 +172,7 @@ public class ChapterGroup extends QuestObject {
 		if (chapters.isEmpty()) {
 			return null;
 		} else if (file.canEdit()) {
-			return chapters.get(0);
+			return chapters.getFirst();
 		}
 
 		return chapters.stream()

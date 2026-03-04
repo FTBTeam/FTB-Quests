@@ -39,10 +39,7 @@ public class TranslationManager {
     }
 
     public static void syncTable(ServerPlayer player, String language) {
-        ServerQuestFile file = ServerQuestFile.getInstance();
-        if (file != null && file.isValid()) {
-            file.getTranslationManager().sendTableToPlayer(player, language);
-        }
+        ServerQuestFile.ifExists(instance -> instance.getTranslationManager().sendTableToPlayer(player, language));
     }
 
     private static String getFallbackLocale(QuestObjectBase object) {

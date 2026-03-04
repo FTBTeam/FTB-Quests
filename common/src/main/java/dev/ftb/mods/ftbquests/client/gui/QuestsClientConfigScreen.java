@@ -43,9 +43,8 @@ public class QuestsClientConfigScreen extends EditConfigScreen {
     protected void doAccept() {
         super.doAccept();
 
-        ClientQuestFile file = ClientQuestFile.getInstance();
-
-        if (file != null) {
+        if (ClientQuestFile.exists()) {
+            ClientQuestFile file = ClientQuestFile.getInstance();
             List<CustomPacketPayload> toSend = new ArrayList<>();
             if (!prevLocale.equals(file.getLocale())) {
                 toSend.add(new RequestTranslationTableMessage(file.getLocale()));

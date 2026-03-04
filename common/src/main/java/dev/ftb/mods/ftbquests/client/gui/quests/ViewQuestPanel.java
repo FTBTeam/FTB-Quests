@@ -372,7 +372,7 @@ public class ViewQuestPanel extends ModalPanel {
 		}
 
 		boolean showText = !quest.getHideTextUntilComplete().get(quest.getChapter().isHideTextUntilComplete())
-				|| questScreen.file.selfTeamData != null && questScreen.file.selfTeamData.isCompleted(quest);
+				|| questScreen.file.selfTeamData.isValid() && questScreen.file.selfTeamData.isCompleted(quest);
 
 		buildPageIndices();
 

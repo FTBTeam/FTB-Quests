@@ -13,6 +13,7 @@ import dev.ftb.mods.ftbquests.quest.TeamData;
 
 import java.util.Date;
 import java.util.UUID;
+import org.jspecify.annotations.Nullable;
 
 public class ProgressChange {
 	public static StreamCodec<FriendlyByteBuf, ProgressChange> STREAM_CODEC = StreamCodec.composite(
@@ -24,12 +25,13 @@ public class ProgressChange {
 	);
 
 	private final Date date;
+	@Nullable
 	private final QuestObjectBase origin;
 	private final UUID playerId;
 	private boolean reset;
 	private boolean notifications;
 
-	public ProgressChange(QuestObjectBase origin, UUID playerId) {
+	public ProgressChange(@Nullable QuestObjectBase origin, UUID playerId) {
 		this.origin = origin;
 		this.playerId = playerId;
 		this.date = new Date();

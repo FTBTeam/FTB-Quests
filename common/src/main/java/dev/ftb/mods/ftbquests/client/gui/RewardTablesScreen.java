@@ -76,7 +76,7 @@ public class RewardTablesScreen extends AbstractButtonListScreen {
 
 				EditableString editable = new EditableString();
 				EditStringConfigOverlay<String> panel = new EditStringConfigOverlay<>(getGui(), editable, accepted -> {
-					if (accepted && editable.getValue() != null) {
+					if (accepted) {
 						RewardTable table = new RewardTable(0L, ClientQuestFile.getInstance());
 						table.setRawTitle(editable.getValue());
 						rewardTablesCopy.add(table);

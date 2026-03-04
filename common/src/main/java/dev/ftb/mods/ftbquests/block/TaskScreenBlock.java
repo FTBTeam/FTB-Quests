@@ -41,7 +41,7 @@ import dev.ftb.mods.ftbquests.net.BlockConfigRequestMessage.BlockType;
 import dev.ftb.mods.ftbquests.quest.ServerQuestFile;
 import dev.ftb.mods.ftbquests.registry.ModBlocks;
 
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 
 public class TaskScreenBlock extends BaseEntityBlock {
     private static final MapCodec<TaskScreenBlock> CODEC = RecordCodecBuilder.mapCodec(instance ->

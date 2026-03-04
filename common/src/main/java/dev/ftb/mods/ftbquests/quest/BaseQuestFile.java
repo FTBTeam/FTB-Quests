@@ -1052,7 +1052,7 @@ public abstract class BaseQuestFile extends QuestObject implements QuestFile {
 
 	@Override
 	public TeamData getOrCreateTeamData(UUID teamId) {
-		return teamDataMap.computeIfAbsent(teamId, k -> new TeamData(teamId, this));
+		return teamDataMap.computeIfAbsent(teamId, k -> new TeamData(teamId, isServerSide()));
 	}
 
 	@Override

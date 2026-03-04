@@ -10,7 +10,7 @@ import dev.ftb.mods.ftblibrary.util.TooltipList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.function.Consumer;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 
 public class TooltipContextMenuItem extends ContextMenuItem {
     private final List<Component> tooltips;

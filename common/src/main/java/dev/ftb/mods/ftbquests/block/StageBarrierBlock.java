@@ -10,7 +10,7 @@ import dev.architectury.injectables.annotations.ExpectPlatform;
 
 import dev.ftb.mods.ftbquests.block.entity.QuestBarrierBlockEntity;
 
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 
 public class StageBarrierBlock extends QuestBarrierBlock {
 	private static final MapCodec<StageBarrierBlock> CODEC = simpleCodec(StageBarrierBlock::new);

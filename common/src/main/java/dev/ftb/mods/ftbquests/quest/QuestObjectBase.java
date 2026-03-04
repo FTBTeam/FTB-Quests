@@ -99,7 +99,7 @@ public abstract class QuestObjectBase implements Comparable<QuestObjectBase> {
 		return sendNotifications.get(true);
 	}
 
-	public static ItemStack itemOrMissingFromNBT(Tag tag, HolderLookup.Provider provider) {
+	public static ItemStack itemOrMissingFromNBT(@Nullable Tag tag, HolderLookup.Provider provider) {
 		CompoundTag compoundTag = processItemTagData(tag);
 		return compoundTag.isEmpty() ?
 				ItemStack.EMPTY :
@@ -107,7 +107,7 @@ public abstract class QuestObjectBase implements Comparable<QuestObjectBase> {
 								.orElse(createMissing(compoundTag));
 	}
 
-	public static ItemStack singleItemOrMissingFromNBT(Tag tag, HolderLookup.Provider provider) {
+	public static ItemStack singleItemOrMissingFromNBT(@Nullable Tag tag, HolderLookup.Provider provider) {
 		CompoundTag compoundTag = processItemTagData(tag);
 		return compoundTag.isEmpty() ?
 				ItemStack.EMPTY :
@@ -116,7 +116,7 @@ public abstract class QuestObjectBase implements Comparable<QuestObjectBase> {
 	}
 
 	// support for importing SNBT for itemstacks from legacy (1.20 and older) quest book data
-	private static CompoundTag processItemTagData(Tag tag) {
+	private static CompoundTag processItemTagData(@Nullable Tag tag) {
 		if (tag instanceof StringTag s) {
 			// 1.20 or earlier, item name only
 			return Util.make(new CompoundTag(), t -> t.putString("id", s.asString().orElseThrow()));

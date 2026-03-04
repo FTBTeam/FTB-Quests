@@ -41,8 +41,7 @@ public class CollectRewardsButton extends TabButton {
 		super.draw(graphics, theme, x, y, w, h);
 
 		if (FTBQuestsClient.getClientPlayerData().hasUnclaimedRewards(ClientUtils.getClientPlayer().getUUID(), questScreen.file)) {
-//			GuiHelper.setupDrawing();
-			int s = w / 2;//(int) (treeGui.getZoom() / 2 * quest.size);
+			int s = w / 2;
 			graphics.pose().pushMatrix();
 			graphics.pose().translate(x + w - s, y);
 			IconHelper.renderIcon(ThemeProperties.ALERT_ICON.get(questScreen.file), graphics, 0, 0, s, s);

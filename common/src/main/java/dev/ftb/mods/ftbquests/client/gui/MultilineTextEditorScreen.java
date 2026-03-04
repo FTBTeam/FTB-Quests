@@ -67,7 +67,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonPrimitive;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 
 public class MultilineTextEditorScreen extends BaseScreen {
 	public static final Icon<?> LINK_ICON = Icon.getIcon(FTBQuestsAPI.id("textures/gui/chain_link.png")).withPadding(2);

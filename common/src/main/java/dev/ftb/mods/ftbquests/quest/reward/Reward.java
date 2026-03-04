@@ -37,7 +37,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 
 public abstract class Reward extends QuestObjectBase {
 	protected final Quest quest;
@@ -74,6 +74,7 @@ public abstract class Reward extends QuestObjectBase {
 	}
 
 	@Override
+	@Nullable
 	public final Chapter getQuestChapter() {
 		return quest.getChapter();
 	}
@@ -294,7 +295,8 @@ public abstract class Reward extends QuestObjectBase {
 	}
 
 	public Optional<PositionedIngredient> getIngredient(Widget widget) {
-		return PositionedIngredient.of(getIcon().getIngredient(), widget);
+		return Optional.ofNullable(getIcon().getIngredient())
+				.flatMap(o -> PositionedIngredient.of(o, widget));
 	}
 
 	@Override

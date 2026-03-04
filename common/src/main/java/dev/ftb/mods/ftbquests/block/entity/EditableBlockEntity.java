@@ -18,13 +18,7 @@ public abstract class EditableBlockEntity extends BlockEntity implements IEditab
     public void readPayload(CompoundTag tag, RegistryAccess registryAccess) throws Exception {
         ProblemReporter.Collector reporter = new ProblemReporter.Collector();
 
-        ValueInput input = TagValueInput.create(
-                reporter,
-                registryAccess,
-                tag
-        );
-
-        loadAdditional(input);
+        loadAdditional(TagValueInput.create(reporter, registryAccess, tag));
 
         if (!reporter.isEmpty()) {
             throw new Exception("Failed to read EditableBlockEntity payload: " + reporter.getReport());

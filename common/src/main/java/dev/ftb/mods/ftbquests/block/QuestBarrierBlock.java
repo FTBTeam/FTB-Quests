@@ -48,7 +48,7 @@ import dev.ftb.mods.ftbquests.util.NetUtils;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 
 public class QuestBarrierBlock extends BaseEntityBlock {
 	private static final MapCodec<QuestBarrierBlock> CODEC = simpleCodec(QuestBarrierBlock::new);
@@ -148,7 +148,6 @@ public class QuestBarrierBlock extends BaseEntityBlock {
 			if (level.getBlockEntity(blockPos) instanceof BaseBarrierBlockEntity barrier && barrier.hasPermissionToEdit(sp)) {
 				NetworkManager.sendToPlayer(sp, new BlockConfigRequestMessage(blockPos, BlockType.BARRIER));
                 return InteractionResult.SUCCESS;
-//				return ItemInteractionResult.sidedSuccess(level.isClientSide);
 			}
 			return InteractionResult.FAIL;
 		} else {

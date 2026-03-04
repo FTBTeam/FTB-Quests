@@ -18,10 +18,10 @@ import dev.ftb.mods.ftblibrary.icon.Color4I;
 import java.util.ArrayList;
 import java.util.List;
 import org.apache.commons.lang3.mutable.MutableInt;
-import org.jetbrains.annotations.Nullable;
 
 public class EditableLocaleConfig extends EditableConfigValue<String> {
-    public static final Color4I COLOR = Color4I.rgb(0xFFAA49);
+    public static final Color4I COLOR_HI = Color4I.rgb(0xFFAA49);
+    public static final Color4I COLOR_LO = Color4I.rgb(0x663D0F);
 
     @Override
     public void onClicked(Widget clickedWidget, MouseButton button, ConfigCallback callback) {
@@ -34,13 +34,13 @@ public class EditableLocaleConfig extends EditableConfigValue<String> {
     }
 
     @Override
-    public Color4I getColor(@Nullable String v, Theme theme) {
-        return COLOR;
+    public Color4I getColor(String v, Theme theme) {
+        return theme.hasDarkBackground() ? COLOR_HI : COLOR_LO;
     }
 
     @Override
-    public Component getStringForGUI(@Nullable String v) {
-        return v == null ? NULL_TEXT : Component.literal('"' + v + '"');
+    public Component getStringForGUI(String v) {
+        return Component.literal('"' + v + '"');
     }
 
     private class LocaleSelectorScreen extends AbstractButtonListScreen {

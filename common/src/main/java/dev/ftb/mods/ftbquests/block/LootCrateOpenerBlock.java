@@ -19,7 +19,7 @@ import dev.architectury.injectables.annotations.ExpectPlatform;
 
 import dev.ftb.mods.ftbquests.block.entity.LootCrateOpenerBlockEntity;
 
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 
 public class LootCrateOpenerBlock extends BaseEntityBlock {
     private static final MapCodec<LootCrateOpenerBlock> CODEC = simpleCodec(LootCrateOpenerBlock::new);

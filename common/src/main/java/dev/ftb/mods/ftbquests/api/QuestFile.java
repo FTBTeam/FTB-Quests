@@ -12,7 +12,7 @@ import java.util.Collection;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.function.Consumer;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 
 public interface QuestFile {
     /**
@@ -31,7 +31,8 @@ public interface QuestFile {
      * {@return FTB Quests progress data for the given FTB Teams team UUID, or null if there is no data for this team ID}
      * @param id the team ID to check
      */
-    @Nullable TeamData getNullableTeamData(UUID id);
+    @Nullable
+    TeamData getNullableTeamData(UUID id);
 
     /**
      * {@return FTB Quests progress data for the given FTB Teams team UUID, creating new progress data if necessary}

@@ -30,19 +30,21 @@ public record ChangeChapterGroupMessage(long chapterId, long groupId) implements
 
 	public static void handle(ChangeChapterGroupMessage message, NetworkManager.PacketContext context) {
 		if (NetUtils.canEdit(context)) {
-			Chapter chapter = ServerQuestFile.getInstance().getChapter(message.chapterId);
+			ServerQuestFile.ifExists(file -> {
+				Chapter chapter = file.getChapter(message.chapterId);
 
-			if (chapter != null) {
-				ChapterGroup group = ServerQuestFile.getInstance().getChapterGroup(message.groupId);
-				if (chapter.getGroup() != group) {
-					chapter.getGroup().removeChapter(chapter);
-					group.addChapter(chapter);
-					chapter.file.clearCachedData();
-					chapter.file.markDirty();
-					NetworkHelper.sendToAll(context.getPlayer().level().getServer(),
-							new ChangeChapterGroupResponseMessage(message.chapterId, message.groupId));
+				if (chapter != null) {
+					ChapterGroup group = file.getChapterGroup(message.groupId);
+					if (chapter.getGroup() != group) {
+						chapter.getGroup().removeChapter(chapter);
+						group.addChapter(chapter);
+						chapter.file.clearCachedData();
+						chapter.file.markDirty();
+						NetworkHelper.sendToAll(file.server,
+								new ChangeChapterGroupResponseMessage(message.chapterId, message.groupId));
+					}
 				}
-			}
+			});
 		}
 	}
 }

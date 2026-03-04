@@ -29,8 +29,6 @@ import com.mojang.serialization.codecs.RecordCodecBuilder;
 import dev.architectury.networking.NetworkManager;
 
 import dev.ftb.mods.ftblibrary.client.config.EditableConfigGroup;
-import dev.ftb.mods.ftblibrary.client.config.editable.EditableBoolean;
-import dev.ftb.mods.ftblibrary.client.config.editable.EditableItemStack;
 import dev.ftb.mods.ftblibrary.client.util.ClientUtils;
 import dev.ftb.mods.ftbquests.api.FTBQuestsAPI;
 import dev.ftb.mods.ftbquests.block.TaskScreenBlock;
@@ -241,13 +239,17 @@ public class TaskScreenBlockEntity extends EditableBlockEntity implements ITaskS
         EditableConfigGroup cg = cg0.getOrCreateSubgroup("screen");
         cg.add("task", new EditableQuestObject<>(o -> isSuitableTask(data, o), this::formatLine), getTask(), this::setTask, null)
                 .setNameKey("ftbquests.task");
-        cg.add("skin", new EditableItemStack(true, true), getSkin(), this::setSkin, ItemStack.EMPTY)
+        cg.addItemStack("skin", getSkin(), this::setSkin, ItemStack.EMPTY, true, true)
                 .withFilter(s -> s.getItem() instanceof BlockItem)
                 .setNameKey("block.ftbquests.screen.skin");
-        cg.add("text_shadow", new EditableBoolean(), isTextShadow(), this::setTextShadow, true).setNameKey("block.ftbquests.screen.text_shadow");
-        cg.add("indestructible", new EditableBoolean(), isIndestructible(), this::setIndestructible, false).setNameKey("block.ftbquests.screen.indestructible");
-        cg.add("input_only", new EditableBoolean(), isInputOnly(), this::setInputOnly, false).setNameKey("block.ftbquests.screen.input_only");
-        cg.add("input_icon", new EditableItemStack(true, true), getInputModeIcon(), this::setInputModeIcon, ItemStack.EMPTY).setNameKey("block.ftbquests.screen.input_mode_icon");
+        cg.addBool("text_shadow", isTextShadow(), this::setTextShadow, true)
+                .setNameKey("block.ftbquests.screen.text_shadow");
+        cg.addBool("indestructible", isIndestructible(), this::setIndestructible, true)
+                .setNameKey("block.ftbquests.screen.indestructible");
+        cg.addBool("input_only", isInputOnly(), this::setInputOnly, false)
+                .setNameKey("block.ftbquests.screen.input_only");
+        cg.addItemStack("input_icon", getInputModeIcon(), this::setInputModeIcon, ItemStack.EMPTY, true, true)
+                .setNameKey("block.ftbquests.screen.input_mode_icon");
 
         return cg0;
     }

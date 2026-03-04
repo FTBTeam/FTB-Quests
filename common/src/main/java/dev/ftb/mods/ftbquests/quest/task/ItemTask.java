@@ -320,7 +320,8 @@ public class ItemTask extends Task implements Predicate<ItemStack> {
 		}
 	}
 
-	public boolean isTaskScreenOnly() {
+	@SuppressWarnings("BooleanMethodIsAlwaysInverted")
+    public boolean isTaskScreenOnly() {
 		return taskScreenOnly;
 	}
 

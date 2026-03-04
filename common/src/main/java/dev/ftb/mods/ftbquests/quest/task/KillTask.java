@@ -39,8 +39,9 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 
 public class KillTask extends Task {
 	private static final Identifier ZOMBIE = Identifier.withDefaultNamespace("zombie");
@@ -49,6 +50,7 @@ public class KillTask extends Task {
 	private static final Lazy<NameMap<String>> entityTagMap = Lazy.of(KillTask::scanEntityTags);
 
 	private Identifier entityTypeId = ZOMBIE;
+	@Nullable
 	private TagKey<EntityType<?>> entityTypeTag = null;
 	private long value = 100L;
 	private String customName = "";
@@ -80,7 +82,7 @@ public class KillTask extends Task {
 	@Override
 	public void readData(CompoundTag nbt, HolderLookup.Provider provider) {
 		super.readData(nbt, provider);
-		entityTypeId = Identifier.tryParse(nbt.getString("entity").orElse(""));
+		entityTypeId = parseTypeId(nbt.getString("entity").orElse(""));
 		entityTypeTag = parseTypeTag(nbt.getString("entityTypeTag").orElse(""));
 		value = nbt.getLong("value").orElse(0L);
 		customName = nbt.getString("custom_name").orElse("");
@@ -98,20 +100,24 @@ public class KillTask extends Task {
 	@Override
 	public void readNetData(RegistryFriendlyByteBuf buffer) {
 		super.readNetData(buffer);
-		entityTypeId = Identifier.tryParse(buffer.readUtf());
+		entityTypeId = parseTypeId(buffer.readUtf());
 		entityTypeTag = parseTypeTag(buffer.readUtf());
 		value = buffer.readVarInt();
 		customName = buffer.readUtf();
 	}
 
-	private static @Nullable TagKey<EntityType<?>> parseTypeTag(String tag) {
-		if (tag == null || tag.isEmpty()) {
+	private static Identifier parseTypeId(String idStr) {
+		return Objects.requireNonNullElse(Identifier.tryParse(idStr), ZOMBIE);
+	}
+
+	private static @Nullable TagKey<EntityType<?>> parseTypeTag(String tagStr) {
+		if (tagStr.isEmpty()) {
 			return null;
 		}
-		if (tag.startsWith("#")) {
-			tag = tag.substring(1);
+		if (tagStr.startsWith("#")) {
+			tagStr = tagStr.substring(1);
 		}
-		Identifier rl = Identifier.tryParse(tag);
+		Identifier rl = Identifier.tryParse(tagStr);
         return rl == null || rl.getPath().isEmpty() ? null : TagKey.create(Registries.ENTITY_TYPE, rl);
     }
 

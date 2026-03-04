@@ -179,7 +179,7 @@ public class QuestPanel extends Panel {
 
 	@Override
 	public void drawOffsetBackground(GuiGraphics graphics, Theme theme, int x, int y, int w, int h) {
-		if (questScreen.selectedChapter == null || questScreen.file.selfTeamData == null) {
+		if (questScreen.selectedChapter == null) {
 			return;
 		}
 
@@ -195,9 +195,6 @@ public class QuestPanel extends Panel {
 
 		double mt = -(System.currentTimeMillis() * 0.001D);
 		float lineWidth = (float) (questScreen.getZoom() * ThemeProperties.DEPENDENCY_LINE_THICKNESS.get(questScreen.selectedChapter) / 4D * 3D);
-
-//		RenderSystem.setShader(GameRenderer::getPositionTexColorShader);
-//		RenderSystem.setShaderColor(1F, 1F, 1F, 1F);
 
 		// pass 1: render connections for all visible quests
 		float mu = (float) ((mt * ThemeProperties.DEPENDENCY_LINE_UNSELECTED_SPEED.get(questScreen.selectedChapter)) % 1D);
@@ -377,18 +374,12 @@ public class QuestPanel extends Panel {
 						poseStack.popMatrix();
 					}
 				} else if (!questScreen.isViewingQuest() || !questScreen.viewQuestPanel.isMouseOver()) {
-					//int z = treeGui.getZoom();
 					double sx = (questX - questMinX) / dx * questScreen.scrollWidth + px;
 					double sy = (questY - questMinY) / dy * questScreen.scrollHeight + py;
 					poseStack.pushMatrix();
 					poseStack.translate((float) (sx - bs / 2D), (float) (sy - bs / 2D));
 					poseStack.scale((float) bs, (float) bs);
-//					GuiHelper.setupDrawing();
-//					RenderSystem.enableDepthTest();
-					// TODO: custom shader to implement alphaFunc? for now however, rendering outline at alpha 30 works well
-					//RenderSystem.alphaFunc(GL11.GL_GREATER, 0.01F);
 					IconHelper.renderIcon(QuestShape.get(questScreen.selectedChapter.getDefaultQuestShape()).getOutline().withColor(Color4I.WHITE.withAlpha(30)), graphics, 0, 0, 1, 1);
-					//RenderSystem.defaultAlphaFunc();
 					poseStack.popMatrix();
 
 					if (QuestScreen.grid && !questScreen.isViewingQuest()) {
@@ -411,8 +402,8 @@ public class QuestPanel extends Panel {
 
 		poseStack.pushMatrix();
 
-		int statusX = questScreen.chapterPanel.expanded ? questScreen.chapterPanel.width : questScreen.expandChaptersButton.width;
-		int statusWidth = questScreen.chapterPanel.expanded ? width - statusX + questScreen.expandChaptersButton.width : width;
+		int statusX = questScreen.chapterPanel.isExpanded() ? questScreen.chapterPanel.width : questScreen.expandChaptersButton.width;
+		int statusWidth = questScreen.chapterPanel.isExpanded() ? width - statusX + questScreen.expandChaptersButton.width : width;
 		Color4I statPanelBg = ThemeProperties.WIDGET_BACKGROUND.get();
 		IconHelper.renderIcon(Color4I.DARK_GRAY, graphics, statusX, height - 9, statusWidth, 1);
 		IconHelper.renderIcon(statPanelBg, graphics, statusX, height - 9, statusWidth, 10);

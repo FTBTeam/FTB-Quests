@@ -132,7 +132,6 @@ public class EmergencyItemsScreen extends BaseScreen {
 
 		@Override
 		public void draw(GuiGraphics graphics, Theme theme, int x, int y, int w, int h) {
-//			GuiHelper.setupDrawing();
 			IconHelper.renderIcon(QuestShape.get("rsquare").getOutline(), graphics, x - 3, y - 3, w + 6, h + 6);
 			graphics.pose().pushMatrix();
 			graphics.pose().translate((float) (x + w / 2D), (float) (y + h / 2D));

@@ -157,34 +157,34 @@ public enum FTBQuestsEventHandler {
 	}
 
 	private void playerTick(Player player) {
-		ServerQuestFile file = ServerQuestFile.getInstance();
+		ServerQuestFile.ifExists(file -> {
+			if (player instanceof ServerPlayer serverPlayer && !PlayerHooks.isFake(player)) {
+				if (autoSubmitTasks == null) {
+					autoSubmitTasks = file.collect(Task.class, t -> t.autoSubmitOnPlayerTick() > 0);
+				}
 
-		if (player instanceof ServerPlayer serverPlayer && !PlayerHooks.isFake(player)) {
-			if (autoSubmitTasks == null) {
-				autoSubmitTasks = file.collect(Task.class, t -> t.autoSubmitOnPlayerTick() > 0);
-			}
+				// Don't be deceived, it's somehow possible to be null here
+				//noinspection ConstantValue
+				if (autoSubmitTasks == null || autoSubmitTasks.isEmpty()) {
+					return;
+				}
 
-			// Don't be deceived, it's somehow possible to be null here
-            //noinspection ConstantValue
-            if (autoSubmitTasks == null || autoSubmitTasks.isEmpty()) {
-				return;
-			}
+				file.getTeamData(player).ifPresent(data -> {
+					long now = player.level().getGameTime();
 
-			file.getTeamData(player).ifPresent(data -> {
-				long now = player.level().getGameTime();
-
-				file.withPlayerContext(serverPlayer, () -> {
-					for (Task task : autoSubmitTasks) {
-						long interval = task.autoSubmitOnPlayerTick();
-						if (interval > 0L && now % interval == 0L) {
-							if (!data.isCompleted(task) && data.canStartTasks(task.getQuest())) {
-								task.submitTask(data, serverPlayer);
+					file.withPlayerContext(serverPlayer, () -> {
+						for (Task task : autoSubmitTasks) {
+							long interval = task.autoSubmitOnPlayerTick();
+							if (interval > 0L && now % interval == 0L) {
+								if (!data.isCompleted(task) && data.canStartTasks(task.getQuest())) {
+									task.submitTask(data, serverPlayer);
+								}
 							}
 						}
-					}
+					});
 				});
-			});
-		}
+			}
+		});
 	}
 
 	private void itemCrafted(Player player, ItemStack crafted, Container inventory) {

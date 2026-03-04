@@ -23,29 +23,29 @@ public class FTBQuestsInventoryListener implements ContainerListener {
 	}
 
 	public static void detect(ServerPlayer player, ItemStack craftedItem, long sourceTask) {
-		ServerQuestFile file = ServerQuestFile.getInstance();
-
-		if (file == null || PlayerHooks.isFake(player)) {
+		if (PlayerHooks.isFake(player)) {
 			return;
 		}
 
-		List<Task> tasksToCheck = craftedItem.isEmpty() ? file.getSubmitTasks() : file.getCraftingTasks();
+		ServerQuestFile.ifExists(file -> {
+			List<Task> tasksToCheck = craftedItem.isEmpty() ? file.getSubmitTasks() : file.getCraftingTasks();
 
-		if (!tasksToCheck.isEmpty()) {
-			FTBTeamsAPI.api().getManager().getTeamForPlayer(player).ifPresent(team -> {
-				TeamData data = file.getNullableTeamData(team.getId());
-				if (data != null && !data.isLocked()) {
-					file.withPlayerContext(player, () -> {
-						PlayerInventorySummary.build(player);
-						for (Task task : tasksToCheck) {
-							if (task.id != sourceTask && data.canStartTasks(task.getQuest())) {
-								task.submitTask(data, player, craftedItem);
+			if (!tasksToCheck.isEmpty()) {
+				FTBTeamsAPI.api().getManager().getTeamForPlayer(player).ifPresent(team -> {
+					TeamData data = file.getNullableTeamData(team.getId());
+					if (data != null && !data.isLocked()) {
+						file.withPlayerContext(player, () -> {
+							PlayerInventorySummary.build(player);
+							for (Task task : tasksToCheck) {
+								if (task.id != sourceTask && data.canStartTasks(task.getQuest())) {
+									task.submitTask(data, player, craftedItem);
+								}
 							}
-						}
-					});
-				}
-			});
-		}
+						});
+					}
+				});
+			}
+		});
 	}
 
 	@Override

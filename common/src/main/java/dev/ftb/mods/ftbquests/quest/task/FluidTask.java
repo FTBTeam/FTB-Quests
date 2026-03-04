@@ -26,7 +26,7 @@ import dev.ftb.mods.ftbquests.quest.Quest;
 import dev.ftb.mods.ftbquests.quest.TeamData;
 
 import java.util.Optional;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 
 public class FluidTask extends Task {
 	public static final Identifier TANK_TEXTURE = FTBQuestsAPI.id("textures/tasks/tank.png");

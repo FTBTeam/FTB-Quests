@@ -57,9 +57,9 @@ public class ChapterPanel extends Panel {
 	private static final Pattern NON_EMPTY_PAT = Pattern.compile("^.+$");
 
 	private final QuestScreen questScreen;
-	boolean expanded = isPinned();
-	int curX;
-	int prevX;
+	private boolean expanded = isPinned();
+	private int curX;
+	private int prevX;
 
 	public ChapterPanel(Panel panel) {
 		super(panel);
@@ -161,9 +161,12 @@ public class ChapterPanel extends Panel {
 	public void draw(GuiGraphics graphics, Theme theme, int x, int y, int w, int h) {
 		graphics.pose().pushMatrix();
 		graphics.pose().translate(0, 0);
-//		RenderSystem.enableDepthTest();
 		super.draw(graphics, theme, x, y, w, h);
 		graphics.pose().popMatrix();
+	}
+
+	public boolean isExpanded() {
+		return expanded;
 	}
 
 	public void setExpanded(boolean b) {
@@ -264,8 +267,6 @@ public class ChapterPanel extends Panel {
 
 		@Override
 		public void draw(GuiGraphics graphics, Theme theme, int x, int y, int w, int h) {
-//			GuiHelper.setupDrawing();
-
 			if (isMouseOver()) {
 				IconHelper.renderIcon(Color4I.WHITE.withAlpha(40), graphics, x + 1, y + 1, w - 2, h - 2);
 			}
@@ -296,7 +297,7 @@ public class ChapterPanel extends Panel {
 		public void addMouseOverText(TooltipList list) {
 			chapterPanel.questScreen.addInfoTooltip(list, chapterPanel.questScreen.file);
 
-			if (chapterPanel.questScreen.file.canEdit() && getMouseX() > getX() + width - 34) {
+			if (chapterPanel.questScreen.file.canEdit() && getMouseX() > getX() + width - 34 && getMouseX() < getX() + width - 17) {
 				list.translate("gui.add");
 			}
 		}
@@ -373,8 +374,6 @@ public class ChapterPanel extends Panel {
 
 		@Override
 		public void draw(GuiGraphics graphics, Theme theme, int x, int y, int w, int h) {
-//			GuiHelper.setupDrawing();
-
 			if (xlateWarning) {
 				IconHelper.renderIcon(Color4I.RED.withAlpha(40), graphics, x, y, w, h);
 			}

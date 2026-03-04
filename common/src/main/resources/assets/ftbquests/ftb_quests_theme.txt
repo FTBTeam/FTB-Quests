@@ -12,8 +12,6 @@ disabled_text_color: #999999
 
 widget_border:     #1B1D1E
 widget_background: #44000000
-symbol_in:         #9BC600
-symbol_out:        #408300
 
 button:                hollow_rectangle:{{widget_border}}
 panel:                 {{container_slot}}
@@ -26,12 +24,12 @@ container_slot:        {{button}}; padding=-1
 text_box:              part:minecraft:textures/gui/container/enchanting_table.png; pos=0,185,108,19; corner=6
 
 icon:                 none
-check_icon:           builtin
-add_icon:             builtin
+check_icon:           ftblibrary:textures/icons/check.png
+check_icon_gray:      ftbquests:textures/gui/check_gray.png
+add_icon:             ftblibrary:textures/icons/add.png
 alert_icon:           ftbquests:textures/gui/alert.png
-support_icon:         ftblibrary:textures/icons/support.png
 wiki_icon:            ftbquests:textures/gui/info.png
-wiki_url:             -
+wiki_url:             https://go.ftb.team/docs-quests
 pin_icon_on:          ftbquests:textures/gui/pin.png; color=#F8BD1C
 pin_icon_off:         ftbquests:textures/gui/pin.png; color=#DBDBDB
 editor_icon_on:       ftbquests:textures/gui/editor.png
@@ -78,7 +76,6 @@ dependency_line_selected_speed:     1.0
 dependency_line_unselected_speed:   0.0
 dependency_line_thickness:          0.17
 quest_spacing:                      1.0
-pinned_quest_size:                  0.75
 
 checkmark_task_active:   ftblibrary:icons/accept
 checkmark_task_inactive: ftblibrary:icons/accept_gray

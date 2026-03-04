@@ -13,12 +13,12 @@ import net.minecraft.world.item.ItemStack;
 import com.mojang.util.UndashedUuid;
 
 import dev.architectury.networking.NetworkManager;
+import dev.architectury.utils.GameInstance;
 
 import dev.ftb.mods.ftblibrary.snbt.SNBT;
 import dev.ftb.mods.ftblibrary.snbt.SNBTCompoundTag;
 import dev.ftb.mods.ftbquests.FTBQuests;
 import dev.ftb.mods.ftbquests.api.FTBQuestsAPI;
-import dev.ftb.mods.ftbquests.client.ClientQuestFile;
 import dev.ftb.mods.ftbquests.events.QuestProgressEventData;
 import dev.ftb.mods.ftbquests.net.*;
 import dev.ftb.mods.ftbquests.quest.reward.Reward;
@@ -50,11 +50,13 @@ import it.unimi.dsi.fastutil.objects.Object2ObjectMap;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import org.apache.commons.lang3.function.ToBooleanBiFunction;
 import org.apache.commons.lang3.time.DurationFormatUtils;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 
 public class TeamData {
 	public static final int VERSION = 1;
 	public static final int AUTO_PIN_ID = 1;
+
+	public static final TeamData NONE = new TeamData(Util.NIL_UUID, false, "Loading...");
 
 	private static final byte BOOL_UNKNOWN = -1;
 	private static final byte BOOL_FALSE = 0;
@@ -68,13 +70,13 @@ public class TeamData {
                 buf.writeUUID(data.getTeamId());
                 data.writeNetData(buf);
             },
-			buf -> Util.make(new TeamData(buf.readUUID(), ClientQuestFile.getInstance()), data -> data.readNetData(buf))
+			buf -> Util.make(new TeamData(buf.readUUID(), false), data -> data.readNetData(buf))
     );
 
 	private final UUID teamId;
-	private final BaseQuestFile file;
 
-	private String name;
+    private final boolean serverSide;
+    private String name;
 	private boolean shouldSave;
 	private boolean locked;
 	private boolean rewardsBlocked;
@@ -92,14 +94,15 @@ public class TeamData {
 	private final Object2ByteMap<QuestKey> unclaimedRewardsCache;
 	private final Long2BooleanMap exclusionCache;
 
-	public TeamData(UUID teamId, BaseQuestFile file) {
-		this(teamId, file, "");
+	public TeamData(UUID teamId, boolean serverSide) {
+		this(teamId, serverSide, "");
 	}
 
-	public TeamData(UUID teamId, BaseQuestFile file, String name) {
+	public TeamData(UUID teamId, boolean serverSide, String name) {
 		this.teamId = teamId;
-		this.file = file;
+        this.serverSide = serverSide;
 		this.name = name;
+		this.locked = teamId.equals(Util.NIL_UUID);
 
 		shouldSave = false;
 
@@ -124,8 +127,12 @@ public class TeamData {
 		return teamId;
 	}
 
+	public boolean isValid() {
+		return !teamId.equals(Util.NIL_UUID);
+	}
+
 	public BaseQuestFile getFile() {
-		return file;
+		return FTBQuestsAPI.api().getQuestFile(!serverSide);
 	}
 
 	public static TeamData get(Player player) {
@@ -148,8 +155,8 @@ public class TeamData {
 	}
 
 	public void saveIfChanged() {
-		if (shouldSave && file instanceof ServerQuestFile sqf) {
-			Path path = sqf.server.getWorldPath(ServerQuestFile.FTBQUESTS_DATA);
+		if (shouldSave && serverSide) {
+			Path path = GameInstance.getServer().getWorldPath(ServerQuestFile.FTBQUESTS_DATA);
             try {
                 SNBT.tryWrite(path.resolve(teamId + ".snbt"), serializeNBT());
             } catch (IOException e) {
@@ -184,7 +191,7 @@ public class TeamData {
 					clearCachedProgress();
 					markDirty();
 
-					if (file.isServerSide()) {
+					if (serverSide) {
 						NetworkManager.sendToPlayers(getOnlineMembers(), new ObjectStartedResetMessage(teamId, questId));
 					}
 
@@ -195,7 +202,7 @@ public class TeamData {
 					clearCachedProgress();
 					markDirty();
 
-					if (file.isServerSide()) {
+					if (serverSide) {
 						NetworkManager.sendToPlayers(getOnlineMembers(), new ObjectStartedMessage(teamId, questId));
 					}
 
@@ -222,7 +229,7 @@ public class TeamData {
 				clearCachedProgress();
 				markDirty();
 
-				if (file.isServerSide()) {
+				if (serverSide) {
 					NetworkManager.sendToPlayers(getOnlineMembers(), new ObjectCompletedResetMessage(teamId, id));
 				}
 
@@ -233,7 +240,7 @@ public class TeamData {
 				clearCachedProgress();
 				markDirty();
 
-				if (file.isServerSide()) {
+				if (serverSide) {
 					NetworkManager.sendToPlayers(getOnlineMembers(), new ObjectCompletedMessage(teamId, id));
 				}
 
@@ -265,7 +272,7 @@ public class TeamData {
 			this.rewardsBlocked = rewardsBlocked;
 			clearCachedProgress();
 			markDirty();
-			if (file.isServerSide()) {
+			if (serverSide) {
 				NetworkManager.sendToPlayers(getOnlineMembers(), new SyncRewardBlockingMessage(teamId, rewardsBlocked));
 			}
 			return true;
@@ -316,7 +323,7 @@ public class TeamData {
 			clearCachedProgress();
 			markDirty();
 
-			if (file.isServerSide()) {
+			if (serverSide) {
 				NetworkManager.sendToPlayers(getOnlineMembers(), new ClaimRewardResponseMessage(teamId, player, reward.id));
 			}
 
@@ -346,7 +353,7 @@ public class TeamData {
 			clearCachedProgress();
 			markDirty();
 
-			if (file.isServerSide()) {
+			if (serverSide) {
 				NetworkManager.sendToPlayers(getOnlineMembers(), new ResetRewardMessage(teamId, player, reward.id));
 			}
 
@@ -401,15 +408,17 @@ public class TeamData {
 			markDirty();
 		}
 
+		BaseQuestFile file = getFile();
+
 		name = nbt.getString("name").orElseThrow();
 		locked = nbt.getBoolean("lock").orElseThrow();
 		rewardsBlocked = nbt.getBoolean("rewards_blocked").orElseThrow();
 
-		readLongLongMap(nbt, taskProgress, "task_progress");
-		readLongLongMap(nbt, started, "started");
-		readLongLongMap(nbt, completed, "completed");
-		readLongLongMap(nbt, questRepeatableTime, "repeatable");
-		readLongIntMap(nbt, completionCount, "completion_count");
+		readLongLongMap(file, nbt, taskProgress, "task_progress");
+		readLongLongMap(file, nbt, started, "started");
+		readLongLongMap(file, nbt, completed, "completed");
+		readLongLongMap(file, nbt, questRepeatableTime, "repeatable");
+		readLongIntMap(file, nbt, completionCount, "completion_count");
 
 		claimedRewards.clear();
 		CompoundTag claimedRewardsNBT = nbt.getCompound("claimed_rewards").orElse(new CompoundTag());
@@ -437,7 +446,7 @@ public class TeamData {
 		tag.put(key, subTag);
 	}
 
-	private void readLongLongMap(CompoundTag tag, Long2LongMap map, String key) {
+	private void readLongLongMap(BaseQuestFile file, CompoundTag tag, Long2LongMap map, String key) {
 		map.clear();
 		CompoundTag subTag = tag.getCompound(key).orElse(new CompoundTag());
 		for (String subKey : subTag.keySet()) {
@@ -453,7 +462,7 @@ public class TeamData {
 		tag.put(key, subTag);
 	}
 
-	private void readLongIntMap(CompoundTag tag, Long2IntMap map, String key) {
+	private void readLongIntMap(BaseQuestFile file, CompoundTag tag, Long2IntMap map, String key) {
 		map.clear();
 		CompoundTag subTag = tag.getCompound(key).orElse(new CompoundTag());
 		for (String subKey : subTag.keySet()) {
@@ -703,7 +712,7 @@ public class TeamData {
 
 			clearCachedProgress();
 
-			if (file.isServerSide()) {
+			if (serverSide) {
 				Date now = new Date();
 				Collection<ServerPlayer> onlineMembers = getOnlineMembers();
 
@@ -760,7 +769,7 @@ public class TeamData {
 			clearCachedProgress();
 			markDirty();
 
-			if (file.isServerSide()) {
+			if (serverSide) {
 				NetworkManager.sendToPlayers(getOnlineMembers(), new SyncLockMessage(teamId, locked));
 			}
 
@@ -808,7 +817,7 @@ public class TeamData {
 	 * @return the player's per-player data, or {@code Optional.empty()} if the player isn't in this team
 	 */
 	private Optional<PerPlayerData> getOrCreatePlayerData(Player player) {
-		if (!file.isPlayerOnTeam(player, this)) {
+		if (!getFile().isPlayerOnTeam(player, this)) {
 			return Optional.empty();
 		}
 		if (!perPlayerData.containsKey(player.getUUID())) {
@@ -827,7 +836,7 @@ public class TeamData {
 				playerData.canEdit = newCanEdit;
 				clearCachedProgress();
 				markDirty();
-				if (file.isServerSide() && player instanceof ServerPlayer sp) {
+				if (serverSide && player instanceof ServerPlayer sp) {
 					NetworkManager.sendToPlayer(sp, new SyncEditingModeMessage(teamId, newCanEdit));
 				}
 				return true;

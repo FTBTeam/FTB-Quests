@@ -34,8 +34,8 @@ public class OpenBookCommand {
             NetworkManager.sendToPlayer(player, OpenQuestBookMessage.lastOpenedQuest());
             return Command.SINGLE_SUCCESS;
         } else {
-            if (FTBQuestsCommands.getQuestObjectForString(qobId) instanceof Quest quest && playerCanSeeQuestObject(player, quest)) {
-                NetworkManager.sendToPlayer(player, new OpenQuestBookMessage(quest.id));
+            if (FTBQuestsCommands.getQuestObjectForString(qobId) instanceof QuestObject qo && playerCanSeeQuestObject(player, qo)) {
+                NetworkManager.sendToPlayer(player, new OpenQuestBookMessage(qo.id));
                 return Command.SINGLE_SUCCESS;
             }
         }

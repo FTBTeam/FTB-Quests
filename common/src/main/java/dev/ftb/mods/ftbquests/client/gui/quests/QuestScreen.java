@@ -684,7 +684,7 @@ public class QuestScreen extends BaseScreen {
 		Color4I borderColor = ThemeProperties.WIDGET_BORDER.get(selectedChapter);
 		Color4I backgroundColor = ThemeProperties.WIDGET_BACKGROUND.get(selectedChapter);
 
-		if (!chapterPanel.expanded) {
+		if (!chapterPanel.isExpanded()) {
 			IconHelper.renderIcon(borderColor, graphics, x + pw - 1, y + 1, 1, h - 2);
 			IconHelper.renderIcon(backgroundColor, graphics, x + 1, y + 1, pw - 2, h - 2);
 		}
@@ -891,7 +891,7 @@ public class QuestScreen extends BaseScreen {
 			scrollY = questScreen.questPanel.centerQuestY;
 			selectedChapter = questScreen.selectedChapter == null ? 0L : questScreen.selectedChapter.id;
 			selectedQuests = questScreen.selectedObjects.stream().map(Movable::getMovableID).filter(id -> id != 0).toList();
-			chaptersExpanded = questScreen.chapterPanel.expanded;
+			chaptersExpanded = questScreen.chapterPanel.isExpanded();
 			questViewHistory = new ArrayDeque<>(questScreen.questViewHistory);
 		}
 	}

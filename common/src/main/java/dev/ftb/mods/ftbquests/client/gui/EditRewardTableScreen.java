@@ -258,7 +258,7 @@ public class EditRewardTableScreen extends AbstractButtonListScreen {
 			EditableDouble c = new EditableDouble(0D, Double.POSITIVE_INFINITY);
 			c.setValue((double) wr.getWeight());
 			EditStringConfigOverlay<Double> overlay = new EditStringConfigOverlay<>(parent, c, accepted -> {
-				if (accepted && c.getValue() != null) {
+				if (accepted) {
 					wr.setWeight(c.getValue().floatValue());
 					changed = true;
 				}

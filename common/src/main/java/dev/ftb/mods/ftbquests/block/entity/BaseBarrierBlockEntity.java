@@ -152,7 +152,7 @@ public abstract class BaseBarrierBlockEntity extends EditableBlockEntity {
 			}
 		});
 
-		group.setNameKey(getBlockState().getBlock().getDescriptionId());
+		group.setNameKey(new ItemStack(getBlockState().getBlock()).getItem().getDescriptionId());
 		addConfigEntries(group);
 
 		if (Platform.isForgeLike()) {

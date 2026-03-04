@@ -4,7 +4,6 @@ import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.network.chat.Component;
-import net.minecraft.util.Util;
 import net.minecraft.world.entity.player.Player;
 import com.mojang.blaze3d.platform.InputConstants;
 
@@ -46,8 +45,7 @@ public class ClientQuestFile extends BaseQuestFile {
 	@Nullable
 	private static ClientQuestFile INSTANCE;
 
-	@Nullable
-	public TeamData selfTeamData;  // TeamData for the player on this client
+	public TeamData selfTeamData = TeamData.NONE;  // TeamData for the player on this client
 	@Nullable
 	private QuestScreen questScreen;
 	private QuestScreen.@Nullable PersistedData persistedData;
@@ -77,8 +75,7 @@ public class ClientQuestFile extends BaseQuestFile {
 	}
 
 	private void onReplaced() {
-		selfTeamData = new TeamData(Util.NIL_UUID, this, "Loading...");
-		selfTeamData.setLocked(true);
+		selfTeamData = TeamData.NONE;
 
 		refreshGui();
 		FTBQuests.getRecipeModHelper().refreshRecipes(this);
@@ -86,7 +83,9 @@ public class ClientQuestFile extends BaseQuestFile {
 
 	@Override
 	public boolean canEdit() {
-		return Minecraft.getInstance().player != null && hasEditorPermission() && selfTeamData.getCanEdit(Minecraft.getInstance().player);
+		return Minecraft.getInstance().player != null && hasEditorPermission()
+				&& selfTeamData.isValid()
+				&& selfTeamData.getCanEdit(Minecraft.getInstance().player);
 	}
 
 	@Override
@@ -132,7 +131,7 @@ public class ClientQuestFile extends BaseQuestFile {
 
 	@Nullable
 	private QuestScreen openQuestGui() {
-		if (exists()) {
+		if (exists() && selfTeamData.isValid()) {
 			if (isDisableGui() && !canEdit()) {
 				Minecraft.getInstance().getToastManager().addToast(new CustomToast(Component.translatable("item.ftbquests.book.disabled"), Icons.BARRIER, Component.empty()));
 			} else if (selfTeamData.isLocked()) {
@@ -178,7 +177,7 @@ public class ClientQuestFile extends BaseQuestFile {
 		KnownClientPlayer kcp = FTBTeamsAPI.api().getClientManager().getKnownPlayer(player.getUUID())
 				.orElseThrow(() -> new RuntimeException("Unknown client player " + player.getUUID()));
 
-		return Optional.of(kcp.id().equals(Minecraft.getInstance().player.getUUID()) ? selfTeamData : getOrCreateTeamData(kcp.teamId()));
+		return Optional.of(kcp.id().equals(ClientUtils.getClientPlayer().getUUID()) ? selfTeamData : getOrCreateTeamData(kcp.teamId()));
 	}
 
 	public void setPersistedScreenInfo(QuestScreen.PersistedData persistedData) {

@@ -16,7 +16,7 @@ public class ExpandChaptersButton extends Widget {
 
 	@Override
 	public void draw(GuiGraphics graphics, Theme theme, int x, int y, int w, int h) {
-		if (!questScreen.chapterPanel.expanded) {
+		if (!questScreen.chapterPanel.isExpanded()) {
 			IconHelper.renderIcon(ChapterPanel.ARROW_COLLAPSED, graphics, x + (w - 12) / 2, y + (h - 12) / 2, 12, 12);
 		}
 	}
@@ -25,7 +25,7 @@ public class ExpandChaptersButton extends Widget {
 	public void updateMouseOver(int mouseX, int mouseY) {
 		super.updateMouseOver(mouseX, mouseY);
 
-		if (!questScreen.chapterPanel.expanded && isMouseOver() && !questScreen.isViewingQuest()) {
+		if (!questScreen.chapterPanel.isExpanded() && isMouseOver() && !questScreen.isViewingQuest()) {
 			questScreen.chapterPanel.setExpanded(true);
 		}
 	}

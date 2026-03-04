@@ -1,6 +1,7 @@
 package dev.ftb.mods.ftbquests.quest.task;
 
 import net.minecraft.ChatFormatting;
+import net.minecraft.IdentifierException;
 import net.minecraft.advancements.AdvancementHolder;
 import net.minecraft.advancements.AdvancementProgress;
 import net.minecraft.advancements.CriterionProgress;
@@ -74,7 +75,10 @@ public class AdvancementTask extends AbstractBooleanTask {
 							.name(id -> advancements.getOrDefault(id, def).name())
 							.create()).setNameKey("ftbquests.task.ftbquests.advancement");
 		} else {
-			config.addString("advancement", advancement.toString(), v -> advancement = Identifier.tryParse(v), "minecraft:story/root").setNameKey("ftbquests.task.ftbquests.advancement");
+			try {
+				config.addString("advancement", advancement.toString(), v -> advancement = Identifier.parse(v), "minecraft:story/root").setNameKey("ftbquests.task.ftbquests.advancement");
+			} catch (IdentifierException ignored) {
+			}
 		}
 
 		config.addString("criterion", criterion, v -> criterion = v, "");

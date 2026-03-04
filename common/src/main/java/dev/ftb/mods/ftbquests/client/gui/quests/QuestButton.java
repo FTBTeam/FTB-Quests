@@ -391,7 +391,7 @@ public class QuestButton extends Button implements QuestPositionableButton {
 					outlineColor = ThemeProperties.QUEST_STARTED_COLOR.get(quest);
 				}
 				if (quest.getProgressionMode() == ProgressionMode.FLEXIBLE && quest.allTasksCompleted(teamData)) {
-					questIcon = new ThemeProperties.CheckIcon(Color4I.rgb(0x606060), Color4I.rgb(0x808080));
+					questIcon = ThemeProperties.CHECK_ICON_GRAY.get(quest);
 				}
 			}
 		} else {
@@ -422,10 +422,6 @@ public class QuestButton extends Button implements QuestPositionableButton {
 			IconHelper.renderIcon(icon, graphics, 0, 0, s, s);
 			poseStack.popMatrix();
 		}
-
-//		GuiHelper.setupDrawing();
-		// TODO: custom shader to implement alphaFunc?
-		//RenderSystem.alphaFunc(GL11.GL_GREATER, 0.1F);
 
 		if (questScreen.getViewedQuest() == quest || questScreen.selectedObjects.contains(moveAndDeleteFocus())) {
 			Color4I col = Color4I.WHITE.withAlpha((int) (190D + Math.sin(System.currentTimeMillis() * 0.003D) * 50D));

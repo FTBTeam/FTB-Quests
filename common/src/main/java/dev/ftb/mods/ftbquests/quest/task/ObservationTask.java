@@ -31,6 +31,7 @@ import dev.ftb.mods.ftbquests.quest.Quest;
 import dev.ftb.mods.ftbquests.quest.TeamData;
 
 import java.util.Optional;
+import org.jspecify.annotations.Nullable;
 
 public class ObservationTask extends AbstractBooleanTask {
 	private long timer;
@@ -128,11 +129,7 @@ public class ObservationTask extends AbstractBooleanTask {
 			BlockInWorld blockInWorld = new BlockInWorld(player.level(), blockResult.getBlockPos(), false);
 
 			BlockState state = blockInWorld.getState();
-			if (state == null) {
-				return false;
-			}
-
-			Block block = state.getBlock();
+            Block block = state.getBlock();
 			BlockEntity blockEntity = blockInWorld.getEntity();
 
 			switch (observeType) {
@@ -180,6 +177,7 @@ public class ObservationTask extends AbstractBooleanTask {
 		}
 	}
 
+	@Nullable
 	private BlockInput tryMatchBlock(String string, boolean parseNbt) {
 		try {
 			BlockStateParser.BlockResult blockStateParser = BlockStateParser.parseForBlock(BuiltInRegistries.BLOCK, new StringReader(string), false);

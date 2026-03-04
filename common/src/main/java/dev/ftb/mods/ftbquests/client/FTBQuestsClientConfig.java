@@ -14,7 +14,7 @@ import dev.ftb.mods.ftbquests.client.gui.QuestsClientConfigScreen;
 
 public interface FTBQuestsClientConfig {
     String KEY = FTBQuestsAPI.MOD_ID + "-client";
-    Config CONFIG = Config.create(KEY);
+    Config CONFIG = Config.create(KEY).standardTopLevelComment(FTBQuestsAPI.MOD_NAME, KEY, true);
 
     Config UI = CONFIG.addGroup("ui", 0);
     BooleanValue OLD_SCROLL_WHEEL = UI.addBoolean("old_scroll_wheel", false);

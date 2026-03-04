@@ -5,6 +5,7 @@ import net.minecraft.network.chat.Component;
 import dev.ftb.mods.ftblibrary.client.config.ConfigCallback;
 import dev.ftb.mods.ftblibrary.client.config.editable.EditableConfigValue;
 import dev.ftb.mods.ftblibrary.client.gui.input.MouseButton;
+import dev.ftb.mods.ftblibrary.client.gui.theme.Theme;
 import dev.ftb.mods.ftblibrary.client.gui.widget.Widget;
 import dev.ftb.mods.ftblibrary.util.TooltipList;
 import dev.ftb.mods.ftbquests.client.gui.SelectQuestObjectScreen;
@@ -49,9 +50,7 @@ public class EditableQuestObject<T extends QuestObjectBase> extends EditableConf
 	}
 
 	@Override
-	public void addInfo(TooltipList list) {
-		if (value != null) {
-			list.add(info("ID", value));
-		}
+	public void addInfo(TooltipList list, Theme theme) {
+		list.add(info("ID", value));
 	}
 }

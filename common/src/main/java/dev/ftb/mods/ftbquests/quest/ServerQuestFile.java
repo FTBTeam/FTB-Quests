@@ -73,12 +73,16 @@ public class ServerQuestFile extends BaseQuestFile {
 		INSTANCE = null;
 	}
 
+	public static boolean exists() {
+		return INSTANCE != null && !INSTANCE.invalid;
+	}
+
 	public static ServerQuestFile getInstance() {
 		return Objects.requireNonNull(INSTANCE);
 	}
 
 	public static void ifExists(Consumer<ServerQuestFile> consumer) {
-		if (INSTANCE != null) {
+		if (INSTANCE != null && INSTANCE.isValid()) {
 			consumer.accept(INSTANCE);
 		}
 	}
@@ -127,7 +131,7 @@ public class ServerQuestFile extends BaseQuestFile {
 
 							try {
 								UUID uuid = UndashedUuid.fromString(nbt.getString("uuid").orElseThrow());
-								TeamData data = new TeamData(uuid, this);
+								TeamData data = new TeamData(uuid, true);
 								addData(data, true);
 								data.deserializeNBT(nbt);
 							} catch (Exception ex) {
@@ -270,7 +274,7 @@ public class ServerQuestFile extends BaseQuestFile {
 		UUID id = event.getTeam().getId();
 
 		TeamData data = teamDataMap.computeIfAbsent(id, k -> {
-			TeamData newTeamData = new TeamData(id, this);
+			TeamData newTeamData = new TeamData(id, true);
 			newTeamData.markDirty();
 			return newTeamData;
 		});

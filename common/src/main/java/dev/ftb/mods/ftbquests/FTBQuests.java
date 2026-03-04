@@ -31,10 +31,8 @@ import org.jspecify.annotations.Nullable;
 public class FTBQuests {
 	public static final Logger LOGGER = LogManager.getLogger(FTBQuestsAPI.MOD_NAME);
 
-	public static FTBQuests instance;
-
-	public static IQuestProxy PROXY;
-
+	@Nullable
+	private static IQuestProxy PROXY;
 	@Nullable
 	private static RecipeModHelper recipeModHelper;
 	private static final RecipeModHelper NO_OP_HELPER = new RecipeModHelper.NoOp();
@@ -62,6 +60,10 @@ public class FTBQuests {
 
 	public static RecipeModHelper getRecipeModHelper() {
 		return Objects.requireNonNullElse(recipeModHelper, NO_OP_HELPER);
+	}
+
+	public static IQuestProxy proxy() {
+		return Objects.requireNonNull(PROXY);
 	}
 
 	public static void setRecipeModHelper(RecipeModHelper recipeModHelper) {

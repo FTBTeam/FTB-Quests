@@ -6,17 +6,10 @@ import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.server.packs.resources.ResourceManagerReloadListener;
 
 import dev.ftb.mods.ftbquests.api.FTBQuestsAPI;
-import dev.ftb.mods.ftbquests.quest.QuestObjectBase;
-import dev.ftb.mods.ftbquests.quest.QuestObjectType;
 import dev.ftb.mods.ftbquests.quest.QuestShape;
 import dev.ftb.mods.ftbquests.quest.theme.property.ThemeProperties;
-import dev.ftb.mods.ftbquests.quest.theme.selector.AllSelector;
 import dev.ftb.mods.ftbquests.quest.theme.selector.AndSelector;
-import dev.ftb.mods.ftbquests.quest.theme.selector.IDSelector;
-import dev.ftb.mods.ftbquests.quest.theme.selector.NotSelector;
-import dev.ftb.mods.ftbquests.quest.theme.selector.TagSelector;
 import dev.ftb.mods.ftbquests.quest.theme.selector.ThemeSelector;
-import dev.ftb.mods.ftbquests.quest.theme.selector.TypeSelector;
 
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
@@ -25,10 +18,8 @@ import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.regex.Pattern;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

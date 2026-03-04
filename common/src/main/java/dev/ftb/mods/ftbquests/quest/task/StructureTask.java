@@ -106,7 +106,7 @@ public class StructureTask extends AbstractBooleanTask {
 	public boolean canSubmit(TeamData teamData, ServerPlayer player) {
 		if (player.isSpectator()) return false;
 
-		ServerLevel level = (ServerLevel) player.level();
+		ServerLevel level = player.level();
 		StructureManager mgr = level.structureManager();
 		return structure.map(
 				key -> {

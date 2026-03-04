@@ -17,7 +17,7 @@ import dev.ftb.mods.ftbquests.quest.QuestObjectType;
 
 import java.util.Optional;
 import java.util.UUID;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 
 public record CreateObjectResponseMessage(long id, long parent, QuestObjectType questObjectType, CompoundTag nbt, Optional<CompoundTag> extra, Optional<UUID> creator) implements CustomPacketPayload {
 	public static final Type<CreateObjectResponseMessage> TYPE = new Type<>(FTBQuestsAPI.id("create_object_response_message"));

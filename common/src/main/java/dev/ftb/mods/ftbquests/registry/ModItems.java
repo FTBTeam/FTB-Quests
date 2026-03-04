@@ -80,7 +80,7 @@ public class ModItems {
 		CreativeTabRegistry.appendStack(FTBLibrary.getCreativeModeTab(), BASE_ITEMS.stream().map(item -> () -> new ItemStack(item.get())));
 
 		CreativeTabRegistry.modify(FTBLibrary.getCreativeModeTab(), (flags, output, canUseGameMasterBlocks) -> {
-            var stacks = FTBQuests.PROXY.getKnownLootCrates()
+            var stacks = FTBQuests.proxy().getKnownLootCrates()
                     .stream()
                     .map(LootCrate::createStack)
 					.filter(stack -> !stack.isEmpty())

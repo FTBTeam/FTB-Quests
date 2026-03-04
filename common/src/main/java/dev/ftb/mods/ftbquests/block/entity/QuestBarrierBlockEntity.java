@@ -12,7 +12,10 @@ import dev.ftb.mods.ftbquests.quest.Quest;
 import dev.ftb.mods.ftbquests.quest.QuestObjectType;
 import dev.ftb.mods.ftbquests.registry.ModBlockEntityTypes;
 
+import org.jspecify.annotations.Nullable;
+
 public class QuestBarrierBlockEntity extends BaseBarrierBlockEntity {
+	@Nullable
 	private Quest cachedQuest = null;
 
 	public QuestBarrierBlockEntity(BlockPos blockPos, BlockState blockState) {
@@ -47,6 +50,7 @@ public class QuestBarrierBlockEntity extends BaseBarrierBlockEntity {
 				.setNameKey("ftbquests.quest");
 	}
 
+	@Nullable
 	public Quest getQuest() {
 		if (cachedQuest == null && !objStr.isEmpty() || cachedQuest != null && !cachedQuest.getCodeString().equals(objStr)) {
 			long objId = BaseQuestFile.parseCodeString(objStr);
@@ -56,7 +60,7 @@ public class QuestBarrierBlockEntity extends BaseBarrierBlockEntity {
 		return cachedQuest;
 	}
 
-	public void setQuest(Quest quest) {
+	public void setQuest(@Nullable Quest quest) {
 		this.cachedQuest = quest;
 		objStr = quest == null ? "" : quest.getCodeString();
 		setChanged();

@@ -18,7 +18,7 @@ import java.lang.ref.WeakReference;
 import java.util.Optional;
 import java.util.UUID;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 
 public class TaskScreenAuxBlockEntity extends BlockEntity implements ITaskScreen, Nameable {
     @NotNull

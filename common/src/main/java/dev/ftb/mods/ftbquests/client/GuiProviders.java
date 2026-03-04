@@ -5,7 +5,6 @@ import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.Util;
-import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.StructureBlockEntity;
 import net.minecraft.world.phys.BlockHitResult;
@@ -87,7 +86,6 @@ public class GuiProviders {
                     }
                     panel.run();
                 }, task.getType().getDisplayName()).atMousePosition();
-                overlay.setExtraZlevel(300);
                 panel.getGui().pushModalPanel(overlay);
             } else {
                 openSetupGui(panel.getGui(), callback, task);
@@ -121,7 +119,6 @@ public class GuiProviders {
                 }
                 panel.run();
             }, TaskTypes.CHECKMARK.getDisplayName()).atMousePosition();
-            overlay.setExtraZlevel(300);
             panel.getGui().pushModalPanel(overlay);
         });
 
@@ -184,13 +181,10 @@ public class GuiProviders {
 
     public static void setRewardGuiProviders() {
         RewardTypes.ITEM.setGuiProvider((gui, quest, callback) -> {
-            EditableItemStack c = new EditableItemStack(false, false);
-
-            new SelectItemStackScreen(c, accepted -> {
+            EditableItemStack editable = new EditableItemStack(false, false);
+            new SelectItemStackScreen(editable, accepted -> {
                 if (accepted) {
-                    ItemStack copy = c.getValue().copy();
-                    copy.setCount(1);
-                    ItemReward reward = new ItemReward(0L, quest, copy, c.getValue().getCount());
+                    ItemReward reward = new ItemReward(0L, quest, editable.getValue().copyWithCount(1), editable.getValue().getCount());
                     callback.accept(reward);
                 }
                 gui.run();

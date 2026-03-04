@@ -18,6 +18,7 @@ import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 public final class QuestShape extends Icon<QuestShape> {
 	private static final Map<String, QuestShape> MAP = new LinkedHashMap<>();
@@ -99,14 +100,22 @@ public final class QuestShape extends Icon<QuestShape> {
 	private PixelBuffer makeShapePixels() {
 		try {
 			Identifier shapeLoc = FTBQuestsAPI.id("textures/shapes/" + id + "/shape.png");
-			Resource resource = Minecraft.getInstance().getResourceManager().getResource(shapeLoc).get();
-			try (InputStream stream = resource.open()) {
-				return PixelBuffer.from(stream);
+			Optional<Resource> opt = Minecraft.getInstance().getResourceManager().getResource(shapeLoc);
+			if (opt.isPresent()) {
+				try (InputStream stream = opt.get().open()) {
+					return PixelBuffer.from(stream);
+				}
+			} else {
+				return emptyBuffer();
 			}
 		} catch (Exception ex) {
-			PixelBuffer res = new PixelBuffer(1, 1);
-			res.setRGB(0, 0, 0xFFFFFFFF);
-			return res;
+			return emptyBuffer();
 		}
+	}
+
+	private static PixelBuffer emptyBuffer() {
+		PixelBuffer res = new PixelBuffer(1, 1);
+		res.setRGB(0, 0, 0xFFFFFFFF);
+		return res;
 	}
 }

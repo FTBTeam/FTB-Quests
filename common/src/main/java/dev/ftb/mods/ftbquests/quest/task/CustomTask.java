@@ -135,7 +135,7 @@ public class CustomTask extends Task {
 		private static final LongSet toSync = new LongOpenHashSet();
 
 		public static void tick(MinecraftServer server) {
-			if (!toSync.isEmpty() && ServerQuestFile.getInstance() != null) {
+			if (!toSync.isEmpty() && ServerQuestFile.exists()) {
 				toSync.forEach(id -> {
 					if (ServerQuestFile.getInstance().get(id) instanceof CustomTask c) {
 						NetworkHelper.sendToAll(server, new EditObjectResponseMessage(c));

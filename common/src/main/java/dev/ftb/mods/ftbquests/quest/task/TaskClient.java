@@ -14,7 +14,7 @@ public interface TaskClient {
 	}
 
 	enum Default implements TaskClient {
-		INSTANCE;
+		INSTANCE
 	}
 
 	enum NoOp implements TaskClient {

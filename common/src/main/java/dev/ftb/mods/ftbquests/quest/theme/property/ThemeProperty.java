@@ -3,7 +3,7 @@ package dev.ftb.mods.ftbquests.quest.theme.property;
 import dev.ftb.mods.ftbquests.quest.QuestObjectBase;
 import dev.ftb.mods.ftbquests.quest.theme.QuestTheme;
 
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 
 public abstract class ThemeProperty<T> {
 	private final String name;

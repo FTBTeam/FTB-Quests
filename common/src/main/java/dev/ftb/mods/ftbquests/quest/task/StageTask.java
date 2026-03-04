@@ -92,20 +92,20 @@ public class StageTask extends AbstractBooleanTask {
 	@SuppressWarnings("unused")
 	public static void checkStages(ServerPlayer player) {
 		// hook for FTB XMod Compat to call into
-		if (ServerQuestFile.getInstance() == null || PlayerHooks.isFake(player)) {
+		if (PlayerHooks.isFake(player)) {
 			return;
 		}
 
-		ServerQuestFile.getInstance().getTeamData(player).ifPresent(data -> {
-			if (!data.isLocked()) {
-				ServerQuestFile.getInstance().withPlayerContext(player, () -> {
-					for (Task task : ServerQuestFile.getInstance().getAllTasks()) {
-						if (task instanceof StageTask && data.canStartTasks(task.getQuest())) {
-							task.submitTask(data, player);
-						}
-					}
-				});
-			}
-		});
+		ServerQuestFile.ifExists(instance -> instance.getTeamData(player).ifPresent(data -> {
+            if (!data.isLocked()) {
+                instance.withPlayerContext(player, () -> {
+                    for (Task task : ServerQuestFile.getInstance().getAllTasks()) {
+                        if (task instanceof StageTask && data.canStartTasks(task.getQuest())) {
+                            task.submitTask(data, player);
+                        }
+                    }
+                });
+            }
+        }));
 	}
 }

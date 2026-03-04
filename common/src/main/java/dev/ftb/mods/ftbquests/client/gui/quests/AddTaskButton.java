@@ -24,7 +24,7 @@ import dev.ftb.mods.ftbquests.quest.theme.property.ThemeProperties;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 
 public class AddTaskButton extends Button {
 	private final Quest quest;

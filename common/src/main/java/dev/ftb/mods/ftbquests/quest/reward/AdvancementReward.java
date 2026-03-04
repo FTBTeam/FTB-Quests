@@ -1,6 +1,7 @@
 package dev.ftb.mods.ftbquests.quest.reward;
 
 import net.minecraft.ChatFormatting;
+import net.minecraft.IdentifierException;
 import net.minecraft.advancements.AdvancementHolder;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
@@ -72,7 +73,10 @@ public class AdvancementReward extends Reward {
 							.name(resourceLocation -> advancements.get(resourceLocation).name())
 							.create()).setNameKey("ftbquests.reward.ftbquests.advancement");
 		} else {
-			config.addString("advancement", advancement.toString(), v -> advancement = Identifier.tryParse(v), "minecraft:story/root").setNameKey("ftbquests.reward.ftbquests.advancement");
+			try {
+				config.addString("advancement", advancement.toString(), v -> advancement = Identifier.parse(v), "minecraft:story/root").setNameKey("ftbquests.reward.ftbquests.advancement");
+			} catch (IdentifierException ignored) {
+			}
 		}
 
 		config.addString("criterion", criterion, v -> criterion = v, "");

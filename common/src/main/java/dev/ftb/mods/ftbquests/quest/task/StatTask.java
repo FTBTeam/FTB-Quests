@@ -60,7 +60,7 @@ public class StatTask extends Task {
 	@Override
 	public void readData(CompoundTag nbt, HolderLookup.Provider provider) {
 		super.readData(nbt, provider);
-		stat = Identifier.tryParse(nbt.getString("stat").orElseThrow());
+		stat = Identifier.parse(nbt.getString("stat").orElseThrow());
 		value = nbt.getInt("value").orElseThrow();
 	}
 
