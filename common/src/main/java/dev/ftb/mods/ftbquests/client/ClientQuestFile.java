@@ -178,6 +178,7 @@ public class ClientQuestFile extends BaseQuestFile {
 
 	@Override
 	public boolean isPlayerOnTeam(Player player, TeamData teamData) {
+		if (!isShareProgressWithTeam()) return player.getUUID().equals(teamData.getTeamId());
 		return FTBTeamsAPI.api().getClientManager().getKnownPlayer(player.getUUID())
 				.map(kcp -> kcp.teamId().equals(teamData.getTeamId()))
 				.orElse(false);
