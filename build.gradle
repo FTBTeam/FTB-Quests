@@ -8,7 +8,7 @@ plugins {
 apply from: 'https://raw.githubusercontent.com/FTBTeam/mods-meta/main/gradle/changelog.gradle'
 
 architectury {
-	minecraft = rootProject.minecraft_version
+	minecraft = minecraft_version
 }
 
 subprojects {
@@ -26,8 +26,13 @@ subprojects {
 	}
 
 	dependencies {
-		minecraft "com.mojang:minecraft:${rootProject.minecraft_version}"
-		mappings loom.officialMojangMappings()
+		minecraft "com.mojang:minecraft:${minecraft_version}"
+
+		// Use mojmap with ParchmentMC
+		mappings loom.layered() {
+			officialMojangMappings()
+			parchment("org.parchmentmc.data:parchment-${parchment_version}@zip")
+		}
 	}
 }
 
@@ -53,6 +58,12 @@ allprojects {
 
 	repositories {
 		mavenLocal()
+
+		maven {
+			name = 'ParchmentMC'
+			url = 'https://maven.parchmentmc.org'
+		}
+
 		maven {
 			url "https://maven.architectury.dev/"
 			content {
