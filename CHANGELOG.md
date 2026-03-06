@@ -4,6 +4,15 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2101.1.23]
+
+### Added
+* Quest started and completed events are now also fired on the client
+  * See the `ObjectStartedEvent` and `ObjectCompletedEvent` architectury events
+  * If you are listening for these events, note that they are now fired twice, once on server and once on client
+  * `event.getData().getQuestFile().isServerSide()` can be used to easily determine which side you're on
+  * Events fired client-side always have empty lists for `event.getOnlineMembers()` and `event.getNotifiedPlayers()`
+
 ## [2101.1.22]
 
 ### Added
