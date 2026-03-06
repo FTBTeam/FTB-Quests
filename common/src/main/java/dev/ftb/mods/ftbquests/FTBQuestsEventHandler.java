@@ -1,9 +1,31 @@
 package dev.ftb.mods.ftbquests;
 
+import net.minecraft.commands.CommandBuildContext;
+import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.commands.Commands;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.Container;
+import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.inventory.AbstractContainerMenu;
+import net.minecraft.world.inventory.InventoryMenu;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.gamerules.GameRules;
 import com.mojang.brigadier.CommandDispatcher;
+
 import dev.architectury.event.EventResult;
-import dev.architectury.event.events.common.*;
+import dev.architectury.event.events.common.CommandRegistrationEvent;
+import dev.architectury.event.events.common.EntityEvent;
+import dev.architectury.event.events.common.LifecycleEvent;
+import dev.architectury.event.events.common.PlayerEvent;
+import dev.architectury.event.events.common.TickEvent;
 import dev.architectury.hooks.level.entity.PlayerHooks;
+
 import dev.ftb.mods.ftbquests.block.QuestBarrierBlock;
 import dev.ftb.mods.ftbquests.command.FTBQuestsCommands;
 import dev.ftb.mods.ftbquests.events.ClearFileCacheEvent;
@@ -23,29 +45,16 @@ import dev.ftb.mods.ftbteams.api.event.PlayerChangedTeamEvent;
 import dev.ftb.mods.ftbteams.api.event.PlayerLoggedInAfterTeamEvent;
 import dev.ftb.mods.ftbteams.api.event.TeamCreatedEvent;
 import dev.ftb.mods.ftbteams.api.event.TeamEvent;
-import net.minecraft.commands.CommandBuildContext;
-import net.minecraft.commands.CommandSourceStack;
-import net.minecraft.commands.Commands;
-import net.minecraft.resources.ResourceKey;
-import net.minecraft.server.MinecraftServer;
-import net.minecraft.server.level.ServerLevel;
-import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.world.Container;
-import net.minecraft.world.damagesource.DamageSource;
-import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.inventory.AbstractContainerMenu;
-import net.minecraft.world.inventory.InventoryMenu;
-import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.level.GameRules;
-import net.minecraft.world.level.Level;
 
 import java.util.List;
+import org.jspecify.annotations.Nullable;
 
 public enum FTBQuestsEventHandler {
 	INSTANCE;
 
+	@Nullable
 	private List<KillTask> killTasks = null;
+	@Nullable
 	private List<Task> autoSubmitTasks = null;
 
 	void init() {
@@ -75,7 +84,7 @@ public enum FTBQuestsEventHandler {
 	}
 
 	private void serverAboutToStart(MinecraftServer server) {
-		ServerQuestFile.INSTANCE = new ServerQuestFile(server);
+		ServerQuestFile.startup(server);
 	}
 
 	private void registerCommands(CommandDispatcher<CommandSourceStack> dispatcher, CommandBuildContext ctx, Commands.CommandSelection selection) {
@@ -83,21 +92,17 @@ public enum FTBQuestsEventHandler {
 	}
 
 	private void serverStarted(MinecraftServer server) {
-		ServerQuestFile.INSTANCE.load();
+		ServerQuestFile.getInstance().load(true, true);
 	}
 
 	private void serverStopped(MinecraftServer server) {
 		clearCachedData();
 
-		ServerQuestFile.INSTANCE.saveNow();
-		ServerQuestFile.INSTANCE.unload();
-		ServerQuestFile.INSTANCE = null;
+		ServerQuestFile.shutdown();
 	}
 
 	private void worldSaved(ServerLevel level) {
-		if (ServerQuestFile.INSTANCE != null) {
-			ServerQuestFile.INSTANCE.saveNow();
-		}
+		ServerQuestFile.ifExists(ServerQuestFile::saveNow);
 	}
 
 	private void fileCacheClear(BaseQuestFile file) {
@@ -112,33 +117,34 @@ public enum FTBQuestsEventHandler {
 	}
 
 	private void playerLoggedIn(PlayerLoggedInAfterTeamEvent event) {
-		ServerQuestFile.INSTANCE.playerLoggedIn(event);
+		ServerQuestFile.getInstance().playerLoggedIn(event);
 	}
 
 	private void teamCreated(TeamCreatedEvent event) {
-		ServerQuestFile.INSTANCE.teamCreated(event);
+		ServerQuestFile.getInstance().teamCreated(event);
 	}
 
 	private void playerChangedTeam(PlayerChangedTeamEvent event) {
-		ServerQuestFile.INSTANCE.playerChangedTeam(event);
+		ServerQuestFile.getInstance().playerChangedTeam(event);
 	}
 
 	private EventResult playerKill(LivingEntity entity, DamageSource source) {
 		// `source` should never be null, this is a defensive check against badly behaved mods.
-		if (source == null) {
+        //noinspection ConstantValue
+        if (source == null) {
 			return EventResult.pass();
 		}
 
 		if (source.getEntity() instanceof ServerPlayer player && !PlayerHooks.isFake(player)) {
 			if (killTasks == null) {
-				killTasks = ServerQuestFile.INSTANCE.collect(KillTask.class);
+				killTasks = ServerQuestFile.getInstance().collect(KillTask.class);
 			}
 
 			if (killTasks.isEmpty()) {
 				return EventResult.pass();
 			}
 
-			ServerQuestFile.INSTANCE.getTeamData(player).ifPresent(data -> {
+			ServerQuestFile.getInstance().getTeamData(player).ifPresent(data -> {
 				for (KillTask task : killTasks) {
 					if (data.getProgress(task) < task.getMaxProgress() && data.canStartTasks(task.getQuest())) {
 						task.kill(data, entity);
@@ -151,33 +157,34 @@ public enum FTBQuestsEventHandler {
 	}
 
 	private void playerTick(Player player) {
-		ServerQuestFile file = ServerQuestFile.INSTANCE;
+		ServerQuestFile.ifExists(file -> {
+			if (player instanceof ServerPlayer serverPlayer && !PlayerHooks.isFake(player)) {
+				if (autoSubmitTasks == null) {
+					autoSubmitTasks = file.collect(Task.class, t -> t.autoSubmitOnPlayerTick() > 0);
+				}
 
-		if (player instanceof ServerPlayer serverPlayer && file != null && !PlayerHooks.isFake(player)) {
-			if (autoSubmitTasks == null) {
-				autoSubmitTasks = file.collect(Task.class, t -> t.autoSubmitOnPlayerTick() > 0);
-			}
+				// Don't be deceived, it's somehow possible to be null here
+				//noinspection ConstantValue
+				if (autoSubmitTasks == null || autoSubmitTasks.isEmpty()) {
+					return;
+				}
 
-			// Don't be deceived, it's somehow possible to be null here
-			if (autoSubmitTasks == null || autoSubmitTasks.isEmpty()) {
-				return;
-			}
+				file.getTeamData(player).ifPresent(data -> {
+					long now = player.level().getGameTime();
 
-			file.getTeamData(player).ifPresent(data -> {
-				long now = player.level().getGameTime();
-
-				file.withPlayerContext(serverPlayer, () -> {
-					for (Task task : autoSubmitTasks) {
-						long interval = task.autoSubmitOnPlayerTick();
-						if (interval > 0L && now % interval == 0L) {
-							if (!data.isCompleted(task) && data.canStartTasks(task.getQuest())) {
-								task.submitTask(data, serverPlayer);
+					file.withPlayerContext(serverPlayer, () -> {
+						for (Task task : autoSubmitTasks) {
+							long interval = task.autoSubmitOnPlayerTick();
+							if (interval > 0L && now % interval == 0L) {
+								if (!data.isCompleted(task) && data.canStartTasks(task.getQuest())) {
+									task.submitTask(data, serverPlayer);
+								}
 							}
 						}
-					}
+					});
 				});
-			});
-		}
+			}
+		});
 	}
 
 	private void itemCrafted(Player player, ItemStack crafted, Container inventory) {
@@ -199,16 +206,16 @@ public enum FTBQuestsEventHandler {
 			return;
 		}
 
-		if (PlayerHooks.isFake(newPlayer) || newPlayer.level().getGameRules().getBoolean(GameRules.RULE_KEEPINVENTORY)) {
+		if (PlayerHooks.isFake(newPlayer) || newPlayer.level().getGameRules().get(GameRules.KEEP_INVENTORY)) {
 			return;
 		}
 
-		if (!ServerQuestFile.INSTANCE.dropBookOnDeath()) {
-			for (int i = 0; i < oldPlayer.getInventory().items.size(); i++) {
-				ItemStack stack = oldPlayer.getInventory().items.get(i);
+		if (!ServerQuestFile.getInstance().dropBookOnDeath()) {
+			for (int i = 0; i < oldPlayer.getInventory().getContainerSize(); i++) {
+				ItemStack stack = oldPlayer.getInventory().getItem(i);
 
 				if (stack.getItem() == ModItems.BOOK.get() && newPlayer.addItem(stack)) {
-					oldPlayer.getInventory().items.set(i, ItemStack.EMPTY);
+					oldPlayer.getInventory().setItem(i, ItemStack.EMPTY);
 				}
 			}
 		}
@@ -216,7 +223,7 @@ public enum FTBQuestsEventHandler {
 
 	private void changedDimension(ServerPlayer player, ResourceKey<Level> oldLevel, ResourceKey<Level> newLevel) {
 		if (!PlayerHooks.isFake(player)) {
-			ServerQuestFile file = ServerQuestFile.INSTANCE;
+			ServerQuestFile file = ServerQuestFile.getInstance();
 			file.getTeamData(player).ifPresent(data -> {
 				if (!data.isLocked()) {
 					file.withPlayerContext(player, () -> {

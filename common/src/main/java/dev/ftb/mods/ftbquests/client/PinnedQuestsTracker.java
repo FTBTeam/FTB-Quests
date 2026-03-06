@@ -1,12 +1,5 @@
 package dev.ftb.mods.ftbquests.client;
 
-import dev.ftb.mods.ftblibrary.icon.Color4I;
-import dev.ftb.mods.ftblibrary.ui.GuiHelper;
-import dev.ftb.mods.ftbquests.client.gui.quests.QuestScreen;
-import dev.ftb.mods.ftbquests.quest.Quest;
-import dev.ftb.mods.ftbquests.quest.TeamData;
-import dev.ftb.mods.ftbquests.quest.task.Task;
-import it.unimi.dsi.fastutil.longs.LongSet;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
@@ -16,9 +9,19 @@ import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.Style;
 import net.minecraft.util.FormattedCharSequence;
 
+import dev.ftb.mods.ftblibrary.client.gui.GuiHelper;
+import dev.ftb.mods.ftblibrary.client.icon.IconHelper;
+import dev.ftb.mods.ftblibrary.client.util.ClientUtils;
+import dev.ftb.mods.ftblibrary.icon.Color4I;
+import dev.ftb.mods.ftbquests.client.gui.quests.QuestScreen;
+import dev.ftb.mods.ftbquests.quest.Quest;
+import dev.ftb.mods.ftbquests.quest.TeamData;
+import dev.ftb.mods.ftbquests.quest.task.Task;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import it.unimi.dsi.fastutil.longs.LongSet;
 
 public enum PinnedQuestsTracker {
     INSTANCE;
@@ -42,11 +45,11 @@ public enum PinnedQuestsTracker {
     }
 
     private void collectPinnedQuests(ClientQuestFile file) {
-        TeamData data = file.selfTeamData;
+        TeamData data = FTBQuestsClient.getClientPlayerData();
 
         showChapterTitle = false;
         List<Quest> pinnedQuests = new ArrayList<>();
-        LongSet pinnedIds = data.getPinnedQuestIds(FTBQuestsClient.getClientPlayer());
+        LongSet pinnedIds = data.getPinnedQuestIds(ClientUtils.getClientPlayer());
         if (!pinnedIds.isEmpty()) {
             if (pinnedIds.contains(TeamData.AUTO_PIN_ID)) {
                 // special auto-pin value: collect all quests which can be done now
@@ -106,7 +109,7 @@ public enum PinnedQuestsTracker {
 
         MutableComponent title = Component.translatable("ftbquests.pinned");
         if (showChapterTitle) {
-            ClientQuestFile.INSTANCE.getQuestScreen().flatMap(QuestScreen::getSelectedChapter)
+            ClientQuestFile.getInstance().getQuestScreen().flatMap(QuestScreen::getSelectedChapter)
                     .ifPresent(chapter -> title.append(": ").append(chapter.getTitle()));
         }
 
@@ -128,14 +131,14 @@ public enum PinnedQuestsTracker {
                 insetX, insetY
         );
 
-        graphics.pose().pushPose();
-        graphics.pose().translate(pos.x(), pos.y(), 100);
-        graphics.pose().scale(scale, scale, 1F);
+        graphics.pose().pushMatrix();
+        graphics.pose().translate(pos.x(), pos.y());
+        graphics.pose().scale(scale, scale);
 
         GuiHelper.drawHollowRect(graphics, 0, 0, width, height, Color4I.BLACK.withAlpha(100), false);
-        Color4I.BLACK.withAlpha(100).draw(graphics, 0, 0, width, height);
-        Color4I.GRAY.withAlpha(50).draw(graphics, 1, 1, width - 2, mc.font.lineHeight + 4);
-        Color4I.BLACK.draw(graphics, 0, mc.font.lineHeight + 4, width, 1);
+        IconHelper.renderIcon(Color4I.BLACK.withAlpha(100), graphics, 0, 0, width, height);
+        IconHelper.renderIcon(Color4I.GRAY.withAlpha(50), graphics, 1, 1, width - 2, mc.font.lineHeight + 4);
+        IconHelper.renderIcon(Color4I.BLACK, graphics, 0, mc.font.lineHeight + 4, width, 1);
 
         graphics.drawString(mc.font, title, (width - titleWidth) / 2, 4, 0xFFFFFF00);
         int yPos = mc.font.lineHeight + 8;
@@ -148,6 +151,6 @@ public enum PinnedQuestsTracker {
             }
         }
 
-        graphics.pose().popPose();
+        graphics.pose().popMatrix();
     }
 }

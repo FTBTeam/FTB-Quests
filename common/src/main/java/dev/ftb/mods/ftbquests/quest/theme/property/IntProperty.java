@@ -2,6 +2,8 @@ package dev.ftb.mods.ftbquests.quest.theme.property;
 
 import net.minecraft.util.Mth;
 
+import org.jspecify.annotations.Nullable;
+
 public class IntProperty extends ThemeProperty<Integer> {
 	public final int min;
 	public final int max;
@@ -17,13 +19,13 @@ public class IntProperty extends ThemeProperty<Integer> {
 	}
 
 	@Override
+	@Nullable
 	public Integer parse(String string) {
 		try {
 			int i = Integer.parseInt(string);
 			return Mth.clamp(i, min, max);
 		} catch (Exception ignored) {
+			return null;
 		}
-
-		return null;
 	}
 }

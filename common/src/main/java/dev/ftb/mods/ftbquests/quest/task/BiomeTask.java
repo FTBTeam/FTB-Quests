@@ -1,13 +1,5 @@
 package dev.ftb.mods.ftbquests.quest.task;
 
-import com.mojang.datafixers.util.Either;
-import dev.ftb.mods.ftblibrary.config.ConfigGroup;
-import dev.ftb.mods.ftblibrary.config.NameMap;
-import dev.ftb.mods.ftbquests.client.FTBQuestsClient;
-import dev.ftb.mods.ftbquests.quest.Quest;
-import dev.ftb.mods.ftbquests.quest.TeamData;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.Holder;
 import net.minecraft.core.HolderLookup;
@@ -17,11 +9,19 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.resources.Identifier;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.biome.Biomes;
+import com.mojang.datafixers.util.Either;
+
+import dev.ftb.mods.ftblibrary.client.config.EditableConfigGroup;
+import dev.ftb.mods.ftblibrary.client.util.ClientUtils;
+import dev.ftb.mods.ftblibrary.util.NameMap;
+import dev.ftb.mods.ftbquests.quest.Quest;
+import dev.ftb.mods.ftbquests.quest.TeamData;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -52,7 +52,7 @@ public class BiomeTask extends AbstractBooleanTask {
 	@Override
 	public void readData(CompoundTag nbt, HolderLookup.Provider provider) {
 		super.readData(nbt, provider);
-		setBiome(nbt.getString("biome"));
+		setBiome(nbt.getString("biome").orElseThrow());
 	}
 
 	@Override
@@ -68,14 +68,12 @@ public class BiomeTask extends AbstractBooleanTask {
 	}
 
 	@Override
-	@Environment(EnvType.CLIENT)
-	public void fillConfigGroup(ConfigGroup config) {
+	public void fillConfigGroup(EditableConfigGroup config) {
 		super.fillConfigGroup(config);
-		config.addEnum("biome", getBiome(), this::setBiome, NameMap.of(DEFAULT_BIOME.location().toString(), getKnownBiomes()).create());
+		config.addEnum("biome", getBiome(), this::setBiome, NameMap.of(DEFAULT_BIOME.identifier().toString(), getKnownBiomes()).create());
 	}
 
 	@Override
-	@Environment(EnvType.CLIENT)
 	public MutableComponent getAltTitle() {
 		return Component.translatable("ftbquests.task.ftbquests.biome").append(": ")
 				.append(Component.literal(getBiome())).withStyle(ChatFormatting.DARK_GREEN);
@@ -100,37 +98,37 @@ public class BiomeTask extends AbstractBooleanTask {
 		return biome.map(
 				key -> biomeHolder.unwrapKey().map(k -> k == key).orElse(false),
 				tagKey -> {
-					var reg = player.level().registryAccess().registry(Registries.BIOME).orElseThrow();
-					return reg.getTag(tagKey).map(holderSet -> holderSet.contains(biomeHolder)).orElse(false);
+					var reg = player.level().registryAccess().getOrThrow(Registries.BIOME).value();
+					return reg.get(tagKey).map(holderSet -> holderSet.contains(biomeHolder)).orElse(false);
 				}
 		);
 	}
 
 	private String getBiome() {
 		return biome.map(
-				key -> key.location().toString(),
+				key -> key.identifier().toString(),
 				tagKey -> "#" + tagKey.location()
 		);
 	}
 
 	private void setBiome(String str) {
 		biome = str.startsWith("#") ?
-				Either.right(TagKey.create(Registries.BIOME, safeResourceLocation(str.substring(1), DEFAULT_BIOME.location()))) :
-				Either.left(ResourceKey.create(Registries.BIOME, safeResourceLocation(str, DEFAULT_BIOME.location())));
+				Either.right(TagKey.create(Registries.BIOME, safeResourceLocation(str.substring(1), DEFAULT_BIOME.identifier()))) :
+				Either.left(ResourceKey.create(Registries.BIOME, safeResourceLocation(str, DEFAULT_BIOME.identifier())));
 	}
 
 	private List<String> getKnownBiomes() {
 		// only called client-side to fill the config screen options
 		if (KNOWN_BIOMES.isEmpty()) {
-			RegistryAccess registryAccess = FTBQuestsClient.getClientPlayer().level().registryAccess();
+			RegistryAccess registryAccess = ClientUtils.getClientPlayer().level().registryAccess();
 			KNOWN_BIOMES.addAll(registryAccess
-					.registryOrThrow(Registries.BIOME).registryKeySet().stream()
-					.map(o -> o.location().toString())
+					.getOrThrow(Registries.BIOME).value().keySet().stream()
+					.map(Identifier::toString)
 					.sorted(String::compareTo)
 					.toList()
 			);
 			KNOWN_BIOMES.addAll(registryAccess
-					.registryOrThrow(Registries.BIOME).getTagNames()
+					.getOrThrow(Registries.BIOME).tags()
 					.map(o -> "#" + o.location())
 					.sorted(String::compareTo)
 					.toList()

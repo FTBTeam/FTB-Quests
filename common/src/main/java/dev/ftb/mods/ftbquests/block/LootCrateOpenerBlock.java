@@ -1,8 +1,5 @@
 package dev.ftb.mods.ftbquests.block;
 
-import com.mojang.serialization.MapCodec;
-import dev.architectury.injectables.annotations.ExpectPlatform;
-import dev.ftb.mods.ftbquests.block.entity.LootCrateOpenerBlockEntity;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.InteractionResult;
@@ -15,16 +12,20 @@ import net.minecraft.world.level.block.RenderShape;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.material.MapColor;
 import net.minecraft.world.phys.BlockHitResult;
-import org.jetbrains.annotations.Nullable;
+import com.mojang.serialization.MapCodec;
+
+import dev.architectury.injectables.annotations.ExpectPlatform;
+
+import dev.ftb.mods.ftbquests.block.entity.LootCrateOpenerBlockEntity;
+
+import org.jspecify.annotations.Nullable;
 
 public class LootCrateOpenerBlock extends BaseEntityBlock {
     private static final MapCodec<LootCrateOpenerBlock> CODEC = simpleCodec(LootCrateOpenerBlock::new);
-    public static final Properties PROPS = Properties.of().mapColor(MapColor.WOOD).strength(1.8f);
 
     public LootCrateOpenerBlock(Properties props) {
-        super(PROPS);
+        super(props);
     }
 
     @Nullable
@@ -40,7 +41,7 @@ public class LootCrateOpenerBlock extends BaseEntityBlock {
 
     @Override
     protected MapCodec<LootCrateOpenerBlock> codec() {
-        return null;
+        return CODEC;
     }
 
     @Override
@@ -50,13 +51,13 @@ public class LootCrateOpenerBlock extends BaseEntityBlock {
 
     @Override
     protected InteractionResult useWithoutItem(BlockState blockState, Level level, BlockPos blockPos, Player player, BlockHitResult blockHitResult) {
-        if (!level.isClientSide) {
+        if (!level.isClientSide()) {
             if (level.getBlockEntity(blockPos) instanceof LootCrateOpenerBlockEntity opener) {
                 player.displayClientMessage(Component.translatable("block.ftbquests.loot_crate_opener.rightclick", opener.getOutputCount()), true);
             }
         }
 
-        return InteractionResult.sidedSuccess(level.isClientSide);
+        return level.isClientSide() ? InteractionResult.SUCCESS : InteractionResult.SUCCESS_SERVER;
     }
 
     @Override

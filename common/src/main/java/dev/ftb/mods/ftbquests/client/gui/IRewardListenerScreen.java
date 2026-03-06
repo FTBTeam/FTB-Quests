@@ -1,6 +1,6 @@
 package dev.ftb.mods.ftbquests.client.gui;
 
-import dev.ftb.mods.ftblibrary.util.client.ClientUtils;
+import dev.ftb.mods.ftblibrary.client.util.ClientUtils;
 
 @FunctionalInterface
 public interface IRewardListenerScreen {

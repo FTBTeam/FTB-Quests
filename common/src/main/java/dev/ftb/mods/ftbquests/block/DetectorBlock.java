@@ -1,7 +1,5 @@
 package dev.ftb.mods.ftbquests.block;
 
-import com.mojang.serialization.MapCodec;
-import dev.ftb.mods.ftbquests.block.entity.DetectorBlockEntity;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.world.entity.LivingEntity;
@@ -15,11 +13,15 @@ import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
-import org.jetbrains.annotations.Nullable;
+import net.minecraft.world.level.redstone.Orientation;
+import com.mojang.serialization.MapCodec;
+
+import dev.ftb.mods.ftbquests.block.entity.DetectorBlockEntity;
+
+import org.jspecify.annotations.Nullable;
 
 public class DetectorBlock extends BaseEntityBlock {
 	private static final MapCodec<DetectorBlock> CODEC = simpleCodec(DetectorBlock::new);
-	public static final Properties PROPS = Properties.of().strength(0.3F);
 
 	public DetectorBlock(BlockBehaviour.Properties props) {
 		super(props);
@@ -44,7 +46,7 @@ public class DetectorBlock extends BaseEntityBlock {
 	}
 
 	@Override
-	public void neighborChanged(BlockState blockState, Level level, BlockPos blockPos, Block block, BlockPos blockPos2, boolean bl) {
+	public void neighborChanged(BlockState blockState, Level level, BlockPos blockPos, Block block, @Nullable Orientation orientation, boolean bl) {
 		if (!level.isClientSide()) {
 			boolean wasPowered = blockState.getValue(BlockStateProperties.POWERED);
 

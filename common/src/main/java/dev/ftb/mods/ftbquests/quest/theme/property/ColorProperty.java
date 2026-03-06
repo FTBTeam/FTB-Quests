@@ -9,6 +9,6 @@ public class ColorProperty extends ThemeProperty<Color4I> {
 
 	@Override
 	public Color4I parse(String string) {
-		return Color4I.fromString(string);
+		return Color4I.parse(string);
 	}
 }

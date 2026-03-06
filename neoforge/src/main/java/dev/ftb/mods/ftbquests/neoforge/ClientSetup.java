@@ -1,9 +1,10 @@
 package dev.ftb.mods.ftbquests.neoforge;
 
-import dev.ftb.mods.ftbquests.client.FTBQuestsClientEventHandler;
-import dev.ftb.mods.ftbquests.client.neoforge.ModelBakeEventHandler;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.neoforge.client.event.TextureAtlasStitchedEvent;
+
+import dev.ftb.mods.ftbquests.client.FTBQuestsClientEventHandler;
+import dev.ftb.mods.ftbquests.client.neoforge.ModelBakeEventHandler;
 
 public class ClientSetup {
     public static void init(IEventBus modEventBus) {

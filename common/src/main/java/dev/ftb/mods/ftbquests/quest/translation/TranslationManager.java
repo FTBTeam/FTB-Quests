@@ -1,6 +1,11 @@
 package dev.ftb.mods.ftbquests.quest.translation;
 
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.util.Util;
+
 import dev.architectury.networking.NetworkManager;
+
 import dev.ftb.mods.ftblibrary.snbt.SNBT;
 import dev.ftb.mods.ftbquests.FTBQuests;
 import dev.ftb.mods.ftbquests.client.FTBQuestsClientConfig;
@@ -8,17 +13,20 @@ import dev.ftb.mods.ftbquests.net.SyncTranslationTableMessage;
 import dev.ftb.mods.ftbquests.quest.BaseQuestFile;
 import dev.ftb.mods.ftbquests.quest.QuestObjectBase;
 import dev.ftb.mods.ftbquests.quest.ServerQuestFile;
-import net.minecraft.Util;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.server.level.ServerPlayer;
-import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.*;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
+import org.jetbrains.annotations.NotNull;
 
 public class TranslationManager {
     private static final Pattern LANG_FILE_PAT = Pattern.compile("^\\w+\\.snbt$");
@@ -31,10 +39,7 @@ public class TranslationManager {
     }
 
     public static void syncTable(ServerPlayer player, String language) {
-        ServerQuestFile file = ServerQuestFile.INSTANCE;
-        if (file != null && file.isValid()) {
-            file.getTranslationManager().sendTableToPlayer(player, language);
-        }
+        ServerQuestFile.ifExists(instance -> instance.getTranslationManager().sendTableToPlayer(player, language));
     }
 
     private static String getFallbackLocale(QuestObjectBase object) {
@@ -56,11 +61,11 @@ public class TranslationManager {
 
         try (Stream<Path> s = Files.list(langFolder)) {
             s.filter(TranslationManager::isValidLangFile).forEach(path -> {
-                CompoundTag langNBT = SNBT.read(path);
-                if (langNBT != null) {
+                try {
+                    var langNBT = SNBT.tryRead(path);
                     String locale = (path.getFileName().toString().split("\\.", 2))[0].toLowerCase(Locale.ROOT);
                     map.put(locale, TranslationTable.fromNBT(langNBT));
-                } else {
+                } catch (IOException e) {
                     FTBQuests.LOGGER.error("can't read lang file {}", path);
                 }
             });
@@ -78,8 +83,11 @@ public class TranslationManager {
             if (force || table.isSaveNeeded()) {
                 boolean prevSort = SNBT.setShouldSortKeysOnWrite(true);
                 Path savePath = langFolder.resolve(locale + ".snbt");
-                if (!SNBT.write(savePath, table.saveToNBT())) {
+                try {
+                    SNBT.tryWrite(savePath, table.saveToNBT());
+                } catch (IOException e) {
                     FTBQuests.LOGGER.error("can't write lang file {}", savePath);
+                    throw new RuntimeException(e);
                 }
                 table.setSaveNeeded(false);
                 SNBT.setShouldSortKeysOnWrite(prevSort);
@@ -165,7 +173,7 @@ public class TranslationManager {
 
     public void sendTranslationsToPlayer(ServerPlayer player) {
         Set<String> toSend = new HashSet<>();
-        String fallback = ServerQuestFile.INSTANCE.getFallbackLocale();
+        String fallback = ServerQuestFile.getInstance().getFallbackLocale();
 
         toSend.add(DEFAULT_FALLBACK_LOCALE);
         toSend.add(fallback);
@@ -187,13 +195,13 @@ public class TranslationManager {
 
     public void processInitialTranslation(CompoundTag extra, QuestObjectBase object) {
         if (extra.contains("locale") && extra.contains("translate")) {
-            String locale = extra.getString("locale");
+            String locale = extra.getStringOr("locale", "en_us");
             TranslationTable table = map.computeIfAbsent(locale, k -> new TranslationTable());
-            CompoundTag tag = extra.getCompound("translate");
-            for (String keyStr : tag.getAllKeys()) {
+            CompoundTag tag = extra.getCompound("translate").orElse(new CompoundTag());
+            for (String keyStr : tag.keySet()) {
                 TranslationKey key = TranslationKey.NAME_MAP.getNullable(keyStr);
                 if (key != null) {
-                    table.put(makeKey(object, key), tag.getString(keyStr));
+                    table.put(makeKey(object, key), tag.getString(keyStr).orElse(""));
                 }
             }
         }

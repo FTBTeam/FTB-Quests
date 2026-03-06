@@ -1,14 +1,5 @@
 package dev.ftb.mods.ftbquests.quest.task;
 
-import com.mojang.datafixers.util.Either;
-import dev.architectury.networking.NetworkManager;
-import dev.ftb.mods.ftblibrary.config.ConfigGroup;
-import dev.ftb.mods.ftblibrary.config.NameMap;
-import dev.ftb.mods.ftbquests.net.SyncStructuresRequestMessage;
-import dev.ftb.mods.ftbquests.quest.Quest;
-import dev.ftb.mods.ftbquests.quest.TeamData;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.registries.Registries;
@@ -16,19 +7,28 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.resources.Identifier;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.level.StructureManager;
 import net.minecraft.world.level.levelgen.structure.Structure;
+import com.mojang.datafixers.util.Either;
+
+import dev.architectury.networking.NetworkManager;
+
+import dev.ftb.mods.ftblibrary.client.config.EditableConfigGroup;
+import dev.ftb.mods.ftblibrary.util.NameMap;
+import dev.ftb.mods.ftbquests.net.SyncStructuresRequestMessage;
+import dev.ftb.mods.ftbquests.quest.Quest;
+import dev.ftb.mods.ftbquests.quest.TeamData;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class StructureTask extends AbstractBooleanTask {
-	private static final ResourceLocation DEFAULT_STRUCTURE = ResourceLocation.withDefaultNamespace("mineshaft");
+	private static final Identifier DEFAULT_STRUCTURE = Identifier.withDefaultNamespace("mineshaft");
 
 	private static final List<String> KNOWN_STRUCTURES = new ArrayList<>();
 
@@ -59,7 +59,7 @@ public class StructureTask extends AbstractBooleanTask {
 	@Override
 	public void readData(CompoundTag nbt, HolderLookup.Provider provider) {
 		super.readData(nbt, provider);
-		setStructure(nbt.getString("structure"));
+		setStructure(nbt.getString("structure").orElseThrow());
 	}
 
 	@Override
@@ -75,8 +75,7 @@ public class StructureTask extends AbstractBooleanTask {
 	}
 
 	@Override
-	@Environment(EnvType.CLIENT)
-	public void fillConfigGroup(ConfigGroup config) {
+	public void fillConfigGroup(EditableConfigGroup config) {
 		super.fillConfigGroup(config);
 		if (KNOWN_STRUCTURES.isEmpty()) {
 			// should not normally be the case, but as a defensive fallback...
@@ -87,7 +86,6 @@ public class StructureTask extends AbstractBooleanTask {
 	}
 
 	@Override
-	@Environment(EnvType.CLIENT)
 	public MutableComponent getAltTitle() {
 		return Component.translatable("ftbquests.task.ftbquests.structure")
 				.append(": ").append(Component.literal(getStructure()).withStyle(ChatFormatting.DARK_GREEN));
@@ -108,11 +106,11 @@ public class StructureTask extends AbstractBooleanTask {
 	public boolean canSubmit(TeamData teamData, ServerPlayer player) {
 		if (player.isSpectator()) return false;
 
-		ServerLevel level = (ServerLevel) player.level();
+		ServerLevel level = player.level();
 		StructureManager mgr = level.structureManager();
 		return structure.map(
 				key -> {
-					Structure structure = mgr.registryAccess().registryOrThrow(Registries.STRUCTURE).get(key);
+					Structure structure = mgr.registryAccess().getOrThrow(Registries.STRUCTURE).value().getValue(key);
 					return structure != null && mgr.getStructureWithPieceAt(player.blockPosition(), structure).isValid();
 				},
 				tag -> mgr.getStructureWithPieceAt(player.blockPosition(), tag).isValid()
@@ -127,7 +125,7 @@ public class StructureTask extends AbstractBooleanTask {
 
 	private String getStructure() {
 		return structure.map(
-				key -> key.location().toString(),
+				key -> key.identifier().toString(),
 				tag -> "#" + tag.location()
 		);
 	}

@@ -10,11 +10,7 @@
     "CCC"
   ],
   "key": {
-    "B": {
-      "item": "book"
-    },
-    "C": {
-      "item": "minecraft:stone"
-    }
+    "B": "book",
+    "C": "minecraft:stone"
   }
 }

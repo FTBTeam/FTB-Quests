@@ -1,19 +1,19 @@
 package dev.ftb.mods.ftbquests.quest;
 
-import dev.ftb.mods.ftblibrary.config.ConfigGroup;
-import dev.ftb.mods.ftblibrary.icon.Color4I;
-import dev.ftb.mods.ftbquests.events.QuestProgressEventData;
-import dev.ftb.mods.ftbquests.quest.theme.property.ThemeProperties;
-import dev.ftb.mods.ftbquests.util.ProgressChange;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 
+import dev.ftb.mods.ftblibrary.client.config.EditableConfigGroup;
+import dev.ftb.mods.ftblibrary.icon.Color4I;
+import dev.ftb.mods.ftbquests.events.QuestProgressEventData;
+import dev.ftb.mods.ftbquests.quest.theme.property.ThemeProperties;
+import dev.ftb.mods.ftbquests.util.ProgressChange;
+
 import java.util.Collection;
 import java.util.List;
 import java.util.UUID;
+import org.jspecify.annotations.Nullable;
 
 public abstract class QuestObject extends QuestObjectBase {
 	protected boolean disableToast = false;
@@ -34,7 +34,7 @@ public abstract class QuestObject extends QuestObjectBase {
 	@Override
 	public void readData(CompoundTag nbt, HolderLookup.Provider provider) {
 		super.readData(nbt, provider);
-		disableToast = nbt.getBoolean("disable_toast");
+		disableToast = nbt.getBoolean("disable_toast").orElse(false);
 	}
 
 	@Override
@@ -50,8 +50,7 @@ public abstract class QuestObject extends QuestObjectBase {
 	}
 
 	@Override
-	@Environment(EnvType.CLIENT)
-	public void fillConfigGroup(ConfigGroup config) {
+	public void fillConfigGroup(EditableConfigGroup config) {
 		super.fillConfigGroup(config);
 		config.addBool("disable_toast", disableToast, v -> disableToast = v, false).setNameKey("ftbquests.disable_completion_toast").setCanEdit(getQuestChapter() == null || !getQuestChapter().isAlwaysInvisible()).setOrder(127);
 	}
@@ -91,8 +90,8 @@ public abstract class QuestObject extends QuestObjectBase {
 		return true;
 	}
 
-	public boolean isSearchable(TeamData data) {
-		return isVisible(data);
+	public boolean isSearchable(@Nullable TeamData data) {
+		return data != null && isVisible(data);
 	}
 
 	public void onStarted(QuestProgressEventData<?> data) {
@@ -104,7 +103,6 @@ public abstract class QuestObject extends QuestObjectBase {
 	protected void verifyDependenciesInternal(long original, int depth) {
 	}
 
-	@Environment(EnvType.CLIENT)
 	public Color4I getProgressColor(TeamData data) {
 		if (data.isCompleted(this)) {
 			return ThemeProperties.QUEST_COMPLETED_COLOR.get();
@@ -115,7 +113,6 @@ public abstract class QuestObject extends QuestObjectBase {
 		return ThemeProperties.QUEST_NOT_STARTED_COLOR.get();
 	}
 
-	@Environment(EnvType.CLIENT)
 	public Color4I getProgressColor(TeamData data, boolean dim) {
 		Color4I c = getProgressColor(data);
 		return dim ? c.addBrightness(-0.35F) : c;
@@ -153,6 +150,7 @@ public abstract class QuestObject extends QuestObjectBase {
 		return false;
 	}
 
+	@Nullable
 	public Quest getRelatedQuest() {
 		return null;
 	}

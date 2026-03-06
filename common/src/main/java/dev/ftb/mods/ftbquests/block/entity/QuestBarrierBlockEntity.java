@@ -1,17 +1,21 @@
 package dev.ftb.mods.ftbquests.block.entity;
 
-import dev.ftb.mods.ftblibrary.config.ConfigGroup;
-import dev.ftb.mods.ftbquests.api.FTBQuestsAPI;
-import dev.ftb.mods.ftbquests.quest.BaseQuestFile;
-import dev.ftb.mods.ftbquests.quest.Quest;
-import dev.ftb.mods.ftbquests.quest.QuestObjectType;
-import dev.ftb.mods.ftbquests.registry.ModBlockEntityTypes;
-import dev.ftb.mods.ftbquests.util.ConfigQuestObject;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.block.state.BlockState;
 
+import dev.ftb.mods.ftblibrary.client.config.EditableConfigGroup;
+import dev.ftb.mods.ftbquests.api.FTBQuestsAPI;
+import dev.ftb.mods.ftbquests.client.config.EditableQuestObject;
+import dev.ftb.mods.ftbquests.quest.BaseQuestFile;
+import dev.ftb.mods.ftbquests.quest.Quest;
+import dev.ftb.mods.ftbquests.quest.QuestObjectType;
+import dev.ftb.mods.ftbquests.registry.ModBlockEntityTypes;
+
+import org.jspecify.annotations.Nullable;
+
 public class QuestBarrierBlockEntity extends BaseBarrierBlockEntity {
+	@Nullable
 	private Quest cachedQuest = null;
 
 	public QuestBarrierBlockEntity(BlockPos blockPos, BlockState blockState) {
@@ -41,21 +45,22 @@ public class QuestBarrierBlockEntity extends BaseBarrierBlockEntity {
 	}
 
 	@Override
-	protected void addConfigEntries(ConfigGroup cg) {
-		cg.add("quest", new ConfigQuestObject<>(QuestObjectType.QUEST), getQuest(), this::setQuest, null)
+	protected void addConfigEntries(EditableConfigGroup cg) {
+		cg.add("quest", new EditableQuestObject<>(QuestObjectType.QUEST), getQuest(), this::setQuest, null)
 				.setNameKey("ftbquests.quest");
 	}
 
+	@Nullable
 	public Quest getQuest() {
 		if (cachedQuest == null && !objStr.isEmpty() || cachedQuest != null && !cachedQuest.getCodeString().equals(objStr)) {
 			long objId = BaseQuestFile.parseCodeString(objStr);
-			cachedQuest = FTBQuestsAPI.api().getQuestFile(level.isClientSide).getQuest(objId);
+			cachedQuest = FTBQuestsAPI.api().getQuestFile(level.isClientSide()).getQuest(objId);
 		}
 
 		return cachedQuest;
 	}
 
-	public void setQuest(Quest quest) {
+	public void setQuest(@Nullable Quest quest) {
 		this.cachedQuest = quest;
 		objStr = quest == null ? "" : quest.getCodeString();
 		setChanged();

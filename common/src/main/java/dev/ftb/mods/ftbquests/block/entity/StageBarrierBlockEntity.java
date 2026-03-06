@@ -1,11 +1,13 @@
 package dev.ftb.mods.ftbquests.block.entity;
 
-import dev.ftb.mods.ftblibrary.config.ConfigGroup;
-import dev.ftb.mods.ftblibrary.integration.stages.StageHelper;
-import dev.ftb.mods.ftbquests.registry.ModBlockEntityTypes;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.block.state.BlockState;
+
+import dev.ftb.mods.ftblibrary.client.config.EditableConfigGroup;
+import dev.ftb.mods.ftblibrary.integration.stages.StageHelper;
+import dev.ftb.mods.ftbquests.registry.ModBlockEntityTypes;
+import dev.ftb.mods.ftbteams.api.TeamStagesHelper;
 
 public class StageBarrierBlockEntity extends BaseBarrierBlockEntity {
 	public StageBarrierBlockEntity(BlockPos blockPos, BlockState blockState) {
@@ -14,11 +16,12 @@ public class StageBarrierBlockEntity extends BaseBarrierBlockEntity {
 
 	@Override
 	public boolean isOpen(Player player) {
-		return !objStr.isEmpty() && StageHelper.INSTANCE.getProvider().has(player, objStr);
+		return !objStr.isEmpty() &&
+				(StageHelper.INSTANCE.getProvider().has(player, objStr) || TeamStagesHelper.hasTeamStage(player, objStr));
 	}
 
 	@Override
-	protected void addConfigEntries(ConfigGroup cg) {
+	protected void addConfigEntries(EditableConfigGroup cg) {
 		cg.addString("stage", objStr, s -> objStr = s, "").setNameKey("ftbquests.task.ftbquests.gamestage");
 	}
 }

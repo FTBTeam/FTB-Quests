@@ -1,10 +1,12 @@
 package dev.ftb.mods.ftbquests.events;
 
+import net.minecraft.server.level.ServerPlayer;
+
 import dev.architectury.event.Event;
 import dev.architectury.event.EventActor;
 import dev.architectury.event.EventFactory;
+
 import dev.ftb.mods.ftbquests.quest.reward.CustomReward;
-import net.minecraft.server.level.ServerPlayer;
 
 public class CustomRewardEvent {
 	public static final Event<EventActor<CustomRewardEvent>> EVENT = EventFactory.createEventActorLoop();

@@ -1,15 +1,5 @@
 package dev.ftb.mods.ftbquests.quest.task;
 
-import dev.architectury.hooks.level.entity.PlayerHooks;
-import dev.ftb.mods.ftblibrary.config.ConfigGroup;
-import dev.ftb.mods.ftblibrary.integration.stages.StageHelper;
-import dev.ftb.mods.ftbquests.quest.Quest;
-import dev.ftb.mods.ftbquests.quest.ServerQuestFile;
-import dev.ftb.mods.ftbquests.quest.TeamData;
-import dev.ftb.mods.ftbteams.api.FTBTeamsAPI;
-import dev.ftb.mods.ftbteams.api.TeamStagesHelper;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
@@ -17,6 +7,16 @@ import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.server.level.ServerPlayer;
+
+import dev.architectury.hooks.level.entity.PlayerHooks;
+
+import dev.ftb.mods.ftblibrary.client.config.EditableConfigGroup;
+import dev.ftb.mods.ftblibrary.integration.stages.StageHelper;
+import dev.ftb.mods.ftbquests.quest.Quest;
+import dev.ftb.mods.ftbquests.quest.ServerQuestFile;
+import dev.ftb.mods.ftbquests.quest.TeamData;
+import dev.ftb.mods.ftbteams.api.FTBTeamsAPI;
+import dev.ftb.mods.ftbteams.api.TeamStagesHelper;
 
 public class StageTask extends AbstractBooleanTask {
 	private String stage = "";
@@ -43,8 +43,8 @@ public class StageTask extends AbstractBooleanTask {
 	@Override
 	public void readData(CompoundTag nbt, HolderLookup.Provider provider) {
 		super.readData(nbt, provider);
-		stage = nbt.getString("stage");
-		teamStage = nbt.getBoolean("team_stage");
+		stage = nbt.getString("stage").orElseThrow();
+		teamStage = nbt.getBooleanOr("team_stage", false);
 	}
 
 	@Override
@@ -62,15 +62,13 @@ public class StageTask extends AbstractBooleanTask {
 	}
 
 	@Override
-	@Environment(EnvType.CLIENT)
-	public void fillConfigGroup(ConfigGroup config) {
+	public void fillConfigGroup(EditableConfigGroup config) {
 		super.fillConfigGroup(config);
 		config.addString("stage", stage, v -> stage = v, "").setNameKey("ftbquests.task.ftbquests.gamestage");
 		config.addBool("team_stage", teamStage, v -> teamStage = v, false);
 	}
 
 	@Override
-	@Environment(EnvType.CLIENT)
 	public MutableComponent getAltTitle() {
 		return Component.translatable("ftbquests.task.ftbquests.gamestage").append(": ").append(Component.literal(stage).withStyle(ChatFormatting.YELLOW));
 	}
@@ -94,20 +92,20 @@ public class StageTask extends AbstractBooleanTask {
 	@SuppressWarnings("unused")
 	public static void checkStages(ServerPlayer player) {
 		// hook for FTB XMod Compat to call into
-		if (ServerQuestFile.INSTANCE == null || PlayerHooks.isFake(player)) {
+		if (PlayerHooks.isFake(player)) {
 			return;
 		}
 
-		ServerQuestFile.INSTANCE.getTeamData(player).ifPresent(data -> {
-			if (!data.isLocked()) {
-				ServerQuestFile.INSTANCE.withPlayerContext(player, () -> {
-					for (Task task : ServerQuestFile.INSTANCE.getAllTasks()) {
-						if (task instanceof StageTask && data.canStartTasks(task.getQuest())) {
-							task.submitTask(data, player);
-						}
-					}
-				});
-			}
-		});
+		ServerQuestFile.ifExists(instance -> instance.getTeamData(player).ifPresent(data -> {
+            if (!data.isLocked()) {
+                instance.withPlayerContext(player, () -> {
+                    for (Task task : ServerQuestFile.getInstance().getAllTasks()) {
+                        if (task instanceof StageTask && data.canStartTasks(task.getQuest())) {
+                            task.submitTask(data, player);
+                        }
+                    }
+                });
+            }
+        }));
 	}
 }

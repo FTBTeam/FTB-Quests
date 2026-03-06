@@ -2,7 +2,8 @@ package dev.ftb.mods.ftbquests.quest.theme.property;
 
 import dev.ftb.mods.ftbquests.quest.QuestObjectBase;
 import dev.ftb.mods.ftbquests.quest.theme.QuestTheme;
-import org.jetbrains.annotations.Nullable;
+
+import org.jspecify.annotations.Nullable;
 
 public abstract class ThemeProperty<T> {
 	private final String name;
@@ -40,7 +41,7 @@ public abstract class ThemeProperty<T> {
 	}
 
 	public T get(@Nullable QuestObjectBase object) {
-		return QuestTheme.instance.get(this, object);
+		return QuestTheme.getInstance().get(this, object);
 	}
 
 	public T get() {

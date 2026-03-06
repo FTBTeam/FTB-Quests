@@ -1,18 +1,18 @@
 package dev.ftb.mods.ftbquests.api;
 
+import net.minecraft.world.entity.player.Player;
+
 import dev.ftb.mods.ftbquests.quest.Chapter;
 import dev.ftb.mods.ftbquests.quest.Quest;
 import dev.ftb.mods.ftbquests.quest.QuestLink;
 import dev.ftb.mods.ftbquests.quest.TeamData;
 import dev.ftb.mods.ftbteams.api.Team;
-import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.player.Player;
-import org.jetbrains.annotations.Nullable;
 
 import java.util.Collection;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.function.Consumer;
+import org.jspecify.annotations.Nullable;
 
 public interface QuestFile {
     /**
@@ -31,7 +31,8 @@ public interface QuestFile {
      * {@return FTB Quests progress data for the given FTB Teams team UUID, or null if there is no data for this team ID}
      * @param id the team ID to check
      */
-    @Nullable TeamData getNullableTeamData(UUID id);
+    @Nullable
+    TeamData getNullableTeamData(UUID id);
 
     /**
      * {@return FTB Quests progress data for the given FTB Teams team UUID, creating new progress data if necessary}
@@ -44,15 +45,6 @@ public interface QuestFile {
      * @param team the team to check
      */
     TeamData getOrCreateTeamData(Team team);
-
-    /**
-     * {@return quest team data for the player, creating new progress data if necessary}
-     * @param player the player
-     * @deprecated not recommended since it can return null if player's team data isn't ready. Use {@link #getTeamData(Player)}.
-     */
-    @Nullable
-    @Deprecated(forRemoval = true)
-    TeamData getOrCreateTeamData(Entity player);
 
     /**
      * Get the FTB Quests team progress data for the given player, creating new progress data if necessary.

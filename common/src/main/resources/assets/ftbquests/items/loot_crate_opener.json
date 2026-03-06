@@ -1,0 +1,6 @@
+{
+  "model": {
+    "type": "minecraft:model",
+    "model": "ftbquests:block/loot_crate_opener"
+  }
+}

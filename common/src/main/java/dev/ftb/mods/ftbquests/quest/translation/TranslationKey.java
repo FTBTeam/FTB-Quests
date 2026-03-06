@@ -1,7 +1,8 @@
 package dev.ftb.mods.ftbquests.quest.translation;
 
 import com.mojang.datafixers.util.Either;
-import dev.ftb.mods.ftblibrary.config.NameMap;
+
+import dev.ftb.mods.ftblibrary.util.NameMap;
 
 import java.util.List;
 

@@ -1,28 +1,6 @@
 package dev.ftb.mods.ftbquests.quest.task;
 
-import dev.ftb.mods.ftblibrary.config.ConfigGroup;
-import dev.ftb.mods.ftblibrary.config.Tristate;
-import dev.ftb.mods.ftblibrary.icon.Icon;
-import dev.ftb.mods.ftblibrary.icon.IconAnimation;
-import dev.ftb.mods.ftblibrary.icon.ItemIcon;
-import dev.ftb.mods.ftblibrary.math.Bits;
-import dev.ftb.mods.ftblibrary.ui.Button;
-import dev.ftb.mods.ftblibrary.util.TooltipList;
-import dev.ftb.mods.ftbquests.FTBQuests;
-import dev.ftb.mods.ftbquests.client.FTBQuestsClient;
-import dev.ftb.mods.ftbquests.client.gui.CustomToast;
-import dev.ftb.mods.ftbquests.client.gui.quests.ValidItemsScreen;
-import dev.ftb.mods.ftbquests.integration.item_filtering.ItemMatchingSystem;
-import dev.ftb.mods.ftbquests.integration.item_filtering.ItemMatchingSystem.ComponentMatchType;
-import dev.ftb.mods.ftbquests.item.MissingItem;
-import dev.ftb.mods.ftbquests.quest.Quest;
-import dev.ftb.mods.ftbquests.quest.TeamData;
-import dev.ftb.mods.ftbquests.registry.ModItems;
-import dev.ftb.mods.ftbquests.util.PlayerInventorySummary;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.ChatFormatting;
-import net.minecraft.client.Minecraft;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.RegistryFriendlyByteBuf;
@@ -32,6 +10,23 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
+
+import dev.ftb.mods.ftblibrary.client.config.EditableConfigGroup;
+import dev.ftb.mods.ftblibrary.client.config.Tristate;
+import dev.ftb.mods.ftblibrary.client.util.ClientUtils;
+import dev.ftb.mods.ftblibrary.icon.AnimatedIcon;
+import dev.ftb.mods.ftblibrary.icon.Icon;
+import dev.ftb.mods.ftblibrary.icon.ItemIcon;
+import dev.ftb.mods.ftblibrary.math.Bits;
+import dev.ftb.mods.ftblibrary.util.TooltipList;
+import dev.ftb.mods.ftbquests.FTBQuests;
+import dev.ftb.mods.ftbquests.integration.item_filtering.ItemMatchingSystem;
+import dev.ftb.mods.ftbquests.integration.item_filtering.ItemMatchingSystem.ComponentMatchType;
+import dev.ftb.mods.ftbquests.item.MissingItem;
+import dev.ftb.mods.ftbquests.quest.Quest;
+import dev.ftb.mods.ftbquests.quest.TeamData;
+import dev.ftb.mods.ftbquests.registry.ModItems;
+import dev.ftb.mods.ftbquests.util.PlayerInventorySummary;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -105,11 +100,11 @@ public class ItemTask extends Task implements Predicate<ItemStack> {
 	public void readData(CompoundTag nbt, HolderLookup.Provider provider) {
 		super.readData(nbt, provider);
 		itemStack = itemOrMissingFromNBT(nbt.get("item"), provider);
-		count = Math.max(nbt.getLong("count"), 1L);
+		count = Math.max(nbt.getLongOr("count", 1), 1L);
 		consumeItems = Tristate.read(nbt, "consume_items");
 		onlyFromCrafting = Tristate.read(nbt, "only_from_crafting");
-		matchComponents = ComponentMatchType.NAME_MAP.get(nbt.getString("match_components"));
-		taskScreenOnly = nbt.getBoolean("task_screen_only");
+		matchComponents = nbt.getString("match_components").map(ComponentMatchType.NAME_MAP::get).orElse(ComponentMatchType.NONE);
+		taskScreenOnly = nbt.getBooleanOr("task_screen_only", false);
 	}
 
 	@Override
@@ -147,11 +142,10 @@ public class ItemTask extends Task implements Predicate<ItemStack> {
 	}
 
 	public List<ItemStack> getValidDisplayItems() {
-		return ItemMatchingSystem.INSTANCE.getAllMatchingStacks(itemStack);
+		return ItemMatchingSystem.INSTANCE.getAllMatchingStacks(itemStack, getQuestFile().holderLookup());
 	}
 
 	@Override
-	@Environment(EnvType.CLIENT)
 	public MutableComponent getAltTitle() {
 		if (count > 1) {
 			return Component.literal(count + "x ").append(itemStack.getHoverName());
@@ -161,14 +155,13 @@ public class ItemTask extends Task implements Predicate<ItemStack> {
 	}
 
 	@Override
-	@Environment(EnvType.CLIENT)
-	public Icon getAltIcon() {
-		List<Icon> icons = new ArrayList<>();
+	public Icon<?> getAltIcon() {
+		List<Icon<?>> icons = new ArrayList<>();
 
 		for (ItemStack stack : getValidDisplayItems()) {
 			ItemStack copy = stack.copy();
 			copy.setCount(1);
-			Icon icon = ItemIcon.getItemIcon(copy);
+			Icon<?> icon = ItemIcon.ofItemStack(copy);
 
 			if (!icon.isEmpty()) {
 				icons.add(icon);
@@ -176,10 +169,10 @@ public class ItemTask extends Task implements Predicate<ItemStack> {
 		}
 
 		if (icons.isEmpty()) {
-			return ItemIcon.getItemIcon(ModItems.MISSING_ITEM.get());
+			return ItemIcon.ofItem(ModItems.MISSING_ITEM.get());
 		}
 
-		return IconAnimation.fromList(icons, false);
+		return AnimatedIcon.fromList(icons, false);
 	}
 
 	@Override
@@ -188,12 +181,11 @@ public class ItemTask extends Task implements Predicate<ItemStack> {
 			return true;
 		}
 
-		return ItemMatchingSystem.INSTANCE.doesItemMatch(itemStack, stack, matchComponents);
+		return ItemMatchingSystem.INSTANCE.doesItemMatch(itemStack, stack, matchComponents, getQuestFile().holderLookup());
 	}
 
 	@Override
-	@Environment(EnvType.CLIENT)
-	public void fillConfigGroup(ConfigGroup config) {
+	public void fillConfigGroup(EditableConfigGroup config) {
 		super.fillConfigGroup(config);
 		config.addItemStack("item", itemStack, v -> itemStack = v, ItemStack.EMPTY, true, false).setNameKey("ftbquests.task.ftbquests.item");
 		config.addLong("count", count, v -> count = v, 1, 1, Long.MAX_VALUE);
@@ -219,19 +211,8 @@ public class ItemTask extends Task implements Predicate<ItemStack> {
 	}
 
 	@Override
-	@Environment(EnvType.CLIENT)
-	public void onButtonClicked(Button button, boolean canClick) {
-		button.playClickSound();
-
-		List<ItemStack> validItems = getValidDisplayItems();
-
-		if (!consumesResources() && validItems.size() == 1 && FTBQuests.getRecipeModHelper().isRecipeModAvailable()) {
-			FTBQuests.getRecipeModHelper().showRecipes(validItems.get(0));
-		} else if (validItems.isEmpty()) {
-			Minecraft.getInstance().getToasts().addToast(new CustomToast(Component.literal("No valid items!"), ItemIcon.getItemIcon(ModItems.MISSING_ITEM.get()), Component.literal("Report this bug to modpack author!")));
-		} else {
-			new ValidItemsScreen(this, validItems, canClick).openGui();
-		}
+	public TaskClient client() {
+		return ItemTaskClient.INSTANCE;
 	}
 
 	@Override
@@ -243,8 +224,8 @@ public class ItemTask extends Task implements Predicate<ItemStack> {
 			// use item's tooltip, but include a count with the item name (e.g. "3 x Stick") if appropriate
 			ItemStack stack = getIcon() instanceof ItemIcon i ? i.getStack() : itemStack;
 			List<Component> lines = stack.getTooltipLines(Item.TooltipContext.of(
-					FTBQuestsClient.getClientLevel()),
-					FTBQuestsClient.getClientPlayer(),
+					ClientUtils.getClientLevel()),
+					ClientUtils.getClientPlayer(),
 					advanced ? TooltipFlag.Default.ADVANCED : TooltipFlag.Default.NORMAL
 			);
 			if (!lines.isEmpty()) {
@@ -257,7 +238,6 @@ public class ItemTask extends Task implements Predicate<ItemStack> {
 	}
 
 	@Override
-	@Environment(EnvType.CLIENT)
 	public void addMouseOverText(TooltipList list, TeamData teamData) {
 		if (taskScreenOnly) {
 			list.blankLine();
@@ -323,13 +303,13 @@ public class ItemTask extends Task implements Predicate<ItemStack> {
 		} else if (craftedItem.isEmpty()) {
 			boolean changed = false;
 
-			for (int i = 0; i < player.getInventory().items.size(); i++) {
-				ItemStack stack = player.getInventory().items.get(i);
+			for (int i = 0; i < player.getInventory().getContainerSize(); i++) {
+				ItemStack stack = player.getInventory().getItem(i);
 				ItemStack stack1 = insert(teamData, stack, false);
 
 				if (stack != stack1) {
 					changed = true;
-					player.getInventory().items.set(i, stack1.isEmpty() ? ItemStack.EMPTY : stack1);
+					player.getInventory().setItem(i, stack1.isEmpty() ? ItemStack.EMPTY : stack1);
 				}
 			}
 
@@ -340,7 +320,8 @@ public class ItemTask extends Task implements Predicate<ItemStack> {
 		}
 	}
 
-	public boolean isTaskScreenOnly() {
+	@SuppressWarnings("BooleanMethodIsAlwaysInverted")
+    public boolean isTaskScreenOnly() {
 		return taskScreenOnly;
 	}
 

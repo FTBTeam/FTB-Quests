@@ -1,21 +1,20 @@
 package dev.ftb.mods.ftbquests.quest.reward;
 
-import dev.ftb.mods.ftblibrary.ui.Button;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.util.RandomSource;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.block.entity.BlockEntity;
+
+import dev.ftb.mods.ftblibrary.client.gui.widget.Button;
 import dev.ftb.mods.ftblibrary.util.TooltipList;
 import dev.ftb.mods.ftbquests.client.gui.RewardNotificationsScreen;
 import dev.ftb.mods.ftbquests.quest.Quest;
 import dev.ftb.mods.ftbquests.quest.loot.RewardTable;
 import dev.ftb.mods.ftbquests.quest.loot.WeightedReward;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
-import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.util.RandomSource;
-import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.level.block.entity.BlockEntity;
-import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 import java.util.UUID;
+import org.jspecify.annotations.Nullable;
 
 public class LootReward extends RandomReward {
 	public LootReward(long id, Quest quest) {
@@ -39,7 +38,6 @@ public class LootReward extends RandomReward {
 	}
 
 	@Override
-	@Environment(EnvType.CLIENT)
 	public void addMouseOverText(TooltipList list) {
 		if (getTable() != null) {
 			getTable().addMouseOverText(list, true, true);
@@ -47,7 +45,6 @@ public class LootReward extends RandomReward {
 	}
 
 	@Override
-	@Environment(EnvType.CLIENT)
 	public void onButtonClicked(Button button, boolean canClick) {
 		if (canClick) {
 			new RewardNotificationsScreen().openGui();

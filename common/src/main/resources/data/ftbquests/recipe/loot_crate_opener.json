@@ -11,14 +11,8 @@
     "PPP"
   ],
   "key": {
-    "B": {
-      "item": "book"
-    },
-    "P": {
-      "tag": "minecraft:planks"
-    },
-    "C": {
-      "item": "minecraft:stone_pickaxe"
-    }
+    "B": "book",
+    "P": "#minecraft:planks",
+    "C": "minecraft:stone_pickaxe"
   }
 }

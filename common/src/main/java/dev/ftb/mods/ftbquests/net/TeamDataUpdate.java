@@ -1,10 +1,11 @@
 package dev.ftb.mods.ftbquests.net;
 
-import dev.ftb.mods.ftbquests.quest.TeamData;
 import net.minecraft.core.UUIDUtil;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
+
+import dev.ftb.mods.ftbquests.quest.TeamData;
 
 import java.util.UUID;
 

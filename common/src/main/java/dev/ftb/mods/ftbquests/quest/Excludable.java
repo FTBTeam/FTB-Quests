@@ -1,5 +1,6 @@
 package dev.ftb.mods.ftbquests.quest;
 
+@FunctionalInterface
 public interface Excludable {
     /**
      * Check for mutually exclusive questlines. A quest is considered <em>excluded</em> if:
@@ -14,6 +15,4 @@ public interface Excludable {
      * @return true if the quest is excluded; it will not be shown (outside edit mode), progressable, or completable
      */
     boolean isQuestObjectExcluded(TeamData teamData);
-
-    long getId();
 }

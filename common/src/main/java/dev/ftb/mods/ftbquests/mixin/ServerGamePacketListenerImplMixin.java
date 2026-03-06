@@ -1,9 +1,11 @@
 package dev.ftb.mods.ftbquests.mixin;
 
-import dev.ftb.mods.ftbquests.quest.translation.TranslationManager;
 import net.minecraft.network.protocol.common.ServerboundClientInformationPacket;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.network.ServerGamePacketListenerImpl;
+
+import dev.ftb.mods.ftbquests.quest.translation.TranslationManager;
+
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;

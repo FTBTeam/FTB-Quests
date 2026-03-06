@@ -1,8 +1,9 @@
 package dev.ftb.mods.ftbquests.quest.reward;
 
+import net.minecraft.server.level.ServerPlayer;
+
 import dev.ftb.mods.ftbquests.events.CustomRewardEvent;
 import dev.ftb.mods.ftbquests.quest.Quest;
-import net.minecraft.server.level.ServerPlayer;
 
 public class CustomReward extends Reward {
 	public CustomReward(long id, Quest quest) {

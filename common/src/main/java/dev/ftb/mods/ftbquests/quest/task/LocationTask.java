@@ -1,20 +1,19 @@
 package dev.ftb.mods.ftbquests.quest.task;
 
-import dev.ftb.mods.ftblibrary.config.ConfigGroup;
-import dev.ftb.mods.ftbquests.quest.Quest;
-import dev.ftb.mods.ftbquests.quest.TeamData;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.resources.Identifier;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.util.Mth;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.StructureBlockEntity;
+
+import dev.ftb.mods.ftblibrary.client.config.EditableConfigGroup;
+import dev.ftb.mods.ftbquests.quest.Quest;
+import dev.ftb.mods.ftbquests.quest.TeamData;
 
 public class LocationTask extends AbstractBooleanTask {
 	private ResourceKey<Level> dimension;
@@ -51,7 +50,7 @@ public class LocationTask extends AbstractBooleanTask {
 	@Override
 	public void writeData(CompoundTag nbt, HolderLookup.Provider provider) {
 		super.writeData(nbt, provider);
-		nbt.putString("dimension", dimension.location().toString());
+		nbt.putString("dimension", dimension.identifier().toString());
 		nbt.putBoolean("ignore_dimension", ignoreDimension);
 		nbt.putIntArray("position", new int[]{x, y, z});
 		nbt.putIntArray("size", new int[]{w, h, d});
@@ -60,10 +59,10 @@ public class LocationTask extends AbstractBooleanTask {
 	@Override
 	public void readData(CompoundTag nbt, HolderLookup.Provider provider) {
 		super.readData(nbt, provider);
-		dimension = ResourceKey.create(Registries.DIMENSION, ResourceLocation.tryParse(nbt.getString("dimension")));
-		ignoreDimension = nbt.getBoolean("ignore_dimension");
+		dimension = ResourceKey.create(Registries.DIMENSION, Identifier.tryParse(nbt.getString("dimension").orElseThrow()));
+		ignoreDimension = nbt.getBoolean("ignore_dimension").orElseThrow();
 
-		int[] pos = nbt.getIntArray("position");
+		int[] pos = nbt.getIntArray("position").orElseThrow();
 
 		if (pos.length == 3) {
 			x = pos[0];
@@ -71,7 +70,7 @@ public class LocationTask extends AbstractBooleanTask {
 			z = pos[2];
 		}
 
-		int[] size = nbt.getIntArray("size");
+		int[] size = nbt.getIntArray("size").orElseThrow();
 
 		if (pos.length == 3) {
 			w = size[0];
@@ -83,7 +82,7 @@ public class LocationTask extends AbstractBooleanTask {
 	@Override
 	public void writeNetData(RegistryFriendlyByteBuf buffer) {
 		super.writeNetData(buffer);
-		buffer.writeResourceLocation(dimension.location());
+		buffer.writeIdentifier(dimension.identifier());
 		buffer.writeBoolean(ignoreDimension);
 		buffer.writeVarInt(x);
 		buffer.writeVarInt(y);
@@ -96,7 +95,7 @@ public class LocationTask extends AbstractBooleanTask {
 	@Override
 	public void readNetData(RegistryFriendlyByteBuf buffer) {
 		super.readNetData(buffer);
-		dimension = ResourceKey.create(Registries.DIMENSION, buffer.readResourceLocation());
+		dimension = ResourceKey.create(Registries.DIMENSION, buffer.readIdentifier());
 		ignoreDimension = buffer.readBoolean();
 		x = buffer.readVarInt();
 		y = buffer.readVarInt();
@@ -107,10 +106,9 @@ public class LocationTask extends AbstractBooleanTask {
 	}
 
 	@Override
-	@Environment(EnvType.CLIENT)
-	public void fillConfigGroup(ConfigGroup config) {
+	public void fillConfigGroup(EditableConfigGroup config) {
 		super.fillConfigGroup(config);
-		config.addString("dim", dimension.location().toString(), v -> dimension = ResourceKey.create(Registries.DIMENSION, ResourceLocation.tryParse(v)), "minecraft:overworld");
+		config.addString("dim", dimension.identifier().toString(), v -> dimension = ResourceKey.create(Registries.DIMENSION, Identifier.tryParse(v)), "minecraft:overworld");
 		config.addBool("ignore_dim", ignoreDimension, v -> ignoreDimension = v, false);
 		config.addInt("x", x, v -> x = v, 0, Integer.MIN_VALUE, Integer.MAX_VALUE);
 		config.addInt("y", y, v -> y = v, 0, Integer.MIN_VALUE, Integer.MAX_VALUE);

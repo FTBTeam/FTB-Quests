@@ -1,28 +1,30 @@
 package dev.ftb.mods.ftbquests.client.gui.quests;
 
-import dev.architectury.networking.NetworkManager;
-import dev.ftb.mods.ftblibrary.icon.Icons;
-import dev.ftb.mods.ftblibrary.ui.ContextMenuItem;
-import dev.ftb.mods.ftblibrary.ui.Panel;
-import dev.ftb.mods.ftblibrary.ui.WidgetLayout;
-import dev.ftb.mods.ftblibrary.ui.input.MouseButton;
-import dev.ftb.mods.ftblibrary.util.TooltipList;
-import dev.ftb.mods.ftbquests.client.ClientQuestFile;
-import dev.ftb.mods.ftbquests.client.FTBQuestsClient;
-import dev.ftb.mods.ftbquests.client.FTBQuestsClientConfig;
-import dev.ftb.mods.ftbquests.client.gui.CustomToast;
-import dev.ftb.mods.ftbquests.client.gui.RewardTablesScreen;
-import dev.ftb.mods.ftbquests.net.ChangeProgressMessage;
-import dev.ftb.mods.ftbquests.net.ForceSaveMessage;
-import dev.ftb.mods.ftbquests.net.ToggleEditingModeMessage;
-import dev.ftb.mods.ftbquests.quest.task.StructureTask;
-import dev.ftb.mods.ftbquests.quest.theme.ThemeLoader;
-import dev.ftb.mods.ftbquests.quest.theme.property.ThemeProperties;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.network.chat.ClickEvent;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.Style;
+import net.minecraft.server.permissions.Permissions;
+
+import dev.architectury.networking.NetworkManager;
+
+import dev.ftb.mods.ftblibrary.client.gui.input.MouseButton;
+import dev.ftb.mods.ftblibrary.client.gui.layout.WidgetLayout;
+import dev.ftb.mods.ftblibrary.client.gui.widget.ContextMenuItem;
+import dev.ftb.mods.ftblibrary.client.gui.widget.Panel;
+import dev.ftb.mods.ftblibrary.client.util.ClientUtils;
+import dev.ftb.mods.ftblibrary.icon.Icons;
+import dev.ftb.mods.ftblibrary.util.TooltipList;
+import dev.ftb.mods.ftbquests.client.ClientQuestFile;
+import dev.ftb.mods.ftbquests.client.FTBQuestsClient;
+import dev.ftb.mods.ftbquests.client.FTBQuestsClientConfig;
+import dev.ftb.mods.ftbquests.client.gui.RewardTablesScreen;
+import dev.ftb.mods.ftbquests.net.ChangeProgressMessage;
+import dev.ftb.mods.ftbquests.net.ForceSaveMessage;
+import dev.ftb.mods.ftbquests.net.ToggleEditingModeMessage;
+import dev.ftb.mods.ftbquests.quest.task.StructureTask;
+import dev.ftb.mods.ftbquests.quest.theme.property.ThemeProperties;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -42,7 +44,7 @@ public class OtherButtonsPanelBottom extends OtherButtonsPanel {
 			add(new EditSettingsButton(this));
 		}
 
-		if (FTBQuestsClient.getClientPlayer().hasPermissions(2) || ClientQuestFile.INSTANCE.hasEditorPermission()) {
+		if (ClientUtils.getClientPlayer().permissions().hasPermission(Permissions.COMMANDS_GAMEMASTER) || ClientQuestFile.getInstance().hasEditorPermission()) {
 			// note: single player owner can't use the GUI button but can use the /ftbquests editing_mode command
 			// this is intentional, since there should not be an obvious "cheat" button for single player questing
 			add(new ToggleEditModeButton(this));
@@ -67,14 +69,14 @@ public class OtherButtonsPanelBottom extends OtherButtonsPanel {
 
 		private static Component makeTooltip() {
 			String key = ClientQuestFile.canClientPlayerEdit() ? "commands.ftbquests.editing_mode.enabled" : "commands.ftbquests.editing_mode.disabled";
-			return Component.translatable(key, ClientQuestFile.INSTANCE.selfTeamData.getName());
+			return Component.translatable(key, FTBQuestsClient.getClientPlayerData().getName());
 		}
 
 		@Override
 		public void onClicked(MouseButton button) {
 			playClickSound();
 
-			if (!questScreen.file.selfTeamData.getCanEdit(Minecraft.getInstance().player)) {
+			if (!FTBQuestsClient.getClientPlayerData().getCanEdit(ClientUtils.getClientPlayer())) {
 				StructureTask.maybeRequestStructureSync();
 			}
 
@@ -123,10 +125,10 @@ public class OtherButtonsPanelBottom extends OtherButtonsPanel {
 					b -> questScreen.file.onEditButtonClicked(this)));
 
 			contextMenu.add(new ContextMenuItem(Component.translatable("ftbquests.gui.reset_progress"), ThemeProperties.RELOAD_ICON.get(),
-					b -> ChangeProgressMessage.sendToServer(questScreen.file.selfTeamData, questScreen.file, progressChange -> progressChange.setReset(true)))
+					b -> ChangeProgressMessage.sendToServer(FTBQuestsClient.getClientPlayerData(), questScreen.file, progressChange -> progressChange.setReset(true)))
 					.setYesNoText(Component.translatable("ftbquests.gui.reset_progress_q")));
 			contextMenu.add(new ContextMenuItem(Component.translatable("ftbquests.gui.complete_instantly"), ThemeProperties.CHECK_ICON.get(),
-					b -> ChangeProgressMessage.sendToServer(questScreen.file.selfTeamData, questScreen.file, progressChange -> progressChange.setReset(false)))
+					b -> ChangeProgressMessage.sendToServer(FTBQuestsClient.getClientPlayerData(), questScreen.file, progressChange -> progressChange.setReset(false)))
 					.setYesNoText(Component.translatable("ftbquests.gui.complete_instantly_q")));
 
 			contextMenu.add(new TooltipContextMenuItem(Component.translatable("ftbquests.reward_tables"), ThemeProperties.REWARD_TABLE_ICON.get(),
@@ -137,19 +139,11 @@ public class OtherButtonsPanelBottom extends OtherButtonsPanel {
 					b -> saveLocally()));
 
 			contextMenu.add(new ContextMenuItem(Component.translatable("ftbquests.gui.reload_theme"), ThemeProperties.RELOAD_ICON.get(),
-					b -> reload_theme()));
+					b -> QuestScreen.reloadTheme()));
 			contextMenu.add(new ContextMenuItem(Component.translatable("ftbquests.gui.wiki"), Icons.INFO,
 					b -> handleClick(WIKI_URL)));
 
 			questScreen.openContextMenu(contextMenu);
-		}
-
-		private void reload_theme() {
-			Minecraft mc = Minecraft.getInstance();
-			//FIXME: mc.getTextureManager().onResourceManagerReload(mc.getResourceManager());
-			ThemeLoader.loadTheme(mc.getResourceManager());
-			ClientQuestFile.INSTANCE.refreshGui();
-			Minecraft.getInstance().getToasts().addToast(new CustomToast(Component.translatable("ftbquests.gui.reload_theme"), Icons.ACCEPT, Component.translatable("gui.done")));
 		}
 
 		private void saveLocally() {
@@ -163,12 +157,12 @@ public class OtherButtonsPanelBottom extends OtherButtonsPanel {
 				appendNum(fileName, time.get(Calendar.MINUTE), '-');
 				appendNum(fileName, time.get(Calendar.SECOND), '\0');
 				File file = new File(Minecraft.getInstance().gameDirectory, fileName.toString()).getCanonicalFile();
-				ClientQuestFile.INSTANCE.writeDataFull(file.toPath(), ClientQuestFile.INSTANCE.holderLookup());
-				ClientQuestFile.INSTANCE.getTranslationManager().saveToNBT(file.toPath().resolve("lang"), true);
+				ClientQuestFile.getInstance().writeDataFull(file.toPath(), ClientQuestFile.getInstance().holderLookup());
+				ClientQuestFile.getInstance().getTranslationManager().saveToNBT(file.toPath().resolve("lang"), true);
 
                 String p = "." + file.getPath().replace(Minecraft.getInstance().gameDirectory.getCanonicalFile().getAbsolutePath(), "");
 				Component component = Component.translatable("ftbquests.gui.saved_as_file", p)
-						.withStyle(Style.EMPTY.withClickEvent(new ClickEvent(ClickEvent.Action.OPEN_FILE, p)));
+						.withStyle(Style.EMPTY.withClickEvent(new ClickEvent.OpenFile(p)));
 				Minecraft.getInstance().player.displayClientMessage(component, false);
 			} catch (Exception ex) {
 				ex.printStackTrace();

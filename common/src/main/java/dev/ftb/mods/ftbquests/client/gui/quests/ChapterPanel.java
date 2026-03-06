@@ -1,17 +1,36 @@
 package dev.ftb.mods.ftbquests.client.gui.quests;
 
+import net.minecraft.ChatFormatting;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.network.chat.Style;
+import net.minecraft.network.chat.TextColor;
+import net.minecraft.util.Mth;
+import net.minecraft.util.Util;
 import com.mojang.blaze3d.platform.InputConstants;
-import com.mojang.blaze3d.systems.RenderSystem;
+
 import dev.architectury.networking.NetworkManager;
-import dev.ftb.mods.ftblibrary.config.StringConfig;
-import dev.ftb.mods.ftblibrary.config.ui.EditStringConfigOverlay;
+
+import dev.ftb.mods.ftblibrary.client.config.editable.EditableString;
+import dev.ftb.mods.ftblibrary.client.config.gui.EditStringConfigOverlay;
+import dev.ftb.mods.ftblibrary.client.gui.GuiHelper;
+import dev.ftb.mods.ftblibrary.client.gui.input.MouseButton;
+import dev.ftb.mods.ftblibrary.client.gui.layout.WidgetLayout;
+import dev.ftb.mods.ftblibrary.client.gui.theme.Theme;
+import dev.ftb.mods.ftblibrary.client.gui.widget.Button;
+import dev.ftb.mods.ftblibrary.client.gui.widget.ContextMenuItem;
+import dev.ftb.mods.ftblibrary.client.gui.widget.Panel;
+import dev.ftb.mods.ftblibrary.client.gui.widget.Widget;
+import dev.ftb.mods.ftblibrary.client.icon.IconHelper;
+import dev.ftb.mods.ftblibrary.client.util.ClientUtils;
+import dev.ftb.mods.ftblibrary.client.util.PositionedIngredient;
 import dev.ftb.mods.ftblibrary.icon.Color4I;
 import dev.ftb.mods.ftblibrary.icon.Icon;
 import dev.ftb.mods.ftblibrary.icon.Icons;
-import dev.ftb.mods.ftblibrary.ui.*;
-import dev.ftb.mods.ftblibrary.ui.input.MouseButton;
 import dev.ftb.mods.ftblibrary.util.TooltipList;
-import dev.ftb.mods.ftblibrary.util.client.PositionedIngredient;
 import dev.ftb.mods.ftbquests.client.ClientQuestFile;
 import dev.ftb.mods.ftbquests.client.FTBQuestsClient;
 import dev.ftb.mods.ftbquests.client.FTBQuestsClientConfig;
@@ -26,17 +45,6 @@ import dev.ftb.mods.ftbquests.quest.ChapterGroup;
 import dev.ftb.mods.ftbquests.quest.theme.property.ThemeProperties;
 import dev.ftb.mods.ftbquests.quest.translation.TranslationKey;
 import dev.ftb.mods.ftbquests.util.TextUtils;
-import net.minecraft.ChatFormatting;
-import net.minecraft.Util;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.MutableComponent;
-import net.minecraft.network.chat.Style;
-import net.minecraft.network.chat.TextColor;
-import net.minecraft.util.Mth;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -44,14 +52,14 @@ import java.util.Optional;
 import java.util.regex.Pattern;
 
 public class ChapterPanel extends Panel {
-	public static final Icon ARROW_COLLAPSED = Icon.getIcon("ftbquests:textures/gui/arrow_collapsed.png");
-	public static final Icon ARROW_EXPANDED = Icon.getIcon("ftbquests:textures/gui/arrow_expanded.png");
+	public static final Icon<?> ARROW_COLLAPSED = Icon.getIcon("ftbquests:textures/gui/arrow_collapsed.png");
+	public static final Icon<?> ARROW_EXPANDED = Icon.getIcon("ftbquests:textures/gui/arrow_expanded.png");
 	private static final Pattern NON_EMPTY_PAT = Pattern.compile("^.+$");
 
 	private final QuestScreen questScreen;
-	boolean expanded = isPinned();
-	int curX;
-	int prevX;
+	private boolean expanded = isPinned();
+	private int curX;
+	private int prevX;
 
 	public ChapterPanel(Panel panel) {
 		super(panel);
@@ -64,7 +72,7 @@ public class ChapterPanel extends Panel {
 
 		boolean canEdit = questScreen.file.canEdit();
 
-		for (Chapter chapter : questScreen.file.getDefaultChapterGroup().getVisibleChapters(questScreen.file.selfTeamData)) {
+		for (Chapter chapter : questScreen.file.getDefaultChapterGroup().getVisibleChapters(FTBQuestsClient.getClientPlayerData())) {
 			add(new ChapterButton(this, chapter));
 		}
 
@@ -132,12 +140,12 @@ public class ChapterPanel extends Panel {
 
 	@Override
 	public int getX() {
-		return Mth.lerpInt(Minecraft.getInstance().getTimer().getGameTimeDeltaPartialTick(true), prevX, curX);
+		return Mth.lerpInt(Minecraft.getInstance().getDeltaTracker().getGameTimeDeltaPartialTick(true), prevX, curX);
 	}
 
 	@Override
 	public void drawBackground(GuiGraphics graphics, Theme theme, int x, int y, int w, int h) {
-		ThemeProperties.CHAPTER_PANEL_BACKGROUND.get().draw(graphics, x, y, w, h);
+		IconHelper.renderIcon(ThemeProperties.CHAPTER_PANEL_BACKGROUND.get(), graphics, x, y, w, h);
 	}
 
 	@Override
@@ -151,11 +159,14 @@ public class ChapterPanel extends Panel {
 
 	@Override
 	public void draw(GuiGraphics graphics, Theme theme, int x, int y, int w, int h) {
-		graphics.pose().pushPose();
-		graphics.pose().translate(0, 0, QuestScreen.Z_LEVEL);
-		RenderSystem.enableDepthTest();
+		graphics.pose().pushMatrix();
+		graphics.pose().translate(0, 0);
 		super.draw(graphics, theme, x, y, w, h);
-		graphics.pose().popPose();
+		graphics.pose().popMatrix();
+	}
+
+	public boolean isExpanded() {
+		return expanded;
 	}
 
 	public void setExpanded(boolean b) {
@@ -204,7 +215,7 @@ public class ChapterPanel extends Panel {
                 if (file.canEdit()) {
                     if (getMouseX() > getX() + width - 34) {
                         showAddChapterOrGroupDialog(file);
-                    } else if (button.isLeft() && Screen.hasAltDown()) {
+                    } else if (button.isLeft() && Minecraft.getInstance().hasAltDown()) {
 						file.onEditButtonClicked(chapterPanel.questScreen);
 					}
                 }
@@ -216,7 +227,7 @@ public class ChapterPanel extends Panel {
 
 			List<ContextMenuItem> contextMenu = new ArrayList<>();
 			contextMenu.add(new ContextMenuItem(Component.translatable("ftbquests.chapter"), ThemeProperties.ADD_ICON.get(), b -> {
-				StringConfig c = new StringConfig(NON_EMPTY_PAT);
+				EditableString c = new EditableString(NON_EMPTY_PAT);
 				EditStringConfigOverlay<String> overlay = new EditStringConfigOverlay<>(parent.getParent(), c, accepted -> {
 					chapterPanel.questScreen.openGui();
 
@@ -235,12 +246,12 @@ public class ChapterPanel extends Panel {
 			}));
 
 			contextMenu.add(new ContextMenuItem(Component.translatable("ftbquests.chapter_group"), ThemeProperties.ADD_ICON.get(), b -> {
-				StringConfig c = new StringConfig(NON_EMPTY_PAT);
+				EditableString c = new EditableString(NON_EMPTY_PAT);
 				EditStringConfigOverlay<String> overlay = new EditStringConfigOverlay<>(parent.getParent(), c, accepted -> {
 					chapterPanel.questScreen.openGui();
 
 					if (accepted) {
-						ChapterGroup group = new ChapterGroup(0L, ClientQuestFile.INSTANCE);
+						ChapterGroup group = new ChapterGroup(0L, ClientQuestFile.getInstance());
 						CompoundTag extra = Util.make(new CompoundTag(), t -> t.putLong("group", 0L));
 						file.getTranslationManager().addInitialTranslation(extra, file.getLocale(), TranslationKey.TITLE, c.getValue());
 						NetworkManager.sendToServer(CreateObjectMessage.create(group, extra));
@@ -256,25 +267,23 @@ public class ChapterPanel extends Panel {
 
 		@Override
 		public void draw(GuiGraphics graphics, Theme theme, int x, int y, int w, int h) {
-			GuiHelper.setupDrawing();
-
 			if (isMouseOver()) {
-				Color4I.WHITE.withAlpha(40).draw(graphics, x + 1, y + 1, w - 2, h - 2);
+				IconHelper.renderIcon(Color4I.WHITE.withAlpha(40), graphics, x + 1, y + 1, w - 2, h - 2);
 			}
 
 			ChatFormatting f = isMouseOver() ? ChatFormatting.WHITE : ChatFormatting.GRAY;
 
-			icon.draw(graphics, x + 2, y + 3, 12, 12);
+			IconHelper.renderIcon(icon, graphics, x + 2, y + 3, 12, 12);
 			theme.drawString(graphics, Component.literal("").append(title).withStyle(f), x + 16, y + 5);
 
-			ThemeProperties.WIDGET_BORDER.get(ClientQuestFile.INSTANCE).draw(graphics, x, y + h - 1, w, 1);
+			IconHelper.renderIcon(ThemeProperties.WIDGET_BORDER.get(ClientQuestFile.getInstance()), graphics, x, y + h - 1, w, 1);
 
 			boolean canEdit = chapterPanel.questScreen.file.canEdit();
 
-			(chapterPanel.isPinned() ? ThemeProperties.PIN_ICON_ON : ThemeProperties.PIN_ICON_OFF).get().draw(graphics, x + w - 16, y + 3, 12, 12);
+			IconHelper.renderIcon((chapterPanel.isPinned() ? ThemeProperties.PIN_ICON_ON : ThemeProperties.PIN_ICON_OFF).get(), graphics, x + w - 16, y + 3, 12, 12);
 
 			if (canEdit) {
-				ThemeProperties.ADD_ICON.get().draw(graphics, x + w - 31, y + 3, 12, 12);
+				IconHelper.renderIcon(ThemeProperties.ADD_ICON.get(), graphics, x + w - 31, y + 3, 12, 12);
 			}
 		}
 
@@ -288,7 +297,7 @@ public class ChapterPanel extends Panel {
 		public void addMouseOverText(TooltipList list) {
 			chapterPanel.questScreen.addInfoTooltip(list, chapterPanel.questScreen.file);
 
-			if (chapterPanel.questScreen.file.canEdit() && getMouseX() > getX() + width - 34) {
+			if (chapterPanel.questScreen.file.canEdit() && getMouseX() > getX() + width - 34 && getMouseX() < getX() + width - 17) {
 				list.translate("gui.add");
 			}
 		}
@@ -303,7 +312,7 @@ public class ChapterPanel extends Panel {
 			super(panel, g.getTitle(), g.getIcon());
 			setSize(100, 18);
 			group = g;
-			visibleChapters = g.getVisibleChapters(panel.questScreen.file.selfTeamData);
+			visibleChapters = g.getVisibleChapters(FTBQuestsClient.getClientPlayerData());
 			xlateWarning = g.getQuestFile().getTranslationManager().hasMissingTranslation(group, TranslationKey.TITLE);
 		}
 
@@ -313,7 +322,7 @@ public class ChapterPanel extends Panel {
 
 			if (file.canEdit()) {
 				if (button.isLeft()) {
-					if (Screen.hasAltDown()) {
+					if (Minecraft.getInstance().hasAltDown()) {
 						group.onEditButtonClicked(chapterPanel.questScreen);
 						return;
 					} else if (getMouseX() > getX() + width - 15) {
@@ -345,7 +354,7 @@ public class ChapterPanel extends Panel {
 
 			playClickSound();
 
-			StringConfig c = new StringConfig(NON_EMPTY_PAT);
+			EditableString c = new EditableString(NON_EMPTY_PAT);
 			EditStringConfigOverlay<String> overlay = new EditStringConfigOverlay<>(parent.getParent(), c, accepted -> {
 				chapterPanel.questScreen.openGui();
 
@@ -365,24 +374,22 @@ public class ChapterPanel extends Panel {
 
 		@Override
 		public void draw(GuiGraphics graphics, Theme theme, int x, int y, int w, int h) {
-			GuiHelper.setupDrawing();
-
 			if (xlateWarning) {
-				Color4I.RED.withAlpha(40).draw(graphics, x, y, w, h);
+				IconHelper.renderIcon(Color4I.RED.withAlpha(40), graphics, x, y, w, h);
 			}
 			if (isMouseOver()) {
-				Color4I.WHITE.withAlpha(40).draw(graphics, x + 1, y, w - 2, h);
+				IconHelper.renderIcon(Color4I.WHITE.withAlpha(40), graphics, x + 1, y, w - 2, h);
 			}
 
 			ChatFormatting f = isMouseOver() ? ChatFormatting.WHITE : ChatFormatting.GRAY;
 
-			(group.isGuiCollapsed() ? ARROW_COLLAPSED : ARROW_EXPANDED).withColor(Color4I.getChatFormattingColor(f)).draw(graphics, x + 3, y + 5, 8, 8);
+			IconHelper.renderIcon((group.isGuiCollapsed() ? ARROW_COLLAPSED : ARROW_EXPANDED).withColor(Color4I.getChatFormattingColor(f)), graphics, x + 3, y + 5, 8, 8);
 			theme.drawString(graphics, Component.literal("").append(title).withStyle(f), x + 15, y + 5);
 
 			boolean canEdit = chapterPanel.questScreen.file.canEdit();
 
 			if (canEdit) {
-				ThemeProperties.ADD_ICON.get().draw(graphics, x + w - 14, y + 3, 12, 12);
+				IconHelper.renderIcon(ThemeProperties.ADD_ICON.get(), graphics, x + w - 14, y + 3, 12, 12);
 			}
 		}
 
@@ -431,8 +438,7 @@ public class ChapterPanel extends Panel {
 						chapter.onEditButtonClicked(chapterPanel.questScreen);
 					} else if (isKeyDown(InputConstants.KEY_RALT)) {
 						FTBQuestsClient.copyToClipboard(chapter);
-						Minecraft.getInstance().getToasts().addToast(new CustomToast(Component.translatable("ftbquests.quest.copied"),
-								Icons.INFO, Component.literal(chapter.getTitle().getString())));
+						FTBQuestsClient.showInfoToast(Component.translatable("ftbquests.quest.copied"), Component.literal(chapter.getTitle().getString()));
 					} else if (chapterPanel.questScreen.selectedChapter != chapter) {
 						chapterPanel.questScreen.open(chapter, false);
 						chapter.getAutofocus().ifPresent(chapterPanel.questScreen::scrollTo);
@@ -459,32 +465,30 @@ public class ChapterPanel extends Panel {
 
 		@Override
 		public void draw(GuiGraphics graphics, Theme theme, int x, int y, int w, int h) {
-			GuiHelper.setupDrawing();
+//			GuiHelper.setupDrawing();
 
 			if (xlateWarningTitle || xlateWarningSubtitle) {
-				Color4I.RED.withAlpha(40).draw(graphics, x, y, w, h);
+				IconHelper.renderIcon(Color4I.RED.withAlpha(40), graphics, x, y, w, h);
 			}
 			if (chapterPanel.questScreen.selectedChapter != null && chapter.id == chapterPanel.questScreen.selectedChapter.id) {
 				// current chapter highlighting
 				GuiHelper.drawGradientRect(graphics, x + 1, y, w - 2, h, ThemeProperties.SELECTED_HILITE_1.get(), ThemeProperties.SELECTED_HILITE_2.get());
 				GuiHelper.drawHollowRect(graphics, x + 1, y, w - 2, h, Color4I.GRAY.withAlpha(192), false);
 			} else if (isMouseOver()) {
-				Color4I.WHITE.withAlpha(40).draw(graphics, x + 1, y, w - 2, h);
+				IconHelper.renderIcon(Color4I.WHITE.withAlpha(40), graphics, x + 1, y, w - 2, h);
 			}
 
-			Color4I c = chapter.getProgressColor(chapterPanel.questScreen.file.selfTeamData, !isMouseOver());
+			Color4I c = chapter.getProgressColor(FTBQuestsClient.getClientPlayerData(), !isMouseOver());
 			int xOff = chapter.getGroup().isDefaultGroup() ? 0 : 7;
 
-			icon.draw(graphics, x + 2 + xOff, y + 1, 12, 12);
+			IconHelper.renderIcon(icon, graphics, x + 2 + xOff, y + 1, 12, 12);
 			MutableComponent text = Component.literal("").append(title).withStyle(Style.EMPTY.withColor(TextColor.fromRgb(c.rgb())));
 			theme.drawString(graphics, text, x + 16 + xOff, y + 3);
 
-			GuiHelper.setupDrawing();
-
 			if (!chapter.hasAnyVisibleChildren()) {
-				ThemeProperties.CLOSE_ICON.get().draw(graphics, x + w - 12, y + 3, 8, 8);
-			} else if (chapterPanel.questScreen.file.selfTeamData.hasUnclaimedRewards(Minecraft.getInstance().player.getUUID(), chapter)) {
-				ThemeProperties.ALERT_ICON.get().draw(graphics, x + w - 12, y + 3, 8, 8);
+				IconHelper.renderIcon(ThemeProperties.CLOSE_ICON.get(), graphics, x + w - 12, y + 3, 8, 8);
+			} else if (FTBQuestsClient.getClientPlayerData().hasUnclaimedRewards(ClientUtils.getClientPlayer().getUUID(), chapter)) {
+				IconHelper.renderIcon(ThemeProperties.ALERT_ICON.get(), graphics, x + w - 12, y + 3, 8, 8);
 			}
 		}
 
@@ -508,7 +512,7 @@ public class ChapterPanel extends Panel {
 		public int getActualWidth(QuestScreen screen) {
 			int extra = chapter.getGroup().isDefaultGroup() ? 0 : 7;
 
-			if (!chapter.hasAnyVisibleChildren() || chapterPanel.questScreen.file.selfTeamData.hasUnclaimedRewards(Minecraft.getInstance().player.getUUID(), chapter)) {
+			if (!chapter.hasAnyVisibleChildren() || FTBQuestsClient.getClientPlayerData().hasUnclaimedRewards(ClientUtils.getClientPlayer().getUUID(), chapter)) {
 				// space for the "X" marker
 				extra += 16;
 			}

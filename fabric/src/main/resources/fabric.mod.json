@@ -31,5 +31,7 @@
 		"ftbteams": ">=${ftbteamsversion}"
 	},
 	"breaks": {
-	}
+		"ftbxmodcompat": "<21.1.7"
+	},
+	"accessWidener" : "ftbquests.accesswidener"
 }

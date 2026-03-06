@@ -1,22 +1,24 @@
 package dev.ftb.mods.ftbquests.net;
 
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.codec.ByteBufCodecs;
+import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+
 import dev.architectury.networking.NetworkManager;
+
 import dev.ftb.mods.ftbquests.api.FTBQuestsAPI;
 import dev.ftb.mods.ftbquests.client.ClientQuestFile;
 import dev.ftb.mods.ftbquests.quest.Quest;
 import dev.ftb.mods.ftbquests.quest.QuestObjectBase;
 import dev.ftb.mods.ftbquests.quest.reward.Reward;
 import dev.ftb.mods.ftbquests.quest.task.Task;
-import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.network.codec.ByteBufCodecs;
-import net.minecraft.network.codec.StreamCodec;
-import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 
 import java.util.List;
 import java.util.Objects;
 
 public record ReorderItemResponseMessage(long questId, List<Long> itemIds, boolean task) implements CustomPacketPayload {
-    public static final Type<ReorderItemResponseMessage> TYPE = new Type<>(FTBQuestsAPI.rl("reorder_item_response"));
+    public static final Type<ReorderItemResponseMessage> TYPE = new Type<>(FTBQuestsAPI.id("reorder_item_response"));
     public static final StreamCodec<FriendlyByteBuf, ReorderItemResponseMessage> STREAM_CODEC = StreamCodec.composite(
             ByteBufCodecs.VAR_LONG, ReorderItemResponseMessage::questId,
             ByteBufCodecs.VAR_LONG.apply(ByteBufCodecs.list()), ReorderItemResponseMessage::itemIds,
@@ -34,7 +36,7 @@ public record ReorderItemResponseMessage(long questId, List<Long> itemIds, boole
 
     public static void handle(ReorderItemResponseMessage message, NetworkManager.PacketContext context) {
         context.queue(() -> {
-            ClientQuestFile file = ClientQuestFile.INSTANCE;
+            ClientQuestFile file = ClientQuestFile.getInstance();
             Quest q = file.getQuest(message.questId);
             if (q != null) {
                 if (message.task) {

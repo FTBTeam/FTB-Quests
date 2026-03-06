@@ -1,24 +1,26 @@
 package dev.ftb.mods.ftbquests.net;
 
-import dev.architectury.networking.NetworkManager;
-import dev.ftb.mods.ftbquests.api.FTBQuestsAPI;
-import dev.ftb.mods.ftbquests.client.FTBQuestsNetClient;
-import dev.ftb.mods.ftbquests.quest.QuestObjectBase;
-import dev.ftb.mods.ftbquests.quest.QuestObjectType;
-import net.minecraft.Util;
 import net.minecraft.core.UUIDUtil;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
-import org.jetbrains.annotations.Nullable;
+import net.minecraft.util.Util;
+
+import dev.architectury.networking.NetworkManager;
+
+import dev.ftb.mods.ftbquests.api.FTBQuestsAPI;
+import dev.ftb.mods.ftbquests.client.FTBQuestsNetClient;
+import dev.ftb.mods.ftbquests.quest.QuestObjectBase;
+import dev.ftb.mods.ftbquests.quest.QuestObjectType;
 
 import java.util.Optional;
 import java.util.UUID;
+import org.jspecify.annotations.Nullable;
 
 public record CreateObjectResponseMessage(long id, long parent, QuestObjectType questObjectType, CompoundTag nbt, Optional<CompoundTag> extra, Optional<UUID> creator) implements CustomPacketPayload {
-	public static final Type<CreateObjectResponseMessage> TYPE = new Type<>(FTBQuestsAPI.rl("create_object_response_message"));
+	public static final Type<CreateObjectResponseMessage> TYPE = new Type<>(FTBQuestsAPI.id("create_object_response_message"));
 
 	public static final StreamCodec<FriendlyByteBuf, CreateObjectResponseMessage> STREAM_CODEC = StreamCodec.composite(
 			ByteBufCodecs.VAR_LONG, CreateObjectResponseMessage::id,

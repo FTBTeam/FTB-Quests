@@ -1,8 +1,10 @@
 package dev.ftb.mods.ftbquests.fabric.mixin;
 
-import dev.ftb.mods.ftbquests.client.FTBQuestsClientEventHandler;
 import net.minecraft.client.renderer.texture.SpriteLoader;
 import net.minecraft.client.renderer.texture.TextureAtlas;
+
+import dev.ftb.mods.ftbquests.client.FTBQuestsClientEventHandler;
+
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;

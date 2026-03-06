@@ -3,6 +3,7 @@ package dev.ftb.mods.ftbquests.events;
 import dev.architectury.event.Event;
 import dev.architectury.event.EventActor;
 import dev.architectury.event.EventFactory;
+
 import dev.ftb.mods.ftbquests.quest.task.CustomTask;
 
 public class CustomTaskEvent {

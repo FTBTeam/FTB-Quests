@@ -1,15 +1,16 @@
 package dev.ftb.mods.ftbquests.client.gui;
 
-import dev.ftb.mods.ftblibrary.icon.Icon;
-import dev.ftb.mods.ftblibrary.ui.misc.SimpleToast;
-import dev.ftb.mods.ftbquests.client.FTBQuestsClientConfig;
-import dev.ftb.mods.ftbquests.client.NotificationStyle;
-import dev.ftb.mods.ftbquests.quest.Chapter;
-import dev.ftb.mods.ftbquests.quest.QuestObject;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.client.sounds.SoundManager;
 import net.minecraft.network.chat.Component;
 import net.minecraft.sounds.SoundEvents;
+
+import dev.ftb.mods.ftblibrary.client.gui.SimpleToast;
+import dev.ftb.mods.ftblibrary.icon.Icon;
+import dev.ftb.mods.ftbquests.client.FTBQuestsClientConfig;
+import dev.ftb.mods.ftbquests.client.NotificationStyle;
+import dev.ftb.mods.ftbquests.quest.Chapter;
+import dev.ftb.mods.ftbquests.quest.QuestObject;
 
 public class ToastQuestObject extends SimpleToast {
 	private final QuestObject object;
@@ -34,7 +35,7 @@ public class ToastQuestObject extends SimpleToast {
 	}
 
 	@Override
-	public Icon getIcon() {
+	public Icon<?> getIcon() {
 		return object.getIcon();
 	}
 

@@ -16,7 +16,7 @@ public enum FTBQuestsAPIImpl implements FTBQuestsAPI.API {
     public BaseQuestFile getQuestFile(boolean isClient) {
         return isClient ?
                 Objects.requireNonNull(FTBQuestsClient.getClientQuestFile()) :
-                ServerQuestFile.INSTANCE;
+                ServerQuestFile.getInstance();
     }
 
     @Override

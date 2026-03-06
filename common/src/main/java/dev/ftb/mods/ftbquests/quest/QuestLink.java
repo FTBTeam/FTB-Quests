@@ -1,20 +1,17 @@
 package dev.ftb.mods.ftbquests.quest;
 
-import dev.architectury.networking.NetworkManager;
-import dev.ftb.mods.ftblibrary.config.ConfigGroup;
-import dev.ftb.mods.ftblibrary.icon.Icon;
-import dev.ftb.mods.ftblibrary.util.client.ClientUtils;
-import dev.ftb.mods.ftbquests.client.FTBQuestsClient;
-import dev.ftb.mods.ftbquests.client.gui.quests.QuestScreen;
-import dev.ftb.mods.ftbquests.net.MoveMovableMessage;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 
+import dev.ftb.mods.ftblibrary.client.config.EditableConfigGroup;
+import dev.ftb.mods.ftblibrary.client.util.ClientUtils;
+import dev.ftb.mods.ftblibrary.icon.Icon;
+import dev.ftb.mods.ftbquests.client.gui.quests.QuestScreen;
+
 import java.util.Optional;
+import org.jspecify.annotations.Nullable;
 
 public class QuestLink extends QuestObject implements Movable, Excludable {
     private Chapter chapter;
@@ -36,6 +33,7 @@ public class QuestLink extends QuestObject implements Movable, Excludable {
     }
 
     @Override
+    @Nullable
     public Quest getRelatedQuest() {
         return getQuest().orElse(null);
     }
@@ -56,7 +54,7 @@ public class QuestLink extends QuestObject implements Movable, Excludable {
     }
 
     @Override
-    public Icon getAltIcon() {
+    public Icon<?> getAltIcon() {
         return getQuest().map(Quest::getAltIcon).orElse(null);
     }
 
@@ -91,7 +89,7 @@ public class QuestLink extends QuestObject implements Movable, Excludable {
     }
 
     @Override
-    public void fillConfigGroup(ConfigGroup config) {
+    public void fillConfigGroup(EditableConfigGroup config) {
         super.fillConfigGroup(config);
 
         config.addEnum("shape", shape.isEmpty() ? "default" : shape, v -> shape = v.equals("default") ? "" : v, QuestShape.idMapWithDefault);
@@ -101,7 +99,6 @@ public class QuestLink extends QuestObject implements Movable, Excludable {
     }
 
     @Override
-    @Environment(EnvType.CLIENT)
     public void editedFromGUI() {
         QuestScreen gui = ClientUtils.getCurrentGuiAs(QuestScreen.class);
         if (gui != null) {
@@ -129,14 +126,14 @@ public class QuestLink extends QuestObject implements Movable, Excludable {
     public void readData(CompoundTag nbt, HolderLookup.Provider provider) {
         super.readData(nbt, provider);
 
-        linkId = Long.parseLong(nbt.getString("linked_quest"), 16);
-        x = nbt.getDouble("x");
-        y = nbt.getDouble("y");
-        shape = nbt.getString("shape");
+        linkId = Long.parseLong(nbt.getString("linked_quest").orElseThrow(), 16);
+        x = nbt.getDouble("x").orElseThrow();
+        y = nbt.getDouble("y").orElseThrow();
+        shape = nbt.getStringOr("shape", "");
         if (shape.equals("default")) {
             shape = "";
         }
-        size = nbt.contains("size") ? nbt.getDouble("size") : 1D;
+        size = nbt.getDoubleOr("size", 1D);
     }
 
     @Override
@@ -161,9 +158,11 @@ public class QuestLink extends QuestObject implements Movable, Excludable {
         shape = buffer.readUtf(64);
     }
 
-    public void setPosition(double qx, double qy) {
+    @Override
+    public QuestLink setPosition(double qx, double qy) {
         x = qx;
         y = qy;
+        return this;
     }
 
     @Override
@@ -174,6 +173,11 @@ public class QuestLink extends QuestObject implements Movable, Excludable {
     @Override
     public Chapter getChapter() {
         return chapter;
+    }
+
+    @Override
+    public void setChapter(Chapter newChapter) {
+        this.chapter = newChapter;
     }
 
     @Override
@@ -199,33 +203,6 @@ public class QuestLink extends QuestObject implements Movable, Excludable {
     @Override
     public String getShape() {
         return shape.isEmpty() ? chapter.getDefaultQuestShape() : shape;
-    }
-
-    @Override
-    public void initiateMoveClientSide(Chapter to, double x, double y) {
-        NetworkManager.sendToServer(new MoveMovableMessage(id, to.id, x, y));
-    }
-
-    @Override
-    public void onMoved(double newX, double newY, long newChapterId) {
-        this.x = newX;
-        this.y = newY;
-
-        if (newChapterId != chapter.id) {
-            BaseQuestFile f = getQuestFile();
-            Chapter newChapter = f.getChapter(newChapterId);
-
-            if (newChapter != null) {
-                chapter.removeQuestLink(this);
-                newChapter.addQuestLink(this);
-                chapter = newChapter;
-            }
-        }
-    }
-
-    @Override
-    public void copyToClipboard() {
-        FTBQuestsClient.copyToClipboard(this);
     }
 
     public boolean linksTo(Quest quest) {

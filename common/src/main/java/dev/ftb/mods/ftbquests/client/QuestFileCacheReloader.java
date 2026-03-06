@@ -8,7 +8,7 @@ public class QuestFileCacheReloader implements ResourceManagerReloadListener {
 	@Override
 	public void onResourceManagerReload(ResourceManager resourceManager) {
 		if (ClientQuestFile.exists()) {
-			ClientQuestFile.INSTANCE.clearCachedData();
+			ClientQuestFile.getInstance().clearCachedData();
 		}
 	}
 }

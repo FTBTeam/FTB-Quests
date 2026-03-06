@@ -1,26 +1,29 @@
 package dev.ftb.mods.ftbquests.block.entity;
 
-import dev.ftb.mods.ftbquests.registry.ModBlockEntityTypes;
-import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.HolderLookup;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.NbtUtils;
 import net.minecraft.network.chat.Component;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.util.Util;
 import net.minecraft.world.Nameable;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
-import org.jetbrains.annotations.NotNull;
+import net.minecraft.world.level.storage.ValueInput;
+import net.minecraft.world.level.storage.ValueOutput;
+
+import dev.ftb.mods.ftbquests.registry.ModBlockEntityTypes;
 
 import java.lang.ref.WeakReference;
 import java.util.Optional;
 import java.util.UUID;
+import org.jetbrains.annotations.NotNull;
+import org.jspecify.annotations.Nullable;
 
 public class TaskScreenAuxBlockEntity extends BlockEntity implements ITaskScreen, Nameable {
     @NotNull
     private WeakReference<TaskScreenBlockEntity> coreScreen = new WeakReference<>(null);
+    @Nullable
     private BlockPos corePosPending;  // non-null after NBT load & before querying/resolving
 
     public TaskScreenAuxBlockEntity(BlockPos blockPos, BlockState blockState) {
@@ -59,21 +62,29 @@ public class TaskScreenAuxBlockEntity extends BlockEntity implements ITaskScreen
     }
 
     @Override
-    public void loadAdditional(CompoundTag compoundTag, HolderLookup.Provider provider) {
-        super.loadAdditional(compoundTag, provider);
-        corePosPending = NbtUtils.readBlockPos(compoundTag, "CorePos").orElse(null);
+    public void preRemoveSideEffects(BlockPos blockPos, BlockState blockState) {
+        if (level instanceof ServerLevel serverLevel) {
+            // just break the core screen and let it handle the multiblock removal logic
+            getCoreScreen().ifPresent(coreScreen -> serverLevel.removeBlock(coreScreen.getBlockPos(), false));
+        }
     }
 
     @Override
-    protected void saveAdditional(CompoundTag compoundTag, HolderLookup.Provider provider) {
-        super.saveAdditional(compoundTag, provider);
+    public void loadAdditional(ValueInput input) {
+        super.loadAdditional(input);
+        corePosPending = input.read("CorePos", BlockPos.CODEC).orElse(null);
+    }
+
+    @Override
+    protected void saveAdditional(ValueOutput output) {
+        super.saveAdditional(output);
 
         if (corePosPending != null) {
-            compoundTag.put("CorePos", NbtUtils.writeBlockPos(corePosPending));
+            output.store("CorePos", BlockPos.CODEC, corePosPending);
         } else {
             TaskScreenBlockEntity cs = coreScreen.get();
             if (cs != null) {
-                compoundTag.put("CorePos", NbtUtils.writeBlockPos(cs.getBlockPos()));
+                output.store("CorePos", BlockPos.CODEC, cs.getBlockPos());
             }
         }
     }

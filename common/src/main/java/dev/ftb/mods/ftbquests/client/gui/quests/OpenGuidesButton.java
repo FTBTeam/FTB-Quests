@@ -1,9 +1,10 @@
 package dev.ftb.mods.ftbquests.client.gui.quests;
 
-import dev.ftb.mods.ftblibrary.ui.Panel;
-import dev.ftb.mods.ftblibrary.ui.input.MouseButton;
-import dev.ftb.mods.ftbquests.quest.theme.property.ThemeProperties;
 import net.minecraft.network.chat.Component;
+
+import dev.ftb.mods.ftblibrary.client.gui.input.MouseButton;
+import dev.ftb.mods.ftblibrary.client.gui.widget.Panel;
+import dev.ftb.mods.ftbquests.quest.theme.property.ThemeProperties;
 
 public class OpenGuidesButton extends TabButton {
 	public OpenGuidesButton(Panel panel) {

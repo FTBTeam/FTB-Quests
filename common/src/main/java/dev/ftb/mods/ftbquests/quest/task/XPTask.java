@@ -1,10 +1,5 @@
 package dev.ftb.mods.ftbquests.quest.task;
 
-import dev.ftb.mods.ftblibrary.config.ConfigGroup;
-import dev.ftb.mods.ftbquests.quest.Quest;
-import dev.ftb.mods.ftbquests.quest.TeamData;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
@@ -14,6 +9,10 @@ import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
+
+import dev.ftb.mods.ftblibrary.client.config.EditableConfigGroup;
+import dev.ftb.mods.ftbquests.quest.Quest;
+import dev.ftb.mods.ftbquests.quest.TeamData;
 
 public class XPTask extends Task implements ISingleLongValueTask {
 	private long value = 1L;
@@ -53,8 +52,8 @@ public class XPTask extends Task implements ISingleLongValueTask {
 	@Override
 	public void readData(CompoundTag nbt, HolderLookup.Provider provider) {
 		super.readData(nbt, provider);
-		value = nbt.getLong("value");
-		points = nbt.getBoolean("points");
+		value = nbt.getLong("value").orElseThrow();
+		points = nbt.getBoolean("points").orElseThrow();
 	}
 
 	@Override
@@ -77,15 +76,13 @@ public class XPTask extends Task implements ISingleLongValueTask {
 	}
 
 	@Override
-	@Environment(EnvType.CLIENT)
-	public void fillConfigGroup(ConfigGroup config) {
+	public void fillConfigGroup(EditableConfigGroup config) {
 		super.fillConfigGroup(config);
 		config.addLong("value", value, v -> value = v, 1L, 1L, Long.MAX_VALUE);
 		config.addBool("points", points, v -> points = v, false);
 	}
 
 	@Override
-	@Environment(EnvType.CLIENT)
 	public MutableComponent getAltTitle() {
 		return Component.translatable("ftbquests.reward.ftbquests.xp_levels").append(": ").append(Component.literal(formatMaxProgress()).withStyle(ChatFormatting.RED));
 	}

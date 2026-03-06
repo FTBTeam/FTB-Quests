@@ -1,22 +1,5 @@
 package dev.ftb.mods.ftbquests.quest.reward;
 
-import dev.architectury.networking.NetworkManager;
-import dev.ftb.mods.ftblibrary.config.ConfigGroup;
-import dev.ftb.mods.ftblibrary.config.Tristate;
-import dev.ftb.mods.ftblibrary.icon.Icon;
-import dev.ftb.mods.ftblibrary.ui.Button;
-import dev.ftb.mods.ftblibrary.ui.Widget;
-import dev.ftb.mods.ftblibrary.util.TooltipList;
-import dev.ftb.mods.ftblibrary.util.client.ClientUtils;
-import dev.ftb.mods.ftblibrary.util.client.PositionedIngredient;
-import dev.ftb.mods.ftbquests.client.gui.quests.QuestScreen;
-import dev.ftb.mods.ftbquests.integration.RecipeModHelper;
-import dev.ftb.mods.ftbquests.net.ClaimRewardMessage;
-import dev.ftb.mods.ftbquests.quest.*;
-import dev.ftb.mods.ftbquests.quest.translation.TranslationKey;
-import dev.ftb.mods.ftbquests.util.ProgressChange;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.RegistryFriendlyByteBuf;
@@ -25,9 +8,36 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.entity.BlockEntity;
-import org.jetbrains.annotations.Nullable;
 
-import java.util.*;
+import dev.architectury.networking.NetworkManager;
+
+import dev.ftb.mods.ftblibrary.client.config.EditableConfigGroup;
+import dev.ftb.mods.ftblibrary.client.config.Tristate;
+import dev.ftb.mods.ftblibrary.client.gui.widget.Button;
+import dev.ftb.mods.ftblibrary.client.gui.widget.Widget;
+import dev.ftb.mods.ftblibrary.client.util.ClientUtils;
+import dev.ftb.mods.ftblibrary.client.util.PositionedIngredient;
+import dev.ftb.mods.ftblibrary.icon.Icon;
+import dev.ftb.mods.ftblibrary.util.TooltipList;
+import dev.ftb.mods.ftbquests.client.gui.quests.QuestScreen;
+import dev.ftb.mods.ftbquests.integration.RecipeModHelper;
+import dev.ftb.mods.ftbquests.net.ClaimRewardMessage;
+import dev.ftb.mods.ftbquests.quest.BaseQuestFile;
+import dev.ftb.mods.ftbquests.quest.Chapter;
+import dev.ftb.mods.ftbquests.quest.Quest;
+import dev.ftb.mods.ftbquests.quest.QuestObjectBase;
+import dev.ftb.mods.ftbquests.quest.QuestObjectType;
+import dev.ftb.mods.ftbquests.quest.ServerQuestFile;
+import dev.ftb.mods.ftbquests.quest.TeamData;
+import dev.ftb.mods.ftbquests.quest.translation.TranslationKey;
+import dev.ftb.mods.ftbquests.util.ProgressChange;
+
+import java.util.EnumSet;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
+import java.util.UUID;
+import org.jspecify.annotations.Nullable;
 
 public abstract class Reward extends QuestObjectBase {
 	protected final Quest quest;
@@ -85,7 +95,7 @@ public abstract class Reward extends QuestObjectBase {
 		}
 
 		if (autoclaim != RewardAutoClaim.DEFAULT) {
-			nbt.putString("auto", autoclaim.id);
+			nbt.putString("auto", autoclaim.getId());
 		}
 
 		if (excludeFromClaimAll) nbt.putBoolean("exclude_from_claim_all", true);
@@ -97,10 +107,13 @@ public abstract class Reward extends QuestObjectBase {
 	public void readData(CompoundTag nbt, HolderLookup.Provider provider) {
 		super.readData(nbt, provider);
 		team = Tristate.read(nbt, "team_reward");
-		autoclaim = RewardAutoClaim.NAME_MAP.get(nbt.getString("auto"));
-		excludeFromClaimAll = nbt.getBoolean("exclude_from_claim_all");
-		ignoreRewardBlocking = nbt.getBoolean("ignore_reward_blocking");
-		disableRewardScreenBlur	= nbt.getBoolean("disable_reward_screen_blur");
+		autoclaim = nbt.getString("auto")
+				.map(RewardAutoClaim.NAME_MAP::get)
+				.orElse(RewardAutoClaim.DEFAULT);
+
+		excludeFromClaimAll = nbt.getBooleanOr("exclude_from_claim_all", getType().getExcludeFromListRewards());
+		ignoreRewardBlocking = nbt.getBooleanOr("ignore_reward_blocking", false);
+		disableRewardScreenBlur	= nbt.getBooleanOr("disable_reward_screen_blur", false);
 	}
 
 	@Override
@@ -124,8 +137,7 @@ public abstract class Reward extends QuestObjectBase {
 	}
 
 	@Override
-	@Environment(EnvType.CLIENT)
-	public void fillConfigGroup(ConfigGroup config) {
+	public void fillConfigGroup(EditableConfigGroup config) {
 		super.fillConfigGroup(config);
 		config.addEnum("team", team, v -> team = v, Tristate.NAME_MAP)
 				.setNameKey("ftbquests.reward.team_reward");
@@ -195,7 +207,6 @@ public abstract class Reward extends QuestObjectBase {
 	}
 
 	@Override
-	@Environment(EnvType.CLIENT)
 	public void editedFromGUI() {
 		QuestScreen gui = ClientUtils.getCurrentGuiAs(QuestScreen.class);
 		if (gui != null) {
@@ -244,35 +255,30 @@ public abstract class Reward extends QuestObjectBase {
 	}
 
 	@Override
-	@Environment(EnvType.CLIENT)
-	public Icon getAltIcon() {
+	public Icon<?> getAltIcon() {
 		return getType().getIconSupplier();
 	}
 
 	@Override
-	@Environment(EnvType.CLIENT)
 	public Component getAltTitle() {
 		return getType().getDisplayName();
 	}
 
 	@Override
-	public final ConfigGroup createSubGroup(ConfigGroup group) {
+	public final EditableConfigGroup createSubGroup(EditableConfigGroup group) {
 		RewardType type = getType();
 		return group.getOrCreateSubgroup(getObjectType().getId())
 				.getOrCreateSubgroup(type.getTypeId().getNamespace())
 				.getOrCreateSubgroup(type.getTypeId().getPath());
 	}
 
-	@Environment(EnvType.CLIENT)
 	public void addMouseOverText(TooltipList list) {
 	}
 
-	@Environment(EnvType.CLIENT)
 	public boolean addTitleInMouseOverText() {
 		return true;
 	}
 
-	@Environment(EnvType.CLIENT)
 	public void onButtonClicked(Button button, boolean canClick) {
 		if (canClick) {
 			button.playClickSound();
@@ -288,9 +294,9 @@ public abstract class Reward extends QuestObjectBase {
 		return false;
 	}
 
-	@Environment(EnvType.CLIENT)
 	public Optional<PositionedIngredient> getIngredient(Widget widget) {
-		return PositionedIngredient.of(getIcon().getIngredient(), widget);
+		return Optional.ofNullable(getIcon().getIngredient())
+				.flatMap(o -> PositionedIngredient.of(o, widget));
 	}
 
 	@Override
@@ -298,7 +304,6 @@ public abstract class Reward extends QuestObjectBase {
 		return EnumSet.of(RecipeModHelper.Components.QUESTS);
 	}
 
-	@Environment(EnvType.CLIENT)
 	public String getButtonText() {
 		return "";
 	}

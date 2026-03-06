@@ -1,7 +1,8 @@
 package dev.ftb.mods.ftbquests.integration;
 
-import dev.ftb.mods.ftbquests.quest.QuestObjectBase;
 import net.minecraft.world.item.ItemStack;
+
+import dev.ftb.mods.ftbquests.quest.QuestObjectBase;
 
 import java.util.Collection;
 

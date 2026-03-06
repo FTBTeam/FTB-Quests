@@ -1,23 +1,36 @@
 package dev.ftb.mods.ftbquests.quest;
 
+import net.minecraft.core.HolderLookup;
+import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.level.storage.LevelResource;
 import com.mojang.util.UndashedUuid;
+
 import dev.architectury.networking.NetworkManager;
 import dev.architectury.platform.Platform;
 import dev.architectury.utils.Env;
+
 import dev.ftb.mods.ftblibrary.snbt.SNBT;
-import dev.ftb.mods.ftblibrary.snbt.SNBTCompoundTag;
 import dev.ftb.mods.ftblibrary.util.NetworkHelper;
 import dev.ftb.mods.ftbquests.FTBQuests;
 import dev.ftb.mods.ftbquests.events.QuestProgressEventData;
 import dev.ftb.mods.ftbquests.integration.PermissionsHelper;
-import dev.ftb.mods.ftbquests.net.*;
+import dev.ftb.mods.ftbquests.net.CreateOtherTeamDataMessage;
+import dev.ftb.mods.ftbquests.net.DeleteObjectResponseMessage;
+import dev.ftb.mods.ftbquests.net.MoveChapterGroupResponseMessage;
+import dev.ftb.mods.ftbquests.net.SyncEditorPermissionMessage;
+import dev.ftb.mods.ftbquests.net.SyncQuestsMessage;
+import dev.ftb.mods.ftbquests.net.SyncTeamDataMessage;
+import dev.ftb.mods.ftbquests.net.TeamDataChangedMessage;
+import dev.ftb.mods.ftbquests.net.TeamDataUpdate;
+import dev.ftb.mods.ftbquests.net.UpdateTeamDataMessage;
 import dev.ftb.mods.ftbquests.quest.reward.RewardType;
 import dev.ftb.mods.ftbquests.quest.reward.RewardTypes;
 import dev.ftb.mods.ftbquests.quest.task.Task;
 import dev.ftb.mods.ftbquests.quest.task.TaskType;
 import dev.ftb.mods.ftbquests.quest.task.TaskTypes;
 import dev.ftb.mods.ftbquests.util.FTBQuestsInventoryListener;
-import dev.ftb.mods.ftbquests.util.FileUtils;
 import dev.ftb.mods.ftbquests.util.PlayerInventorySummary;
 import dev.ftb.mods.ftbteams.api.FTBTeamsAPI;
 import dev.ftb.mods.ftbteams.api.Team;
@@ -25,34 +38,62 @@ import dev.ftb.mods.ftbteams.api.event.PlayerChangedTeamEvent;
 import dev.ftb.mods.ftbteams.api.event.PlayerLoggedInAfterTeamEvent;
 import dev.ftb.mods.ftbteams.api.event.TeamCreatedEvent;
 import dev.ftb.mods.ftbteams.data.PartyTeam;
-import net.minecraft.core.HolderLookup;
-import net.minecraft.server.MinecraftServer;
-import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.level.storage.LevelResource;
 
+import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Date;
 import java.util.List;
+import java.util.Objects;
 import java.util.UUID;
+import java.util.function.Consumer;
 import java.util.stream.Stream;
+import org.jspecify.annotations.Nullable;
 
 public class ServerQuestFile extends BaseQuestFile {
 	public static final LevelResource FTBQUESTS_DATA = new LevelResource("ftbquests");
 
-	public static ServerQuestFile INSTANCE;
+	@Nullable
+	private static ServerQuestFile INSTANCE;
 
 	public final MinecraftServer server;
 	private boolean shouldSave;
 	private boolean isLoading;
-	private Path folder;
+	private final Path folder;
+	@Nullable
 	private ServerPlayer currentPlayer = null;
+
+	public static void startup(MinecraftServer server) {
+		INSTANCE = new ServerQuestFile(server);
+	}
+
+	public static void shutdown() {
+		ServerQuestFile sqf = getInstance();
+		sqf.saveNow();
+		sqf.unload();
+		INSTANCE = null;
+	}
+
+	public static boolean exists() {
+		return INSTANCE != null && !INSTANCE.invalid;
+	}
+
+	public static ServerQuestFile getInstance() {
+		return Objects.requireNonNull(INSTANCE);
+	}
+
+	public static void ifExists(Consumer<ServerQuestFile> consumer) {
+		if (INSTANCE != null && INSTANCE.isValid()) {
+			consumer.accept(INSTANCE);
+		}
+	}
 
 	public ServerQuestFile(MinecraftServer s) {
 		server = s;
 		shouldSave = false;
 		isLoading = false;
+
+		folder = Platform.getConfigFolder().resolve("ftbquests/quests");
 
 		int taskTypeId = 0;
 
@@ -64,17 +105,12 @@ public class ServerQuestFile extends BaseQuestFile {
 		int rewardTypeId = 0;
 
 		for (RewardType type : RewardTypes.TYPES.values()) {
-			type.intId = ++rewardTypeId;
-			rewardTypeIds.put(type.intId, type);
+			type.internalId = ++rewardTypeId;
+			rewardTypeIds.put(type.internalId, type);
 		}
 	}
 
-	public void load() {
-		load(true, true);
-	}
-
 	public void load(boolean quests, boolean progression) {
-		folder = Platform.getConfigFolder().resolve("ftbquests/quests");
 
 		if (quests) {
 			if (Files.exists(folder)) {
@@ -91,16 +127,19 @@ public class ServerQuestFile extends BaseQuestFile {
 			if (Files.exists(path)) {
 				try (Stream<Path> s = Files.list(path)) {
 					s.filter(p -> p.getFileName().toString().contains("-") && p.getFileName().toString().endsWith(".snbt")).forEach(path1 -> {
-						SNBTCompoundTag nbt = SNBT.read(path1);
-						if (nbt != null) {
+						try {
+							var nbt = SNBT.tryRead(path1);
+
 							try {
-								UUID uuid = UndashedUuid.fromString(nbt.getString("uuid"));
-								TeamData data = new TeamData(uuid, this);
+								UUID uuid = UndashedUuid.fromString(nbt.getString("uuid").orElseThrow());
+								TeamData data = new TeamData(uuid, true);
 								addData(data, true);
 								data.deserializeNBT(nbt);
 							} catch (Exception ex) {
 								FTBQuests.LOGGER.error("can't parse progression data for {}: {}", path1, ex.getMessage());
 							}
+						} catch (IOException e) {
+							throw new RuntimeException(e);
 						}
 					});
 				} catch (Exception ex) {
@@ -135,12 +174,18 @@ public class ServerQuestFile extends BaseQuestFile {
 		QuestObjectBase object = getBase(id);
 
 		if (object != null) {
+			object.getPath().ifPresent(path -> {
+                try {
+                    Files.delete(getFolder().resolve(path));
+                } catch (IOException e) {
+					FTBQuests.LOGGER.error("can't delete {}: {}", getFolder().resolve(path), e.getMessage());
+                }
+			});
 			getTranslationManager().removeAllTranslations(object);
 			object.deleteChildren();
 			object.deleteSelf();
 			refreshIDMap();
 			markDirty();
-			object.getPath().ifPresent(path -> FileUtils.delete(getFolder().resolve(path).toFile()));
 		}
 
 		NetworkHelper.sendToAll(server, new DeleteObjectResponseMessage(id));
@@ -152,16 +197,14 @@ public class ServerQuestFile extends BaseQuestFile {
 	}
 
 	public void saveNow() {
-		if (getFolder() != null) {
-			if (shouldSave) {
-				writeDataFull(getFolder(), server.registryAccess());
-				shouldSave = false;
-			}
-
-			getTranslationManager().saveToNBT(getFolder().resolve("lang"), false);
-
-			getAllTeamData().forEach(TeamData::saveIfChanged);
+		if (shouldSave) {
+			writeDataFull(getFolder(), server.registryAccess());
+			shouldSave = false;
 		}
+
+		getTranslationManager().saveToNBT(getFolder().resolve("lang"), false);
+
+		getAllTeamData().forEach(TeamData::saveIfChanged);
 	}
 
 	public void unload() {
@@ -170,11 +213,12 @@ public class ServerQuestFile extends BaseQuestFile {
 		deleteSelf();
 	}
 
+	@Nullable
 	public ServerPlayer getCurrentPlayer() {
 		return currentPlayer;
 	}
 
-	public void withPlayerContext(ServerPlayer player, Runnable toDo) {
+	public void withPlayerContext(@Nullable ServerPlayer player, Runnable toDo) {
 		currentPlayer = player;
 		try {
 			toDo.run();
@@ -186,6 +230,11 @@ public class ServerQuestFile extends BaseQuestFile {
 	public void playerLoggedIn(PlayerLoggedInAfterTeamEvent event) {
 		ServerPlayer player = event.getPlayer();
 		TeamData data = getOrCreateTeamData(event.getTeam());
+
+		if (data.getName().isEmpty()) {
+			data.setName(player.getPlainTextName());
+			NetworkManager.sendToPlayer(player, new UpdateTeamDataMessage(data.getTeamId(), data.getName()));
+		}
 
 		// Sync the quest book data
 		// - client will respond to this with a RequestTeamData message
@@ -231,7 +280,7 @@ public class ServerQuestFile extends BaseQuestFile {
 		UUID id = event.getTeam().getId();
 
 		TeamData data = teamDataMap.computeIfAbsent(id, k -> {
-			TeamData newTeamData = new TeamData(id, this);
+			TeamData newTeamData = new TeamData(id, true);
 			newTeamData.markDirty();
 			return newTeamData;
 		});

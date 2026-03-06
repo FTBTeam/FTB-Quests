@@ -1,10 +1,11 @@
 package dev.ftb.mods.ftbquests.api;
 
+import net.minecraft.resources.Identifier;
+
 import dev.ftb.mods.ftbquests.quest.BaseQuestFile;
-import net.minecraft.resources.ResourceLocation;
-import org.jetbrains.annotations.ApiStatus;
 
 import java.util.Objects;
+import org.jetbrains.annotations.ApiStatus;
 
 /**
  * Note: FTB Quests API for 1.20 is subject to change! More API will be added, but don't count on classes and methods
@@ -33,8 +34,8 @@ public class FTBQuestsAPI {
      * @param path the resource location path component
      * @return a new resource location
      */
-    public static ResourceLocation rl(String path) {
-        return ResourceLocation.fromNamespaceAndPath(MOD_ID, path);
+    public static Identifier id(String path) {
+        return Identifier.fromNamespaceAndPath(MOD_ID, path);
     }
 
     /**

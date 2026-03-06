@@ -1,9 +1,10 @@
 package dev.ftb.mods.ftbquests.quest.task;
 
-import dev.ftb.mods.ftbquests.quest.Quest;
-import dev.ftb.mods.ftbquests.quest.TeamData;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.item.ItemStack;
+
+import dev.ftb.mods.ftbquests.quest.Quest;
+import dev.ftb.mods.ftbquests.quest.TeamData;
 
 public abstract class AbstractBooleanTask extends Task {
 	public AbstractBooleanTask(long id, Quest quest) {

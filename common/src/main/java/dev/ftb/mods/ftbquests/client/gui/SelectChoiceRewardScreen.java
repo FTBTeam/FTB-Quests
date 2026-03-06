@@ -1,22 +1,26 @@
 package dev.ftb.mods.ftbquests.client.gui;
 
+import net.minecraft.network.chat.Component;
+
 import dev.architectury.networking.NetworkManager;
-import dev.ftb.mods.ftblibrary.ui.Panel;
-import dev.ftb.mods.ftblibrary.ui.SimpleTextButton;
-import dev.ftb.mods.ftblibrary.ui.Theme;
-import dev.ftb.mods.ftblibrary.ui.input.MouseButton;
-import dev.ftb.mods.ftblibrary.ui.misc.AbstractButtonListScreen;
+
+import dev.ftb.mods.ftblibrary.client.gui.input.MouseButton;
+import dev.ftb.mods.ftblibrary.client.gui.screens.AbstractButtonListScreen;
+import dev.ftb.mods.ftblibrary.client.gui.theme.Theme;
+import dev.ftb.mods.ftblibrary.client.gui.widget.Panel;
+import dev.ftb.mods.ftblibrary.client.gui.widget.SimpleTextButton;
+import dev.ftb.mods.ftblibrary.client.util.PositionedIngredient;
 import dev.ftb.mods.ftblibrary.util.TooltipList;
-import dev.ftb.mods.ftblibrary.util.client.PositionedIngredient;
 import dev.ftb.mods.ftbquests.net.ClaimChoiceRewardMessage;
 import dev.ftb.mods.ftbquests.quest.loot.WeightedReward;
 import dev.ftb.mods.ftbquests.quest.reward.ChoiceReward;
-import net.minecraft.network.chat.Component;
 
 import java.util.Optional;
+import org.jspecify.annotations.Nullable;
 
 public class SelectChoiceRewardScreen extends AbstractButtonListScreen {
 	private final ChoiceReward choiceReward;
+	@Nullable
 	private WeightedReward acceptedReward;
 
 	public SelectChoiceRewardScreen(ChoiceReward choiceReward) {
@@ -49,7 +53,7 @@ public class SelectChoiceRewardScreen extends AbstractButtonListScreen {
 	@Override
 	protected void doAccept() {
 		closeGui();
-		if (choiceReward.getTable() != null) {
+		if (choiceReward.getTable() != null && acceptedReward != null) {
 			int idx = choiceReward.getTable().getWeightedRewards().indexOf(acceptedReward);
 			NetworkManager.sendToServer(new ClaimChoiceRewardMessage(choiceReward.id, idx));
 		}

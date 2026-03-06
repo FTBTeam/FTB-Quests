@@ -9,11 +9,7 @@
 		"T "
 	],
 	"key": {
-		"S": {
-			"item": "ftbquests:screen_1"
-		},
-		"T": {
-			"item": "minecraft:stick"
-		}
+		"S": "ftbquests:screen_1",
+		"T": "#c:rods/wooden"
 	}
 }

@@ -1,42 +1,59 @@
 package dev.ftb.mods.ftbquests.client.gui.quests;
 
-import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.*;
-import com.mojang.math.Axis;
+import net.minecraft.ChatFormatting;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.renderer.RenderPipelines;
+import net.minecraft.network.chat.Component;
+import net.minecraft.util.ARGB;
+import net.minecraft.util.Mth;
+
 import dev.architectury.networking.NetworkManager;
-import dev.ftb.mods.ftblibrary.config.ImageResourceConfig;
-import dev.ftb.mods.ftblibrary.config.ui.resource.SelectImageResourceScreen;
+
+import dev.ftb.mods.ftblibrary.client.config.editable.EditableImageResource;
+import dev.ftb.mods.ftblibrary.client.config.gui.resource.SelectImageResourceScreen;
+import dev.ftb.mods.ftblibrary.client.gui.GuiHelper;
+import dev.ftb.mods.ftblibrary.client.gui.input.Key;
+import dev.ftb.mods.ftblibrary.client.gui.input.MouseButton;
+import dev.ftb.mods.ftblibrary.client.gui.theme.Theme;
+import dev.ftb.mods.ftblibrary.client.gui.widget.Button;
+import dev.ftb.mods.ftblibrary.client.gui.widget.ContextMenuItem;
+import dev.ftb.mods.ftblibrary.client.gui.widget.Panel;
+import dev.ftb.mods.ftblibrary.client.gui.widget.Widget;
+import dev.ftb.mods.ftblibrary.client.icon.IconHelper;
 import dev.ftb.mods.ftblibrary.icon.Color4I;
 import dev.ftb.mods.ftblibrary.icon.Icon;
 import dev.ftb.mods.ftblibrary.icon.Icons;
 import dev.ftb.mods.ftblibrary.icon.ImageIcon;
 import dev.ftb.mods.ftblibrary.math.MathUtils;
-import dev.ftb.mods.ftblibrary.ui.*;
-import dev.ftb.mods.ftblibrary.ui.input.Key;
-import dev.ftb.mods.ftblibrary.ui.input.MouseButton;
 import dev.ftb.mods.ftbquests.api.FTBQuestsAPI;
+import dev.ftb.mods.ftbquests.client.FTBQuestsClient;
 import dev.ftb.mods.ftbquests.client.FTBQuestsClientConfig;
-import dev.ftb.mods.ftbquests.net.*;
-import dev.ftb.mods.ftbquests.quest.*;
+import dev.ftb.mods.ftbquests.net.CopyChapterImageMessage;
+import dev.ftb.mods.ftbquests.net.CopyQuestMessage;
+import dev.ftb.mods.ftbquests.net.CreateObjectMessage;
+import dev.ftb.mods.ftbquests.net.CreateTaskAtMessage;
+import dev.ftb.mods.ftbquests.quest.ChapterImage;
+import dev.ftb.mods.ftbquests.quest.Movable;
+import dev.ftb.mods.ftbquests.quest.Quest;
+import dev.ftb.mods.ftbquests.quest.QuestLink;
+import dev.ftb.mods.ftbquests.quest.QuestObjectBase;
+import dev.ftb.mods.ftbquests.quest.QuestShape;
 import dev.ftb.mods.ftbquests.quest.task.Task;
 import dev.ftb.mods.ftbquests.quest.task.TaskType;
 import dev.ftb.mods.ftbquests.quest.task.TaskTypes;
 import dev.ftb.mods.ftbquests.quest.theme.property.ThemeProperties;
 import dev.ftb.mods.ftbquests.quest.translation.TranslationKey;
-import net.minecraft.ChatFormatting;
-import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.client.renderer.GameRenderer;
-import net.minecraft.network.chat.Component;
-import net.minecraft.util.Mth;
-import org.jetbrains.annotations.Nullable;
-import org.joml.Matrix4f;
-import org.lwjgl.glfw.GLFW;
 
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.List;
 import java.util.function.Consumer;
+import org.jetbrains.annotations.UnknownNullability;
+import org.joml.Matrix3x2fStack;
+import org.jspecify.annotations.Nullable;
+import org.lwjgl.glfw.GLFW;
 
 public class QuestPanel extends Panel {
 	private static final ImageIcon DEFAULT_DEPENDENCY_LINE_TEXTURE = (ImageIcon) Icon.getIcon(FTBQuestsAPI.MOD_ID + ":textures/gui/dependency.png");
@@ -46,6 +63,7 @@ public class QuestPanel extends Panel {
 	protected double questY = 0;
 	double centerQuestX = 0;
 	double centerQuestY = 0;
+	@Nullable
 	QuestButton mouseOverQuest = null;
 	private double questMinX, questMinY, questMaxX, questMaxY;
 
@@ -113,7 +131,7 @@ public class QuestPanel extends Panel {
 		}
 
 		questScreen.selectedChapter.getImages().stream()
-				.filter(image -> questScreen.file.canEdit() || image.shouldShowImage(questScreen.file.selfTeamData))
+				.filter(image -> questScreen.file.canEdit() || image.shouldShowImage(FTBQuestsClient.getClientPlayerData()))
 				.sorted(Comparator.comparingInt(ChapterImage::getOrder))
 				.forEach(image -> add(new ChapterImageButton(this, image)));
 
@@ -159,18 +177,11 @@ public class QuestPanel extends Panel {
 
 	@Override
 	public void drawOffsetBackground(GuiGraphics graphics, Theme theme, int x, int y, int w, int h) {
-		if (questScreen.selectedChapter == null || questScreen.file.selfTeamData == null) {
+		if (questScreen.selectedChapter == null) {
 			return;
 		}
 
-		Tesselator tesselator = Tesselator.getInstance();
-
-		Icon icon = ThemeProperties.DEPENDENCY_LINE_TEXTURE.get(questScreen.selectedChapter);
-		if (icon instanceof ImageIcon img) {
-			img.bindTexture();
-		} else {
-			DEFAULT_DEPENDENCY_LINE_TEXTURE.bindTexture();
-		}
+		Icon<?> dependencyLineTexture = ThemeProperties.DEPENDENCY_LINE_TEXTURE.get(questScreen.selectedChapter);
 
 		Quest selectedQuest = questScreen.getViewedQuest();
 		if (selectedQuest == null) {
@@ -182,9 +193,6 @@ public class QuestPanel extends Panel {
 
 		double mt = -(System.currentTimeMillis() * 0.001D);
 		float lineWidth = (float) (questScreen.getZoom() * ThemeProperties.DEPENDENCY_LINE_THICKNESS.get(questScreen.selectedChapter) / 4D * 3D);
-
-		RenderSystem.setShader(GameRenderer::getPositionTexColorShader);
-		RenderSystem.setShaderColor(1F, 1F, 1F, 1F);
 
 		// pass 1: render connections for all visible quests
 		float mu = (float) ((mt * ThemeProperties.DEPENDENCY_LINE_UNSELECTED_SPEED.get(questScreen.selectedChapter)) % 1D);
@@ -201,9 +209,9 @@ public class QuestPanel extends Panel {
 
 				for (QuestButton button : qb.getDependencies()) {
 					if (button.shouldDraw() && button.quest != selectedQuest && qb.quest != selectedQuest && !button.quest.shouldHideDependentLines()) {
-						renderConnection(widget, button, graphics.pose(), lineWidth,
+						renderConnection(graphics, dependencyLineTexture, widget, button, graphics.pose(), lineWidth,
 								c.redi(), c.greeni(), c.bluei(), c.alphai(), c.alphai(),
-								mu, tesselator);
+								mu);
 					}
 				}
 			}
@@ -227,10 +235,10 @@ public class QuestPanel extends Panel {
 								a2 = 30;
 								toOutline.add(qb);
 							}
-							renderConnection(widget, button, graphics.pose(), lineWidth, c.redi(), c.greeni(), c.bluei(), a2, a, ms, tesselator);
+							renderConnection(graphics, dependencyLineTexture, widget, button, graphics.pose(), lineWidth, c.redi(), c.greeni(), c.bluei(), a2, a, ms);
 						} else if (qb.quest == selectedQuest || qb.isMouseOver()) {
 							Color4I c = ThemeProperties.DEPENDENCY_LINE_REQUIRES_COLOR.get(questScreen.selectedChapter);
-							renderConnection(widget, button, graphics.pose(), lineWidth, c.redi(), c.greeni(), c.bluei(), c.alphai(), c.alphai(), ms, tesselator);
+							renderConnection(graphics, dependencyLineTexture, widget, button, graphics.pose(), lineWidth, c.redi(), c.greeni(), c.bluei(), c.alphai(), c.alphai(), ms);
 						}
 					}
 				}
@@ -238,35 +246,49 @@ public class QuestPanel extends Panel {
 
 		}
 		toOutline.forEach(qb -> {
-			QuestShape.get(qb.quest.getShape()).getShape()
-					.withColor(Color4I.BLACK.withAlpha(30))
-					.draw(graphics, qb.getX(), qb.getY(), qb.width, qb.height);
-			QuestShape.get(qb.quest.getShape()).getOutline()
-					.withColor(Color4I.BLACK.withAlpha(90))
-					.draw(graphics, qb.getX(), qb.getY(), qb.width, qb.height);
+			IconHelper.renderIcon(QuestShape.get(qb.quest.getShape()).getShape()
+							.withColor(Color4I.BLACK.withAlpha(30)),
+					graphics, qb.getX(), qb.getY(), qb.width, qb.height);
+			IconHelper.renderIcon(QuestShape.get(qb.quest.getShape()).getOutline()
+							.withColor(Color4I.BLACK.withAlpha(90)),
+					graphics, qb.getX(), qb.getY(), qb.width, qb.height);
 		});
 	}
 
-	private void renderConnection(Widget widget, QuestButton button, PoseStack poseStack, float s, int r, int g, int b, int a, int a1, float mu, Tesselator tesselator) {
-		double sx = widget.getX() + widget.width / 2.0;
-		double sy = widget.getY() + widget.height / 2.0;
-		double ex = button.getX() + button.width / 2.0;
-		double ey = button.getY() + button.height / 2.0;
+	private void renderConnection(GuiGraphics graphics, Icon<?> dependencyLineTexture, Widget widget, QuestButton button, Matrix3x2fStack poseStack, float s, int r, int g, int b, int a, int a1, float mu) {
+		if (!(dependencyLineTexture instanceof ImageIcon icon)) {
+			return;
+		}
+
+		float sx = widget.getX() + widget.width / 2.0f;
+		float sy = widget.getY() + widget.height / 2.0f;
+
+		float ex = button.getX() + button.width / 2.0f;
+		float ey = button.getY() + button.height / 2.0f;
 		float len = (float) MathUtils.dist(sx, sy, ex, ey);
 
-		poseStack.pushPose();
-		poseStack.translate(sx, sy, 0);
-		poseStack.mulPose(Axis.ZP.rotation((float) Math.atan2(ey - sy, ex - sx)));
-		Matrix4f m = poseStack.last().pose();
+		poseStack.pushMatrix();
+		poseStack.translate(sx, sy);
+		poseStack.rotate((float) Math.atan2(ey - sy, ex - sx));
 
-		BufferBuilder buffer = tesselator.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX_COLOR);
-		buffer.addVertex(m, 0, -s, 0).setColor(r, g, b, a).setUv(len / s / 2F + mu, 0);
-		buffer.addVertex(m, 0, s, 0).setColor(r, g, b, a).setUv(len / s / 2F + mu, 1);
-		buffer.addVertex(m, len, s, 0).setColor(r * 3 / 4, g * 3 / 4, b * 3 / 4, a1).setUv(mu, 1);
-		buffer.addVertex(m, len, -s, 0).setColor(r * 3 / 4, g * 3 / 4, b * 3 / 4, a1).setUv(mu, 0);
-		BufferUploader.drawWithShader(buffer.buildOrThrow());
+		var texture = Minecraft.getInstance().getTextureManager().getTexture(icon.texture);
 
-		poseStack.popPose();
+		graphics.submitBlit(
+				RenderPipelines.GUI_TEXTURED,
+				texture.getTextureView(),
+				texture.getSampler(),
+				0,
+				(int) -s,
+				(int) len,
+				(int) s,
+				len / s / 2F + mu,
+				mu,
+				0,
+				1,
+				ARGB.color(a, r, g, b)
+		);
+
+		poseStack.popMatrix();
 	}
 
 	@Override
@@ -301,7 +323,7 @@ public class QuestPanel extends Panel {
 			}
 
 			if (questScreen.file.canEdit()) {
-				PoseStack poseStack = graphics.pose();
+				Matrix3x2fStack poseStack = graphics.pose();
 
 				drawStatusBar(graphics, theme, poseStack);
 
@@ -322,20 +344,20 @@ public class QuestPanel extends Panel {
 						double oy = m.getY() - ominY;
 						double sx = (questX + ox - questMinX) / dx * questScreen.scrollWidth + px;
 						double sy = (questY + oy - questMinY) / dy * questScreen.scrollHeight + py;
-						poseStack.pushPose();
+						poseStack.pushMatrix();
 						// translate/rotate order is highly dependent on whether the object aligns at center or corner.  fun fun fun
 						if (m.isAlignToCorner()) {
-							poseStack.translate(sx - bs * m.getWidth() / 2D, sy - bs * m.getHeight() / 2D, 0D);
+							poseStack.translate((float) (sx - bs * m.getWidth() / 2D), (float) (sy - bs * m.getHeight() / 2D));
 						} else {
-							poseStack.translate(sx, sy, 0D);
+							poseStack.translate((float) sx, (float) sy);
 						}
-						poseStack.mulPose(Axis.ZP.rotationDegrees((float) m.getRotation()));
+						poseStack.rotate((float) m.getRotation());
 						if (!m.isAlignToCorner()) {
-							poseStack.translate(-bs * m.getWidth() / 2D, -bs * m.getHeight() / 2D, 0D);
+							poseStack.translate((float) (-bs * m.getWidth() / 2D), (float) (-bs * m.getHeight() / 2D));
 						}
-						poseStack.scale((float) (bs * m.getWidth()), (float) (bs * m.getHeight()), 1F);
+						poseStack.scale((float) (bs * m.getWidth()), (float) (bs * m.getHeight()));
 						m.drawMoved(graphics);
-						poseStack.popPose();
+						poseStack.popMatrix();
 					}
 
 					if (QuestScreen.grid && !questScreen.isViewingQuest()) {
@@ -344,50 +366,48 @@ public class QuestPanel extends Panel {
 						double boxW = omaxX / dx * questScreen.scrollWidth + px - boxX;
 						double boxH = omaxY / dy * questScreen.scrollHeight + py - boxY;
 
-						poseStack.pushPose();
-						poseStack.translate(0, 0, 200);
+						poseStack.pushMatrix();
+						poseStack.translate(0, 0);//, 200);
 						GuiHelper.drawHollowRect(graphics, (int) Math.round(boxX), (int) Math.round(boxY), (int) Math.round(boxW), (int) Math.round(boxH), Color4I.WHITE.withAlpha(30), false);
-						poseStack.popPose();
+						poseStack.popMatrix();
 					}
 				} else if (!questScreen.isViewingQuest() || !questScreen.viewQuestPanel.isMouseOver()) {
-					//int z = treeGui.getZoom();
 					double sx = (questX - questMinX) / dx * questScreen.scrollWidth + px;
 					double sy = (questY - questMinY) / dy * questScreen.scrollHeight + py;
-					poseStack.pushPose();
-					poseStack.translate(sx - bs / 2D, sy - bs / 2D, 0D);
-					poseStack.scale((float) bs, (float) bs, 1F);
-					GuiHelper.setupDrawing();
-					RenderSystem.enableDepthTest();
-					// TODO: custom shader to implement alphaFunc? for now however, rendering outline at alpha 30 works well
-					//RenderSystem.alphaFunc(GL11.GL_GREATER, 0.01F);
-					QuestShape.get(questScreen.selectedChapter.getDefaultQuestShape()).getOutline().withColor(Color4I.WHITE.withAlpha(30)).draw(graphics, 0, 0, 1, 1);
-					//RenderSystem.defaultAlphaFunc();
-					poseStack.popPose();
+					poseStack.pushMatrix();
+					poseStack.translate((float) (sx - bs / 2D), (float) (sy - bs / 2D));
+					poseStack.scale((float) bs, (float) bs);
+					IconHelper.renderIcon(QuestShape.get(questScreen.selectedChapter.getDefaultQuestShape()).getOutline().withColor(Color4I.WHITE.withAlpha(30)), graphics, 0, 0, 1, 1);
+					poseStack.popMatrix();
 
 					if (QuestScreen.grid && !questScreen.isViewingQuest()) {
-						poseStack.pushPose();
-						poseStack.translate(0, 0, 1000);
-						Color4I.WHITE.draw(graphics, (int) Math.round(sx), (int) Math.round(sy), 1, 1);
-						Color4I.WHITE.withAlpha(30).draw(graphics, getX(), (int) sy, width, 1);
-						Color4I.WHITE.withAlpha(30).draw(graphics, (int) Math.round(sx), getY(), 1, height);
-						poseStack.popPose();
+						poseStack.pushMatrix();
+						poseStack.translate(0, 0);//, 1000);
+						IconHelper.renderIcon(Color4I.WHITE, graphics, (int) Math.round(sx), (int) Math.round(sy), 1, 1);
+						IconHelper.renderIcon(Color4I.WHITE.withAlpha(30), graphics, getX(), (int) sy, width, 1);
+						IconHelper.renderIcon(Color4I.WHITE.withAlpha(30), graphics, (int) Math.round(sx), getY(), 1, height);
+						poseStack.popMatrix();
 					}
 				}
 			}
 		}
 	}
 
-	private void drawStatusBar(GuiGraphics graphics, Theme theme, PoseStack poseStack) {
-		poseStack.pushPose();
+	private void drawStatusBar(GuiGraphics graphics, Theme theme, @UnknownNullability Matrix3x2fStack poseStack) {
+		if (questScreen.selectedChapter == null) {
+			return;
+		}
 
-		int statusX = questScreen.chapterPanel.expanded ? questScreen.chapterPanel.width : questScreen.expandChaptersButton.width;
-		int statusWidth = questScreen.chapterPanel.expanded ? width - statusX + questScreen.expandChaptersButton.width : width;
+		poseStack.pushMatrix();
+
+		int statusX = questScreen.chapterPanel.isExpanded() ? questScreen.chapterPanel.width : questScreen.expandChaptersButton.width;
+		int statusWidth = questScreen.chapterPanel.isExpanded() ? width - statusX + questScreen.expandChaptersButton.width : width;
 		Color4I statPanelBg = ThemeProperties.WIDGET_BACKGROUND.get();
-		Color4I.DARK_GRAY.draw(graphics, statusX, height - 9, statusWidth, 1);
-		statPanelBg.draw(graphics, statusX, height - 9, statusWidth, 10);
+		IconHelper.renderIcon(Color4I.DARK_GRAY, graphics, statusX, height - 9, statusWidth, 1);
+		IconHelper.renderIcon(statPanelBg, graphics, statusX, height - 9, statusWidth, 10);
 
-		poseStack.translate(statusX, height - 6, 600);
-		poseStack.scale(0.5f, 0.5f, 0.5f);
+		poseStack.translate(statusX, height - 6);
+		poseStack.scale(0.5f, 0.5f);
 
 		String curStr = String.format("Cursor: [%+.2f, %+.2f]", questX, questY);
 		int pos = theme.drawString(graphics, curStr, 6, 0, Theme.SHADOW) + 25;
@@ -404,7 +424,7 @@ public class QuestPanel extends Panel {
 		String cStr = String.format("Center: [%.2f, %.2f]", centerQuestX, centerQuestY);
 		theme.drawString(graphics, cStr, statusWidth * 2 - theme.getStringWidth(cStr) - 6, 0, Theme.SHADOW);
 
-		poseStack.popPose();
+		poseStack.popMatrix();
 	}
 
 	@Override
@@ -475,40 +495,40 @@ public class QuestPanel extends Panel {
 
 			contextMenu.add(new ContextMenuItem(Component.translatable("ftbquests.chapter.image"), Icons.ART, b -> showImageCreationScreen(qx, qy)));
 
-			String clip = getClipboardString();
-			if (!ChapterImage.isImageInClipboard()) {
-				QuestObjectBase.parseHexId(clip).ifPresent(questId -> {
-					QuestObject qo = questScreen.file.get(questId);
-					contextMenu.add(ContextMenuItem.SEPARATOR);
-					if (qo instanceof Quest quest) {
+			QuestObjectBase.parseHexId(getClipboardString()).ifPresent(questId -> {
+				QuestObjectBase qo = questScreen.file.getBase(questId);
+                switch (qo) {
+					case Quest quest -> {
+						contextMenu.add(ContextMenuItem.SEPARATOR);
 						contextMenu.add(new PasteQuestMenuItem(quest, Component.translatable("ftbquests.gui.paste"),
-								Icons.ADD,
-								b -> NetworkManager.sendToServer(new CopyQuestMessage(quest.id, questScreen.selectedChapter.id, qx, qy, true))));
-						if (quest.hasDependencies()) {
-							contextMenu.add(new PasteQuestMenuItem(quest, Component.translatable("ftbquests.gui.paste_no_deps"),
-									Icons.ADD_GRAY.withTint(Color4I.rgb(0x008000)),
-									b -> NetworkManager.sendToServer(new CopyQuestMessage(quest.id, questScreen.selectedChapter.id, qx, qy, false))));
-						}
-						contextMenu.add(new PasteQuestMenuItem(quest, Component.translatable("ftbquests.gui.paste_link"),
-								Icons.ADD_GRAY.withTint(Color4I.rgb(0x8080C0)),
-								b -> {
-									QuestLink link = new QuestLink(0L, questScreen.selectedChapter, quest.id);
-									link.setPosition(qx, qy);
-									NetworkManager.sendToServer(CreateObjectMessage.create(link, null));
-								}));
-					} else if (qo instanceof Task task) {
-						contextMenu.add(new AddTaskButton.PasteTaskMenuItem(task, b -> copyAndCreateTask(task, qx, qy)));
-					}
-				});
-			} else {
-				ChapterImageButton.getClipboardImage().ifPresent(clipImg -> {
-					contextMenu.add(ContextMenuItem.SEPARATOR);
-					contextMenu.add(new TooltipContextMenuItem(Component.translatable("ftbquests.gui.paste_image"),
-							Icons.ADD,
-							b -> NetworkManager.sendToServer(new CopyChapterImageMessage(clipImg, questScreen.selectedChapter, qx, qy)),
-							Component.literal(clipImg.getImage().toString()).withStyle(ChatFormatting.GRAY)));
-				});
-			}
+                                Icons.ADD,
+                                b -> NetworkManager.sendToServer(new CopyQuestMessage(quest.id, questScreen.selectedChapter.id, qx, qy, true))));
+                        if (quest.hasDependencies()) {
+                            contextMenu.add(new PasteQuestMenuItem(quest, Component.translatable("ftbquests.gui.paste_no_deps"),
+                                    Icons.ADD_GRAY.withTint(Color4I.rgb(0x008000)),
+                                    b -> NetworkManager.sendToServer(new CopyQuestMessage(quest.id, questScreen.selectedChapter.id, qx, qy, false))));
+                        }
+                        contextMenu.add(new PasteQuestMenuItem(quest, Component.translatable("ftbquests.gui.paste_link"),
+                                Icons.ADD_GRAY.withTint(Color4I.rgb(0x8080C0)),
+                                b -> {
+                                    QuestLink link = new QuestLink(0L, questScreen.selectedChapter, quest.id).setPosition(qx, qy);
+                                    NetworkManager.sendToServer(CreateObjectMessage.create(link, null));
+                                }));
+                    }
+                    case Task task -> {
+						contextMenu.add(ContextMenuItem.SEPARATOR);
+                        contextMenu.add(new AddTaskButton.PasteTaskMenuItem(task, b -> copyAndCreateTask(task, qx, qy)));
+                    }
+                    case ChapterImage img -> {
+						contextMenu.add(ContextMenuItem.SEPARATOR);
+                        contextMenu.add(new TooltipContextMenuItem(Component.translatable("ftbquests.gui.paste_image"),
+                                Icons.ADD,
+                                b -> NetworkManager.sendToServer(new CopyChapterImageMessage(img.getId(), questScreen.selectedChapter.getId(), qx, qy)),
+                                Component.literal(img.getImage().toString()).withStyle(ChatFormatting.GRAY)));
+                    }
+                    case null, default -> {}
+                }
+			});
 
 			questScreen.openContextMenu(contextMenu).setExtraZlevel(900);
 			return true;
@@ -518,27 +538,30 @@ public class QuestPanel extends Panel {
 	}
 
 	private void showImageCreationScreen(double qx, double qy) {
-		ImageResourceConfig imageConfig = new ImageResourceConfig();
+		if (questScreen.selectedChapter == null) {
+			return;
+		}
+		EditableImageResource imageConfig = new EditableImageResource();
 		new SelectImageResourceScreen(imageConfig, accepted -> {
 			if (accepted) {
 				playClickSound();
-				ChapterImage image = new ChapterImage(questScreen.selectedChapter)
+				ChapterImage image = new ChapterImage(0L, questScreen.selectedChapter)
 						.setImage(Icon.getIcon(imageConfig.getValue()))
 						.setPosition(qx, qy);
 				image.fixupAspectRatio(true);
-				questScreen.selectedChapter.addImage(image);
-				NetworkManager.sendToServer(EditObjectMessage.forQuestObject(questScreen.selectedChapter));
+				NetworkManager.sendToServer(CreateObjectMessage.create(image, null));
 			}
 			QuestPanel.this.questScreen.openGui();
 		}).openGui();
 	}
 
 	private void copyAndCreateTask(Task task, double qx, double qy) {
+		if (questScreen.selectedChapter == null) {
+			return;
+		}
 		Task newTask = QuestObjectBase.copy(task,
 				() -> TaskType.createTask(0L, new Quest(0L, questScreen.selectedChapter), task.getType().getTypeId().toString()));
-		if (newTask != null) {
-			NetworkManager.sendToServer(CreateTaskAtMessage.create(questScreen.selectedChapter, qx, qy, newTask, null));
-		}
+		NetworkManager.sendToServer(CreateTaskAtMessage.create(questScreen.selectedChapter, qx, qy, newTask, null));
 	}
 
 	@Override

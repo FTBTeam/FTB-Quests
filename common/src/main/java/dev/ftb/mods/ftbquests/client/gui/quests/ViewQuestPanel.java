@@ -1,25 +1,48 @@
 package dev.ftb.mods.ftbquests.client.gui.quests;
 
+import net.minecraft.ChatFormatting;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.screens.ConfirmLinkScreen;
+import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.network.chat.ClickEvent;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.HoverEvent;
+import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.network.chat.Style;
+import net.minecraft.util.Mth;
+import net.minecraft.util.Util;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.Items;
+import net.minecraft.world.item.TooltipFlag;
 import com.mojang.datafixers.util.Pair;
+
 import dev.architectury.networking.NetworkManager;
-import dev.ftb.mods.ftblibrary.config.ConfigGroup;
-import dev.ftb.mods.ftblibrary.config.ImageResourceConfig;
-import dev.ftb.mods.ftblibrary.config.ListConfig;
-import dev.ftb.mods.ftblibrary.config.StringConfig;
-import dev.ftb.mods.ftblibrary.config.ui.EditConfigScreen;
-import dev.ftb.mods.ftblibrary.config.ui.EditStringConfigOverlay;
+
+import dev.ftb.mods.ftblibrary.client.config.EditableConfigGroup;
+import dev.ftb.mods.ftblibrary.client.config.editable.EditableImageResource;
+import dev.ftb.mods.ftblibrary.client.config.editable.EditableList;
+import dev.ftb.mods.ftblibrary.client.config.editable.EditableString;
+import dev.ftb.mods.ftblibrary.client.config.gui.EditConfigScreen;
+import dev.ftb.mods.ftblibrary.client.config.gui.EditStringConfigOverlay;
+import dev.ftb.mods.ftblibrary.client.gui.CursorType;
+import dev.ftb.mods.ftblibrary.client.gui.input.Key;
+import dev.ftb.mods.ftblibrary.client.gui.input.MouseButton;
+import dev.ftb.mods.ftblibrary.client.gui.layout.CompactGridLayout;
+import dev.ftb.mods.ftblibrary.client.gui.layout.WidgetLayout;
+import dev.ftb.mods.ftblibrary.client.gui.theme.Theme;
+import dev.ftb.mods.ftblibrary.client.gui.widget.*;
+import dev.ftb.mods.ftblibrary.client.icon.IconHelper;
+import dev.ftb.mods.ftblibrary.client.util.ImageComponent;
 import dev.ftb.mods.ftblibrary.icon.Color4I;
 import dev.ftb.mods.ftblibrary.icon.Icon;
 import dev.ftb.mods.ftblibrary.icon.Icons;
 import dev.ftb.mods.ftblibrary.icon.ItemIcon;
-import dev.ftb.mods.ftblibrary.ui.*;
-import dev.ftb.mods.ftblibrary.ui.input.Key;
-import dev.ftb.mods.ftblibrary.ui.input.MouseButton;
-import dev.ftb.mods.ftblibrary.ui.misc.CompactGridLayout;
+import dev.ftb.mods.ftblibrary.util.Lazy;
 import dev.ftb.mods.ftblibrary.util.TooltipList;
-import dev.ftb.mods.ftblibrary.util.client.ImageComponent;
 import dev.ftb.mods.ftbquests.api.FTBQuestsAPI;
 import dev.ftb.mods.ftbquests.client.ClientQuestFile;
+import dev.ftb.mods.ftbquests.client.FTBQuestsClient;
 import dev.ftb.mods.ftbquests.client.FTBQuestsClientConfig;
 import dev.ftb.mods.ftbquests.client.gui.ImageComponentWidget;
 import dev.ftb.mods.ftbquests.client.gui.MultilineTextEditorScreen;
@@ -37,35 +60,27 @@ import dev.ftb.mods.ftbquests.quest.theme.QuestTheme;
 import dev.ftb.mods.ftbquests.quest.theme.property.ThemeProperties;
 import dev.ftb.mods.ftbquests.quest.translation.TranslationKey;
 import dev.ftb.mods.ftbquests.util.TextUtils;
-import it.unimi.dsi.fastutil.longs.Long2IntMap;
-import it.unimi.dsi.fastutil.longs.Long2IntOpenHashMap;
-import net.minecraft.ChatFormatting;
-import net.minecraft.Util;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.client.gui.screens.ConfirmLinkScreen;
-import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.network.chat.*;
-import net.minecraft.util.Mth;
-import net.minecraft.world.item.Item;
-import net.minecraft.world.item.Items;
-import net.minecraft.world.item.TooltipFlag;
-import org.apache.commons.lang3.StringUtils;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
-import org.lwjgl.glfw.GLFW;
 
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+import java.util.Locale;
+import java.util.Objects;
 import java.util.function.BiConsumer;
+import it.unimi.dsi.fastutil.longs.Long2IntMap;
+import it.unimi.dsi.fastutil.longs.Long2IntOpenHashMap;
+import org.jspecify.annotations.Nullable;
+import org.lwjgl.glfw.GLFW;
 
 public class ViewQuestPanel extends ModalPanel {
-	public static final Icon PAGEBREAK_ICON = Icon.getIcon(FTBQuestsAPI.rl("textures/gui/pagebreak.png"));
+	public static final Icon<?> PAGEBREAK_ICON = Icon.getIcon(FTBQuestsAPI.id("textures/gui/pagebreak.png"));
 
 	private final QuestScreen questScreen;
+	@Nullable
 	private Quest quest = null;
-	private Icon icon = Color4I.empty();
+	private Icon<?> icon = Color4I.empty();
 	private Button buttonOpenDependencies;
 	private BlankPanel panelContent;
 	private BlankPanel panelTasks;
@@ -82,10 +97,6 @@ public class ViewQuestPanel extends ModalPanel {
 		setPosAndSize(-1, -1, 0, 0);
 		setOnlyRenderWidgetsInside(true);
 		setOnlyInteractWithWidgetsInside(true);
-		// Vanilla applies a +Z translation of 150 for item rendering
-		// Supported quest size is up to 8x, so we need to translate at least 8*150 along the +Z axis,
-		//   to ensure the panel renders above any item icons
-		setExtraZlevel(1250);
 	}
 
 	@Override
@@ -99,11 +110,16 @@ public class ViewQuestPanel extends ModalPanel {
 		return quest != null && super.checkMouseOver(mouseX, mouseY);
 	}
 
+	@Nullable
 	public Quest getViewedQuest() {
 		return quest;
 	}
 
-	public void setViewedQuest(Quest newQuest) {
+	private Quest requireQuest() {
+		return Objects.requireNonNull(quest);
+	}
+
+	public void setViewedQuest(@Nullable Quest newQuest) {
 		if (quest != newQuest) {
 			quest = newQuest;
 			refreshWidgets();
@@ -111,7 +127,7 @@ public class ViewQuestPanel extends ModalPanel {
 	}
 
 	public boolean canEdit() {
-		return quest.getQuestFile().canEdit();
+		return quest != null && quest.getQuestFile().canEdit();
 	}
 
 	private void buildPageIndices() {
@@ -147,8 +163,7 @@ public class ViewQuestPanel extends ModalPanel {
 			return;
 		}
 
-		QuestObjectBase prev = QuestTheme.currentObject;
-		QuestTheme.currentObject = quest;
+		QuestObjectBase prev = QuestTheme.setFallbackQuestObject(quest);
 
 		setScrollX(0);
 		setScrollY(0);
@@ -165,7 +180,7 @@ public class ViewQuestPanel extends ModalPanel {
 
 		if (quest.getMinWidth() > 0) {
 			w = Math.max(quest.getMinWidth(), w);
-		} else if (questScreen.selectedChapter.getDefaultMinWidth() > 0) {
+		} else if (questScreen.selectedChapter != null && questScreen.selectedChapter.getDefaultMinWidth() > 0) {
 			w = Math.max(questScreen.selectedChapter.getDefaultMinWidth(), w);
 		}
 
@@ -184,7 +199,7 @@ public class ViewQuestPanel extends ModalPanel {
 			TaskButton taskButton = new TaskButton(panelTasks, task);
 			panelTasks.add(taskButton);
 			taskButton.setSize(bsize, bsize);
-			if (!canEdit && seq && !questScreen.file.selfTeamData.isCompleted(task)) {
+			if (!canEdit && seq && !FTBQuestsClient.getClientPlayerData().isCompleted(task)) {
 				break;
 			}
 		}
@@ -197,7 +212,7 @@ public class ViewQuestPanel extends ModalPanel {
 		}
 
 		for (Reward reward : quest.getRewards()) {
-			if (canEdit || !questScreen.file.selfTeamData.isRewardBlocked(reward) && reward.getAutoClaimType() != RewardAutoClaim.INVISIBLE) {
+			if (canEdit || !FTBQuestsClient.getClientPlayerData().isRewardBlocked(reward) && reward.getAutoClaimType() != RewardAutoClaim.INVISIBLE) {
 				RewardButton b = new RewardButton(panelRewards, reward);
 				panelRewards.add(b);
 				b.setSize(bsize, bsize);
@@ -252,7 +267,7 @@ public class ViewQuestPanel extends ModalPanel {
 		add(buttonPin = new PinViewQuestButton());
 		buttonPin.setPosAndSize(w - iconSize * 2 - 4, 4, iconSize, iconSize);
 
-		if (questScreen.selectedChapter.id != quest.getChapter().id) {
+		if (questScreen.selectedChapter != null && questScreen.selectedChapter.id != quest.getChapter().id) {
 			GotoLinkedQuestButton b = new GotoLinkedQuestButton();
 			add(b);
 			b.setPosAndSize(iconSize + 4, 0, iconSize, iconSize);
@@ -357,7 +372,7 @@ public class ViewQuestPanel extends ModalPanel {
 		}
 
 		boolean showText = !quest.getHideTextUntilComplete().get(quest.getChapter().isHideTextUntilComplete())
-				|| questScreen.file.selfTeamData != null && questScreen.file.selfTeamData.isCompleted(quest);
+				|| questScreen.file.selfTeamData.isValid() && questScreen.file.selfTeamData.isCompleted(quest);
 
 		buildPageIndices();
 
@@ -400,10 +415,13 @@ public class ViewQuestPanel extends ModalPanel {
 		setPos((parent.width - width) / 2, (parent.height - height) / 2);
 		panelContent.setHeight(height - 17);
 
-		QuestTheme.currentObject = prev;
+		QuestTheme.setFallbackQuestObject(prev);
 	}
 
 	private void addDescriptionText(boolean canEdit, Component subtitle) {
+		if (quest == null) {
+			return;
+		}
 		Pair<Integer,Integer> pageSpan = pageIndices.get(getCurrentPage());
 		if (!TextUtils.isComponentEmpty(subtitle)) {
 			panelText.add(new VerticalSpaceWidget(panelText, 7));
@@ -425,7 +443,7 @@ public class ViewQuestPanel extends ModalPanel {
 		}
 	}
 
-	private @NotNull ImageComponentWidget makeImageComponentWidget(ImageComponent img, int idx) {
+	private ImageComponentWidget makeImageComponentWidget(ImageComponent img, int idx) {
 		ImageComponentWidget cw = new ImageComponentWidget(this, panelText, img, idx);
 
 		if (cw.getComponent().isFit()) {
@@ -482,7 +500,6 @@ public class ViewQuestPanel extends ModalPanel {
 		}
 	}
 
-	@NotNull
 	private SimpleTextButton makeNextPageButton(Panel buttonPanel, int currentPage) {
 		SimpleTextButton nextPage = new SimpleTextButton(buttonPanel, Component.empty(), ThemeProperties.RIGHT_ARROW.get()) {
 			@Override
@@ -501,7 +518,6 @@ public class ViewQuestPanel extends ModalPanel {
 		return nextPage;
 	}
 
-	@NotNull
 	private SimpleTextButton makePrevPageButton(Panel buttonPanel, int currentPage, int labelWidth) {
 		SimpleTextButton prevPage = new SimpleTextButton(buttonPanel, Component.empty(), ThemeProperties.LEFT_ARROW.get()) {
 			@Override
@@ -520,6 +536,7 @@ public class ViewQuestPanel extends ModalPanel {
 		return prevPage;
 	}
 
+	@Nullable
 	private ImageComponent findImageComponent(Component c) {
 		// FIXME: this isn't ideal and needs a proper fix in ftb library, but works for now
 		if (c.getContents() instanceof ImageComponent img) {
@@ -543,7 +560,7 @@ public class ViewQuestPanel extends ModalPanel {
 	public void tick() {
 		super.tick();
 
-		if (quest != null && quest.hasDependencies() && !questScreen.file.selfTeamData.canStartTasks(quest) && buttonOpenDependencies != null) {
+		if (quest != null && quest.hasDependencies() && !FTBQuestsClient.getClientPlayerData().canStartTasks(quest)) {
 			float red = Mth.sin((System.currentTimeMillis() % 1200) * (3.1415927f / 1200f));
 			Color4I col = Color4I.rgb((int) (red * 127 + 63), 0, 0);
 			buttonOpenDependencies.setIcon(Icon.getIcon(FTBQuestsAPI.MOD_ID + ":textures/gui/arrow_left.png").withTint(col));
@@ -566,7 +583,7 @@ public class ViewQuestPanel extends ModalPanel {
 		}
 
 		for (QuestObject object : c) {
-			if (questScreen.file.canEdit() || object.isSearchable(questScreen.file.selfTeamData)) {
+			if (questScreen.file.canEdit() || object.isSearchable(FTBQuestsClient.getClientPlayerData())) {
 				MutableComponent title = object.getMutableTitle();
 				if (object.getQuestChapter() != null && object.getQuestChapter() != quest.getQuestChapter()) {
 					Component suffix = Component.literal(" [").append(object.getQuestChapter().getTitle()).append("]").withStyle(ChatFormatting.GRAY);
@@ -589,13 +606,13 @@ public class ViewQuestPanel extends ModalPanel {
 	}
 
 	@Override
-	public void keyReleased(Key key) {
+	public boolean keyReleased(Key key) {
 		// released rather than pressed; if we used pressed, keypress would be picked up by the next screen
 
-		if (quest == null) return;
+		if (quest == null) return false;
 
 		if (questScreen.file.canEdit()) {
-			switch (key.keyCode) {
+			switch (key.event().key()) {
 				case GLFW.GLFW_KEY_S -> editSubtitle();
 				case GLFW.GLFW_KEY_T -> editTitle();
 				case GLFW.GLFW_KEY_D -> editDescription();
@@ -607,7 +624,7 @@ public class ViewQuestPanel extends ModalPanel {
 				case GLFW.GLFW_KEY_RIGHT -> moveTasksAndRewards(true);
 			}
 		} else {
-			switch (key.keyCode) {
+			switch (key.event().key()) {
 				case GLFW.GLFW_KEY_PAGE_UP, GLFW.GLFW_KEY_LEFT -> {
 					setCurrentPage(Math.max(0, getCurrentPage() - 1));
 					refreshWidgets();
@@ -618,6 +635,9 @@ public class ViewQuestPanel extends ModalPanel {
 				}
 			}
 		}
+
+		// TODO: @since 21.11: We should handle correctly if the key release was handled by one of the above actions
+		return false;
 	}
 
 	private void moveTasksAndRewards(boolean moveRight) {
@@ -639,7 +659,7 @@ public class ViewQuestPanel extends ModalPanel {
 	}
 
 	private void editTitle() {
-		StringConfig c = new StringConfig(null);
+		EditableString c = new EditableString();
 
 		// pressing T while mousing over a task button allows editing the task title
 		QuestObject qo = panelTasks.getWidgets().stream()
@@ -660,7 +680,7 @@ public class ViewQuestPanel extends ModalPanel {
 	}
 
 	private void editSubtitle() {
-		StringConfig c = new StringConfig(null);
+		EditableString c = new EditableString();
 		c.setValue(quest.getRawSubtitle());
 		EditStringConfigOverlay<String> overlay = new EditStringConfigOverlay<>(getGui(), c, accepted -> {
 			if (accepted) {
@@ -668,13 +688,13 @@ public class ViewQuestPanel extends ModalPanel {
 				syncQuestToServer();
 			}
 		}, Component.translatable("ftbquests.chapter.subtitle"));
-		overlay.setWidth(Mth.clamp(overlay.getWidth(), 150, getScreen().getGuiScaledWidth() - 20));
+		overlay.setWidth(Mth.clamp(overlay.getWidth(), 150, getWindow().getGuiScaledWidth() - 20));
 		overlay.setPos(panelText.getX() + (panelText.width - overlay.width) / 2, panelText.getY() - 14);
 		getGui().pushModalPanel(overlay);
 	}
 
 	private void editDescription() {
-		ListConfig<String, StringConfig> lc = new ListConfig<>(new StringConfig());
+		EditableList<String, EditableString> lc = new EditableList<>(new EditableString());
 
 		lc.setValue(new ArrayList<>(quest.getRawDescription()));
 		new MultilineTextEditorScreen(Component.translatable("ftbquests.gui.edit_description"), lc, accepted -> {
@@ -739,7 +759,7 @@ public class ViewQuestPanel extends ModalPanel {
 		} else {
 			var mutableRawDesc = new ArrayList<>(quest.getRawDescription());
 
-			StringConfig c = new StringConfig(null);
+			EditableString c = new EditableString();
 			c.setValue(line == -1 ? "" : mutableRawDesc.get(line));
 			EditStringConfigOverlay<String> overlay = new EditStringConfigOverlay<>(getGui(), c, accepted -> {
 				if (accepted) {
@@ -753,13 +773,13 @@ public class ViewQuestPanel extends ModalPanel {
 					refreshWidgets();
 				}
 			}).atPosition(clickedWidget.getX(), clickedWidget.getY());
-			overlay.setWidth(Mth.clamp(overlay.getWidth(), 150, getScreen().getGuiScaledWidth() - clickedWidget.getX() - 20));
+			overlay.setWidth(Mth.clamp(overlay.getWidth(), 150, getWindow().getGuiScaledWidth() - clickedWidget.getX() - 20));
 			getGui().pushModalPanel(overlay);
 		}
 	}
 
 	private void editImage(int line, ImageComponent component) {
-		ConfigGroup group = new ConfigGroup(FTBQuestsAPI.MOD_ID + ".chapter.image", accepted -> {
+		EditableConfigGroup group = new EditableConfigGroup(FTBQuestsAPI.MOD_ID + ".chapter.image", accepted -> {
 			openGui();
 			if (accepted) {
 				quest.modifyTranslatableListValue(TranslationKey.QUEST_DESC, mutableRawDesc -> {
@@ -775,8 +795,8 @@ public class ViewQuestPanel extends ModalPanel {
 			}
 		});
 
-		group.add("image", new ImageResourceConfig(), ImageResourceConfig.getResourceLocation(component.getImage()),
-				v -> component.setImage(Icon.getIcon(v)), ImageResourceConfig.NONE);
+		group.add("image", new EditableImageResource(), EditableImageResource.getIdentifier(component.getImage()),
+				v -> component.setImage(Icon.getIcon(v)), EditableImageResource.NONE);
 		group.addInt("width", component.getWidth(), component::setWidth, 0, 1, 1000);
 		group.addInt("height", component.getHeight(), component::setHeight, 0, 1, 1000);
 		group.addEnum("align", component.getAlign(), component::setAlign, ImageComponent.ImageAlign.NAME_MAP, ImageComponent.ImageAlign.CENTER);
@@ -818,24 +838,21 @@ public class ViewQuestPanel extends ModalPanel {
 	@Override
 	public void draw(GuiGraphics graphics, Theme theme, int x, int y, int w, int h) {
 		if (quest != null) {
-			QuestObjectBase prev = QuestTheme.currentObject;
-			QuestTheme.currentObject = quest;
+			QuestObjectBase prev = QuestTheme.setFallbackQuestObject(quest);
 			super.draw(graphics, theme, x, y, w, h);
-			QuestTheme.currentObject = prev;
+			QuestTheme.setFallbackQuestObject(prev);
 		}
 	}
 
 	@Override
 	public void drawBackground(GuiGraphics graphics, Theme theme, int x, int y, int w, int h) {
-		ThemeProperties.QUEST_VIEW_BACKGROUND.get().draw(graphics, x, y, w, h);
+		IconHelper.renderIcon(ThemeProperties.QUEST_VIEW_BACKGROUND.get(), graphics, x, y, w, h);
 
-		if (titleField != null && panelContent != null) {
-			int iconSize = Math.min(16, titleField.height + 2);
-			icon.draw(graphics, x + 4, y + 4, iconSize, iconSize);
-			ThemeProperties.QUEST_VIEW_BORDER.get().draw(graphics, x + 1, panelContent.getY(), w - 2, 1);
-			if (questScreen.file.selfTeamData.getMilliSecondsUntilRepeatable(quest) > 0L) {
-				Icons.TIME.draw(graphics,x + 6 + iconSize, y + 4, iconSize, iconSize);
-			}
+		int iconSize = Math.min(16, titleField.height + 2);
+		IconHelper.renderIcon(icon, graphics, x + 4, y + 4, iconSize, iconSize);
+		IconHelper.renderIcon(ThemeProperties.QUEST_VIEW_BORDER.get(), graphics, x + 1, panelContent.getY(), w - 2, 1);
+		if (FTBQuestsClient.getClientPlayerData().getMilliSecondsUntilRepeatable(quest) > 0L) {
+			IconHelper.renderIcon(Icons.TIME, graphics,x + 6 + iconSize, y + 4, iconSize, iconSize);
 		}
 	}
 
@@ -872,7 +889,7 @@ public class ViewQuestPanel extends ModalPanel {
 
 	private class QuestDescriptionField extends TextField {
 		private final boolean canEdit;
-		private final boolean xlateWarning;
+		private final Lazy<Boolean> xlateWarning = Lazy.of(this::shouldWarnXlate);
 		private final BiConsumer<Boolean,Widget> editCallback;
 		private final TranslationKey key;
 
@@ -881,15 +898,17 @@ public class ViewQuestPanel extends ModalPanel {
 			this.canEdit = canEdit;
 			this.editCallback = editCallback;
 			this.key = key;
+		}
 
-			xlateWarning = FTBQuestsClientConfig.HILITE_MISSING.get()
-					&& quest.getQuestFile().getTranslationManager().hasMissingTranslation(quest, key);
+		private boolean shouldWarnXlate() {
+			return FTBQuestsClientConfig.HILITE_MISSING.get()
+					&& (quest == null || quest.getQuestFile().getTranslationManager().hasMissingTranslation(quest, key));
 		}
 
 		@Override
 		public void draw(GuiGraphics graphics, Theme theme, int x, int y, int w, int h) {
-			if (xlateWarning) {
-				Color4I.RED.withAlpha(40).draw(graphics, x, y, w, h);
+			if (xlateWarning.get()) {
+				IconHelper.renderIcon(Color4I.RED.withAlpha(40), graphics, x, y, w, h);
 			}
 			super.draw(graphics, theme, x, y, w, h);
 		}
@@ -900,11 +919,9 @@ public class ViewQuestPanel extends ModalPanel {
 				if (canEdit && button.isRight()) {
 					editCallback.accept(true, this);
 					return true;
-				} else if (button.isLeft() && Minecraft.getInstance().screen != null) {
-					Optional<Style> style = getComponentStyleAt(questScreen.getTheme(), getMouseX(), getMouseY());
-					if (style.isPresent()) {
-						return handleCustomClickEvent(style.get()) || Minecraft.getInstance().screen.handleComponentClicked(style.get());
-					}
+				} else if (button.isLeft()) {
+					return getClickableStyleAt(questScreen.getTheme(), getMouseX(), getMouseY())
+							.map(this::handleCustomClickEvent).orElse(false);
 				}
 			}
 
@@ -912,50 +929,57 @@ public class ViewQuestPanel extends ModalPanel {
 		}
 
 		private boolean handleCustomClickEvent(Style style) {
-			if (style == null) return false;
-
-			ClickEvent clickEvent = style.getClickEvent();
-			if (clickEvent == null) return false;
-
-			if (clickEvent.getAction() == ClickEvent.Action.CHANGE_PAGE) {
-				String[] fields = clickEvent.getValue().split("/");
-				QuestObjectBase.parseHexId(fields[0]).ifPresentOrElse(questId -> {
-					QuestObject qo = quest.getQuestFile().get(questId);
-					if (qo != null) {
-						if (qo instanceof Quest && fields.length >= 2 && StringUtils.isNumeric(fields[1])) {
-							currentPages.put(questId.longValue(), Integer.parseInt(fields[1]) - 1);
+			switch (style.getClickEvent()) {
+				case ClickEvent.Custom changePage when quest != null -> {
+					return changePage.payload().map(tag -> {
+						if (changePage.id().equals(MultilineTextEditorScreen.QUEST_LINK_ACTION)) {
+							tag.asCompound().ifPresent(compoundTag -> {
+								String idStr = compoundTag.getStringOr("quest_id", "0");
+								QuestObjectBase.parseHexId(idStr).ifPresentOrElse(questId -> {
+									QuestObject qo = quest.getQuestFile().get(questId);
+									if (qo != null) {
+										if (qo instanceof Quest) {
+											currentPages.put(questId.longValue(), compoundTag.getIntOr("page", 1) - 1);
+										}
+										playClickSound();
+										questScreen.open(qo, false);
+									} else {
+										errorToPlayer("Unknown quest object id: %s", idStr);
+									}
+								}, () -> errorToPlayer("Invalid quest object id: %s", idStr));
+							});
 						}
-						questScreen.open(qo, false);
-					} else {
-						errorToPlayer("Unknown quest object id: %s", clickEvent.getValue());
-					}
-				}, () -> errorToPlayer("Invalid quest object id: %s", clickEvent.getValue()));
-				return true;
-			} else if (clickEvent.getAction() == ClickEvent.Action.OPEN_URL) {
-				try {
-					URI uri = new URI(clickEvent.getValue());
-					String scheme = uri.getScheme();
-					if (scheme == null) {
-						throw new URISyntaxException(clickEvent.getValue(), "Missing protocol");
-					}
-					if (!scheme.equalsIgnoreCase("http") && !scheme.equalsIgnoreCase("https")) {
-						throw new URISyntaxException(clickEvent.getValue(), "Unsupported protocol: " + scheme.toLowerCase(Locale.ROOT));
-					}
-
-					final Screen curScreen = Minecraft.getInstance().screen;
-					Minecraft.getInstance().setScreen(new ConfirmLinkScreen(accepted -> {
-						if (accepted) {
-							Util.getPlatform().openUri(uri);
-						}
-						Minecraft.getInstance().setScreen(curScreen);
-					}, clickEvent.getValue(), false));
-					return true;
-				} catch (URISyntaxException e) {
-					errorToPlayer("Can't open url for %s (%s)", clickEvent.getValue(), e.getMessage());
+						return true;
+					}).orElse(false);
 				}
-				return true;
+				case ClickEvent.OpenUrl openUrl -> {
+					try {
+						URI uri = openUrl.uri();
+						String scheme = uri.getScheme();
+						if (scheme == null) {
+							throw new URISyntaxException(uri.toString(), "Missing protocol");
+						}
+						if (!scheme.equalsIgnoreCase("http") && !scheme.equalsIgnoreCase("https")) {
+							throw new URISyntaxException(uri.toString(), "Unsupported protocol: " + scheme.toLowerCase(Locale.ROOT));
+						}
+
+						final Screen curScreen = Minecraft.getInstance().screen;
+						Minecraft.getInstance().setScreen(new ConfirmLinkScreen(accepted -> {
+							if (accepted) {
+								Util.getPlatform().openUri(uri);
+							}
+							Minecraft.getInstance().setScreen(curScreen);
+						}, uri.toString(), false));
+						return true;
+					} catch (URISyntaxException e) {
+						errorToPlayer("Can't open url for %s (%s)", openUrl.uri(), e.getMessage());
+					}
+					return true;
+				}
+				case null, default -> {
+					return false;
+				}
 			}
-			return false;
 		}
 
 		private void errorToPlayer(String msg, Object... args) {
@@ -984,31 +1008,21 @@ public class ViewQuestPanel extends ModalPanel {
 
 			super.addMouseOverText(list);
 
-			getComponentStyleAt(questScreen.getTheme(), getMouseX(), getMouseY()).ifPresent(style -> {
-				if (style.getHoverEvent() != null) {
-					HoverEvent hoverevent = style.getHoverEvent();
-					HoverEvent.ItemStackInfo stackInfo = hoverevent.getValue(HoverEvent.Action.SHOW_ITEM);
-					Minecraft mc = Minecraft.getInstance();
-					TooltipFlag flag = mc.options.advancedItemTooltips ? TooltipFlag.Default.ADVANCED : TooltipFlag.Default.NORMAL;
-					if (stackInfo != null) {
-						stackInfo.getItemStack().getTooltipLines(Item.TooltipContext.of(mc.level), mc.player, flag).forEach(list::add);
-					} else {
-						HoverEvent.EntityTooltipInfo entityInfo = hoverevent.getValue(HoverEvent.Action.SHOW_ENTITY);
-						if (entityInfo != null) {
-							if (flag.isAdvanced()) {
-								entityInfo.getTooltipLines().forEach(list::add);
-							}
-						} else {
-							Component component = hoverevent.getValue(HoverEvent.Action.SHOW_TEXT);
-							if (component != null) {
-								list.add(component);
-							}
-						}
-					}
+			getClickableStyleAt(questScreen.getTheme(), getMouseX(), getMouseY()).ifPresent(style -> {
+				Minecraft mc = Minecraft.getInstance();
+				TooltipFlag flag = mc.options.advancedItemTooltips ? TooltipFlag.Default.ADVANCED : TooltipFlag.Default.NORMAL;
+				switch (style.getHoverEvent()) {
+					case HoverEvent.ShowItem showItem ->
+							showItem.item().getTooltipLines(Item.TooltipContext.of(mc.level), mc.player, flag).forEach(list::add);
+					case HoverEvent.ShowEntity showEntity when flag.isAdvanced() ->
+							showEntity.entity().getTooltipLines().forEach(list::add);
+					case HoverEvent.ShowText showText ->
+							list.add(showText.value());
+					case null, default -> {}
 				}
 			});
 
-			if (xlateWarning) {
+			if (xlateWarning.get()) {
 				ClientQuestFile.addTranslationWarning(list, key);
 			}
 		}
@@ -1107,7 +1121,7 @@ public class ViewQuestPanel extends ModalPanel {
 		private final Quest quest;
 
 		public OpenInGuideButton(Panel panel, Quest q) {
-			super(panel, Component.translatable("ftbquests.gui.open_in_guide"), ItemIcon.getItemIcon(Items.BOOK));
+			super(panel, Component.translatable("ftbquests.gui.open_in_guide"), ItemIcon.ofItem(Items.BOOK));
 			setHeight(13);
 			setX((panel.width - width) / 2);
 			quest = q;

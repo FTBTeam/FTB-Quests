@@ -1,18 +1,28 @@
 package dev.ftb.mods.ftbquests.client.gui;
 
+import net.minecraft.ChatFormatting;
+import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import net.minecraft.util.Util;
+import net.minecraft.world.item.Items;
+
 import dev.architectury.networking.NetworkManager;
-import dev.ftb.mods.ftblibrary.config.StringConfig;
-import dev.ftb.mods.ftblibrary.config.ui.EditStringConfigOverlay;
+
+import dev.ftb.mods.ftblibrary.client.config.editable.EditableString;
+import dev.ftb.mods.ftblibrary.client.config.gui.EditStringConfigOverlay;
+import dev.ftb.mods.ftblibrary.client.gui.input.Key;
+import dev.ftb.mods.ftblibrary.client.gui.input.MouseButton;
+import dev.ftb.mods.ftblibrary.client.gui.screens.AbstractButtonListScreen;
+import dev.ftb.mods.ftblibrary.client.gui.theme.Theme;
+import dev.ftb.mods.ftblibrary.client.gui.widget.ContextMenuItem;
+import dev.ftb.mods.ftblibrary.client.gui.widget.Panel;
+import dev.ftb.mods.ftblibrary.client.gui.widget.SimpleTextButton;
+import dev.ftb.mods.ftblibrary.client.icon.IconHelper;
 import dev.ftb.mods.ftblibrary.icon.Color4I;
 import dev.ftb.mods.ftblibrary.icon.Icons;
 import dev.ftb.mods.ftblibrary.icon.ItemIcon;
-import dev.ftb.mods.ftblibrary.ui.ContextMenuItem;
-import dev.ftb.mods.ftblibrary.ui.Panel;
-import dev.ftb.mods.ftblibrary.ui.SimpleTextButton;
-import dev.ftb.mods.ftblibrary.ui.Theme;
-import dev.ftb.mods.ftblibrary.ui.input.Key;
-import dev.ftb.mods.ftblibrary.ui.input.MouseButton;
-import dev.ftb.mods.ftblibrary.ui.misc.AbstractButtonListScreen;
 import dev.ftb.mods.ftblibrary.util.TooltipList;
 import dev.ftb.mods.ftbquests.FTBQuests;
 import dev.ftb.mods.ftbquests.client.ClientQuestFile;
@@ -26,24 +36,17 @@ import dev.ftb.mods.ftbquests.quest.loot.RewardTable;
 import dev.ftb.mods.ftbquests.quest.reward.RandomReward;
 import dev.ftb.mods.ftbquests.quest.translation.TranslationKey;
 import dev.ftb.mods.ftbquests.registry.ModItems;
-import it.unimi.dsi.fastutil.ints.IntOpenHashSet;
-import it.unimi.dsi.fastutil.ints.IntSet;
-import net.minecraft.ChatFormatting;
-import net.minecraft.Util;
-import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.network.chat.Component;
-import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
-import net.minecraft.world.item.Items;
-import org.apache.commons.lang3.mutable.MutableInt;
-import org.jetbrains.annotations.NotNull;
-import org.lwjgl.glfw.GLFW;
 
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+import it.unimi.dsi.fastutil.ints.IntOpenHashSet;
+import it.unimi.dsi.fastutil.ints.IntSet;
+import org.apache.commons.lang3.mutable.MutableInt;
+import org.jetbrains.annotations.NotNull;
+import org.lwjgl.glfw.GLFW;
 
 public class RewardTablesScreen extends AbstractButtonListScreen {
 	private final QuestScreen questScreen;
@@ -57,9 +60,9 @@ public class RewardTablesScreen extends AbstractButtonListScreen {
 		super();
 
 		this.questScreen = questScreen;
-		this.rewardTablesCopy = ClientQuestFile.INSTANCE.getRewardTables().stream()
+		this.rewardTablesCopy = ClientQuestFile.getInstance().getRewardTables().stream()
 				.map(table -> QuestObjectBase.copy(table,
-						() -> new RewardTable(table.id, ClientQuestFile.INSTANCE)))
+						() -> new RewardTable(table.id, ClientQuestFile.getInstance())))
 				.collect(Collectors.toCollection(ArrayList::new));
 
 		setTitle(Component.translatable("ftbquests.reward_tables"));
@@ -71,11 +74,11 @@ public class RewardTablesScreen extends AbstractButtonListScreen {
 			public void onClicked(MouseButton button) {
 				playClickSound();
 
-				StringConfig cfg = new StringConfig();
-				EditStringConfigOverlay<String> panel = new EditStringConfigOverlay<>(getGui(), cfg, accepted -> {
+				EditableString editable = new EditableString();
+				EditStringConfigOverlay<String> panel = new EditStringConfigOverlay<>(getGui(), editable, accepted -> {
 					if (accepted) {
-						RewardTable table = new RewardTable(0L, ClientQuestFile.INSTANCE);
-						table.setRawTitle(cfg.getValue());
+						RewardTable table = new RewardTable(0L, ClientQuestFile.getInstance());
+						table.setRawTitle(editable.getValue());
 						rewardTablesCopy.add(table);
 						refreshWidgets();
 					}
@@ -114,7 +117,7 @@ public class RewardTablesScreen extends AbstractButtonListScreen {
 		);
 
 		setWidth(maxW);
-		setHeight(getGui().getScreen().getGuiScaledHeight() * 4 / 5);
+		setHeight(getGui().getWindow().getGuiScaledHeight() * 4 / 5);
 
 		return true;
 	}
@@ -158,7 +161,7 @@ public class RewardTablesScreen extends AbstractButtonListScreen {
 	}
 
 	private static CreateObjectMessage makeCreationPacket(RewardTable table) {
-		ClientQuestFile file = ClientQuestFile.INSTANCE;
+		ClientQuestFile file = ClientQuestFile.getInstance();
 		CompoundTag extra = Util.make(new CompoundTag(), tag -> file.getTranslationManager().addInitialTranslation(
 				tag, file.getLocale(), TranslationKey.TITLE, table.getRawTitle())
 		);
@@ -231,12 +234,14 @@ public class RewardTablesScreen extends AbstractButtonListScreen {
 			}
 
 			List<ContextMenuItem> menu = List.of(
-					new ContextMenuItem(Component.translatable("ftbquests.gui.edit"), ItemIcon.getItemIcon(Items.FEATHER),
+					new ContextMenuItem(Component.translatable("ftbquests.gui.edit"), ItemIcon.ofItem(Items.FEATHER),
 							b -> editRewardTable()),
 					new ContextMenuItem(Component.translatable(pendingDeleteIndexes.contains(idx) ? "ftbquests.gui.restore" : "gui.remove"), Icons.BIN,
 							b -> deleteRewardTable()),
-					new ContextMenuItem(getLootCrateText(), ItemIcon.getItemIcon(ModItems.LOOTCRATE.get()),
-							b -> toggleLootCrate())
+					new ContextMenuItem(getLootCrateText(), ItemIcon.ofItem(ModItems.LOOTCRATE.get()),
+							b -> toggleLootCrate()),
+					new ContextMenuItem(Component.translatable("ftbquests.gui.copy_id"), Icons.SETTINGS,
+							b -> QuestScreen.setClipboardString(table.getCodeString()))
 			);
 			getGui().openContextMenu(menu);
 		}
@@ -244,16 +249,16 @@ public class RewardTablesScreen extends AbstractButtonListScreen {
 		@Override
 		public void drawBackground(GuiGraphics graphics, Theme theme, int x, int y, int w, int h) {
 			if (isMouseOver) {
-				Color4I.WHITE.withAlpha(30).draw(graphics, x, y, w, h);
-				ItemIcon.getItemIcon(ModItems.LOOTCRATE.get()).draw(graphics, x + w - 26, y + 2, 12, 12);
-				Icons.BIN.draw(graphics, x + w - 13, y + 2, 12, 12);
+				IconHelper.renderIcon(Color4I.WHITE.withAlpha(30), graphics, x, y, w, h);
+				IconHelper.renderIcon(ItemIcon.ofItem(ModItems.LOOTCRATE.get()), graphics, x + w - 26, y + 2, 12, 12);
+				IconHelper.renderIcon(Icons.BIN, graphics, x + w - 13, y + 2, 12, 12);
 			}
 			if (pendingDeleteIndexes.contains(idx)) {
-				Color4I.RED.withAlpha(64).draw(graphics, x, y, w, h);
+				IconHelper.renderIcon(Color4I.RED.withAlpha(64), graphics, x, y, w, h);
 			} else if (rewardTablesCopy.get(idx).getId() == 0) {
-				Color4I.GREEN.withAlpha(64).draw(graphics, x, y, w, h);
+				IconHelper.renderIcon(Color4I.GREEN.withAlpha(64), graphics, x, y, w, h);
 			}
-			Color4I.GRAY.withAlpha(40).draw(graphics, x, y + h, w, 1);
+			IconHelper.renderIcon(Color4I.GRAY.withAlpha(40), graphics, x, y + h, w, 1);
 		}
 
 		@Override
@@ -261,9 +266,9 @@ public class RewardTablesScreen extends AbstractButtonListScreen {
 			super.draw(graphics, theme, x, y, w, h);
 
 			if (pendingDeleteIndexes.contains(idx)) {
-				Color4I.GRAY.draw(graphics, x + 20, y + h / 2, theme.getStringWidth(title), 1);
+				IconHelper.renderIcon(Color4I.GRAY, graphics, x + 20, y + h / 2, theme.getStringWidth(title), 1);
 			}  else if (rewardTablesCopy.get(idx).getId() == 0) {
-				Icons.ADD.draw(graphics, x + 24 + theme.getStringWidth(title), y + 2, 12, 12);
+				IconHelper.renderIcon(Icons.ADD, graphics, x + 24 + theme.getStringWidth(title), y + 2, 12, 12);
 			}
 		}
 
@@ -315,7 +320,7 @@ public class RewardTablesScreen extends AbstractButtonListScreen {
 				list.add(getLootCrateText());
 			} else {
 				MutableInt usedIn = new MutableInt(0);
-				ClientQuestFile.INSTANCE.forAllQuests(quest -> quest.getRewards().stream()
+				ClientQuestFile.getInstance().forAllQuests(quest -> quest.getRewards().stream()
 						.filter(reward -> reward instanceof RandomReward rr && rr.getTable() != null && rr.getTable().id == table.id)
 						.forEach(reward -> usedIn.increment()));
 				list.add(Component.translatable("ftbquests.reward_table.used_in", usedIn));

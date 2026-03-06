@@ -1,16 +1,7 @@
 package dev.ftb.mods.ftbquests.quest.task;
 
-import com.mojang.brigadier.StringReader;
-import dev.architectury.registry.registries.RegistrarManager;
-import dev.ftb.mods.ftblibrary.config.ConfigGroup;
-import dev.ftb.mods.ftblibrary.config.NameMap;
-import dev.ftb.mods.ftblibrary.ui.Button;
-import dev.ftb.mods.ftbquests.quest.Quest;
-import dev.ftb.mods.ftbquests.quest.TeamData;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.ChatFormatting;
-import net.minecraft.ResourceLocationException;
+import net.minecraft.IdentifierException;
 import net.minecraft.commands.arguments.blocks.BlockInput;
 import net.minecraft.commands.arguments.blocks.BlockStateParser;
 import net.minecraft.core.HolderLookup;
@@ -19,7 +10,7 @@ import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.entity.player.Player;
@@ -30,8 +21,17 @@ import net.minecraft.world.level.block.state.pattern.BlockInWorld;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.EntityHitResult;
 import net.minecraft.world.phys.HitResult;
+import com.mojang.brigadier.StringReader;
+
+import dev.architectury.registry.registries.RegistrarManager;
+
+import dev.ftb.mods.ftblibrary.client.config.EditableConfigGroup;
+import dev.ftb.mods.ftblibrary.util.NameMap;
+import dev.ftb.mods.ftbquests.quest.Quest;
+import dev.ftb.mods.ftbquests.quest.TeamData;
 
 import java.util.Optional;
+import org.jspecify.annotations.Nullable;
 
 public class ObservationTask extends AbstractBooleanTask {
 	private long timer;
@@ -70,9 +70,9 @@ public class ObservationTask extends AbstractBooleanTask {
 	@Override
 	public void readData(CompoundTag nbt, HolderLookup.Provider provider) {
 		super.readData(nbt, provider);
-		timer = nbt.getLong("timer");
-		observeType = ObserveType.values()[nbt.getInt("observe_type")];
-		toObserve = nbt.getString("to_observe");
+		timer = nbt.getLong("timer").orElseThrow();
+		observeType = ObserveType.values()[nbt.getInt("observe_type").orElseThrow()];
+		toObserve = nbt.getString("to_observe").orElseThrow();
 	}
 
 	@Override
@@ -92,8 +92,7 @@ public class ObservationTask extends AbstractBooleanTask {
 	}
 
 	@Override
-	@Environment(EnvType.CLIENT)
-	public void fillConfigGroup(ConfigGroup config) {
+	public void fillConfigGroup(EditableConfigGroup config) {
 		super.fillConfigGroup(config);
 		config.addLong("timer", timer, v -> timer = v, 0L, 0L, 1200L);
 		config.addEnum("observe_type", observeType, v -> observeType = v, ObserveType.NAME_MAP);
@@ -107,11 +106,6 @@ public class ObservationTask extends AbstractBooleanTask {
 	}
 
 	@Override
-	@Environment(EnvType.CLIENT)
-	public void onButtonClicked(Button button, boolean canClick) {
-	}
-
-	@Override
 	public boolean canSubmit(TeamData teamData, ServerPlayer player) {
 		return true;
 	}
@@ -119,6 +113,11 @@ public class ObservationTask extends AbstractBooleanTask {
 	@Override
 	public boolean checkOnLogin() {
 		return false;
+	}
+
+	@Override
+	public TaskClient client() {
+		return TaskClient.NoOp.INSTANCE;
 	}
 
 	public boolean observe(Player player, HitResult result) {
@@ -130,11 +129,7 @@ public class ObservationTask extends AbstractBooleanTask {
 			BlockInWorld blockInWorld = new BlockInWorld(player.level(), blockResult.getBlockPos(), false);
 
 			BlockState state = blockInWorld.getState();
-			if (state == null) {
-				return false;
-			}
-
-			Block block = state.getBlock();
+            Block block = state.getBlock();
 			BlockEntity blockEntity = blockInWorld.getEntity();
 
 			switch (observeType) {
@@ -174,17 +169,18 @@ public class ObservationTask extends AbstractBooleanTask {
 		return false;
 	}
 
-	private Optional<ResourceLocation> asTagRL(String str) {
+	private Optional<Identifier> asTagRL(String str) {
 		try {
-			return Optional.ofNullable(ResourceLocation.tryParse(str.startsWith("#") ? str.substring(1) : str));
-		} catch (ResourceLocationException e) {
+			return Optional.ofNullable(Identifier.tryParse(str.startsWith("#") ? str.substring(1) : str));
+		} catch (IdentifierException e) {
 			return Optional.empty();
 		}
 	}
 
+	@Nullable
 	private BlockInput tryMatchBlock(String string, boolean parseNbt) {
 		try {
-			BlockStateParser.BlockResult blockStateParser = BlockStateParser.parseForBlock(BuiltInRegistries.BLOCK.asLookup(), new StringReader(string), false);
+			BlockStateParser.BlockResult blockStateParser = BlockStateParser.parseForBlock(BuiltInRegistries.BLOCK, new StringReader(string), false);
 			return new BlockInput(blockStateParser.blockState(), blockStateParser.properties().keySet(), parseNbt ? blockStateParser.nbt() : null);
 		} catch (Exception ex) {
 			return null;

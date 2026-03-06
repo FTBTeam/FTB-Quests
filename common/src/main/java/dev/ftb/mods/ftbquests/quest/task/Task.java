@@ -1,37 +1,36 @@
 package dev.ftb.mods.ftbquests.quest.task;
 
-import dev.architectury.networking.NetworkManager;
-import dev.ftb.mods.ftblibrary.config.ConfigGroup;
+import net.minecraft.ChatFormatting;
+import net.minecraft.core.HolderLookup;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.resources.Identifier;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.item.ItemStack;
+
+import dev.ftb.mods.ftblibrary.client.config.EditableConfigGroup;
+import dev.ftb.mods.ftblibrary.client.gui.widget.Widget;
+import dev.ftb.mods.ftblibrary.client.util.ClientUtils;
+import dev.ftb.mods.ftblibrary.client.util.PositionedIngredient;
 import dev.ftb.mods.ftblibrary.icon.Icon;
-import dev.ftb.mods.ftblibrary.ui.Button;
-import dev.ftb.mods.ftblibrary.ui.Widget;
 import dev.ftb.mods.ftblibrary.util.StringUtils;
 import dev.ftb.mods.ftblibrary.util.TooltipList;
-import dev.ftb.mods.ftblibrary.util.client.ClientUtils;
-import dev.ftb.mods.ftblibrary.util.client.PositionedIngredient;
 import dev.ftb.mods.ftbquests.FTBQuests;
-import dev.ftb.mods.ftbquests.client.FTBQuestsClient;
 import dev.ftb.mods.ftbquests.client.gui.quests.QuestScreen;
 import dev.ftb.mods.ftbquests.events.CustomTaskEvent;
 import dev.ftb.mods.ftbquests.events.ObjectCompletedEvent;
 import dev.ftb.mods.ftbquests.events.ObjectStartedEvent;
 import dev.ftb.mods.ftbquests.events.QuestProgressEventData;
 import dev.ftb.mods.ftbquests.integration.RecipeModHelper;
-import dev.ftb.mods.ftbquests.net.SubmitTaskMessage;
-import dev.ftb.mods.ftbquests.quest.*;
+import dev.ftb.mods.ftbquests.quest.BaseQuestFile;
+import dev.ftb.mods.ftbquests.quest.Chapter;
+import dev.ftb.mods.ftbquests.quest.Quest;
+import dev.ftb.mods.ftbquests.quest.QuestObject;
+import dev.ftb.mods.ftbquests.quest.QuestObjectType;
+import dev.ftb.mods.ftbquests.quest.TeamData;
 import dev.ftb.mods.ftbquests.util.ProgressChange;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
-import net.minecraft.ChatFormatting;
-import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.core.HolderLookup;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.network.RegistryFriendlyByteBuf;
-import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.MutableComponent;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.world.item.ItemStack;
 
 import java.util.EnumSet;
 import java.util.List;
@@ -165,7 +164,6 @@ public abstract class Task extends QuestObject {
 	}
 
 	@Override
-	@Environment(EnvType.CLIENT)
 	public void editedFromGUI() {
 		QuestScreen gui = ClientUtils.getCurrentGuiAs(QuestScreen.class);
 		if (gui != null) {
@@ -185,28 +183,21 @@ public abstract class Task extends QuestObject {
 	}
 
 	@Override
-	@Environment(EnvType.CLIENT)
 	public Component getAltTitle() {
 		return getType().getDisplayName();
 	}
 
 	@Override
-	@Environment(EnvType.CLIENT)
-	public Icon getAltIcon() {
+	public Icon<?> getAltIcon() {
 		return getType().getIconSupplier();
 	}
 
 	@Override
-	public final ConfigGroup createSubGroup(ConfigGroup group) {
+	public final EditableConfigGroup createSubGroup(EditableConfigGroup group) {
 		TaskType type = getType();
 		return group.getOrCreateSubgroup(getObjectType().getId())
 				.getOrCreateSubgroup(type.getTypeId().getNamespace())
 				.getOrCreateSubgroup(type.getTypeId().getPath());
-	}
-
-	@Environment(EnvType.CLIENT)
-	public void drawGUI(TeamData teamData, GuiGraphics graphics, int x, int y, int w, int h) {
-		getIcon().draw(graphics, x, y, w, h);
 	}
 
 	public boolean canInsertItem() {
@@ -227,7 +218,6 @@ public abstract class Task extends QuestObject {
 	 * @param teamData the team / player data
 	 * @param advanced true for advanced tooltips (when F3+H is in use)
 	 */
-	@Environment(EnvType.CLIENT)
 	public void addMouseOverHeader(TooltipList list, TeamData teamData, boolean advanced) {
 		list.add(getTitle());
 	}
@@ -237,28 +227,21 @@ public abstract class Task extends QuestObject {
 	 * @param list list to append text to
 	 * @param teamData the team / player data
 	 */
-	@Environment(EnvType.CLIENT)
 	public void addMouseOverText(TooltipList list, TeamData teamData) {
 	}
 
-	@Environment(EnvType.CLIENT)
 	public boolean addTitleInMouseOverText() {
 		return true;
 	}
 
-	@Environment(EnvType.CLIENT)
-	public void onButtonClicked(Button button, boolean canClick) {
-		if (canClick && autoSubmitOnPlayerTick() <= 0) {
-			button.playClickSound();
-			NetworkManager.sendToServer(new SubmitTaskMessage(id));
-		}
+	public TaskClient client() {
+		return TaskClient.Default.INSTANCE;
 	}
 
 	public boolean submitItemsOnInventoryChange() {
 		return false;
 	}
 
-	@Environment(EnvType.CLIENT)
 	public Optional<PositionedIngredient> getIngredient(Widget widget) {
 		if (addTitleInMouseOverText()) {
 			return PositionedIngredient.of(getIcon().getIngredient(), widget);
@@ -271,7 +254,6 @@ public abstract class Task extends QuestObject {
 		return EnumSet.of(RecipeModHelper.Components.QUESTS);
 	}
 
-	@Environment(EnvType.CLIENT)
 	public MutableComponent getButtonText() {
 		return getMaxProgress() > 1L || consumesResources() ? Component.literal(formatMaxProgress()) : Component.empty();
 	}
@@ -316,7 +298,7 @@ public abstract class Task extends QuestObject {
 	public void readData(CompoundTag nbt, HolderLookup.Provider provider) {
 		super.readData(nbt, provider);
 
-		optionalTask = nbt.getBoolean("optional_task");
+		optionalTask = nbt.getBoolean("optional_task").orElse(false);
 	}
 
 	@Override
@@ -334,14 +316,14 @@ public abstract class Task extends QuestObject {
 	}
 
 	@Override
-	public void fillConfigGroup(ConfigGroup config) {
+	public void fillConfigGroup(EditableConfigGroup config) {
 		super.fillConfigGroup(config);
 
 		config.addBool("optional_task", optionalTask, v -> optionalTask = v, false).setNameKey("ftbquests.quest.misc.optional_task");
 	}
 
-	protected ResourceLocation safeResourceLocation(String str, ResourceLocation fallback) {
-		var location = ResourceLocation.tryParse(str);
+	protected Identifier safeResourceLocation(String str, Identifier fallback) {
+		var location = Identifier.tryParse(str);
 		if (location != null) {
 			return location;
 		}
@@ -349,7 +331,7 @@ public abstract class Task extends QuestObject {
 		if (getQuestFile().isServerSide()) {
 			FTBQuests.LOGGER.warn("Ignoring bad resource location '{}' for task {}", str, id);
 		} else {
-			FTBQuestsClient.getClientPlayer().displayClientMessage(
+			ClientUtils.getClientPlayer().displayClientMessage(
 					Component.literal("Bad resource location: " + str).withStyle(ChatFormatting.RED), false);
 		}
 

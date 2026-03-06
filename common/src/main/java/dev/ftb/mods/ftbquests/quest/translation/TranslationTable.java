@@ -1,20 +1,19 @@
 package dev.ftb.mods.ftbquests.quest.translation;
 
-import com.google.common.collect.Maps;
-import com.mojang.datafixers.util.Either;
-import net.minecraft.Util;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.StringTag;
-import net.minecraft.nbt.Tag;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.util.Util;
+import com.mojang.datafixers.util.Either;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import com.google.common.collect.Maps;
 
 public class TranslationTable {
     public static final StreamCodec<FriendlyByteBuf, TranslationTable> STREAM_CODEC = StreamCodec.composite(
@@ -35,10 +34,10 @@ public class TranslationTable {
 
     public static TranslationTable fromNBT(CompoundTag tag) {
         Map<String, Either<String, List<String>>> map = new HashMap<>();
-        tag.getAllKeys().forEach(k -> {
+        tag.keySet().forEach(k -> {
             switch (tag.get(k)) {
-                case StringTag str -> map.put(k, Either.left(str.getAsString()));
-                case ListTag list -> map.put(k, Either.right(list.stream().map(Tag::getAsString).toList()));
+                case StringTag str -> map.put(k, Either.left(str.asString().orElseThrow()));
+                case ListTag list -> map.put(k, Either.right(list.stream().map(e -> e.asString().orElseThrow()).toList()));
                 case null, default -> { }
             }
         });

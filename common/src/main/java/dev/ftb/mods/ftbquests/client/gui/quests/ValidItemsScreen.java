@@ -1,22 +1,32 @@
 package dev.ftb.mods.ftbquests.client.gui.quests;
 
+import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.network.chat.Component;
+import net.minecraft.world.item.ItemStack;
+
 import dev.architectury.networking.NetworkManager;
+
+import dev.ftb.mods.ftblibrary.client.gui.GuiHelper;
+import dev.ftb.mods.ftblibrary.client.gui.WidgetType;
+import dev.ftb.mods.ftblibrary.client.gui.input.Key;
+import dev.ftb.mods.ftblibrary.client.gui.input.MouseButton;
+import dev.ftb.mods.ftblibrary.client.gui.layout.CompactGridLayout;
+import dev.ftb.mods.ftblibrary.client.gui.theme.Theme;
+import dev.ftb.mods.ftblibrary.client.gui.widget.BaseScreen;
+import dev.ftb.mods.ftblibrary.client.gui.widget.Button;
+import dev.ftb.mods.ftblibrary.client.gui.widget.Panel;
+import dev.ftb.mods.ftblibrary.client.gui.widget.SimpleTextButton;
+import dev.ftb.mods.ftblibrary.client.gui.widget.Widget;
+import dev.ftb.mods.ftblibrary.client.icon.IconHelper;
+import dev.ftb.mods.ftblibrary.client.util.PositionedIngredient;
 import dev.ftb.mods.ftblibrary.icon.Color4I;
 import dev.ftb.mods.ftblibrary.icon.ItemIcon;
-import dev.ftb.mods.ftblibrary.ui.*;
-import dev.ftb.mods.ftblibrary.ui.input.Key;
-import dev.ftb.mods.ftblibrary.ui.input.MouseButton;
-import dev.ftb.mods.ftblibrary.ui.misc.CompactGridLayout;
 import dev.ftb.mods.ftblibrary.util.TooltipList;
-import dev.ftb.mods.ftblibrary.util.client.PositionedIngredient;
 import dev.ftb.mods.ftbquests.FTBQuests;
 import dev.ftb.mods.ftbquests.client.ClientQuestFile;
 import dev.ftb.mods.ftbquests.client.gui.FTBQuestsTheme;
 import dev.ftb.mods.ftbquests.net.SubmitTaskMessage;
 import dev.ftb.mods.ftbquests.quest.task.ItemTask;
-import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.network.chat.Component;
-import net.minecraft.world.item.ItemStack;
 
 import java.util.List;
 import java.util.Optional;
@@ -132,7 +142,7 @@ public class ValidItemsScreen extends BaseScreen {
 
 	@Override
 	public boolean doesGuiPauseGame() {
-		return ClientQuestFile.exists() && ClientQuestFile.INSTANCE.isPauseGame();
+		return ClientQuestFile.exists() && ClientQuestFile.getInstance().isPauseGame();
 	}
 
 	@Override
@@ -148,7 +158,7 @@ public class ValidItemsScreen extends BaseScreen {
 		private final ItemStack stack;
 
 		ValidItemButton(Panel panel, ItemStack stack) {
-			super(panel, Component.empty(), ItemIcon.getItemIcon(stack));
+			super(panel, Component.empty(), ItemIcon.ofItemStack(stack));
 			this.stack = stack;
 		}
 
@@ -165,14 +175,14 @@ public class ValidItemsScreen extends BaseScreen {
 		@Override
 		public void draw(GuiGraphics graphics, Theme theme, int x, int y, int w, int h) {
 			if (isMouseOver()) {
-				Color4I.WHITE.withAlpha(33).draw(graphics, x, y, w, h);
+				IconHelper.renderIcon(Color4I.WHITE.withAlpha(33), graphics, x, y, w, h);
 			}
 
-			graphics.pose().pushPose();
-			graphics.pose().translate(x + w / 2D, y + h / 2D, 10);
-			graphics.pose().scale(2F, 2F, 2F);
-			GuiHelper.drawItem(graphics, stack, 0, true, null);
-			graphics.pose().popPose();
+			graphics.pose().pushMatrix();
+			graphics.pose().translate((float) (x + w / 2D), (float) (y + h / 2D));
+			graphics.pose().scale(2F, 2F);
+			GuiHelper.drawItem(graphics, stack, true, null);
+			graphics.pose().popMatrix();
 		}
 	}
 }

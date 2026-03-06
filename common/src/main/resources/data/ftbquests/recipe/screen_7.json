@@ -10,14 +10,8 @@
     "CCC"
   ],
   "key": {
-    "3": {
-      "item": "ftbquests:screen_3"
-    },
-    "5": {
-      "item": "ftbquests:screen_5"
-    },
-    "C": {
-      "item": "ftbquests:screen_1"
-    }
+    "3": "ftbquests:screen_3",
+    "5": "ftbquests:screen_5",
+    "C": "ftbquests:screen_1"
   }
 }

@@ -1,15 +1,17 @@
 package dev.ftb.mods.ftbquests.client.gui;
 
-import dev.ftb.mods.ftblibrary.ui.Panel;
-import dev.ftb.mods.ftblibrary.ui.Theme;
-import dev.ftb.mods.ftblibrary.ui.Widget;
-import dev.ftb.mods.ftblibrary.ui.input.MouseButton;
-import dev.ftb.mods.ftblibrary.util.TooltipList;
-import dev.ftb.mods.ftblibrary.util.client.ImageComponent;
-import dev.ftb.mods.ftbquests.client.gui.quests.ViewQuestPanel;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.network.chat.HoverEvent;
 import net.minecraft.network.chat.MutableComponent;
+
+import dev.ftb.mods.ftblibrary.client.gui.input.MouseButton;
+import dev.ftb.mods.ftblibrary.client.gui.theme.Theme;
+import dev.ftb.mods.ftblibrary.client.gui.widget.Panel;
+import dev.ftb.mods.ftblibrary.client.gui.widget.Widget;
+import dev.ftb.mods.ftblibrary.client.icon.IconHelper;
+import dev.ftb.mods.ftblibrary.client.util.ImageComponent;
+import dev.ftb.mods.ftblibrary.util.TooltipList;
+import dev.ftb.mods.ftbquests.client.gui.quests.ViewQuestPanel;
 
 public class ImageComponentWidget extends Widget {
 	private final ImageComponent component;
@@ -29,13 +31,13 @@ public class ImageComponentWidget extends Widget {
 	}
 
 	public void addMouseOverText(TooltipList list) {
-		if (mutableComponent.getStyle().getHoverEvent() != null && mutableComponent.getStyle().getHoverEvent().getAction() == HoverEvent.Action.SHOW_TEXT) {
-			list.add(mutableComponent.getStyle().getHoverEvent().getValue(HoverEvent.Action.SHOW_TEXT));
+		if (mutableComponent.getStyle().getHoverEvent() != null && mutableComponent.getStyle().getHoverEvent() instanceof HoverEvent.ShowText showText) {
+			list.add(showText.value());
 		}
 	}
 
 	public void draw(GuiGraphics graphics, Theme theme, int x, int y, int w, int h) {
-		component.getImage().draw(graphics, x, y, w, h);
+		IconHelper.renderIcon(component.getImage(), graphics, x, y, w, h);
 	}
 
 	public ImageComponent getComponent() {

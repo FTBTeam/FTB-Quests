@@ -1,19 +1,17 @@
 package dev.ftb.mods.ftbquests.client.config;
 
-import dev.ftb.mods.ftblibrary.config.ConfigGroup;
-import dev.ftb.mods.ftblibrary.snbt.config.SNBTConfig;
-import dev.ftb.mods.ftblibrary.snbt.config.StringValue;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
+import dev.ftb.mods.ftblibrary.client.config.EditableConfigGroup;
+import dev.ftb.mods.ftblibrary.client.config.editable.EditableConfigValue;
+import dev.ftb.mods.ftblibrary.config.value.Config;
+import dev.ftb.mods.ftblibrary.config.value.StringValue;
 
 public class LocaleValue extends StringValue {
-    public LocaleValue(SNBTConfig config, String value, String def) {
+    public LocaleValue(Config config, String value, String def) {
         super(config, value, def);
     }
 
     @Override
-    @Environment(EnvType.CLIENT)
-    public void createClientConfig(ConfigGroup group) {
-        group.add(key, new LocaleConfig(), get(), this::set, defaultValue);
+    protected EditableConfigValue<?> fillClientConfig(EditableConfigGroup group) {
+        return group.add(key, new EditableLocaleConfig(), get(), this::set, defaultValue);
     }
 }

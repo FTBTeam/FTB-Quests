@@ -6,11 +6,7 @@
 		"count": 1
 	},
 	"ingredients": [
-		{
-			"item": "minecraft:book"
-		},
-		{
-			"tag": "c:stones"
-		}
+		"minecraft:book",
+		"#c:stones"
 	]
 }

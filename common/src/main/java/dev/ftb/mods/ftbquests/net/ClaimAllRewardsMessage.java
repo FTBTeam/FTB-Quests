@@ -1,15 +1,17 @@
 package dev.ftb.mods.ftbquests.net;
 
-import dev.architectury.networking.NetworkManager;
-import dev.ftb.mods.ftbquests.api.FTBQuestsAPI;
-import dev.ftb.mods.ftbquests.quest.ServerQuestFile;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.server.level.ServerPlayer;
 
+import dev.architectury.networking.NetworkManager;
+
+import dev.ftb.mods.ftbquests.api.FTBQuestsAPI;
+import dev.ftb.mods.ftbquests.quest.ServerQuestFile;
+
 public class ClaimAllRewardsMessage implements CustomPacketPayload {
-	public static final Type<ClaimAllRewardsMessage> TYPE = new Type<>(FTBQuestsAPI.rl("claim_all_rewards_message"));
+	public static final Type<ClaimAllRewardsMessage> TYPE = new Type<>(FTBQuestsAPI.id("claim_all_rewards_message"));
 
 	public static final ClaimAllRewardsMessage INSTANCE = new ClaimAllRewardsMessage();
 
@@ -23,7 +25,7 @@ public class ClaimAllRewardsMessage implements CustomPacketPayload {
 	public static void handle(ClaimAllRewardsMessage message, NetworkManager.PacketContext context) {
 		context.queue(() -> {
 			ServerPlayer player = (ServerPlayer) context.getPlayer();
-			ServerQuestFile.INSTANCE.getTeamData(player).ifPresent(data -> {
+			ServerQuestFile.getInstance().getTeamData(player).ifPresent(data -> {
 				data.getFile().forAllQuests(quest -> {
 					if (data.isCompleted(quest)) {
 						quest.getRewards().stream()

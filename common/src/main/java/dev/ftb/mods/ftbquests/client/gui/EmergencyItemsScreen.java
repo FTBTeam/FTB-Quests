@@ -1,27 +1,36 @@
 package dev.ftb.mods.ftbquests.client.gui;
 
-import com.mojang.blaze3d.vertex.PoseStack;
-import dev.architectury.networking.NetworkManager;
-import dev.ftb.mods.ftblibrary.icon.Color4I;
-import dev.ftb.mods.ftblibrary.icon.Icons;
-import dev.ftb.mods.ftblibrary.ui.*;
-import dev.ftb.mods.ftblibrary.ui.input.MouseButton;
-import dev.ftb.mods.ftblibrary.util.TimeUtils;
-import dev.ftb.mods.ftblibrary.util.TooltipList;
-import dev.ftb.mods.ftblibrary.util.client.PositionedIngredient;
-import dev.ftb.mods.ftbquests.client.ClientQuestFile;
-import dev.ftb.mods.ftbquests.net.GetEmergencyItemsMessage;
-import dev.ftb.mods.ftbquests.quest.QuestShape;
 import net.minecraft.ChatFormatting;
-import net.minecraft.Util;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.util.Util;
 import net.minecraft.world.item.ItemStack;
+
+import dev.architectury.networking.NetworkManager;
+
+import dev.ftb.mods.ftblibrary.client.gui.GuiHelper;
+import dev.ftb.mods.ftblibrary.client.gui.input.MouseButton;
+import dev.ftb.mods.ftblibrary.client.gui.layout.WidgetLayout;
+import dev.ftb.mods.ftblibrary.client.gui.theme.Theme;
+import dev.ftb.mods.ftblibrary.client.gui.widget.BaseScreen;
+import dev.ftb.mods.ftblibrary.client.gui.widget.Panel;
+import dev.ftb.mods.ftblibrary.client.gui.widget.SimpleTextButton;
+import dev.ftb.mods.ftblibrary.client.gui.widget.Widget;
+import dev.ftb.mods.ftblibrary.client.icon.IconHelper;
+import dev.ftb.mods.ftblibrary.client.util.PositionedIngredient;
+import dev.ftb.mods.ftblibrary.icon.Color4I;
+import dev.ftb.mods.ftblibrary.icon.Icons;
+import dev.ftb.mods.ftblibrary.util.TimeUtils;
+import dev.ftb.mods.ftblibrary.util.TooltipList;
+import dev.ftb.mods.ftbquests.client.ClientQuestFile;
+import dev.ftb.mods.ftbquests.net.GetEmergencyItemsMessage;
+import dev.ftb.mods.ftbquests.quest.QuestShape;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import org.joml.Matrix3x2fStack;
 
 public class EmergencyItemsScreen extends BaseScreen {
 	private static long endTime = 0L;
@@ -31,7 +40,7 @@ public class EmergencyItemsScreen extends BaseScreen {
 
 	public EmergencyItemsScreen() {
 		if (endTime < Util.getEpochMillis()) {
-			endTime = Util.getEpochMillis() + ClientQuestFile.INSTANCE.getEmergencyItemsCooldown() * 1000L;
+			endTime = Util.getEpochMillis() + ClientQuestFile.getInstance().getEmergencyItemsCooldown() * 1000L;
 		}
 
 		itemPanel = new ItemPanel();
@@ -42,7 +51,7 @@ public class EmergencyItemsScreen extends BaseScreen {
 				if (Util.getEpochMillis() >= endTime) {
 					playClickSound();
 					NetworkManager.sendToServer(GetEmergencyItemsMessage.INSTANCE);
-					endTime = Util.getEpochMillis() + ClientQuestFile.INSTANCE.getEmergencyItemsCooldown() * 1000L;
+					endTime = Util.getEpochMillis() + ClientQuestFile.getInstance().getEmergencyItemsCooldown() * 1000L;
 				}
 			}
 
@@ -74,18 +83,18 @@ public class EmergencyItemsScreen extends BaseScreen {
 
 	@Override
 	public void drawBackground(GuiGraphics graphics, Theme theme, int x, int y, int w, int h) {
-		PoseStack poseStack = graphics.pose();
+		Matrix3x2fStack poseStack = graphics.pose();
 
-		poseStack.pushPose();
-		poseStack.translate((int) (w / 2D), (int) (h / 5D), 0);
-		poseStack.scale(2F, 2F, 1F);
+		poseStack.pushMatrix();
+		poseStack.translate((int) (w / 2D), (int) (h / 5D));
+		poseStack.scale(2F, 2F);
 		Component titleMsg = Component.translatable("ftbquests.file.emergency_items");
 		theme.drawString(graphics, titleMsg, -theme.getStringWidth(titleMsg) / 2, 0, Color4I.WHITE, 0);
-		poseStack.popPose();
+		poseStack.popMatrix();
 
-		poseStack.pushPose();
-		poseStack.translate((int) (w / 2D), (int) (h / 2.5D), 0);
-		poseStack.scale(4F, 4F, 1F);
+		poseStack.pushMatrix();
+		poseStack.translate((int) (w / 2D), (int) (h / 2.5D));
+		poseStack.scale(4F, 4F);
 		long timeLeft = endTime - Util.getEpochMillis();
 		String timeStr = timeLeft <= 0L ? "00:00" : TimeUtils.getTimeString(timeLeft / 1000L * 1000L + 1000L);
 		int x1 = -theme.getStringWidth(timeStr) / 2;
@@ -94,7 +103,7 @@ public class EmergencyItemsScreen extends BaseScreen {
 		theme.drawString(graphics, timeStr, x1, 1, Color4I.BLACK, 0);
 		theme.drawString(graphics, timeStr, x1, -1, Color4I.BLACK, 0);
 		theme.drawString(graphics, timeStr, x1, 0, Color4I.WHITE, 0);
-		poseStack.popPose();
+		poseStack.popMatrix();
 	}
 
 	@Override
@@ -123,12 +132,11 @@ public class EmergencyItemsScreen extends BaseScreen {
 
 		@Override
 		public void draw(GuiGraphics graphics, Theme theme, int x, int y, int w, int h) {
-			GuiHelper.setupDrawing();
-			QuestShape.get("rsquare").getOutline().draw(graphics, x - 3, y - 3, w + 6, h + 6);
-			graphics.pose().pushPose();
-			graphics.pose().translate(x + w / 2D, y + h / 2D, 100);
-			GuiHelper.drawItem(graphics, stack, 0, true, null);
-			graphics.pose().popPose();
+			IconHelper.renderIcon(QuestShape.get("rsquare").getOutline(), graphics, x - 3, y - 3, w + 6, h + 6);
+			graphics.pose().pushMatrix();
+			graphics.pose().translate((float) (x + w / 2D), (float) (y + h / 2D));
+			GuiHelper.drawItem(graphics, stack, true, null);
+			graphics.pose().popMatrix();
 		}
 
 		@Override
@@ -144,7 +152,7 @@ public class EmergencyItemsScreen extends BaseScreen {
 
 		@Override
 		public void addWidgets() {
-			ClientQuestFile.INSTANCE.getEmergencyItems()
+			ClientQuestFile.getInstance().getEmergencyItems()
 					.forEach(stack -> add(new EmergencyItemWidget(this, stack)));
 		}
 

@@ -1,34 +1,35 @@
 package dev.ftb.mods.ftbquests.quest.task;
 
-import dev.architectury.fluid.FluidStack;
-import dev.ftb.mods.ftblibrary.config.ConfigGroup;
-import dev.ftb.mods.ftblibrary.icon.Color4I;
-import dev.ftb.mods.ftblibrary.icon.Icon;
-import dev.ftb.mods.ftblibrary.ui.Widget;
-import dev.ftb.mods.ftblibrary.util.StringUtils;
-import dev.ftb.mods.ftblibrary.util.client.ClientUtils;
-import dev.ftb.mods.ftblibrary.util.client.PositionedIngredient;
-import dev.ftb.mods.ftbquests.api.FTBQuestsAPI;
-import dev.ftb.mods.ftbquests.quest.Quest;
-import dev.ftb.mods.ftbquests.quest.TeamData;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.component.DataComponentMap;
 import net.minecraft.core.component.DataComponentPatch;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.Tag;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.material.Fluids;
-import org.jetbrains.annotations.Nullable;
+
+import dev.architectury.fluid.FluidStack;
+
+import dev.ftb.mods.ftblibrary.client.config.EditableConfigGroup;
+import dev.ftb.mods.ftblibrary.client.gui.widget.Widget;
+import dev.ftb.mods.ftblibrary.client.util.ClientUtils;
+import dev.ftb.mods.ftblibrary.client.util.PositionedIngredient;
+import dev.ftb.mods.ftblibrary.icon.Color4I;
+import dev.ftb.mods.ftblibrary.icon.Icon;
+import dev.ftb.mods.ftblibrary.util.StringUtils;
+import dev.ftb.mods.ftbquests.api.FTBQuestsAPI;
+import dev.ftb.mods.ftbquests.quest.Quest;
+import dev.ftb.mods.ftbquests.quest.TeamData;
 
 import java.util.Optional;
+import org.jspecify.annotations.Nullable;
 
 public class FluidTask extends Task {
-	public static final ResourceLocation TANK_TEXTURE = FTBQuestsAPI.rl("textures/tasks/tank.png");
+	public static final Identifier TANK_TEXTURE = FTBQuestsAPI.id("textures/tasks/tank.png");
 	private static final FluidStack WATER = FluidStack.create(Fluids.WATER, FluidStack.bucketAmount());
 
 	private FluidStack fluidStack = FluidStack.create(Fluids.WATER, FluidStack.bucketAmount());
@@ -90,17 +91,26 @@ public class FluidTask extends Task {
 	public void readData(CompoundTag nbt, HolderLookup.Provider provider) {
 		super.readData(nbt, provider);
 
-		if (nbt.contains("fluid", Tag.TAG_STRING)) {
+		var stringComp = nbt.getString("fluid");
+		if (stringComp.isPresent()) {
 			// legacy - fluid stored as string ID
-			ResourceLocation id = ResourceLocation.tryParse(nbt.getString("fluid"));
+			Identifier id = Identifier.tryParse(stringComp.get());
 			if (id == null) {
+				// Default to water if invalid
 				fluidStack = FluidStack.create(Fluids.WATER, 1000L);
 			} else {
-				fluidStack = FluidStack.create(BuiltInRegistries.FLUID.get(id), nbt.getLong("amount"));
+				BuiltInRegistries.FLUID.get(id).ifPresentOrElse(stack -> {
+					fluidStack = FluidStack.create(stack, nbt.getLongOr("amount", 1000L));
+				}, () -> {
+					// Default to water if invalid
+					fluidStack = FluidStack.create(Fluids.WATER, 1000L);
+				});
 			}
-		} else {
-			fluidStack = FluidStack.read(provider, nbt.getCompound("fluid")).orElse(FluidStack.empty());
+			return;
 		}
+
+		nbt.getCompound("fluid")
+				.ifPresentOrElse(tag -> fluidStack = FluidStack.read(provider, tag).orElse(FluidStack.empty()), () -> fluidStack = FluidStack.empty());
 	}
 
 	@Override
@@ -145,7 +155,7 @@ public class FluidTask extends Task {
 	}
 
 	@Override
-	public void fillConfigGroup(ConfigGroup config) {
+	public void fillConfigGroup(EditableConfigGroup config) {
 		super.fillConfigGroup(config);
 
 		config.addFluidStack("fluid", fluidStack, v -> fluidStack = v, WATER, false);

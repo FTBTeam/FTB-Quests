@@ -1,11 +1,13 @@
 package dev.ftb.mods.ftbquests.client.gui.quests;
 
-import dev.ftb.mods.ftblibrary.ui.Theme;
+import net.minecraft.client.gui.GuiGraphics;
+
+import dev.ftb.mods.ftblibrary.client.gui.theme.Theme;
+import dev.ftb.mods.ftblibrary.client.icon.IconHelper;
 import dev.ftb.mods.ftbquests.quest.Quest;
 import dev.ftb.mods.ftbquests.quest.QuestLink;
 import dev.ftb.mods.ftbquests.quest.QuestObject;
 import dev.ftb.mods.ftbquests.quest.theme.property.ThemeProperties;
-import net.minecraft.client.gui.GuiGraphics;
 
 public class QuestLinkButton extends QuestButton {
     private final QuestLink link;
@@ -31,11 +33,11 @@ public class QuestLinkButton extends QuestButton {
 
         if (questScreen.file.canEdit()) {
             float s = w / 8F * 3F;
-            graphics.pose().pushPose();
-            graphics.pose().translate(x, y + h - s, 200);
-            graphics.pose().scale(s, s, 1F);
-            ThemeProperties.LINK_ICON.get().draw(graphics, 0, 0, 1, 1);
-            graphics.pose().popPose();
+            graphics.pose().pushMatrix();
+            graphics.pose().translate(x, y + h - s);
+            graphics.pose().scale(s, s);
+            IconHelper.renderIcon(ThemeProperties.LINK_ICON.get(), graphics, 0, 0, 1, 1);
+            graphics.pose().popMatrix();
         }
     }
 

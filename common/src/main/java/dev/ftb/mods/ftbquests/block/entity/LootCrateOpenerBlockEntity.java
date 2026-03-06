@@ -1,28 +1,37 @@
 package dev.ftb.mods.ftbquests.block.entity;
 
-import dev.ftb.mods.ftbquests.item.LootCrateItem;
-import dev.ftb.mods.ftbquests.quest.loot.LootCrate;
-import dev.ftb.mods.ftbquests.quest.loot.WeightedReward;
-import dev.ftb.mods.ftbquests.registry.ModBlockEntityTypes;
-import dev.ftb.mods.ftbquests.registry.ModDataComponents;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.HolderLookup;
+import net.minecraft.core.UUIDUtil;
+import net.minecraft.core.component.DataComponentGetter;
 import net.minecraft.core.component.DataComponentMap;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.ListTag;
-import net.minecraft.nbt.Tag;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.component.ItemContainerContents;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.storage.ValueInput;
+import net.minecraft.world.level.storage.ValueOutput;
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
 
-import java.util.*;
+import dev.ftb.mods.ftbquests.item.LootCrateItem;
+import dev.ftb.mods.ftbquests.quest.loot.LootCrate;
+import dev.ftb.mods.ftbquests.quest.loot.WeightedReward;
+import dev.ftb.mods.ftbquests.registry.ModBlockEntityTypes;
+import dev.ftb.mods.ftbquests.registry.ModDataComponents;
+
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
+import org.jspecify.annotations.Nullable;
 
 public class LootCrateOpenerBlockEntity extends BlockEntity {
     private static final ItemEntry EMPTY_ENTRY = new ItemEntry(ItemStack.EMPTY);
     private static final int MAX_ITEM_TYPES = 64;
 
+    @Nullable
     private UUID owner = null;
     private final Map<ItemEntry, Integer> outputs = new LinkedHashMap<>();
 
@@ -30,45 +39,48 @@ public class LootCrateOpenerBlockEntity extends BlockEntity {
         super(ModBlockEntityTypes.LOOT_CRATE_OPENER.get(), blockPos, blockState);
     }
 
-    @Override
-    public void loadAdditional(CompoundTag compoundTag, HolderLookup.Provider provider) {
-        super.loadAdditional(compoundTag, provider);
-
-        outputs.clear();
-        ListTag itemTag = compoundTag.getList("Items", Tag.TAG_COMPOUND);
-        itemTag.forEach(el -> {
-            if (el instanceof CompoundTag tag) {
-                ItemStack stack = ItemStack.parseOptional(provider, tag.getCompound("item"));
-                int amount = tag.getInt("amount");
-                outputs.put(new ItemEntry(stack), amount);
-            }
-        });
-
-        owner = compoundTag.hasUUID("Owner") ? compoundTag.getUUID("Owner") : null;
+    private record StackWithAmount(ItemStack stack, int amount) {
+        public static final Codec<StackWithAmount> CODEC = RecordCodecBuilder.create(instance -> instance.group(
+                ItemStack.CODEC.fieldOf("stack").forGetter(StackWithAmount::stack),
+                Codec.INT.fieldOf("amount").forGetter(StackWithAmount::amount)
+        ).apply(instance, StackWithAmount::new));
     }
 
     @Override
-    protected void saveAdditional(CompoundTag compoundTag, HolderLookup.Provider provider) {
-        super.saveAdditional(compoundTag, provider);
+    public void loadAdditional(ValueInput valueInput) {
+        super.loadAdditional(valueInput);
 
-        ListTag itemTag = new ListTag();
+        outputs.clear();
+        valueInput.read("Items", StackWithAmount.CODEC).ifPresent(stack -> {
+            outputs.put(new ItemEntry(stack.stack()), stack.amount());
+        });
+
+        owner = valueInput.read("Owner", UUIDUtil.CODEC).orElse(null);
+    }
+
+    @Override
+    protected void saveAdditional(ValueOutput valueOutput) {
+        super.saveAdditional(valueOutput);
+
+        List<StackWithAmount> stacks = new ArrayList<>();
         outputs.forEach((item, amount) -> {
-            CompoundTag tag = new CompoundTag();
-            tag.put("item", item.stack.save(provider, new CompoundTag()));
-            tag.putInt("amount", amount);
-            itemTag.add(tag);
+            var entry = new StackWithAmount(item.stack, amount);
+            stacks.add(entry);
         });
-        if (!itemTag.isEmpty()) compoundTag.put("Items", itemTag);
 
-        if (owner != null) compoundTag.putUUID("Owner", owner);
+        if (!stacks.isEmpty()) {
+            valueOutput.store("Items", StackWithAmount.CODEC.listOf(), stacks);
+        }
+
+        if (owner != null) valueOutput.store("Owner", UUIDUtil.CODEC, owner);
     }
 
     @Override
-    protected void applyImplicitComponents(DataComponentInput dataComponentInput) {
-        super.applyImplicitComponents(dataComponentInput);
+    protected void applyImplicitComponents(DataComponentGetter dataComponentGetter) {
+        super.applyImplicitComponents(dataComponentGetter);
 
         outputs.clear();
-        dataComponentInput.getOrDefault(ModDataComponents.LOOT_CRATE_ITEMS.get(), ItemContainerContents.EMPTY)
+        dataComponentGetter.getOrDefault(ModDataComponents.LOOT_CRATE_ITEMS.get(), ItemContainerContents.EMPTY)
                 .stream().forEach(stack -> outputs.put(new ItemEntry(stack), stack.getCount()));
     }
 
@@ -80,6 +92,7 @@ public class LootCrateOpenerBlockEntity extends BlockEntity {
                 ItemContainerContents.fromItems(outputs.keySet().stream().map(ItemEntry::stack).toList()));
     }
 
+    @Nullable
     public UUID getOwner() {
         return owner;
     }
@@ -122,7 +135,7 @@ public class LootCrateOpenerBlockEntity extends BlockEntity {
     }
 
     protected ItemStack _insertItem(int slot, ItemStack stack, boolean simulate) {
-        if (slot != 0 || level == null || level.getServer() == null || level.isClientSide || outputs.size() >= MAX_ITEM_TYPES) {
+        if (slot != 0 || level == null || level.getServer() == null || level.isClientSide() || outputs.size() >= MAX_ITEM_TYPES) {
             return stack;
         }
 
@@ -160,7 +173,7 @@ public class LootCrateOpenerBlockEntity extends BlockEntity {
     }
 
     protected boolean _isItemValid(int slot, ItemStack stack) {
-        return slot == 0 && LootCrateItem.getCrate(stack, level.isClientSide) != null;
+        return slot == 0 && LootCrateItem.getCrate(stack, level.isClientSide()) != null;
     }
 
     protected ItemStack _extractItem(int slot, int amount, boolean simulate) {
@@ -175,7 +188,7 @@ public class LootCrateOpenerBlockEntity extends BlockEntity {
         int toExtract = Math.min(count, Math.min(amount, stack1.getMaxStackSize()));
         stack1.setCount(toExtract);
 
-        if (!simulate && !level.isClientSide) {
+        if (!simulate && !level.isClientSide()) {
             count -= toExtract;
             if (count <= 0) {
                 outputs.remove(entry);

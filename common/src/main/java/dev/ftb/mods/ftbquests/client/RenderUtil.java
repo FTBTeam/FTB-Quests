@@ -2,12 +2,13 @@ package dev.ftb.mods.ftbquests.client;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
+
 import org.joml.Matrix4f;
 
 public class RenderUtil {
     public static final int FULL_BRIGHT = 0x00F000F0;
 
-    private final PoseStack matrixStack;
+    private final PoseStack.Pose pose;
     private final VertexConsumer builder;
     private final float x;
     private final float y;
@@ -19,17 +20,18 @@ public class RenderUtil {
     private float v2 = 1f;
     private float w = 16f;
     private float h = 16f;
+    private float zOffset = 0f;
     private int color = 0xFFFFFFFF;
 
-    private RenderUtil(PoseStack matrixStack, VertexConsumer builder, float x, float y) {
-        this.matrixStack = matrixStack;
+    private RenderUtil(PoseStack.Pose pose, VertexConsumer builder, float x, float y) {
+        this.pose = pose;
         this.builder = builder;
         this.x = x;
         this.y = y;
     }
 
-    public static RenderUtil create(PoseStack matrixStack, VertexConsumer builder, float x, float y) {
-        return new RenderUtil(matrixStack, builder, x, y);
+    public static RenderUtil create(PoseStack.Pose pose, VertexConsumer builder, float x, float y) {
+        return new RenderUtil(pose, builder, x, y);
     }
 
     public RenderUtil withUV(float u1, float v1, float u2, float v2) {
@@ -51,26 +53,31 @@ public class RenderUtil {
         return this;
     }
 
+    public RenderUtil withZOffset(float zOffset) {
+        this.zOffset = zOffset;
+        return this;
+    }
+
     public RenderUtil withLighting(int packedLightIn) {
         this.packedLightIn = packedLightIn;
         return this;
     }
 
     public void draw() {
-        Matrix4f posMat = matrixStack.last().pose();
-        builder.addVertex(posMat, x, y + h, 0)
+        Matrix4f posMat = pose.pose();
+        builder.addVertex(posMat, x, y + h, zOffset)
                 .setColor(color)
                 .setUv(u1, v2)
                 .setLight(packedLightIn);
-        builder.addVertex(posMat, x + w, y + h, 0)
+        builder.addVertex(posMat, x + w, y + h, zOffset)
                 .setColor(color)
                 .setUv(u2, v2)
                 .setLight(packedLightIn);
-        builder.addVertex(posMat, x + w, y, 0)
+        builder.addVertex(posMat, x + w, y, zOffset)
                 .setColor(color)
                 .setUv(u2, v1)
                 .setLight(packedLightIn);
-        builder.addVertex(posMat, x, y, 0)
+        builder.addVertex(posMat, x, y, zOffset)
                 .setColor(color)
                 .setUv(u1, v1)
                 .setLight(packedLightIn);

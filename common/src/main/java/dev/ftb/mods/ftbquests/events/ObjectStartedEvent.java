@@ -3,6 +3,7 @@ package dev.ftb.mods.ftbquests.events;
 import dev.architectury.event.Event;
 import dev.architectury.event.EventActor;
 import dev.architectury.event.EventFactory;
+
 import dev.ftb.mods.ftbquests.quest.BaseQuestFile;
 import dev.ftb.mods.ftbquests.quest.Chapter;
 import dev.ftb.mods.ftbquests.quest.Quest;

@@ -1,15 +1,15 @@
 package dev.ftb.mods.ftbquests.quest.reward;
 
-import dev.architectury.networking.NetworkManager;
-import dev.ftb.mods.ftblibrary.config.ConfigGroup;
-import dev.ftb.mods.ftbquests.net.CustomToastMessage;
-import dev.ftb.mods.ftbquests.quest.Quest;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.server.level.ServerPlayer;
+
+import dev.architectury.networking.NetworkManager;
+
+import dev.ftb.mods.ftblibrary.client.config.EditableConfigGroup;
+import dev.ftb.mods.ftbquests.net.CustomToastMessage;
+import dev.ftb.mods.ftbquests.quest.Quest;
 
 public class ToastReward extends Reward {
 	private String description;
@@ -37,7 +37,7 @@ public class ToastReward extends Reward {
 	@Override
 	public void readData(CompoundTag nbt, HolderLookup.Provider provider) {
 		super.readData(nbt, provider);
-		description = nbt.getString("description");
+		description = nbt.getString("description").orElseThrow();
 	}
 
 	@Override
@@ -53,8 +53,7 @@ public class ToastReward extends Reward {
 	}
 
 	@Override
-	@Environment(EnvType.CLIENT)
-	public void fillConfigGroup(ConfigGroup config) {
+	public void fillConfigGroup(EditableConfigGroup config) {
 		super.fillConfigGroup(config);
 		config.addString("description", description, v -> description = v, "");
 	}

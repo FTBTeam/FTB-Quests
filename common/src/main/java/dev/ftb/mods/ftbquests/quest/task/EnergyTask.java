@@ -1,16 +1,15 @@
 package dev.ftb.mods.ftbquests.quest.task;
 
-import dev.ftb.mods.ftblibrary.config.ConfigGroup;
-import dev.ftb.mods.ftblibrary.util.StringUtils;
-import dev.ftb.mods.ftbquests.client.EnergyTaskClientData;
-import dev.ftb.mods.ftbquests.quest.Quest;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
+
+import dev.ftb.mods.ftblibrary.client.config.EditableConfigGroup;
+import dev.ftb.mods.ftblibrary.util.StringUtils;
+import dev.ftb.mods.ftbquests.client.EnergyTaskClientData;
+import dev.ftb.mods.ftbquests.quest.Quest;
 
 public abstract class EnergyTask extends Task implements ISingleLongValueTask {
 	private long value = 1000L;
@@ -38,13 +37,13 @@ public abstract class EnergyTask extends Task implements ISingleLongValueTask {
 	@Override
 	public void readData(CompoundTag nbt, HolderLookup.Provider provider) {
 		super.readData(nbt, provider);
-		value = nbt.getLong("value");
+		value = nbt.getLong("value").orElseThrow();
 
 		if (value < 1L) {
 			value = 1L;
 		}
 
-		maxInput = nbt.getLong("max_input");
+		maxInput = nbt.getLongOr("max_input", 1000L);
 	}
 
 	@Override
@@ -71,7 +70,6 @@ public abstract class EnergyTask extends Task implements ISingleLongValueTask {
 	}
 
 	@Override
-	@Environment(EnvType.CLIENT)
 	public MutableComponent getAltTitle() {
 		return Component.literal(StringUtils.formatDouble(value, true));
 	}
@@ -82,8 +80,7 @@ public abstract class EnergyTask extends Task implements ISingleLongValueTask {
 	}
 
 	@Override
-	@Environment(EnvType.CLIENT)
-	public void fillConfigGroup(ConfigGroup config) {
+	public void fillConfigGroup(EditableConfigGroup config) {
 		super.fillConfigGroup(config);
 		config.addLong("value", value, v -> value = v, 1000L, 1L, Long.MAX_VALUE);
 		config.addLong("max_input", maxInput, v -> maxInput = v, 1000L, 0L, Integer.MAX_VALUE).setNameKey("ftbquests.task.max_input");

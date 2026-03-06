@@ -2,6 +2,8 @@ package dev.ftb.mods.ftbquests.quest.theme.property;
 
 import net.minecraft.util.Mth;
 
+import org.jspecify.annotations.Nullable;
+
 public class DoubleProperty extends ThemeProperty<Double> {
 	private final double min;
 	private final double max;
@@ -18,13 +20,13 @@ public class DoubleProperty extends ThemeProperty<Double> {
 	}
 
 	@Override
+	@Nullable
 	public Double parse(String string) {
 		try {
 			double i = Double.parseDouble(string);
 			return Mth.clamp(i, min, max);
 		} catch (Exception ignored) {
+			return null;
 		}
-
-		return null;
 	}
 }

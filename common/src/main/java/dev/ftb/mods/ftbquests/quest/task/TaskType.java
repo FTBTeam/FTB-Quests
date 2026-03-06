@@ -1,43 +1,41 @@
 package dev.ftb.mods.ftbquests.quest.task;
 
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.chat.Component;
+import net.minecraft.resources.Identifier;
+import net.minecraft.util.Util;
+
+import dev.ftb.mods.ftblibrary.client.gui.widget.Panel;
 import dev.ftb.mods.ftblibrary.icon.Icon;
-import dev.ftb.mods.ftblibrary.ui.Panel;
 import dev.ftb.mods.ftbquests.api.FTBQuestsAPI;
 import dev.ftb.mods.ftbquests.client.GuiProviders;
 import dev.ftb.mods.ftbquests.quest.Quest;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
-import net.minecraft.Util;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
-import org.jetbrains.annotations.Nullable;
 
 import java.util.function.BiConsumer;
 import java.util.function.Supplier;
+import org.apache.commons.lang3.Validate;
 
 public final class TaskType {
-	private final ResourceLocation typeId;
+	private final Identifier typeId;
 	private final Provider provider;
-	private final Supplier<Icon> iconSupplier;
-	private Component displayName;
+	private final Supplier<Icon<?>> iconSupplier;
+	private final Component displayName;
 	private GuiProvider guiProvider;
 	public int internalId;
 
-	TaskType(ResourceLocation typeId, Provider provider, Supplier<Icon> iconSupplier) {
+	TaskType(Identifier typeId, Provider provider, Supplier<Icon<?>> iconSupplier) {
 		this.typeId = typeId;
 		this.provider = provider;
 		this.iconSupplier = iconSupplier;
 
-		displayName = null;
+		displayName = Component.translatable(typeId.toLanguageKey("ftbquests.task"));
 		guiProvider = GuiProviders.defaultTaskGuiProvider(provider);
 	}
 
-	public ResourceLocation getTypeId() {
+	public Identifier getTypeId() {
 		return typeId;
 	}
 
-	@Nullable
 	public static Task createTask(long id, Quest quest, String typeId) {
 		if (typeId.isEmpty()) {
 			typeId = FTBQuestsAPI.MOD_ID + ":item";
@@ -45,12 +43,8 @@ public final class TaskType {
 			typeId = FTBQuestsAPI.MOD_ID + ':' + typeId;
 		}
 
-		TaskType type = TaskTypes.TYPES.get(ResourceLocation.tryParse(typeId));
-
-		if (type == null) {
-			return null;
-		}
-
+		TaskType type = TaskTypes.TYPES.get(Identifier.tryParse(typeId));
+		Validate.isTrue(type != null, "Unknown task type: " + type);
 		return type.provider.create(id, quest);
 	}
 
@@ -66,20 +60,11 @@ public final class TaskType {
 		return Util.make(new CompoundTag(), t -> t.putString("type", getTypeForNBT()));
 	}
 
-	public TaskType setDisplayName(Component name) {
-		displayName = name;
-		return this;
-	}
-
 	public Component getDisplayName() {
-		if (displayName == null) {
-			displayName = Component.translatable("ftbquests.task." + typeId.getNamespace() + '.' + typeId.getPath());
-		}
-
 		return displayName;
 	}
 
-	public Icon getIconSupplier() {
+	public Icon<?> getIconSupplier() {
 		return iconSupplier.get();
 	}
 
@@ -99,7 +84,6 @@ public final class TaskType {
 
 	@FunctionalInterface
 	public interface GuiProvider {
-		@Environment(EnvType.CLIENT)
 		void openCreationGui(Panel panel, Quest quest, BiConsumer<Task,CompoundTag> callback);
 	}
 

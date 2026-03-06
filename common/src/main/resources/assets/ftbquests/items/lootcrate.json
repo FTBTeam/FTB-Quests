@@ -1,0 +1,12 @@
+{
+  "model": {
+    "type": "minecraft:model",
+    "model": "ftbquests:item/lootcrate",
+    "tints": [
+      {
+        "type": "ftbquests:loot_crate",
+        "default": -1
+      }
+    ]
+  }
+}

@@ -1,9 +1,10 @@
 package dev.ftb.mods.ftbquests.quest.reward;
 
+import net.minecraft.server.level.ServerPlayer;
+
 import dev.ftb.mods.ftbquests.quest.Quest;
 import dev.ftb.mods.ftbquests.quest.loot.RewardTable;
 import dev.ftb.mods.ftbquests.quest.loot.WeightedReward;
-import net.minecraft.server.level.ServerPlayer;
 
 public class AllTableReward extends LootReward {
     public AllTableReward(long id, Quest parent) {

@@ -1,10 +1,11 @@
 package dev.ftb.mods.ftbquests.neoforge;
 
+import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
+import net.minecraft.world.phys.AABB;
+
 import dev.ftb.mods.ftbquests.block.entity.TaskScreenBlockEntity;
 import dev.ftb.mods.ftbquests.block.neoforge.NeoForgeTaskScreenBlockEntity;
 import dev.ftb.mods.ftbquests.client.TaskScreenRenderer;
-import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
-import net.minecraft.world.phys.AABB;
 
 public class NeoForgeTaskScreenRenderer extends TaskScreenRenderer {
     public NeoForgeTaskScreenRenderer(BlockEntityRendererProvider.Context context) {

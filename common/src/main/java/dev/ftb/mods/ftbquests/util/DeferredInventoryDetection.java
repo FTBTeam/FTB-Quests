@@ -1,6 +1,5 @@
 package dev.ftb.mods.ftbquests.util;
 
-import it.unimi.dsi.fastutil.objects.Object2LongOpenHashMap;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.item.ItemStack;
@@ -8,6 +7,7 @@ import net.minecraft.world.item.ItemStack;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
+import it.unimi.dsi.fastutil.objects.Object2LongOpenHashMap;
 
 public class DeferredInventoryDetection {
     private static final long MILLIS_IN_TICK = 50L;

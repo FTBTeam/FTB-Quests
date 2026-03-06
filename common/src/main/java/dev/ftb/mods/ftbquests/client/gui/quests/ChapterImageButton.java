@@ -1,33 +1,40 @@
 package dev.ftb.mods.ftbquests.client.gui.quests;
 
-import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.math.Axis;
-import dev.ftb.mods.ftblibrary.config.ConfigGroup;
-import dev.ftb.mods.ftblibrary.config.ui.EditConfigScreen;
+import net.minecraft.ChatFormatting;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.util.Util;
+import com.mojang.blaze3d.platform.InputConstants;
+
+import dev.ftb.mods.ftblibrary.client.config.EditableConfigGroup;
+import dev.ftb.mods.ftblibrary.client.config.gui.EditConfigScreen;
+import dev.ftb.mods.ftblibrary.client.gui.WidgetType;
+import dev.ftb.mods.ftblibrary.client.gui.input.MouseButton;
+import dev.ftb.mods.ftblibrary.client.gui.theme.Theme;
+import dev.ftb.mods.ftblibrary.client.gui.widget.Button;
+import dev.ftb.mods.ftblibrary.client.gui.widget.ContextMenuItem;
+import dev.ftb.mods.ftblibrary.client.gui.widget.Panel;
+import dev.ftb.mods.ftblibrary.client.gui.widget.Widget;
+import dev.ftb.mods.ftblibrary.client.icon.IconHelper;
 import dev.ftb.mods.ftblibrary.icon.Color4I;
 import dev.ftb.mods.ftblibrary.icon.Icon;
 import dev.ftb.mods.ftblibrary.icon.Icons;
-import dev.ftb.mods.ftblibrary.ui.*;
-import dev.ftb.mods.ftblibrary.ui.input.MouseButton;
 import dev.ftb.mods.ftblibrary.util.TooltipList;
 import dev.ftb.mods.ftbquests.api.FTBQuestsAPI;
+import dev.ftb.mods.ftbquests.client.FTBQuestsClient;
 import dev.ftb.mods.ftbquests.net.EditObjectMessage;
 import dev.ftb.mods.ftbquests.quest.ChapterImage;
 import dev.ftb.mods.ftbquests.quest.Movable;
 import dev.ftb.mods.ftbquests.quest.theme.property.ThemeProperties;
-import net.minecraft.ChatFormatting;
-import net.minecraft.Util;
-import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.MutableComponent;
-import org.jetbrains.annotations.NotNull;
+import dev.ftb.mods.ftbquests.util.TextUtils;
 
-import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 import java.util.function.BiFunction;
+import org.jetbrains.annotations.NotNull;
+import org.joml.Matrix3x2fStack;
 
 public class ChapterImageButton extends Button implements QuestPositionableButton {
 	private final QuestScreen questScreen;
@@ -51,34 +58,22 @@ public class ChapterImageButton extends Button implements QuestPositionableButto
 	}
 
 	public ChapterImageButton(Panel panel, ChapterImage i) {
-		super(panel, Component.empty(), i.getImage());
+		super(panel, i.getTitle(), i.getImage());
 		questScreen = (QuestScreen) panel.getGui();
 		setSize(20, 20);
 		chapterImage = i;
 		setDrawLayer(DrawLayer.BACKGROUND); // draw *before* connection lines & quest widgets
 	}
 
-	public static Optional<ChapterImage> getClipboardImage() {
-		ChapterImage img = ChapterImage.clipboard.get();
-		if (img != null) {
-			if (img.getChapter().isValid()) {
-				return Optional.of(img);
-			} else {
-				ChapterImage.clipboard = new WeakReference<>(null);
-			}
-		}
-		return Optional.empty();
-	}
-
 	@Override
 	public boolean checkMouseOver(int mouseX, int mouseY) {
-        if (questScreen.questPanel.mouseOverQuest != null
+		if (questScreen.questPanel.mouseOverQuest != null
 				|| questScreen.movingObjects
 				|| questScreen.viewQuestPanel.isMouseOver()
 				|| questScreen.chapterPanel.isMouseOver()
 				|| chapterImage.getClick().isEmpty() && !questScreen.file.canEdit()) {
-            return false;
-        }
+			return false;
+		}
 
 		if (chapterImage.getRotation() != 0) {
 			// need a bit of trig here, and we'll memoize it for performance
@@ -91,16 +86,16 @@ public class ChapterImageButton extends Button implements QuestPositionableButto
 			mouseY = (int) (cy + rotated.y);
 		}
 
-        return super.checkMouseOver(mouseX, mouseY);
+		return super.checkMouseOver(mouseX, mouseY);
 	}
 
 	@Override
 	public boolean mousePressed(MouseButton button) {
-        if (isMouseOver() && getWidgetType() != WidgetType.DISABLED) {
+		if (isMouseOver() && getWidgetType() != WidgetType.DISABLED) {
 			onClicked(button);
 			// returning false on left button click allows click-through for panning behaviour
 			//  (also, images with a click action defined should swallow the mouse click)
-			return !button.isLeft() || button.isLeft() && Screen.hasAltDown() || !chapterImage.getClick().isEmpty();
+			return !button.isLeft() || button.isLeft() && Minecraft.getInstance().hasAltDown() || !chapterImage.getClick().isEmpty();
 		}
 		return false;
 	}
@@ -123,10 +118,10 @@ public class ChapterImageButton extends Button implements QuestPositionableButto
 				}
 			});
 
-			contextMenu.add(new ContextMenuItem(Component.translatable("gui.copy"), Icons.INFO, b -> chapterImage.copyToClipboard()) {
+			contextMenu.add(new ContextMenuItem(Component.translatable("ftbquests.gui.copy_id"), Icons.INFO, b -> chapterImage.copyToClipboard()) {
 				@Override
 				public void addMouseOverText(TooltipList list) {
-					list.add(Component.literal(chapterImage.getImage().toString()).withStyle(ChatFormatting.DARK_GRAY));
+					list.add(Component.literal(chapterImage.getCodeString()).withStyle(ChatFormatting.DARK_GRAY));
 				}
 			});
 
@@ -137,17 +132,25 @@ public class ChapterImageButton extends Button implements QuestPositionableButto
 						b -> chapterImage.fixupAspectRatio(false)));
 			}
 
-			contextMenu.add(new ContextMenuItem(Component.translatable("selectServer.delete"), ThemeProperties.DELETE_ICON.get(), b -> {
-				chapterImage.getChapter().removeImage(chapterImage);
-				EditObjectMessage.sendToServer(chapterImage.getChapter());
-			}).setYesNoText(Component.translatable("delete_item", chapterImage.getImage().toString())));
+			int nSelected = questScreen.selectedObjects.size();
+			Component yesNo = Component.translatable("delete_item", nSelected > 0 ?
+					Component.translatable("ftbquests.objects", nSelected) :
+					Component.translatable("delete_item", chapterImage.getImage().toString())
+			);
+			contextMenu.add(new ContextMenuItem(Component.translatable("selectServer.delete"), ThemeProperties.DELETE_ICON.get(),
+					b -> handleDeletion())
+					.setYesNoText(yesNo)
+			);
 
 			getGui().openContextMenu(contextMenu);
 		} else if (button.isLeft()) {
-			if (Screen.hasControlDown() && questScreen.file.canEdit()) {
+			if (Minecraft.getInstance().hasControlDown() && questScreen.file.canEdit()) {
 				questScreen.toggleSelected(chapterImage);
-			} else if (Screen.hasAltDown() && questScreen.file.canEdit()) {
+			} else if (isKeyDown(InputConstants.KEY_LALT) && questScreen.file.canEdit()) {
 				openEditScreen();
+			} else if (isKeyDown(InputConstants.KEY_RALT) && questScreen.file.canEdit()) {
+				chapterImage.copyToClipboard();
+				FTBQuestsClient.showInfoToast(Component.translatable("ftbquests.quest.copied"), Component.literal(moveAndDeleteFocus().getTitle().getString()));
 			} else if (!chapterImage.getClick().isEmpty()) {
 				playClickSound();
 				handleClick(chapterImage.getClick());
@@ -161,11 +164,19 @@ public class ChapterImageButton extends Button implements QuestPositionableButto
 		}
 	}
 
+	private void handleDeletion() {
+		if (questScreen.selectedObjects.isEmpty()) {
+			questScreen.file.deleteObject(chapterImage.getId());
+		} else {
+			questScreen.deleteSelectedObjects();
+		}
+	}
+
 	private void openEditScreen() {
 		String name = chapterImage.getImage() instanceof Color4I ? chapterImage.getColor().toString() : chapterImage.getImage().toString();
-		ConfigGroup group = new ConfigGroup(FTBQuestsAPI.MOD_ID, accepted -> {
+		EditableConfigGroup group = new EditableConfigGroup(FTBQuestsAPI.MOD_ID, accepted -> {
 			if (accepted) {
-				EditObjectMessage.sendToServer(chapterImage.getChapter());
+				EditObjectMessage.sendToServer(chapterImage);
 			}
 			run();
 		}) {
@@ -188,54 +199,54 @@ public class ChapterImageButton extends Button implements QuestPositionableButto
 	}
 
 	@Override
-    public boolean collidesWith(int x, int y, int w, int h) {
-        // small kludge: always try to render rotated images, even if they're off-screen
-        // while it's possible to do extra calculations to determine the effective bounding area of a rotated image,
-        //   it adds a lot of complexity for a relatively small benefit
-        return chapterImage.getRotation() != 0 || super.collidesWith(x, y, w, h);
-    }
+	public boolean collidesWith(int x, int y, int w, int h) {
+		// small kludge: always try to render rotated images, even if they're off-screen
+		// while it's possible to do extra calculations to determine the effective bounding area of a rotated image,
+		//   it adds a lot of complexity for a relatively small benefit
+		return chapterImage.getRotation() != 0 || super.collidesWith(x, y, w, h);
+	}
 
 	@Override
 	public void addMouseOverText(TooltipList list) {
-		chapterImage.addHoverText(list);
+		TextUtils.processComponentWithPossibleNewlines(getTitle(), list::add);
 	}
 
 	@Override
 	public void draw(GuiGraphics graphics, Theme theme, int x, int y, int w, int h) {
-		Icon image = chapterImage.getImage();
+		Icon<?> image = chapterImage.getImage();
 
 		// if we've got this far and the image shouldn't normally be drawn, we must be in edit mode
-		boolean transparent = !chapterImage.shouldShowImage(questScreen.file.selfTeamData);
+		boolean transparent = !chapterImage.shouldShowImage(FTBQuestsClient.getClientPlayerData());
 		if (transparent) {
 			image = image.withColor(Color4I.WHITE.withAlpha(100));
 		} else if (!chapterImage.getColor().equals(Color4I.WHITE) || chapterImage.getAlpha() < 255) {
 			image = image.withColor(chapterImage.getColor().withAlpha(chapterImage.getAlpha()));
 		}
 
-		PoseStack poseStack = graphics.pose();
-		poseStack.pushPose();
+		Matrix3x2fStack poseStack = graphics.pose();
+		poseStack.pushMatrix();
 
 		if (chapterImage.isAlignToCorner()) {
-			poseStack.translate(x, y, 0);
-			poseStack.mulPose(Axis.ZP.rotationDegrees((float) chapterImage.getRotation()));
-			poseStack.scale(w, h, 1);
-			image.draw(graphics, 0, 0, 1, 1);
+			poseStack.translate(x, y);
+			poseStack.rotate((float) chapterImage.getRotation());
+			poseStack.scale(w, h);
+			IconHelper.renderIcon(image, graphics, 0, 0, 1, 1);
 			if (questScreen.selectedObjects.contains(moveAndDeleteFocus())) {
 				Color4I col = Color4I.WHITE.withAlpha((int) (128D + Math.sin(System.currentTimeMillis() * 0.003D) * 50D));
-				col.draw(graphics, 0, 0, 1, 1);
+				IconHelper.renderIcon(col, graphics, 0, 0, 1, 1);
 			}
 		} else {
-			poseStack.translate((int) (x + w / 2D), (int) (y + h / 2D), 0);
-			poseStack.mulPose(Axis.ZP.rotationDegrees((float) chapterImage.getRotation()));
-			poseStack.scale(w / 2F, h / 2F, 1);
-			image.draw(graphics, -1, -1, 2, 2);
+			poseStack.translate((int) (x + w / 2D), (int) (y + h / 2D));
+			poseStack.rotate((float) chapterImage.getRotation());
+			poseStack.scale(w / 2F, h / 2F);
+			IconHelper.renderIcon(image, graphics, -1, -1, 2, 2);
 			if (questScreen.selectedObjects.contains(moveAndDeleteFocus())) {
 				Color4I col = Color4I.WHITE.withAlpha((int) (128D + Math.sin(System.currentTimeMillis() * 0.003D) * 50D));
-				col.draw(graphics, -1, -1, 2, 2);
+				IconHelper.renderIcon(col, graphics, -1, -1, 2, 2);
 			}
 		}
 
-		poseStack.popPose();
+		poseStack.popMatrix();
 	}
 
 	@Override

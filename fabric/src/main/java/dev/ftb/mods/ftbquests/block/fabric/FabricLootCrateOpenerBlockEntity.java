@@ -1,14 +1,16 @@
 package dev.ftb.mods.ftbquests.block.fabric;
 
-import dev.ftb.mods.ftbquests.block.entity.LootCrateOpenerBlockEntity;
-import dev.ftb.mods.ftbquests.item.LootCrateItem;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.block.state.BlockState;
+
 import net.fabricmc.fabric.api.transfer.v1.item.ItemVariant;
 import net.fabricmc.fabric.api.transfer.v1.storage.Storage;
 import net.fabricmc.fabric.api.transfer.v1.storage.base.SingleVariantStorage;
 import net.fabricmc.fabric.api.transfer.v1.transaction.TransactionContext;
-import net.minecraft.core.BlockPos;
-import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.level.block.state.BlockState;
+
+import dev.ftb.mods.ftbquests.block.entity.LootCrateOpenerBlockEntity;
+import dev.ftb.mods.ftbquests.item.LootCrateItem;
 
 @SuppressWarnings("UnstableApiUsage")
 public class FabricLootCrateOpenerBlockEntity extends LootCrateOpenerBlockEntity {

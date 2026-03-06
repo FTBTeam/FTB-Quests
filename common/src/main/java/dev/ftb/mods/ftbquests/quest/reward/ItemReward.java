@@ -1,19 +1,5 @@
 package dev.ftb.mods.ftbquests.quest.reward;
 
-import dev.architectury.hooks.item.ItemStackHooks;
-import dev.architectury.networking.NetworkManager;
-import dev.ftb.mods.ftblibrary.config.ConfigGroup;
-import dev.ftb.mods.ftblibrary.icon.Icon;
-import dev.ftb.mods.ftblibrary.icon.ItemIcon;
-import dev.ftb.mods.ftblibrary.ui.Widget;
-import dev.ftb.mods.ftblibrary.util.client.PositionedIngredient;
-import dev.ftb.mods.ftbquests.FTBQuests;
-import dev.ftb.mods.ftbquests.net.NotifyItemRewardMessage;
-import dev.ftb.mods.ftbquests.quest.Quest;
-import dev.ftb.mods.ftbquests.registry.ModItems;
-import io.netty.handler.codec.EncoderException;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.RegistryFriendlyByteBuf;
@@ -24,11 +10,25 @@ import net.minecraft.util.RandomSource;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.block.entity.BlockEntity;
-import org.jetbrains.annotations.Nullable;
+
+import dev.architectury.hooks.item.ItemStackHooks;
+import dev.architectury.networking.NetworkManager;
+
+import dev.ftb.mods.ftblibrary.client.config.EditableConfigGroup;
+import dev.ftb.mods.ftblibrary.client.gui.widget.Widget;
+import dev.ftb.mods.ftblibrary.client.util.PositionedIngredient;
+import dev.ftb.mods.ftblibrary.icon.Icon;
+import dev.ftb.mods.ftblibrary.icon.ItemIcon;
+import dev.ftb.mods.ftbquests.FTBQuests;
+import dev.ftb.mods.ftbquests.net.NotifyItemRewardMessage;
+import dev.ftb.mods.ftbquests.quest.Quest;
+import dev.ftb.mods.ftbquests.registry.ModItems;
 
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import io.netty.handler.codec.EncoderException;
+import org.jspecify.annotations.Nullable;
 
 public class ItemReward extends Reward {
 	private ItemStack item;
@@ -70,7 +70,7 @@ public class ItemReward extends Reward {
 		super.writeData(nbt, provider);
 
 		if (!item.isEmpty()) {
-			nbt.put("item", item.save(provider));
+			nbt.store("item", ItemStack.CODEC, item);
 		}
 
 		if (count > 1) {
@@ -90,14 +90,14 @@ public class ItemReward extends Reward {
 
 		item = itemOrMissingFromNBT(nbt.get("item"), provider);
 
-		count = nbt.getInt("count");
+		count = nbt.getIntOr("count", 1);
 		if (count == 0) {
 			count = item.getCount();
 			item.setCount(1);
 		}
 
-		randomBonus = nbt.getInt("random_bonus");
-		onlyOne = nbt.getBoolean("only_one");
+		randomBonus = nbt.getIntOr("random_bonus", 0);
+		onlyOne = nbt.getBooleanOr("only_one", false);
 	}
 
 	@Override
@@ -130,8 +130,7 @@ public class ItemReward extends Reward {
 	}
 
 	@Override
-	@Environment(EnvType.CLIENT)
-	public void fillConfigGroup(ConfigGroup config) {
+	public void fillConfigGroup(EditableConfigGroup config) {
 		super.fillConfigGroup(config);
 
 		config.addItemStack("item", item, v -> item = v, ItemStack.EMPTY, true, false).setNameKey("ftbquests.reward.ftbquests.item");
@@ -176,7 +175,6 @@ public class ItemReward extends Reward {
 	}
 
 	@Override
-	@Environment(EnvType.CLIENT)
 	public MutableComponent getAltTitle() {
 		if (randomBonus > 0) {
 			return Component.literal(count + "-" + (count + randomBonus) + "x ").append(item.getHoverName());
@@ -188,19 +186,16 @@ public class ItemReward extends Reward {
 	}
 
 	@Override
-	@Environment(EnvType.CLIENT)
-	public Icon getAltIcon() {
-		return item.isEmpty() ? super.getAltIcon() : ItemIcon.getItemIcon(ItemStackHooks.copyWithCount(item, 1));
+	public Icon<?> getAltIcon() {
+		return item.isEmpty() ? super.getAltIcon() : ItemIcon.ofItemStack(ItemStackHooks.copyWithCount(item, 1));
 	}
 
 	@Override
-	@Environment(EnvType.CLIENT)
 	public Optional<PositionedIngredient> getIngredient(Widget widget) {
 		return PositionedIngredient.of(item, widget, true);
 	}
 
 	@Override
-	@Environment(EnvType.CLIENT)
 	public String getButtonText() {
 		return randomBonus > 0 ? count + "-" + (count + randomBonus) : Integer.toString(count);
 	}

@@ -1,29 +1,42 @@
 package dev.ftb.mods.ftbquests.client;
 
-import dev.ftb.mods.ftblibrary.config.*;
-import dev.ftb.mods.ftblibrary.config.ui.EditConfigScreen;
-import dev.ftb.mods.ftblibrary.config.ui.EditStringConfigOverlay;
-import dev.ftb.mods.ftblibrary.config.ui.resource.SelectFluidScreen;
-import dev.ftb.mods.ftblibrary.config.ui.resource.SelectItemStackScreen;
-import dev.ftb.mods.ftblibrary.integration.currency.CurrencyHelper;
-import dev.ftb.mods.ftbquests.api.FTBQuestsAPI;
-import dev.ftb.mods.ftbquests.client.gui.SelectQuestObjectScreen;
-import dev.ftb.mods.ftbquests.quest.Quest;
-import dev.ftb.mods.ftbquests.quest.QuestObjectType;
-import dev.ftb.mods.ftbquests.quest.loot.RewardTable;
-import dev.ftb.mods.ftbquests.quest.reward.*;
-import dev.ftb.mods.ftbquests.quest.task.*;
-import dev.ftb.mods.ftbquests.quest.translation.TranslationKey;
-import dev.ftb.mods.ftbquests.util.ConfigQuestObject;
-import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
-import net.minecraft.world.item.ItemStack;
+import net.minecraft.util.Util;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.StructureBlockEntity;
 import net.minecraft.world.phys.BlockHitResult;
+
+import dev.ftb.mods.ftblibrary.client.config.EditableConfigGroup;
+import dev.ftb.mods.ftblibrary.client.config.editable.EditableFluid;
+import dev.ftb.mods.ftblibrary.client.config.editable.EditableInt;
+import dev.ftb.mods.ftblibrary.client.config.editable.EditableItemStack;
+import dev.ftb.mods.ftblibrary.client.config.editable.EditableLong;
+import dev.ftb.mods.ftblibrary.client.config.editable.EditableString;
+import dev.ftb.mods.ftblibrary.client.config.editable.EditableStringifiedConfig;
+import dev.ftb.mods.ftblibrary.client.config.gui.EditConfigScreen;
+import dev.ftb.mods.ftblibrary.client.config.gui.EditStringConfigOverlay;
+import dev.ftb.mods.ftblibrary.client.config.gui.resource.SelectFluidScreen;
+import dev.ftb.mods.ftblibrary.client.config.gui.resource.SelectItemStackScreen;
+import dev.ftb.mods.ftblibrary.integration.currency.CurrencyHelper;
+import dev.ftb.mods.ftbquests.api.FTBQuestsAPI;
+import dev.ftb.mods.ftbquests.client.config.EditableQuestObject;
+import dev.ftb.mods.ftbquests.client.gui.SelectQuestObjectScreen;
+import dev.ftb.mods.ftbquests.quest.Quest;
+import dev.ftb.mods.ftbquests.quest.QuestObjectType;
+import dev.ftb.mods.ftbquests.quest.loot.RewardTable;
+import dev.ftb.mods.ftbquests.quest.reward.CurrencyReward;
+import dev.ftb.mods.ftbquests.quest.reward.ItemReward;
+import dev.ftb.mods.ftbquests.quest.reward.RandomReward;
+import dev.ftb.mods.ftbquests.quest.reward.Reward;
+import dev.ftb.mods.ftbquests.quest.reward.RewardType;
+import dev.ftb.mods.ftbquests.quest.reward.RewardTypes;
+import dev.ftb.mods.ftbquests.quest.reward.StageReward;
+import dev.ftb.mods.ftbquests.quest.reward.XPReward;
+import dev.ftb.mods.ftbquests.quest.task.*;
+import dev.ftb.mods.ftbquests.quest.translation.TranslationKey;
 
 import java.util.function.BiConsumer;
 
@@ -33,7 +46,7 @@ public class GuiProviders {
             Reward reward = provider.create(0L, quest);
 
             if (reward instanceof RandomReward randomReward) {
-                ConfigQuestObject<RewardTable> config = new ConfigQuestObject<>(QuestObjectType.REWARD_TABLE);
+                EditableQuestObject<RewardTable> config = new EditableQuestObject<>(QuestObjectType.REWARD_TABLE);
                 SelectQuestObjectScreen<?> s = new SelectQuestObjectScreen<>(config, accepted -> {
                     if (accepted) {
                         randomReward.setTable(config.getValue());
@@ -45,7 +58,7 @@ public class GuiProviders {
                 s.setHasSearchBox(true);
                 s.openGui();
             } else {
-                ConfigGroup group = new ConfigGroup(FTBQuestsAPI.MOD_ID, accepted -> {
+                EditableConfigGroup group = new EditableConfigGroup(FTBQuestsAPI.MOD_ID, accepted -> {
                     if (accepted) {
                         callback.accept(reward);
                     }
@@ -63,17 +76,16 @@ public class GuiProviders {
             Task task = provider.create(0L, quest);
 
             if (task instanceof ISingleLongValueTask slvTask) {
-                LongConfig c = new LongConfig(slvTask.getMinConfigValue(), slvTask.getMaxConfigValue());
-                c.setValue(slvTask.getMinConfigValue());
+                EditableLong editable = new EditableLong(slvTask.getMinConfigValue(), slvTask.getMaxConfigValue());
+                editable.setValue(slvTask.getMinConfigValue());
 
-                EditStringConfigOverlay<Long> overlay = new EditStringConfigOverlay<>(panel.getGui(), c, accepted -> {
+                EditStringConfigOverlay<Long> overlay = new EditStringConfigOverlay<>(panel.getGui(), editable, accepted -> {
                     if (accepted) {
-                        slvTask.setValue(c.getValue());
+                        slvTask.setValue(editable.getValue());
                         callback.accept(task, task.getType().makeExtraNBT());
                     }
                     panel.run();
                 }, task.getType().getDisplayName()).atMousePosition();
-                overlay.setExtraZlevel(300);
                 panel.getGui().pushModalPanel(overlay);
             } else {
                 openSetupGui(panel.getGui(), callback, task);
@@ -83,42 +95,39 @@ public class GuiProviders {
 
     public static void setTaskGuiProviders() {
         TaskTypes.ITEM.setGuiProvider((gui, quest, callback) -> {
-            ItemStackConfig c = new ItemStackConfig(false, false);
-
-            new SelectItemStackScreen(c, accepted -> {
+            EditableItemStack editable = new EditableItemStack(false, false);
+            new SelectItemStackScreen(editable, accepted -> {
                 gui.run();
                 if (accepted) {
-                    ItemTask itemTask = new ItemTask(0L, quest).setStackAndCount(c.getValue(), c.getValue().getCount());
+                    ItemTask itemTask = new ItemTask(0L, quest).setStackAndCount(editable.getValue(), editable.getValue().getCount());
                     callback.accept(itemTask, itemTask.getType().makeExtraNBT());
                 }
             }).openGui();
         });
 
         TaskTypes.CHECKMARK.setGuiProvider((panel, quest, callback) -> {
-            StringConfig c = new StringConfig(null);
-            c.setValue("");
+            EditableString editable = new EditableString();
+            editable.setValue("");
 
-            EditStringConfigOverlay<String> overlay = new EditStringConfigOverlay<>(panel.getGui(), c, accepted -> {
+            EditStringConfigOverlay<String> overlay = new EditStringConfigOverlay<>(panel.getGui(), editable, accepted -> {
                 if (accepted) {
                     CheckmarkTask checkmarkTask = new CheckmarkTask(0L, quest);
-                    checkmarkTask.setRawTitle(c.getValue());
+                    checkmarkTask.setRawTitle(editable.getValue());
                     CompoundTag extra = checkmarkTask.getType().makeExtraNBT();
-                    quest.getQuestFile().getTranslationManager().addInitialTranslation(extra, quest.getQuestFile().getLocale(), TranslationKey.TITLE, c.getValue());
+                    quest.getQuestFile().getTranslationManager().addInitialTranslation(extra, quest.getQuestFile().getLocale(), TranslationKey.TITLE, editable.getValue());
                     callback.accept(checkmarkTask, extra);
                 }
                 panel.run();
             }, TaskTypes.CHECKMARK.getDisplayName()).atMousePosition();
-            overlay.setExtraZlevel(300);
             panel.getGui().pushModalPanel(overlay);
         });
 
         TaskTypes.FLUID.setGuiProvider((gui, quest, callback) -> {
-            FluidConfig c = new FluidConfig(false);
-
-            new SelectFluidScreen(c, accepted -> {
+            EditableFluid editable = new EditableFluid(false);
+            new SelectFluidScreen(editable, accepted -> {
                 gui.run();
                 if (accepted) {
-                    FluidTask fluidTask = new FluidTask(0L, quest).setFluid(c.getValue());
+                    FluidTask fluidTask = new FluidTask(0L, quest).setFluid(editable.getValue());
                     callback.accept(fluidTask, fluidTask.getType().makeExtraNBT());
                 }
             }).openGui();
@@ -158,7 +167,7 @@ public class GuiProviders {
     }
 
     private static void openSetupGui(Runnable gui, BiConsumer<Task, CompoundTag> callback, Task task) {
-        ConfigGroup group = new ConfigGroup(FTBQuestsAPI.MOD_ID, accepted -> {
+        EditableConfigGroup group = new EditableConfigGroup(FTBQuestsAPI.MOD_ID, accepted -> {
             gui.run();
             if (accepted) {
                 callback.accept(task, task.getType().makeExtraNBT());
@@ -172,28 +181,25 @@ public class GuiProviders {
 
     public static void setRewardGuiProviders() {
         RewardTypes.ITEM.setGuiProvider((gui, quest, callback) -> {
-            ItemStackConfig c = new ItemStackConfig(false, false);
-
-            new SelectItemStackScreen(c, accepted -> {
+            EditableItemStack editable = new EditableItemStack(false, false);
+            new SelectItemStackScreen(editable, accepted -> {
                 if (accepted) {
-                    ItemStack copy = c.getValue().copy();
-                    copy.setCount(1);
-                    ItemReward reward = new ItemReward(0L, quest, copy, c.getValue().getCount());
+                    ItemReward reward = new ItemReward(0L, quest, editable.getValue().copyWithCount(1), editable.getValue().getCount());
                     callback.accept(reward);
                 }
                 gui.run();
             }).openGui();
         });
 
-        simpleRewardProvider(RewardTypes.XP, XPReward::new, Util.make(new IntConfig(1, Integer.MAX_VALUE), c -> c.setValue(100)));
-        simpleRewardProvider(RewardTypes.XP_LEVELS, XPReward::new, Util.make(new IntConfig(1, Integer.MAX_VALUE), c -> c.setValue(5)));
-        simpleRewardProvider(RewardTypes.STAGE, StageReward::new, new StringConfig());
+        simpleRewardProvider(RewardTypes.XP, XPReward::new, Util.make(new EditableInt(1, Integer.MAX_VALUE), c -> c.setValue(100)));
+        simpleRewardProvider(RewardTypes.XP_LEVELS, XPReward::new, Util.make(new EditableInt(1, Integer.MAX_VALUE), c -> c.setValue(5)));
+        simpleRewardProvider(RewardTypes.STAGE, StageReward::new, new EditableString());
         if (CurrencyHelper.getInstance().getProvider().isValidProvider()) {
-            simpleRewardProvider(RewardTypes.CURRENCY, CurrencyReward::new, Util.make(new IntConfig(1, Integer.MAX_VALUE), c -> c.setValue(1)));
+            simpleRewardProvider(RewardTypes.CURRENCY, CurrencyReward::new, Util.make(new EditableInt(1, Integer.MAX_VALUE), c -> c.setValue(1)));
         }
     }
 
-    private static <T> void simpleRewardProvider(RewardType type, RewardFactory<T> factory, ConfigFromString<T> cfg) {
+    private static <T> void simpleRewardProvider(RewardType type, RewardFactory<T> factory, EditableStringifiedConfig<T> cfg) {
         type.setGuiProvider((panel, quest, callback) -> {
             EditStringConfigOverlay<T> overlay = new EditStringConfigOverlay<>(panel.getGui(), cfg, accepted -> {
                 if (accepted) {

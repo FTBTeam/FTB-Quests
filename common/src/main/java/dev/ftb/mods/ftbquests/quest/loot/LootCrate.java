@@ -1,14 +1,15 @@
 package dev.ftb.mods.ftbquests.quest.loot;
 
-import dev.ftb.mods.ftblibrary.config.ConfigGroup;
-import dev.ftb.mods.ftblibrary.config.NameMap;
-import dev.ftb.mods.ftblibrary.icon.Color4I;
-import dev.ftb.mods.ftbquests.quest.QuestObjectBase;
-import dev.ftb.mods.ftbquests.registry.ModDataComponents;
-import dev.ftb.mods.ftbquests.registry.ModItems;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.world.item.ItemStack;
+
+import dev.ftb.mods.ftblibrary.client.config.EditableConfigGroup;
+import dev.ftb.mods.ftblibrary.icon.Color4I;
+import dev.ftb.mods.ftblibrary.util.NameMap;
+import dev.ftb.mods.ftbquests.quest.QuestObjectBase;
+import dev.ftb.mods.ftbquests.registry.ModDataComponents;
+import dev.ftb.mods.ftbquests.registry.ModItems;
 
 import java.util.Collection;
 import java.util.LinkedHashMap;
@@ -34,7 +35,7 @@ public final class LootCrate {
 		this.table = table;
 
 		if (initFromTable) {
-			initFromTable();
+			stringID = initFromTable();
 		} else {
 			stringID = table.toString();
 		}
@@ -44,9 +45,9 @@ public final class LootCrate {
 		return isClient ? LOOT_CRATES_CLIENT : LOOT_CRATES_SERVER;
 	}
 
-	public void initFromTable() {
-		stringID = buildStringID(table);
-		Defaults def = Defaults.NAME_MAP.getNullable(stringID);
+	private String initFromTable() {
+		String id = buildStringID(table);
+		Defaults def = Defaults.NAME_MAP.getNullable(id);
 		if (def != null) {
 			color = Color4I.rgb(def.color);
 			glow = def.glow;
@@ -54,6 +55,7 @@ public final class LootCrate {
 			drops.monster = def.monster;
 			drops.boss = def.boss;
 		}
+		return id;
 	}
 
 	private static String buildStringID(RewardTable table) {
@@ -101,11 +103,11 @@ public final class LootCrate {
 	}
 
 	public void readData(CompoundTag nbt) {
-		stringID = nbt.getString("string_id");
-		itemName = nbt.getString("item_name");
-		color = Color4I.rgb(nbt.getInt("color"));
-		glow = nbt.getBoolean("glow");
-		drops.readData(nbt.getCompound("drops"));
+		stringID = nbt.getString("string_id").orElseThrow();
+		color = Color4I.rgb(nbt.getInt("color").orElseThrow());
+		nbt.getString("item_name").ifPresent(s -> itemName = s);
+		nbt.getBoolean("glow").ifPresent(bool -> glow = bool);
+		nbt.getCompound("drops").ifPresent(drops::writeData);
 	}
 
 	public void writeNetData(FriendlyByteBuf data) {
@@ -124,13 +126,13 @@ public final class LootCrate {
 		drops.readNetData(data);
 	}
 
-	public void fillConfigGroup(ConfigGroup config) {
+	public void fillConfigGroup(EditableConfigGroup config) {
 		config.addString("id", stringID, v -> stringID = v, "", Pattern.compile("[a-z0-9_]+"));
 		config.addString("item_name", itemName, v -> itemName = v, "");
 		config.addColor("color", color, v -> color = v, Color4I.WHITE);
 		config.addBool("glow", glow, v -> glow = v, true);
 
-		ConfigGroup d = config.getOrCreateSubgroup("drops");
+		EditableConfigGroup d = config.getOrCreateSubgroup("drops");
 		d.setNameKey("ftbquests.loot.entitydrops");
 		d.addInt("passive", drops.passive, v -> drops.passive = v, 0, 0, Integer.MAX_VALUE).setNameKey("ftbquests.loot.entitytype.passive");
 		d.addInt("monster", drops.monster, v -> drops.monster = v, 0, 0, Integer.MAX_VALUE).setNameKey("ftbquests.loot.entitytype.monster");

@@ -1,6 +1,14 @@
 package dev.ftb.mods.ftbquests.net;
 
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.codec.ByteBufCodecs;
+import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import net.minecraft.util.Util;
+
 import dev.architectury.networking.NetworkManager;
+
 import dev.ftb.mods.ftblibrary.util.NetworkHelper;
 import dev.ftb.mods.ftbquests.FTBQuests;
 import dev.ftb.mods.ftbquests.api.FTBQuestsAPI;
@@ -8,15 +16,9 @@ import dev.ftb.mods.ftbquests.client.ClientQuestFile;
 import dev.ftb.mods.ftbquests.quest.QuestObjectBase;
 import dev.ftb.mods.ftbquests.quest.ServerQuestFile;
 import dev.ftb.mods.ftbquests.util.NetUtils;
-import net.minecraft.Util;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.network.codec.ByteBufCodecs;
-import net.minecraft.network.codec.StreamCodec;
-import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 
 public record EditObjectMessage(long id, CompoundTag nbt) implements CustomPacketPayload {
-	public static final Type<EditObjectMessage> TYPE = new Type<>(FTBQuestsAPI.rl("edit_object_message"));
+	public static final Type<EditObjectMessage> TYPE = new Type<>(FTBQuestsAPI.id("edit_object_message"));
 
 	public static final StreamCodec<FriendlyByteBuf, EditObjectMessage> STREAM_CODEC = StreamCodec.composite(
 			ByteBufCodecs.VAR_LONG, EditObjectMessage::id,
@@ -26,9 +28,9 @@ public record EditObjectMessage(long id, CompoundTag nbt) implements CustomPacke
 
 	public static EditObjectMessage forQuestObject(QuestObjectBase qo) {
 		FTBQuests.getRecipeModHelper().refreshRecipes(qo);
-		ClientQuestFile.INSTANCE.clearCachedData();
+		ClientQuestFile.getInstance().clearCachedData();
 
-		return new EditObjectMessage(qo.id, Util.make(new CompoundTag(), nbt1 -> qo.writeData(nbt1, ClientQuestFile.INSTANCE.holderLookup())));
+		return new EditObjectMessage(qo.id, Util.make(new CompoundTag(), nbt1 -> qo.writeData(nbt1, ClientQuestFile.getInstance().holderLookup())));
 	}
 
 	public static void sendToServer(QuestObjectBase qo) {
@@ -43,12 +45,12 @@ public record EditObjectMessage(long id, CompoundTag nbt) implements CustomPacke
 	public static void handle(EditObjectMessage message, NetworkManager.PacketContext context) {
 		context.queue(() -> {
 			if (NetUtils.canEdit(context)) {
-				QuestObjectBase object = ServerQuestFile.INSTANCE.getBase(message.id);
+				QuestObjectBase object = ServerQuestFile.getInstance().getBase(message.id);
 				if (object != null) {
 					object.readData(message.nbt, context.registryAccess());
-					ServerQuestFile.INSTANCE.clearCachedData();
-					ServerQuestFile.INSTANCE.markDirty();
-					NetworkHelper.sendToAll(context.getPlayer().getServer(), new EditObjectResponseMessage(object));
+					ServerQuestFile.getInstance().clearCachedData();
+					ServerQuestFile.getInstance().markDirty();
+					NetworkHelper.sendToAll(context.getPlayer().level().getServer(), new EditObjectResponseMessage(object));
 					object.editedFromGUIOnServer();
 				}
 			}

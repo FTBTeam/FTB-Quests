@@ -1,21 +1,22 @@
 package dev.ftb.mods.ftbquests.client.gui;
 
-import dev.ftb.mods.ftblibrary.icon.Icon;
 import net.minecraft.world.item.ItemStack;
+
+import dev.ftb.mods.ftblibrary.icon.Icon;
 
 import java.util.Objects;
 
 public class RewardKey {
 	private final String title;
-	private final Icon icon;
+	private final Icon<?> icon;
 	private final ItemStack stack;
 	private final boolean disableBlur;
 
-	public RewardKey(String title, Icon icon, boolean disableBlur) {
+	public RewardKey(String title, Icon<?> icon, boolean disableBlur) {
 		this(title, icon, ItemStack.EMPTY, disableBlur);
 	}
 
-	public RewardKey(String title, Icon icon, ItemStack stack, boolean disableBlur) {
+	public RewardKey(String title, Icon<?> icon, ItemStack stack, boolean disableBlur) {
 		this.title = title;
 		this.icon = icon;
 		this.stack = stack;
@@ -26,7 +27,7 @@ public class RewardKey {
 		return title;
 	}
 
-	public Icon getIcon() {
+	public Icon<?> getIcon() {
 		return icon;
 	}
 

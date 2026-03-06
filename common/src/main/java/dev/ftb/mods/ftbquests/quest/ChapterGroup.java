@@ -1,17 +1,21 @@
 package dev.ftb.mods.ftbquests.quest;
 
-import dev.ftb.mods.ftblibrary.config.ConfigGroup;
+import net.minecraft.network.chat.Component;
+
+import dev.ftb.mods.ftblibrary.client.config.EditableConfigGroup;
+import dev.ftb.mods.ftblibrary.client.util.ClientUtils;
+import dev.ftb.mods.ftblibrary.icon.AnimatedIcon;
 import dev.ftb.mods.ftblibrary.icon.Icon;
-import dev.ftb.mods.ftblibrary.icon.IconAnimation;
-import dev.ftb.mods.ftblibrary.util.client.ClientUtils;
 import dev.ftb.mods.ftbquests.client.gui.quests.QuestScreen;
 import dev.ftb.mods.ftbquests.events.QuestProgressEventData;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
-import net.minecraft.network.chat.Component;
-import org.jetbrains.annotations.Nullable;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
+import java.util.UUID;
+import org.jspecify.annotations.Nullable;
 
 public class ChapterGroup extends QuestObject {
 	protected final BaseQuestFile file;
@@ -63,11 +67,11 @@ public class ChapterGroup extends QuestObject {
 	}
 
 	public boolean isFirstGroup() {
-		return !file.chapterGroups.isEmpty() && this == file.chapterGroups.get(0);
+		return !file.chapterGroups.isEmpty() && this == file.chapterGroups.getFirst();
 	}
 
 	public boolean isLastGroup() {
-		return !file.chapterGroups.isEmpty() && this == file.chapterGroups.get(file.chapterGroups.size() - 1);
+		return !file.chapterGroups.isEmpty() && this == file.chapterGroups.getLast();
 	}
 
 	public boolean isDefaultGroup() {
@@ -100,13 +104,11 @@ public class ChapterGroup extends QuestObject {
 	}
 
 	@Override
-	@Environment(EnvType.CLIENT)
-	public void fillConfigGroup(ConfigGroup config) {
+	public void fillConfigGroup(EditableConfigGroup config) {
 		config.addString("title", getRawTitle(), this::setRawTitle, "").setNameKey("ftbquests.title").setOrder(-127);
 	}
 
 	@Override
-	@Environment(EnvType.CLIENT)
 	public void editedFromGUI() {
 		QuestScreen gui = ClientUtils.getCurrentGuiAs(QuestScreen.class);
 
@@ -116,21 +118,19 @@ public class ChapterGroup extends QuestObject {
 	}
 
 	@Override
-	@Environment(EnvType.CLIENT)
 	public Component getAltTitle() {
 		return Component.literal("Unnamed Group");
 	}
 
 	@Override
-	@Environment(EnvType.CLIENT)
-	public Icon getAltIcon() {
-		List<Icon> list = new ArrayList<>();
+	public Icon<?> getAltIcon() {
+		List<Icon<?>> list = new ArrayList<>();
 
 		for (Chapter chapter : chapters) {
 			list.add(chapter.getIcon());
 		}
 
-		return IconAnimation.fromList(list, false);
+		return AnimatedIcon.fromList(list, false);
 	}
 
 	public boolean isVisible(TeamData data) {
@@ -172,7 +172,7 @@ public class ChapterGroup extends QuestObject {
 		if (chapters.isEmpty()) {
 			return null;
 		} else if (file.canEdit()) {
-			return chapters.get(0);
+			return chapters.getFirst();
 		}
 
 		return chapters.stream()

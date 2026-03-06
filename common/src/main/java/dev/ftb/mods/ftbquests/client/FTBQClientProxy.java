@@ -11,7 +11,7 @@ import java.util.Objects;
 public class FTBQClientProxy implements IQuestProxy {
     @Override
     public Collection<LootCrate> getKnownLootCrates() {
-        return ClientQuestFile.exists() ? ClientQuestFile.INSTANCE.getRewardTables().stream()
+        return ClientQuestFile.exists() ? ClientQuestFile.getInstance().getRewardTables().stream()
                 .map(RewardTable::getLootCrate)
                 .filter(Objects::nonNull)
                 .toList() :

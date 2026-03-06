@@ -1,11 +1,17 @@
 package dev.ftb.mods.ftbquests.integration.item_filtering;
 
-import dev.ftb.mods.ftblibrary.config.NameMap;
-import dev.ftb.mods.ftbquests.api.ItemFilterAdapter;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.core.component.DataComponentMap;
 import net.minecraft.world.item.ItemStack;
 
-import java.util.*;
+import dev.ftb.mods.ftblibrary.util.NameMap;
+import dev.ftb.mods.ftbquests.api.ItemFilterAdapter;
+
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 public enum ItemMatchingSystem {
@@ -25,18 +31,18 @@ public enum ItemMatchingSystem {
         return adapters.stream().filter(adapter -> adapter.isFilterStack(stack)).findFirst();
     }
 
-    public boolean doesItemMatch(ItemStack filterStack, ItemStack toCheck, ComponentMatchType matchType) {
+    public boolean doesItemMatch(ItemStack filterStack, ItemStack toCheck, ComponentMatchType matchType, HolderLookup.Provider registryAccess) {
         return getFilterAdapter(filterStack)
-                .map(adapter -> adapter.doesItemMatch(filterStack, toCheck))
+                .map(adapter -> adapter.doesItemMatch(filterStack, toCheck, registryAccess))
                 .orElse(areItemStacksEqual(filterStack, toCheck,  matchType));
     }
 
-    public List<ItemStack> getAllMatchingStacks(ItemStack filterStack) {
+    public List<ItemStack> getAllMatchingStacks(ItemStack filterStack, HolderLookup.Provider registryAccess) {
         List<ItemStack> res = new ArrayList<>();
 
         adapters.forEach(adapter -> {
             if (adapter.isFilterStack(filterStack)) {
-                res.addAll(DisplayStacksCache.getCachedDisplayStacks(filterStack, adapter));
+                res.addAll(DisplayStacksCache.getCachedDisplayStacks(filterStack, adapter, registryAccess));
             }
         });
 
@@ -58,6 +64,7 @@ public enum ItemMatchingSystem {
     }
 
     private boolean fuzzyMatch(DataComponentMap map, DataComponentMap toMatch) {
+        //noinspection DataFlowIssue
         return map.stream().allMatch(tc -> toMatch.has(tc.type()) && toMatch.get(tc.type()).equals(tc.value()));
     }
 

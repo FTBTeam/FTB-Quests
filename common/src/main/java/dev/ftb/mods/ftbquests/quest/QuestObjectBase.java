@@ -1,16 +1,30 @@
 package dev.ftb.mods.ftbquests.quest;
 
+import net.minecraft.ChatFormatting;
+import net.minecraft.core.HolderLookup;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.ListTag;
+import net.minecraft.nbt.NbtOps;
+import net.minecraft.nbt.StringTag;
+import net.minecraft.nbt.Tag;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.util.Util;
+import net.minecraft.world.item.ItemStack;
+
 import dev.architectury.networking.NetworkManager;
-import dev.ftb.mods.ftblibrary.config.ConfigGroup;
-import dev.ftb.mods.ftblibrary.config.StringConfig;
-import dev.ftb.mods.ftblibrary.config.Tristate;
-import dev.ftb.mods.ftblibrary.config.ui.EditConfigScreen;
+
+import dev.ftb.mods.ftblibrary.client.config.EditableConfigGroup;
+import dev.ftb.mods.ftblibrary.client.config.Tristate;
+import dev.ftb.mods.ftblibrary.client.config.editable.EditableString;
+import dev.ftb.mods.ftblibrary.client.config.gui.EditConfigScreen;
 import dev.ftb.mods.ftblibrary.icon.Icon;
 import dev.ftb.mods.ftblibrary.math.Bits;
 import dev.ftb.mods.ftblibrary.snbt.SNBTCompoundTag;
 import dev.ftb.mods.ftbquests.api.FTBQuestsAPI;
 import dev.ftb.mods.ftbquests.client.ClientQuestFile;
-import dev.ftb.mods.ftbquests.client.ConfigIconItemStack;
+import dev.ftb.mods.ftbquests.client.config.EditableIconItemStack;
 import dev.ftb.mods.ftbquests.integration.RecipeModHelper;
 import dev.ftb.mods.ftbquests.item.CustomIconItem;
 import dev.ftb.mods.ftbquests.net.EditObjectMessage;
@@ -22,23 +36,20 @@ import dev.ftb.mods.ftbquests.registry.ModItems;
 import dev.ftb.mods.ftbquests.util.NetUtils;
 import dev.ftb.mods.ftbquests.util.ProgressChange;
 import dev.ftb.mods.ftbquests.util.TextUtils;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
-import net.minecraft.ChatFormatting;
-import net.minecraft.Util;
-import net.minecraft.core.HolderLookup;
-import net.minecraft.nbt.*;
-import net.minecraft.network.RegistryFriendlyByteBuf;
-import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.MutableComponent;
-import net.minecraft.world.item.ItemStack;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.EnumMap;
+import java.util.EnumSet;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 import java.util.regex.Pattern;
+import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
 
 public abstract class QuestObjectBase implements Comparable<QuestObjectBase> {
 	private static final Pattern TAG_PATTERN = Pattern.compile("^[a-z0-9_]*$");
@@ -50,8 +61,11 @@ public abstract class QuestObjectBase implements Comparable<QuestObjectBase> {
 	private ItemStack rawIcon = ItemStack.EMPTY;
 	private List<String> tags = new ArrayList<>(0);
 
-	private Icon cachedIcon = null;
+	@Nullable
+	private Icon<?> cachedIcon = null;
+	@Nullable
 	private Component cachedTitle = null;
+	@Nullable
 	private Set<String> cachedTags = null;
 
 	// stores translations in the client-side proto-quest-object before it's sent to server
@@ -85,15 +99,15 @@ public abstract class QuestObjectBase implements Comparable<QuestObjectBase> {
 		return sendNotifications.get(true);
 	}
 
-	public static ItemStack itemOrMissingFromNBT(Tag tag, HolderLookup.Provider provider) {
+	public static ItemStack itemOrMissingFromNBT(@Nullable Tag tag, HolderLookup.Provider provider) {
 		CompoundTag compoundTag = processItemTagData(tag);
 		return compoundTag.isEmpty() ?
 				ItemStack.EMPTY :
-				ItemStack.parse(provider, compoundTag)
-						.orElse(createMissing(compoundTag));
+				ItemStack.CODEC.parse(provider.createSerializationContext(NbtOps.INSTANCE), compoundTag).result()
+								.orElse(createMissing(compoundTag));
 	}
 
-	public static ItemStack singleItemOrMissingFromNBT(Tag tag, HolderLookup.Provider provider) {
+	public static ItemStack singleItemOrMissingFromNBT(@Nullable Tag tag, HolderLookup.Provider provider) {
 		CompoundTag compoundTag = processItemTagData(tag);
 		return compoundTag.isEmpty() ?
 				ItemStack.EMPTY :
@@ -102,16 +116,16 @@ public abstract class QuestObjectBase implements Comparable<QuestObjectBase> {
 	}
 
 	// support for importing SNBT for itemstacks from legacy (1.20 and older) quest book data
-	private static CompoundTag processItemTagData(Tag tag) {
+	private static CompoundTag processItemTagData(@Nullable Tag tag) {
 		if (tag instanceof StringTag s) {
 			// 1.20 or earlier, item name only
-			return Util.make(new CompoundTag(), t -> t.putString("id", s.getAsString()));
+			return Util.make(new CompoundTag(), t -> t.putString("id", s.asString().orElseThrow()));
 		} else if (tag instanceof CompoundTag c) {
 			if (c.contains("Count") || c.contains("tag")) {
 				// 1.20 or earlier with count and/or NBT data; migrate, but no NBT -> component data conversion
 				return Util.make(new CompoundTag(), t -> {
-					t.putString("id", c.getString("id"));
-					int count = c.getInt("Count");
+					t.putString("id", c.getString("id").orElseThrow());
+					int count = c.getInt("Count").orElse(1);
 					if (count != 0) t.putInt("count", count);
 				});
 			} else {
@@ -125,8 +139,8 @@ public abstract class QuestObjectBase implements Comparable<QuestObjectBase> {
 	}
 
 	private static ItemStack createMissing(CompoundTag tag) {
-		String id = tag.getString("id");
-		int count = Math.max(1, tag.getInt("count"));
+		String id = tag.getString("id").orElse("unknown");
+		int count = Math.max(1, tag.getInt("count").orElse(1));
 		String text = count == 1 ? id : count + "x " + id;
 
 		return Util.make(new ItemStack(ModItems.MISSING_ITEM.get()),
@@ -305,18 +319,18 @@ public abstract class QuestObjectBase implements Comparable<QuestObjectBase> {
 	}
 
 	public void readData(CompoundTag nbt, HolderLookup.Provider provider) {
-		rawIcon = singleItemOrMissingFromNBT(nbt.getCompound("icon"), provider);
+		nbt.getCompound("icon").ifPresent(icon -> rawIcon = singleItemOrMissingFromNBT(icon, provider));
 
-		ListTag tagsList = nbt.getList("tags", Tag.TAG_STRING);
+		ListTag tagsList = nbt.getList("tags").orElse(new ListTag());
 
 		tags = new ArrayList<>(tagsList.size());
 
 		for (int i = 0; i < tagsList.size(); i++) {
-			tags.add(tagsList.getString(i));
+			tags.add(tagsList.getString(i).orElse(""));
 		}
 
 		if (nbt.contains("custom_id")) {
-			tags.add(nbt.getString("custom_id"));
+			tags.add(nbt.getString("custom_id").orElse(""));
 		}
 	}
 
@@ -354,26 +368,22 @@ public abstract class QuestObjectBase implements Comparable<QuestObjectBase> {
 		return true;
 	}
 
-	@Environment(EnvType.CLIENT)
-	public void fillConfigGroup(ConfigGroup config) {
+	public void fillConfigGroup(EditableConfigGroup config) {
 		if (hasTitleConfig()) {
 			config.addString("title", getRawTitle(), this::setRawTitle, "").setNameKey("ftbquests.title").setOrder(-127);
 		}
 
 		if (hasIconConfig()) {
-			config.add("icon", new ConfigIconItemStack(), rawIcon, v -> rawIcon = v, ItemStack.EMPTY).setNameKey("ftbquests.icon").setOrder(-126);
+			config.add("icon", new EditableIconItemStack(), rawIcon, v -> rawIcon = v, ItemStack.EMPTY).setNameKey("ftbquests.icon").setOrder(-126);
 		}
 
-		config.addList("tags", tags, new StringConfig(TAG_PATTERN), "").setNameKey("ftbquests.tags").setOrder(-125);
+		config.addList("tags", tags, new EditableString(TAG_PATTERN), "").setNameKey("ftbquests.tags").setOrder(-125);
 	}
 
-	@Environment(EnvType.CLIENT)
 	public abstract Component getAltTitle();
 
-	@Environment(EnvType.CLIENT)
-	public abstract Icon getAltIcon();
+	public abstract Icon<?> getAltIcon();
 
-	@Environment(EnvType.CLIENT)
 	public final Component getTitle() {
 		if (cachedTitle != null) {
 			return cachedTitle.copy();
@@ -388,13 +398,11 @@ public abstract class QuestObjectBase implements Comparable<QuestObjectBase> {
 		return cachedTitle.copy();
 	}
 
-	@Environment(EnvType.CLIENT)
 	public final MutableComponent getMutableTitle() {
 		return getTitle().copy();
 	}
 
-	@Environment(EnvType.CLIENT)
-	public final Icon getIcon() {
+	public final Icon<?> getIcon() {
 		if (cachedIcon == null) {
 			if (!rawIcon.isEmpty()) {
 				cachedIcon = CustomIconItem.getIcon(rawIcon);
@@ -417,9 +425,8 @@ public abstract class QuestObjectBase implements Comparable<QuestObjectBase> {
 	public void deleteChildren() {
 	}
 
-	@Environment(EnvType.CLIENT)
 	public void editedFromGUI() {
-		ClientQuestFile.INSTANCE.refreshGui();
+		ClientQuestFile.getInstance().refreshGui();
 	}
 
 	public void editedFromGUIOnServer() {
@@ -438,13 +445,12 @@ public abstract class QuestObjectBase implements Comparable<QuestObjectBase> {
 		cachedTags = null;
 	}
 
-	public ConfigGroup createSubGroup(ConfigGroup group) {
+	public EditableConfigGroup createSubGroup(EditableConfigGroup group) {
 		return group.getOrCreateSubgroup(getObjectType().getId());
 	}
 
-	@Environment(EnvType.CLIENT)
 	public void onEditButtonClicked(Runnable gui) {
-		ConfigGroup group = new ConfigGroup(FTBQuestsAPI.MOD_ID, accepted -> {
+		EditableConfigGroup group = new EditableConfigGroup(FTBQuestsAPI.MOD_ID, accepted -> {
 			gui.run();
 			if (accepted && validateEditedConfig()) {
 				NetworkManager.sendToServer(EditObjectMessage.forQuestObject(this));
@@ -475,11 +481,8 @@ public abstract class QuestObjectBase implements Comparable<QuestObjectBase> {
 		return EnumSet.noneOf(RecipeModHelper.Components.class);
 	}
 
-	public static <T extends QuestObjectBase> T copy(T orig, Supplier<T> factory) {
+	public static <T extends QuestObjectBase> T copy(T orig, Supplier<@NonNull T> factory) {
 		T copied = factory.get();
-		if (copied == null) {
-			return null;
-		}
 		CompoundTag tag = new CompoundTag();
 		orig.writeData(tag, orig.holderLookup());
 		copied.readData(tag, orig.holderLookup());
@@ -487,7 +490,7 @@ public abstract class QuestObjectBase implements Comparable<QuestObjectBase> {
 	}
 
 	@Override
-	public int compareTo(@NotNull QuestObjectBase other) {
+	public int compareTo(QuestObjectBase other) {
 		int typeCmp = Integer.compare(getObjectType().ordinal(), other.getObjectType().ordinal());
 		return typeCmp == 0 ?
 				getTitle().getString().toLowerCase().compareTo(other.getTitle().getString().toLowerCase()) :
@@ -503,6 +506,6 @@ public abstract class QuestObjectBase implements Comparable<QuestObjectBase> {
 			return new SNBTCompoundTag();
 		}
 
-		return Util.make(SNBTCompoundTag.of(stack.save(holderLookup())), SNBTCompoundTag::singleLine);
+		return Util.make(SNBTCompoundTag.of(ItemStack.CODEC.encodeStart(holderLookup().createSerializationContext(NbtOps.INSTANCE), stack).getOrThrow()), SNBTCompoundTag::singleLine);
 	}
 }

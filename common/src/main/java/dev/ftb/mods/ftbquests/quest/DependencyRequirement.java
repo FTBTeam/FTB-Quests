@@ -1,6 +1,6 @@
 package dev.ftb.mods.ftbquests.quest;
 
-import dev.ftb.mods.ftblibrary.config.NameMap;
+import dev.ftb.mods.ftblibrary.util.NameMap;
 
 public enum DependencyRequirement {
 	ALL_COMPLETED("all_completed", false, true),

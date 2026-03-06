@@ -1,13 +1,5 @@
 package dev.ftb.mods.ftbquests.quest.reward;
 
-import dev.architectury.networking.NetworkManager;
-import dev.ftb.mods.ftblibrary.config.ConfigGroup;
-import dev.ftb.mods.ftblibrary.icon.Icon;
-import dev.ftb.mods.ftbquests.net.NotifyRewardMessage;
-import dev.ftb.mods.ftbquests.quest.Quest;
-import dev.ftb.mods.ftbteams.api.FTBTeamsAPI;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.ChatFormatting;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.core.BlockPos;
@@ -17,6 +9,16 @@ import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.server.permissions.LevelBasedPermissionSet;
+import net.minecraft.server.permissions.PermissionSet;
+
+import dev.architectury.networking.NetworkManager;
+
+import dev.ftb.mods.ftblibrary.client.config.EditableConfigGroup;
+import dev.ftb.mods.ftblibrary.icon.Icon;
+import dev.ftb.mods.ftbquests.net.NotifyRewardMessage;
+import dev.ftb.mods.ftbquests.quest.Quest;
+import dev.ftb.mods.ftbteams.api.FTBTeamsAPI;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -27,7 +29,7 @@ import java.util.regex.Pattern;
 
 public class CommandReward extends Reward {
 	private static final String DEFAULT_COMMAND = "/say Hi, @p!";
-	private static final Icon REWARD_ICON = Icon.getIcon("minecraft:block/command_block_back");
+	private static final Icon<?> REWARD_ICON = Icon.getIcon("minecraft:block/command_block_back");
 	public static final Pattern PATTERN = Pattern.compile("[{](\\w+)}");
 
 	private String command;
@@ -63,15 +65,15 @@ public class CommandReward extends Reward {
 	@Override
 	public void readData(CompoundTag nbt, HolderLookup.Provider provider) {
 		super.readData(nbt, provider);
-		command = nbt.getString("command");
-		if (nbt.getBoolean("elevate_perms")) {
+		command = nbt.getString("command").orElse(DEFAULT_COMMAND);
+		if (nbt.getBooleanOr("elevate_perms", false)) {
 			// legacy migration
 			permissionLevel = 2;
 		} else {
-			permissionLevel = nbt.getInt("permission_level");
+			permissionLevel = nbt.getIntOr("permission_level", 0);
 		}
-		silent = nbt.getBoolean("silent");
-		feedbackMessage = nbt.getString("feedback_message");
+		silent = nbt.getBooleanOr("silent", false);
+		feedbackMessage = nbt.getStringOr("feedback_message", "");
 	}
 
 	@Override
@@ -93,8 +95,7 @@ public class CommandReward extends Reward {
 	}
 
 	@Override
-	@Environment(EnvType.CLIENT)
-	public void fillConfigGroup(ConfigGroup config) {
+	public void fillConfigGroup(EditableConfigGroup config) {
 		super.fillConfigGroup(config);
 		config.addString("command", command, v -> command = v, DEFAULT_COMMAND).setNameKey("ftbquests.reward.ftbquests.command");
 		config.addInt("permission_level", permissionLevel, v -> permissionLevel = v, 0, 0, 4);
@@ -105,7 +106,7 @@ public class CommandReward extends Reward {
 	@Override
 	public void claim(ServerPlayer player, boolean notify) {
 		Map<String, Object> overrides = new HashMap<>();
-		overrides.put("p", player.getGameProfile().getName());
+		overrides.put("p", player.getGameProfile().name());
 
 		BlockPos pos = player.blockPosition();
 		overrides.put("x", pos.getX());
@@ -128,10 +129,10 @@ public class CommandReward extends Reward {
 		String cmd = format(command.trim(), overrides);
 
 		CommandSourceStack source = player.createCommandSourceStack();
-		if (permissionLevel > 0) source = source.withPermission(permissionLevel);
+		if (permissionLevel > 0) source = source.withPermission(idToPermissionSet(permissionLevel));
 		if (silent) source = source.withSuppressedOutput();
 		
-		player.server.getCommands().performPrefixedCommand(source, cmd);
+		player.level().getServer().getCommands().performPrefixedCommand(source, cmd);
 
 		if (notify) {
 			String key = feedbackMessage.isEmpty() ? "ftbquests.reward.ftbquests.command.success" : feedbackMessage;
@@ -139,8 +140,18 @@ public class CommandReward extends Reward {
 		}
 	}
 
+	private static PermissionSet idToPermissionSet(int level) {
+		return switch (level) {
+			case 0 -> PermissionSet.NO_PERMISSIONS;
+			case 1 -> LevelBasedPermissionSet.MODERATOR;
+			case 2 -> LevelBasedPermissionSet.GAMEMASTER;
+			case 3 -> LevelBasedPermissionSet.ADMIN;
+			case 4 -> LevelBasedPermissionSet.OWNER;
+			default -> throw new IllegalArgumentException("Unknown level: " + level);
+		};
+	}
+
 	@Override
-	@Environment(EnvType.CLIENT)
 	public MutableComponent getAltTitle() {
 		return Component.translatable("ftbquests.reward.ftbquests.command").append(": ").append(Component.literal(command).withStyle(ChatFormatting.RED));
 	}

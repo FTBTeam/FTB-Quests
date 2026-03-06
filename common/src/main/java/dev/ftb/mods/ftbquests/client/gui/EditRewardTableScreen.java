@@ -1,35 +1,42 @@
 package dev.ftb.mods.ftbquests.client.gui;
 
+import net.minecraft.ChatFormatting;
+import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.network.chat.Component;
+import net.minecraft.world.item.Items;
 import com.mojang.blaze3d.platform.InputConstants;
-import dev.ftb.mods.ftblibrary.config.ConfigGroup;
-import dev.ftb.mods.ftblibrary.config.DoubleConfig;
-import dev.ftb.mods.ftblibrary.config.ui.EditConfigScreen;
-import dev.ftb.mods.ftblibrary.config.ui.EditStringConfigOverlay;
+
+import dev.ftb.mods.ftblibrary.client.config.EditableConfigGroup;
+import dev.ftb.mods.ftblibrary.client.config.editable.EditableDouble;
+import dev.ftb.mods.ftblibrary.client.config.gui.EditConfigScreen;
+import dev.ftb.mods.ftblibrary.client.config.gui.EditStringConfigOverlay;
+import dev.ftb.mods.ftblibrary.client.gui.input.Key;
+import dev.ftb.mods.ftblibrary.client.gui.input.MouseButton;
+import dev.ftb.mods.ftblibrary.client.gui.screens.AbstractButtonListScreen;
+import dev.ftb.mods.ftblibrary.client.gui.theme.NordTheme;
+import dev.ftb.mods.ftblibrary.client.gui.theme.Theme;
+import dev.ftb.mods.ftblibrary.client.gui.widget.ContextMenuItem;
+import dev.ftb.mods.ftblibrary.client.gui.widget.Panel;
+import dev.ftb.mods.ftblibrary.client.gui.widget.SimpleButton;
+import dev.ftb.mods.ftblibrary.client.gui.widget.SimpleTextButton;
+import dev.ftb.mods.ftblibrary.client.icon.IconHelper;
+import dev.ftb.mods.ftblibrary.client.util.PositionedIngredient;
 import dev.ftb.mods.ftblibrary.icon.Color4I;
 import dev.ftb.mods.ftblibrary.icon.Icons;
 import dev.ftb.mods.ftblibrary.icon.ItemIcon;
-import dev.ftb.mods.ftblibrary.ui.*;
-import dev.ftb.mods.ftblibrary.ui.input.Key;
-import dev.ftb.mods.ftblibrary.ui.input.MouseButton;
-import dev.ftb.mods.ftblibrary.ui.misc.AbstractButtonListScreen;
 import dev.ftb.mods.ftblibrary.util.TooltipList;
-import dev.ftb.mods.ftblibrary.util.client.PositionedIngredient;
 import dev.ftb.mods.ftbquests.api.FTBQuestsAPI;
 import dev.ftb.mods.ftbquests.quest.loot.RewardTable;
 import dev.ftb.mods.ftbquests.quest.loot.WeightedReward;
 import dev.ftb.mods.ftbquests.quest.reward.RewardType;
 import dev.ftb.mods.ftbquests.quest.reward.RewardTypes;
-import net.minecraft.ChatFormatting;
-import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.network.chat.Component;
-import net.minecraft.world.item.Items;
-import org.lwjgl.glfw.GLFW;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Consumer;
+import org.lwjgl.glfw.GLFW;
 
 public class EditRewardTableScreen extends AbstractButtonListScreen {
 	private final Runnable parentScreen;
@@ -100,7 +107,7 @@ public class EditRewardTableScreen extends AbstractButtonListScreen {
 	public boolean keyPressed(Key key) {
 		if (super.keyPressed(key)) {
 			return true;
-		} else if ((key.is(InputConstants.KEY_RETURN) || key.is(InputConstants.KEY_NUMPADENTER)) && key.modifiers.shift()) {
+		} else if ((key.is(InputConstants.KEY_RETURN) || key.is(InputConstants.KEY_NUMPADENTER)) && key.modifiers().shift()) {
 			this.doAccept();
 			return true;
 		} else {
@@ -133,7 +140,7 @@ public class EditRewardTableScreen extends AbstractButtonListScreen {
 		public void draw(GuiGraphics graphics, Theme theme, int x, int y, int w, int h) {
 			super.draw(graphics, theme, x, y, w, h);
 
-			editedTable.getIcon().draw(graphics, x + 2, y + 2, 16, 16);
+			IconHelper.renderIcon(editedTable.getIcon(), graphics, x + 2, y + 2, 16, 16);
 			theme.drawString(graphics, getGui().getTitle(), x + 20, y + 6, Theme.SHADOW);
 		}
 	}
@@ -146,7 +153,7 @@ public class EditRewardTableScreen extends AbstractButtonListScreen {
 		@Override
 		public void onClicked(MouseButton button) {
 			playClickSound();
-			ConfigGroup group = new ConfigGroup(FTBQuestsAPI.MOD_ID, accepted -> {
+			EditableConfigGroup group = new EditableConfigGroup(FTBQuestsAPI.MOD_ID, accepted -> {
 				editedTable.clearCachedData();
 				run();
 			}) {
@@ -231,9 +238,9 @@ public class EditRewardTableScreen extends AbstractButtonListScreen {
 				}
 			} else {
 				List<ContextMenuItem> contextMenu = new ArrayList<>();
-				contextMenu.add(new ContextMenuItem(Component.translatable("selectServer.edit"), ItemIcon.getItemIcon(Items.FEATHER),
+				contextMenu.add(new ContextMenuItem(Component.translatable("selectServer.edit"), ItemIcon.ofItem(Items.FEATHER),
 						b -> editRewardTableEntry()));
-				contextMenu.add(new ContextMenuItem(Component.translatable("ftbquests.reward_table.set_weight"), ItemIcon.getItemIcon(Items.ANVIL),
+				contextMenu.add(new ContextMenuItem(Component.translatable("ftbquests.reward_table.set_weight"), ItemIcon.ofItem(Items.ANVIL),
 						b -> setEntryWeight()));
 				contextMenu.add(new ContextMenuItem(Component.translatable("gui.remove"), Icons.BIN, b -> doDeletion())
 						.setYesNoText(Component.translatable("delete_item", wr.getReward().getTitle())));
@@ -248,7 +255,7 @@ public class EditRewardTableScreen extends AbstractButtonListScreen {
 		}
 
 		private void setEntryWeight() {
-			DoubleConfig c = new DoubleConfig(0D, Double.POSITIVE_INFINITY);
+			EditableDouble c = new EditableDouble(0D, Double.POSITIVE_INFINITY);
 			c.setValue((double) wr.getWeight());
 			EditStringConfigOverlay<Double> overlay = new EditStringConfigOverlay<>(parent, c, accepted -> {
 				if (accepted) {
@@ -261,7 +268,7 @@ public class EditRewardTableScreen extends AbstractButtonListScreen {
 		}
 
 		private void editRewardTableEntry() {
-			ConfigGroup group = new ConfigGroup(FTBQuestsAPI.MOD_ID, accepted -> {
+			EditableConfigGroup group = new EditableConfigGroup(FTBQuestsAPI.MOD_ID, accepted -> {
 				if (accepted) {
 					wr.getReward().clearCachedData();
 					changed = true;
@@ -280,11 +287,11 @@ public class EditRewardTableScreen extends AbstractButtonListScreen {
 		@Override
 		public void drawBackground(GuiGraphics graphics, Theme theme, int x, int y, int w, int h) {
 			if (isMouseOver) {
-				Color4I.WHITE.withAlpha(30).draw(graphics, x, y, w, h);
-				ItemIcon.getItemIcon(Items.ANVIL).draw(graphics, x + w - 26, y + 2, 12, 12);
-				Icons.BIN.draw(graphics, x + w - 13, y + 2, 12, 12);
+				IconHelper.renderIcon(Color4I.WHITE.withAlpha(30), graphics, x, y, w, h);
+				IconHelper.renderIcon(ItemIcon.ofItem(Items.ANVIL), graphics, x + w - 26, y + 2, 12, 12);
+				IconHelper.renderIcon(Icons.BIN, graphics, x + w - 13, y + 2, 12, 12);
 			}
-			Color4I.GRAY.withAlpha(40).draw(graphics, x, y + h, w, 1);
+			IconHelper.renderIcon(Color4I.GRAY.withAlpha(40), graphics, x, y + h, w, 1);
 		}
 
 		@Override

@@ -1,6 +1,6 @@
 package dev.ftb.mods.ftbquests.client.gui.quests;
 
-import dev.ftb.mods.ftblibrary.ui.Panel;
+import dev.ftb.mods.ftblibrary.client.gui.widget.Panel;
 
 public abstract class OtherButtonsPanel extends Panel {
 	protected final QuestScreen questScreen;

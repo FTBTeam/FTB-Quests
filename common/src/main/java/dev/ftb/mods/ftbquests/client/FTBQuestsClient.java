@@ -1,6 +1,29 @@
 package dev.ftb.mods.ftbquests.client;
 
+import net.minecraft.client.KeyMapping;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.player.LocalPlayer;
+import net.minecraft.client.renderer.block.model.BakedQuad;
+import net.minecraft.client.renderer.block.model.BlockModelPart;
+import net.minecraft.client.renderer.block.model.BlockStateModel;
+import net.minecraft.client.renderer.chunk.ChunkSectionLayer;
+import net.minecraft.client.renderer.texture.TextureAtlasSprite;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.core.HolderLookup;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.network.chat.Component;
+import net.minecraft.resources.Identifier;
+import net.minecraft.server.packs.PackType;
+import net.minecraft.util.RandomSource;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.CreativeModeTab;
+import net.minecraft.world.item.CreativeModeTabs;
+import net.minecraft.world.level.block.state.BlockState;
 import com.mojang.blaze3d.platform.InputConstants;
+
 import dev.architectury.event.events.client.ClientLifecycleEvent;
 import dev.architectury.networking.NetworkManager;
 import dev.architectury.platform.Platform;
@@ -8,19 +31,23 @@ import dev.architectury.registry.ReloadListenerRegistry;
 import dev.architectury.registry.client.keymappings.KeyMappingRegistry;
 import dev.architectury.registry.client.rendering.RenderTypeRegistry;
 import dev.architectury.registry.registries.RegistrarManager;
+
 import dev.ftb.mods.ftblibrary.FTBLibrary;
-import dev.ftb.mods.ftblibrary.config.EntityFaceConfig;
-import dev.ftb.mods.ftblibrary.config.ImageResourceConfig;
-import dev.ftb.mods.ftblibrary.config.ResourceConfigValue;
+import dev.ftb.mods.ftblibrary.client.config.editable.EditableEntityFace;
+import dev.ftb.mods.ftblibrary.client.config.editable.EditableImageResource;
+import dev.ftb.mods.ftblibrary.client.config.editable.EditableResource;
+import dev.ftb.mods.ftblibrary.client.config.gui.EditConfigScreen;
+import dev.ftb.mods.ftblibrary.client.gui.input.MouseButton;
+import dev.ftb.mods.ftblibrary.client.gui.widget.Widget;
+import dev.ftb.mods.ftblibrary.client.util.ClientUtils;
 import dev.ftb.mods.ftblibrary.config.manager.ConfigManager;
-import dev.ftb.mods.ftblibrary.config.ui.EditConfigScreen;
 import dev.ftb.mods.ftblibrary.icon.Icon;
-import dev.ftb.mods.ftblibrary.ui.Widget;
-import dev.ftb.mods.ftblibrary.ui.input.MouseButton;
+import dev.ftb.mods.ftblibrary.icon.Icons;
 import dev.ftb.mods.ftbquests.FTBQuests;
 import dev.ftb.mods.ftbquests.api.FTBQuestsAPI;
 import dev.ftb.mods.ftbquests.block.entity.BaseBarrierBlockEntity;
 import dev.ftb.mods.ftbquests.block.entity.TaskScreenBlockEntity;
+import dev.ftb.mods.ftbquests.client.gui.CustomToast;
 import dev.ftb.mods.ftbquests.client.gui.RewardToast;
 import dev.ftb.mods.ftbquests.client.gui.ToastQuestObject;
 import dev.ftb.mods.ftbquests.item.CustomIconItem;
@@ -31,39 +58,18 @@ import dev.ftb.mods.ftbquests.quest.QuestObjectBase;
 import dev.ftb.mods.ftbquests.quest.TeamData;
 import dev.ftb.mods.ftbquests.quest.theme.ThemeLoader;
 import dev.ftb.mods.ftbquests.registry.ModBlocks;
-import net.minecraft.client.KeyMapping;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.client.player.LocalPlayer;
-import net.minecraft.client.renderer.RenderType;
-import net.minecraft.client.renderer.block.model.BakedQuad;
-import net.minecraft.client.renderer.texture.TextureAtlasSprite;
-import net.minecraft.client.resources.model.BakedModel;
-import net.minecraft.core.BlockPos;
-import net.minecraft.core.Direction;
-import net.minecraft.core.HolderLookup;
-import net.minecraft.core.registries.Registries;
-import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.server.packs.PackType;
-import net.minecraft.util.RandomSource;
-import net.minecraft.world.InteractionHand;
-import net.minecraft.world.entity.EntityType;
-import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.item.CreativeModeTab;
-import net.minecraft.world.item.CreativeModeTabs;
-import net.minecraft.world.level.Level;
-import net.minecraft.world.level.block.state.BlockState;
-import org.jetbrains.annotations.Nullable;
 
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
+import org.jspecify.annotations.Nullable;
 
 public class FTBQuestsClient {
 	public static KeyMapping KEY_QUESTS;
+	private static final KeyMapping.Category FTB_QUESTS_KEY_CATEGORY = new KeyMapping.Category(FTBQuestsAPI.id("keys"));
 
     public static void init() {
 		maybeMigrateClientConfig();
@@ -71,14 +77,9 @@ public class FTBQuestsClient {
 		ConfigManager.getInstance().registerClientConfig(FTBQuestsClientConfig.CONFIG, FTBQuestsAPI.MOD_ID, FTBQuestsClientConfig::onEdited);
 
 		ClientLifecycleEvent.CLIENT_SETUP.register(FTBQuestsClient::onClientSetup);
-
-		// Minecraft.getInstance() might not exist here (datagen in particular)
-        //noinspection ConstantValue
-        if (Minecraft.getInstance() != null) {
-			ReloadListenerRegistry.register(PackType.CLIENT_RESOURCES, new QuestFileCacheReloader());
-			ReloadListenerRegistry.register(PackType.CLIENT_RESOURCES, new ThemeLoader());
-			KeyMappingRegistry.register(KEY_QUESTS = new KeyMapping("key.ftbquests.quests", InputConstants.Type.KEYSYM, -1, "key.categories.ftbquests"));
-		}
+		ReloadListenerRegistry.register(PackType.CLIENT_RESOURCES, new QuestFileCacheReloader(), FTBQuestsAPI.id("file_cache"));
+		ReloadListenerRegistry.register(PackType.CLIENT_RESOURCES, new ThemeLoader(), FTBQuestsAPI.id("themes"));
+		KeyMappingRegistry.register(KEY_QUESTS = new KeyMapping("key.ftbquests.quests", InputConstants.Type.KEYSYM, -1, FTB_QUESTS_KEY_CATEGORY));
 
 		new FTBQuestsClientEventHandler().init();
 	}
@@ -99,36 +100,36 @@ public class FTBQuestsClient {
 	}
 
 	private static void onClientSetup(Minecraft minecraft) {
-		RenderTypeRegistry.register(RenderType.translucent(), ModBlocks.BARRIER.get());
-		RenderTypeRegistry.register(RenderType.translucent(), ModBlocks.STAGE_BARRIER.get());
-		RenderTypeRegistry.register(RenderType.solid(), ModBlocks.TASK_SCREEN_1.get());
-		RenderTypeRegistry.register(RenderType.solid(), ModBlocks.TASK_SCREEN_3.get());
-		RenderTypeRegistry.register(RenderType.solid(), ModBlocks.TASK_SCREEN_5.get());
-		RenderTypeRegistry.register(RenderType.solid(), ModBlocks.TASK_SCREEN_7.get());
-		RenderTypeRegistry.register(RenderType.solid(), ModBlocks.AUX_SCREEN.get());
+		RenderTypeRegistry.register(ChunkSectionLayer.TRANSLUCENT, ModBlocks.BARRIER.get());
+		RenderTypeRegistry.register(ChunkSectionLayer.TRANSLUCENT, ModBlocks.STAGE_BARRIER.get());
+		RenderTypeRegistry.register(ChunkSectionLayer.SOLID, ModBlocks.TASK_SCREEN_1.get());
+		RenderTypeRegistry.register(ChunkSectionLayer.SOLID, ModBlocks.TASK_SCREEN_3.get());
+		RenderTypeRegistry.register(ChunkSectionLayer.SOLID, ModBlocks.TASK_SCREEN_5.get());
+		RenderTypeRegistry.register(ChunkSectionLayer.SOLID, ModBlocks.TASK_SCREEN_7.get());
+		RenderTypeRegistry.register(ChunkSectionLayer.SOLID, ModBlocks.AUX_SCREEN.get());
 		GuiProviders.setTaskGuiProviders();
 		GuiProviders.setRewardGuiProviders();
 	}
 
 	@Nullable
 	public static BaseQuestFile getClientQuestFile() {
-		return ClientQuestFile.INSTANCE;
+		return ClientQuestFile.getInstance();
 	}
 
-	public static Player getClientPlayer() {
-		return Minecraft.getInstance().player;
-	}
-
-	public static Level getClientLevel() {
-		return Minecraft.getInstance().level;
-	}
+//	public static Player getClientPlayer() {
+//		return Objects.requireNonNull(Minecraft.getInstance().player);
+//	}
+//
+//	public static Level getClientLevel() {
+//		return Objects.requireNonNull(Minecraft.getInstance().level);
+//	}
 
 	public static boolean isClientDataLoaded() {
 		return ClientQuestFile.exists();
 	}
 
 	public static TeamData getClientPlayerData() {
-		return ClientQuestFile.INSTANCE.selfTeamData;
+		return Objects.requireNonNull(ClientQuestFile.getInstance().selfTeamData);
 	}
 
 	public static BaseQuestFile createClientQuestFile() {
@@ -136,7 +137,7 @@ public class FTBQuestsClient {
 	}
 
 	public static HolderLookup.Provider holderLookup() {
-		return getClientLevel().registryAccess();
+		return ClientUtils.getClientLevel().registryAccess();
 	}
 
 	public static void openGui() {
@@ -144,15 +145,15 @@ public class FTBQuestsClient {
 	}
 
 	public static void openCustomIconGui(Player player, InteractionHand hand) {
-		ResourceConfigValue<?> config = Screen.hasShiftDown() ? new EntityFaceConfig() : new ImageResourceConfig();
-		config.onClicked(null, MouseButton.LEFT, accepted -> {
+		EditableResource<?> editable = Minecraft.getInstance().hasShiftDown() ? new EditableEntityFace() : new EditableImageResource();
+		editable.onClicked(null, MouseButton.LEFT, accepted -> {
 			if (accepted) {
 				// TODO minor code smell here
-				if (config.getValue() instanceof ResourceLocation rl) {
-					CustomIconItem.setIcon(player.getItemInHand(hand), config.isEmpty() ? null : rl);
+				if (editable.getValue() instanceof Identifier rl) {
+					CustomIconItem.setIcon(player.getItemInHand(hand), editable.isEmpty() ? null : rl);
 					NetworkManager.sendToServer(new SetCustomImageMessage(hand, false, rl));
-				} else if (config.getValue() instanceof EntityType<?> et) {
-					CustomIconItem.setFaceIcon(player.getItemInHand(hand), config.isEmpty() ? null : et);
+				} else if (editable.getValue() instanceof EntityType<?> et) {
+					CustomIconItem.setFaceIcon(player.getItemInHand(hand), editable.isEmpty() ? EditableEntityFace.NONE : et);
 					NetworkManager.sendToServer(new SetCustomImageMessage(hand, true, RegistrarManager.getId(et, Registries.ENTITY_TYPE)));
 				}
 			}
@@ -161,8 +162,8 @@ public class FTBQuestsClient {
 	}
 
 	public static void openTaskScreenConfigGui(BlockPos pos) {
-		if (Minecraft.getInstance().level.getBlockEntity(pos) instanceof TaskScreenBlockEntity coreScreen) {
-			new EditConfigScreen(coreScreen.fillConfigGroup(ClientQuestFile.INSTANCE.getOrCreateTeamData(coreScreen.getTeamId()))).setAutoclose(true).openGui();
+		if (ClientUtils.getClientLevel().getBlockEntity(pos) instanceof TaskScreenBlockEntity coreScreen) {
+			new EditConfigScreen(coreScreen.fillConfigGroup(ClientQuestFile.getInstance().getOrCreateTeamData(coreScreen.getTeamId()))).setAutoclose(true).openGui();
 		}
 	}
 
@@ -174,10 +175,11 @@ public class FTBQuestsClient {
 
 	public static float[] getTextureUV(BlockState state, Direction face) {
 		if (state == null) return null;
-		BakedModel model = Minecraft.getInstance().getBlockRenderer().getBlockModel(state);
-		List<BakedQuad> quads = model.getQuads(state, face, RandomSource.create());
+		BlockStateModel model = Minecraft.getInstance().getBlockRenderer().getBlockModel(state);
+		List<BlockModelPart> blockModelParts = model.collectParts(RandomSource.create());
+		List<BakedQuad> quads = blockModelParts.getFirst().getQuads(face);
 		if (!quads.isEmpty()) {
-			TextureAtlasSprite sprite = quads.get(0).getSprite();
+			TextureAtlasSprite sprite = quads.getFirst().sprite();
 			return new float[] { sprite.getU0(), sprite.getV0(), sprite.getU1(), sprite.getV1() };
 		} else {
 			return new float[0];
@@ -211,7 +213,7 @@ public class FTBQuestsClient {
 	public static Optional<CreativeModeTab.ItemDisplayParameters> creativeTabDisplayParams() {
 		LocalPlayer player = Minecraft.getInstance().player;
 		if (player != null) {
-			return Optional.of(new CreativeModeTab.ItemDisplayParameters(player.connection.enabledFeatures(), Minecraft.getInstance().options.operatorItemsTab().get(), player.clientLevel.registryAccess()));
+			return Optional.of(new CreativeModeTab.ItemDisplayParameters(player.connection.enabledFeatures(), Minecraft.getInstance().options.operatorItemsTab().get(), player.level().registryAccess()));
 		}
 		return Optional.empty();
 	}
@@ -220,11 +222,27 @@ public class FTBQuestsClient {
 		Widget.setClipboardString(qo.getCodeString());
 	}
 
-	static void showCompletionToast(QuestObject qo) {
-		Minecraft.getInstance().getToasts().addToast(new ToastQuestObject(qo));
+	public static void copyToClipboard(String str) {
+		Widget.setClipboardString(str);
 	}
 
-	static void showRewardToast(Component text, Icon icon) {
-		Minecraft.getInstance().getToasts().addToast(new RewardToast(text, icon));
+	static void showCompletionToast(QuestObject qo) {
+		Minecraft.getInstance().getToastManager().addToast(new ToastQuestObject(qo));
+	}
+
+	static void showRewardToast(Component text, Icon<?> icon) {
+		Minecraft.getInstance().getToastManager().addToast(new RewardToast(text, icon));
+	}
+
+	public static void showErrorToast(Component text) {
+		showErrorToast(text, Component.empty());
+	}
+
+	public static void showErrorToast(Component text, Component desc) {
+		Minecraft.getInstance().getToastManager().addToast(new CustomToast(text, Icons.BARRIER, desc));
+	}
+
+	public static void showInfoToast(Component text, Component desc) {
+		Minecraft.getInstance().getToastManager().addToast(new CustomToast(text, Icons.INFO, desc));
 	}
 }

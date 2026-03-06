@@ -1,32 +1,13 @@
 package dev.ftb.mods.ftbquests.block.entity;
 
-import com.mojang.serialization.Codec;
-import com.mojang.serialization.codecs.RecordCodecBuilder;
-import dev.architectury.networking.NetworkManager;
-import dev.ftb.mods.ftblibrary.config.BooleanConfig;
-import dev.ftb.mods.ftblibrary.config.ConfigGroup;
-import dev.ftb.mods.ftblibrary.config.ItemStackConfig;
-import dev.ftb.mods.ftbquests.api.FTBQuestsAPI;
-import dev.ftb.mods.ftbquests.block.TaskScreenBlock;
-import dev.ftb.mods.ftbquests.client.FTBQuestsClient;
-import dev.ftb.mods.ftbquests.net.BlockConfigResponseMessage;
-import dev.ftb.mods.ftbquests.quest.BaseQuestFile;
-import dev.ftb.mods.ftbquests.quest.QuestObjectBase;
-import dev.ftb.mods.ftbquests.quest.TeamData;
-import dev.ftb.mods.ftbquests.quest.task.Task;
-import dev.ftb.mods.ftbquests.registry.ModBlockEntityTypes;
-import dev.ftb.mods.ftbquests.registry.ModBlocks;
-import dev.ftb.mods.ftbquests.registry.ModDataComponents;
-import dev.ftb.mods.ftbquests.util.ConfigQuestObject;
-import dev.ftb.mods.ftbteams.api.FTBTeamsAPI;
 import net.minecraft.ChatFormatting;
-import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.HolderLookup;
+import net.minecraft.core.UUIDUtil;
+import net.minecraft.core.component.DataComponentGetter;
 import net.minecraft.core.component.DataComponentMap;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.NbtOps;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.codec.ByteBufCodecs;
@@ -34,45 +15,75 @@ import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientGamePacketListener;
 import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
+import net.minecraft.util.Util;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import net.minecraft.world.level.storage.ValueInput;
+import net.minecraft.world.level.storage.ValueOutput;
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
+
+import dev.architectury.networking.NetworkManager;
+
+import dev.ftb.mods.ftblibrary.client.config.EditableConfigGroup;
+import dev.ftb.mods.ftblibrary.client.util.ClientUtils;
+import dev.ftb.mods.ftbquests.api.FTBQuestsAPI;
+import dev.ftb.mods.ftbquests.block.TaskScreenBlock;
+import dev.ftb.mods.ftbquests.client.FTBQuestsClient;
+import dev.ftb.mods.ftbquests.client.config.EditableQuestObject;
+import dev.ftb.mods.ftbquests.net.BlockConfigResponseMessage;
+import dev.ftb.mods.ftbquests.quest.BaseQuestFile;
+import dev.ftb.mods.ftbquests.quest.QuestObjectBase;
+import dev.ftb.mods.ftbquests.quest.TeamData;
+import dev.ftb.mods.ftbquests.quest.task.ItemTask;
+import dev.ftb.mods.ftbquests.quest.task.Task;
+import dev.ftb.mods.ftbquests.registry.ModBlockEntityTypes;
+import dev.ftb.mods.ftbquests.registry.ModBlocks;
+import dev.ftb.mods.ftbquests.registry.ModDataComponents;
+import dev.ftb.mods.ftbteams.api.FTBTeamsAPI;
 
 import java.util.Optional;
 import java.util.UUID;
+import org.jetbrains.annotations.NotNull;
+import org.jspecify.annotations.Nullable;
 
 import static dev.ftb.mods.ftbquests.block.TaskScreenBlock.FACING;
 
 public class TaskScreenBlockEntity extends EditableBlockEntity implements ITaskScreen {
     private long taskId = 0L;
+    @Nullable
     private Task task = null;
     private boolean indestructible = false;
     private boolean inputOnly = false;
-    private boolean textShadow = false;
+    private boolean textShadow = true;
     private ItemStack inputModeIcon = ItemStack.EMPTY;
     private ItemStack skin = ItemStack.EMPTY;
-    @NotNull
     private UUID teamId = Util.NIL_UUID;
-    public float[] fakeTextureUV = null;  // null for unknown, 0-array for no texture, 4-array for a texture
+    public float @Nullable [] fakeTextureUV = null;  // null for unknown, 0-array for no texture, 4-array for a texture
+    @Nullable
     private TeamData cachedTeamData = null;
 
     public TaskScreenBlockEntity(BlockPos blockPos, BlockState blockState) {
         super(ModBlockEntityTypes.CORE_TASK_SCREEN.get(), blockPos, blockState);
     }
 
+    @Nullable
     public Task getTask() {
         if (task == null && taskId != 0L || task != null && task.id != taskId) {
-            task = FTBQuestsAPI.api().getQuestFile(level.isClientSide).getTask(taskId);
+            task = FTBQuestsAPI.api().getQuestFile(level.isClientSide()).getTask(taskId);
         }
 
         return task;
     }
 
-    public void setTask(Task task) {
+    public ItemStack getTaskItem() {
+        return task instanceof ItemTask itemTask ? itemTask.getItemStack() : ItemStack.EMPTY;
+    }
+
+    public void setTask(@Nullable Task task) {
         this.task = task;
         this.taskId = task == null ? 0L: task.id;
         setChanged();
@@ -131,14 +142,14 @@ public class TaskScreenBlockEntity extends EditableBlockEntity implements ITaskS
     }
 
     @Override
-    @NotNull
     public UUID getTeamId() {
         return teamId;
     }
 
+    @Nullable
     public TeamData getCachedTeamData() {
         if (cachedTeamData == null) {
-            BaseQuestFile f = FTBQuestsAPI.api().getQuestFile(level.isClientSide);
+            BaseQuestFile f = FTBQuestsAPI.api().getQuestFile(level.isClientSide());
             cachedTeamData = f.getNullableTeamData(getTeamId());
         }
         return cachedTeamData;
@@ -149,7 +160,9 @@ public class TaskScreenBlockEntity extends EditableBlockEntity implements ITaskS
         return Optional.of(this);
     }
 
-    public void removeAllAuxScreens() {
+    @Override
+    public void preRemoveSideEffects(BlockPos blockPos, BlockState blockState) {
+        // break all the auxiliary screen blocks for this core screen
         if (level != null && getBlockState().getBlock() instanceof TaskScreenBlock tsb) {
             BlockPos.betweenClosedStream(TaskScreenBlock.getMultiblockBounds(getBlockPos(), tsb.getSize(), getBlockState().getValue(FACING))).forEach(pos -> {
                 if (level.getBlockState(pos).getBlock() == ModBlocks.AUX_SCREEN.get()) {
@@ -171,31 +184,29 @@ public class TaskScreenBlockEntity extends EditableBlockEntity implements ITaskS
     }
 
     @Override
-    public void loadAdditional(CompoundTag compoundTag, HolderLookup.Provider provider) {
-        super.loadAdditional(compoundTag, provider);
+    public void loadAdditional(ValueInput valueInput) {
+        super.loadAdditional(valueInput);
 
-        teamId = compoundTag.hasUUID("TeamID") ? compoundTag.getUUID("TeamID") : Util.NIL_UUID;
+        teamId = valueInput.read("TeamID", UUIDUtil.CODEC)
+                .orElse(Util.NIL_UUID);
 
-        TaskScreenSaveData data = TaskScreenSaveData.CODEC.parse(NbtOps.INSTANCE, compoundTag.getCompound("savedData"))
-                .result().orElse(TaskScreenSaveData.DEFAULT);
-        applySavedData(data);
+        valueInput.read("savedData", TaskScreenSaveData.CODEC)
+                .ifPresentOrElse(this::applySavedData, () -> applySavedData(TaskScreenSaveData.DEFAULT));
 
         task = null;
         fakeTextureUV = null;  // force recalc
     }
 
     @Override
-    protected void saveAdditional(CompoundTag compoundTag, HolderLookup.Provider provider) {
-        super.saveAdditional(compoundTag, provider);
+    protected void saveAdditional(ValueOutput valueOutput) {
+        super.saveAdditional(valueOutput);
 
-        if (teamId != Util.NIL_UUID) compoundTag.putUUID("TeamID", teamId);
-
-        TaskScreenSaveData.CODEC.encodeStart(NbtOps.INSTANCE, TaskScreenSaveData.fromBlockEntity(this))
-                .ifSuccess(tag -> compoundTag.put("savedData", tag));
+        if (teamId != Util.NIL_UUID) valueOutput.store("TeamID", UUIDUtil.CODEC, teamId);
+        valueOutput.store("savedData", TaskScreenSaveData.CODEC, TaskScreenSaveData.fromBlockEntity(this));
     }
 
     @Override
-    protected void applyImplicitComponents(DataComponentInput dataComponentInput) {
+    protected void applyImplicitComponents(DataComponentGetter dataComponentInput) {
         super.applyImplicitComponents(dataComponentInput);
 
         applySavedData(dataComponentInput.getOrDefault(ModDataComponents.TASK_SCREEN_SAVED.get(), TaskScreenSaveData.DEFAULT));
@@ -217,34 +228,41 @@ public class TaskScreenBlockEntity extends EditableBlockEntity implements ITaskS
         textShadow = data.textShadow;
     }
 
-    public ConfigGroup fillConfigGroup(TeamData data) {
-        ConfigGroup cg0 = new ConfigGroup("task_screen", accepted -> {
+    public EditableConfigGroup fillConfigGroup(TeamData data) {
+        EditableConfigGroup cg0 = new EditableConfigGroup("task_screen", accepted -> {
             if (accepted) {
                 NetworkManager.sendToServer(new BlockConfigResponseMessage(getBlockPos(), saveWithoutMetadata(getLevel().registryAccess())));
             }
         });
 
-        cg0.setNameKey(getBlockState().getBlock().getDescriptionId());
-        ConfigGroup cg = cg0.getOrCreateSubgroup("screen");
-        cg.add("task", new ConfigQuestObject<>(o -> isSuitableTask(data, o), this::formatLine), getTask(), this::setTask, null).setNameKey("ftbquests.task");
-        cg.add("skin", new ItemStackConfig(true, true), getSkin(), this::setSkin, ItemStack.EMPTY).setNameKey("block.ftbquests.screen.skin");
-        cg.add("text_shadow", new BooleanConfig(), isTextShadow(), this::setTextShadow, false).setNameKey("block.ftbquests.screen.text_shadow");
-        cg.add("indestructible", new BooleanConfig(), isIndestructible(), this::setIndestructible, false).setNameKey("block.ftbquests.screen.indestructible");
-        cg.add("input_only", new BooleanConfig(), isInputOnly(), this::setInputOnly, false).setNameKey("block.ftbquests.screen.input_only");
-        cg.add("input_icon", new ItemStackConfig(true, true), getInputModeIcon(), this::setInputModeIcon, ItemStack.EMPTY).setNameKey("block.ftbquests.screen.input_mode_icon");
+        cg0.setNameKey(new ItemStack(getBlockState().getBlock()).getItem().getDescriptionId());
+        EditableConfigGroup cg = cg0.getOrCreateSubgroup("screen");
+        cg.add("task", new EditableQuestObject<>(o -> isSuitableTask(data, o), this::formatLine), getTask(), this::setTask, null)
+                .setNameKey("ftbquests.task");
+        cg.addItemStack("skin", getSkin(), this::setSkin, ItemStack.EMPTY, true, true)
+                .withFilter(s -> s.getItem() instanceof BlockItem)
+                .setNameKey("block.ftbquests.screen.skin");
+        cg.addBool("text_shadow", isTextShadow(), this::setTextShadow, true)
+                .setNameKey("block.ftbquests.screen.text_shadow");
+        cg.addBool("indestructible", isIndestructible(), this::setIndestructible, true)
+                .setNameKey("block.ftbquests.screen.indestructible");
+        cg.addBool("input_only", isInputOnly(), this::setInputOnly, false)
+                .setNameKey("block.ftbquests.screen.input_only");
+        cg.addItemStack("input_icon", getInputModeIcon(), this::setInputModeIcon, ItemStack.EMPTY, true, true)
+                .setNameKey("block.ftbquests.screen.input_mode_icon");
 
         return cg0;
     }
 
-    private Component formatLine(Task task) {
-        if (this.task == null) return Component.empty();
+    private Component formatLine(@Nullable Task task) {
+        if (task == null) return Component.empty();
 
         Component questTxt = Component.literal(" [").append(task.getQuest().getTitle()).append("]").withStyle(ChatFormatting.GREEN);
-        return ConfigQuestObject.formatEntry(task).copy().append(questTxt);
+        return EditableQuestObject.formatEntry(task).copy().append(questTxt);
     }
 
     private boolean isSuitableTask(TeamData data, QuestObjectBase o) {
-        return o instanceof Task t && (data.getCanEdit(FTBQuestsClient.getClientPlayer()) || data.canStartTasks(t.getQuest())) && t.consumesResources();
+        return o instanceof Task t && (data.getCanEdit(ClientUtils.getClientPlayer()) || data.canStartTasks(t.getQuest())) && t.consumesResources();
     }
 
     public float[] getFakeTextureUV() {
@@ -280,7 +298,7 @@ public class TaskScreenBlockEntity extends EditableBlockEntity implements ITaskS
 
     public record TaskScreenSaveData(long taskId, ItemStack skin, boolean indestructible, boolean inputOnly, ItemStack inputModeIcon, boolean textShadow) {
         public static TaskScreenSaveData DEFAULT = new TaskScreenSaveData(
-                0L, ItemStack.EMPTY, false, false, ItemStack.EMPTY, false
+                0L, ItemStack.EMPTY, false, true, ItemStack.EMPTY, false
         );
 
         public static TaskScreenSaveData fromBlockEntity(TaskScreenBlockEntity b) {
@@ -292,8 +310,8 @@ public class TaskScreenBlockEntity extends EditableBlockEntity implements ITaskS
                 ItemStack.CODEC.optionalFieldOf("skin", ItemStack.EMPTY).forGetter(TaskScreenSaveData::skin),
                 Codec.BOOL.optionalFieldOf("indestructible", false).forGetter(TaskScreenSaveData::indestructible),
                 Codec.BOOL.optionalFieldOf("input_only", false).forGetter(TaskScreenSaveData::inputOnly),
-                ItemStack.CODEC.optionalFieldOf("skin", ItemStack.EMPTY).forGetter(TaskScreenSaveData::inputModeIcon),
-                Codec.BOOL.optionalFieldOf("text_shadow", false).forGetter(TaskScreenSaveData::textShadow)
+                ItemStack.CODEC.optionalFieldOf("inputModeIcon", ItemStack.EMPTY).forGetter(TaskScreenSaveData::inputModeIcon),
+                Codec.BOOL.optionalFieldOf("text_shadow", true  ).forGetter(TaskScreenSaveData::textShadow)
         ).apply(builder, TaskScreenSaveData::new));
 
         public static StreamCodec<RegistryFriendlyByteBuf, TaskScreenSaveData> STREAM_CODEC = StreamCodec.composite(

@@ -1,16 +1,18 @@
 package dev.ftb.mods.ftbquests.net;
 
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.codec.ByteBufCodecs;
+import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import com.mojang.datafixers.util.Either;
+
 import dev.architectury.networking.NetworkManager;
+
 import dev.ftb.mods.ftblibrary.util.NetworkHelper;
 import dev.ftb.mods.ftbquests.api.FTBQuestsAPI;
 import dev.ftb.mods.ftbquests.client.ClientQuestFile;
 import dev.ftb.mods.ftbquests.quest.QuestObjectBase;
 import dev.ftb.mods.ftbquests.quest.translation.TranslationKey;
-import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.network.codec.ByteBufCodecs;
-import net.minecraft.network.codec.StreamCodec;
-import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -25,7 +27,7 @@ import java.util.List;
  * @param val the content; a string or list of string, depending on the subkey
  */
 public record SyncTranslationMessageToClient(long id, String locale, TranslationKey subKey, Either<String, List<String>> val) implements CustomPacketPayload {
-    public static final Type<SyncTranslationMessageToClient> TYPE = new Type<>(FTBQuestsAPI.rl("sync_translation_to_client"));
+    public static final Type<SyncTranslationMessageToClient> TYPE = new Type<>(FTBQuestsAPI.id("sync_translation_to_client"));
 
     public static StreamCodec<FriendlyByteBuf, SyncTranslationMessageToClient> STREAM_CODEC = StreamCodec.composite(
             ByteBufCodecs.VAR_LONG, SyncTranslationMessageToClient::id,
@@ -50,7 +52,7 @@ public record SyncTranslationMessageToClient(long id, String locale, Translation
 
     public static void handle(SyncTranslationMessageToClient message, NetworkManager.PacketContext context) {
         context.queue(() -> {
-            ClientQuestFile file = ClientQuestFile.INSTANCE;
+            ClientQuestFile file = ClientQuestFile.getInstance();
             if (file.isValid()) {
                 QuestObjectBase object = file.getBase(message.id);
                 if (object != null) {

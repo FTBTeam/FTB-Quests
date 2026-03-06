@@ -1,25 +1,13 @@
 package dev.ftb.mods.ftbquests.block.entity;
 
-import com.mojang.serialization.Codec;
-import com.mojang.serialization.codecs.RecordCodecBuilder;
-import dev.architectury.networking.NetworkManager;
-import dev.architectury.platform.Platform;
-import dev.ftb.mods.ftblibrary.config.ConfigGroup;
-import dev.ftb.mods.ftblibrary.config.ItemStackConfig;
-import dev.ftb.mods.ftbquests.api.FTBQuestsAPI;
-import dev.ftb.mods.ftbquests.block.QuestBarrierBlock;
-import dev.ftb.mods.ftbquests.client.FTBQuestsClient;
-import dev.ftb.mods.ftbquests.net.BlockConfigResponseMessage;
-import dev.ftb.mods.ftbquests.registry.ModBlocks;
-import dev.ftb.mods.ftbquests.registry.ModDataComponents;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.HolderLookup;
+import net.minecraft.core.component.DataComponentGetter;
 import net.minecraft.core.component.DataComponentMap;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.NbtOps;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.codec.ByteBufCodecs;
@@ -28,13 +16,14 @@ import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientGamePacketListener;
 import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
 import net.minecraft.network.protocol.game.ClientboundSoundPacket;
+import net.minecraft.resources.Identifier;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
+import net.minecraft.world.entity.Relative;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.ItemStack;
@@ -44,17 +33,35 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.storage.ValueInput;
+import net.minecraft.world.level.storage.ValueOutput;
 import net.minecraft.world.phys.Vec3;
-import org.jetbrains.annotations.Nullable;
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
 
-import java.util.List;
+import dev.architectury.networking.NetworkManager;
+import dev.architectury.platform.Platform;
+
+import dev.ftb.mods.ftblibrary.client.config.EditableConfigGroup;
+import dev.ftb.mods.ftblibrary.client.config.editable.EditableItemStack;
+import dev.ftb.mods.ftblibrary.client.util.ClientUtils;
+import dev.ftb.mods.ftbquests.api.FTBQuestsAPI;
+import dev.ftb.mods.ftbquests.block.QuestBarrierBlock;
+import dev.ftb.mods.ftbquests.client.FTBQuestsClient;
+import dev.ftb.mods.ftbquests.net.BlockConfigResponseMessage;
+import dev.ftb.mods.ftbquests.registry.ModBlocks;
+import dev.ftb.mods.ftbquests.registry.ModDataComponents;
+
 import java.util.Objects;
 import java.util.Optional;
+import java.util.function.Consumer;
+import org.jspecify.annotations.Nullable;
 
 import static dev.ftb.mods.ftbquests.block.QuestBarrierBlock.OPEN;
 
 public abstract class BaseBarrierBlockEntity extends EditableBlockEntity {
 	protected String objStr = "";
+	@Nullable
 	protected BlockState camo = null;
 	private boolean invisibleWhenOpen = false;
 	private ItemStack skin = ItemStack.EMPTY;
@@ -66,8 +73,8 @@ public abstract class BaseBarrierBlockEntity extends EditableBlockEntity {
 
 	public static void tick(Level level, BlockPos blockPos, BlockState blockState, BlockEntity blockEntity) {
 		if (blockEntity instanceof BaseBarrierBlockEntity barrier) {
-			if (level.isClientSide && FTBQuestsClient.isClientDataLoaded() && level.getGameTime() % 5L == 0L) {
-				boolean completed = barrier.isOpen(FTBQuestsClient.getClientPlayer());
+			if (level.isClientSide() && FTBQuestsClient.isClientDataLoaded() && level.getGameTime() % 5L == 0L) {
+				boolean completed = barrier.isOpen(ClientUtils.getClientPlayer());
 
 				if (completed != blockState.getValue(OPEN)) {
 					level.setBlock(blockPos, blockState.setValue(OPEN, completed), Block.UPDATE_CLIENTS | Block.UPDATE_IMMEDIATE);
@@ -78,37 +85,28 @@ public abstract class BaseBarrierBlockEntity extends EditableBlockEntity {
 		}
 	}
 
-	@Override
-	public void loadAdditional(CompoundTag tag, HolderLookup.Provider provider) {
-		super.loadAdditional(tag, provider);
+    @Override
+    protected void loadAdditional(ValueInput valueInput) {
+        super.loadAdditional(valueInput);
 
-		if (tag.contains("Object")) {
-			// TODO legacy - remove in 1.22
-			objStr = tag.getString("Object");
-			skin = ItemStack.EMPTY;
-		} else {
-			BarrierSavedData data = BarrierSavedData.CODEC.parse(NbtOps.INSTANCE, tag.getCompound("savedData"))
-					.result().orElse(BarrierSavedData.DEFAULT);
-			applySavedData(data);
-		}
+		valueInput.read("savedData", BarrierSavedData.CODEC).ifPresent(this::applySavedData);
 	}
 
-	@Override
-	public void saveAdditional(CompoundTag compoundTag, HolderLookup.Provider provider) {
-		super.saveAdditional(compoundTag, provider);
+    @Override
+    protected void saveAdditional(ValueOutput valueOutput) {
+        super.saveAdditional(valueOutput);
 
-		BarrierSavedData.CODEC.encodeStart(NbtOps.INSTANCE, BarrierSavedData.fromBlockEntity(this))
-				.ifSuccess(tag -> compoundTag.put("savedData", tag));
-	}
+        valueOutput.store("savedData", BarrierSavedData.CODEC, BarrierSavedData.fromBlockEntity(this));
+    }
 
-	@Override
-	protected void applyImplicitComponents(DataComponentInput dataComponentInput) {
+    @Override
+	protected void applyImplicitComponents(DataComponentGetter dataComponentInput) {
 		super.applyImplicitComponents(dataComponentInput);
 
 		applySavedData(dataComponentInput.getOrDefault(ModDataComponents.BARRIER_SAVED.get(), BarrierSavedData.DEFAULT));
 	}
 
-	@Override
+    @Override
 	protected void collectImplicitComponents(DataComponentMap.Builder builder) {
 		super.collectImplicitComponents(builder);
 
@@ -145,27 +143,27 @@ public abstract class BaseBarrierBlockEntity extends EditableBlockEntity {
 
 	public abstract boolean isOpen(Player player);
 
-	protected abstract void addConfigEntries(ConfigGroup cg);
+	protected abstract void addConfigEntries(EditableConfigGroup cg);
 
-	public ConfigGroup fillConfigGroup() {
-		ConfigGroup group = new ConfigGroup("ftbquests.barrier", accepted -> {
+	public EditableConfigGroup fillConfigGroup() {
+		EditableConfigGroup group = new EditableConfigGroup("ftbquests.barrier", accepted -> {
 			if (accepted) {
 				NetworkManager.sendToServer(new BlockConfigResponseMessage(getBlockPos(), saveWithoutMetadata(getLevel().registryAccess())));
 			}
 		});
 
-		group.setNameKey(getBlockState().getBlock().getDescriptionId());
+		group.setNameKey(new ItemStack(getBlockState().getBlock()).getItem().getDescriptionId());
 		addConfigEntries(group);
 
 		if (Platform.isForgeLike()) {
-			ConfigGroup appearance = group.getOrCreateSubgroup("appearance").setNameKey("ftbquests.quest.appearance");
-			appearance.add("skin", new ItemStackConfig(true, true), getSkin(), this::setSkin, ItemStack.EMPTY)
+			EditableConfigGroup appearance = group.getOrCreateSubgroup("appearance").setNameKey("ftbquests.quest.appearance");
+			appearance.add("skin", new EditableItemStack(true, true), getSkin(), this::setSkin, ItemStack.EMPTY)
 					.withFilter(stack -> stack.getItem() instanceof BlockItem)
 					.setNameKey("block.ftbquests.screen.skin");
 			appearance.addBool("invis_when_open", isInvisibleWhenOpen(), this::setInvisibleWhenOpen, false).setNameKey("block.ftbquests.barrier.invis_when_open");
 		}
 
-		ConfigGroup teleport = group.getOrCreateSubgroup("teleport").setNameKey("ftbquests.barrier.teleport");
+		EditableConfigGroup teleport = group.getOrCreateSubgroup("teleport").setNameKey("ftbquests.barrier.teleport");
 		teleport.addBool("enabled", teleportData.enabled, v -> teleportData = teleportData.withEnabled(v), false);
 		teleport.addBool("relative", teleportData.relative, v -> teleportData = teleportData.withRelative(v), false);
 		teleport.addInt("dest_x", teleportData.dest.getX(), v -> teleportData = teleportData.withDestX(v), 0, Integer.MIN_VALUE, Integer.MAX_VALUE);
@@ -204,7 +202,7 @@ public abstract class BaseBarrierBlockEntity extends EditableBlockEntity {
 
 	public BlockState getClientAppearance() {
 		if (camo == null) {
-			if (isOpen(FTBQuestsClient.getClientPlayer())) {
+			if (isOpen(ClientUtils.getClientPlayer())) {
 				camo = invisibleWhenOpen ?
 						Blocks.AIR.defaultBlockState() :
 						ModBlocks.BARRIER.get().defaultBlockState().setValue(QuestBarrierBlock.OPEN, true);
@@ -219,7 +217,7 @@ public abstract class BaseBarrierBlockEntity extends EditableBlockEntity {
 
 	@Override
 	public boolean hasPermissionToEdit(Player player) {
-		return FTBQuestsAPI.api().getQuestFile(level.isClientSide).getTeamData(player)
+		return FTBQuestsAPI.api().getQuestFile(player.level().isClientSide()).getTeamData(player)
 				.map(team -> team.getCanEdit(player))
 				.orElse(false);
 	}
@@ -251,12 +249,12 @@ public abstract class BaseBarrierBlockEntity extends EditableBlockEntity {
 				BarrierSavedData::new
 		);
 
-		public void addTooltipInfo(BaseBarrierBlockEntity.BarrierSavedData data, List<Component> tooltip, String what) {
-			tooltip.add(Component.translatable("item.ftbquests.barrier.object." + what, data.objStr().isEmpty() ? "-" : data.objStr).withStyle(ChatFormatting.GRAY));
+		public void addTooltipInfo(BaseBarrierBlockEntity.BarrierSavedData data, Consumer<Component> tooltip, String what) {
+			tooltip.accept(Component.translatable("item.ftbquests.barrier.object." + what, data.objStr().isEmpty() ? "-" : data.objStr).withStyle(ChatFormatting.GRAY));
 			if (Platform.isForgeLike() && !data.skin().isEmpty()) {
-				tooltip.add(Component.translatable("item.ftbquests.barrier.skin", data.skin().getDisplayName()).withStyle(ChatFormatting.GRAY));
+				tooltip.accept(Component.translatable("item.ftbquests.barrier.skin", data.skin().getDisplayName()).withStyle(ChatFormatting.GRAY));
 			}
-			tooltip.add(Component.translatable("item.ftbquests.barrier.invis_when_open", data.invisibleWhenOpen()).withStyle(ChatFormatting.GRAY));
+			tooltip.accept(Component.translatable("item.ftbquests.barrier.invis_when_open", data.invisibleWhenOpen()).withStyle(ChatFormatting.GRAY));
 		}
 	}
 
@@ -299,9 +297,9 @@ public abstract class BaseBarrierBlockEntity extends EditableBlockEntity {
 		}
 
 		public TeleportData withDimId(String dimStr) {
-			return withDimId(dimStr.isEmpty() || ResourceLocation.tryParse(dimStr) == null ?
+			return withDimId(dimStr.isEmpty() || Identifier.tryParse(dimStr) == null ?
 					null :
-                    ResourceKey.create(Registries.DIMENSION, ResourceLocation.parse(dimStr)));
+                    ResourceKey.create(Registries.DIMENSION, Identifier.parse(dimStr)));
 		}
 
 		public TeleportData withDimId(@Nullable ResourceKey<Level> dimId) {
@@ -322,7 +320,7 @@ public abstract class BaseBarrierBlockEntity extends EditableBlockEntity {
 		}
 
 		public String dimStr() {
-			return dimId.map(id -> id.location().toString()).orElse("");
+			return dimId.map(id -> id.identifier().toString()).orElse("");
 		}
 
 		@Nullable
@@ -334,12 +332,13 @@ public abstract class BaseBarrierBlockEntity extends EditableBlockEntity {
 			return relative ? this.withDestPos(basePos.offset(dest)) : this;
 		}
 
-		public void teleportPlayer(ServerPlayer player) {
-            if (player != null && player.getServer() != null && enabled) {
+		public void teleportPlayer(@Nullable ServerPlayer player) {
+            if (player != null && enabled) {
                 Vec3 dest = dest().getBottomCenter();
-                Level destLevel = Objects.requireNonNullElse(getLevel(player.getServer()), player.level());
+                Level destLevel = Objects.requireNonNullElse(getLevel(player.level().getServer()), player.level());
                 if (destLevel instanceof ServerLevel serverLevel) {
-                    player.teleportTo(serverLevel, dest.x, dest.y, dest.z, yaw(), pitch());
+                    // TODO: @since 21.11: Relative.ALL might not be correct here.
+                    player.teleportTo(serverLevel, dest.x, dest.y, dest.z, Relative.ALL, yaw(), pitch(), true);
                     var sound = BuiltInRegistries.SOUND_EVENT.wrapAsHolder(SoundEvents.PLAYER_TELEPORT);
                     player.connection.send(new ClientboundSoundPacket(sound, SoundSource.PLAYERS, dest.x, dest.y, dest.z, 0.5f, 1f, serverLevel.getRandom().nextLong()));
                 }

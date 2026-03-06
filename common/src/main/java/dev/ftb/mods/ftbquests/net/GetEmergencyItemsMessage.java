@@ -1,21 +1,23 @@
 package dev.ftb.mods.ftbquests.net;
 
-import dev.architectury.hooks.item.ItemStackHooks;
-import dev.architectury.networking.NetworkManager;
-import dev.ftb.mods.ftbquests.api.FTBQuestsAPI;
-import dev.ftb.mods.ftbquests.quest.ServerQuestFile;
-import it.unimi.dsi.fastutil.objects.Object2LongMap;
-import it.unimi.dsi.fastutil.objects.Object2LongOpenHashMap;
-import net.minecraft.Util;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.util.Util;
+
+import dev.architectury.hooks.item.ItemStackHooks;
+import dev.architectury.networking.NetworkManager;
+
+import dev.ftb.mods.ftbquests.api.FTBQuestsAPI;
+import dev.ftb.mods.ftbquests.quest.ServerQuestFile;
 
 import java.util.UUID;
+import it.unimi.dsi.fastutil.objects.Object2LongMap;
+import it.unimi.dsi.fastutil.objects.Object2LongOpenHashMap;
 
 public record GetEmergencyItemsMessage() implements CustomPacketPayload {
-	public static final Type<GetEmergencyItemsMessage> TYPE = new Type<>(FTBQuestsAPI.rl("get_emergency_items_message"));
+	public static final Type<GetEmergencyItemsMessage> TYPE = new Type<>(FTBQuestsAPI.id("get_emergency_items_message"));
 
 	public static final GetEmergencyItemsMessage INSTANCE = new GetEmergencyItemsMessage();
 
@@ -34,8 +36,8 @@ public record GetEmergencyItemsMessage() implements CustomPacketPayload {
 			long now = Util.getEpochMillis();
 			long delta = now - lastItemsGot.getOrDefault(player.getUUID(), 0L);
 
-			if (delta >= ServerQuestFile.INSTANCE.getEmergencyItemsCooldown() * 1000L) {
-				ServerQuestFile.INSTANCE.getEmergencyItems()
+			if (delta >= ServerQuestFile.getInstance().getEmergencyItemsCooldown() * 1000L) {
+				ServerQuestFile.getInstance().getEmergencyItems()
 						.forEach(stack -> ItemStackHooks.giveItem(player, stack.copy()));
 				lastItemsGot.put(player.getUUID(), now);
 			}

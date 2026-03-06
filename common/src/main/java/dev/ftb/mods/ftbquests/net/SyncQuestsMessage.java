@@ -1,15 +1,17 @@
 package dev.ftb.mods.ftbquests.net;
 
-import dev.architectury.networking.NetworkManager;
-import dev.ftb.mods.ftbquests.api.FTBQuestsAPI;
-import dev.ftb.mods.ftbquests.client.ClientQuestFile;
-import dev.ftb.mods.ftbquests.quest.BaseQuestFile;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 
+import dev.architectury.networking.NetworkManager;
+
+import dev.ftb.mods.ftbquests.api.FTBQuestsAPI;
+import dev.ftb.mods.ftbquests.client.ClientQuestFile;
+import dev.ftb.mods.ftbquests.quest.BaseQuestFile;
+
 public record SyncQuestsMessage(BaseQuestFile file) implements CustomPacketPayload {
-	public static final Type<SyncQuestsMessage> TYPE = new Type<>(FTBQuestsAPI.rl("sync_quests_message"));
+	public static final Type<SyncQuestsMessage> TYPE = new Type<>(FTBQuestsAPI.id("sync_quests_message"));
 
 	public static final StreamCodec<RegistryFriendlyByteBuf, SyncQuestsMessage> STREAM_CODEC = StreamCodec.composite(
 			BaseQuestFile.STREAM_CODEC, SyncQuestsMessage::file,
@@ -25,7 +27,7 @@ public record SyncQuestsMessage(BaseQuestFile file) implements CustomPacketPaylo
 		context.queue(() -> {
 			ClientQuestFile.syncFromServer(message.file);
 
-			ClientQuestFile.INSTANCE.updateLootCrates();
+			ClientQuestFile.getInstance().updateLootCrates();
 
 			NetworkManager.sendToServer(RequestTeamDataMessage.INSTANCE);
 		});

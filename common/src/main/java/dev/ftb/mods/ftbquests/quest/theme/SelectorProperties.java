@@ -9,8 +9,8 @@ public class SelectorProperties implements Comparable<SelectorProperties> {
 	public final ThemeSelector selector;
 	public final Map<String, String> properties;
 
-	public SelectorProperties(ThemeSelector s) {
-		selector = s;
+	public SelectorProperties(ThemeSelector selector) {
+		this.selector = selector;
 		properties = new LinkedHashMap<>();
 	}
 

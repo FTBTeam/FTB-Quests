@@ -1,28 +1,30 @@
 package dev.ftb.mods.ftbquests.quest;
 
-import dev.ftb.mods.ftblibrary.config.ConfigGroup;
-import dev.ftb.mods.ftblibrary.config.StringConfig;
-import dev.ftb.mods.ftblibrary.config.Tristate;
-import dev.ftb.mods.ftblibrary.icon.Icon;
-import dev.ftb.mods.ftblibrary.icon.IconAnimation;
-import dev.ftb.mods.ftblibrary.math.Bits;
-import dev.ftb.mods.ftblibrary.snbt.SNBTCompoundTag;
-import dev.ftb.mods.ftbquests.events.ObjectCompletedEvent;
-import dev.ftb.mods.ftbquests.events.ObjectStartedEvent;
-import dev.ftb.mods.ftbquests.events.QuestProgressEventData;
-import dev.ftb.mods.ftbquests.quest.translation.TranslationKey;
-import dev.ftb.mods.ftbquests.util.NetUtils;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.ListTag;
-import net.minecraft.nbt.Tag;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 
-import java.util.*;
+import dev.ftb.mods.ftblibrary.client.config.EditableConfigGroup;
+import dev.ftb.mods.ftblibrary.client.config.Tristate;
+import dev.ftb.mods.ftblibrary.client.config.editable.EditableString;
+import dev.ftb.mods.ftblibrary.icon.AnimatedIcon;
+import dev.ftb.mods.ftblibrary.icon.Icon;
+import dev.ftb.mods.ftblibrary.math.Bits;
+import dev.ftb.mods.ftbquests.events.ObjectCompletedEvent;
+import dev.ftb.mods.ftbquests.events.ObjectStartedEvent;
+import dev.ftb.mods.ftbquests.events.QuestProgressEventData;
+import dev.ftb.mods.ftbquests.quest.translation.TranslationKey;
+
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
+import java.util.UUID;
 import java.util.regex.Pattern;
 
 public final class Chapter extends QuestObject {
@@ -144,43 +146,52 @@ public final class Chapter extends QuestObject {
 		quests.remove(quest);
 	}
 
+	public void addImage(ChapterImage image) {
+		images.add(image);
+	}
+
+	public void removeImage(ChapterImage image) {
+		images.remove(image);
+	}
+
+	public void addQuestLink(QuestLink link) {
+		questLinks.add(link);
+	}
+
+	public void removeQuestLink(QuestLink link) {
+		questLinks.remove(link);
+	}
+
+	public void addChildObject(Movable child) {
+        switch (child) {
+            case Quest q -> addQuest(q);
+            case QuestLink ql -> addQuestLink(ql);
+            case ChapterImage img -> addImage(img);
+            default -> throw new IllegalArgumentException("expecting quest, quest link or chapter image!");
+        }
+	}
+
+	public void removeChildObject(Movable child) {
+		switch (child) {
+			case Quest q -> removeQuest(q);
+			case QuestLink ql -> removeQuestLink(ql);
+			case ChapterImage img -> removeImage(img);
+			default -> throw new IllegalArgumentException("expecting quest, quest link or chapter image!");
+		}
+	}
+
 	@Override
 	public void writeData(CompoundTag nbt, HolderLookup.Provider provider) {
-		nbt.putString("filename", filename);
 		super.writeData(nbt, provider);
 
-		if (alwaysInvisible) {
-			nbt.putBoolean("always_invisible", true);
-		}
-
+		nbt.putString("filename", filename);
+		if (alwaysInvisible) nbt.putBoolean("always_invisible", true);
 		nbt.putString("default_quest_shape", defaultQuestShape);
-		if (defaultQuestSize != 1D) {
-			nbt.putDouble("default_quest_size", defaultQuestSize);
-		}
+		if (defaultQuestSize != 1D) nbt.putDouble("default_quest_size", defaultQuestSize);
 		nbt.putBoolean("default_hide_dependency_lines", defaultHideDependencyLines);
-
-		if (!images.isEmpty()) {
-			ListTag list = new ListTag();
-
-			for (ChapterImage image : images) {
-				SNBTCompoundTag nbt1 = new SNBTCompoundTag();
-				image.writeData(nbt1);
-				list.add(nbt1);
-			}
-
-			nbt.put("images", list);
-		}
-
-		if (defaultMinWidth > 0) {
-			nbt.putInt("default_min_width", defaultMinWidth);
-		}
-
-		if (progressionMode != ProgressionMode.DEFAULT) {
-			nbt.putString("progression_mode", progressionMode.getId());
-		}
-
+		if (defaultMinWidth > 0) nbt.putInt("default_min_width", defaultMinWidth);
+		if (progressionMode != ProgressionMode.DEFAULT) nbt.putString("progression_mode", progressionMode.getId());
 		consumeItems.write(nbt, "consume_items");
-
 		if (hideQuestDetailsUntilStartable) nbt.putBoolean("hide_quest_details_until_startable", true);
 		if (hideQuestUntilDepsVisible) nbt.putBoolean("hide_quest_until_deps_visible", true);
 		if (hideQuestUntilDepsComplete) nbt.putBoolean("hide_quest_until_deps_complete", true);
@@ -193,42 +204,27 @@ public final class Chapter extends QuestObject {
 
 	@Override
 	public void readData(CompoundTag nbt, HolderLookup.Provider provider) {
-		filename = nbt.getString("filename");
 		super.readData(nbt, provider);
 
-		alwaysInvisible = nbt.getBoolean("always_invisible");
-		defaultQuestShape = nbt.getString("default_quest_shape");
+		filename = nbt.getString("filename").orElseThrow();
+		alwaysInvisible = nbt.getBooleanOr("always_invisible", false);
+		defaultQuestShape = nbt.getString("default_quest_shape").orElseThrow();
+		defaultQuestSize = nbt.getDoubleOr("default_quest_size", 1D);
+		defaultHideDependencyLines = nbt.getBooleanOr("default_hide_dependency_lines", false);
+		defaultMinWidth = nbt.getIntOr("default_min_width", 0);
+		progressionMode = nbt.getString("progression_mode").map(ProgressionMode.NAME_MAP::get).orElse(ProgressionMode.DEFAULT);
+		consumeItems = Tristate.read(nbt, "consume_items");
+		hideQuestDetailsUntilStartable = nbt.getBooleanOr("hide_quest_details_until_startable", false);
+		hideQuestUntilDepsVisible = nbt.getBooleanOr("hide_quest_until_deps_visible", false);
+		hideQuestUntilDepsComplete = nbt.getBooleanOr("hide_quest_until_deps_complete", false);
+		hideTextUntilComplete = nbt.getBooleanOr("hide_text_until_complete", false);
+		defaultRepeatable = nbt.getBooleanOr("default_repeatable_quest", false);
+		requireSequentialTasks = nbt.getBooleanOr("require_sequential_tasks", false);
+		autoFocusId = nbt.getStringOr("autofocus_id", "");
 
 		if (defaultQuestShape.equals("default")) {
 			defaultQuestShape = "";
 		}
-
-		defaultQuestSize = nbt.contains("default_quest_size", SNBTCompoundTag.TAG_DOUBLE) ?
-				nbt.getDouble("default_quest_size") :
-				1D;
-
-		defaultHideDependencyLines = nbt.getBoolean("default_hide_dependency_lines");
-
-		ListTag imgs = nbt.getList("images", Tag.TAG_COMPOUND);
-
-		images.clear();
-
-		for (int i = 0; i < imgs.size(); i++) {
-			ChapterImage image = new ChapterImage(this);
-			image.readData(imgs.getCompound(i));
-			images.add(image);
-		}
-
-		defaultMinWidth = nbt.getInt("default_min_width");
-		progressionMode = ProgressionMode.NAME_MAP.get(nbt.getString("progression_mode"));
-		consumeItems = Tristate.read(nbt, "consume_items");
-		hideQuestDetailsUntilStartable = nbt.getBoolean("hide_quest_details_until_startable");
-		hideQuestUntilDepsVisible = nbt.getBoolean("hide_quest_until_deps_visible");
-		hideQuestUntilDepsComplete = nbt.getBoolean("hide_quest_until_deps_complete");
-		hideTextUntilComplete = nbt.getBoolean("hide_text_until_complete");
-		defaultRepeatable = nbt.getBoolean("default_repeatable_quest");
-		requireSequentialTasks = nbt.getBoolean("require_sequential_tasks");
-		autoFocusId = nbt.getString("autofocus_id");
 	}
 
 	@Override
@@ -237,10 +233,16 @@ public final class Chapter extends QuestObject {
 		buffer.writeUtf(filename, Short.MAX_VALUE);
 		buffer.writeUtf(defaultQuestShape, Short.MAX_VALUE);
 		buffer.writeDouble(defaultQuestSize);
-		buffer.writeCollection(images, (buf, img) -> img.writeNetData(buf));
 		buffer.writeInt(defaultMinWidth);
 		ProgressionMode.NAME_MAP.write(buffer, progressionMode);
 
+		int flags = makeFlags();
+		buffer.writeVarInt(flags);
+
+		if (!autoFocusId.isEmpty()) buffer.writeLong(QuestObjectBase.parseHexId(autoFocusId).orElse(0L));
+	}
+
+	private int makeFlags() {
 		int flags = 0;
 		flags = Bits.setFlag(flags, 0x01, alwaysInvisible);
 		flags = Bits.setFlag(flags, 0x02, defaultHideDependencyLines);
@@ -253,9 +255,7 @@ public final class Chapter extends QuestObject {
 		flags = Bits.setFlag(flags, 0x100, !autoFocusId.isEmpty());
 		flags = Bits.setFlag(flags, 0x200, hideQuestUntilDepsVisible);
 		flags = Bits.setFlag(flags, 0x400, hideTextUntilComplete);
-		buffer.writeVarInt(flags);
-
-		if (!autoFocusId.isEmpty()) buffer.writeLong(QuestObjectBase.parseHexId(autoFocusId).orElse(0L));
+		return flags;
 	}
 
 	@Override
@@ -264,7 +264,6 @@ public final class Chapter extends QuestObject {
 		filename = buffer.readUtf(Short.MAX_VALUE);
 		defaultQuestShape = buffer.readUtf(Short.MAX_VALUE);
 		defaultQuestSize = buffer.readDouble();
-		NetUtils.read(buffer, images, buf -> ChapterImage.fromNet(this, buf));
 		defaultMinWidth = buffer.readInt();
 		progressionMode = ProgressionMode.NAME_MAP.read(buffer);
 
@@ -344,21 +343,19 @@ public final class Chapter extends QuestObject {
 	}
 
 	@Override
-	@Environment(EnvType.CLIENT)
 	public MutableComponent getAltTitle() {
 		return Component.translatable("ftbquests.unnamed");
 	}
 
 	@Override
-	@Environment(EnvType.CLIENT)
-	public Icon getAltIcon() {
-		List<Icon> list = new ArrayList<>();
+	public Icon<?> getAltIcon() {
+		List<Icon<?>> list = new ArrayList<>();
 
 		for (Quest quest : quests) {
 			list.add(quest.getIcon());
 		}
 
-		return IconAnimation.fromList(list, false);
+		return AnimatedIcon.fromList(list, false);
 	}
 
 	@Override
@@ -417,18 +414,17 @@ public final class Chapter extends QuestObject {
 	}
 
 	@Override
-	@Environment(EnvType.CLIENT)
-	public void fillConfigGroup(ConfigGroup config) {
+	public void fillConfigGroup(EditableConfigGroup config) {
 		super.fillConfigGroup(config);
 
-		config.addList("subtitle", getRawSubtitle(), new StringConfig(), this::setRawSubtitle, "");
+		config.addList("subtitle", getRawSubtitle(), new EditableString(), this::setRawSubtitle, "");
 
-		ConfigGroup appearance = config.getOrCreateSubgroup("appearance").setNameKey("ftbquests.quest.appearance");
+		EditableConfigGroup appearance = config.getOrCreateSubgroup("appearance").setNameKey("ftbquests.quest.appearance");
 		appearance.addEnum("default_quest_shape", defaultQuestShape.isEmpty() ? "default" : defaultQuestShape, v -> defaultQuestShape = v.equals("default") ? "" : v, QuestShape.idMapWithDefault);
 		appearance.addDouble("default_quest_size", defaultQuestSize, v -> defaultQuestSize = v, 1, 0.0625D, 8D);
 		appearance.addInt("default_min_width", defaultMinWidth, v -> defaultMinWidth = v, 0, 0, 3000);
 
-		ConfigGroup visibility = config.getOrCreateSubgroup("visibility").setNameKey("ftbquests.quest.visibility");
+		EditableConfigGroup visibility = config.getOrCreateSubgroup("visibility").setNameKey("ftbquests.quest.visibility");
 		visibility.addBool("always_invisible", alwaysInvisible, v -> alwaysInvisible = v, false);
 		visibility.addBool("default_hide_dependency_lines", defaultHideDependencyLines, v -> defaultHideDependencyLines = v, false);
 		visibility.addBool("hide_quest_details_until_startable", hideQuestDetailsUntilStartable, v -> hideQuestDetailsUntilStartable = v, false);
@@ -436,7 +432,7 @@ public final class Chapter extends QuestObject {
 		visibility.addBool("hide_quest_until_deps_complete", hideQuestUntilDepsComplete, v -> hideQuestUntilDepsComplete = v, false);
 		visibility.addBool("hide_text_until_complete", hideTextUntilComplete, v -> hideTextUntilComplete = v, false);
 
-		ConfigGroup misc = config.getOrCreateSubgroup("misc").setNameKey("ftbquests.quest.misc");
+		EditableConfigGroup misc = config.getOrCreateSubgroup("misc").setNameKey("ftbquests.quest.misc");
 		misc.addString("autofocus_id", autoFocusId, v -> autoFocusId = v, "", HEX_STRING);
 		misc.addEnum("progression_mode", progressionMode, v -> progressionMode = v, ProgressionMode.NAME_MAP);
 		misc.addBool("default_repeatable", defaultRepeatable, v -> defaultRepeatable = v, false);
@@ -516,22 +512,6 @@ public final class Chapter extends QuestObject {
 		return hideQuestUntilDepsVisible;
 	}
 
-	public void addImage(ChapterImage image) {
-		images.add(image);
-	}
-
-	public void removeImage(ChapterImage image) {
-		images.remove(image);
-	}
-
-	public void addQuestLink(QuestLink link) {
-		questLinks.add(link);
-	}
-
-	public void removeQuestLink(QuestLink link) {
-		questLinks.remove(link);
-	}
-
 	public List<String> getRawSubtitle() {
 		return file.getTranslationManager().getStringListTranslation(this, file.getLocale(), TranslationKey.CHAPTER_SUBTITLE)
 				.orElse(List.of());
@@ -554,7 +534,7 @@ public final class Chapter extends QuestObject {
 	}
 
 	public Optional<Movable> getAutofocus() {
-		if (autoFocusId != null && !autoFocusId.isEmpty()) {
+		if (!autoFocusId.isEmpty()) {
 			return QuestObjectBase.parseHexId(autoFocusId)
 					.flatMap(id -> file.get(id) instanceof Movable m && m.getChapter() == this ?
 							Optional.of(m) :

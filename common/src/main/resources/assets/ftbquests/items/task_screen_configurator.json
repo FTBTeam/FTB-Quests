@@ -1,0 +1,6 @@
+{
+  "model": {
+    "type": "minecraft:model",
+    "model": "ftbquests:item/task_screen_configurator"
+  }
+}

@@ -1,22 +1,29 @@
 package dev.ftb.mods.ftbquests.client.gui;
 
-import dev.ftb.mods.ftblibrary.icon.Color4I;
-import dev.ftb.mods.ftblibrary.ui.*;
-import dev.ftb.mods.ftblibrary.ui.input.MouseButton;
-import dev.ftb.mods.ftblibrary.util.StringUtils;
-import dev.ftb.mods.ftblibrary.util.TooltipList;
-import dev.ftb.mods.ftblibrary.util.client.PositionedIngredient;
-import dev.ftb.mods.ftbquests.quest.QuestShape;
-import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.util.Mth;
 
+import dev.ftb.mods.ftblibrary.client.gui.input.MouseButton;
+import dev.ftb.mods.ftblibrary.client.gui.layout.WidgetLayout;
+import dev.ftb.mods.ftblibrary.client.gui.theme.Theme;
+import dev.ftb.mods.ftblibrary.client.gui.widget.BaseScreen;
+import dev.ftb.mods.ftblibrary.client.gui.widget.Panel;
+import dev.ftb.mods.ftblibrary.client.gui.widget.SimpleTextButton;
+import dev.ftb.mods.ftblibrary.client.gui.widget.Widget;
+import dev.ftb.mods.ftblibrary.client.icon.IconHelper;
+import dev.ftb.mods.ftblibrary.client.util.PositionedIngredient;
+import dev.ftb.mods.ftblibrary.icon.Color4I;
+import dev.ftb.mods.ftblibrary.util.StringUtils;
+import dev.ftb.mods.ftblibrary.util.TooltipList;
+import dev.ftb.mods.ftbquests.quest.QuestShape;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
 
 public class RewardNotificationsScreen extends BaseScreen implements IRewardListenerScreen {
 	private final Object2IntOpenHashMap<RewardKey> rewards;
@@ -83,12 +90,12 @@ public class RewardNotificationsScreen extends BaseScreen implements IRewardList
 
 	@Override
 	public void drawBackground(GuiGraphics graphics, Theme theme, int x, int y, int w, int h) {
-		graphics.pose().pushPose();
-		graphics.pose().translate((int) (w / 2D), (int) (h / 5D), 0);
-		graphics.pose().scale(2, 2, 1);
+		graphics.pose().pushMatrix();
+		graphics.pose().translate((int) (w / 2D), (int) (h / 5D));
+		graphics.pose().scale(2, 2);
 		MutableComponent s = Component.translatable("ftbquests.rewards");
 		theme.drawString(graphics, s, -theme.getStringWidth(s) / 2, 0, Color4I.WHITE, 0);
-		graphics.pose().popPose();
+		graphics.pose().popMatrix();
 	}
 
 	@Override
@@ -121,24 +128,26 @@ public class RewardNotificationsScreen extends BaseScreen implements IRewardList
 
 		@Override
 		public void draw(GuiGraphics graphics, Theme theme, int x, int y, int w, int h) {
-			GuiHelper.setupDrawing();
-			QuestShape.get("rsquare").getOutline().draw(graphics, x, y, w, h);
-			key.getIcon().draw(graphics, x + 3, y + 3, 16, 16);
+			IconHelper.renderIcon(QuestShape.get("rsquare").getOutline(), graphics, x, y, w, h);
+			IconHelper.renderIcon(key.getIcon(), graphics, x + 3, y + 3, 16, 16);
 
 			int count = rewards.getInt(key);
 
 			if (count > 1) {
-				graphics.pose().pushPose();
-				graphics.pose().translate(0, 0, 600);
+				graphics.pose().pushMatrix();
+				graphics.pose().translate(0, 0);//, 600);
 				Component s = Component.literal(StringUtils.formatDouble(count, true)).withStyle(ChatFormatting.YELLOW);
 				theme.drawString(graphics, s, x + 22 - theme.getStringWidth(s), y + 12, Theme.SHADOW);
-				graphics.pose().popPose();
+				graphics.pose().popMatrix();
 			}
 		}
 
 		@Override
 		public Optional<PositionedIngredient> getIngredientUnderMouse() {
-			return PositionedIngredient.of(key.getIcon().getIngredient(), this, true);
+			Object ingredient = key.getIcon().getIngredient();
+			return ingredient == null ?
+					Optional.empty() :
+					PositionedIngredient.of(ingredient, this, true);
 		}
 	}
 }

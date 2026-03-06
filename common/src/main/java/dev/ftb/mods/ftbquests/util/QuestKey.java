@@ -1,13 +1,14 @@
 package dev.ftb.mods.ftbquests.util;
 
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.util.Util;
 import com.mojang.util.UndashedUuid;
+
 import dev.ftb.mods.ftbquests.quest.QuestObjectBase;
 import dev.ftb.mods.ftbquests.quest.reward.Reward;
-import net.minecraft.Util;
-import net.minecraft.network.FriendlyByteBuf;
-import org.jetbrains.annotations.NotNull;
 
 import java.util.UUID;
+import org.jetbrains.annotations.NotNull;
 
 public record QuestKey(UUID uuid, long id) implements Comparable<QuestKey> {
 
