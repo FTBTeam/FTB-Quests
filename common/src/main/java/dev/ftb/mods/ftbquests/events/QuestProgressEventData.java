@@ -26,6 +26,10 @@ public final class QuestProgressEventData<T extends QuestObject> {
 		notifiedPlayers = new ArrayList<>(notified);
 	}
 
+	public static <T extends QuestObject> QuestProgressEventData<T> forClient(Date date, TeamData teamData, T object) {
+		return new QuestProgressEventData<>(date, teamData, object, List.of(), List.of());
+	}
+
 	public void setStarted(long id) {
 		teamData.setStarted(id, time);
 	}
