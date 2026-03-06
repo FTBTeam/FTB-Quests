@@ -295,7 +295,7 @@ public class RewardTable extends QuestObjectBase {
 
 		for (WeightedReward wr : weightedRewards) {
 			buffer.writeLong(wr.getReward().getId());
-			buffer.writeVarInt(wr.getReward().getType().intId);
+			buffer.writeVarInt(wr.getReward().getType().internalId);
 			wr.getReward().writeNetData(buffer);
 			buffer.writeFloat(wr.getWeight());
 		}

@@ -262,8 +262,8 @@ public abstract class BaseQuestFile extends QuestObject implements QuestFile {
 		}
 
 		QuestObjectBase object = questObjectMap.get(id);
-        //noinspection ConstantValue
-        return object == null || object.invalid ? null : object;
+		//noinspection ConstantValue
+		return object == null || object.invalid ? null : object;
 	}
 
 	@Nullable
@@ -370,6 +370,7 @@ public abstract class BaseQuestFile extends QuestObject implements QuestFile {
 			}
 
 			chapter.getQuestLinks().forEach(link -> questObjectMap.put(link.id, link));
+			chapter.getImages().forEach(img -> questObjectMap.put(img.id, img));
 		});
 
 		refreshRewardTableRewardIDs();
@@ -385,28 +386,16 @@ public abstract class BaseQuestFile extends QuestObject implements QuestFile {
 				return new Chapter(id, this, getChapterGroup(extra.getLong("group").orElse(0L)));
 			}
 			case QUEST -> {
-				Chapter chapter = getChapter(parent);
-				if (chapter != null) {
-					return new Quest(id, chapter);
-				}
-				throw new IllegalArgumentException("Parent chapter not found!");
+				return new Quest(id, getChapterOrThrow(parent));
 			}
 			case QUEST_LINK -> {
-				Chapter chapter = getChapter(parent);
-				if (chapter != null) {
-					return new QuestLink(id, chapter, 0L);
-				}
-				throw new IllegalArgumentException("Parent chapter not found!");
-			}
+                return new QuestLink(id, getChapterOrThrow(parent), 0L);
+            }
 			case TASK -> {
 				Quest quest = getQuest(parent);
 				if (quest != null) {
-					Task task = TaskType.createTask(id, quest, extra.getString("type").orElse(""));
-					if (task != null) {
-						return task;
-					}
-					throw new IllegalArgumentException("Unknown task type!");
-				}
+                    return TaskType.createTask(id, quest, extra.getString("type").orElse(""));
+                }
 				throw new IllegalArgumentException("Parent quest not found!");
 			}
 			case REWARD -> {
@@ -415,7 +404,7 @@ public abstract class BaseQuestFile extends QuestObject implements QuestFile {
 					return RewardTable.createRewardForTable(id, rewardType, this);
 				} else {
 					Quest quest = getQuestObjectOrThrow(parent, Quest.class);
-                    return RewardType.createReward(id, quest, rewardType);
+					return RewardType.createReward(id, quest, rewardType);
 				}
 			}
 			case REWARD_TABLE -> {
@@ -423,6 +412,9 @@ public abstract class BaseQuestFile extends QuestObject implements QuestFile {
 			}
 			case CHAPTER_GROUP -> {
 				return new ChapterGroup(id, this);
+			}
+			case IMAGE -> {
+				return new ChapterImage(id, getChapterOrThrow(parent));
 			}
 			default -> throw new IllegalArgumentException("Unknown type: " + type);
 		}
@@ -518,33 +510,42 @@ public abstract class BaseQuestFile extends QuestObject implements QuestFile {
 					chapterNBT.putInt("order_index", ci);
 					chapter.writeData(chapterNBT, provider);
 
-					ListTag questList = new ListTag();
-					for (Quest quest : chapter.getQuests()) {
-						if (quest.isValid()) {
-							SNBTCompoundTag questNBT = new SNBTCompoundTag();
-							quest.writeData(questNBT, provider);
-							questNBT.putString("id", quest.getCodeString());
-							if (!quest.getTasks().isEmpty()) {
-								quest.writeTasks(questNBT, provider);
+					chapterNBT.put("quests", Util.make(new ListTag(), list -> {
+						for (Quest quest : chapter.getQuests()) {
+							if (quest.isValid()) {
+								list.add(Util.make(new SNBTCompoundTag(), questNBT -> {
+									quest.writeData(questNBT, provider);
+									questNBT.putString("id", quest.getCodeString());
+									if (!quest.getTasks().isEmpty()) {
+										quest.writeTasks(questNBT, provider);
+									}
+									if (!quest.getRewards().isEmpty()) {
+										quest.writeRewards(questNBT, provider);
+									}
+								}));
 							}
-							if (!quest.getRewards().isEmpty()) {
-								quest.writeRewards(questNBT, provider);
-							}
-							questList.add(questNBT);
 						}
-					}
-					chapterNBT.put("quests", questList);
+					}));
 
-					ListTag linkList = new ListTag();
-					for (QuestLink link : chapter.getQuestLinks()) {
-						if (link.getQuest().isPresent()) {
-							SNBTCompoundTag linkNBT = new SNBTCompoundTag();
-							link.writeData(linkNBT, provider);
-							linkNBT.putString("id", link.getCodeString());
-							linkList.add(linkNBT);
+					chapterNBT.put("quest_links", Util.make(new ListTag(), list -> {
+						for (QuestLink link : chapter.getQuestLinks()) {
+							if (link.getQuest().isPresent()) {
+								list.add(Util.make(new SNBTCompoundTag(), linkNBT -> {
+									link.writeData(linkNBT, provider);
+									linkNBT.putString("id", link.getCodeString());
+								}));
+							}
 						}
-					}
-					chapterNBT.put("quest_links", linkList);
+					}));
+
+					chapterNBT.put("images", Util.make(new ListTag(), list -> {
+						for (ChapterImage image : chapter.getImages()) {
+							list.add(Util.make(new SNBTCompoundTag(), imageNBT -> {
+								image.writeData(imageNBT, provider);
+								imageNBT.putString("id", image.getCodeString());
+							}));
+						}
+					}));
 
 					SNBT.tryWrite(folder.resolve("chapters/" + chapter.getFilename() + ".snbt"), chapterNBT);
 				}
@@ -576,7 +577,7 @@ public abstract class BaseQuestFile extends QuestObject implements QuestFile {
 			SNBT.tryWrite(folder.resolve("chapter_groups.snbt"), groupNBT);
 		} catch (IOException e) {
 			LOGGER.error("Failed to save quest file.", e);
-        } finally {
+		} finally {
 			SNBT.setShouldSortKeysOnWrite(prev);
 		}
 	}
@@ -593,21 +594,21 @@ public abstract class BaseQuestFile extends QuestObject implements QuestFile {
 		MutableInt questCounter = new MutableInt();
 
 		final Long2ObjectOpenHashMap<CompoundTag> dataCache = new Long2ObjectOpenHashMap<>();
-        try {
-            var fileNBT = SNBT.tryRead(folder.resolve("data.snbt"));
+		try {
+			var fileNBT = SNBT.tryRead(folder.resolve("data.snbt"));
 			fileVersion = fileNBT.getInt("version").orElseThrow();
 			questObjectMap.put(1, this);
 			readData(fileNBT, provider);
-        } catch (IOException e) {
-            LOGGER.error("Failed to load default data file.", e);
-        }
+		} catch (IOException e) {
+			LOGGER.error("Failed to load default data file.", e);
+		}
 
 		translationManager.loadFromNBT(this, folder.resolve("lang"));
 
 		Path groupsFile = folder.resolve("chapter_groups.snbt");
 		if (Files.exists(groupsFile)) {
-            try {
-                var chapterGroupsTag = SNBT.tryRead(groupsFile);
+			try {
+				var chapterGroupsTag = SNBT.tryRead(groupsFile);
 				ListTag groupListTag = chapterGroupsTag.getList("chapter_groups").orElse(new ListTag());
 
 				for (int i = 0; i < groupListTag.size(); i++) {
@@ -619,9 +620,9 @@ public abstract class BaseQuestFile extends QuestObject implements QuestFile {
 					});
 
 				}
-            } catch (IOException e) {
-                LOGGER.error("Failed to read chapter groups file.", e);
-            }
+			} catch (IOException e) {
+				LOGGER.error("Failed to read chapter groups file.", e);
+			}
 		}
 
 		Path chaptersFolder = folder.resolve("chapters");
@@ -632,8 +633,8 @@ public abstract class BaseQuestFile extends QuestObject implements QuestFile {
 		if (Files.exists(chaptersFolder)) {
 			try (Stream<Path> s = Files.list(chaptersFolder)) {
 				s.filter(path -> path.toString().endsWith(".snbt")).forEach(path -> {
-                    try {
-                        var chapterNBT = SNBT.tryRead(path);
+					try {
+						var chapterNBT = SNBT.tryRead(path);
 						Chapter chapter = new Chapter(readID(chapterNBT.get("id")),this,
 								getChapterGroup(getID(chapterNBT.get("group"))),
 								path.getFileName().toString().replace(".snbt", "")
@@ -657,7 +658,7 @@ public abstract class BaseQuestFile extends QuestObject implements QuestFile {
 									taskList.getCompound(j).ifPresent(taskNBT -> {
 										long taskId = readID(taskNBT.get("id"));
 										Task task = TaskType.createTask(taskId, quest, taskNBT.getString("type").orElseThrow());
-                                        questObjectMap.put(task.id, task);
+										questObjectMap.put(task.id, task);
 										dataCache.put(task.id, taskNBT);
 										quest.addTask(task);
 									});
@@ -689,10 +690,21 @@ public abstract class BaseQuestFile extends QuestObject implements QuestFile {
 							});
 						}
 
+						ListTag images = chapterNBT.getList("images").orElse(new ListTag());
+						for (int i = 0; i < images.size(); i++) {
+							images.getCompound(i).ifPresent(imgNBT -> {
+								// will generate a new id if the "id" field is missing, good for loading older data
+								ChapterImage image = new ChapterImage(readID(imgNBT.get("id")), chapter);
+								chapter.addImage(image);
+								questObjectMap.put(image.id, image);
+								dataCache.put(image.id, imgNBT);
+							});
+						}
+
 						chapterCounter.increment();
-                    } catch (IOException e) {
-                        LOGGER.error("Failed to load chapter {}", path, e);
-                    }
+					} catch (IOException e) {
+						LOGGER.error("Failed to load chapter {}", path, e);
+					}
 				});
 			} catch (IOException e) {
 				LOGGER.error("Failed to read chapters folder.", e);
@@ -704,17 +716,17 @@ public abstract class BaseQuestFile extends QuestObject implements QuestFile {
 		if (Files.exists(rewardTableFolder)) {
 			try (Stream<Path> s = Files.list(rewardTableFolder)) {
 				s.filter(path -> path.toString().endsWith(".snbt")).forEach(path -> {
-                    try {
-                        var tableNBT = SNBT.tryRead(path);
+					try {
+						var tableNBT = SNBT.tryRead(path);
 						String filename = path.getFileName().toString().replace(".snbt", "");
 						RewardTable table = new RewardTable(readID(tableNBT.get("id")), this, filename);
 						objectOrderMap.put(table.id, (int) tableNBT.getInt("order_index").orElse(0));
 						questObjectMap.put(table.id, table);
 						dataCache.put(table.id, tableNBT);
 						rewardTables.add(table);
-                    } catch (IOException e) {
-                        LOGGER.error("Failed to load reward table {}", path, e);
-                    }
+					} catch (IOException e) {
+						LOGGER.error("Failed to load reward table {}", path, e);
+					}
 				});
 			} catch (Exception ex) {
 				ex.printStackTrace();
@@ -847,7 +859,7 @@ public abstract class BaseQuestFile extends QuestObject implements QuestFile {
 		buffer.writeVarInt(RewardTypes.TYPES.size());
 		for (RewardType type : RewardTypes.TYPES.values()) {
 			buffer.writeIdentifier(type.getTypeId());
-			buffer.writeVarInt(type.intId);
+			buffer.writeVarInt(type.internalId);
 		}
 
 		writeNetData(buffer);
@@ -882,7 +894,7 @@ public abstract class BaseQuestFile extends QuestObject implements QuestFile {
 
 					buffer.writeVarInt(quest.getRewards().size());
 					quest.getRewards().forEach(reward -> {
-						buffer.writeVarInt(reward.getType().intId);
+						buffer.writeVarInt(reward.getType().internalId);
 						buffer.writeLong(reward.id);
 					});
 				}
@@ -890,6 +902,11 @@ public abstract class BaseQuestFile extends QuestObject implements QuestFile {
 				buffer.writeVarInt(chapter.getQuestLinks().size());
 				for (QuestLink questLink : chapter.getQuestLinks()) {
 					buffer.writeLong(questLink.id);
+				}
+
+				buffer.writeVarInt(chapter.getImages().size());
+				for (ChapterImage img : chapter.getImages()) {
+					buffer.writeLong(img.id);
 				}
 			}
 		}
@@ -915,6 +932,7 @@ public abstract class BaseQuestFile extends QuestObject implements QuestFile {
 				});
 
 				chapter.getQuestLinks().forEach(questLink -> questLink.writeNetData(buffer));
+				chapter.getImages().forEach(image -> image.writeNetData(buffer));
 			}
 		}
 
@@ -932,7 +950,7 @@ public abstract class BaseQuestFile extends QuestObject implements QuestFile {
 		}
 
 		for (RewardType type : RewardTypes.TYPES.values()) {
-			type.intId = 0;
+			type.internalId = 0;
 		}
 
 		int taskTypesSize = buffer.readVarInt();
@@ -952,8 +970,8 @@ public abstract class BaseQuestFile extends QuestObject implements QuestFile {
 			int id = buffer.readVarInt();
 
 			if (type != null) {
-				type.intId = id;
-				rewardTypeIds.put(type.intId, type);
+				type.internalId = id;
+				rewardTypeIds.put(type.internalId, type);
 			}
 		}
 
@@ -1005,6 +1023,12 @@ public abstract class BaseQuestFile extends QuestObject implements QuestFile {
 					QuestLink questLink = new QuestLink(buffer.readLong(), chapter, 0L);
 					chapter.addQuestLink(questLink);
 				}
+
+				int imageCount = buffer.readVarInt();
+				for (int j = 0; j < imageCount; j++) {
+					ChapterImage image = new ChapterImage(buffer.readLong(), chapter);
+					chapter.addImage(image);
+				}
 			}
 		}
 
@@ -1032,6 +1056,10 @@ public abstract class BaseQuestFile extends QuestObject implements QuestFile {
 
 				for (QuestLink questLink : chapter.getQuestLinks()) {
 					questLink.readNetData(buffer);
+				}
+
+				for (ChapterImage image : chapter.getImages()) {
+					image.readNetData(buffer);
 				}
 			}
 		}
@@ -1309,12 +1337,12 @@ public abstract class BaseQuestFile extends QuestObject implements QuestFile {
 		List<T> list = new ArrayList<>();
 
 		for (QuestObjectBase base : getAllObjects()) {
-            if (cls.isAssignableFrom(base.getClass())) {
+			if (cls.isAssignableFrom(base.getClass())) {
 				T casted = cls.cast(base);
 				if (filter.test(casted)) {
 					list.add(casted);
-                }
-            }
+				}
+			}
 		}
 
 		if (list.isEmpty()) {

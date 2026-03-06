@@ -42,10 +42,12 @@ import dev.ftb.mods.ftblibrary.client.gui.widget.Widget;
 import dev.ftb.mods.ftblibrary.client.util.ClientUtils;
 import dev.ftb.mods.ftblibrary.config.manager.ConfigManager;
 import dev.ftb.mods.ftblibrary.icon.Icon;
+import dev.ftb.mods.ftblibrary.icon.Icons;
 import dev.ftb.mods.ftbquests.FTBQuests;
 import dev.ftb.mods.ftbquests.api.FTBQuestsAPI;
 import dev.ftb.mods.ftbquests.block.entity.BaseBarrierBlockEntity;
 import dev.ftb.mods.ftbquests.block.entity.TaskScreenBlockEntity;
+import dev.ftb.mods.ftbquests.client.gui.CustomToast;
 import dev.ftb.mods.ftbquests.client.gui.RewardToast;
 import dev.ftb.mods.ftbquests.client.gui.ToastQuestObject;
 import dev.ftb.mods.ftbquests.item.CustomIconItem;
@@ -220,11 +222,27 @@ public class FTBQuestsClient {
 		Widget.setClipboardString(qo.getCodeString());
 	}
 
+	public static void copyToClipboard(String str) {
+		Widget.setClipboardString(str);
+	}
+
 	static void showCompletionToast(QuestObject qo) {
 		Minecraft.getInstance().getToastManager().addToast(new ToastQuestObject(qo));
 	}
 
 	static void showRewardToast(Component text, Icon<?> icon) {
 		Minecraft.getInstance().getToastManager().addToast(new RewardToast(text, icon));
+	}
+
+	public static void showErrorToast(Component text) {
+		showErrorToast(text, Component.empty());
+	}
+
+	public static void showErrorToast(Component text, Component desc) {
+		Minecraft.getInstance().getToastManager().addToast(new CustomToast(text, Icons.BARRIER, desc));
+	}
+
+	public static void showInfoToast(Component text, Component desc) {
+		Minecraft.getInstance().getToastManager().addToast(new CustomToast(text, Icons.INFO, desc));
 	}
 }

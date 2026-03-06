@@ -8,8 +8,6 @@ import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import com.mojang.datafixers.util.Pair;
 
-import dev.architectury.networking.NetworkManager;
-
 import dev.ftb.mods.ftblibrary.client.config.ConfigCallback;
 import dev.ftb.mods.ftblibrary.client.config.EditableConfigGroup;
 import dev.ftb.mods.ftblibrary.client.config.Tristate;
@@ -23,7 +21,6 @@ import dev.ftb.mods.ftblibrary.icon.Icon;
 import dev.ftb.mods.ftblibrary.math.Bits;
 import dev.ftb.mods.ftblibrary.snbt.SNBTCompoundTag;
 import dev.ftb.mods.ftbquests.FTBQuests;
-import dev.ftb.mods.ftbquests.client.FTBQuestsClient;
 import dev.ftb.mods.ftbquests.client.config.EditableQuestObject;
 import dev.ftb.mods.ftbquests.client.gui.MultilineTextEditorScreen;
 import dev.ftb.mods.ftbquests.client.gui.quests.QuestScreen;
@@ -31,7 +28,6 @@ import dev.ftb.mods.ftbquests.events.ObjectCompletedEvent;
 import dev.ftb.mods.ftbquests.events.ObjectStartedEvent;
 import dev.ftb.mods.ftbquests.events.QuestProgressEventData;
 import dev.ftb.mods.ftbquests.integration.RecipeModHelper;
-import dev.ftb.mods.ftbquests.net.MoveMovableMessage;
 import dev.ftb.mods.ftbquests.quest.reward.Reward;
 import dev.ftb.mods.ftbquests.quest.reward.RewardType;
 import dev.ftb.mods.ftbquests.quest.task.Task;
@@ -171,7 +167,9 @@ public final class Quest extends QuestObject implements Movable, Excludable {
 		return hideTextUntilComplete;
 	}
 
-	public boolean showInRecipeMod() {
+	// used by FTB XMod Compat
+	@SuppressWarnings("unused")
+    public boolean showInRecipeMod() {
 		return !disableJEI.get(getQuestFile().isDefaultQuestDisableJEI());
 	}
 
@@ -183,6 +181,13 @@ public final class Quest extends QuestObject implements Movable, Excludable {
 	public void setRawSubtitle(String rawSubtitle) {
 		setTranslatableValue(TranslationKey.QUEST_SUBTITLE, rawSubtitle);
 		cachedSubtitle = null;
+	}
+
+	@Override
+	public Quest setPosition(double x, double y) {
+		this.x = x;
+		this.y = y;
+		return this;
 	}
 
 	public void setX(double x) {
@@ -723,6 +728,11 @@ public final class Quest extends QuestObject implements Movable, Excludable {
 	}
 
 	@Override
+	public void setChapter(Chapter newChapter) {
+		this.chapter = newChapter;
+	}
+
+	@Override
 	public double getX() {
 		return x;
 	}
@@ -745,11 +755,6 @@ public final class Quest extends QuestObject implements Movable, Excludable {
 	@Override
 	public String getShape() {
 		return shape.isEmpty() ? chapter.getDefaultQuestShape() : shape;
-	}
-
-	@Override
-	public void initiateMoveClientSide(Chapter to, double x, double y) {
-		NetworkManager.sendToServer(new MoveMovableMessage(id, to.id, x, y));
 	}
 
 	@Override
@@ -904,26 +909,6 @@ public final class Quest extends QuestObject implements Movable, Excludable {
 			gui.refreshQuestPanel();
 			gui.refreshViewQuestPanel();
 		}
-	}
-
-	@Override
-	public void onMoved(double newX, double newY, long newChapterId) {
-		x = newX;
-		y = newY;
-
-		if (newChapterId != chapter.id) {
-			Chapter newChapter = getQuestFile().getChapter(newChapterId);
-			if (newChapter != null) {
-				chapter.removeQuest(this);
-				newChapter.addQuest(this);
-				chapter = newChapter;
-			}
-		}
-	}
-
-	@Override
-	public void copyToClipboard() {
-		FTBQuestsClient.copyToClipboard(this);
 	}
 
 	/**

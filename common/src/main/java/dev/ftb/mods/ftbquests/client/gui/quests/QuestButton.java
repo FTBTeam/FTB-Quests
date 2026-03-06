@@ -1,10 +1,10 @@
 package dev.ftb.mods.ftbquests.client.gui.quests;
 
 import net.minecraft.ChatFormatting;
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.ComponentUtils;
 import net.minecraft.world.entity.player.Player;
 import com.mojang.blaze3d.platform.InputConstants;
 
@@ -29,7 +29,6 @@ import dev.ftb.mods.ftblibrary.util.TooltipList;
 import dev.ftb.mods.ftbquests.client.FTBQuestsClient;
 import dev.ftb.mods.ftbquests.client.FTBQuestsClientConfig;
 import dev.ftb.mods.ftbquests.client.gui.ContextMenuBuilder;
-import dev.ftb.mods.ftbquests.client.gui.CustomToast;
 import dev.ftb.mods.ftbquests.net.CreateObjectMessage;
 import dev.ftb.mods.ftbquests.net.DeleteObjectMessage;
 import dev.ftb.mods.ftbquests.net.EditObjectMessage;
@@ -150,56 +149,11 @@ public class QuestButton extends Button implements QuestPositionableButton {
 
 			Collection<Quest> selected = questScreen.getSelectedQuests();
 			if (!selected.isEmpty()) {
-				if (!selected.contains(quest)) {
-					contextMenu.add(new ContextMenuItem(Component.translatable("ftbquests.gui.add_dependencies"),
-							ThemeProperties.ADD_ICON.get(),
-							b -> selected.forEach(q -> editDependency(quest, q, true)))
-					);
-					contextMenu.add(new ContextMenuItem(Component.translatable("ftbquests.gui.remove_dependencies"),
-							ThemeProperties.DELETE_ICON.get(),
-							b -> selected.forEach(q -> editDependency(quest, q, false)))
-					);
-					contextMenu.add(new ContextMenuItem(Component.translatable("ftbquests.gui.add_dependencies_self"),
-							ThemeProperties.ADD_ICON.get(),
-							b -> selected.forEach(q -> editDependency(q, quest, true)))
-					);
-					contextMenu.add(new ContextMenuItem(Component.translatable("ftbquests.gui.remove_dependencies_self"),
-							ThemeProperties.DELETE_ICON.get(),
-							b -> selected.forEach(q -> editDependency(q, quest, false)))
-					);
-				} else {
-					contextMenu.add(new ContextMenuItem(Component.translatable("gui.move"),
-							ThemeProperties.MOVE_UP_ICON.get(quest),
-							b -> questScreen.movingObjects = true));
-					contextMenu.add(new ContextMenuItem(Component.translatable("ftbquests.gui.add_reward_all"),
-							ThemeProperties.ADD_ICON.get(quest),
-							b -> openAddRewardContextMenu()));
-					contextMenu.add(new ContextMenuItem(Component.translatable("ftbquests.gui.clear_reward_all"),
-							ThemeProperties.CLOSE_ICON.get(quest),
-							b -> selected.forEach(q -> q.getRewards().forEach(r -> NetworkManager.sendToServer(new DeleteObjectMessage(r.id))))));
-					contextMenu.add(new ContextMenuItem(Component.translatable("ftbquests.gui.bulk_change_size"),
-							Icons.SETTINGS,
-							b -> bulkChangeSize()));
-					contextMenu.add(new ContextMenuItem(Component.translatable("selectServer.delete"),
-							ThemeProperties.DELETE_ICON.get(quest),
-							b -> questScreen.deleteSelectedObjects())
-							.setYesNoText(Component.translatable("delete_item", Component.translatable("ftbquests.quests").append(" [" + questScreen.selectedObjects.size() + "]"))));
-				}
-
-				contextMenu.add(ContextMenuItem.SEPARATOR);
-				contextMenu.add(new ContextMenuItem(Component.literal("Ctrl+A to select all quests").withStyle(ChatFormatting.GRAY), Icons.INFO, null).setCloseMenu(false));
-				contextMenu.add(new ContextMenuItem(Component.literal("Ctrl+D to deselect all quests").withStyle(ChatFormatting.GRAY), Icons.INFO, null).setCloseMenu(false));
-				contextMenu.add(new ContextMenuItem(Component.literal("Ctrl+Arrow Key to move selected quests").withStyle(ChatFormatting.GRAY), Icons.INFO, null).setCloseMenu(false));
-
+				addMultiselectionContextMenuItems(contextMenu, selected);
 				getGui().openContextMenu(contextMenu);
 			} else {
 				ContextMenuBuilder.create(theQuestObject(), questScreen)
 						.withDeletionFocus(moveAndDeleteFocus())
-						.insertAtTop(List.of(new TooltipContextMenuItem(Component.translatable("gui.move"),
-								ThemeProperties.MOVE_UP_ICON.get(quest),
-								b -> questScreen.initiateMoving(moveAndDeleteFocus()),
-								Component.translatable("ftbquests.gui.move_tooltip").withStyle(ChatFormatting.DARK_GRAY))
-						))
 						.openContextMenu(getGui());
 			}
 		} else if (button.isLeft()) {
@@ -212,8 +166,7 @@ public class QuestButton extends Button implements QuestPositionableButton {
 				quest.onEditButtonClicked(questScreen);
 			} else if (isKeyDown(InputConstants.KEY_RALT) && canEdit) {
 				quest.copyToClipboard();
-				Minecraft.getInstance().getToastManager().addToast(new CustomToast(Component.translatable("ftbquests.quest.copied"),
-						Icons.INFO, Component.literal(moveAndDeleteFocus().getTitle().getString())));
+				FTBQuestsClient.showInfoToast(Component.translatable("ftbquests.quest.copied"), Component.literal(moveAndDeleteFocus().getTitle().getString()));
 			} else if (!quest.getGuidePage().isEmpty() && quest.getTasks().isEmpty() && quest.getRewards().isEmpty() && quest.getDescription().isEmpty()) {
 				handleClick("guide", quest.getGuidePage());
 			} else if (canEdit || !quest.hideDetailsUntilStartable() || FTBQuestsClient.getClientPlayerData().canStartTasks(quest)) {
@@ -223,7 +176,6 @@ public class QuestButton extends Button implements QuestPositionableButton {
 			if (!questScreen.selectedObjects.contains(moveAndDeleteFocus())) {
 				questScreen.toggleSelected(moveAndDeleteFocus());
 			}
-
 			questScreen.movingObjects = true;
 		} else if (button.isRight()) {
 			questScreen.movingObjects = false;
@@ -234,6 +186,56 @@ public class QuestButton extends Button implements QuestPositionableButton {
 				questScreen.closeQuest();
 			}
 		}
+	}
+
+	private void addMultiselectionContextMenuItems(List<ContextMenuItem> contextMenu, Collection<Quest> selected) {
+		// when one or more quest objects are currently selected
+		if (!selected.contains(quest)) {
+			contextMenu.add(new ContextMenuItem(Component.translatable("ftbquests.gui.add_dependencies"),
+					ThemeProperties.ADD_ICON.get(),
+					b -> selected.forEach(q -> editDependency(quest, q, true)))
+			);
+			contextMenu.add(new ContextMenuItem(Component.translatable("ftbquests.gui.remove_dependencies"),
+					ThemeProperties.DELETE_ICON.get(),
+					b -> selected.forEach(q -> editDependency(quest, q, false)))
+			);
+			contextMenu.add(new ContextMenuItem(Component.translatable("ftbquests.gui.add_dependencies_self"),
+					ThemeProperties.ADD_ICON.get(),
+					b -> selected.forEach(q -> editDependency(q, quest, true)))
+			);
+			contextMenu.add(new ContextMenuItem(Component.translatable("ftbquests.gui.remove_dependencies_self"),
+					ThemeProperties.DELETE_ICON.get(),
+					b -> selected.forEach(q -> editDependency(q, quest, false)))
+			);
+		} else {
+			contextMenu.add(new ContextMenuItem(Component.translatable("gui.move"),
+					ThemeProperties.MOVE_UP_ICON.get(quest),
+					b -> questScreen.movingObjects = true));
+			contextMenu.add(new ContextMenuItem(Component.translatable("ftbquests.gui.add_reward_all"),
+					ThemeProperties.ADD_ICON.get(quest),
+					b -> openAddRewardContextMenu()));
+			contextMenu.add(new ContextMenuItem(Component.translatable("ftbquests.gui.clear_reward_all"),
+					ThemeProperties.CLOSE_ICON.get(quest),
+					b -> selected.forEach(q -> q.getRewards().forEach(r -> NetworkManager.sendToServer(new DeleteObjectMessage(r.id))))));
+			contextMenu.add(new ContextMenuItem(Component.translatable("ftbquests.gui.bulk_change_size"),
+					Icons.SETTINGS,
+					b -> bulkChangeSize()));
+			contextMenu.add(new ContextMenuItem(Component.translatable("selectServer.delete"),
+					ThemeProperties.DELETE_ICON.get(quest),
+					b -> questScreen.deleteSelectedObjects())
+					.setYesNoText(Component.translatable("delete_item", Component.translatable("ftbquests.quests").append(" [" + questScreen.selectedObjects.size() + "]"))));
+		}
+
+		contextMenu.add(ContextMenuItem.SEPARATOR);
+		contextMenu.add(new ContextMenuItem(Component.translatable(
+				"ftbquests.gui.info.ctrl_a_select_all").withStyle(ChatFormatting.GRAY),
+				Icons.INFO, null).setCloseMenu(false));
+		contextMenu.add(new ContextMenuItem(Component.translatable(
+				"ftbquests.gui.info.ctrl_d_deselect_all").withStyle(ChatFormatting.GRAY),
+				Icon.empty(), null).setCloseMenu(false));
+		contextMenu.add(new ContextMenuItem(Component.translatable(
+				"ftbquests.gui.info.ctrl_arrow_move").withStyle(ChatFormatting.GRAY),
+				Icon.empty(), null).setCloseMenu(false));
 	}
 
 	private void bulkChangeSize() {
@@ -314,47 +316,31 @@ public class QuestButton extends Button implements QuestPositionableButton {
 
 		TeamData teamData = questScreen.file.selfTeamData;
 
-		if (teamData != null) {
-			if (teamData.isStarted(quest) && !teamData.isCompleted(quest)) {
-				title = title.copy().append(Component.literal(" " + teamData.getRelativeProgress(quest) + "%").withStyle(ChatFormatting.DARK_GRAY));
-			}
-		}
+        if (teamData.isStarted(quest) && !teamData.isCompleted(quest)) {
+            title = title.copy().append(Component.literal(" " + teamData.getRelativeProgress(quest) + "%").withStyle(ChatFormatting.DARK_GRAY));
+        }
 
-		if (title.getString().contains("\n")) {
-			// I'm not proud of this kludge but getting titles with embedded newlines and possible styling
-			// to work well as tooltips is not fun
-			title.visit((style, txt) -> {
-				for (String s : txt.split("\n")) {
-					if (!s.isEmpty()) list.add(Component.literal(s).withStyle(style));
-				}
-				return Optional.empty();
-			}, title.getStyle());
-		} else {
-			list.add(title);
-		}
+		TextUtils.processComponentWithPossibleNewlines(title, list::add);
 
-		Component description = quest.getSubtitle();
-
-		if (!TextUtils.isComponentEmpty(description)) {
-			list.add(description.copy().withStyle(ChatFormatting.GRAY));
+		Component subtitle = quest.getSubtitle();
+		if (!TextUtils.isComponentEmpty(subtitle)) {
+			list.add(subtitle.copy().withStyle(ChatFormatting.GRAY));
 		}
 
 		if (quest.isOptional()) {
-			list.add(Component.literal("[").withStyle(ChatFormatting.GRAY).append(Component.translatable("ftbquests.quest.misc.optional")).append("]"));
+			list.add(ComponentUtils.wrapInSquareBrackets(Component.translatable("ftbquests.quest.misc.optional")).withStyle(ChatFormatting.GRAY));
 		}
 		if (quest.canBeRepeated()) {
-			list.add(Component.translatable("ftbquests.quest.misc.can_repeat").withStyle(ChatFormatting.GRAY));
-			if (teamData != null) {
-				int completionCount = teamData.getCompletionCount(quest);
-				if (completionCount > 0) {
-					String key = completionCount > 1 ? "ftbquests.quest.misc.completion_count.plural" : "ftbquests.quest.misc.completion_count";
-					list.add(Component.translatable(key, completionCount).withStyle(ChatFormatting.GRAY));
-				}
-			}
-		}
-		if (teamData != null && !teamData.canStartTasks(quest)) {
+			list.add(ComponentUtils.wrapInSquareBrackets(Component.translatable("ftbquests.quest.misc.can_repeat")).withStyle(ChatFormatting.GRAY));
+            int completionCount = teamData.getCompletionCount(quest);
+            if (completionCount > 0) {
+                String key = completionCount > 1 ? "ftbquests.quest.misc.completion_count.plural" : "ftbquests.quest.misc.completion_count";
+                list.add(Component.translatable(key, completionCount).withStyle(ChatFormatting.GRAY));
+            }
+        }
+		if (!teamData.canStartTasks(quest)) {
 			Component reason = teamData.getCannotStartReason(this.quest);
-			list.add(Component.literal("[").withStyle(ChatFormatting.DARK_GRAY).append(reason).append("]"));
+			list.add(ComponentUtils.wrapInSquareBrackets(reason).withStyle(ChatFormatting.DARK_GRAY));
 		}
 		if (quest.isExclusiveQuest()) {
 			list.add(Component.translatable("ftbquests.quest.misc.exclusive").withStyle(ChatFormatting.GOLD));

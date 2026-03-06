@@ -2,7 +2,6 @@ package dev.ftb.mods.ftbquests.quest;
 
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.ListTag;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
@@ -13,12 +12,10 @@ import dev.ftb.mods.ftblibrary.client.config.editable.EditableString;
 import dev.ftb.mods.ftblibrary.icon.AnimatedIcon;
 import dev.ftb.mods.ftblibrary.icon.Icon;
 import dev.ftb.mods.ftblibrary.math.Bits;
-import dev.ftb.mods.ftblibrary.snbt.SNBTCompoundTag;
 import dev.ftb.mods.ftbquests.events.ObjectCompletedEvent;
 import dev.ftb.mods.ftbquests.events.ObjectStartedEvent;
 import dev.ftb.mods.ftbquests.events.QuestProgressEventData;
 import dev.ftb.mods.ftbquests.quest.translation.TranslationKey;
-import dev.ftb.mods.ftbquests.util.NetUtils;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -149,43 +146,52 @@ public final class Chapter extends QuestObject {
 		quests.remove(quest);
 	}
 
+	public void addImage(ChapterImage image) {
+		images.add(image);
+	}
+
+	public void removeImage(ChapterImage image) {
+		images.remove(image);
+	}
+
+	public void addQuestLink(QuestLink link) {
+		questLinks.add(link);
+	}
+
+	public void removeQuestLink(QuestLink link) {
+		questLinks.remove(link);
+	}
+
+	public void addChildObject(Movable child) {
+        switch (child) {
+            case Quest q -> addQuest(q);
+            case QuestLink ql -> addQuestLink(ql);
+            case ChapterImage img -> addImage(img);
+            default -> throw new IllegalArgumentException("expecting quest, quest link or chapter image!");
+        }
+	}
+
+	public void removeChildObject(Movable child) {
+		switch (child) {
+			case Quest q -> removeQuest(q);
+			case QuestLink ql -> removeQuestLink(ql);
+			case ChapterImage img -> removeImage(img);
+			default -> throw new IllegalArgumentException("expecting quest, quest link or chapter image!");
+		}
+	}
+
 	@Override
 	public void writeData(CompoundTag nbt, HolderLookup.Provider provider) {
-		nbt.putString("filename", filename);
 		super.writeData(nbt, provider);
 
-		if (alwaysInvisible) {
-			nbt.putBoolean("always_invisible", true);
-		}
-
+		nbt.putString("filename", filename);
+		if (alwaysInvisible) nbt.putBoolean("always_invisible", true);
 		nbt.putString("default_quest_shape", defaultQuestShape);
-		if (defaultQuestSize != 1D) {
-			nbt.putDouble("default_quest_size", defaultQuestSize);
-		}
+		if (defaultQuestSize != 1D) nbt.putDouble("default_quest_size", defaultQuestSize);
 		nbt.putBoolean("default_hide_dependency_lines", defaultHideDependencyLines);
-
-		if (!images.isEmpty()) {
-			ListTag list = new ListTag();
-
-			for (ChapterImage image : images) {
-				SNBTCompoundTag nbt1 = new SNBTCompoundTag();
-				image.writeData(nbt1);
-				list.add(nbt1);
-			}
-
-			nbt.put("images", list);
-		}
-
-		if (defaultMinWidth > 0) {
-			nbt.putInt("default_min_width", defaultMinWidth);
-		}
-
-		if (progressionMode != ProgressionMode.DEFAULT) {
-			nbt.putString("progression_mode", progressionMode.getId());
-		}
-
+		if (defaultMinWidth > 0) nbt.putInt("default_min_width", defaultMinWidth);
+		if (progressionMode != ProgressionMode.DEFAULT) nbt.putString("progression_mode", progressionMode.getId());
 		consumeItems.write(nbt, "consume_items");
-
 		if (hideQuestDetailsUntilStartable) nbt.putBoolean("hide_quest_details_until_startable", true);
 		if (hideQuestUntilDepsVisible) nbt.putBoolean("hide_quest_until_deps_visible", true);
 		if (hideQuestUntilDepsComplete) nbt.putBoolean("hide_quest_until_deps_complete", true);
@@ -198,32 +204,13 @@ public final class Chapter extends QuestObject {
 
 	@Override
 	public void readData(CompoundTag nbt, HolderLookup.Provider provider) {
-		filename = nbt.getString("filename").orElseThrow();
 		super.readData(nbt, provider);
 
+		filename = nbt.getString("filename").orElseThrow();
 		alwaysInvisible = nbt.getBooleanOr("always_invisible", false);
 		defaultQuestShape = nbt.getString("default_quest_shape").orElseThrow();
-
-		if (defaultQuestShape.equals("default")) {
-			defaultQuestShape = "";
-		}
-
 		defaultQuestSize = nbt.getDoubleOr("default_quest_size", 1D);
-
 		defaultHideDependencyLines = nbt.getBooleanOr("default_hide_dependency_lines", false);
-
-		ListTag imgs = nbt.getList("images").orElse(new ListTag());
-
-		images.clear();
-
-		for (int i = 0; i < imgs.size(); i++) {
-			imgs.getCompound(i).ifPresent(imageComp -> {
-				ChapterImage image = new ChapterImage(this);
-				image.readData(imageComp);
-				images.add(image);
-			});
-		}
-
 		defaultMinWidth = nbt.getIntOr("default_min_width", 0);
 		progressionMode = nbt.getString("progression_mode").map(ProgressionMode.NAME_MAP::get).orElse(ProgressionMode.DEFAULT);
 		consumeItems = Tristate.read(nbt, "consume_items");
@@ -234,6 +221,10 @@ public final class Chapter extends QuestObject {
 		defaultRepeatable = nbt.getBooleanOr("default_repeatable_quest", false);
 		requireSequentialTasks = nbt.getBooleanOr("require_sequential_tasks", false);
 		autoFocusId = nbt.getStringOr("autofocus_id", "");
+
+		if (defaultQuestShape.equals("default")) {
+			defaultQuestShape = "";
+		}
 	}
 
 	@Override
@@ -242,7 +233,6 @@ public final class Chapter extends QuestObject {
 		buffer.writeUtf(filename, Short.MAX_VALUE);
 		buffer.writeUtf(defaultQuestShape, Short.MAX_VALUE);
 		buffer.writeDouble(defaultQuestSize);
-		buffer.writeCollection(images, (buf, img) -> img.writeNetData(buf));
 		buffer.writeInt(defaultMinWidth);
 		ProgressionMode.NAME_MAP.write(buffer, progressionMode);
 
@@ -274,7 +264,6 @@ public final class Chapter extends QuestObject {
 		filename = buffer.readUtf(Short.MAX_VALUE);
 		defaultQuestShape = buffer.readUtf(Short.MAX_VALUE);
 		defaultQuestSize = buffer.readDouble();
-		NetUtils.read(buffer, images, buf -> ChapterImage.fromNet(this, buf));
 		defaultMinWidth = buffer.readInt();
 		progressionMode = ProgressionMode.NAME_MAP.read(buffer);
 
@@ -521,22 +510,6 @@ public final class Chapter extends QuestObject {
 
 	public boolean isHideQuestUntilDepsVisible() {
 		return hideQuestUntilDepsVisible;
-	}
-
-	public void addImage(ChapterImage image) {
-		images.add(image);
-	}
-
-	public void removeImage(ChapterImage image) {
-		images.remove(image);
-	}
-
-	public void addQuestLink(QuestLink link) {
-		questLinks.add(link);
-	}
-
-	public void removeQuestLink(QuestLink link) {
-		questLinks.remove(link);
 	}
 
 	public List<String> getRawSubtitle() {

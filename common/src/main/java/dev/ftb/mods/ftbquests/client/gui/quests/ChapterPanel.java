@@ -438,8 +438,7 @@ public class ChapterPanel extends Panel {
 						chapter.onEditButtonClicked(chapterPanel.questScreen);
 					} else if (isKeyDown(InputConstants.KEY_RALT)) {
 						FTBQuestsClient.copyToClipboard(chapter);
-						Minecraft.getInstance().getToastManager().addToast(new CustomToast(Component.translatable("ftbquests.quest.copied"),
-								Icons.INFO, Component.literal(chapter.getTitle().getString())));
+						FTBQuestsClient.showInfoToast(Component.translatable("ftbquests.quest.copied"), Component.literal(chapter.getTitle().getString()));
 					} else if (chapterPanel.questScreen.selectedChapter != chapter) {
 						chapterPanel.questScreen.open(chapter, false);
 						chapter.getAutofocus().ifPresent(chapterPanel.questScreen::scrollTo);

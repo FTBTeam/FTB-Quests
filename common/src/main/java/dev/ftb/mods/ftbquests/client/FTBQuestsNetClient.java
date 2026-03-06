@@ -170,7 +170,7 @@ public class FTBQuestsNetClient {
 	}
 
 	public static void moveQuest(long id, long chapter, double x, double y) {
-		if (ClientQuestFile.getInstance().get(id) instanceof Movable movable) {
+		if (ClientQuestFile.getInstance().getBase(id) instanceof Movable movable) {
 			movable.onMoved(x, y, chapter);
 			QuestScreen gui = ClientUtils.getCurrentGuiAs(QuestScreen.class);
 			if (gui != null) {

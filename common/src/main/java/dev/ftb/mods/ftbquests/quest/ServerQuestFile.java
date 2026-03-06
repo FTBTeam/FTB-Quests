@@ -24,6 +24,7 @@ import dev.ftb.mods.ftbquests.net.SyncQuestsMessage;
 import dev.ftb.mods.ftbquests.net.SyncTeamDataMessage;
 import dev.ftb.mods.ftbquests.net.TeamDataChangedMessage;
 import dev.ftb.mods.ftbquests.net.TeamDataUpdate;
+import dev.ftb.mods.ftbquests.net.UpdateTeamDataMessage;
 import dev.ftb.mods.ftbquests.quest.reward.RewardType;
 import dev.ftb.mods.ftbquests.quest.reward.RewardTypes;
 import dev.ftb.mods.ftbquests.quest.task.Task;
@@ -104,8 +105,8 @@ public class ServerQuestFile extends BaseQuestFile {
 		int rewardTypeId = 0;
 
 		for (RewardType type : RewardTypes.TYPES.values()) {
-			type.intId = ++rewardTypeId;
-			rewardTypeIds.put(type.intId, type);
+			type.internalId = ++rewardTypeId;
+			rewardTypeIds.put(type.internalId, type);
 		}
 	}
 
@@ -176,15 +177,15 @@ public class ServerQuestFile extends BaseQuestFile {
 			object.getPath().ifPresent(path -> {
                 try {
                     Files.delete(getFolder().resolve(path));
-					getTranslationManager().removeAllTranslations(object);
-					object.deleteChildren();
-					object.deleteSelf();
-					refreshIDMap();
-					markDirty();
                 } catch (IOException e) {
 					FTBQuests.LOGGER.error("can't delete {}: {}", getFolder().resolve(path), e.getMessage());
                 }
 			});
+			getTranslationManager().removeAllTranslations(object);
+			object.deleteChildren();
+			object.deleteSelf();
+			refreshIDMap();
+			markDirty();
 		}
 
 		NetworkHelper.sendToAll(server, new DeleteObjectResponseMessage(id));
@@ -229,6 +230,11 @@ public class ServerQuestFile extends BaseQuestFile {
 	public void playerLoggedIn(PlayerLoggedInAfterTeamEvent event) {
 		ServerPlayer player = event.getPlayer();
 		TeamData data = getOrCreateTeamData(event.getTeam());
+
+		if (data.getName().isEmpty()) {
+			data.setName(player.getPlainTextName());
+			NetworkManager.sendToPlayer(player, new UpdateTeamDataMessage(data.getTeamId(), data.getName()));
+		}
 
 		// Sync the quest book data
 		// - client will respond to this with a RequestTeamData message

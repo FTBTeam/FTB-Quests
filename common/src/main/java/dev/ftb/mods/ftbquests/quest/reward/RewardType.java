@@ -24,7 +24,7 @@ public final class RewardType {
 	@Nullable
 	private GuiProvider guiProvider;
 	private boolean excludeFromListRewards = false;
-	public int intId;
+	public int internalId;
 
 	public RewardType(Identifier typeId, Provider provider, Supplier<Icon<?>> iconSupplier, boolean availableByDefault) {
 		this.typeId = typeId;

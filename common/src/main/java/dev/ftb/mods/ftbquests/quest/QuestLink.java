@@ -5,14 +5,10 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 
-import dev.architectury.networking.NetworkManager;
-
 import dev.ftb.mods.ftblibrary.client.config.EditableConfigGroup;
 import dev.ftb.mods.ftblibrary.client.util.ClientUtils;
 import dev.ftb.mods.ftblibrary.icon.Icon;
-import dev.ftb.mods.ftbquests.client.FTBQuestsClient;
 import dev.ftb.mods.ftbquests.client.gui.quests.QuestScreen;
-import dev.ftb.mods.ftbquests.net.MoveMovableMessage;
 
 import java.util.Optional;
 import org.jspecify.annotations.Nullable;
@@ -162,9 +158,11 @@ public class QuestLink extends QuestObject implements Movable, Excludable {
         shape = buffer.readUtf(64);
     }
 
-    public void setPosition(double qx, double qy) {
+    @Override
+    public QuestLink setPosition(double qx, double qy) {
         x = qx;
         y = qy;
+        return this;
     }
 
     @Override
@@ -175,6 +173,11 @@ public class QuestLink extends QuestObject implements Movable, Excludable {
     @Override
     public Chapter getChapter() {
         return chapter;
+    }
+
+    @Override
+    public void setChapter(Chapter newChapter) {
+        this.chapter = newChapter;
     }
 
     @Override
@@ -200,33 +203,6 @@ public class QuestLink extends QuestObject implements Movable, Excludable {
     @Override
     public String getShape() {
         return shape.isEmpty() ? chapter.getDefaultQuestShape() : shape;
-    }
-
-    @Override
-    public void initiateMoveClientSide(Chapter to, double x, double y) {
-        NetworkManager.sendToServer(new MoveMovableMessage(id, to.id, x, y));
-    }
-
-    @Override
-    public void onMoved(double newX, double newY, long newChapterId) {
-        this.x = newX;
-        this.y = newY;
-
-        if (newChapterId != chapter.id) {
-            BaseQuestFile f = getQuestFile();
-            Chapter newChapter = f.getChapter(newChapterId);
-
-            if (newChapter != null) {
-                chapter.removeQuestLink(this);
-                newChapter.addQuestLink(this);
-                chapter = newChapter;
-            }
-        }
-    }
-
-    @Override
-    public void copyToClipboard() {
-        FTBQuestsClient.copyToClipboard(this);
     }
 
     public boolean linksTo(Quest quest) {

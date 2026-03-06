@@ -12,6 +12,8 @@ import dev.ftb.mods.ftblibrary.client.util.ClientTextComponentUtils;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
+import java.util.function.Consumer;
 import com.google.gson.JsonParseException;
 import com.google.gson.JsonParser;
 import org.apache.commons.lang3.text.translate.UnicodeUnescaper;
@@ -53,5 +55,21 @@ public class TextUtils {
 
     public static boolean isComponentEmpty(Component c) {
         return c.getSiblings().isEmpty() && c.getContents() == PlainTextContents.EMPTY;
+    }
+
+    public static void processComponentWithPossibleNewlines(Component c, Consumer<Component> consumer) {
+        String str = c.getString();
+        if (str.contains("\n")) {
+            // I'm not proud of this kludge but getting titles with embedded newlines and possible styling
+            // to work well as tooltips is not fun
+            c.visit((style, txt) -> {
+                for (String s : txt.split("\n")) {
+                    if (!s.isEmpty()) consumer.accept(Component.literal(s).withStyle(style));
+                }
+                return Optional.empty();
+            }, c.getStyle());
+        } else if (!str.isEmpty()) {
+            consumer.accept(c);
+        }
     }
 }

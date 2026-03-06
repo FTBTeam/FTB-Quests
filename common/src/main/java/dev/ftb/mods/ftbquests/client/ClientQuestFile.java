@@ -133,10 +133,10 @@ public class ClientQuestFile extends BaseQuestFile {
 	private QuestScreen openQuestGui() {
 		if (exists() && selfTeamData.isValid()) {
 			if (isDisableGui() && !canEdit()) {
-				Minecraft.getInstance().getToastManager().addToast(new CustomToast(Component.translatable("item.ftbquests.book.disabled"), Icons.BARRIER, Component.empty()));
+				FTBQuestsClient.showErrorToast(Component.translatable("item.ftbquests.book.disabled"));
 			} else if (selfTeamData.isLocked()) {
 				Component msg = lockMessage.isEmpty() ? Component.literal("Quests locked!") : TextUtils.parseRawText(lockMessage, holderLookup());
-				Minecraft.getInstance().getToastManager().addToast(new CustomToast(msg, Icons.BARRIER, Component.empty()));
+				FTBQuestsClient.showErrorToast(msg);
 			} else {
 				if (canEdit()) {
 					StructureTask.maybeRequestStructureSync();
