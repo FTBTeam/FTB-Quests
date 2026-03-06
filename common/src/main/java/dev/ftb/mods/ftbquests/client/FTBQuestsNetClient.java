@@ -19,10 +19,15 @@ import dev.ftb.mods.ftbquests.client.gui.QuestObjectUpdateListener;
 import dev.ftb.mods.ftbquests.client.gui.RewardKey;
 import dev.ftb.mods.ftbquests.client.gui.RewardToast;
 import dev.ftb.mods.ftbquests.client.gui.quests.QuestScreen;
+import dev.ftb.mods.ftbquests.events.ObjectCompletedEvent;
+import dev.ftb.mods.ftbquests.events.ObjectStartedEvent;
+import dev.ftb.mods.ftbquests.events.QuestProgressEventData;
 import dev.ftb.mods.ftbquests.net.TeamDataUpdate;
+import dev.ftb.mods.ftbquests.quest.BaseQuestFile;
 import dev.ftb.mods.ftbquests.quest.Chapter;
 import dev.ftb.mods.ftbquests.quest.ChapterGroup;
 import dev.ftb.mods.ftbquests.quest.Movable;
+import dev.ftb.mods.ftbquests.quest.Quest;
 import dev.ftb.mods.ftbquests.quest.QuestObject;
 import dev.ftb.mods.ftbquests.quest.QuestObjectBase;
 import dev.ftb.mods.ftbquests.quest.QuestObjectType;
@@ -235,6 +240,8 @@ public class FTBQuestsNetClient {
 		teamData.setStarted(id, time);
 
 		refreshQuestScreenIfOpen();
+
+		fireStartedEvent(teamData, id, time);
 	}
 
 	public static void objectCompleted(UUID teamId, long id, @Nullable Date time) {
@@ -246,6 +253,52 @@ public class FTBQuestsNetClient {
 		QuestObject qo = ClientQuestFile.getInstance().get(id);
 		if (qo != null) {
 			FTBQuests.getRecipeModHelper().refreshRecipes(qo);
+		}
+
+		fireCompletedEvent(teamData, id, time);
+	}
+
+	private static void fireStartedEvent(TeamData teamData, long id, @Nullable Date time) {
+		switch (ClientQuestFile.getInstance().get(id)) {
+			case Quest q -> {
+				QuestProgressEventData<Quest> eventData = QuestProgressEventData.forClient(time, teamData, q);
+				ObjectStartedEvent.QUEST.invoker().act(new ObjectStartedEvent.QuestEvent(eventData));
+			}
+			case Chapter c -> {
+				QuestProgressEventData<Chapter> eventData = QuestProgressEventData.forClient(time, teamData, c);
+				ObjectStartedEvent.CHAPTER.invoker().act(new ObjectStartedEvent.ChapterEvent(eventData));
+			}
+			case Task t -> {
+				QuestProgressEventData<Task> eventData = QuestProgressEventData.forClient(time, teamData, t);
+				ObjectStartedEvent.TASK.invoker().act(new ObjectStartedEvent.TaskEvent(eventData));
+			}
+			case BaseQuestFile f -> {
+				QuestProgressEventData<BaseQuestFile> eventData = QuestProgressEventData.forClient(time, teamData, f);
+				ObjectStartedEvent.FILE.invoker().act(new ObjectStartedEvent.FileEvent(eventData));
+			}
+			case null, default -> {}
+		}
+	}
+
+	private static void fireCompletedEvent(TeamData teamData, long id, @Nullable Date time) {
+		switch (ClientQuestFile.getInstance().get(id)) {
+			case Quest q -> {
+				QuestProgressEventData<Quest> eventData = QuestProgressEventData.forClient(time, teamData, q);
+				ObjectCompletedEvent.QUEST.invoker().act(new ObjectCompletedEvent.QuestEvent(eventData));
+			}
+			case Chapter c -> {
+				QuestProgressEventData<Chapter> eventData = QuestProgressEventData.forClient(time, teamData, c);
+				ObjectCompletedEvent.CHAPTER.invoker().act(new ObjectCompletedEvent.ChapterEvent(eventData));
+			}
+			case Task t -> {
+				QuestProgressEventData<Task> eventData = QuestProgressEventData.forClient(time, teamData, t);
+				ObjectCompletedEvent.TASK.invoker().act(new ObjectCompletedEvent.TaskEvent(eventData));
+			}
+			case BaseQuestFile f -> {
+				QuestProgressEventData<BaseQuestFile> eventData = QuestProgressEventData.forClient(time, teamData, f);
+				ObjectCompletedEvent.FILE.invoker().act(new ObjectCompletedEvent.FileEvent(eventData));
+			}
+			case null, default -> {}
 		}
 	}
 
