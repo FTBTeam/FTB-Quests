@@ -34,6 +34,7 @@ import dev.ftb.mods.ftbquests.quest.reward.Reward;
 import dev.ftb.mods.ftbquests.quest.reward.RewardType;
 import dev.ftb.mods.ftbquests.quest.reward.RewardTypes;
 import dev.ftb.mods.ftbquests.quest.reward.StageReward;
+import dev.ftb.mods.ftbquests.quest.reward.XPLevelsReward;
 import dev.ftb.mods.ftbquests.quest.reward.XPReward;
 import dev.ftb.mods.ftbquests.quest.task.*;
 import dev.ftb.mods.ftbquests.quest.translation.TranslationKey;
@@ -192,7 +193,7 @@ public class GuiProviders {
         });
 
         simpleRewardProvider(RewardTypes.XP, XPReward::new, Util.make(new EditableInt(1, Integer.MAX_VALUE), c -> c.setValue(100)));
-        simpleRewardProvider(RewardTypes.XP_LEVELS, XPReward::new, Util.make(new EditableInt(1, Integer.MAX_VALUE), c -> c.setValue(5)));
+        simpleRewardProvider(RewardTypes.XP_LEVELS, XPLevelsReward::new, Util.make(new EditableInt(1, Integer.MAX_VALUE), c -> c.setValue(5)));
         simpleRewardProvider(RewardTypes.STAGE, StageReward::new, new EditableString());
         if (CurrencyHelper.getInstance().getProvider().isValidProvider()) {
             simpleRewardProvider(RewardTypes.CURRENCY, CurrencyReward::new, Util.make(new EditableInt(1, Integer.MAX_VALUE), c -> c.setValue(1)));
