@@ -13,6 +13,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   * `event.getData().getQuestFile().isServerSide()` can be used to easily determine which side you're on
   * Events fired client-side always have empty lists for `event.getOnlineMembers()` and `event.getNotifiedPlayers()`
 
+###
+* Fixed the XP Levels reward type (exp amount always getting set to 0)
+* The `/ftbquests open_book` command now works for chapter ID's again, as it used to
+
 ## [2101.1.22]
 
 ### Added
