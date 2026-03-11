@@ -226,7 +226,10 @@ public class ItemTask extends Task implements Predicate<ItemStack> {
 		List<ItemStack> validItems = getValidDisplayItems();
 
 		if (!consumesResources() && validItems.size() == 1 && FTBQuests.getRecipeModHelper().isRecipeModAvailable()) {
-			FTBQuests.getRecipeModHelper().showRecipes(validItems.get(0));
+			ItemStack stack = validItems.getFirst();
+			if (!stack.isEmpty()) {
+				FTBQuests.getRecipeModHelper().showRecipes(stack);
+			}
 		} else if (validItems.isEmpty()) {
 			Minecraft.getInstance().getToasts().addToast(new CustomToast(Component.literal("No valid items!"), ItemIcon.getItemIcon(ModItems.MISSING_ITEM.get()), Component.literal("Report this bug to modpack author!")));
 		} else {
