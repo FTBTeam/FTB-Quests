@@ -186,7 +186,7 @@ public class GuiProviders {
         });
 
         simpleRewardProvider(RewardTypes.XP, XPReward::new, Util.make(new IntConfig(1, Integer.MAX_VALUE), c -> c.setValue(100)));
-        simpleRewardProvider(RewardTypes.XP_LEVELS, XPReward::new, Util.make(new IntConfig(1, Integer.MAX_VALUE), c -> c.setValue(5)));
+        simpleRewardProvider(RewardTypes.XP_LEVELS, XPLevelsReward::new, Util.make(new IntConfig(1, Integer.MAX_VALUE), c -> c.setValue(5)));
         simpleRewardProvider(RewardTypes.STAGE, StageReward::new, new StringConfig());
         if (CurrencyHelper.getInstance().getProvider().isValidProvider()) {
             simpleRewardProvider(RewardTypes.CURRENCY, CurrencyReward::new, Util.make(new IntConfig(1, Integer.MAX_VALUE), c -> c.setValue(1)));

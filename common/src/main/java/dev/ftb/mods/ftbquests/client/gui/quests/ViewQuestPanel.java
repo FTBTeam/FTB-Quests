@@ -198,7 +198,7 @@ public class ViewQuestPanel extends ModalPanel {
 
 		for (Reward reward : quest.getRewards()) {
 			if (canEdit || !questScreen.file.selfTeamData.isRewardBlocked(reward) && reward.getAutoClaimType() != RewardAutoClaim.INVISIBLE) {
-				RewardButton b = new RewardButton(panelRewards, reward);
+				RewardButton b = new RewardButton(panelRewards, reward, questScreen);
 				panelRewards.add(b);
 				b.setSize(bsize, bsize);
 			}

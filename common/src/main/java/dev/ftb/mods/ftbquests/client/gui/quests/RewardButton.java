@@ -30,11 +30,11 @@ import java.util.Optional;
 
 public class RewardButton extends Button {
 	private final QuestScreen questScreen;
-	Reward reward;
+	final Reward reward;
 
-	public RewardButton(Panel panel, Reward reward) {
+	public RewardButton(Panel panel, Reward reward, QuestScreen questScreen) {
 		super(panel, reward.getTitle(), reward.getIcon());
-		questScreen = (QuestScreen) panel.getGui();
+		this.questScreen = questScreen;
 		this.reward = reward;
 		setSize(18, 18);
 	}
@@ -142,8 +142,6 @@ public class RewardButton extends Button {
 
 		if (questScreen.file.selfTeamData == null) {
 			return;
-		} else if (questScreen.getContextMenu().isEmpty()) {
-			//return;
 		}
 
 		PoseStack poseStack = graphics.pose();
@@ -154,10 +152,10 @@ public class RewardButton extends Button {
 		boolean completed = false;
 
 		if (questScreen.file.selfTeamData.getClaimType(Minecraft.getInstance().player.getUUID(), reward).isClaimed()) {
-			ThemeProperties.CHECK_ICON.get().draw(graphics, x + w - 9, y + 1, 8, 8);
+			ThemeProperties.CHECK_ICON.get().withColor(Color4I.WHITE.withAlpha(192)).draw(graphics, x + w - 9, y + 1, 8, 8);
 			completed = true;
 		} else if (questScreen.file.selfTeamData.isCompleted(reward.getQuest())) {
-			ThemeProperties.ALERT_ICON.get().draw(graphics, x + w - 9, y + 1, 8, 8);
+			ThemeProperties.ALERT_ICON.get().withColor(Color4I.WHITE.withAlpha(192)).draw(graphics, x + w - 9, y + 1, 8, 8);
 		}
 
 		poseStack.popPose();
