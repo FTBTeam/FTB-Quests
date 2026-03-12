@@ -65,4 +65,10 @@ public class FTBQuestsTheme extends Theme {
 	public void drawTextBox(GuiGraphics graphics, int x, int y, int w, int h) {
 		ThemeProperties.TEXT_BOX.get().draw(graphics, x, y, w, h);
 	}
+
+	@Override
+	public void drawWidget(GuiGraphics graphics, int x, int y, int w, int h, WidgetType type) {
+		Color4I.BLACK.withAlpha(60).draw(graphics, x, y, w, h);
+		ThemeProperties.BUTTON.get().draw(graphics, x, y, w, h);
+	}
 }
