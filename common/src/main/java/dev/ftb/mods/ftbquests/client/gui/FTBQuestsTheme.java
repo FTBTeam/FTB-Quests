@@ -67,4 +67,10 @@ public class FTBQuestsTheme extends Theme {
 	public void drawTextBox(GuiGraphics graphics, int x, int y, int w, int h) {
 		IconHelper.renderIcon(ThemeProperties.TEXT_BOX.get(), graphics, x, y, w, h);
 	}
+
+	@Override
+	public void drawWidget(GuiGraphics graphics, int x, int y, int w, int h, WidgetType type) {
+		IconHelper.renderIcon(Color4I.BLACK.withAlpha(60), graphics, x, y, w, h);
+		IconHelper.renderIcon(ThemeProperties.BUTTON.get(), graphics, x, y, w, h);
+	}
 }
