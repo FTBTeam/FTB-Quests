@@ -39,7 +39,7 @@ import java.util.stream.Collectors;
 
 public class TaskButton extends Button {
 	private final QuestScreen questScreen;
-	Task task;
+	final Task task;
 
 	public TaskButton(Panel panel, Task task) {
 		super(panel, task.getTitle(), Icons.ACCEPT);
