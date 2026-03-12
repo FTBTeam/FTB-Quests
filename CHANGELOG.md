@@ -7,13 +7,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [2101.1.23]
 
 ### Added
+* Major rework of the "Claim all Rewards" GUI (opened by the button at the top-right)
+  * No longer immediately claims everything; now pops up a friendly list of claimable rewards, sorted by chapter and quest
+  * Claim rewards individually or use the "Claim all Rewards" button in that screen to claim all auto-claimable rewards
+  * Note that some rewards (those which require a choice or random loot table rewards) must be claimed individually
+
+### Changed
 * Quest started and completed events are now also fired on the client
   * See the `ObjectStartedEvent` and `ObjectCompletedEvent` architectury events
   * If you are listening for these events, note that they are now fired twice, once on server and once on client
   * `event.getData().getQuestFile().isServerSide()` can be used to easily determine which side you're on
   * Events fired client-side always have empty lists for `event.getOnlineMembers()` and `event.getNotifiedPlayers()`
 
-###
+### Fixed
 * Fixed the XP Levels reward type (exp amount always getting set to 0)
 * The `/ftbquests open_book` command now works for chapter ID's again, as it used to
 
