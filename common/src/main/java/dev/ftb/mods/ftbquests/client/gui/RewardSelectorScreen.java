@@ -14,6 +14,7 @@ import dev.ftb.mods.ftbquests.quest.Chapter;
 import dev.ftb.mods.ftbquests.quest.Quest;
 import dev.ftb.mods.ftbquests.quest.TeamData;
 import dev.ftb.mods.ftbquests.quest.reward.Reward;
+import net.minecraft.ChatFormatting;
 import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
@@ -27,21 +28,24 @@ import java.util.List;
 import static dev.ftb.mods.ftblibrary.util.TextComponentUtils.hotkeyTooltip;
 
 public class RewardSelectorScreen extends AbstractGroupedButtonListScreen<Chapter, Quest> {
+    private static final int REFRESH_TIME = 80;
+
     private final TeamData selfData;
     private final QuestScreen questScreen;
+
     private int widestQuestName;
     private int maxRewardCount;
     private int totalRewards;
     private int excludedRewards;
-    private final long screenOpenedAt;
+    private int msgTimeout = 0;
+    private Component message = Component.empty();
+    private long rewardInfoGenerated;
 
     public RewardSelectorScreen(TeamData selfData, QuestScreen questScreen) {
         super(Component.translatable("ftbquests.gui.reward_selector"));
 
         this.selfData = selfData;
         this.questScreen = questScreen;
-
-        screenOpenedAt = Util.getMillis();
 
         showBottomPanel(true);
     }
@@ -91,6 +95,8 @@ public class RewardSelectorScreen extends AbstractGroupedButtonListScreen<Chapte
             });
         }
 
+        rewardInfoGenerated = Util.getEpochMillis();
+
         return groups;
     }
 
@@ -113,6 +119,10 @@ public class RewardSelectorScreen extends AbstractGroupedButtonListScreen<Chapte
 
     private void doClaimAll() {
         NetworkManager.sendToServer(ClaimAllRewardsMessage.INSTANCE);
+        message = excludedRewards > 0 ?
+                Component.translatable("ftbquests.gui.claim_all_exclusion", excludedRewards) :
+                Component.translatable("ftbquests.gui.all_rewards_claimed");
+        msgTimeout = REFRESH_TIME;
     }
 
     @Override
@@ -122,9 +132,26 @@ public class RewardSelectorScreen extends AbstractGroupedButtonListScreen<Chapte
     }
 
     @Override
+    public void tick() {
+        super.tick();
+
+        if (msgTimeout > 0 && --msgTimeout == 0) {
+            groups.clear();
+            groups.addAll(getGroups());
+            refreshWidgets();
+        }
+    }
+
+    @Override
     public void drawBackground(GuiGraphics graphics, Theme theme, int x, int y, int w, int h) {
         super.drawBackground(graphics, theme, x, y, w, h);
         theme.drawPanelBackground(graphics, x, y, w, h);
+
+        if (msgTimeout > 0) {
+            int barWidth = theme.getStringWidth(message) * msgTimeout / REFRESH_TIME;
+            Color4I.BLACK.withAlpha(60).draw(graphics, x - 1, y - theme.getFontHeight() - 4, barWidth, theme.getFontHeight() + 4);
+            theme.drawString(graphics, message.copy().withStyle(ChatFormatting.YELLOW), x, y - theme.getFontHeight() - 2, Theme.SHADOW);
+        }
     }
 
     @Override
@@ -159,9 +186,9 @@ public class RewardSelectorScreen extends AbstractGroupedButtonListScreen<Chapte
         private boolean shouldShowButton(Reward reward) {
             return switch (selfData.getClaimType(Minecraft.getInstance().player.getUUID(), reward)) {
                 case CANT_CLAIM -> false;
-                // do show any claimed rewards that were only claimed since this screen was first opened
+                // do show any claimed rewards that were only claimed since the reward data was generated
                 case CLAIMED -> selfData.getRewardClaimTime(Minecraft.getInstance().player.getUUID(), reward)
-                        .map(date -> date.getTime() > screenOpenedAt).orElse(false);
+                        .map(date -> date.getTime() > rewardInfoGenerated).orElse(false);
                 case CAN_CLAIM -> true;
             };
         }
