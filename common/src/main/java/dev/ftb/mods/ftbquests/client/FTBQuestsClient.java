@@ -2,6 +2,7 @@ package dev.ftb.mods.ftbquests.client;
 
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.client.renderer.block.model.BakedQuad;
 import net.minecraft.client.renderer.block.model.BlockModelPart;
@@ -48,6 +49,7 @@ import dev.ftb.mods.ftbquests.api.FTBQuestsAPI;
 import dev.ftb.mods.ftbquests.block.entity.BaseBarrierBlockEntity;
 import dev.ftb.mods.ftbquests.block.entity.TaskScreenBlockEntity;
 import dev.ftb.mods.ftbquests.client.gui.CustomToast;
+import dev.ftb.mods.ftbquests.client.gui.RewardSelectorScreen;
 import dev.ftb.mods.ftbquests.client.gui.RewardToast;
 import dev.ftb.mods.ftbquests.client.gui.ToastQuestObject;
 import dev.ftb.mods.ftbquests.item.CustomIconItem;
@@ -71,7 +73,7 @@ public class FTBQuestsClient {
 	public static KeyMapping KEY_QUESTS;
 	private static final KeyMapping.Category FTB_QUESTS_KEY_CATEGORY = new KeyMapping.Category(FTBQuestsAPI.id("keys"));
 
-    public static void init() {
+	public static void init() {
 		maybeMigrateClientConfig();
 
 		ConfigManager.getInstance().registerClientConfig(FTBQuestsClientConfig.CONFIG, FTBQuestsAPI.MOD_ID, FTBQuestsClientConfig::onEdited);
@@ -231,7 +233,10 @@ public class FTBQuestsClient {
 	}
 
 	static void showRewardToast(Component text, Icon<?> icon) {
-		Minecraft.getInstance().getToastManager().addToast(new RewardToast(text, icon));
+		Screen screen = Minecraft.getInstance().screen;
+		if (screen == null || ClientUtils.getGuiAs(screen, RewardSelectorScreen.class) == null) {
+			Minecraft.getInstance().getToastManager().addToast(new RewardToast(text, icon));
+		}
 	}
 
 	public static void showErrorToast(Component text) {
