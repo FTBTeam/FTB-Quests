@@ -37,11 +37,11 @@ import org.joml.Matrix3x2fStack;
 
 public class RewardButton extends Button {
 	private final QuestScreen questScreen;
-	Reward reward;
+	final Reward reward;
 
-	public RewardButton(Panel panel, Reward reward) {
+	public RewardButton(Panel panel, Reward reward, QuestScreen questScreen) {
 		super(panel, reward.getTitle(), reward.getIcon());
-		questScreen = (QuestScreen) panel.getGui();
+		this.questScreen = questScreen;
 		this.reward = reward;
 		setSize(18, 18);
 	}
@@ -143,28 +143,24 @@ public class RewardButton extends Button {
 	@Override
 	public void draw(GuiGraphics graphics, Theme theme, int x, int y, int w, int h) {
 		int bs = h >= 32 ? 32 : 16;
-//		GuiHelper.setupDrawing();
 		drawBackground(graphics, theme, x, y, w, h);
 		drawIcon(graphics, theme, x + (w - bs) / 2, y + (h - bs) / 2, bs, bs);
 
-		if (questScreen.file.selfTeamData == null) {
+		if (!questScreen.file.selfTeamData.isValid()) {
 			return;
-		} else if (questScreen.getContextMenu().isEmpty()) {
-			//return;
 		}
 
 		Matrix3x2fStack poseStack = graphics.pose();
 
 		poseStack.pushMatrix();
 		poseStack.translate(0, 0);
-//		RenderSystem.enableBlend();
 		boolean completed = false;
 
 		if (questScreen.file.selfTeamData.getClaimType(Minecraft.getInstance().player.getUUID(), reward).isClaimed()) {
-			IconHelper.renderIcon(ThemeProperties.CHECK_ICON.get(), graphics, x + w - 9, y + 1, 8, 8);
+			IconHelper.renderIcon(ThemeProperties.CHECK_ICON.get().withColor(Color4I.WHITE.withAlpha(192)), graphics, x + w - 9, y + 1, 8, 8);
 			completed = true;
 		} else if (questScreen.file.selfTeamData.isCompleted(reward.getQuest())) {
-			IconHelper.renderIcon(ThemeProperties.ALERT_ICON.get(), graphics, x + w - 9, y + 1, 8, 8);
+			IconHelper.renderIcon(ThemeProperties.ALERT_ICON.get().withColor(Color4I.WHITE.withAlpha(192)), graphics, x + w - 9, y + 1, 8, 8);
 		}
 
 		poseStack.popMatrix();

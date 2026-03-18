@@ -4,6 +4,17 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2111.1.2]
+
+### Added
+* Major rework of the "Claim all Rewards" GUI (opened by the button at the top-right)
+  * No longer immediately claims everything; now pops up a friendly list of claimable rewards, sorted by chapter and quest
+  * Claim rewards individually or use the "Claim all Rewards" button in that screen to claim all auto-claimable rewards
+  * Note that some rewards (those which require a choice or random loot table rewards) must be claimed individually
+
+### Fixed
+* Fixed the XP Levels reward type (exp amount always getting set to 0)
+
 ## [2111.1.1]
 
 ### Fixed
