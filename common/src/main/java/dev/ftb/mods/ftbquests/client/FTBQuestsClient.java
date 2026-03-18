@@ -17,10 +17,12 @@ import dev.ftb.mods.ftblibrary.config.ui.EditConfigScreen;
 import dev.ftb.mods.ftblibrary.icon.Icon;
 import dev.ftb.mods.ftblibrary.ui.Widget;
 import dev.ftb.mods.ftblibrary.ui.input.MouseButton;
+import dev.ftb.mods.ftblibrary.util.client.ClientUtils;
 import dev.ftb.mods.ftbquests.FTBQuests;
 import dev.ftb.mods.ftbquests.api.FTBQuestsAPI;
 import dev.ftb.mods.ftbquests.block.entity.BaseBarrierBlockEntity;
 import dev.ftb.mods.ftbquests.block.entity.TaskScreenBlockEntity;
+import dev.ftb.mods.ftbquests.client.gui.RewardSelectorScreen;
 import dev.ftb.mods.ftbquests.client.gui.RewardToast;
 import dev.ftb.mods.ftbquests.client.gui.ToastQuestObject;
 import dev.ftb.mods.ftbquests.item.CustomIconItem;
@@ -65,7 +67,7 @@ import java.util.Optional;
 public class FTBQuestsClient {
 	public static KeyMapping KEY_QUESTS;
 
-    public static void init() {
+	public static void init() {
 		maybeMigrateClientConfig();
 
 		ConfigManager.getInstance().registerClientConfig(FTBQuestsClientConfig.CONFIG, FTBQuestsAPI.MOD_ID, FTBQuestsClientConfig::onEdited);
@@ -73,8 +75,8 @@ public class FTBQuestsClient {
 		ClientLifecycleEvent.CLIENT_SETUP.register(FTBQuestsClient::onClientSetup);
 
 		// Minecraft.getInstance() might not exist here (datagen in particular)
-        //noinspection ConstantValue
-        if (Minecraft.getInstance() != null) {
+		//noinspection ConstantValue
+		if (Minecraft.getInstance() != null) {
 			ReloadListenerRegistry.register(PackType.CLIENT_RESOURCES, new QuestFileCacheReloader());
 			ReloadListenerRegistry.register(PackType.CLIENT_RESOURCES, new ThemeLoader());
 			KeyMappingRegistry.register(KEY_QUESTS = new KeyMapping("key.ftbquests.quests", InputConstants.Type.KEYSYM, -1, "key.categories.ftbquests"));
@@ -225,6 +227,9 @@ public class FTBQuestsClient {
 	}
 
 	static void showRewardToast(Component text, Icon icon) {
-		Minecraft.getInstance().getToasts().addToast(new RewardToast(text, icon));
+		Screen screen = Minecraft.getInstance().screen;
+		if (screen == null || ClientUtils.getGuiAs(screen, RewardSelectorScreen.class) == null) {
+			Minecraft.getInstance().getToasts().addToast(new RewardToast(text, icon));
+		}
 	}
 }
