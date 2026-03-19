@@ -28,6 +28,7 @@ import java.util.UUID;
 import org.jspecify.annotations.Nullable;
 
 public class RandomReward extends Reward {
+	@Nullable
 	private RewardTable table;
 
 	public RandomReward(long id, Quest parent) {
@@ -62,8 +63,8 @@ public class RandomReward extends Reward {
 		BaseQuestFile file = getQuestFile();
 
 		nbt.getLong("table_id").ifPresent(tableId -> {
-			if (id != 0L) {
-				table = file.getRewardTable(id);
+			if (tableId != 0L) {
+				table = file.getRewardTable(tableId);
 			}
 
 			if (table == null) return;
