@@ -7,14 +7,11 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.storage.ValueInput;
 
 import net.neoforged.neoforge.model.data.ModelData;
-import net.neoforged.neoforge.model.data.ModelProperty;
 
-import dev.ftb.mods.ftbquests.block.entity.QuestBarrierBlockEntity;
+import dev.ftb.mods.ftbquests.block.entity.StageBarrierBlockEntity;
 
-public class NeoForgeQuestBarrierBlockEntity extends QuestBarrierBlockEntity {
-    public static final ModelProperty<BlockState> CAMOUFLAGE_STATE = new ModelProperty<>();
-
-    public NeoForgeQuestBarrierBlockEntity(BlockPos blockPos, BlockState blockState) {
+public class NeoStageBarrierBlockEntity extends StageBarrierBlockEntity {
+    public NeoStageBarrierBlockEntity(BlockPos blockPos, BlockState blockState) {
         super(blockPos, blockState);
     }
 
@@ -23,7 +20,6 @@ public class NeoForgeQuestBarrierBlockEntity extends QuestBarrierBlockEntity {
         super.forceAppearanceUpdate();
         requestModelDataUpdate();
     }
-
 
     @Override
     public void onDataPacket(Connection net, ValueInput input) {
@@ -42,7 +38,7 @@ public class NeoForgeQuestBarrierBlockEntity extends QuestBarrierBlockEntity {
     @Override
     public ModelData getModelData() {
         return ModelData.builder()
-                .with(CAMOUFLAGE_STATE, getClientAppearance())
+                .with(NeoQuestBarrierBlockEntity.CAMOUFLAGE_STATE, getClientAppearance())
                 .build();
     }
 }

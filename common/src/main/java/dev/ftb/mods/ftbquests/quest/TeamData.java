@@ -1,56 +1,45 @@
 package dev.ftb.mods.ftbquests.quest;
 
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.ListTag;
-import net.minecraft.nbt.StringTag;
-import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.network.chat.Component;
-import net.minecraft.network.codec.StreamCodec;
-import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.util.Util;
-import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.item.ItemStack;
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
 import com.mojang.util.UndashedUuid;
-
-import dev.architectury.networking.NetworkManager;
-import dev.architectury.utils.GameInstance;
-
-import dev.ftb.mods.ftblibrary.snbt.SNBT;
-import dev.ftb.mods.ftblibrary.snbt.SNBTCompoundTag;
+import de.marhali.json5.Json5Element;
+import de.marhali.json5.Json5Object;
+import dev.ftb.mods.ftblibrary.json5.Json5Ops;
+import dev.ftb.mods.ftblibrary.json5.Json5Util;
+import dev.ftb.mods.ftblibrary.platform.network.Server2PlayNetworking;
 import dev.ftb.mods.ftbquests.FTBQuests;
 import dev.ftb.mods.ftbquests.api.FTBQuestsAPI;
-import dev.ftb.mods.ftbquests.events.QuestProgressEventData;
+import dev.ftb.mods.ftbquests.events.progress.ProgressEventData;
 import dev.ftb.mods.ftbquests.net.*;
 import dev.ftb.mods.ftbquests.quest.reward.Reward;
 import dev.ftb.mods.ftbquests.quest.reward.RewardAutoClaim;
 import dev.ftb.mods.ftbquests.quest.reward.RewardClaimType;
 import dev.ftb.mods.ftbquests.quest.task.Task;
+import dev.ftb.mods.ftbquests.util.FTBQCodecs;
 import dev.ftb.mods.ftbquests.util.FTBQuestsInventoryListener;
 import dev.ftb.mods.ftbquests.util.QuestKey;
 import dev.ftb.mods.ftbteams.api.FTBTeamsAPI;
 import dev.ftb.mods.ftbteams.api.Team;
-
-import java.io.IOException;
-import java.nio.file.Path;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.Date;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
-import java.util.stream.Collectors;
 import it.unimi.dsi.fastutil.longs.*;
-import it.unimi.dsi.fastutil.objects.Object2ByteMap;
-import it.unimi.dsi.fastutil.objects.Object2ByteOpenHashMap;
-import it.unimi.dsi.fastutil.objects.Object2LongMap;
-import it.unimi.dsi.fastutil.objects.Object2LongOpenHashMap;
-import it.unimi.dsi.fastutil.objects.Object2ObjectMap;
-import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
+import it.unimi.dsi.fastutil.objects.*;
+import net.minecraft.core.UUIDUtil;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.codec.ByteBufCodecs;
+import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.util.Util;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
 import org.apache.commons.lang3.function.ToBooleanBiFunction;
 import org.apache.commons.lang3.time.DurationFormatUtils;
 import org.jspecify.annotations.Nullable;
+
+import java.io.IOException;
+import java.nio.file.Path;
+import java.util.*;
+import java.util.function.Function;
 
 public class TeamData {
 	public static final int VERSION = 1;
@@ -62,21 +51,23 @@ public class TeamData {
 	private static final byte BOOL_FALSE = 0;
 	private static final byte BOOL_TRUE = 1;
 
-	private static final Comparator<Long2LongMap.Entry> LONG2LONG_COMPARATOR = (e1, e2) -> Long.compareUnsigned(e1.getLongValue(), e2.getLongValue());
-	private static final Comparator<Object2LongMap.Entry<QuestKey>> OBJECT2LONG_COMPARATOR = (e1, e2) -> Long.compareUnsigned(e1.getLongValue(), e2.getLongValue());
+	private static final Comparator<Long2LongMap.Entry> LONG2LONG_COMPARATOR
+			= (e1, e2) -> Long.compareUnsigned(e1.getLongValue(), e2.getLongValue());
+	private static final Comparator<Object2LongMap.Entry<QuestKey>> OBJECT2LONG_COMPARATOR
+			= (e1, e2) -> Long.compareUnsigned(e1.getLongValue(), e2.getLongValue());
 
 	public static final StreamCodec<FriendlyByteBuf,TeamData> STREAM_CODEC = StreamCodec.of(
-            (buf, data) -> {
-                buf.writeUUID(data.getTeamId());
-                data.writeNetData(buf);
-            },
+			(buf, data) -> {
+				buf.writeUUID(data.getTeamId());
+				data.writeNetData(buf);
+			},
 			buf -> Util.make(new TeamData(buf.readUUID(), false), data -> data.readNetData(buf))
-    );
+	);
 
 	private final UUID teamId;
 
-    private final boolean serverSide;
-    private String name;
+	private final boolean serverSide;
+	private String name;
 	private boolean shouldSave;
 	private boolean locked;
 	private boolean rewardsBlocked;
@@ -100,21 +91,17 @@ public class TeamData {
 
 	public TeamData(UUID teamId, boolean serverSide, String name) {
 		this.teamId = teamId;
-        this.serverSide = serverSide;
+		this.serverSide = serverSide;
 		this.name = name;
 		this.locked = teamId.equals(Util.NIL_UUID);
 
 		shouldSave = false;
 
 		taskProgress = new Long2LongOpenHashMap();
-		taskProgress.defaultReturnValue(0L);
 		claimedRewards = new Object2LongOpenHashMap<>();
-		claimedRewards.defaultReturnValue(0L);
 		started = new Long2LongOpenHashMap();
-		started.defaultReturnValue(0L);
 		completed = new Long2LongOpenHashMap();
 		completionCount = new Long2IntOpenHashMap();
-		completed.defaultReturnValue(0L);
 		perPlayerData = new Object2ObjectOpenHashMap<>();
 		areDependenciesCompleteCache = new Long2ByteOpenHashMap();
 		areDependenciesVisibleCache = new Long2ByteOpenHashMap();
@@ -155,14 +142,14 @@ public class TeamData {
 	}
 
 	public void saveIfChanged() {
-		if (shouldSave && serverSide) {
-			Path path = GameInstance.getServer().getWorldPath(ServerQuestFile.FTBQUESTS_DATA);
-            try {
-                SNBT.tryWrite(path.resolve(teamId + ".snbt"), serializeNBT());
-            } catch (IOException e) {
-                FTBQuests.LOGGER.error("Could not save data for team {}", teamId, e);
-            }
-            shouldSave = false;
+		if (shouldSave && serverSide && ServerQuestFile.exists()) {
+			Path path = ServerQuestFile.getInstance().server.getWorldPath(ServerQuestFile.FTBQUESTS_DATA);
+			try {
+				Json5Util.tryWrite(path.resolve(teamId + ".snbt"), toJson());
+			} catch (IOException e) {
+				FTBQuests.LOGGER.error("Could not save data for team {}", teamId, e);
+			}
+			shouldSave = false;
 		}
 	}
 
@@ -172,7 +159,7 @@ public class TeamData {
 	}
 
 	public long getProgress(long taskId) {
-		return taskProgress.get(taskId);
+		return taskProgress.getOrDefault(taskId, 0L);
 	}
 
 	public long getProgress(Task task) {
@@ -180,7 +167,7 @@ public class TeamData {
 	}
 
 	public Optional<Date> getStartedTime(long questId) {
-		long when = started.get(questId);
+		long when = started.getOrDefault(questId, 0L);
 		return when == 0L ? Optional.empty() : Optional.of(new Date(when));
 	}
 
@@ -192,7 +179,7 @@ public class TeamData {
 					markDirty();
 
 					if (serverSide) {
-						NetworkManager.sendToPlayers(getOnlineMembers(), new ObjectStartedResetMessage(teamId, questId));
+						Server2PlayNetworking.send(getOnlineMembers(), new ObjectStartedResetMessage(teamId, questId));
 					}
 
 					return true;
@@ -203,7 +190,7 @@ public class TeamData {
 					markDirty();
 
 					if (serverSide) {
-						NetworkManager.sendToPlayers(getOnlineMembers(), new ObjectStartedMessage(teamId, questId));
+						Server2PlayNetworking.send(getOnlineMembers(), new ObjectStartedMessage(teamId, questId));
 					}
 
 					return true;
@@ -215,7 +202,7 @@ public class TeamData {
 	}
 
 	public Optional<Date> getCompletedTime(long questId) {
-		long when = completed.get(questId);
+		long when = completed.getOrDefault(questId, 0L);
 		return when == 0L ? Optional.empty() : Optional.of(new Date(when));
 	}
 
@@ -230,7 +217,7 @@ public class TeamData {
 				markDirty();
 
 				if (serverSide) {
-					NetworkManager.sendToPlayers(getOnlineMembers(), new ObjectCompletedResetMessage(teamId, id));
+					Server2PlayNetworking.send(getOnlineMembers(), new ObjectCompletedResetMessage(teamId, id));
 				}
 
 				return true;
@@ -241,7 +228,7 @@ public class TeamData {
 				markDirty();
 
 				if (serverSide) {
-					NetworkManager.sendToPlayers(getOnlineMembers(), new ObjectCompletedMessage(teamId, id));
+					Server2PlayNetworking.send(getOnlineMembers(), new ObjectCompletedMessage(teamId, id));
 				}
 
 				return true;
@@ -253,7 +240,7 @@ public class TeamData {
 
 	public Optional<Date> getRewardClaimTime(UUID player, Reward reward) {
 		QuestKey key = QuestKey.forReward(player, reward);
-		long t = claimedRewards.getLong(key);
+		long t = claimedRewards.getOrDefault(key, 0L);
 		return t == 0L ? Optional.empty() : Optional.of(new Date(t));
 	}
 
@@ -273,7 +260,7 @@ public class TeamData {
 			clearCachedProgress();
 			markDirty();
 			if (serverSide) {
-				NetworkManager.sendToPlayers(getOnlineMembers(), new SyncRewardBlockingMessage(teamId, rewardsBlocked));
+				Server2PlayNetworking.send(getOnlineMembers(), new SyncRewardBlockingMessage(teamId, rewardsBlocked));
 			}
 			return true;
 		}
@@ -324,16 +311,16 @@ public class TeamData {
 			markDirty();
 
 			if (serverSide) {
-				NetworkManager.sendToPlayers(getOnlineMembers(), new ClaimRewardResponseMessage(teamId, player, reward.id));
+				Server2PlayNetworking.send(getOnlineMembers(), new ClaimRewardResponseMessage(teamId, player, reward.id));
 			}
 
-            if (reward.getQuest().resetProgressIfRepeatable(this, player)) {
+			if (reward.getQuest().resetProgressIfRepeatable(this, player)) {
 				long questId = reward.getQuest().getId();
 				completionCount.merge(questId, 1, Integer::sum);
-                if (reward.getQuest().getRepeatCooldown() > 0) {
-                    questRepeatableTime.put(questId, System.currentTimeMillis() + reward.getQuest().getRepeatCooldown() * 1000L);
-                }
-            }
+				if (reward.getQuest().getRepeatCooldown() > 0) {
+					questRepeatableTime.put(questId, System.currentTimeMillis() + reward.getQuest().getRepeatCooldown() * 1000L);
+				}
+			}
 
 			return true;
 		}
@@ -354,7 +341,7 @@ public class TeamData {
 			markDirty();
 
 			if (serverSide) {
-				NetworkManager.sendToPlayers(getOnlineMembers(), new ResetRewardMessage(teamId, player, reward.id));
+				Server2PlayNetworking.send(getOnlineMembers(), new ResetRewardMessage(teamId, player, reward.id));
 			}
 
 			return true;
@@ -370,114 +357,54 @@ public class TeamData {
 		exclusionCache.clear();
 	}
 
-	public SNBTCompoundTag serializeNBT() {
-		SNBTCompoundTag nbt = new SNBTCompoundTag();
-		nbt.putInt("version", VERSION);
-		nbt.putString("uuid", UndashedUuid.toString(teamId));
-		nbt.putString("name", name);
-		nbt.putBoolean("lock", locked);
-		nbt.putBoolean("rewards_blocked", rewardsBlocked);
+	public Json5Object toJson() {
+		Json5Object json = new Json5Object();
 
-		writeLongLongMap(nbt, taskProgress, "task_progress");
-		writeLongLongMap(nbt, started, "started");
-		writeLongLongMap(nbt, completed, "completed");
-		writeLongLongMap(nbt, questRepeatableTime, "repeatable");
-		writeLongIntMap(nbt, completionCount, "completion_count");
+		json.addProperty("version", VERSION);
+		json.addProperty("uuid", UndashedUuid.toString(teamId));
+		json.addProperty("name", name);
+		json.addProperty("lock", locked);
+		json.addProperty("rewards_blocked", rewardsBlocked);
+		Json5Util.store(json, "task_progress", FTBQCodecs.LONG_LONG_MAP_CODEC, taskProgress);
+		Json5Util.store(json, "started", FTBQCodecs.LONG_LONG_MAP_CODEC, started);
+		Json5Util.store(json, "completed", FTBQCodecs.LONG_LONG_MAP_CODEC, completed);
+		Json5Util.store(json, "repeatable", FTBQCodecs.LONG_LONG_MAP_CODEC, questRepeatableTime);
+		Json5Util.store(json, "completion_count", FTBQCodecs.LONG_INT_MAP_CODEC, completionCount);
+		Json5Util.store(json, "claimed_rewards", FTBQCodecs.CLAIMED_REWARDS_CODEC, claimedRewards);
+		Json5Util.store(json, "player_data", PerPlayerData.MAP_CODEC, perPlayerData);
 
-		SNBTCompoundTag claimedRewardsNBT = new SNBTCompoundTag();
-		for (Object2LongMap.Entry<QuestKey> entry : claimedRewards.object2LongEntrySet().stream().sorted(OBJECT2LONG_COMPARATOR).toList()) {
-			claimedRewardsNBT.putLong(entry.getKey().toString(), entry.getLongValue());
-		}
-		nbt.put("claimed_rewards", claimedRewardsNBT);
-
-		CompoundTag ppdTag = new CompoundTag();
-		perPlayerData.forEach((id, ppd) -> {
-			if (!ppd.hasDefaultValues()) {
-				ppdTag.put(UndashedUuid.toString(id), ppd.writeNBT());
-			}
-		});
-		nbt.put("player_data", ppdTag);
-
-		return nbt;
+		return json;
 	}
 
-	public void deserializeNBT(SNBTCompoundTag nbt) {
-		int fileVersion = nbt.getInt("version").orElse(VERSION);
-
+	public void deserializeJson(Json5Object json) {
+		int fileVersion = Json5Util.getInt(json, "version").orElse(VERSION);
 		if (fileVersion != VERSION) {
 			markDirty();
 		}
 
-		BaseQuestFile file = getFile();
+		name = Json5Util.getString(json,"name").orElseThrow();
+		locked = Json5Util.getBoolean(json, "lock").orElseThrow();
+		rewardsBlocked = Json5Util.getBoolean(json, "rewards_blocked").orElseThrow();
 
-		name = nbt.getString("name").orElseThrow();
-		locked = nbt.getBoolean("lock").orElseThrow();
-		rewardsBlocked = nbt.getBoolean("rewards_blocked").orElseThrow();
-
-		readLongLongMap(file, nbt, taskProgress, "task_progress");
-		readLongLongMap(file, nbt, started, "started");
-		readLongLongMap(file, nbt, completed, "completed");
-		readLongLongMap(file, nbt, questRepeatableTime, "repeatable");
-		readLongIntMap(file, nbt, completionCount, "completion_count");
+		decodeMapFromJson(FTBQCodecs.LONG_LONG_MAP_CODEC, taskProgress, json.get("task_progress"));
+		decodeMapFromJson(FTBQCodecs.LONG_LONG_MAP_CODEC, started, json.get("started"));
+		decodeMapFromJson(FTBQCodecs.LONG_LONG_MAP_CODEC, completed, json.get("completed"));
+		decodeMapFromJson(FTBQCodecs.LONG_LONG_MAP_CODEC, questRepeatableTime, json.get("repeatable"));
+		decodeMapFromJson(FTBQCodecs.LONG_INT_MAP_CODEC, completionCount, json.get("completion_count"));
 
 		claimedRewards.clear();
-		CompoundTag claimedRewardsNBT = nbt.getCompound("claimed_rewards").orElse(new CompoundTag());
-		for (String s : claimedRewardsNBT.keySet()) {
-			claimedRewards.put(QuestKey.fromString(s), (long) claimedRewardsNBT.getLong(s).orElse(0L));
-		}
+		FTBQCodecs.CLAIMED_REWARDS_CODEC.parse(Json5Ops.INSTANCE, json.get("claimed_rewards")).result()
+						.ifPresent(claimedRewards::putAll);
 
 		perPlayerData.clear();
-		CompoundTag ppdTag = nbt.getCompound("player_data").orElse(new CompoundTag());
-		for (String key : ppdTag.keySet()) {
-			try {
-				UUID id = UndashedUuid.fromString(key);
-				perPlayerData.put(id, PerPlayerData.fromNBT(ppdTag.getCompound(key).orElseThrow(), file));
-			} catch (IllegalArgumentException e) {
-				FTBQuests.LOGGER.error("ignoring invalid player ID {} while loading per-player data for team {}", key, teamId);
-			}
-		}
-	}
-
-	private void writeLongLongMap(CompoundTag tag, Long2LongMap map, String key) {
-		SNBTCompoundTag subTag = new SNBTCompoundTag();
-		for (Long2LongMap.Entry entry : map.long2LongEntrySet().stream().sorted(LONG2LONG_COMPARATOR).toList()) {
-			subTag.putLong(QuestObjectBase.getCodeString(entry.getLongKey()), entry.getLongValue());
-		}
-		tag.put(key, subTag);
-	}
-
-	private void readLongLongMap(BaseQuestFile file, CompoundTag tag, Long2LongMap map, String key) {
-		map.clear();
-		CompoundTag subTag = tag.getCompound(key).orElse(new CompoundTag());
-		for (String subKey : subTag.keySet()) {
-			map.put(file.getID(subKey), (long) subTag.getLong(subKey).orElse(0L));
-		}
-	}
-
-	private void writeLongIntMap(CompoundTag tag, Long2IntMap map, String key) {
-		SNBTCompoundTag subTag = new SNBTCompoundTag();
-		for (Long2IntMap.Entry entry : map.long2IntEntrySet().stream().toList()) {
-			subTag.putInt(QuestObjectBase.getCodeString(entry.getLongKey()), entry.getIntValue());
-		}
-		tag.put(key, subTag);
-	}
-
-	private void readLongIntMap(BaseQuestFile file, CompoundTag tag, Long2IntMap map, String key) {
-		map.clear();
-		CompoundTag subTag = tag.getCompound(key).orElse(new CompoundTag());
-		for (String subKey : subTag.keySet()) {
-			map.put(file.getID(subKey), (int) subTag.getInt(subKey).orElse(0));
-		}
+		PerPlayerData.MAP_CODEC.parse(Json5Ops.INSTANCE, json.get("player_data")).result()
+				.ifPresent(perPlayerData::putAll);
 	}
 
 	private void writeNetData(FriendlyByteBuf buffer) {
 		buffer.writeUtf(name, Short.MAX_VALUE);
 
-		buffer.writeVarInt(taskProgress.size());
-		for (Long2LongMap.Entry entry : taskProgress.long2LongEntrySet()) {
-			buffer.writeLong(entry.getLongKey());
-			buffer.writeVarLong(entry.getLongValue());
-		}
+		FTBQCodecs.LONG_LONG_MAP_STREAM_CODEC.encode(buffer, taskProgress);
 
 		long now = System.currentTimeMillis();
 
@@ -508,28 +435,15 @@ public class TeamData {
 		buffer.writeBoolean(locked);
 		buffer.writeBoolean(rewardsBlocked);
 
-		buffer.writeVarInt(claimedRewards.size());
-		for (Object2LongMap.Entry<QuestKey> entry : claimedRewards.object2LongEntrySet()) {
-			entry.getKey().toNetwork(buffer);
-			buffer.writeVarLong(now - entry.getLongValue());
-		}
-
-		buffer.writeVarInt(perPlayerData.size());
-		perPlayerData.forEach((id, ppd) -> {
-			buffer.writeUUID(id);
-			ppd.writeNet(buffer);
-		});
-
+		FTBQCodecs.CLAIMED_REWARDS_STREAM_CODEC.encode(buffer, claimedRewards);
+		PerPlayerData.MAP_STREAM_CODEC.encode(buffer, perPlayerData);
 	}
 
 	private void readNetData(FriendlyByteBuf buffer) {
 		name = buffer.readUtf(Short.MAX_VALUE);
 
 		taskProgress.clear();
-		int ts = buffer.readVarInt();
-		for (int i = 0; i < ts; i++) {
-			taskProgress.put(buffer.readLong(), buffer.readVarLong());
-		}
+		taskProgress.putAll(FTBQCodecs.LONG_LONG_MAP_STREAM_CODEC.decode(buffer));
 
 		long now = System.currentTimeMillis();
 
@@ -561,19 +475,10 @@ public class TeamData {
 		rewardsBlocked = buffer.readBoolean();
 
 		claimedRewards.clear();
+		claimedRewards.putAll(FTBQCodecs.CLAIMED_REWARDS_STREAM_CODEC.decode(buffer));
+
 		perPlayerData.clear();
-
-		int claimedRewardCount = buffer.readVarInt();
-		for (int i = 0; i < claimedRewardCount; i++) {
-			QuestKey key = QuestKey.fromNetwork(buffer);
-			claimedRewards.put(key, now - buffer.readVarLong());
-		}
-
-		int ppdCount = buffer.readVarInt();
-		for (int i = 0; i < ppdCount; i++) {
-			UUID id = buffer.readUUID();
-			perPlayerData.put(id, PerPlayerData.fromNet(buffer));
-		}
+		perPlayerData.putAll(PerPlayerData.MAP_STREAM_CODEC.decode(buffer));
 	}
 
 	public final int getRelativeProgress(QuestObject object) {
@@ -595,12 +500,12 @@ public class TeamData {
 	}
 
 	public int getCompletionCount(Quest quest) {
-        if (quest.canBeRepeated()) {
-            return completionCount.getOrDefault(quest.getId(), 0);
-        } else {
-            return isCompleted(quest) ? 1 : 0;
-        }
-    }
+		if (quest.canBeRepeated()) {
+			return completionCount.getOrDefault(quest.getId(), 0);
+		} else {
+			return isCompleted(quest) ? 1 : 0;
+		}
+	}
 
 	private boolean checkDepsCached(Quest quest, Long2ByteMap cache, ToBooleanBiFunction<Quest,TeamData> checker) {
 		if (!quest.hasDependencies()) {
@@ -716,10 +621,10 @@ public class TeamData {
 				Date now = new Date();
 				Collection<ServerPlayer> onlineMembers = getOnlineMembers();
 
-				NetworkManager.sendToPlayers(getOnlineMembers(), new UpdateTaskProgressMessage(this.getTeamId(), task.id, progress));
+				Server2PlayNetworking.send(getOnlineMembers(), new UpdateTaskProgressMessage(this.getTeamId(), task.id, progress));
 
 				if (prevProgress == 0L) {
-					task.onStarted(new QuestProgressEventData<>(now, this, task, onlineMembers, Collections.emptyList()));
+					task.onStarted(new ProgressEventData<>(now, this, task, onlineMembers, List.of()));
 				}
 
 				// if we're in flexible progress mode, we can get here without dependencies being complete yet
@@ -742,7 +647,7 @@ public class TeamData {
 			notifiedPlayers = List.of();
 		}
 
-		task.onCompleted(new QuestProgressEventData<>(new Date(), this, task, onlineMembers, notifiedPlayers));
+		task.onCompleted(new ProgressEventData<>(new Date(), this, task, onlineMembers, notifiedPlayers));
 
 		for (ServerPlayer player : onlineMembers) {
 			FTBQuestsInventoryListener.detect(player, ItemStack.EMPTY, task.id);
@@ -751,7 +656,7 @@ public class TeamData {
 		if (isCompleted(task.getQuest())) {
 			perPlayerData.values().forEach(data -> data.pinnedQuests.remove(task.getQuest().id));
 			markDirty();
-			NetworkManager.sendToPlayers(getOnlineMembers(), new TogglePinnedResponseMessage(task.getQuest().id, false));
+			Server2PlayNetworking.send(getOnlineMembers(), new TogglePinnedResponseMessage(task.getQuest().id, false));
 		}
 	}
 
@@ -770,7 +675,7 @@ public class TeamData {
 			markDirty();
 
 			if (serverSide) {
-				NetworkManager.sendToPlayers(getOnlineMembers(), new SyncLockMessage(teamId, locked));
+				Server2PlayNetworking.send(getOnlineMembers(), new SyncLockMessage(teamId, locked));
 			}
 
 			return true;
@@ -783,11 +688,11 @@ public class TeamData {
 		// used when joining an existing party team
 		from.taskProgress.forEach((id, data) -> taskProgress.mergeLong(id, data, Long::max));
 
-		from.started.forEach((id, data) -> started.mergeLong(id, data, (oldVal, newVal) -> oldVal));
-		from.completed.forEach((id, data) -> completed.mergeLong(id, data, (oldVal, newVal) -> oldVal));
-		from.claimedRewards.forEach((id, data) -> claimedRewards.mergeLong(id, data, (oldVal, newVal) -> oldVal));
+		from.started.forEach((id, data) -> started.mergeLong(id, data, (oldVal, _) -> oldVal));
+		from.completed.forEach((id, data) -> completed.mergeLong(id, data, (oldVal, _) -> oldVal));
+		from.claimedRewards.forEach((id, data) -> claimedRewards.mergeLong(id, data, (oldVal, _) -> oldVal));
 
-		from.perPlayerData.forEach((id, data) -> perPlayerData.merge(id, data, (oldVal, newVal) -> oldVal));
+		from.perPlayerData.forEach((id, data) -> perPlayerData.merge(id, data, (oldVal, _) -> oldVal));
 	}
 
 	public void mergeClaimedRewards(TeamData from) {
@@ -837,7 +742,7 @@ public class TeamData {
 				clearCachedProgress();
 				markDirty();
 				if (serverSide && player instanceof ServerPlayer sp) {
-					NetworkManager.sendToPlayer(sp, new SyncEditingModeMessage(teamId, newCanEdit));
+					Server2PlayNetworking.send(sp, new SyncEditingModeMessage(teamId, newCanEdit));
 				}
 				return true;
 			}
@@ -890,7 +795,28 @@ public class TeamData {
 		markDirty();
 	}
 
+	private static <K,V> void decodeMapFromJson(Codec<Map<K,V>> codec, Map<K,V> map, Json5Element el) {
+		map.clear();
+		codec.parse(Json5Ops.INSTANCE, el).result().ifPresent(map::putAll);
+	}
+
 	private static class PerPlayerData {
+		public static final Codec<PerPlayerData> CODEC = RecordCodecBuilder.create(builder -> builder.group(
+				Codec.BOOL.optionalFieldOf("can_edit", false).forGetter(p -> p.canEdit),
+				Codec.BOOL.optionalFieldOf("auto_pin", false).forGetter(p -> p.autoPin),
+				FTBQCodecs.LONG_SET_CODEC.optionalFieldOf("pinned_quests", new LongArraySet()).forGetter(p -> p.pinnedQuests)
+		).apply(builder, PerPlayerData::new));
+		public static final StreamCodec<FriendlyByteBuf, PerPlayerData> STREAM_CODEC = StreamCodec.composite(
+				ByteBufCodecs.BOOL, p -> p.canEdit,
+				ByteBufCodecs.BOOL, p -> p.autoPin,
+				FTBQCodecs.LONG_SET_STREAM_CODEC, p -> p.pinnedQuests,
+				PerPlayerData::new
+		);
+		public static final Codec<Map<UUID,PerPlayerData>> MAP_CODEC
+				= Codec.unboundedMap(UUIDUtil.STRING_CODEC, CODEC).xmap(HashMap::new, Function.identity());
+		public static final StreamCodec<FriendlyByteBuf, Map<UUID,PerPlayerData>> MAP_STREAM_CODEC
+				= ByteBufCodecs.map(HashMap::new, UUIDUtil.STREAM_CODEC, STREAM_CODEC);
+
 		private boolean canEdit;
 		private boolean autoPin;
 		private final LongSet pinnedQuests;
@@ -904,61 +830,6 @@ public class TeamData {
 			this.canEdit = canEdit;
 			this.autoPin = autoPin;
 			this.pinnedQuests = pinnedQuests;
-		}
-
-		public boolean hasDefaultValues() {
-			return !canEdit && !autoPin && pinnedQuests.isEmpty();
-		}
-
-		public static PerPlayerData fromNBT(CompoundTag nbt, BaseQuestFile file) {
-			boolean canEdit = nbt.getBoolean("can_edit").orElse(false);
-			boolean autoPin = nbt.getBoolean("auto_pin").orElse(false);
-			LongSet pq = nbt.getList("pinned_quests").stream()
-					.map(tag -> file.getID(tag.asString()))
-					.collect(Collectors.toCollection(LongOpenHashSet::new));
-			return new PerPlayerData(canEdit, autoPin, pq);
-		}
-
-		public static PerPlayerData fromNet(FriendlyByteBuf buffer) {
-			PerPlayerData ppd = new PerPlayerData();
-
-			ppd.canEdit = buffer.readBoolean();
-			ppd.autoPin = buffer.readBoolean();
-			int pinnedCount = buffer.readVarInt();
-			for (int i = 0; i < pinnedCount; i++) {
-				ppd.pinnedQuests.add(buffer.readLong());
-			}
-
-			return ppd;
-		}
-
-		public CompoundTag writeNBT() {
-			CompoundTag nbt = new CompoundTag();
-
-			if (canEdit) nbt.putBoolean("can_edit", true);
-			if (autoPin) nbt.putBoolean("auto_pin", true);
-
-			if (!pinnedQuests.isEmpty()) {
-				long[] pinnedQuestsArray = pinnedQuests.toLongArray();
-				Arrays.sort(pinnedQuestsArray);
-				ListTag pinnedQuestsNBT = new ListTag();
-				for (long l : pinnedQuestsArray) {
-					pinnedQuestsNBT.add(StringTag.valueOf(QuestObjectBase.getCodeString(l)));
-				}
-				nbt.put("pinned_quests", pinnedQuestsNBT);
-			}
-
-			return nbt;
-		}
-
-		public void writeNet(FriendlyByteBuf buffer) {
-			buffer.writeBoolean(canEdit);
-			buffer.writeBoolean(autoPin);
-
-			buffer.writeVarInt(pinnedQuests.size());
-			for (long reward : pinnedQuests) {
-				buffer.writeLong(reward);
-			}
 		}
 	}
 }

@@ -1,16 +1,6 @@
 package dev.ftb.mods.ftbquests.quest.reward;
 
-import net.minecraft.core.HolderLookup;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.network.RegistryFriendlyByteBuf;
-import net.minecraft.network.chat.Component;
-import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.util.RandomSource;
-import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.level.block.entity.BlockEntity;
-
-import dev.architectury.networking.NetworkManager;
-
+import de.marhali.json5.Json5Object;
 import dev.ftb.mods.ftblibrary.client.config.EditableConfigGroup;
 import dev.ftb.mods.ftblibrary.client.config.Tristate;
 import dev.ftb.mods.ftblibrary.client.gui.widget.Button;
@@ -18,26 +8,25 @@ import dev.ftb.mods.ftblibrary.client.gui.widget.Widget;
 import dev.ftb.mods.ftblibrary.client.util.ClientUtils;
 import dev.ftb.mods.ftblibrary.client.util.PositionedIngredient;
 import dev.ftb.mods.ftblibrary.icon.Icon;
+import dev.ftb.mods.ftblibrary.json5.Json5Util;
+import dev.ftb.mods.ftblibrary.platform.network.Play2ServerNetworking;
 import dev.ftb.mods.ftblibrary.util.TooltipList;
 import dev.ftb.mods.ftbquests.client.gui.quests.QuestScreen;
 import dev.ftb.mods.ftbquests.integration.RecipeModHelper;
 import dev.ftb.mods.ftbquests.net.ClaimRewardMessage;
-import dev.ftb.mods.ftbquests.quest.BaseQuestFile;
-import dev.ftb.mods.ftbquests.quest.Chapter;
-import dev.ftb.mods.ftbquests.quest.Quest;
-import dev.ftb.mods.ftbquests.quest.QuestObjectBase;
-import dev.ftb.mods.ftbquests.quest.QuestObjectType;
-import dev.ftb.mods.ftbquests.quest.ServerQuestFile;
-import dev.ftb.mods.ftbquests.quest.TeamData;
+import dev.ftb.mods.ftbquests.quest.*;
 import dev.ftb.mods.ftbquests.quest.translation.TranslationKey;
 import dev.ftb.mods.ftbquests.util.ProgressChange;
-
-import java.util.EnumSet;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
-import java.util.UUID;
+import net.minecraft.core.HolderLookup;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.chat.Component;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.util.RandomSource;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.block.entity.BlockEntity;
 import org.jspecify.annotations.Nullable;
+
+import java.util.*;
 
 public abstract class Reward extends QuestObjectBase {
 	protected final Quest quest;
@@ -87,33 +76,28 @@ public abstract class Reward extends QuestObjectBase {
 	public abstract RewardType getType();
 
 	@Override
-	public void writeData(CompoundTag nbt, HolderLookup.Provider provider) {
-		super.writeData(nbt, provider);
+	public void writeData(Json5Object json, HolderLookup.Provider provider) {
+		super.writeData(json, provider);
 
-		if (team != Tristate.DEFAULT) {
-			team.write(nbt, "team_reward");
-		}
-
-		if (autoclaim != RewardAutoClaim.DEFAULT) {
-			nbt.putString("auto", autoclaim.getId());
-		}
-
-		if (excludeFromClaimAll) nbt.putBoolean("exclude_from_claim_all", true);
-		if (ignoreRewardBlocking) nbt.putBoolean("ignore_reward_blocking", true);
-		if (disableRewardScreenBlur) nbt.putBoolean("disable_reward_screen_blur", true);
+		if (team != Tristate.DEFAULT) team.write(json, "team_reward");
+		if (autoclaim != RewardAutoClaim.DEFAULT) json.addProperty("auto", autoclaim.getId());
+		if (excludeFromClaimAll) json.addProperty("exclude_from_claim_all", true);
+		if (ignoreRewardBlocking) json.addProperty("ignore_reward_blocking", true);
+		if (disableRewardScreenBlur) json.addProperty("disable_reward_screen_blur", true);
 	}
 
 	@Override
-	public void readData(CompoundTag nbt, HolderLookup.Provider provider) {
-		super.readData(nbt, provider);
-		team = Tristate.read(nbt, "team_reward");
-		autoclaim = nbt.getString("auto")
+	public void readData(Json5Object json, HolderLookup.Provider provider) {
+		super.readData(json, provider);
+
+		team = Tristate.read(json, "team_reward");
+		autoclaim = Json5Util.getString(json, "auto")
 				.map(RewardAutoClaim.NAME_MAP::get)
 				.orElse(RewardAutoClaim.DEFAULT);
 
-		excludeFromClaimAll = nbt.getBooleanOr("exclude_from_claim_all", getType().getExcludeFromListRewards());
-		ignoreRewardBlocking = nbt.getBooleanOr("ignore_reward_blocking", false);
-		disableRewardScreenBlur	= nbt.getBooleanOr("disable_reward_screen_blur", false);
+		excludeFromClaimAll = Json5Util.getBoolean(json, "exclude_from_claim_all").orElse(getType().getExcludeFromListRewards());
+		ignoreRewardBlocking = Json5Util.getBoolean(json, "ignore_reward_blocking").orElse(false);
+		disableRewardScreenBlur	= Json5Util.getBoolean(json, "disable_reward_screen_blur").orElse(false);
 	}
 
 	@Override
@@ -282,7 +266,7 @@ public abstract class Reward extends QuestObjectBase {
 	public void onButtonClicked(Button button, boolean canClick) {
 		if (canClick) {
 			button.playClickSound();
-			NetworkManager.sendToServer(new ClaimRewardMessage(id, true));
+			Play2ServerNetworking.send(new ClaimRewardMessage(id, true));
 		}
 	}
 
@@ -316,7 +300,7 @@ public abstract class Reward extends QuestObjectBase {
 		return false;
 	}
 
-	public void addAnyProtoTranslations(CompoundTag tag) {
+	public void addAnyProtoTranslations(Json5Object tag) {
 		if (protoTranslations.containsKey(TranslationKey.TITLE)) {
 			getQuestFile().getTranslationManager().addInitialTranslation(tag, getQuestFile().getLocale(), TranslationKey.TITLE, protoTranslations.get(TranslationKey.TITLE));
 		}

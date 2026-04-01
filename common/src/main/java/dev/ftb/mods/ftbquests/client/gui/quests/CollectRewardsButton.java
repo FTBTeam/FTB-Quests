@@ -1,8 +1,5 @@
 package dev.ftb.mods.ftbquests.client.gui.quests;
 
-import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.network.chat.Component;
-
 import dev.ftb.mods.ftblibrary.client.gui.input.MouseButton;
 import dev.ftb.mods.ftblibrary.client.gui.theme.Theme;
 import dev.ftb.mods.ftblibrary.client.gui.widget.Panel;
@@ -12,6 +9,8 @@ import dev.ftb.mods.ftblibrary.icon.Color4I;
 import dev.ftb.mods.ftblibrary.util.TooltipList;
 import dev.ftb.mods.ftbquests.client.gui.RewardSelectorScreen;
 import dev.ftb.mods.ftbquests.quest.theme.property.ThemeProperties;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
+import net.minecraft.network.chat.Component;
 
 public class CollectRewardsButton extends TabButton {
 	public CollectRewardsButton(Panel panel) {
@@ -38,7 +37,7 @@ public class CollectRewardsButton extends TabButton {
 	}
 
 	@Override
-	public void draw(GuiGraphics graphics, Theme theme, int x, int y, int w, int h) {
+	public void draw(GuiGraphicsExtractor graphics, Theme theme, int x, int y, int w, int h) {
 		Color4I c = Color4I.WHITE.withAlpha(anyUnclaimedRewards() ? 255 : 128);
 		IconHelper.renderIcon(icon.withColor(c), graphics, x + (w - 16) / 2, y + (h - 16) / 2, 16, 16);
 

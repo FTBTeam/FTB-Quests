@@ -4,9 +4,9 @@ import net.minecraft.client.renderer.blockentity.state.BlockEntityRenderState;
 import net.minecraft.client.renderer.item.ItemStackRenderState;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.network.chat.Component;
+import org.jspecify.annotations.Nullable;
 
 import java.util.UUID;
-import org.jspecify.annotations.Nullable;
 
 public class TaskScreenRenderState extends BlockEntityRenderState {
     boolean shouldRender;
@@ -22,6 +22,8 @@ public class TaskScreenRenderState extends BlockEntityRenderState {
     @Nullable ResourceSprite resourceSprite;
     @Nullable ResourceSprite overlaySprite;
     public int resourceSpriteTint = 0xFFFFFFFF;
+    public int screenSize = 1;
+    public float rotationAngle = 0f;
 
     public record ResourceSprite(TextureAtlasSprite sprite, boolean interpolateHeight) {}
 }

@@ -1,27 +1,16 @@
 package dev.ftb.mods.ftbquests.quest;
 
-import net.minecraft.ChatFormatting;
-import net.minecraft.core.HolderLookup;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.ListTag;
-import net.minecraft.nbt.NbtOps;
-import net.minecraft.nbt.StringTag;
-import net.minecraft.nbt.Tag;
-import net.minecraft.network.RegistryFriendlyByteBuf;
-import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.MutableComponent;
-import net.minecraft.util.Util;
-import net.minecraft.world.item.ItemStack;
-
-import dev.architectury.networking.NetworkManager;
-
+import com.mojang.serialization.Codec;
+import de.marhali.json5.Json5Object;
 import dev.ftb.mods.ftblibrary.client.config.EditableConfigGroup;
 import dev.ftb.mods.ftblibrary.client.config.Tristate;
 import dev.ftb.mods.ftblibrary.client.config.editable.EditableString;
 import dev.ftb.mods.ftblibrary.client.config.gui.EditConfigScreen;
 import dev.ftb.mods.ftblibrary.icon.Icon;
+import dev.ftb.mods.ftblibrary.json5.Json5Ops;
+import dev.ftb.mods.ftblibrary.json5.Json5Util;
 import dev.ftb.mods.ftblibrary.math.Bits;
-import dev.ftb.mods.ftblibrary.snbt.SNBTCompoundTag;
+import dev.ftb.mods.ftblibrary.platform.network.Play2ServerNetworking;
 import dev.ftb.mods.ftbquests.api.FTBQuestsAPI;
 import dev.ftb.mods.ftbquests.client.ClientQuestFile;
 import dev.ftb.mods.ftbquests.client.config.EditableIconItemStack;
@@ -36,20 +25,19 @@ import dev.ftb.mods.ftbquests.registry.ModItems;
 import dev.ftb.mods.ftbquests.util.NetUtils;
 import dev.ftb.mods.ftbquests.util.ProgressChange;
 import dev.ftb.mods.ftbquests.util.TextUtils;
+import net.minecraft.ChatFormatting;
+import net.minecraft.core.HolderLookup;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.util.Util;
+import net.minecraft.world.item.ItemStack;
+import org.jspecify.annotations.Nullable;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.EnumMap;
-import java.util.EnumSet;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 import java.util.regex.Pattern;
-import org.jspecify.annotations.NonNull;
-import org.jspecify.annotations.Nullable;
 
 public abstract class QuestObjectBase implements Comparable<QuestObjectBase> {
 	private static final Pattern TAG_PATTERN = Pattern.compile("^[a-z0-9_]*$");
@@ -99,48 +87,47 @@ public abstract class QuestObjectBase implements Comparable<QuestObjectBase> {
 		return sendNotifications.get(true);
 	}
 
-	public static ItemStack itemOrMissingFromNBT(@Nullable Tag tag, HolderLookup.Provider provider) {
-		CompoundTag compoundTag = processItemTagData(tag);
-		return compoundTag.isEmpty() ?
+	public static ItemStack itemOrMissingFromJson(Json5Object json, HolderLookup.Provider provider) {
+//		CompoundTag compoundTag = processItemTagData(tag);
+		return json.isEmpty() ?
 				ItemStack.EMPTY :
-				ItemStack.CODEC.parse(provider.createSerializationContext(NbtOps.INSTANCE), compoundTag).result()
-								.orElse(createMissing(compoundTag));
+				ItemStack.CODEC.parse(provider.createSerializationContext(Json5Ops.INSTANCE), json).result()
+								.orElse(createMissing(json));
 	}
 
-	public static ItemStack singleItemOrMissingFromNBT(@Nullable Tag tag, HolderLookup.Provider provider) {
-		CompoundTag compoundTag = processItemTagData(tag);
-		return compoundTag.isEmpty() ?
-				ItemStack.EMPTY :
-				ItemStack.SINGLE_ITEM_CODEC.parse(provider.createSerializationContext(NbtOps.INSTANCE), compoundTag).result()
-						.orElse(createMissing(compoundTag));
-	}
+//	public static ItemStack singleItemOrMissingFromJson(Json5Object json, HolderLookup.Provider provider) {
+//		return json.isEmpty() ?
+//				ItemStack.EMPTY :
+//				ItemStack.CODEC.parse(provider.createSerializationContext(Json5Ops.INSTANCE), json).result()
+//						.orElse(createMissing(json));
+//	}
 
 	// support for importing SNBT for itemstacks from legacy (1.20 and older) quest book data
-	private static CompoundTag processItemTagData(@Nullable Tag tag) {
-		if (tag instanceof StringTag s) {
-			// 1.20 or earlier, item name only
-			return Util.make(new CompoundTag(), t -> t.putString("id", s.asString().orElseThrow()));
-		} else if (tag instanceof CompoundTag c) {
-			if (c.contains("Count") || c.contains("tag")) {
-				// 1.20 or earlier with count and/or NBT data; migrate, but no NBT -> component data conversion
-				return Util.make(new CompoundTag(), t -> {
-					t.putString("id", c.getString("id").orElseThrow());
-					int count = c.getInt("Count").orElse(1);
-					if (count != 0) t.putInt("count", count);
-				});
-			} else {
-				// 1.21 or later; it's good as-is
-				return c;
-			}
-		} else {
-			// shouldn't get here?
-			return new CompoundTag();
-		}
-	}
+//	private static CompoundTag processItemTagData(Json5Object tag) {
+//		if (tag instanceof StringTag s) {
+//			// 1.20 or earlier, item name only
+//			return Util.make(new CompoundTag(), t -> t.putString("id", s.asString().orElseThrow()));
+//		} else if (tag instanceof CompoundTag c) {
+//			if (c.contains("Count") || c.contains("tag")) {
+//				// 1.20 or earlier with count and/or NBT data; migrate, but no NBT -> component data conversion
+//				return Util.make(new CompoundTag(), t -> {
+//					t.putString("id", c.getString("id").orElseThrow());
+//					int count = c.getInt("Count").orElse(1);
+//					if (count != 0) t.putInt("count", count);
+//				});
+//			} else {
+//				// 1.21 or later; it's good as-is
+//				return c;
+//			}
+//		} else {
+//			// shouldn't get here?
+//			return new CompoundTag();
+//		}
+//	}
 
-	private static ItemStack createMissing(CompoundTag tag) {
-		String id = tag.getString("id").orElse("unknown");
-		int count = Math.max(1, tag.getInt("count").orElse(1));
+	private static ItemStack createMissing(Json5Object json) {
+		String id = Json5Util.getString(json, "id").orElse("unknown");
+		int count = Math.max(1, Json5Util.getInt(json, "count").orElse(1));
 		String text = count == 1 ? id : count + "x " + id;
 
 		return Util.make(new ItemStack(ModItems.MISSING_ITEM.get()),
@@ -173,7 +160,7 @@ public abstract class QuestObjectBase implements Comparable<QuestObjectBase> {
 			String locale = getQuestFile().getLocale();
 			getQuestFile().getTranslationManager().addTranslation(this, locale, translationKey, value);
 			if (!getQuestFile().isServerSide()) {
-				NetworkManager.sendToServer(SyncTranslationMessageToServer.create(this, locale, translationKey, value));
+				Play2ServerNetworking.send(SyncTranslationMessageToServer.create(this, locale, translationKey, value));
 			}
 		} else if (!getQuestFile().isServerSide()) {
 			protoTranslations.put(translationKey, value);
@@ -185,7 +172,7 @@ public abstract class QuestObjectBase implements Comparable<QuestObjectBase> {
 			String locale = getQuestFile().getLocale();
 			getQuestFile().getTranslationManager().addTranslation(this, locale, translationKey, value);
 			if (!getQuestFile().isServerSide()) {
-				NetworkManager.sendToServer(SyncTranslationMessageToServer.create(this, locale, translationKey, value));
+				Play2ServerNetworking.send(SyncTranslationMessageToServer.create(this, locale, translationKey, value));
 			}
 		}
 		// proto-translations not handled here since there aren't any list values that need handling
@@ -304,33 +291,22 @@ public abstract class QuestObjectBase implements Comparable<QuestObjectBase> {
 		return 1L;
 	}
 
-	public void writeData(CompoundTag nbt, HolderLookup.Provider provider) {
+	public void writeData(Json5Object json, HolderLookup.Provider provider) {
 		if (!rawIcon.isEmpty()) {
-			ItemStack.SINGLE_ITEM_CODEC.encodeStart(NbtOps.INSTANCE, rawIcon).ifSuccess(t -> nbt.put("icon", t));
+			ItemStack.CODEC.encodeStart(Json5Ops.INSTANCE, rawIcon).ifSuccess(t -> json.add("icon", t));
 		}
-
 		if (!tags.isEmpty()) {
-			nbt.put("tags", Util.make(new ListTag(), l -> {
-				for (String s : tags) {
-					l.add(StringTag.valueOf(s));
-				}
-			}));
+			Json5Util.store(json, "tags", Codec.STRING.listOf(), tags);
 		}
 	}
 
-	public void readData(CompoundTag nbt, HolderLookup.Provider provider) {
-		nbt.getCompound("icon").ifPresent(icon -> rawIcon = singleItemOrMissingFromNBT(icon, provider));
+	public void readData(Json5Object json, HolderLookup.Provider provider) {
+		Json5Util.getJson5Object(json, "icon").ifPresent(icon -> rawIcon = itemOrMissingFromJson(icon, provider));
 
-		ListTag tagsList = nbt.getList("tags").orElse(new ListTag());
+		tags = Json5Util.fetch(json, "tags", Codec.STRING.listOf()).orElseGet(ArrayList::new);
 
-		tags = new ArrayList<>(tagsList.size());
-
-		for (int i = 0; i < tagsList.size(); i++) {
-			tags.add(tagsList.getString(i).orElse(""));
-		}
-
-		if (nbt.contains("custom_id")) {
-			tags.add(nbt.getString("custom_id").orElse(""));
+		if (json.has("custom_id")) {
+			tags.add(json.get("custom_id").getAsString());
 		}
 	}
 
@@ -453,7 +429,7 @@ public abstract class QuestObjectBase implements Comparable<QuestObjectBase> {
 		EditableConfigGroup group = new EditableConfigGroup(FTBQuestsAPI.MOD_ID, accepted -> {
 			gui.run();
 			if (accepted && validateEditedConfig()) {
-				NetworkManager.sendToServer(EditObjectMessage.forQuestObject(this));
+				Play2ServerNetworking.send(EditObjectMessage.forQuestObject(this));
 			}
 		}) {
 			@Override
@@ -481,9 +457,9 @@ public abstract class QuestObjectBase implements Comparable<QuestObjectBase> {
 		return EnumSet.noneOf(RecipeModHelper.Components.class);
 	}
 
-	public static <T extends QuestObjectBase> T copy(T orig, Supplier<@NonNull T> factory) {
+	public static <T extends QuestObjectBase> T copy(T orig, Supplier<T> factory) {
 		T copied = factory.get();
-		CompoundTag tag = new CompoundTag();
+		Json5Object tag = new Json5Object();
 		orig.writeData(tag, orig.holderLookup());
 		copied.readData(tag, orig.holderLookup());
 		return copied;
@@ -501,11 +477,11 @@ public abstract class QuestObjectBase implements Comparable<QuestObjectBase> {
 		return getQuestFile().holderLookup();
 	}
 
-	protected CompoundTag saveItemSingleLine(ItemStack stack) {
-		if (stack.isEmpty()) {
-			return new SNBTCompoundTag();
-		}
-
-		return Util.make(SNBTCompoundTag.of(ItemStack.CODEC.encodeStart(holderLookup().createSerializationContext(NbtOps.INSTANCE), stack).getOrThrow()), SNBTCompoundTag::singleLine);
-	}
+//	protected CompoundTag saveItemSingleLine(ItemStack stack) {
+//		if (stack.isEmpty()) {
+//			return new SNBTCompoundTag();
+//		}
+//
+//		return Util.make(SNBTCompoundTag.of(ItemStack.CODEC.encodeStart(holderLookup().createSerializationContext(NbtOps.INSTANCE), stack).getOrThrow()), SNBTCompoundTag::singleLine);
+//	}
 }

@@ -1,15 +1,5 @@
 package dev.ftb.mods.ftbquests.client.gui.quests;
 
-import net.minecraft.ChatFormatting;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.network.chat.Component;
-import net.minecraft.world.item.Item;
-import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.TooltipFlag;
-
-import dev.architectury.networking.NetworkManager;
-
 import dev.ftb.mods.ftblibrary.client.gui.GuiHelper;
 import dev.ftb.mods.ftblibrary.client.gui.WidgetType;
 import dev.ftb.mods.ftblibrary.client.gui.input.MouseButton;
@@ -22,6 +12,7 @@ import dev.ftb.mods.ftblibrary.client.util.ClientUtils;
 import dev.ftb.mods.ftblibrary.client.util.PositionedIngredient;
 import dev.ftb.mods.ftblibrary.icon.Color4I;
 import dev.ftb.mods.ftblibrary.icon.Icons;
+import dev.ftb.mods.ftblibrary.platform.network.Play2ServerNetworking;
 import dev.ftb.mods.ftblibrary.util.TooltipList;
 import dev.ftb.mods.ftbquests.client.ClientQuestFile;
 import dev.ftb.mods.ftbquests.client.gui.ContextMenuBuilder;
@@ -29,11 +20,18 @@ import dev.ftb.mods.ftbquests.net.ReorderItemMessage;
 import dev.ftb.mods.ftbquests.quest.reward.ItemReward;
 import dev.ftb.mods.ftbquests.quest.reward.Reward;
 import dev.ftb.mods.ftbquests.quest.theme.property.ThemeProperties;
+import net.minecraft.ChatFormatting;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
+import net.minecraft.network.chat.Component;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.TooltipFlag;
+import org.joml.Matrix3x2fStack;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import org.joml.Matrix3x2fStack;
 
 public class RewardButton extends Button {
 	private final QuestScreen questScreen;
@@ -118,10 +116,10 @@ public class RewardButton extends Button {
 			ContextMenuBuilder builder = ContextMenuBuilder.create(reward, questScreen);
 
 			builder.insertAtTop(List.of(new ContextMenuItem(Component.translatable("ftbquests.gui.move_left"), Icons.LEFT,
-					b -> NetworkManager.sendToServer(new ReorderItemMessage(reward.getId(), false))
+					b -> Play2ServerNetworking.send(new ReorderItemMessage(reward.getId(), false))
 			)));
 			builder.insertAtTop(List.of(new ContextMenuItem(Component.translatable("ftbquests.gui.move_right"), Icons.RIGHT,
-					b -> NetworkManager.sendToServer(new ReorderItemMessage(reward.getId(), true))
+					b -> Play2ServerNetworking.send(new ReorderItemMessage(reward.getId(), true))
 			)));
 
 			builder.openContextMenu(getGui());
@@ -134,14 +132,14 @@ public class RewardButton extends Button {
 	}
 
 	@Override
-	public void drawBackground(GuiGraphics graphics, Theme theme, int x, int y, int w, int h) {
+	public void drawBackground(GuiGraphicsExtractor graphics, Theme theme, int x, int y, int w, int h) {
 		if (isMouseOver()) {
 			super.drawBackground(graphics, theme, x, y, w, h);
 		}
 	}
 
 	@Override
-	public void draw(GuiGraphics graphics, Theme theme, int x, int y, int w, int h) {
+	public void draw(GuiGraphicsExtractor graphics, Theme theme, int x, int y, int w, int h) {
 		int bs = h >= 32 ? 32 : 16;
 		drawBackground(graphics, theme, x, y, w, h);
 		drawIcon(graphics, theme, x + (w - bs) / 2, y + (h - bs) / 2, bs, bs);

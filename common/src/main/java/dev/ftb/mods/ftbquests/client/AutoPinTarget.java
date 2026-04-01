@@ -1,8 +1,7 @@
 package dev.ftb.mods.ftbquests.client;
 
-import net.minecraft.network.chat.Component;
-
 import dev.ftb.mods.ftblibrary.util.NameMap;
+import net.minecraft.network.chat.Component;
 
 public enum AutoPinTarget {
     QUEST_BOOK("file"),

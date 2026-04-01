@@ -1,18 +1,17 @@
 package dev.ftb.mods.ftbquests.command;
 
+import com.mojang.brigadier.Command;
+import com.mojang.brigadier.arguments.BoolArgumentType;
+import com.mojang.brigadier.builder.LiteralArgumentBuilder;
+import dev.ftb.mods.ftbquests.quest.ServerQuestFile;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.arguments.EntityArgument;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
-import com.mojang.brigadier.Command;
-import com.mojang.brigadier.arguments.BoolArgumentType;
-import com.mojang.brigadier.builder.LiteralArgumentBuilder;
-
-import dev.ftb.mods.ftbquests.quest.ServerQuestFile;
+import org.jspecify.annotations.Nullable;
 
 import java.util.Objects;
-import org.jspecify.annotations.Nullable;
 
 import static net.minecraft.commands.Commands.argument;
 

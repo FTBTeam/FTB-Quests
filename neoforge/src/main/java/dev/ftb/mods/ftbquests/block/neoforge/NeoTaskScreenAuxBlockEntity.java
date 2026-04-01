@@ -10,20 +10,20 @@ import net.neoforged.neoforge.transfer.item.ItemResource;
 
 import dev.ftb.mods.ftbquests.block.entity.TaskScreenAuxBlockEntity;
 
-public class NeoForgeTaskScreenAuxBlockEntity extends TaskScreenAuxBlockEntity {
-    public NeoForgeTaskScreenAuxBlockEntity(BlockPos blockPos, BlockState blockState) {
+public class NeoTaskScreenAuxBlockEntity extends TaskScreenAuxBlockEntity {
+    public NeoTaskScreenAuxBlockEntity(BlockPos blockPos, BlockState blockState) {
         super(blockPos, blockState);
     }
 
     public ResourceHandler<ItemResource> getItemHandler() {
-        return getCoreScreen().map(s -> ((NeoForgeTaskScreenBlockEntity) s).getItemHandler()).orElse(null);
+        return getCoreScreen().map(s -> ((NeoTaskScreenBlockEntity) s).getItemHandler()).orElse(null);
     }
 
     public ResourceHandler<FluidResource> getFluidHandler() {
-        return getCoreScreen().map(s -> ((NeoForgeTaskScreenBlockEntity) s).getFluidHandler()).orElse(null);
+        return getCoreScreen().map(s -> ((NeoTaskScreenBlockEntity) s).getFluidHandler()).orElse(null);
     }
 
     public EnergyHandler getEnergyHandler() {
-        return getCoreScreen().map(s -> ((NeoForgeTaskScreenBlockEntity) s).getEnergyHandler()).orElse(null);
+        return getCoreScreen().map(s -> ((NeoTaskScreenBlockEntity) s).getEnergyHandler()).orElse(null);
     }
 }

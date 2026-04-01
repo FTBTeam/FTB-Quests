@@ -1,13 +1,8 @@
 package dev.ftb.mods.ftbquests.quest;
 
-import net.minecraft.core.HolderLookup;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.ListTag;
-import net.minecraft.nbt.StringTag;
-import net.minecraft.network.RegistryFriendlyByteBuf;
-import net.minecraft.network.chat.Component;
 import com.mojang.datafixers.util.Pair;
-
+import de.marhali.json5.Json5Array;
+import de.marhali.json5.Json5Object;
 import dev.ftb.mods.ftblibrary.client.config.ConfigCallback;
 import dev.ftb.mods.ftblibrary.client.config.EditableConfigGroup;
 import dev.ftb.mods.ftblibrary.client.config.Tristate;
@@ -18,30 +13,34 @@ import dev.ftb.mods.ftblibrary.client.gui.widget.Widget;
 import dev.ftb.mods.ftblibrary.client.util.ClientUtils;
 import dev.ftb.mods.ftblibrary.icon.AnimatedIcon;
 import dev.ftb.mods.ftblibrary.icon.Icon;
+import dev.ftb.mods.ftblibrary.json5.Json5Util;
 import dev.ftb.mods.ftblibrary.math.Bits;
-import dev.ftb.mods.ftblibrary.snbt.SNBTCompoundTag;
+import dev.ftb.mods.ftblibrary.platform.event.NativeEventPosting;
 import dev.ftb.mods.ftbquests.FTBQuests;
 import dev.ftb.mods.ftbquests.client.config.EditableQuestObject;
 import dev.ftb.mods.ftbquests.client.gui.MultilineTextEditorScreen;
 import dev.ftb.mods.ftbquests.client.gui.quests.QuestScreen;
-import dev.ftb.mods.ftbquests.events.ObjectCompletedEvent;
-import dev.ftb.mods.ftbquests.events.ObjectStartedEvent;
-import dev.ftb.mods.ftbquests.events.QuestProgressEventData;
+import dev.ftb.mods.ftbquests.events.progress.ProgressEventData;
+import dev.ftb.mods.ftbquests.events.progress.ProgressType;
+import dev.ftb.mods.ftbquests.events.progress.QuestProgressEvent;
 import dev.ftb.mods.ftbquests.integration.RecipeModHelper;
 import dev.ftb.mods.ftbquests.quest.reward.Reward;
-import dev.ftb.mods.ftbquests.quest.reward.RewardType;
 import dev.ftb.mods.ftbquests.quest.task.Task;
-import dev.ftb.mods.ftbquests.quest.task.TaskType;
 import dev.ftb.mods.ftbquests.quest.translation.TranslationKey;
 import dev.ftb.mods.ftbquests.util.ProgressChange;
 import dev.ftb.mods.ftbquests.util.TextUtils;
+import it.unimi.dsi.fastutil.longs.LongOpenHashSet;
+import it.unimi.dsi.fastutil.longs.LongSet;
+import net.minecraft.core.HolderLookup;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.chat.Component;
+import net.minecraft.util.Util;
+import org.jetbrains.annotations.UnknownNullability;
+import org.jspecify.annotations.Nullable;
 
 import java.util.*;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
-import it.unimi.dsi.fastutil.longs.LongOpenHashSet;
-import it.unimi.dsi.fastutil.longs.LongSet;
-import org.jspecify.annotations.Nullable;
 
 public final class Quest extends QuestObject implements Movable, Excludable {
 	public static final String PAGEBREAK_CODE = "{@pagebreak}";
@@ -242,157 +241,92 @@ public final class Quest extends QuestObject implements Movable, Excludable {
 	}
 
 	@Override
-	public void writeData(CompoundTag nbt, HolderLookup.Provider provider) {
-		super.writeData(nbt, provider);
-
-		nbt.putDouble("x", x);
-		nbt.putDouble("y", y);
-
-		if (!shape.isEmpty()) {
-			nbt.putString("shape", shape);
-		}
-
-		if (!guidePage.isEmpty()) {
-			nbt.putString("guide_page", guidePage);
-		}
-
-		hideDependencyLines.write(nbt, "hide_dependency_lines");
-
-		if (hideDependentLines) {
-			nbt.putBoolean("hide_dependent_lines", true);
-		}
-
-		if (minRequiredDependencies > 0) {
-			nbt.putInt("min_required_dependencies", (byte) minRequiredDependencies);
-		}
+	public void writeData(Json5Object json, HolderLookup.Provider provider) {
+		super.writeData(json, provider);
 
 		removeInvalidDependencies();
 
+		json.addProperty("x", x);
+		json.addProperty("y", y);
+		if (!shape.isEmpty()) json.addProperty("shape", shape);
+		if (!guidePage.isEmpty()) json.addProperty("guide_page", guidePage);
+		hideDependencyLines.write(json, "hide_dependency_lines");
+		if (hideDependentLines) json.addProperty("hide_dependent_lines", true);
+		if (minRequiredDependencies > 0) json.addProperty("min_required_dependencies", minRequiredDependencies);
 		if (hasDependencies()) {
-			ListTag deps = new ListTag();
-			for (QuestObject dep : dependencies) {
-				deps.add(StringTag.valueOf(dep.getCodeString()));
-			}
-			nbt.put("dependencies", deps);
+			json.add("dependencies", Util.make(new Json5Array(), a -> {
+				dependencies.forEach(dep -> a.add(dep.getCodeString()));
+			}));
 		}
-
-		disableJEI.write(nbt, "disable_recipe_mod");
-		hideUntilDepsVisible.write(nbt, "hide_until_deps_visible");
-		hideUntilDepsComplete.write(nbt, "hide_until_deps_complete");
-
+		disableJEI.write(json, "disable_recipe_mod");
+		hideUntilDepsVisible.write(json, "hide_until_deps_visible");
+		hideUntilDepsComplete.write(json, "hide_until_deps_complete");
 		if (dependencyRequirement != DependencyRequirement.ALL_COMPLETED) {
-			nbt.putString("dependency_requirement", dependencyRequirement.getId());
+			json.addProperty("dependency_requirement", dependencyRequirement.getId());
 		}
-
-		hideTextUntilComplete.write(nbt,"hide_text_until_complete");
-
-		if (size != 0D) {
-			nbt.putDouble("size", size);
-		}
-
-		if (iconScale != 1d) {
-			nbt.putDouble("icon_scale", iconScale);
-		}
-
-		if (optional) {
-			nbt.putBoolean("optional", true);
-		}
-
-		if (minWidth > 0) {
-			nbt.putInt("min_width", minWidth);
-		}
-
-		canRepeat.write(nbt, "can_repeat");
-
-		if (invisibleUntilCompleted) {
-			nbt.putBoolean("invisible", true);
-		}
-		if (invisibleUntilTasks > 0) {
-			nbt.putInt("invisible_until_tasks", invisibleUntilTasks);
-		}
-
-		if (ignoreRewardBlocking) {
-			nbt.putBoolean("ignore_reward_blocking", true);
-		}
-
-		if (progressionMode != ProgressionMode.DEFAULT) {
-			nbt.putString("progression_mode", progressionMode.getId());
-		}
-
-		hideDetailsUntilStartable.write(nbt, "hide_details_until_startable");
-		requireSequentialTasks.write(nbt, "require_sequential_tasks");
-
-		if (hideLockIcon) {
-			nbt.putBoolean("hide_lock_icon", true);
-		}
-
-		if (maxCompletableDeps > 0) {
-			nbt.putInt("max_completable_dependents", maxCompletableDeps);
-		}
-
-		if (repeatCooldown > 0) {
-			nbt.putInt("repeat_cooldown", repeatCooldown);
-		}
+		hideTextUntilComplete.write(json,"hide_text_until_complete");
+		if (size != 0D) json.addProperty("size", size);
+		if (iconScale != 1d) json.addProperty("icon_scale", iconScale);
+		if (optional) json.addProperty("optional", true);
+		if (minWidth > 0) json.addProperty("min_width", minWidth);
+		canRepeat.write(json, "can_repeat");
+		if (invisibleUntilCompleted) json.addProperty("invisible", true);
+		if (invisibleUntilTasks > 0) json.addProperty("invisible_until_tasks", invisibleUntilTasks);
+		if (ignoreRewardBlocking) json.addProperty("ignore_reward_blocking", true);
+		if (progressionMode != ProgressionMode.DEFAULT) json.addProperty("progression_mode", progressionMode.getId());
+		hideDetailsUntilStartable.write(json, "hide_details_until_startable");
+		requireSequentialTasks.write(json, "require_sequential_tasks");
+		if (hideLockIcon) json.addProperty("hide_lock_icon", true);
+		if (maxCompletableDeps > 0) json.addProperty("max_completable_dependents", maxCompletableDeps);
+		if (repeatCooldown > 0) json.addProperty("repeat_cooldown", repeatCooldown);
 	}
 
 	@Override
-	public void readData(CompoundTag nbt, HolderLookup.Provider provider) {
-		super.readData(nbt, provider);
+	public void readData(@UnknownNullability Json5Object json, HolderLookup.Provider provider) {
+		super.readData(json, provider);
 
-		x = nbt.getDouble("x").orElseThrow();
-		y = nbt.getDouble("y").orElseThrow();
-		shape = nbt.getStringOr("shape", "");
+		x = Json5Util.getDouble(json, "x").orElseThrow();
+		y = Json5Util.getDouble(json, "y").orElseThrow();
+		shape = Json5Util.getString(json, "shape").orElse("");
 		if (shape.equals("default")) {
 			shape = "";
 		}
 
-		guidePage = nbt.getStringOr("guide_page", "");
-		hideDependencyLines = Tristate.read(nbt, "hide_dependency_lines");
-		hideDependentLines = nbt.getBooleanOr("hide_dependent_lines", false);
-		minRequiredDependencies = nbt.getIntOr("min_required_dependencies", 0);
+		guidePage = Json5Util.getString(json, "guide_page").orElse("");
+		hideDependencyLines = Tristate.read(json, "hide_dependency_lines");
+		hideDependentLines = Json5Util.getBoolean(json, "hide_dependent_lines").orElse(false);
+		minRequiredDependencies = Json5Util.getInt(json, "min_required_dependencies").orElse(0);
 
 		clearDependencies();
+		Json5Util.getJson5Array(json, "dependencies").ifPresent(a -> a.forEach(el -> {
+            if (chapter.file.get(chapter.file.getID(el.getAsString())) instanceof QuestObject qo) {
+                addDependency(qo);
+            }
+        }));
 
-		Optional<int[]> depsAsIntArray = nbt.getIntArray("dependencies");
-		if (depsAsIntArray.isPresent()) {
-			for (int i : depsAsIntArray.get()) {
-				QuestObject object = chapter.file.get(i);
-
-				if (object != null) {
-					addDependency(object);
-				}
-			}
-		} else {
-			ListTag deps = nbt.getList("dependencies").orElse(new ListTag());
-
-			for (int i = 0; i < deps.size(); i++) {
-				QuestObject object = chapter.file.get(chapter.file.getID(deps.getString(i).orElse("")));
-
-				if (object != null) {
-					addDependency(object);
-				}
-			}
-		}
-
-		hideUntilDepsVisible = Tristate.read(nbt, "hide_until_deps_visible");
-		hideUntilDepsComplete = Tristate.read(nbt, "hide_until_deps_complete");
-		disableJEI = Tristate.read(nbt, "disable_recipe_mod");
-		dependencyRequirement = nbt.getString("dependency_requirement").map(DependencyRequirement.NAME_MAP::get).orElse(DependencyRequirement.ALL_COMPLETED);
-		hideTextUntilComplete = Tristate.read(nbt, "hide_text_until_complete");
-		size = nbt.getDoubleOr("size", 0D);
-		iconScale = nbt.getDoubleOr("icon_scale", 1F);
-		optional = nbt.getBooleanOr("optional", false);
-		minWidth = nbt.getIntOr("min_width", 0);
-		canRepeat = Tristate.read(nbt, "can_repeat");
-		invisibleUntilCompleted = nbt.getBooleanOr("invisible", false);
-		invisibleUntilTasks = nbt.getIntOr("invisible_until_tasks", 0);
-		ignoreRewardBlocking = nbt.getBooleanOr("ignore_reward_blocking", false);
-		progressionMode = nbt.getString("progression_mode").map(ProgressionMode.NAME_MAP::get).orElse(ProgressionMode.DEFAULT);
-		hideDetailsUntilStartable = Tristate.read(nbt, "hide_details_until_startable");
-		requireSequentialTasks = Tristate.read(nbt, "require_sequential_tasks");
-		hideLockIcon = nbt.getBooleanOr("hide_lock_icon", false);
-		maxCompletableDeps = nbt.getIntOr("max_completable_dependents", 0);
-		repeatCooldown = nbt.getIntOr("repeat_cooldown", 0);
+		hideUntilDepsVisible = Tristate.read(json, "hide_until_deps_visible");
+		hideUntilDepsComplete = Tristate.read(json, "hide_until_deps_complete");
+		disableJEI = Tristate.read(json, "disable_recipe_mod");
+		dependencyRequirement = Json5Util.getString(json, "dependency_requirement")
+				.map(DependencyRequirement.NAME_MAP::get)
+				.orElse(DependencyRequirement.ALL_COMPLETED);
+		hideTextUntilComplete = Tristate.read(json, "hide_text_until_complete");
+		size = Json5Util.getDouble(json, "size").orElse(0D);
+		iconScale = Json5Util.getDouble(json, "icon_scale").orElse(1.0);
+		optional = Json5Util.getBoolean(json, "optional").orElse(false);
+		minWidth = Json5Util.getInt(json, "min_width").orElse(0);
+		canRepeat = Tristate.read(json, "can_repeat");
+		invisibleUntilCompleted = Json5Util.getBoolean(json, "invisible").orElse(false);
+		invisibleUntilTasks = Json5Util.getInt(json, "invisible_until_tasks").orElse(0);
+		ignoreRewardBlocking = Json5Util.getBoolean(json, "ignore_reward_blocking").orElse(false);
+		progressionMode = Json5Util.getString(json, "progression_mode")
+				.map(ProgressionMode.NAME_MAP::get)
+				.orElse(ProgressionMode.DEFAULT);
+		hideDetailsUntilStartable = Tristate.read(json, "hide_details_until_startable");
+		requireSequentialTasks = Tristate.read(json, "require_sequential_tasks");
+		hideLockIcon = Json5Util.getBoolean(json, "hide_lock_icon").orElse(false);
+		maxCompletableDeps = Json5Util.getInt(json, "max_completable_dependents").orElse(0);
+		repeatCooldown = Json5Util.getInt(json, "repeat_cooldown").orElse(0);
 	}
 
 	@Override
@@ -536,33 +470,33 @@ public final class Quest extends QuestObject implements Movable, Excludable {
 	}
 
 	@Override
-	public void onStarted(QuestProgressEventData<?> data) {
+	public void onStarted(ProgressEventData<?> data) {
 		data.setStarted(id);
-		ObjectStartedEvent.QUEST.invoker().act(new ObjectStartedEvent.QuestEvent(data.withObject(this)));
+		NativeEventPosting.get().postEvent(new QuestProgressEvent.Data(ProgressType.STARTED, data.withObject(this)));
 
-		if (!data.getTeamData().isStarted(chapter)) {
+		if (!data.teamData().isStarted(chapter)) {
 			chapter.onStarted(data.withObject(chapter));
 		}
 	}
 
 	@Override
-	public void onCompleted(QuestProgressEventData<?> data) {
-		if (!data.getTeamData().isCompleted(this)) {
+	public void onCompleted(ProgressEventData<?> data) {
+		if (!data.teamData().isCompleted(this)) {
 			// it's possible this quest is already completed, if it has one or more optional tasks
 			data.setCompleted(id);
-			ObjectCompletedEvent.QUEST.invoker().act(new ObjectCompletedEvent.QuestEvent(data.withObject(this)));
+			NativeEventPosting.get().postEvent(new QuestProgressEvent.Data(ProgressType.COMPLETED, data.withObject(this)));
 
 			if (!disableToast) {
 				data.notifyPlayers(id);
 			}
 
-			if (!data.getTeamData().isCompleted(chapter) && chapter.isCompletedRaw(data.getTeamData())) {
+			if (!data.teamData().isCompleted(chapter) && chapter.isCompletedRaw(data.teamData())) {
 				chapter.onCompleted(data.withObject(chapter));
 			}
 
-			data.getTeamData().checkAutoCompletion(this);
+			data.teamData().checkAutoCompletion(this);
 
-			checkForDependantCompletion(data.getTeamData());
+			checkForDependantCompletion(data.teamData());
 		}
 	}
 
@@ -957,30 +891,41 @@ public final class Quest extends QuestObject implements Movable, Excludable {
 		return ignoreRewardBlocking;
 	}
 
-	public void writeTasks(CompoundTag tag, HolderLookup.Provider provider) {
-		ListTag t = new ListTag();
-		for (Task task : tasks) {
-			TaskType type = task.getType();
-			SNBTCompoundTag nbt3 = new SNBTCompoundTag();
-			nbt3.putString("id", task.getCodeString());
-			nbt3.putString("type", type.getTypeForNBT());
-			task.writeData(nbt3, provider);
-			t.add(nbt3);
+	public Json5Object writeDataFull(HolderLookup.Provider provider) {
+		Json5Object json = new Json5Object();
+		writeData(json, provider);
+		json.addProperty("id", getCodeString());
+		if (!getTasks().isEmpty()) {
+			writeTasks(json, provider);
 		}
-		tag.put("tasks", t);
+		if (!getRewards().isEmpty()) {
+			writeRewards(json, provider);
+		}
+		return json;
 	}
 
-	public void writeRewards(CompoundTag tag, HolderLookup.Provider provider) {
-		ListTag r = new ListTag();
-		for (Reward reward : rewards) {
-			RewardType type = reward.getType();
-			SNBTCompoundTag nbt3 = new SNBTCompoundTag();
-			nbt3.putString("id", reward.getCodeString());
-			nbt3.putString("type", type.getTypeForNBT());
-			reward.writeData(nbt3, provider);
-			r.add(nbt3);
+	private void writeTasks(Json5Object tag, HolderLookup.Provider provider) {
+		Json5Array t = new Json5Array();
+		for (Task task : tasks) {
+			t.add(Util.make(new Json5Object(), j -> {
+				j.addProperty("id", task.getCodeString());
+				j.addProperty("type", task.getType().getTypeForSerialization());
+				task.writeData(j, provider);
+			}));
 		}
-		tag.put("rewards", r);
+		tag.add("tasks", t);
+	}
+
+	private void writeRewards(Json5Object tag, HolderLookup.Provider provider) {
+		Json5Array r = new Json5Array();
+		for (Reward reward : rewards) {
+			r.add(Util.make(new Json5Object(), j -> {
+				j.addProperty("id", reward.getCodeString());
+				j.addProperty("type", reward.getType().getTypeForSerialization());
+				reward.writeData(j, provider);
+			}));
+		}
+		tag.add("rewards", r);
 	}
 
 	public boolean hasDependencies() {

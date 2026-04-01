@@ -1,19 +1,7 @@
 package dev.ftb.mods.ftbquests.quest.loot;
 
-import net.minecraft.ChatFormatting;
-import net.minecraft.core.HolderLookup;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.ListTag;
-import net.minecraft.network.RegistryFriendlyByteBuf;
-import net.minecraft.network.chat.Component;
-import net.minecraft.resources.Identifier;
-import net.minecraft.server.MinecraftServer;
-import net.minecraft.util.RandomSource;
-import net.minecraft.util.Util;
-import net.minecraft.world.item.ItemStack;
-
-import dev.architectury.networking.NetworkManager;
-
+import de.marhali.json5.Json5Array;
+import de.marhali.json5.Json5Object;
 import dev.ftb.mods.ftblibrary.client.config.EditableConfigGroup;
 import dev.ftb.mods.ftblibrary.client.gui.widget.BaseScreen;
 import dev.ftb.mods.ftblibrary.client.util.ClientUtils;
@@ -21,9 +9,10 @@ import dev.ftb.mods.ftblibrary.icon.AnimatedIcon;
 import dev.ftb.mods.ftblibrary.icon.Icon;
 import dev.ftb.mods.ftblibrary.icon.Icons;
 import dev.ftb.mods.ftblibrary.icon.ItemIcon;
+import dev.ftb.mods.ftblibrary.json5.Json5Util;
 import dev.ftb.mods.ftblibrary.math.Bits;
-import dev.ftb.mods.ftblibrary.snbt.SNBTCompoundTag;
-import dev.ftb.mods.ftblibrary.util.NetworkHelper;
+import dev.ftb.mods.ftblibrary.platform.network.Play2ServerNetworking;
+import dev.ftb.mods.ftblibrary.platform.network.Server2PlayNetworking;
 import dev.ftb.mods.ftblibrary.util.TooltipList;
 import dev.ftb.mods.ftbquests.client.ClientQuestFile;
 import dev.ftb.mods.ftbquests.client.gui.EditRewardTableScreen;
@@ -33,27 +22,25 @@ import dev.ftb.mods.ftbquests.integration.RecipeModHelper;
 import dev.ftb.mods.ftbquests.net.CreateObjectResponseMessage;
 import dev.ftb.mods.ftbquests.net.EditObjectMessage;
 import dev.ftb.mods.ftbquests.net.SyncTranslationMessageToClient;
-import dev.ftb.mods.ftbquests.quest.BaseQuestFile;
-import dev.ftb.mods.ftbquests.quest.Chapter;
-import dev.ftb.mods.ftbquests.quest.Quest;
-import dev.ftb.mods.ftbquests.quest.QuestObjectBase;
-import dev.ftb.mods.ftbquests.quest.QuestObjectType;
-import dev.ftb.mods.ftbquests.quest.ServerQuestFile;
+import dev.ftb.mods.ftbquests.quest.*;
 import dev.ftb.mods.ftbquests.quest.reward.ItemReward;
 import dev.ftb.mods.ftbquests.quest.reward.Reward;
 import dev.ftb.mods.ftbquests.quest.reward.RewardType;
 import dev.ftb.mods.ftbquests.quest.reward.RewardTypes;
 import dev.ftb.mods.ftbquests.quest.translation.TranslationKey;
-
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.EnumSet;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
-import java.util.stream.Collectors;
+import net.minecraft.ChatFormatting;
+import net.minecraft.core.HolderLookup;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.chat.Component;
+import net.minecraft.resources.Identifier;
+import net.minecraft.server.MinecraftServer;
+import net.minecraft.util.RandomSource;
+import net.minecraft.util.Util;
+import net.minecraft.world.item.ItemStack;
 import org.jspecify.annotations.Nullable;
+
+import java.util.*;
+import java.util.stream.Collectors;
 
 public class RewardTable extends QuestObjectBase {
 	private final BaseQuestFile file;
@@ -98,7 +85,7 @@ public class RewardTable extends QuestObjectBase {
 	}
 
 	public static QuestObjectBase createRewardForTable(long id, String type, BaseQuestFile file) {
-        return RewardType.createReward(id, makeFakeQuest(file), type);
+		return RewardType.createReward(id, makeFakeQuest(file), type);
 	}
 
 	public Component getTitleOrElse(Component def) {
@@ -166,100 +153,82 @@ public class RewardTable extends QuestObjectBase {
 	}
 
 	@Override
-	public void writeData(CompoundTag nbt, HolderLookup.Provider provider) {
-		super.writeData(nbt, provider);
+	public void writeData(Json5Object json, HolderLookup.Provider provider) {
+		super.writeData(json, provider);
 
-		if (emptyWeight > 0f) {
-			nbt.putFloat("empty_weight", emptyWeight);
-		}
+		if (emptyWeight > 0f) json.addProperty("empty_weight", emptyWeight);
+		json.addProperty("loot_size", lootSize);
+		if (hideTooltip) json.addProperty("hide_tooltip", true);
+		if (useTitle) json.addProperty("use_title", true);
 
-		nbt.putInt("loot_size", lootSize);
-
-		if (hideTooltip) {
-			nbt.putBoolean("hide_tooltip", true);
-		}
-
-		if (useTitle) {
-			nbt.putBoolean("use_title", true);
-		}
-
-		ListTag list = new ListTag();
-
+		Json5Array list = new Json5Array();
 		for (WeightedReward wr : weightedRewards) {
-			SNBTCompoundTag rewardTag = new SNBTCompoundTag();
-			rewardTag.putString("id", wr.getReward().getCodeString());
-			wr.getReward().writeData(rewardTag, provider);
-			wr.getReward().addAnyProtoTranslations(rewardTag);
+			Json5Object rewardJson = new Json5Object();
+			rewardJson.addProperty("id", wr.getReward().getCodeString());
+			wr.getReward().writeData(rewardJson, provider);
+			wr.getReward().addAnyProtoTranslations(rewardJson);
 
 			if (wr.getReward().getType() != RewardTypes.ITEM) {
-				rewardTag.putString("type", wr.getReward().getType().getTypeForNBT());
+				rewardJson.addProperty("type", wr.getReward().getType().getTypeForSerialization());
 			}
 			if (wr.getWeight() != 1f) {
-				rewardTag.putFloat("weight", wr.getWeight());
+				rewardJson.addProperty("weight", wr.getWeight());
 			}
-			if (rewardTag.size() < 3) {
-				rewardTag.singleLine();
-			}
+//			if (rewardJson.size() < 3) {
+//				rewardJson.singleLine();
+//			}
 
-			list.add(rewardTag);
+			list.add(rewardJson);
 		}
 
-		nbt.put("rewards", list);
+		json.add("rewards", list);
 
-		if (lootCrate != null) {
-			nbt.put("loot_crate", Util.make(new CompoundTag(), tag -> lootCrate.writeData(tag)));
-		}
-
-		if (lootTableId != null) {
-			nbt.putString("loot_table_id", lootTableId.toString());
-		}
+		if (lootCrate != null) json.add("loot_crate", Util.make(new Json5Object(), o -> lootCrate.writeData(o)));
+		if (lootTableId != null) json.addProperty("loot_table_id", lootTableId.toString());
 	}
 
 	@Override
-	public void readData(CompoundTag nbt, HolderLookup.Provider provider) {
-		super.readData(nbt, provider);
-		emptyWeight = nbt.getFloat("empty_weight").orElse(0f);
-		lootSize = nbt.getInt("loot_size").orElse(0);
-		hideTooltip = nbt.getBoolean("hide_tooltip").orElse(true);
-		useTitle = nbt.getBoolean("use_title").orElse(true);
+	public void readData(Json5Object json, HolderLookup.Provider provider) {
+		super.readData(json, provider);
+		emptyWeight = Json5Util.getFloat(json, "empty_weight").orElse(0f);
+		lootSize = Json5Util.getInt(json, "loot_size").orElse(0);
+		hideTooltip = Json5Util.getBoolean(json, "hide_tooltip").orElse(true);
+		useTitle = Json5Util.getBoolean(json,  "use_title").orElse(true);
 
 		Set<Long> prevRewards = weightedRewards.stream().map(wr -> wr.getReward().getId()).collect(Collectors.toSet());
 		weightedRewards.clear();
 
 		boolean refreshIds = false;
 
-		ListTag list = nbt.getList("rewards").orElse(new ListTag());
-		for (int i = 0; i < list.size(); i++) {
+		Json5Array list = Json5Util.getJson5Array(json, "rewards").orElse(new Json5Array());
+		for (var el : list) {
 			boolean newReward = false;
-			Optional<CompoundTag> rewardTagOptional = list.getCompound(i);
-            if (rewardTagOptional.isEmpty()) {
-                continue;
-            }
+			if (el instanceof Json5Object rewardTag) {
+				if (!rewardTag.has("id") && file.isServerSide()) {
+					// can happen on server when reading in an older quest book where reward table rewards didn't have IDs
+					rewardTag.addProperty("id", QuestObjectBase.getCodeString(file.newID()));
+				}
+				long rewardId = QuestObjectBase.parseCodeString(Json5Util.getString(rewardTag, "id").orElse("0"));
+				if (rewardId == 0L && file.isServerSide()) {
+					// Can happen on server when the client has sent a reward table with new reward(s)
+					// Note: can also happen on client when copying rewards that haven't been sent to server yet (reward editor screen)
+					//       - in that case, an id of 0 is fine, so don't do anything here
+					rewardId = file.newID();
+					rewardTag.addProperty("id", QuestObjectBase.getCodeString(rewardId));
+					newReward = refreshIds = true;
+				}
 
-            CompoundTag rewardTag = rewardTagOptional.get();
-			if (!rewardTag.contains("id") && file.isServerSide()) {
-				// can happen on server when reading in an older quest book where reward table rewards didn't have IDs
-				rewardTag.putString("id", QuestObjectBase.getCodeString(file.newID()));
+				Reward reward = RewardType.createReward(rewardId, fakeQuest, Json5Util.getString(rewardTag, "type").orElse(""));
+				getQuestFile().getTranslationManager().processInitialTranslation(rewardTag, reward);
+				reward.readData(rewardTag, provider);
+				float weight = rewardTag.has("weight") ? Json5Util.getFloat(rewardTag, "weight").orElse(0f) : 1;
+				weightedRewards.add(new WeightedReward(reward, weight));
+				prevRewards.remove(rewardId);
+				if (newReward && getFile() instanceof ServerQuestFile sqf) {
+					Server2PlayNetworking.sendToAllPlayers(sqf.server, CreateObjectResponseMessage.create(reward, rewardTag));
+				}
 			}
-			long rewardId = QuestObjectBase.parseCodeString(rewardTag.getString("id").orElse("0"));
-			if (rewardId == 0L && file.isServerSide()) {
-				// Can happen on server when the client has sent a reward table with new reward(s)
-				// Note: can also happen on client when copying rewards that haven't been sent to server yet (reward editor screen)
-				//       - in that case, an id of 0 is fine, so don't do anything here
-				rewardId = file.newID();
-				rewardTag.putString("id", QuestObjectBase.getCodeString(rewardId));
-				newReward = refreshIds = true;
-			}
-
-			Reward reward = RewardType.createReward(rewardId, fakeQuest, rewardTag.getString("type").orElse(""));
-            getQuestFile().getTranslationManager().processInitialTranslation(rewardTag, reward);
-            reward.readData(rewardTag, provider);
-            weightedRewards.add(new WeightedReward(reward, rewardTag.contains("weight") ? rewardTag.getFloat("weight").orElse(0f) : 1));
-            prevRewards.remove(rewardId);
-            if (newReward && getFile() instanceof ServerQuestFile sqf) {
-                NetworkHelper.sendToAll(sqf.server, CreateObjectResponseMessage.create(reward, rewardTag));
-            }
-        }
+		}
 
 		if (refreshIds) {
 			file.refreshRewardTableRewardIDs();
@@ -270,13 +239,11 @@ public class RewardTable extends QuestObjectBase {
 			prevRewards.forEach(id -> getFile().deleteObject(id));
 		}
 
-        lootCrate = nbt.getCompound("loot_crate").map(e -> {
-            LootCrate crate = new LootCrate(this, false);
-            crate.readData(e);
-            return crate;
-        }).orElse(null);
+		lootCrate = Json5Util.getJson5Object(json, "loot_crate")
+				.map(o -> Util.make(new LootCrate(this, false), c -> c.readData(o)))
+				.orElse(null);
 
-		lootTableId = nbt.getString("loot_table_id").map(Identifier::tryParse).orElse(null);
+		lootTableId = Json5Util.getString(json, "loot_table_id").map(Identifier::tryParse).orElse(null);
 	}
 
 	@Override
@@ -394,7 +361,7 @@ public class RewardTable extends QuestObjectBase {
 
 		weightedRewards.forEach(wr ->
 				file.getTranslationManager().getStringTranslation(wr.getReward(), file.getLocale(), TranslationKey.TITLE).ifPresent(title ->
-						NetworkHelper.sendToAll(server, SyncTranslationMessageToClient.create(wr.getReward(), file.getLocale(), TranslationKey.TITLE, title))));
+						Server2PlayNetworking.sendToAllPlayers(server, SyncTranslationMessageToClient.create(wr.getReward(), file.getLocale(), TranslationKey.TITLE, title))));
 	}
 
 	@Override
@@ -439,7 +406,7 @@ public class RewardTable extends QuestObjectBase {
 	@Override
 	public void onEditButtonClicked(Runnable gui) {
 		new EditRewardTableScreen(gui, this, editedReward -> {
-			NetworkManager.sendToServer(EditObjectMessage.forQuestObject(editedReward));
+			Play2ServerNetworking.send(EditObjectMessage.forQuestObject(editedReward));
 			clearCachedData();
 		}).openGui();
 	}
@@ -511,9 +478,9 @@ public class RewardTable extends QuestObjectBase {
 
 	public RewardTable copy() {
 		RewardTable copy = QuestObjectBase.copy(this, () ->  new RewardTable(this.id, this.getFile()));
-        copy.setRawTitle(getRawTitle());
-        copy.weightedRewards.clear();
-        getWeightedRewards().forEach(wr -> copy.weightedRewards.add(wr.copy()));
-        return copy;
+		copy.setRawTitle(getRawTitle());
+		copy.weightedRewards.clear();
+		getWeightedRewards().forEach(wr -> copy.weightedRewards.add(wr.copy()));
+		return copy;
 	}
 }

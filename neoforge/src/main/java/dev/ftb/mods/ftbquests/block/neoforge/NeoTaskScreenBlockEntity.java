@@ -25,14 +25,14 @@ import java.util.function.LongConsumer;
 import java.util.function.LongSupplier;
 import org.jspecify.annotations.NonNull;
 
-public class NeoForgeTaskScreenBlockEntity extends TaskScreenBlockEntity {
+public class NeoTaskScreenBlockEntity extends TaskScreenBlockEntity {
     private AABB cachedRenderAABB = null;
 
     private final ResourceHandler<ItemResource> itemHandler = new TaskItemHandler();
     private final ResourceHandler<FluidResource> fluidHandler = new TaskFluidHandler();
     private final EnergyHandler energyHandler = new TaskEnergyHandler();
 
-    public NeoForgeTaskScreenBlockEntity(BlockPos blockPos, BlockState blockState) {
+    public NeoTaskScreenBlockEntity(BlockPos blockPos, BlockState blockState) {
         super(blockPos, blockState);
     }
 

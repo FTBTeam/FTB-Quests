@@ -1,19 +1,13 @@
 package dev.ftb.mods.ftbquests.client.gui;
 
-import dev.architectury.networking.NetworkManager;
-
 import dev.ftb.mods.ftblibrary.client.gui.screens.AbstractGroupedButtonListScreen;
 import dev.ftb.mods.ftblibrary.client.gui.theme.Theme;
-import dev.ftb.mods.ftblibrary.client.gui.widget.Button;
-import dev.ftb.mods.ftblibrary.client.gui.widget.Panel;
-import dev.ftb.mods.ftblibrary.client.gui.widget.SimpleButton;
-import dev.ftb.mods.ftblibrary.client.gui.widget.SimpleTextButton;
-import dev.ftb.mods.ftblibrary.client.gui.widget.TextField;
-import dev.ftb.mods.ftblibrary.client.gui.widget.Widget;
+import dev.ftb.mods.ftblibrary.client.gui.widget.*;
 import dev.ftb.mods.ftblibrary.client.icon.IconHelper;
 import dev.ftb.mods.ftblibrary.client.util.ClientUtils;
 import dev.ftb.mods.ftblibrary.icon.Color4I;
 import dev.ftb.mods.ftblibrary.icon.Icons;
+import dev.ftb.mods.ftblibrary.platform.network.Play2ServerNetworking;
 import dev.ftb.mods.ftblibrary.util.TooltipList;
 import dev.ftb.mods.ftbquests.client.ClientQuestFile;
 import dev.ftb.mods.ftbquests.client.gui.quests.QuestScreen;
@@ -25,7 +19,7 @@ import dev.ftb.mods.ftbquests.quest.TeamData;
 import dev.ftb.mods.ftbquests.quest.reward.Reward;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.Mth;
 import net.minecraft.util.Util;
@@ -128,7 +122,7 @@ public class RewardSelectorScreen extends AbstractGroupedButtonListScreen<Chapte
     }
 
     private void doClaimAll() {
-        NetworkManager.sendToServer(ClaimAllRewardsMessage.INSTANCE);
+        Play2ServerNetworking.send(ClaimAllRewardsMessage.INSTANCE);
         message = excludedRewards > 0 ?
                 Component.translatable("ftbquests.gui.claim_all_exclusion", excludedRewards) :
                 Component.translatable("ftbquests.gui.all_rewards_claimed");
@@ -152,7 +146,7 @@ public class RewardSelectorScreen extends AbstractGroupedButtonListScreen<Chapte
     }
 
     @Override
-    public void drawBackground(GuiGraphics graphics, Theme theme, int x, int y, int w, int h) {
+    public void drawBackground(GuiGraphicsExtractor graphics, Theme theme, int x, int y, int w, int h) {
         super.drawBackground(graphics, theme, x, y, w, h);
         theme.drawPanelBackground(graphics, x, y, w, h);
 
@@ -221,11 +215,11 @@ public class RewardSelectorScreen extends AbstractGroupedButtonListScreen<Chapte
         }
 
         @Override
-        public void drawBackground(GuiGraphics graphics, Theme theme, int x, int y, int w, int h) {
+        public void drawBackground(GuiGraphicsExtractor graphics, Theme theme, int x, int y, int w, int h) {
             super.drawBackground(graphics, theme, x, y, w, h);
 
             IconHelper.renderIconStatic(value.getIcon(), graphics, x + 2, y + (height - 12) / 2, 12, 12);
-            graphics.hLine(x, x + w, y + h, 0x40808080);
+            graphics.horizontalLine(x, x + w, y + h, 0x40808080);
         }
     }
 
@@ -261,7 +255,7 @@ public class RewardSelectorScreen extends AbstractGroupedButtonListScreen<Chapte
         }
 
         @Override
-        public void drawBackground(GuiGraphics graphics, Theme theme, int x, int y, int w, int h) {
+        public void drawBackground(GuiGraphicsExtractor graphics, Theme theme, int x, int y, int w, int h) {
             theme.drawPanelBackground(graphics, x, y, w, h);
             IconHelper.renderIcon(Color4I.BLACK.withAlpha(80), graphics, x, y + h - 1, w, 1);
         }

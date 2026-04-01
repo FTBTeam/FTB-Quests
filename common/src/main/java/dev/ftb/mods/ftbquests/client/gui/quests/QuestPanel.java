@@ -1,15 +1,5 @@
 package dev.ftb.mods.ftbquests.client.gui.quests;
 
-import net.minecraft.ChatFormatting;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.client.renderer.RenderPipelines;
-import net.minecraft.network.chat.Component;
-import net.minecraft.util.ARGB;
-import net.minecraft.util.Mth;
-
-import dev.architectury.networking.NetworkManager;
-
 import dev.ftb.mods.ftblibrary.client.config.editable.EditableImageResource;
 import dev.ftb.mods.ftblibrary.client.config.gui.resource.SelectImageResourceScreen;
 import dev.ftb.mods.ftblibrary.client.gui.GuiHelper;
@@ -26,37 +16,44 @@ import dev.ftb.mods.ftblibrary.icon.Icon;
 import dev.ftb.mods.ftblibrary.icon.Icons;
 import dev.ftb.mods.ftblibrary.icon.ImageIcon;
 import dev.ftb.mods.ftblibrary.math.MathUtils;
-import dev.ftb.mods.ftbquests.api.FTBQuestsAPI;
+import dev.ftb.mods.ftblibrary.platform.network.Play2ServerNetworking;
 import dev.ftb.mods.ftbquests.client.FTBQuestsClient;
 import dev.ftb.mods.ftbquests.client.FTBQuestsClientConfig;
+import dev.ftb.mods.ftbquests.mixin.GuiGraphicsMixin;
 import dev.ftb.mods.ftbquests.net.CopyChapterImageMessage;
 import dev.ftb.mods.ftbquests.net.CopyQuestMessage;
 import dev.ftb.mods.ftbquests.net.CreateObjectMessage;
 import dev.ftb.mods.ftbquests.net.CreateTaskAtMessage;
-import dev.ftb.mods.ftbquests.quest.ChapterImage;
-import dev.ftb.mods.ftbquests.quest.Movable;
-import dev.ftb.mods.ftbquests.quest.Quest;
-import dev.ftb.mods.ftbquests.quest.QuestLink;
-import dev.ftb.mods.ftbquests.quest.QuestObjectBase;
-import dev.ftb.mods.ftbquests.quest.QuestShape;
+import dev.ftb.mods.ftbquests.quest.*;
 import dev.ftb.mods.ftbquests.quest.task.Task;
 import dev.ftb.mods.ftbquests.quest.task.TaskType;
 import dev.ftb.mods.ftbquests.quest.task.TaskTypes;
 import dev.ftb.mods.ftbquests.quest.theme.property.ThemeProperties;
 import dev.ftb.mods.ftbquests.quest.translation.TranslationKey;
+import net.minecraft.ChatFormatting;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
+import net.minecraft.client.gui.render.TextureSetup;
+import net.minecraft.client.renderer.RenderPipelines;
+import net.minecraft.client.renderer.state.gui.BlitRenderState;
+import net.minecraft.client.renderer.state.gui.GuiElementRenderState;
+import net.minecraft.network.chat.Component;
+import net.minecraft.util.ARGB;
+import net.minecraft.util.Mth;
+import org.jetbrains.annotations.UnknownNullability;
+import org.joml.Matrix3x2f;
+import org.joml.Matrix3x2fStack;
+import org.jspecify.annotations.Nullable;
+import org.lwjgl.glfw.GLFW;
 
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.List;
 import java.util.function.Consumer;
-import org.jetbrains.annotations.UnknownNullability;
-import org.joml.Matrix3x2fStack;
-import org.jspecify.annotations.Nullable;
-import org.lwjgl.glfw.GLFW;
 
 public class QuestPanel extends Panel {
-	private static final ImageIcon DEFAULT_DEPENDENCY_LINE_TEXTURE = (ImageIcon) Icon.getIcon(FTBQuestsAPI.MOD_ID + ":textures/gui/dependency.png");
+//	private static final ImageIcon DEFAULT_DEPENDENCY_LINE_TEXTURE = (ImageIcon) Icon.getIcon(FTBQuestsAPI.MOD_ID + ":textures/gui/dependency.png");
 
 	private final QuestScreen questScreen;
 	protected double questX = 0;
@@ -176,7 +173,7 @@ public class QuestPanel extends Panel {
 	}
 
 	@Override
-	public void drawOffsetBackground(GuiGraphics graphics, Theme theme, int x, int y, int w, int h) {
+	public void drawOffsetBackground(GuiGraphicsExtractor graphics, Theme theme, int x, int y, int w, int h) {
 		if (questScreen.selectedChapter == null) {
 			return;
 		}
@@ -255,7 +252,7 @@ public class QuestPanel extends Panel {
 		});
 	}
 
-	private void renderConnection(GuiGraphics graphics, Icon<?> dependencyLineTexture, Widget widget, QuestButton button, Matrix3x2fStack poseStack, float s, int r, int g, int b, int a, int a1, float mu) {
+	private void renderConnection(GuiGraphicsExtractor graphics, Icon<?> dependencyLineTexture, Widget widget, QuestButton button, Matrix3x2fStack poseStack, float s, int r, int g, int b, int a, int a1, float mu) {
 		if (!(dependencyLineTexture instanceof ImageIcon icon)) {
 			return;
 		}
@@ -272,27 +269,22 @@ public class QuestPanel extends Panel {
 		poseStack.rotate((float) Math.atan2(ey - sy, ex - sx));
 
 		var texture = Minecraft.getInstance().getTextureManager().getTexture(icon.texture);
-
-		graphics.submitBlit(
+		GuiElementRenderState state = new BlitRenderState(
 				RenderPipelines.GUI_TEXTURED,
-				texture.getTextureView(),
-				texture.getSampler(),
-				0,
-				(int) -s,
-				(int) len,
-				(int) s,
-				len / s / 2F + mu,
-				mu,
-				0,
-				1,
-				ARGB.color(a, r, g, b)
+				TextureSetup.singleTexture(texture.getTextureView(), texture.getSampler()),
+				new Matrix3x2f(poseStack),
+				0, (int) -s, (int) len, (int) s,
+				len / s / 2F + mu, mu, 0, 1,
+				ARGB.color(a, r, g, b),
+				null  // TODO null scissor stack could be a problem?
 		);
+		((GuiGraphicsMixin) graphics).getGuiRenderState().addGuiElement(state);
 
 		poseStack.popMatrix();
 	}
 
 	@Override
-	public void draw(GuiGraphics graphics, Theme theme, int x, int y, int w, int h) {
+	public void draw(GuiGraphicsExtractor graphics, Theme theme, int x, int y, int w, int h) {
 		super.draw(graphics, theme, x, y, w, h);
 
 		if (questScreen.selectedChapter != null && isMouseOver()) {
@@ -393,7 +385,7 @@ public class QuestPanel extends Panel {
 		}
 	}
 
-	private void drawStatusBar(GuiGraphics graphics, Theme theme, @UnknownNullability Matrix3x2fStack poseStack) {
+	private void drawStatusBar(GuiGraphicsExtractor graphics, Theme theme, @UnknownNullability Matrix3x2fStack poseStack) {
 		if (questScreen.selectedChapter == null) {
 			return;
 		}
@@ -487,7 +479,7 @@ public class QuestPanel extends Panel {
 									questScreen.file.getTranslationManager().addInitialTranslation(extra, questScreen.file.getLocale(),
 											TranslationKey.TITLE, task.getProtoTranslation(TranslationKey.TITLE));
 								}
-								NetworkManager.sendToServer(CreateTaskAtMessage.create(questScreen.selectedChapter, qx, qy, task, extra));
+								Play2ServerNetworking.send(CreateTaskAtMessage.create(questScreen.selectedChapter, qx, qy, task, extra));
 							}
 					);
 				}));
@@ -502,17 +494,17 @@ public class QuestPanel extends Panel {
 						contextMenu.add(ContextMenuItem.SEPARATOR);
 						contextMenu.add(new PasteQuestMenuItem(quest, Component.translatable("ftbquests.gui.paste"),
                                 Icons.ADD,
-                                b -> NetworkManager.sendToServer(new CopyQuestMessage(quest.id, questScreen.selectedChapter.id, qx, qy, true))));
+                                b -> Play2ServerNetworking.send(new CopyQuestMessage(quest.id, questScreen.selectedChapter.id, qx, qy, true))));
                         if (quest.hasDependencies()) {
                             contextMenu.add(new PasteQuestMenuItem(quest, Component.translatable("ftbquests.gui.paste_no_deps"),
                                     Icons.ADD_GRAY.withTint(Color4I.rgb(0x008000)),
-                                    b -> NetworkManager.sendToServer(new CopyQuestMessage(quest.id, questScreen.selectedChapter.id, qx, qy, false))));
+                                    b -> Play2ServerNetworking.send(new CopyQuestMessage(quest.id, questScreen.selectedChapter.id, qx, qy, false))));
                         }
                         contextMenu.add(new PasteQuestMenuItem(quest, Component.translatable("ftbquests.gui.paste_link"),
                                 Icons.ADD_GRAY.withTint(Color4I.rgb(0x8080C0)),
                                 b -> {
                                     QuestLink link = new QuestLink(0L, questScreen.selectedChapter, quest.id).setPosition(qx, qy);
-                                    NetworkManager.sendToServer(CreateObjectMessage.create(link, null));
+                                    Play2ServerNetworking.send(CreateObjectMessage.create(link, null));
                                 }));
                     }
                     case Task task -> {
@@ -523,7 +515,7 @@ public class QuestPanel extends Panel {
 						contextMenu.add(ContextMenuItem.SEPARATOR);
                         contextMenu.add(new TooltipContextMenuItem(Component.translatable("ftbquests.gui.paste_image"),
                                 Icons.ADD,
-                                b -> NetworkManager.sendToServer(new CopyChapterImageMessage(img.getId(), questScreen.selectedChapter.getId(), qx, qy)),
+                                b -> Play2ServerNetworking.send(new CopyChapterImageMessage(img.getId(), questScreen.selectedChapter.getId(), qx, qy)),
                                 Component.literal(img.getImage().toString()).withStyle(ChatFormatting.GRAY)));
                     }
                     case null, default -> {}
@@ -549,7 +541,7 @@ public class QuestPanel extends Panel {
 						.setImage(Icon.getIcon(imageConfig.getValue()))
 						.setPosition(qx, qy);
 				image.fixupAspectRatio(true);
-				NetworkManager.sendToServer(CreateObjectMessage.create(image, null));
+				Play2ServerNetworking.send(CreateObjectMessage.create(image, null));
 			}
 			QuestPanel.this.questScreen.openGui();
 		}).openGui();
@@ -561,7 +553,7 @@ public class QuestPanel extends Panel {
 		}
 		Task newTask = QuestObjectBase.copy(task,
 				() -> TaskType.createTask(0L, new Quest(0L, questScreen.selectedChapter), task.getType().getTypeId().toString()));
-		NetworkManager.sendToServer(CreateTaskAtMessage.create(questScreen.selectedChapter, qx, qy, newTask, null));
+		Play2ServerNetworking.send(CreateTaskAtMessage.create(questScreen.selectedChapter, qx, qy, newTask, null));
 	}
 
 	@Override

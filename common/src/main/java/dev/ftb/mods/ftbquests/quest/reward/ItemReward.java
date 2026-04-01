@@ -1,7 +1,19 @@
 package dev.ftb.mods.ftbquests.quest.reward;
 
+import de.marhali.json5.Json5Object;
+import dev.ftb.mods.ftblibrary.client.config.EditableConfigGroup;
+import dev.ftb.mods.ftblibrary.client.gui.widget.Widget;
+import dev.ftb.mods.ftblibrary.client.util.PositionedIngredient;
+import dev.ftb.mods.ftblibrary.icon.Icon;
+import dev.ftb.mods.ftblibrary.icon.ItemIcon;
+import dev.ftb.mods.ftblibrary.json5.Json5Util;
+import dev.ftb.mods.ftblibrary.platform.network.Server2PlayNetworking;
+import dev.ftb.mods.ftbquests.FTBQuests;
+import dev.ftb.mods.ftbquests.net.NotifyItemRewardMessage;
+import dev.ftb.mods.ftbquests.quest.Quest;
+import dev.ftb.mods.ftbquests.registry.ModItems;
+import io.netty.handler.codec.EncoderException;
 import net.minecraft.core.HolderLookup;
-import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
@@ -10,25 +22,12 @@ import net.minecraft.util.RandomSource;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.block.entity.BlockEntity;
-
-import dev.architectury.hooks.item.ItemStackHooks;
-import dev.architectury.networking.NetworkManager;
-
-import dev.ftb.mods.ftblibrary.client.config.EditableConfigGroup;
-import dev.ftb.mods.ftblibrary.client.gui.widget.Widget;
-import dev.ftb.mods.ftblibrary.client.util.PositionedIngredient;
-import dev.ftb.mods.ftblibrary.icon.Icon;
-import dev.ftb.mods.ftblibrary.icon.ItemIcon;
-import dev.ftb.mods.ftbquests.FTBQuests;
-import dev.ftb.mods.ftbquests.net.NotifyItemRewardMessage;
-import dev.ftb.mods.ftbquests.quest.Quest;
-import dev.ftb.mods.ftbquests.registry.ModItems;
+import org.jetbrains.annotations.UnknownNullability;
+import org.jspecify.annotations.Nullable;
 
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
-import io.netty.handler.codec.EncoderException;
-import org.jspecify.annotations.Nullable;
 
 public class ItemReward extends Reward {
 	private ItemStack item;
@@ -66,38 +65,27 @@ public class ItemReward extends Reward {
 	}
 
 	@Override
-	public void writeData(CompoundTag nbt, HolderLookup.Provider provider) {
-		super.writeData(nbt, provider);
+	public void writeData(@UnknownNullability Json5Object json, HolderLookup.Provider provider) {
+		super.writeData(json, provider);
 
-		if (!item.isEmpty()) {
-			nbt.store("item", ItemStack.CODEC, item);
-		}
-
-		if (count > 1) {
-			nbt.putInt("count", count);
-		}
-		if (randomBonus > 0) {
-			nbt.putInt("random_bonus", randomBonus);
-		}
-		if (onlyOne) {
-			nbt.putBoolean("only_one", true);
-		}
+		if (!item.isEmpty()) Json5Util.store(json, "item", ItemStack.CODEC, item);
+		if (count > 1) json.addProperty("count", count);
+		if (randomBonus > 0) json.addProperty("random_bonus", randomBonus);
+		if (onlyOne) json.addProperty("only_one", true);
 	}
 
 	@Override
-	public void readData(CompoundTag nbt, HolderLookup.Provider provider) {
-		super.readData(nbt, provider);
+	public void readData(@UnknownNullability Json5Object json, HolderLookup.Provider provider) {
+		super.readData(json, provider);
 
-		item = itemOrMissingFromNBT(nbt.get("item"), provider);
-
-		count = nbt.getIntOr("count", 1);
+		item = itemOrMissingFromJson(Json5Util.getJson5Object(json, "item").orElse(new Json5Object()), provider);
+		count = Json5Util.getInt(json,"count").orElse(1);
 		if (count == 0) {
 			count = item.getCount();
 			item.setCount(1);
 		}
-
-		randomBonus = nbt.getIntOr("random_bonus", 0);
-		onlyOne = nbt.getBooleanOr("only_one", false);
+		randomBonus = Json5Util.getInt(json, "random_bonus").orElse(0);
+		onlyOne = Json5Util.getBoolean(json, "only_one").orElse(false);
 	}
 
 	@Override
@@ -145,15 +133,15 @@ public class ItemReward extends Reward {
 			return;
 		}
 
-		int size = count + player.level().random.nextInt(randomBonus + 1);
+		int size = count + player.level().getRandom().nextInt(randomBonus + 1);
 		while (size > 0) {
 			int s = Math.min(size, item.getMaxStackSize());
-			ItemStackHooks.giveItem(player, ItemStackHooks.copyWithCount(item, s));
+			player.getInventory().placeItemBackInInventory(item.copyWithCount(s));
 			size -= s;
 		}
 
 		if (notify) {
-			NetworkManager.sendToPlayer(player, new NotifyItemRewardMessage(item, size, disableRewardScreenBlur));
+			Server2PlayNetworking.send(player, new NotifyItemRewardMessage(item, size, disableRewardScreenBlur));
 		}
 	}
 
@@ -163,7 +151,7 @@ public class ItemReward extends Reward {
 
 		while (size > 0) {
 			int s = Math.min(size, item.getMaxStackSize());
-			items.add(ItemStackHooks.copyWithCount(item, s));
+			items.add(item.copyWithCount(s));
 			size -= s;
 		}
 
@@ -187,7 +175,7 @@ public class ItemReward extends Reward {
 
 	@Override
 	public Icon<?> getAltIcon() {
-		return item.isEmpty() ? super.getAltIcon() : ItemIcon.ofItemStack(ItemStackHooks.copyWithCount(item, 1));
+		return item.isEmpty() ? super.getAltIcon() : ItemIcon.ofItemStack(item.copyWithCount(1));
 	}
 
 	@Override

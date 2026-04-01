@@ -1,30 +1,25 @@
 package dev.ftb.mods.ftbquests.quest;
 
-import net.minecraft.core.HolderLookup;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.network.RegistryFriendlyByteBuf;
-import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.MutableComponent;
-
+import de.marhali.json5.Json5Object;
 import dev.ftb.mods.ftblibrary.client.config.EditableConfigGroup;
 import dev.ftb.mods.ftblibrary.client.config.Tristate;
 import dev.ftb.mods.ftblibrary.client.config.editable.EditableString;
 import dev.ftb.mods.ftblibrary.icon.AnimatedIcon;
 import dev.ftb.mods.ftblibrary.icon.Icon;
+import dev.ftb.mods.ftblibrary.json5.Json5Util;
 import dev.ftb.mods.ftblibrary.math.Bits;
-import dev.ftb.mods.ftbquests.events.ObjectCompletedEvent;
-import dev.ftb.mods.ftbquests.events.ObjectStartedEvent;
-import dev.ftb.mods.ftbquests.events.QuestProgressEventData;
+import dev.ftb.mods.ftblibrary.platform.event.NativeEventPosting;
+import dev.ftb.mods.ftbquests.events.progress.ChapterProgressEvent;
+import dev.ftb.mods.ftbquests.events.progress.ProgressEventData;
+import dev.ftb.mods.ftbquests.events.progress.ProgressType;
 import dev.ftb.mods.ftbquests.quest.translation.TranslationKey;
+import net.minecraft.core.HolderLookup;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;
+import org.jetbrains.annotations.UnknownNullability;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 import java.util.regex.Pattern;
 
 public final class Chapter extends QuestObject {
@@ -181,46 +176,46 @@ public final class Chapter extends QuestObject {
 	}
 
 	@Override
-	public void writeData(CompoundTag nbt, HolderLookup.Provider provider) {
-		super.writeData(nbt, provider);
+	public void writeData(@UnknownNullability Json5Object json, HolderLookup.Provider provider) {
+		super.writeData(json, provider);
 
-		nbt.putString("filename", filename);
-		if (alwaysInvisible) nbt.putBoolean("always_invisible", true);
-		nbt.putString("default_quest_shape", defaultQuestShape);
-		if (defaultQuestSize != 1D) nbt.putDouble("default_quest_size", defaultQuestSize);
-		nbt.putBoolean("default_hide_dependency_lines", defaultHideDependencyLines);
-		if (defaultMinWidth > 0) nbt.putInt("default_min_width", defaultMinWidth);
-		if (progressionMode != ProgressionMode.DEFAULT) nbt.putString("progression_mode", progressionMode.getId());
-		consumeItems.write(nbt, "consume_items");
-		if (hideQuestDetailsUntilStartable) nbt.putBoolean("hide_quest_details_until_startable", true);
-		if (hideQuestUntilDepsVisible) nbt.putBoolean("hide_quest_until_deps_visible", true);
-		if (hideQuestUntilDepsComplete) nbt.putBoolean("hide_quest_until_deps_complete", true);
-		if (hideTextUntilComplete) nbt.putBoolean("hide_text_until_complete", true);
-		if (defaultRepeatable) nbt.putBoolean("default_repeatable_quest", true);
-		if (requireSequentialTasks) nbt.putBoolean("require_sequential_tasks", true);
+		json.addProperty("filename", filename);
+		if (alwaysInvisible) json.addProperty("always_invisible", true);
+		json.addProperty("default_quest_shape", defaultQuestShape);
+		if (defaultQuestSize != 1D) json.addProperty("default_quest_size", defaultQuestSize);
+		json.addProperty("default_hide_dependency_lines", defaultHideDependencyLines);
+		if (defaultMinWidth > 0) json.addProperty("default_min_width", defaultMinWidth);
+		if (progressionMode != ProgressionMode.DEFAULT) json.addProperty("progression_mode", progressionMode.getId());
+		consumeItems.write(json, "consume_items");
+		if (hideQuestDetailsUntilStartable) json.addProperty("hide_quest_details_until_startable", true);
+		if (hideQuestUntilDepsVisible) json.addProperty("hide_quest_until_deps_visible", true);
+		if (hideQuestUntilDepsComplete) json.addProperty("hide_quest_until_deps_complete", true);
+		if (hideTextUntilComplete) json.addProperty("hide_text_until_complete", true);
+		if (defaultRepeatable) json.addProperty("default_repeatable_quest", true);
+		if (requireSequentialTasks) json.addProperty("require_sequential_tasks", true);
 
-		if (!autoFocusId.isEmpty()) nbt.putString("autofocus_id", autoFocusId);
+		if (!autoFocusId.isEmpty()) json.addProperty("autofocus_id", autoFocusId);
 	}
 
 	@Override
-	public void readData(CompoundTag nbt, HolderLookup.Provider provider) {
-		super.readData(nbt, provider);
+	public void readData(@UnknownNullability Json5Object json, HolderLookup.Provider provider) {
+		super.readData(json, provider);
 
-		filename = nbt.getString("filename").orElseThrow();
-		alwaysInvisible = nbt.getBooleanOr("always_invisible", false);
-		defaultQuestShape = nbt.getString("default_quest_shape").orElseThrow();
-		defaultQuestSize = nbt.getDoubleOr("default_quest_size", 1D);
-		defaultHideDependencyLines = nbt.getBooleanOr("default_hide_dependency_lines", false);
-		defaultMinWidth = nbt.getIntOr("default_min_width", 0);
-		progressionMode = nbt.getString("progression_mode").map(ProgressionMode.NAME_MAP::get).orElse(ProgressionMode.DEFAULT);
-		consumeItems = Tristate.read(nbt, "consume_items");
-		hideQuestDetailsUntilStartable = nbt.getBooleanOr("hide_quest_details_until_startable", false);
-		hideQuestUntilDepsVisible = nbt.getBooleanOr("hide_quest_until_deps_visible", false);
-		hideQuestUntilDepsComplete = nbt.getBooleanOr("hide_quest_until_deps_complete", false);
-		hideTextUntilComplete = nbt.getBooleanOr("hide_text_until_complete", false);
-		defaultRepeatable = nbt.getBooleanOr("default_repeatable_quest", false);
-		requireSequentialTasks = nbt.getBooleanOr("require_sequential_tasks", false);
-		autoFocusId = nbt.getStringOr("autofocus_id", "");
+		filename = Json5Util.getString(json, "filename").orElseThrow();
+		alwaysInvisible = Json5Util.getBoolean(json, "always_invisible").orElse(false);
+		defaultQuestShape = Json5Util.getString(json, "default_quest_shape").orElseThrow();
+		defaultQuestSize = Json5Util.getDouble(json, "default_quest_size").orElse(1D);
+		defaultHideDependencyLines = Json5Util.getBoolean(json, "default_hide_dependency_lines").orElse(false);
+		defaultMinWidth = Json5Util.getInt(json, "default_min_width").orElse(0);
+		progressionMode = Json5Util.getString(json, "progression_mode").map(ProgressionMode.NAME_MAP::get).orElse(ProgressionMode.DEFAULT);
+		consumeItems = Tristate.read(json, "consume_items");
+		hideQuestDetailsUntilStartable = Json5Util.getBoolean(json, "hide_quest_details_until_startable").orElse(false);
+		hideQuestUntilDepsVisible = Json5Util.getBoolean(json, "hide_quest_until_deps_visible").orElse(false);
+		hideQuestUntilDepsComplete = Json5Util.getBoolean(json, "hide_quest_until_deps_complete").orElse(false);
+		hideTextUntilComplete = Json5Util.getBoolean(json, "hide_text_until_complete").orElse(false);
+		defaultRepeatable = Json5Util.getBoolean(json, "default_repeatable_quest").orElse(false);
+		requireSequentialTasks = Json5Util.getBoolean(json, "require_sequential_tasks").orElse(false);
+		autoFocusId = Json5Util.getString(json, "autofocus_id").orElse("");
 
 		if (defaultQuestShape.equals("default")) {
 			defaultQuestShape = "";
@@ -236,8 +231,7 @@ public final class Chapter extends QuestObject {
 		buffer.writeInt(defaultMinWidth);
 		ProgressionMode.NAME_MAP.write(buffer, progressionMode);
 
-		int flags = makeFlags();
-		buffer.writeVarInt(flags);
+		buffer.writeVarInt(makeFlags());
 
 		if (!autoFocusId.isEmpty()) buffer.writeLong(QuestObjectBase.parseHexId(autoFocusId).orElse(0L));
 	}
@@ -313,19 +307,19 @@ public final class Chapter extends QuestObject {
 	}
 
 	@Override
-	public void onStarted(QuestProgressEventData<?> data) {
+	public void onStarted(ProgressEventData<?> data) {
 		data.setStarted(id);
-		ObjectStartedEvent.CHAPTER.invoker().act(new ObjectStartedEvent.ChapterEvent(data.withObject(this)));
+		NativeEventPosting.get().postEvent(new ChapterProgressEvent.Data(ProgressType.STARTED, data.withObject(this)));
 
-		if (!data.getTeamData().isStarted(file)) {
+		if (!data.teamData().isStarted(file)) {
 			file.onStarted(data.withObject(file));
 		}
 	}
 
 	@Override
-	public void onCompleted(QuestProgressEventData<?> data) {
+	public void onCompleted(ProgressEventData<?> data) {
 		data.setCompleted(id);
-		ObjectCompletedEvent.CHAPTER.invoker().act(new ObjectCompletedEvent.ChapterEvent(data.withObject(this)));
+		NativeEventPosting.get().postEvent(new ChapterProgressEvent.Data(ProgressType.COMPLETED, data.withObject(this)));
 
 		if (!disableToast) {
 			data.notifyPlayers(id);
@@ -333,11 +327,11 @@ public final class Chapter extends QuestObject {
 
 		file.forAllQuests(quest -> {
 			if (quest.hasDependency(this)) {
-				data.getTeamData().checkAutoCompletion(quest);
+				data.teamData().checkAutoCompletion(quest);
 			}
 		});
 
-		if (group.isCompletedRaw(data.getTeamData())) {
+		if (group.isCompletedRaw(data.teamData())) {
 			group.onCompleted(data.withObject(group));
 		}
 	}

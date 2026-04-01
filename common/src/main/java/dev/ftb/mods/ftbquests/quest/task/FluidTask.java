@@ -1,45 +1,48 @@
 package dev.ftb.mods.ftbquests.quest.task;
 
+import de.marhali.json5.Json5Object;
+import dev.ftb.mods.ftblibrary.client.config.EditableConfigGroup;
+import dev.ftb.mods.ftblibrary.client.gui.widget.Widget;
+import dev.ftb.mods.ftblibrary.client.util.ClientUtils;
+import dev.ftb.mods.ftblibrary.client.util.PositionedIngredient;
+import dev.ftb.mods.ftblibrary.client.util.TextureAtlasSpriteRef;
+import dev.ftb.mods.ftblibrary.icon.Color4I;
+import dev.ftb.mods.ftblibrary.icon.Icon;
+import dev.ftb.mods.ftblibrary.json5.Json5Ops;
+import dev.ftb.mods.ftblibrary.json5.Json5Util;
+import dev.ftb.mods.ftblibrary.platform.Platform;
+import dev.ftb.mods.ftblibrary.platform.fluid.FluidStack;
+import dev.ftb.mods.ftblibrary.util.StringUtils;
+import dev.ftb.mods.ftbquests.api.FTBQuestsAPI;
+import dev.ftb.mods.ftbquests.quest.Quest;
+import dev.ftb.mods.ftbquests.quest.TeamData;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.component.DataComponentMap;
 import net.minecraft.core.component.DataComponentPatch;
+import net.minecraft.core.component.PatchedDataComponentMap;
 import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.resources.Identifier;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.material.Fluids;
-
-import dev.architectury.fluid.FluidStack;
-
-import dev.ftb.mods.ftblibrary.client.config.EditableConfigGroup;
-import dev.ftb.mods.ftblibrary.client.gui.widget.Widget;
-import dev.ftb.mods.ftblibrary.client.util.ClientUtils;
-import dev.ftb.mods.ftblibrary.client.util.PositionedIngredient;
-import dev.ftb.mods.ftblibrary.icon.Color4I;
-import dev.ftb.mods.ftblibrary.icon.Icon;
-import dev.ftb.mods.ftblibrary.util.StringUtils;
-import dev.ftb.mods.ftbquests.api.FTBQuestsAPI;
-import dev.ftb.mods.ftbquests.quest.Quest;
-import dev.ftb.mods.ftbquests.quest.TeamData;
+import org.jspecify.annotations.Nullable;
 
 import java.util.Optional;
-import org.jspecify.annotations.Nullable;
 
 public class FluidTask extends Task {
 	public static final Identifier TANK_TEXTURE = FTBQuestsAPI.id("textures/tasks/tank.png");
-	private static final FluidStack WATER = FluidStack.create(Fluids.WATER, FluidStack.bucketAmount());
+	private static final FluidStack WATER = new FluidStack(Fluids.WATER, Platform.get().misc().bucketFluidAmount());
 
-	private FluidStack fluidStack = FluidStack.create(Fluids.WATER, FluidStack.bucketAmount());
+	private FluidStack fluidStack = new FluidStack(Fluids.WATER, Platform.get().misc().bucketFluidAmount());
 
 	public FluidTask(long id, Quest quest) {
 		super(id, quest);
 	}
 
 	public Fluid getFluid() {
-		return fluidStack.getFluid();
+		return fluidStack.fluid();
 	}
 
 	public FluidTask setFluid(FluidStack fluidStack) {
@@ -52,7 +55,7 @@ public class FluidTask extends Task {
 	}
 
 	public DataComponentPatch getFluidDataComponentPatch() {
-		return fluidStack.getComponents().asPatch();
+		return fluidStack.getComponents() instanceof PatchedDataComponentMap pdcm ? pdcm.asPatch() : DataComponentPatch.EMPTY;
 	}
 
 	@Override
@@ -62,12 +65,12 @@ public class FluidTask extends Task {
 
 	@Override
 	public long getMaxProgress() {
-		return fluidStack.getAmount();
+		return fluidStack.amount();
 	}
 
 	@Override
 	public String formatMaxProgress() {
-		return getVolumeString(fluidStack.getAmount());
+		return getVolumeString(fluidStack.amount());
 	}
 
 	@Override
@@ -81,60 +84,62 @@ public class FluidTask extends Task {
 	}
 
 	@Override
-	public void writeData(CompoundTag nbt, HolderLookup.Provider provider) {
-		super.writeData(nbt, provider);
+	public void writeData(Json5Object json, HolderLookup.Provider provider) {
+		super.writeData(json, provider);
 
-		nbt.put("fluid", fluidStack.write(provider, new CompoundTag()));
+		json.add("fluid", FluidStack.CODEC.encodeStart(provider.createSerializationContext(Json5Ops.INSTANCE), fluidStack).getOrThrow());
 	}
 
 	@Override
-	public void readData(CompoundTag nbt, HolderLookup.Provider provider) {
-		super.readData(nbt, provider);
+	public void readData(Json5Object json, HolderLookup.Provider provider) {
+		super.readData(json, provider);
 
-		var stringComp = nbt.getString("fluid");
+		var stringComp = Json5Util.getString(json, "fluid");
 		if (stringComp.isPresent()) {
 			// legacy - fluid stored as string ID
 			Identifier id = Identifier.tryParse(stringComp.get());
+			long bucketAmount = Platform.get().misc().bucketFluidAmount();
 			if (id == null) {
 				// Default to water if invalid
-				fluidStack = FluidStack.create(Fluids.WATER, 1000L);
+				fluidStack = new FluidStack(Fluids.WATER, bucketAmount);
 			} else {
-				BuiltInRegistries.FLUID.get(id).ifPresentOrElse(stack -> {
-					fluidStack = FluidStack.create(stack, nbt.getLongOr("amount", 1000L));
-				}, () -> {
-					// Default to water if invalid
-					fluidStack = FluidStack.create(Fluids.WATER, 1000L);
-				});
+				BuiltInRegistries.FLUID.get(id).ifPresentOrElse(
+						stack -> fluidStack = new FluidStack(stack, Json5Util.getLong(json, "amount").orElse(bucketAmount)),
+						() -> fluidStack = new FluidStack(Fluids.WATER, bucketAmount)
+				);
 			}
-			return;
+		} else {
+			Json5Util.getJson5Object(json, "fluid").ifPresentOrElse(
+					o -> fluidStack = FluidStack.CODEC.parse(provider.createSerializationContext(Json5Ops.INSTANCE), o).result()
+							.orElse(FluidStack.empty()),
+					() -> fluidStack = FluidStack.empty()
+			);
 		}
-
-		nbt.getCompound("fluid")
-				.ifPresentOrElse(tag -> fluidStack = FluidStack.read(provider, tag).orElse(FluidStack.empty()), () -> fluidStack = FluidStack.empty());
 	}
 
 	@Override
 	public void writeNetData(RegistryFriendlyByteBuf buffer) {
 		super.writeNetData(buffer);
 
-		fluidStack.write(buffer);
+		FluidStack.OPTIONAL_STREAM_CODEC.encode(buffer, fluidStack);
 	}
 
 	@Override
 	public void readNetData(RegistryFriendlyByteBuf buffer) {
 		super.readNetData(buffer);
 
-		fluidStack = FluidStack.read(buffer);
+		fluidStack = FluidStack.OPTIONAL_STREAM_CODEC.decode(buffer);
 	}
 
 	public static String getVolumeString(long a) {
 		StringBuilder builder = new StringBuilder();
 
-		if (a >= FluidStack.bucketAmount()) {
-			if (a % FluidStack.bucketAmount() != 0L) {
-				builder.append(StringUtils.formatDouble(a / (double) FluidStack.bucketAmount()));
+		long bucketAmount = Platform.get().misc().bucketFluidAmount();
+		if (a >= bucketAmount) {
+			if (a % bucketAmount != 0L) {
+				builder.append(StringUtils.formatDouble(a / (double) bucketAmount));
 			} else {
-				builder.append(a / FluidStack.bucketAmount());
+				builder.append(a / bucketAmount);
 			}
 			builder.append(" B");
 		} else {
@@ -146,12 +151,13 @@ public class FluidTask extends Task {
 
 	@Override
 	public MutableComponent getAltTitle() {
-		return Component.literal(getVolumeString(fluidStack.getAmount()) + " of ").append(fluidStack.getName());
+		return Component.literal(getVolumeString(fluidStack.amount()) + " of ").append(fluidStack.name());
 	}
 
 	@Override
-	public Icon getAltIcon() {
-		return Icon.getIcon(ClientUtils.getStillTexture(fluidStack)).withTint(Color4I.rgb(ClientUtils.getFluidColor(fluidStack)));
+	public Icon<?> getAltIcon() {
+		return new TextureAtlasSpriteRef(ClientUtils.getStillTexture(fluidStack))
+				.createIcon(Color4I.rgb(ClientUtils.getFluidColor(fluidStack)));
 	}
 
 	@Override

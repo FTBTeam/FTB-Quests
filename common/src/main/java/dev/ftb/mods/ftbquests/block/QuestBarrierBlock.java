@@ -1,5 +1,14 @@
 package dev.ftb.mods.ftbquests.block;
 
+import com.mojang.serialization.MapCodec;
+import dev.ftb.mods.ftblibrary.platform.network.Server2PlayNetworking;
+import dev.ftb.mods.ftbquests.FTBQuestsPlatform;
+import dev.ftb.mods.ftbquests.block.entity.BaseBarrierBlockEntity;
+import dev.ftb.mods.ftbquests.client.ClientQuestFile;
+import dev.ftb.mods.ftbquests.net.BlockConfigRequestMessage;
+import dev.ftb.mods.ftbquests.net.BlockConfigRequestMessage.BlockType;
+import dev.ftb.mods.ftbquests.registry.ModDataComponents;
+import dev.ftb.mods.ftbquests.util.NetUtils;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.component.DataComponents;
@@ -29,26 +38,14 @@ import net.minecraft.world.level.material.MapColor;
 import net.minecraft.world.level.material.PushReaction;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.shapes.CollisionContext;
+import net.minecraft.world.phys.shapes.EntityCollisionContext;
 import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
-import com.mojang.serialization.MapCodec;
-
-import dev.architectury.hooks.level.entity.EntityHooks;
-import dev.architectury.injectables.annotations.ExpectPlatform;
-import dev.architectury.networking.NetworkManager;
-
-import dev.ftb.mods.ftbquests.block.entity.BaseBarrierBlockEntity;
-import dev.ftb.mods.ftbquests.block.entity.QuestBarrierBlockEntity;
-import dev.ftb.mods.ftbquests.client.ClientQuestFile;
-import dev.ftb.mods.ftbquests.net.BlockConfigRequestMessage;
-import dev.ftb.mods.ftbquests.net.BlockConfigRequestMessage.BlockType;
-import dev.ftb.mods.ftbquests.registry.ModDataComponents;
-import dev.ftb.mods.ftbquests.util.NetUtils;
+import org.jspecify.annotations.Nullable;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
-import org.jspecify.annotations.Nullable;
 
 public class QuestBarrierBlock extends BaseEntityBlock {
 	private static final MapCodec<QuestBarrierBlock> CODEC = simpleCodec(QuestBarrierBlock::new);
@@ -61,11 +58,11 @@ public class QuestBarrierBlock extends BaseEntityBlock {
 				.mapColor(MapColor.COLOR_LIGHT_BLUE)
 				.pushReaction(PushReaction.BLOCK)
 				.noOcclusion()
-				.isViewBlocking((blockState, blockGetter, blockPos) -> false)
-				.isSuffocating((blockState, blockGetter, blockPos) -> false)
+				.isViewBlocking((_, _, _) -> false)
+				.isSuffocating((_, _, _) -> false)
 				.strength(-1, 6000000F)
-				.lightLevel(blockState -> 3)
-				.emissiveRendering((blockState, blockGetter, blockPos) -> true);
+				.lightLevel(_ -> 3)
+				.emissiveRendering((_, _, _) -> true);
 	}
 
 	public QuestBarrierBlock(Properties props) {
@@ -91,7 +88,7 @@ public class QuestBarrierBlock extends BaseEntityBlock {
 
 	@Override
 	public VoxelShape getCollisionShape(BlockState state, BlockGetter bg, BlockPos pos, CollisionContext ctx) {
-		if (EntityHooks.fromCollision(ctx) instanceof Player player
+		if (ctx instanceof EntityCollisionContext e && e.getEntity() instanceof Player player
 				&& bg.getBlockEntity(pos) instanceof BaseBarrierBlockEntity barrier
 				&& barrier.isOpen(player)) {
 			return Shapes.empty();
@@ -102,7 +99,7 @@ public class QuestBarrierBlock extends BaseEntityBlock {
 
 	@Override
 	protected VoxelShape getShape(BlockState blockState, BlockGetter bg, BlockPos pos, CollisionContext ctx) {
-		if (EntityHooks.fromCollision(ctx) instanceof Player player && blockState.getValue(OPEN) && !NetUtils.canEdit(player)) {
+		if (ctx instanceof EntityCollisionContext e && e.getEntity() instanceof Player player && blockState.getValue(OPEN) && !NetUtils.canEdit(player)) {
 			return Shapes.empty();
 		}
 
@@ -146,7 +143,7 @@ public class QuestBarrierBlock extends BaseEntityBlock {
 	protected InteractionResult useItemOn(ItemStack itemStack, BlockState blockState, Level level, BlockPos blockPos, Player player, InteractionHand interactionHand, BlockHitResult blockHitResult) {
 		if (player instanceof ServerPlayer sp) {
 			if (level.getBlockEntity(blockPos) instanceof BaseBarrierBlockEntity barrier && barrier.hasPermissionToEdit(sp)) {
-				NetworkManager.sendToPlayer(sp, new BlockConfigRequestMessage(blockPos, BlockType.BARRIER));
+				Server2PlayNetworking.send(sp, new BlockConfigRequestMessage(blockPos, BlockType.BARRIER));
                 return InteractionResult.SUCCESS;
 			}
 			return InteractionResult.FAIL;
@@ -187,12 +184,7 @@ public class QuestBarrierBlock extends BaseEntityBlock {
 	@Nullable
 	@Override
 	public BlockEntity newBlockEntity(BlockPos blockPos, BlockState blockState) {
-		return questBlockEntityProvider().create(blockPos, blockState);
-	}
-
-	@ExpectPlatform
-	public static BlockEntityType.BlockEntitySupplier<QuestBarrierBlockEntity> questBlockEntityProvider() {
-		throw new AssertionError();
+		return FTBQuestsPlatform.get().questBarrierBlockEntityProvider().create(blockPos, blockState);
 	}
 
 	public static class TeleportTicker {

@@ -1,22 +1,22 @@
 package dev.ftb.mods.ftbquests.quest.task;
 
-import net.minecraft.ChatFormatting;
-import net.minecraft.core.HolderLookup;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.network.RegistryFriendlyByteBuf;
-import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.MutableComponent;
-import net.minecraft.server.level.ServerPlayer;
-
-import dev.architectury.hooks.level.entity.PlayerHooks;
-
+import de.marhali.json5.Json5Object;
 import dev.ftb.mods.ftblibrary.client.config.EditableConfigGroup;
 import dev.ftb.mods.ftblibrary.integration.stages.StageHelper;
+import dev.ftb.mods.ftblibrary.json5.Json5Util;
+import dev.ftb.mods.ftblibrary.platform.Platform;
 import dev.ftb.mods.ftbquests.quest.Quest;
 import dev.ftb.mods.ftbquests.quest.ServerQuestFile;
 import dev.ftb.mods.ftbquests.quest.TeamData;
 import dev.ftb.mods.ftbteams.api.FTBTeamsAPI;
 import dev.ftb.mods.ftbteams.api.TeamStagesHelper;
+import net.minecraft.ChatFormatting;
+import net.minecraft.core.HolderLookup;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.server.level.ServerPlayer;
+import org.jetbrains.annotations.UnknownNullability;
 
 public class StageTask extends AbstractBooleanTask {
 	private String stage = "";
@@ -32,19 +32,17 @@ public class StageTask extends AbstractBooleanTask {
 	}
 
 	@Override
-	public void writeData(CompoundTag nbt, HolderLookup.Provider provider) {
-		super.writeData(nbt, provider);
-		nbt.putString("stage", stage);
-		if (teamStage) {
-			nbt.putBoolean("team_stage", true);
-		}
+	public void writeData(@UnknownNullability Json5Object json, HolderLookup.Provider provider) {
+		super.writeData(json, provider);
+		json.addProperty("stage", stage);
+		if (teamStage) json.addProperty("team_stage", true);
 	}
 
 	@Override
-	public void readData(CompoundTag nbt, HolderLookup.Provider provider) {
-		super.readData(nbt, provider);
-		stage = nbt.getString("stage").orElseThrow();
-		teamStage = nbt.getBooleanOr("team_stage", false);
+	public void readData(@UnknownNullability Json5Object json, HolderLookup.Provider provider) {
+		super.readData(json, provider);
+		stage = Json5Util.getString(json, "stage").orElseThrow();
+		teamStage = Json5Util.getBoolean(json, "team_stage").orElse(false);
 	}
 
 	@Override
@@ -92,7 +90,7 @@ public class StageTask extends AbstractBooleanTask {
 	@SuppressWarnings("unused")
 	public static void checkStages(ServerPlayer player) {
 		// hook for FTB XMod Compat to call into
-		if (PlayerHooks.isFake(player)) {
+		if (Platform.get().misc().isFakePlayer(player)) {
 			return;
 		}
 

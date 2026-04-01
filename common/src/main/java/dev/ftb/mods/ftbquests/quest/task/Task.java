@@ -1,36 +1,33 @@
 package dev.ftb.mods.ftbquests.quest.task;
 
+import de.marhali.json5.Json5Object;
+import dev.ftb.mods.ftblibrary.client.config.EditableConfigGroup;
+import dev.ftb.mods.ftblibrary.client.gui.widget.Widget;
+import dev.ftb.mods.ftblibrary.client.util.ClientUtils;
+import dev.ftb.mods.ftblibrary.client.util.PositionedIngredient;
+import dev.ftb.mods.ftblibrary.icon.Icon;
+import dev.ftb.mods.ftblibrary.json5.Json5Util;
+import dev.ftb.mods.ftblibrary.platform.event.NativeEventPosting;
+import dev.ftb.mods.ftblibrary.util.StringUtils;
+import dev.ftb.mods.ftblibrary.util.TooltipList;
+import dev.ftb.mods.ftbquests.FTBQuests;
+import dev.ftb.mods.ftbquests.client.gui.quests.QuestScreen;
+import dev.ftb.mods.ftbquests.events.CustomTaskEvent;
+import dev.ftb.mods.ftbquests.events.progress.ProgressEventData;
+import dev.ftb.mods.ftbquests.events.progress.ProgressType;
+import dev.ftb.mods.ftbquests.events.progress.TaskProgressEvent;
+import dev.ftb.mods.ftbquests.integration.RecipeModHelper;
+import dev.ftb.mods.ftbquests.quest.*;
+import dev.ftb.mods.ftbquests.util.ProgressChange;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.HolderLookup;
-import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.item.ItemStack;
-
-import dev.ftb.mods.ftblibrary.client.config.EditableConfigGroup;
-import dev.ftb.mods.ftblibrary.client.gui.widget.Widget;
-import dev.ftb.mods.ftblibrary.client.util.ClientUtils;
-import dev.ftb.mods.ftblibrary.client.util.PositionedIngredient;
-import dev.ftb.mods.ftblibrary.icon.Icon;
-import dev.ftb.mods.ftblibrary.util.StringUtils;
-import dev.ftb.mods.ftblibrary.util.TooltipList;
-import dev.ftb.mods.ftbquests.FTBQuests;
-import dev.ftb.mods.ftbquests.client.gui.quests.QuestScreen;
-import dev.ftb.mods.ftbquests.events.CustomTaskEvent;
-import dev.ftb.mods.ftbquests.events.ObjectCompletedEvent;
-import dev.ftb.mods.ftbquests.events.ObjectStartedEvent;
-import dev.ftb.mods.ftbquests.events.QuestProgressEventData;
-import dev.ftb.mods.ftbquests.integration.RecipeModHelper;
-import dev.ftb.mods.ftbquests.quest.BaseQuestFile;
-import dev.ftb.mods.ftbquests.quest.Chapter;
-import dev.ftb.mods.ftbquests.quest.Quest;
-import dev.ftb.mods.ftbquests.quest.QuestObject;
-import dev.ftb.mods.ftbquests.quest.QuestObjectType;
-import dev.ftb.mods.ftbquests.quest.TeamData;
-import dev.ftb.mods.ftbquests.util.ProgressChange;
+import org.jetbrains.annotations.UnknownNullability;
 
 import java.util.EnumSet;
 import java.util.List;
@@ -99,18 +96,18 @@ public abstract class Task extends QuestObject {
 	}
 
 	@Override
-	public void onStarted(QuestProgressEventData<?> data) {
+	public void onStarted(ProgressEventData<?> data) {
 		data.setStarted(id);
-		ObjectStartedEvent.TASK.invoker().act(new ObjectStartedEvent.TaskEvent(data.withObject(this)));
+		NativeEventPosting.get().postEvent(new TaskProgressEvent.Data(ProgressType.STARTED, data.withObject(this)));
 		quest.onStarted(data.withObject(quest));
 	}
 
 	@Override
-	public final void onCompleted(QuestProgressEventData<?> data) {
+	public final void onCompleted(ProgressEventData<?> data) {
 		data.setCompleted(id);
-		ObjectCompletedEvent.TASK.invoker().act(new ObjectCompletedEvent.TaskEvent(data.withObject(this)));
+		NativeEventPosting.get().postEvent(new TaskProgressEvent.Data(ProgressType.COMPLETED, data.withObject(this)));
 
-		boolean questCompleted = quest.isCompletedRaw(data.getTeamData());
+		boolean questCompleted = quest.isCompletedRaw(data.teamData());
 
 		if (quest.getTasks().size() > 1 && !questCompleted && !disableToast) {
 			data.notifyPlayers(id);
@@ -177,8 +174,8 @@ public abstract class Task extends QuestObject {
 	public final void onCreated() {
 		quest.addTask(this);
 
-		if (this instanceof CustomTask && getQuestFile().isServerSide()) {
-			CustomTaskEvent.EVENT.invoker().act(new CustomTaskEvent((CustomTask) this));
+		if (this instanceof CustomTask customTask && getQuestFile().isServerSide()) {
+			NativeEventPosting.get().postEvent(new CustomTaskEvent.Data(customTask));
 		}
 	}
 
@@ -289,16 +286,16 @@ public abstract class Task extends QuestObject {
 	}
 
 	@Override
-	public void writeData(CompoundTag nbt, HolderLookup.Provider provider) {
-		super.writeData(nbt, provider);
-		if (optionalTask) nbt.putBoolean("optional_task", true);
+	public void writeData(@UnknownNullability Json5Object json, HolderLookup.Provider provider) {
+		super.writeData(json, provider);
+		if (optionalTask) json.addProperty("optional_task", true);
 	}
 
 	@Override
-	public void readData(CompoundTag nbt, HolderLookup.Provider provider) {
-		super.readData(nbt, provider);
+	public void readData(@UnknownNullability Json5Object json, HolderLookup.Provider provider) {
+		super.readData(json, provider);
 
-		optionalTask = nbt.getBoolean("optional_task").orElse(false);
+		optionalTask = Json5Util.getBoolean(json, "optional_task").orElse(false);
 	}
 
 	@Override
@@ -331,8 +328,8 @@ public abstract class Task extends QuestObject {
 		if (getQuestFile().isServerSide()) {
 			FTBQuests.LOGGER.warn("Ignoring bad resource location '{}' for task {}", str, id);
 		} else {
-			ClientUtils.getClientPlayer().displayClientMessage(
-					Component.literal("Bad resource location: " + str).withStyle(ChatFormatting.RED), false);
+			ClientUtils.getClientPlayer().sendSystemMessage(
+					Component.literal("Bad resource location: " + str).withStyle(ChatFormatting.RED));
 		}
 
 		return fallback;

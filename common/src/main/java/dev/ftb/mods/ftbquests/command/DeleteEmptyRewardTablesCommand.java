@@ -1,12 +1,11 @@
 package dev.ftb.mods.ftbquests.command;
 
+import com.mojang.brigadier.Command;
+import com.mojang.brigadier.builder.LiteralArgumentBuilder;
+import dev.ftb.mods.ftbquests.quest.ServerQuestFile;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.network.chat.Component;
-import com.mojang.brigadier.Command;
-import com.mojang.brigadier.builder.LiteralArgumentBuilder;
-
-import dev.ftb.mods.ftbquests.quest.ServerQuestFile;
 
 public class DeleteEmptyRewardTablesCommand {
     public static LiteralArgumentBuilder<CommandSourceStack> register() {

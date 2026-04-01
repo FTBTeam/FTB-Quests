@@ -1,9 +1,17 @@
 package dev.ftb.mods.ftbquests.quest.task;
 
+import com.mojang.datafixers.util.Either;
+import de.marhali.json5.Json5Object;
+import dev.ftb.mods.ftblibrary.client.config.EditableConfigGroup;
+import dev.ftb.mods.ftblibrary.json5.Json5Util;
+import dev.ftb.mods.ftblibrary.platform.network.Play2ServerNetworking;
+import dev.ftb.mods.ftblibrary.util.NameMap;
+import dev.ftb.mods.ftbquests.net.SyncStructuresRequestMessage;
+import dev.ftb.mods.ftbquests.quest.Quest;
+import dev.ftb.mods.ftbquests.quest.TeamData;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.registries.Registries;
-import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
@@ -14,15 +22,7 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.level.StructureManager;
 import net.minecraft.world.level.levelgen.structure.Structure;
-import com.mojang.datafixers.util.Either;
-
-import dev.architectury.networking.NetworkManager;
-
-import dev.ftb.mods.ftblibrary.client.config.EditableConfigGroup;
-import dev.ftb.mods.ftblibrary.util.NameMap;
-import dev.ftb.mods.ftbquests.net.SyncStructuresRequestMessage;
-import dev.ftb.mods.ftbquests.quest.Quest;
-import dev.ftb.mods.ftbquests.quest.TeamData;
+import org.jetbrains.annotations.UnknownNullability;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -51,15 +51,15 @@ public class StructureTask extends AbstractBooleanTask {
 	}
 
 	@Override
-	public void writeData(CompoundTag nbt, HolderLookup.Provider provider) {
-		super.writeData(nbt, provider);
-		nbt.putString("structure", getStructure());
+	public void writeData(@UnknownNullability Json5Object json, HolderLookup.Provider provider) {
+		super.writeData(json, provider);
+		json.addProperty("structure", getStructure());
 	}
 
 	@Override
-	public void readData(CompoundTag nbt, HolderLookup.Provider provider) {
-		super.readData(nbt, provider);
-		setStructure(nbt.getString("structure").orElseThrow());
+	public void readData(@UnknownNullability Json5Object json, HolderLookup.Provider provider) {
+		super.readData(json, provider);
+		setStructure(Json5Util.getString(json, "structure").orElseThrow());
 	}
 
 	@Override
@@ -132,7 +132,7 @@ public class StructureTask extends AbstractBooleanTask {
 
 	public static void maybeRequestStructureSync() {
 		if (KNOWN_STRUCTURES.isEmpty()) {
-			NetworkManager.sendToServer(SyncStructuresRequestMessage.INSTANCE);
+			Play2ServerNetworking.send(SyncStructuresRequestMessage.INSTANCE);
 		}
 	}
 }

@@ -1,10 +1,6 @@
 package dev.ftb.mods.ftbquests.client.config;
 
-import net.minecraft.ChatFormatting;
-import net.minecraft.client.Minecraft;
-import net.minecraft.network.chat.Component;
 import com.mojang.datafixers.util.Pair;
-
 import dev.ftb.mods.ftblibrary.client.config.ConfigCallback;
 import dev.ftb.mods.ftblibrary.client.config.editable.EditableConfigValue;
 import dev.ftb.mods.ftblibrary.client.gui.input.MouseButton;
@@ -14,10 +10,13 @@ import dev.ftb.mods.ftblibrary.client.gui.widget.Panel;
 import dev.ftb.mods.ftblibrary.client.gui.widget.SimpleTextButton;
 import dev.ftb.mods.ftblibrary.client.gui.widget.Widget;
 import dev.ftb.mods.ftblibrary.icon.Color4I;
+import net.minecraft.ChatFormatting;
+import net.minecraft.client.Minecraft;
+import net.minecraft.network.chat.Component;
+import org.apache.commons.lang3.mutable.MutableInt;
 
 import java.util.ArrayList;
 import java.util.List;
-import org.apache.commons.lang3.mutable.MutableInt;
 
 public class EditableLocaleConfig extends EditableConfigValue<String> {
     public static final Color4I COLOR_HI = Color4I.rgb(0xFFAA49);

@@ -1,18 +1,17 @@
 package dev.ftb.mods.ftbquests.net;
 
-import net.minecraft.core.UUIDUtil;
-import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.network.codec.StreamCodec;
-import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
-
-import dev.architectury.networking.NetworkManager;
-
 import dev.ftb.mods.ftblibrary.client.util.ClientUtils;
+import dev.ftb.mods.ftblibrary.platform.network.PacketContext;
+import dev.ftb.mods.ftblibrary.platform.network.Play2ServerNetworking;
 import dev.ftb.mods.ftbquests.api.FTBQuestsAPI;
 import dev.ftb.mods.ftbquests.quest.QuestObjectBase;
 import dev.ftb.mods.ftbquests.quest.TeamData;
 import dev.ftb.mods.ftbquests.util.NetUtils;
 import dev.ftb.mods.ftbquests.util.ProgressChange;
+import net.minecraft.core.UUIDUtil;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 
 import java.util.UUID;
 import java.util.function.Consumer;
@@ -35,15 +34,13 @@ public record ChangeProgressMessage(UUID teamId, ProgressChange progressChange) 
 		if (!team.isLocked()) {
 			ProgressChange change = new ProgressChange(object, ClientUtils.getClientPlayer().getUUID());
 			changeConsumer.accept(change);
-			NetworkManager.sendToServer(new ChangeProgressMessage(team.getTeamId(), change));
+			Play2ServerNetworking.send(new ChangeProgressMessage(team.getTeamId(), change));
 		}
 	}
 
-	public static void handle(ChangeProgressMessage message, NetworkManager.PacketContext context) {
-		context.queue(() -> {
-			if (NetUtils.canEdit(context)) {
-				message.progressChange.maybeForceProgress(message.teamId);
-			}
-		});
+	public static void handle(ChangeProgressMessage message, PacketContext context) {
+		if (NetUtils.canEdit(context)) {
+			message.progressChange.maybeForceProgress(message.teamId);
+		}
 	}
 }

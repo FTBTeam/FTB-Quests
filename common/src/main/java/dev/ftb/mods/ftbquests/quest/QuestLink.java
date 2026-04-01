@@ -1,17 +1,17 @@
 package dev.ftb.mods.ftbquests.quest;
 
-import net.minecraft.core.HolderLookup;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.network.RegistryFriendlyByteBuf;
-import net.minecraft.network.chat.Component;
-
+import de.marhali.json5.Json5Object;
 import dev.ftb.mods.ftblibrary.client.config.EditableConfigGroup;
 import dev.ftb.mods.ftblibrary.client.util.ClientUtils;
 import dev.ftb.mods.ftblibrary.icon.Icon;
+import dev.ftb.mods.ftblibrary.json5.Json5Util;
 import dev.ftb.mods.ftbquests.client.gui.quests.QuestScreen;
+import net.minecraft.core.HolderLookup;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.chat.Component;
+import org.jspecify.annotations.Nullable;
 
 import java.util.Optional;
-import org.jspecify.annotations.Nullable;
 
 public class QuestLink extends QuestObject implements Movable, Excludable {
     private Chapter chapter;
@@ -108,32 +108,28 @@ public class QuestLink extends QuestObject implements Movable, Excludable {
     }
 
     @Override
-    public void writeData(CompoundTag nbt, HolderLookup.Provider provider) {
-        super.writeData(nbt, provider);
+    public void writeData(Json5Object json, HolderLookup.Provider provider) {
+        super.writeData(json, provider);
 
-        nbt.putString("linked_quest", getCodeString(linkId));
-        nbt.putDouble("x", x);
-        nbt.putDouble("y", y);
-        if (!shape.isEmpty()) {
-            nbt.putString("shape", shape);
-        }
-        if (size != 1D) {
-            nbt.putDouble("size", size);
-        }
+        json.addProperty("linked_quest", getCodeString(linkId));
+        json.addProperty("x", x);
+        json.addProperty("y", y);
+        if (!shape.isEmpty()) json.addProperty("shape", shape);
+        if (size != 1D) json.addProperty("size", size);
     }
 
     @Override
-    public void readData(CompoundTag nbt, HolderLookup.Provider provider) {
-        super.readData(nbt, provider);
+    public void readData(Json5Object json, HolderLookup.Provider provider) {
+        super.readData(json, provider);
 
-        linkId = Long.parseLong(nbt.getString("linked_quest").orElseThrow(), 16);
-        x = nbt.getDouble("x").orElseThrow();
-        y = nbt.getDouble("y").orElseThrow();
-        shape = nbt.getStringOr("shape", "");
+        linkId = Long.parseLong(Json5Util.getString(json, "linked_quest").orElseThrow(), 16);
+        x = Json5Util.getDouble(json, "x").orElseThrow();
+        y = Json5Util.getDouble(json, "y").orElseThrow();
+        shape = Json5Util.getString(json, "shape").orElse("");
         if (shape.equals("default")) {
             shape = "";
         }
-        size = nbt.getDoubleOr("size", 1D);
+        size = Json5Util.getDouble(json, "size").orElse(1D);
     }
 
     @Override

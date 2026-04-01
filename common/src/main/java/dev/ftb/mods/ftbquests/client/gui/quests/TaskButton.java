@@ -1,15 +1,5 @@
 package dev.ftb.mods.ftbquests.client.gui.quests;
 
-import net.minecraft.ChatFormatting;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.MutableComponent;
-import net.minecraft.tags.TagKey;
-import net.minecraft.world.item.Item;
-
-import dev.architectury.networking.NetworkManager;
-
 import dev.ftb.mods.ftblibrary.client.gui.WidgetType;
 import dev.ftb.mods.ftblibrary.client.gui.input.MouseButton;
 import dev.ftb.mods.ftblibrary.client.gui.screens.AbstractButtonListScreen;
@@ -23,6 +13,7 @@ import dev.ftb.mods.ftblibrary.client.util.PositionedIngredient;
 import dev.ftb.mods.ftblibrary.icon.Color4I;
 import dev.ftb.mods.ftblibrary.icon.Icons;
 import dev.ftb.mods.ftblibrary.icon.ItemIcon;
+import dev.ftb.mods.ftblibrary.platform.network.Play2ServerNetworking;
 import dev.ftb.mods.ftblibrary.util.TooltipList;
 import dev.ftb.mods.ftbquests.api.ItemFilterAdapter;
 import dev.ftb.mods.ftbquests.client.FTBQuestsClient;
@@ -37,11 +28,18 @@ import dev.ftb.mods.ftbquests.quest.task.ItemTask;
 import dev.ftb.mods.ftbquests.quest.task.Task;
 import dev.ftb.mods.ftbquests.quest.theme.property.ThemeProperties;
 import dev.ftb.mods.ftbquests.util.TextUtils;
+import net.minecraft.ChatFormatting;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.tags.TagKey;
+import net.minecraft.world.item.Item;
+import org.joml.Matrix3x2fStack;
 
 import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
-import org.joml.Matrix3x2fStack;
 
 public class TaskButton extends Button {
 	private final QuestScreen questScreen;
@@ -82,10 +80,10 @@ public class TaskButton extends Button {
 			ContextMenuBuilder builder = ContextMenuBuilder.create(task, questScreen);
 
 			builder.insertAtTop(List.of(new ContextMenuItem(Component.translatable("ftbquests.gui.move_left"), Icons.LEFT,
-					b -> NetworkManager.sendToServer(new ReorderItemMessage(task.getId(), false))
+					b -> Play2ServerNetworking.send(new ReorderItemMessage(task.getId(), false))
 			)));
 			builder.insertAtTop(List.of(new ContextMenuItem(Component.translatable("ftbquests.gui.move_right"), Icons.RIGHT,
-					b -> NetworkManager.sendToServer(new ReorderItemMessage(task.getId(), true))
+					b -> Play2ServerNetworking.send(new ReorderItemMessage(task.getId(), true))
 			)));
 
 			if (task instanceof ItemTask itemTask && !itemTask.getItemStack().isEmpty()) {
@@ -107,14 +105,14 @@ public class TaskButton extends Button {
 					}
 				}
 				builder.insertAtTop(List.of(new ContextMenuItem(Component.translatable("ftbquests.task.grab_item"), Icons.ADD_GRAY,
-						b -> NetworkManager.sendToServer(new GiveItemToPlayerMessage(itemTask.getItemStack()))))
+						b -> Play2ServerNetworking.send(new GiveItemToPlayerMessage(itemTask.getItemStack()))))
 				);
 			}
 			if (task.getIcon() instanceof ItemIcon itemIcon) {
 				builder.insertAtTop(List.of(new ContextMenuItem(Component.translatable("ftbquests.gui.use_as_quest_icon"),
 								ThemeProperties.EDIT_ICON.get(),
 								b -> {
-									task.getQuest().setRawIcon(itemIcon.getStack().copy());
+									task.getQuest().setRawIcon(itemIcon.getStack().create());
 									task.getQuest().clearCachedData();
 									EditObjectMessage.sendToServer(task.getQuest());
 								})
@@ -178,14 +176,14 @@ public class TaskButton extends Button {
 	}
 
 	@Override
-	public void drawBackground(GuiGraphics graphics, Theme theme, int x, int y, int w, int h) {
+	public void drawBackground(GuiGraphicsExtractor graphics, Theme theme, int x, int y, int w, int h) {
 		if (isMouseOver()) {
 			super.drawBackground(graphics, theme, x, y, w, h);
 		}
 	}
 
 	@Override
-	public void drawIcon(GuiGraphics graphics, Theme theme, int x, int y, int w, int h) {
+	public void drawIcon(GuiGraphicsExtractor graphics, Theme theme, int x, int y, int w, int h) {
 		if (task instanceof CheckmarkTask) {
 			TeamData teamData = FTBQuestsClient.getClientPlayerData();
 
@@ -202,7 +200,7 @@ public class TaskButton extends Button {
 	}
 
 	@Override
-	public void draw(GuiGraphics graphics, Theme theme, int x, int y, int w, int h) {
+	public void draw(GuiGraphicsExtractor graphics, Theme theme, int x, int y, int w, int h) {
 		int bs = h >= 32 ? 32 : 16;
 		drawBackground(graphics, theme, x, y, w, h);
 		drawIcon(graphics, theme, x + (w - bs) / 2, y + (h - bs) / 2, bs, bs);
@@ -284,7 +282,7 @@ public class TaskButton extends Button {
 			}
 
 			@Override
-			public void drawBackground(GuiGraphics graphics, Theme theme, int x, int y, int w, int h) {
+			public void drawBackground(GuiGraphicsExtractor graphics, Theme theme, int x, int y, int w, int h) {
 				if (isMouseOver) {
 					IconHelper.renderIcon(Color4I.WHITE.withAlpha(30), graphics, x, y, w, h);
 				}

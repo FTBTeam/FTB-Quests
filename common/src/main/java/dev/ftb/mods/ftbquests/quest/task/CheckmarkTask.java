@@ -1,9 +1,8 @@
 package dev.ftb.mods.ftbquests.quest.task;
 
-import net.minecraft.server.level.ServerPlayer;
-
 import dev.ftb.mods.ftbquests.quest.Quest;
 import dev.ftb.mods.ftbquests.quest.TeamData;
+import net.minecraft.server.level.ServerPlayer;
 
 public class CheckmarkTask extends AbstractBooleanTask {
 	public CheckmarkTask(long id, Quest quest) {

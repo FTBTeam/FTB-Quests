@@ -1,15 +1,16 @@
 package dev.ftb.mods.ftbquests.quest.task;
 
-import net.minecraft.core.HolderLookup;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.network.RegistryFriendlyByteBuf;
-import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.MutableComponent;
-
+import de.marhali.json5.Json5Object;
 import dev.ftb.mods.ftblibrary.client.config.EditableConfigGroup;
+import dev.ftb.mods.ftblibrary.json5.Json5Util;
 import dev.ftb.mods.ftblibrary.util.StringUtils;
 import dev.ftb.mods.ftbquests.client.EnergyTaskClientData;
 import dev.ftb.mods.ftbquests.quest.Quest;
+import net.minecraft.core.HolderLookup;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;
+import org.jetbrains.annotations.UnknownNullability;
 
 public abstract class EnergyTask extends Task implements ISingleLongValueTask {
 	private long value = 1000L;
@@ -25,25 +26,19 @@ public abstract class EnergyTask extends Task implements ISingleLongValueTask {
 	}
 
 	@Override
-	public void writeData(CompoundTag nbt, HolderLookup.Provider provider) {
-		super.writeData(nbt, provider);
-		nbt.putLong("value", value);
+	public void writeData(@UnknownNullability Json5Object json, HolderLookup.Provider provider) {
+		super.writeData(json, provider);
 
-		if (maxInput > 0L) {
-			nbt.putLong("max_input", maxInput);
-		}
+		json.addProperty("value", value);
+		if (maxInput > 0L) json.addProperty("max_input", maxInput);
 	}
 
 	@Override
-	public void readData(CompoundTag nbt, HolderLookup.Provider provider) {
-		super.readData(nbt, provider);
-		value = nbt.getLong("value").orElseThrow();
+	public void readData(@UnknownNullability Json5Object json, HolderLookup.Provider provider) {
+		super.readData(json, provider);
 
-		if (value < 1L) {
-			value = 1L;
-		}
-
-		maxInput = nbt.getLongOr("max_input", 1000L);
+		value = Math.max(1L, Json5Util.getLong(json, "value").orElseThrow());
+		maxInput = Json5Util.getLong(json, "max_input").orElse(1000L);
 	}
 
 	@Override

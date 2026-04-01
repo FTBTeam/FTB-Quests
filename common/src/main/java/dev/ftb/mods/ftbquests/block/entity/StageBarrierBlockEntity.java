@@ -1,13 +1,12 @@
 package dev.ftb.mods.ftbquests.block.entity;
 
-import net.minecraft.core.BlockPos;
-import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.level.block.state.BlockState;
-
 import dev.ftb.mods.ftblibrary.client.config.EditableConfigGroup;
 import dev.ftb.mods.ftblibrary.integration.stages.StageHelper;
 import dev.ftb.mods.ftbquests.registry.ModBlockEntityTypes;
 import dev.ftb.mods.ftbteams.api.TeamStagesHelper;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.level.block.state.BlockState;
 
 public class StageBarrierBlockEntity extends BaseBarrierBlockEntity {
 	public StageBarrierBlockEntity(BlockPos blockPos, BlockState blockState) {

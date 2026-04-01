@@ -1,8 +1,17 @@
 package dev.ftb.mods.ftbquests.item;
 
+import com.mojang.datafixers.util.Either;
+import dev.ftb.mods.ftblibrary.client.config.editable.EditableEntityFace;
+import dev.ftb.mods.ftblibrary.client.config.editable.EditableImageResource;
+import dev.ftb.mods.ftblibrary.icon.EntityIconLoader;
+import dev.ftb.mods.ftblibrary.icon.Icon;
+import dev.ftb.mods.ftblibrary.icon.ItemIcon;
+import dev.ftb.mods.ftbquests.FTBQuests;
+import dev.ftb.mods.ftbquests.client.FTBQuestsClient;
+import dev.ftb.mods.ftbquests.registry.ModDataComponents;
+import dev.ftb.mods.ftbquests.registry.ModItems;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
 import net.minecraft.resources.ResourceKey;
@@ -15,23 +24,10 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.item.component.TooltipDisplay;
 import net.minecraft.world.level.Level;
-import com.mojang.datafixers.util.Either;
-
-import dev.architectury.registry.registries.RegistrarManager;
-
-import dev.ftb.mods.ftblibrary.client.config.editable.EditableEntityFace;
-import dev.ftb.mods.ftblibrary.client.config.editable.EditableImageResource;
-import dev.ftb.mods.ftblibrary.icon.EntityIconLoader;
-import dev.ftb.mods.ftblibrary.icon.Icon;
-import dev.ftb.mods.ftblibrary.icon.ItemIcon;
-import dev.ftb.mods.ftbquests.FTBQuests;
-import dev.ftb.mods.ftbquests.client.FTBQuestsClient;
-import dev.ftb.mods.ftbquests.registry.ModDataComponents;
-import dev.ftb.mods.ftbquests.registry.ModItems;
+import org.jspecify.annotations.Nullable;
 
 import java.util.Optional;
 import java.util.function.Consumer;
-import org.jspecify.annotations.Nullable;
 
 public class CustomIconItem extends Item {
 	private static final Identifier FALLBACK_ICON = Identifier.withDefaultNamespace("textures/misc/unknown_pack.png");
@@ -100,7 +96,7 @@ public class CustomIconItem extends Item {
 	}
 
 	public static void setFaceIcon(ItemStack stack, EntityType<?> value) {
-		setFaceIcon(stack, value == EditableEntityFace.NONE ? null : RegistrarManager.getId(value, Registries.ENTITY_TYPE));
+		setFaceIcon(stack, value == EditableEntityFace.NONE ? null :BuiltInRegistries.ENTITY_TYPE.getKey(value));
 	}
 
 	private static Optional<Either<Identifier, EntityType<?>>> getCustomComponent(ItemStack stack) {

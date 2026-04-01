@@ -1,12 +1,7 @@
 package dev.ftb.mods.ftbquests.client;
 
 import dev.ftb.mods.ftblibrary.config.manager.ConfigManager;
-import dev.ftb.mods.ftblibrary.config.value.BooleanValue;
-import dev.ftb.mods.ftblibrary.config.value.Config;
-import dev.ftb.mods.ftblibrary.config.value.DoubleValue;
-import dev.ftb.mods.ftblibrary.config.value.EnumValue;
-import dev.ftb.mods.ftblibrary.config.value.IntValue;
-import dev.ftb.mods.ftblibrary.config.value.StringValue;
+import dev.ftb.mods.ftblibrary.config.value.*;
 import dev.ftb.mods.ftblibrary.util.PanelPositioning;
 import dev.ftb.mods.ftbquests.api.FTBQuestsAPI;
 import dev.ftb.mods.ftbquests.client.config.LocaleValue;

@@ -1,16 +1,6 @@
 package dev.ftb.mods.ftbquests.client.gui.quests;
 
-import net.minecraft.ChatFormatting;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.client.renderer.Rect2i;
-import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.MutableComponent;
-import net.minecraft.util.Mth;
 import com.mojang.datafixers.util.Pair;
-
-import dev.architectury.networking.NetworkManager;
-
 import dev.ftb.mods.ftblibrary.client.config.EditableConfigGroup;
 import dev.ftb.mods.ftblibrary.client.config.editable.EditableConfigValue;
 import dev.ftb.mods.ftblibrary.client.config.editable.EditableVariantConfig;
@@ -27,6 +17,7 @@ import dev.ftb.mods.ftblibrary.client.util.ClientUtils;
 import dev.ftb.mods.ftblibrary.icon.Color4I;
 import dev.ftb.mods.ftblibrary.icon.Icons;
 import dev.ftb.mods.ftblibrary.math.MathUtils;
+import dev.ftb.mods.ftblibrary.platform.network.Play2ServerNetworking;
 import dev.ftb.mods.ftblibrary.util.TooltipList;
 import dev.ftb.mods.ftbquests.api.FTBQuestsAPI;
 import dev.ftb.mods.ftbquests.client.ClientQuestFile;
@@ -38,39 +29,26 @@ import dev.ftb.mods.ftbquests.client.gui.CustomToast;
 import dev.ftb.mods.ftbquests.client.gui.FTBQuestsTheme;
 import dev.ftb.mods.ftbquests.client.gui.RewardTablesScreen;
 import dev.ftb.mods.ftbquests.client.gui.SelectQuestObjectScreen;
-import dev.ftb.mods.ftbquests.net.ChangeProgressMessage;
-import dev.ftb.mods.ftbquests.net.CopyChapterImageMessage;
-import dev.ftb.mods.ftbquests.net.CopyQuestMessage;
-import dev.ftb.mods.ftbquests.net.CreateObjectMessage;
-import dev.ftb.mods.ftbquests.net.EditObjectMessage;
-import dev.ftb.mods.ftbquests.quest.BaseQuestFile;
-import dev.ftb.mods.ftbquests.quest.Chapter;
-import dev.ftb.mods.ftbquests.quest.ChapterImage;
-import dev.ftb.mods.ftbquests.quest.Movable;
-import dev.ftb.mods.ftbquests.quest.Quest;
-import dev.ftb.mods.ftbquests.quest.QuestLink;
-import dev.ftb.mods.ftbquests.quest.QuestObject;
-import dev.ftb.mods.ftbquests.quest.QuestObjectBase;
-import dev.ftb.mods.ftbquests.quest.QuestObjectType;
+import dev.ftb.mods.ftbquests.net.*;
+import dev.ftb.mods.ftbquests.quest.*;
 import dev.ftb.mods.ftbquests.quest.reward.RandomReward;
 import dev.ftb.mods.ftbquests.quest.reward.Reward;
 import dev.ftb.mods.ftbquests.quest.task.Task;
 import dev.ftb.mods.ftbquests.quest.theme.QuestTheme;
 import dev.ftb.mods.ftbquests.quest.theme.ThemeLoader;
 import dev.ftb.mods.ftbquests.quest.theme.property.ThemeProperties;
+import net.minecraft.ChatFormatting;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
+import net.minecraft.client.renderer.Rect2i;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.util.Mth;
 import org.jetbrains.annotations.Nullable;
 import org.lwjgl.glfw.GLFW;
 
 import java.text.DateFormat;
-import java.util.ArrayDeque;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Date;
-import java.util.Deque;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 
 public class QuestScreen extends BaseScreen {
 	// A fairly large z-offset is needed to ensure various GUI elements render above drawn block items,
@@ -119,6 +97,15 @@ public class QuestScreen extends BaseScreen {
 		this.pendingPersistedData = persistedData;
 
 		selectChapter(null);
+	}
+
+	public static QuestScreen reopen(ClientQuestFile file, PersistedData persistedData) {
+		double mx = Minecraft.getInstance().mouseHandler.xpos();
+		double my = Minecraft.getInstance().mouseHandler.ypos();
+		Minecraft.getInstance().setScreen(null);  // ensures prevScreen is null, so we can close correctly
+		QuestScreen questScreen = new QuestScreen(file, persistedData);
+		questScreen.openGui();
+		return questScreen;
 	}
 
 	@Nullable
@@ -351,7 +338,7 @@ public class QuestScreen extends BaseScreen {
 
 	private void setAutofocusedId(Chapter chapter, long id) {
 		chapter.setAutofocus(id);
-		NetworkManager.sendToServer(EditObjectMessage.forQuestObject(chapter));
+		Play2ServerNetworking.send(EditObjectMessage.forQuestObject(chapter));
 	}
 
 	private List<ContextMenuItem> scanForConfigEntries(List<ContextMenuItem> res, QuestObjectBase object, EditableConfigGroup g) {
@@ -373,13 +360,13 @@ public class QuestScreen extends BaseScreen {
 						value.onClicked(button, mouseButton, accepted -> {
 							if (accepted) {
 								value.applyValue();
-								NetworkManager.sendToServer(EditObjectMessage.forQuestObject(object));
+								Play2ServerNetworking.send(EditObjectMessage.forQuestObject(object));
 							}
 						});
 					}
 
 					@Override
-					public void drawIcon(GuiGraphics graphics, Theme theme, int x, int y, int w, int h) {
+					public void drawIcon(GuiGraphicsExtractor graphics, Theme theme, int x, int y, int w, int h) {
 						IconHelper.renderIcon(value.getIcon(), graphics, x, y, w, h);
 					}
 				});
@@ -447,11 +434,11 @@ public class QuestScreen extends BaseScreen {
 			Pair<Double, Double> qxy = getSnappedXY();
 			return switch (file.getBase(id)) {
 				case Quest quest -> {
-					NetworkManager.sendToServer(new CopyQuestMessage(quest.getId(), chapter.getId(), qxy.getFirst(), qxy.getSecond(), withDeps));
+					Play2ServerNetworking.send(new CopyQuestMessage(quest.getId(), chapter.getId(), qxy.getFirst(), qxy.getSecond(), withDeps));
 					yield true;
 				}
 				case ChapterImage img -> {
-					NetworkManager.sendToServer(new CopyChapterImageMessage(img.getId(), chapter.getId(), qxy.getFirst(), qxy.getSecond()));
+					Play2ServerNetworking.send(new CopyChapterImageMessage(img.getId(), chapter.getId(), qxy.getFirst(), qxy.getSecond()));
 					yield true;
 				}
 				case null, default -> false;
@@ -468,7 +455,7 @@ public class QuestScreen extends BaseScreen {
 			Pair<Double,Double> qxy = getSnappedXY();
 			QuestLink link = new QuestLink(0L, chapter, id);
 			link.setPosition(qxy.getFirst(), qxy.getSecond());
-			NetworkManager.sendToServer(CreateObjectMessage.create(link, null, false));
+			Play2ServerNetworking.send(CreateObjectMessage.create(link, null, false));
 			return true;
 		}).orElse(false);
 	}
@@ -681,7 +668,7 @@ public class QuestScreen extends BaseScreen {
 	}
 
 	@Override
-	public void drawBackground(GuiGraphics graphics, Theme theme, int x, int y, int w, int h) {
+	public void drawBackground(GuiGraphicsExtractor graphics, Theme theme, int x, int y, int w, int h) {
 		QuestTheme.setFallbackQuestObject(selectedChapter);
 
 		super.drawBackground(graphics, theme, x, y, w, h);
@@ -746,7 +733,7 @@ public class QuestScreen extends BaseScreen {
 	}
 
 	@Override
-	public void drawForeground(GuiGraphics graphics, Theme theme, int x, int y, int w, int h) {
+	public void drawForeground(GuiGraphicsExtractor graphics, Theme theme, int x, int y, int w, int h) {
 		Color4I borderColor = ThemeProperties.WIDGET_BORDER.get(selectedChapter);
 		GuiHelper.drawHollowRect(graphics, x, y, w, h, borderColor, false);
 		super.drawForeground(graphics, theme, x, y, w, h);
@@ -758,7 +745,7 @@ public class QuestScreen extends BaseScreen {
 	}
 
 	@Override
-	public boolean drawDefaultBackground(GuiGraphics graphics) {
+	public boolean drawDefaultBackground(GuiGraphicsExtractor graphics) {
 		return false;
 	}
 

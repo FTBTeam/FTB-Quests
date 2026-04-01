@@ -1,11 +1,5 @@
 package dev.ftb.mods.ftbquests.client;
 
-import net.minecraft.ChatFormatting;
-import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.MutableComponent;
-import net.minecraft.sounds.SoundEvents;
-import net.minecraft.world.entity.player.Player;
-
 import dev.ftb.mods.ftblibrary.client.util.ClientUtils;
 import dev.ftb.mods.ftblibrary.icon.Icon;
 import dev.ftb.mods.ftblibrary.util.NameMap;
@@ -13,6 +7,11 @@ import dev.ftb.mods.ftbquests.quest.BaseQuestFile;
 import dev.ftb.mods.ftbquests.quest.Chapter;
 import dev.ftb.mods.ftbquests.quest.QuestObject;
 import dev.ftb.mods.ftbquests.quest.QuestObjectType;
+import net.minecraft.ChatFormatting;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.world.entity.player.Player;
 
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
@@ -63,19 +62,19 @@ public enum NotificationStyle {
     }
 
     private static void completionChat(QuestObject qo) {
-        chatMsg(qo, false);
+        chatMsg(qo, Player::sendSystemMessage);
     }
 
     private static void rewardChat(Component component, Icon<?> icon) {
-        ClientUtils.getClientPlayer().displayClientMessage(formatRewardMsg(component),false);
+        ClientUtils.getClientPlayer().sendSystemMessage(formatRewardMsg(component));
     }
 
     private static void completionActionBar(QuestObject qo) {
-        chatMsg(qo, true);
+        chatMsg(qo, Player::sendOverlayMessage);
     }
 
     private static void rewardActionBar(Component component, Icon<?> icon) {
-        ClientUtils.getClientPlayer().displayClientMessage(formatRewardMsg(component), true);
+        ClientUtils.getClientPlayer().sendOverlayMessage(formatRewardMsg(component));
     }
 
     private static void completionNone(QuestObject qo) {
@@ -90,10 +89,10 @@ public enum NotificationStyle {
                 .append(msg.copy().withStyle(ChatFormatting.WHITE));
     }
 
-    private static void chatMsg(QuestObject qo, boolean actionBar) {
+    private static void chatMsg(QuestObject qo, BiConsumer<Player, Component> consumer) {
         Player player = ClientUtils.getClientPlayer();
         MutableComponent msg = qo.getObjectType().getCompletedMessage().copy().withStyle(qo.getObjectType().getColor());
-        player.displayClientMessage(msg.append(" ").append(qo.getTitle().copy().withStyle(ChatFormatting.WHITE)), actionBar);
+        consumer.accept(player, msg.append(" ").append(qo.getTitle().copy().withStyle(ChatFormatting.WHITE)));
         if (FTBQuestsClientConfig.COMPLETION_SOUNDS.get()) {
             if (qo instanceof Chapter || qo instanceof BaseQuestFile) {
                 player.playSound(SoundEvents.UI_TOAST_CHALLENGE_COMPLETE);

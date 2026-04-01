@@ -1,11 +1,10 @@
 package dev.ftb.mods.ftbquests.client.gui.quests;
 
-import net.minecraft.network.chat.Component;
-
 import dev.ftb.mods.ftblibrary.client.gui.input.MouseButton;
 import dev.ftb.mods.ftblibrary.client.gui.widget.Panel;
 import dev.ftb.mods.ftbquests.client.gui.EmergencyItemsScreen;
 import dev.ftb.mods.ftbquests.quest.theme.property.ThemeProperties;
+import net.minecraft.network.chat.Component;
 
 public class EmergencyItemsButton extends TabButton {
 	public EmergencyItemsButton(Panel panel) {

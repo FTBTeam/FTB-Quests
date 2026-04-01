@@ -1,22 +1,14 @@
 package dev.ftb.mods.ftbquests.quest.task;
 
-import net.minecraft.ChatFormatting;
-import net.minecraft.core.HolderLookup;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.network.RegistryFriendlyByteBuf;
-import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.MutableComponent;
-import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.world.item.Item;
-import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.TooltipFlag;
-
+import de.marhali.json5.Json5Object;
 import dev.ftb.mods.ftblibrary.client.config.EditableConfigGroup;
 import dev.ftb.mods.ftblibrary.client.config.Tristate;
 import dev.ftb.mods.ftblibrary.client.util.ClientUtils;
 import dev.ftb.mods.ftblibrary.icon.AnimatedIcon;
 import dev.ftb.mods.ftblibrary.icon.Icon;
 import dev.ftb.mods.ftblibrary.icon.ItemIcon;
+import dev.ftb.mods.ftblibrary.json5.Json5Ops;
+import dev.ftb.mods.ftblibrary.json5.Json5Util;
 import dev.ftb.mods.ftblibrary.math.Bits;
 import dev.ftb.mods.ftblibrary.util.TooltipList;
 import dev.ftb.mods.ftbquests.FTBQuests;
@@ -27,6 +19,16 @@ import dev.ftb.mods.ftbquests.quest.Quest;
 import dev.ftb.mods.ftbquests.quest.TeamData;
 import dev.ftb.mods.ftbquests.registry.ModItems;
 import dev.ftb.mods.ftbquests.util.PlayerInventorySummary;
+import net.minecraft.ChatFormatting;
+import net.minecraft.core.HolderLookup;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.TooltipFlag;
+import org.jetbrains.annotations.UnknownNullability;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -76,35 +78,30 @@ public class ItemTask extends Task implements Predicate<ItemStack> {
 	}
 
 	@Override
-	public void writeData(CompoundTag nbt, HolderLookup.Provider provider) {
-		super.writeData(nbt, provider);
+	public void writeData(Json5Object json, HolderLookup.Provider provider) {
+		super.writeData(json, provider);
 
-		nbt.put("item", saveItemSingleLine(itemStack.copyWithCount(1)));
-
-		if (count > 1) {
-			nbt.putLong("count", count);
-		}
-
-		consumeItems.write(nbt, "consume_items");
-		onlyFromCrafting.write(nbt, "only_from_crafting");
+		json.add("item", ItemStack.CODEC.encodeStart(provider.createSerializationContext(Json5Ops.INSTANCE), itemStack.copyWithCount(1)).getOrThrow());
+		if (count > 1) json.addProperty("count", count);
+		consumeItems.write(json, "consume_items");
+		onlyFromCrafting.write(json, "only_from_crafting");
 		if (matchComponents != ComponentMatchType.NONE) {
-			nbt.putString("match_components", ComponentMatchType.NAME_MAP.getName(matchComponents));
+			json.addProperty("match_components", ComponentMatchType.NAME_MAP.getName(matchComponents));
 		}
-
 		if (taskScreenOnly) {
-			nbt.putBoolean("task_screen_only", true);
+			json.addProperty("task_screen_only", true);
 		}
 	}
 
 	@Override
-	public void readData(CompoundTag nbt, HolderLookup.Provider provider) {
-		super.readData(nbt, provider);
-		itemStack = itemOrMissingFromNBT(nbt.get("item"), provider);
-		count = Math.max(nbt.getLongOr("count", 1), 1L);
-		consumeItems = Tristate.read(nbt, "consume_items");
-		onlyFromCrafting = Tristate.read(nbt, "only_from_crafting");
-		matchComponents = nbt.getString("match_components").map(ComponentMatchType.NAME_MAP::get).orElse(ComponentMatchType.NONE);
-		taskScreenOnly = nbt.getBooleanOr("task_screen_only", false);
+	public void readData(@UnknownNullability Json5Object json, HolderLookup.Provider provider) {
+		super.readData(json, provider);
+		itemStack = itemOrMissingFromJson(Json5Util.getJson5Object(json, "item").orElseThrow(), provider);
+		count = Math.max(Json5Util.getLong(json, "count").orElse(1L), 1L);
+		consumeItems = Tristate.read(json, "consume_items");
+		onlyFromCrafting = Tristate.read(json, "only_from_crafting");
+		matchComponents = Json5Util.getString(json, "match_components").map(ComponentMatchType.NAME_MAP::get).orElse(ComponentMatchType.NONE);
+		taskScreenOnly = Json5Util.getBoolean(json, "task_screen_only").orElse(false);
 	}
 
 	@Override
@@ -222,7 +219,7 @@ public class ItemTask extends Task implements Predicate<ItemStack> {
 			list.add(getTitle());
 		} else {
 			// use item's tooltip, but include a count with the item name (e.g. "3 x Stick") if appropriate
-			ItemStack stack = getIcon() instanceof ItemIcon i ? i.getStack() : itemStack;
+			ItemStack stack = getIcon() instanceof ItemIcon i ? i.getStack().create() : itemStack;
 			List<Component> lines = stack.getTooltipLines(Item.TooltipContext.of(
 					ClientUtils.getClientLevel()),
 					ClientUtils.getClientPlayer(),

@@ -1,19 +1,19 @@
 package dev.ftb.mods.ftbquests.quest.reward;
 
+import de.marhali.json5.Json5Object;
+import dev.ftb.mods.ftblibrary.client.config.EditableConfigGroup;
+import dev.ftb.mods.ftblibrary.icon.Color4I;
+import dev.ftb.mods.ftblibrary.json5.Json5Util;
+import dev.ftb.mods.ftblibrary.platform.network.Server2PlayNetworking;
+import dev.ftb.mods.ftbquests.net.NotifyRewardMessage;
+import dev.ftb.mods.ftbquests.quest.Quest;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.HolderLookup;
-import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.server.level.ServerPlayer;
-
-import dev.architectury.networking.NetworkManager;
-
-import dev.ftb.mods.ftblibrary.client.config.EditableConfigGroup;
-import dev.ftb.mods.ftblibrary.icon.Color4I;
-import dev.ftb.mods.ftbquests.net.NotifyRewardMessage;
-import dev.ftb.mods.ftbquests.quest.Quest;
+import org.jetbrains.annotations.UnknownNullability;
 
 public class XPLevelsReward extends Reward {
 	private int xpLevels;
@@ -33,15 +33,15 @@ public class XPLevelsReward extends Reward {
 	}
 
 	@Override
-	public void writeData(CompoundTag nbt, HolderLookup.Provider provider) {
-		super.writeData(nbt, provider);
-		nbt.putInt("xp_levels", xpLevels);
+	public void writeData(@UnknownNullability Json5Object json, HolderLookup.Provider provider) {
+		super.writeData(json, provider);
+		json.addProperty("xp_levels", xpLevels);
 	}
 
 	@Override
-	public void readData(CompoundTag nbt, HolderLookup.Provider provider) {
-		super.readData(nbt, provider);
-		xpLevels = nbt.getIntOr("xp_levels", 5);
+	public void readData(@UnknownNullability Json5Object json, HolderLookup.Provider provider) {
+		super.readData(json, provider);
+		xpLevels = Json5Util.getInt(json, "xp_levels").orElse(5);
 	}
 
 	@Override
@@ -69,7 +69,7 @@ public class XPLevelsReward extends Reward {
 		if (notify) {
 			Component text = Component.translatable("ftbquests.reward.ftbquests.xp_levels").append(": ")
 					.append(Component.literal("+" + xpLevels).withStyle(ChatFormatting.GREEN));
-			NetworkManager.sendToPlayer(player, new NotifyRewardMessage(id, text, Color4I.empty(), disableRewardScreenBlur));
+			Server2PlayNetworking.send(player, new NotifyRewardMessage(id, text, Color4I.empty(), disableRewardScreenBlur));
 		}
 	}
 

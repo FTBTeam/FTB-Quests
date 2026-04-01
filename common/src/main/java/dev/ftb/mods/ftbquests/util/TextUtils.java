@@ -1,22 +1,21 @@
 package dev.ftb.mods.ftbquests.util;
 
+import com.google.gson.JsonParseException;
+import com.google.gson.JsonParser;
+import com.mojang.serialization.JsonOps;
+import dev.ftb.mods.ftblibrary.client.util.ClientTextComponentUtils;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.ComponentSerialization;
 import net.minecraft.network.chat.contents.PlainTextContents;
-import com.mojang.serialization.JsonOps;
-
-import dev.ftb.mods.ftblibrary.client.util.ClientTextComponentUtils;
+import org.apache.commons.lang3.text.translate.UnicodeUnescaper;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Consumer;
-import com.google.gson.JsonParseException;
-import com.google.gson.JsonParser;
-import org.apache.commons.lang3.text.translate.UnicodeUnescaper;
 
 public class TextUtils {
     // deprecated in apache commons, but we don't have apache commons text available here

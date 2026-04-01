@@ -1,9 +1,15 @@
 package dev.ftb.mods.ftbquests.quest.task;
 
+import de.marhali.json5.Json5Object;
+import dev.ftb.mods.ftblibrary.client.config.EditableConfigGroup;
+import dev.ftb.mods.ftblibrary.json5.Json5Util;
+import dev.ftb.mods.ftblibrary.util.KnownServerRegistries;
+import dev.ftb.mods.ftblibrary.util.NameMap;
+import dev.ftb.mods.ftbquests.quest.Quest;
+import dev.ftb.mods.ftbquests.quest.TeamData;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.registries.Registries;
-import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
@@ -11,13 +17,6 @@ import net.minecraft.resources.Identifier;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.level.Level;
-
-import dev.ftb.mods.ftblibrary.client.config.EditableConfigGroup;
-import dev.ftb.mods.ftblibrary.util.KnownServerRegistries;
-import dev.ftb.mods.ftblibrary.util.NameMap;
-import dev.ftb.mods.ftbquests.FTBQuests;
-import dev.ftb.mods.ftbquests.quest.Quest;
-import dev.ftb.mods.ftbquests.quest.TeamData;
 
 import java.util.List;
 
@@ -41,22 +40,16 @@ public class DimensionTask extends AbstractBooleanTask {
 	}
 
 	@Override
-	public void writeData(CompoundTag nbt, HolderLookup.Provider provider) {
-		super.writeData(nbt, provider);
-		nbt.putString("dimension", dimension.identifier().toString());
+	public void writeData(Json5Object json, HolderLookup.Provider provider) {
+		super.writeData(json, provider);
+		Json5Util.store(json, "dimension", Identifier.CODEC, dimension.identifier());
 	}
 
 	@Override
-	public void readData(CompoundTag nbt, HolderLookup.Provider provider) {
-		super.readData(nbt, provider);
-		String idStr = nbt.getString("dimension").orElseThrow();
-		Identifier dimId = Identifier.tryParse(idStr);
-		if (dimId == null) {
-			FTBQuests.LOGGER.error("bad dimension id {} in task {}", idStr, getId());
-			dimension = Level.NETHER;
-		} else {
-			dimension = ResourceKey.create(Registries.DIMENSION, dimId);
-		}
+	public void readData(Json5Object json, HolderLookup.Provider provider) {
+		super.readData(json, provider);
+		Identifier dimId = Json5Util.fetch(json, "dimension", Identifier.CODEC).orElseThrow();
+		dimension = ResourceKey.create(Registries.DIMENSION, dimId);
 	}
 
 	@Override

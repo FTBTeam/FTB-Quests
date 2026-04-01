@@ -1,15 +1,7 @@
 package dev.ftb.mods.ftbquests.client.gui.quests;
 
-import net.minecraft.ChatFormatting;
-import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.ComponentUtils;
-import net.minecraft.world.entity.player.Player;
 import com.mojang.blaze3d.platform.InputConstants;
-
-import dev.architectury.networking.NetworkManager;
-
+import de.marhali.json5.Json5Object;
 import dev.ftb.mods.ftblibrary.client.config.editable.EditableDouble;
 import dev.ftb.mods.ftblibrary.client.config.gui.EditStringConfigOverlay;
 import dev.ftb.mods.ftblibrary.client.gui.input.MouseButton;
@@ -25,6 +17,7 @@ import dev.ftb.mods.ftblibrary.icon.Color4I;
 import dev.ftb.mods.ftblibrary.icon.Icon;
 import dev.ftb.mods.ftblibrary.icon.Icons;
 import dev.ftb.mods.ftblibrary.math.PixelBuffer;
+import dev.ftb.mods.ftblibrary.platform.network.Play2ServerNetworking;
 import dev.ftb.mods.ftblibrary.util.TooltipList;
 import dev.ftb.mods.ftbquests.client.FTBQuestsClient;
 import dev.ftb.mods.ftbquests.client.FTBQuestsClientConfig;
@@ -32,25 +25,24 @@ import dev.ftb.mods.ftbquests.client.gui.ContextMenuBuilder;
 import dev.ftb.mods.ftbquests.net.CreateObjectMessage;
 import dev.ftb.mods.ftbquests.net.DeleteObjectMessage;
 import dev.ftb.mods.ftbquests.net.EditObjectMessage;
-import dev.ftb.mods.ftbquests.quest.Movable;
-import dev.ftb.mods.ftbquests.quest.ProgressionMode;
-import dev.ftb.mods.ftbquests.quest.Quest;
-import dev.ftb.mods.ftbquests.quest.QuestObject;
-import dev.ftb.mods.ftbquests.quest.QuestObjectBase;
-import dev.ftb.mods.ftbquests.quest.QuestShape;
-import dev.ftb.mods.ftbquests.quest.TeamData;
+import dev.ftb.mods.ftbquests.quest.*;
 import dev.ftb.mods.ftbquests.quest.reward.Reward;
 import dev.ftb.mods.ftbquests.quest.reward.RewardType;
 import dev.ftb.mods.ftbquests.quest.reward.RewardTypes;
 import dev.ftb.mods.ftbquests.quest.theme.property.ThemeProperties;
 import dev.ftb.mods.ftbquests.util.TextUtils;
+import net.minecraft.ChatFormatting;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.ComponentUtils;
+import net.minecraft.world.entity.player.Player;
+import org.joml.Matrix3x2fStack;
+import org.jspecify.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
-import org.joml.Matrix3x2fStack;
-import org.jspecify.annotations.Nullable;
 
 public class QuestButton extends Button implements QuestPositionableButton {
 	protected final QuestScreen questScreen;
@@ -216,7 +208,7 @@ public class QuestButton extends Button implements QuestPositionableButton {
 					b -> openAddRewardContextMenu()));
 			contextMenu.add(new ContextMenuItem(Component.translatable("ftbquests.gui.clear_reward_all"),
 					ThemeProperties.CLOSE_ICON.get(quest),
-					b -> selected.forEach(q -> q.getRewards().forEach(r -> NetworkManager.sendToServer(new DeleteObjectMessage(r.id))))));
+					b -> selected.forEach(q -> q.getRewards().forEach(r -> Play2ServerNetworking.send(new DeleteObjectMessage(r.id))))));
 			contextMenu.add(new ContextMenuItem(Component.translatable("ftbquests.gui.bulk_change_size"),
 					Icons.SETTINGS,
 					b -> bulkChangeSize()));
@@ -250,7 +242,7 @@ public class QuestButton extends Button implements QuestPositionableButton {
 				quests.forEach(q -> {
 					if (editable.getValue() != null) {
 						q.setSize(editable.getValue());
-						NetworkManager.sendToServer(EditObjectMessage.forQuestObject(q));
+						Play2ServerNetworking.send(EditObjectMessage.forQuestObject(q));
 					}
 				});
 			}
@@ -269,9 +261,9 @@ public class QuestButton extends Button implements QuestPositionableButton {
 					playClickSound();
 					type.getGuiProvider().openCreationGui(parent, quest, reward -> questScreen.getSelectedQuests().forEach(quest -> {
 						Reward newReward = QuestObjectBase.copy(reward, () -> type.createReward(0L, quest));
-                        CompoundTag extra = new CompoundTag();
-                        extra.putString("type", type.getTypeForNBT());
-                        NetworkManager.sendToServer(CreateObjectMessage.create(newReward, extra));
+                        Json5Object extra = new Json5Object();
+                        extra.addProperty("type", type.getTypeForSerialization());
+                        Play2ServerNetworking.send(CreateObjectMessage.create(newReward, extra));
                     }));
 				}));
 			}
@@ -294,7 +286,7 @@ public class QuestButton extends Button implements QuestPositionableButton {
 		quest.removeInvalidDependencies();
 
 		if (quest.verifyDependencies(false)) {
-			NetworkManager.sendToServer(EditObjectMessage.forQuestObject(quest));
+			Play2ServerNetworking.send(EditObjectMessage.forQuestObject(quest));
 			questScreen.questPanel.refreshWidgets();
 		} else {
 			quest.clearDependencies();
@@ -349,7 +341,7 @@ public class QuestButton extends Button implements QuestPositionableButton {
 	}
 
 	@Override
-	public void draw(GuiGraphics graphics, Theme theme, int x, int y, int w, int h) {
+	public void draw(GuiGraphicsExtractor graphics, Theme theme, int x, int y, int w, int h) {
 		Color4I outlineColor = ThemeProperties.QUEST_NOT_STARTED_COLOR.get(quest);
 		Icon<?> questIcon = Color4I.empty() ;
 		Icon<?> hiddenIcon = Color4I.empty();

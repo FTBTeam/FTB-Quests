@@ -1,8 +1,14 @@
 package dev.ftb.mods.ftbquests.quest.task;
 
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.DataResult;
+import de.marhali.json5.Json5Object;
+import dev.ftb.mods.ftblibrary.client.config.EditableConfigGroup;
+import dev.ftb.mods.ftblibrary.json5.Json5Util;
+import dev.ftb.mods.ftbquests.quest.Quest;
+import dev.ftb.mods.ftbquests.quest.TeamData;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.registries.Registries;
-import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.resources.Identifier;
 import net.minecraft.resources.ResourceKey;
@@ -10,12 +16,14 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.util.Mth;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.StructureBlockEntity;
+import org.jetbrains.annotations.UnknownNullability;
 
-import dev.ftb.mods.ftblibrary.client.config.EditableConfigGroup;
-import dev.ftb.mods.ftbquests.quest.Quest;
-import dev.ftb.mods.ftbquests.quest.TeamData;
+import java.util.List;
 
 public class LocationTask extends AbstractBooleanTask {
+	private static final Codec<List<Integer>> THREE_INT_LIST_CODEC = Codec.INT.listOf()
+			.validate(l -> l.size() == 3 ? DataResult.success(l) : DataResult.error(() -> "expecting 3-element list"));
+
 	private ResourceKey<Level> dimension;
 	private boolean ignoreDimension;
 	private int x, y, z;
@@ -48,34 +56,32 @@ public class LocationTask extends AbstractBooleanTask {
 	}
 
 	@Override
-	public void writeData(CompoundTag nbt, HolderLookup.Provider provider) {
-		super.writeData(nbt, provider);
-		nbt.putString("dimension", dimension.identifier().toString());
-		nbt.putBoolean("ignore_dimension", ignoreDimension);
-		nbt.putIntArray("position", new int[]{x, y, z});
-		nbt.putIntArray("size", new int[]{w, h, d});
+	public void writeData(@UnknownNullability Json5Object json, HolderLookup.Provider provider) {
+		super.writeData(json, provider);
+		Json5Util.store(json, "dimension", Identifier.CODEC, dimension.identifier());
+		json.addProperty("ignore_dimension", ignoreDimension);
+		Json5Util.store(json, "position", THREE_INT_LIST_CODEC, List.of(x, y, z));
+		Json5Util.store(json, "size", THREE_INT_LIST_CODEC, List.of(w, h, d));
 	}
 
 	@Override
-	public void readData(CompoundTag nbt, HolderLookup.Provider provider) {
-		super.readData(nbt, provider);
-		dimension = ResourceKey.create(Registries.DIMENSION, Identifier.tryParse(nbt.getString("dimension").orElseThrow()));
-		ignoreDimension = nbt.getBoolean("ignore_dimension").orElseThrow();
+	public void readData(@UnknownNullability Json5Object json, HolderLookup.Provider provider) {
+		super.readData(json, provider);
+		dimension = ResourceKey.create(Registries.DIMENSION, Json5Util.fetch(json, "dimension", Identifier.CODEC).orElseThrow());
+		ignoreDimension = Json5Util.getBoolean(json, "ignore_dimension").orElseThrow();
 
-		int[] pos = nbt.getIntArray("position").orElseThrow();
-
-		if (pos.length == 3) {
-			x = pos[0];
-			y = pos[1];
-			z = pos[2];
+		List<Integer> pos = Json5Util.fetch(json, "position", THREE_INT_LIST_CODEC).orElseThrow();
+		if (pos.size() == 3) {
+			x = pos.get(0);
+			y = pos.get(1);
+			z = pos.get(2);
 		}
 
-		int[] size = nbt.getIntArray("size").orElseThrow();
-
-		if (pos.length == 3) {
-			w = size[0];
-			h = size[1];
-			d = size[2];
+		List<Integer> size = Json5Util.fetch(json, "size", THREE_INT_LIST_CODEC).orElseThrow();
+		if (size.size() == 3) {
+			w = pos.get(0);
+			h = pos.get(1);
+			d = pos.get(2);
 		}
 	}
 

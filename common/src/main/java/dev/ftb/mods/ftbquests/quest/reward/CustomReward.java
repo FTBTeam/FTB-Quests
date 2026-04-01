@@ -1,9 +1,9 @@
 package dev.ftb.mods.ftbquests.quest.reward;
 
-import net.minecraft.server.level.ServerPlayer;
-
+import dev.ftb.mods.ftblibrary.platform.event.NativeEventPosting;
 import dev.ftb.mods.ftbquests.events.CustomRewardEvent;
 import dev.ftb.mods.ftbquests.quest.Quest;
+import net.minecraft.server.level.ServerPlayer;
 
 public class CustomReward extends Reward {
 	public CustomReward(long id, Quest quest) {
@@ -17,6 +17,6 @@ public class CustomReward extends Reward {
 
 	@Override
 	public void claim(ServerPlayer player, boolean notify) {
-		CustomRewardEvent.EVENT.invoker().act(new CustomRewardEvent(this, player, notify));
+		NativeEventPosting.get().postEvent(new CustomRewardEvent.Data(this, player, notify));
 	}
 }

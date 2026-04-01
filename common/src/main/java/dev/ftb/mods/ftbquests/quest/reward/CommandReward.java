@@ -1,24 +1,24 @@
 package dev.ftb.mods.ftbquests.quest.reward;
 
+import de.marhali.json5.Json5Object;
+import dev.ftb.mods.ftblibrary.client.config.EditableConfigGroup;
+import dev.ftb.mods.ftblibrary.icon.Icon;
+import dev.ftb.mods.ftblibrary.json5.Json5Util;
+import dev.ftb.mods.ftblibrary.platform.network.Server2PlayNetworking;
+import dev.ftb.mods.ftbquests.net.NotifyRewardMessage;
+import dev.ftb.mods.ftbquests.quest.Quest;
+import dev.ftb.mods.ftbteams.api.FTBTeamsAPI;
 import net.minecraft.ChatFormatting;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.HolderLookup;
-import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.permissions.LevelBasedPermissionSet;
 import net.minecraft.server.permissions.PermissionSet;
-
-import dev.architectury.networking.NetworkManager;
-
-import dev.ftb.mods.ftblibrary.client.config.EditableConfigGroup;
-import dev.ftb.mods.ftblibrary.icon.Icon;
-import dev.ftb.mods.ftbquests.net.NotifyRewardMessage;
-import dev.ftb.mods.ftbquests.quest.Quest;
-import dev.ftb.mods.ftbteams.api.FTBTeamsAPI;
+import org.jetbrains.annotations.UnknownNullability;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -50,30 +50,26 @@ public class CommandReward extends Reward {
 	}
 
 	@Override
-	public void writeData(CompoundTag nbt, HolderLookup.Provider provider) {
-		super.writeData(nbt, provider);
-		nbt.putString("command", command);
-		if (permissionLevel > 0) {
-			nbt.putInt("permission_level", permissionLevel);
-		}
-		if (silent) nbt.putBoolean("silent", true);
-		if (!feedbackMessage.isEmpty()) {
-			nbt.putString("feedback_message", feedbackMessage);
-		}
+	public void writeData(@UnknownNullability Json5Object json, HolderLookup.Provider provider) {
+		super.writeData(json, provider);
+		json.addProperty("command", command);
+		if (permissionLevel > 0) json.addProperty("permission_level", permissionLevel);
+		if (silent) json.addProperty("silent", true);
+		if (!feedbackMessage.isEmpty()) json.addProperty("feedback_message", feedbackMessage);
 	}
 
 	@Override
-	public void readData(CompoundTag nbt, HolderLookup.Provider provider) {
-		super.readData(nbt, provider);
-		command = nbt.getString("command").orElse(DEFAULT_COMMAND);
-		if (nbt.getBooleanOr("elevate_perms", false)) {
+	public void readData(@UnknownNullability Json5Object json, HolderLookup.Provider provider) {
+		super.readData(json, provider);
+		command = Json5Util.getString(json, "command").orElse(DEFAULT_COMMAND);
+		if (Json5Util.getBoolean(json,"elevate_perms").orElse(false)) {
 			// legacy migration
 			permissionLevel = 2;
 		} else {
-			permissionLevel = nbt.getIntOr("permission_level", 0);
+			permissionLevel = Json5Util.getInt(json, "permission_level").orElse(0);
 		}
-		silent = nbt.getBooleanOr("silent", false);
-		feedbackMessage = nbt.getStringOr("feedback_message", "");
+		silent = Json5Util.getBoolean(json, "silent").orElse(false);
+		feedbackMessage = Json5Util.getString(json, "feedback_message").orElse("");
 	}
 
 	@Override
@@ -136,7 +132,7 @@ public class CommandReward extends Reward {
 
 		if (notify) {
 			String key = feedbackMessage.isEmpty() ? "ftbquests.reward.ftbquests.command.success" : feedbackMessage;
-			NetworkManager.sendToPlayer(player, new NotifyRewardMessage(id, Component.translatable(key), REWARD_ICON, disableRewardScreenBlur));
+			Server2PlayNetworking.send(player, new NotifyRewardMessage(id, Component.translatable(key), REWARD_ICON, disableRewardScreenBlur));
 		}
 	}
 

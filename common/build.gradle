@@ -1,23 +1,33 @@
-dependencies {
-	modImplementation "net.fabricmc:fabric-loader:${rootProject.fabric_loader_version}"
-
-	modApi "dev.architectury:architectury:${rootProject.architectury_api_version}"
-
-	modApi("dev.ftb.mods:ftb-library:${rootProject.ftb_library_version}")
-	modApi "dev.ftb.mods:ftb-teams:${rootProject.ftb_teams_version}"
+plugins {
+	id 'net.fabricmc.fabric-loom'
 }
 
 loom {
-	accessWidenerPath = project(":common").file("src/main/resources/ftbquests.accesswidener")
+
+	accessWidenerPath = project(":common").file("src/main/resources/${project.mod_id}.accesswidener")
+
+	mixin {
+		useLegacyMixinAp = false
+	}
 }
 
-architectury {
-		common("fabric", "neoforge")
+dependencies {
+	minecraft "com.mojang:minecraft:${project.minecraft_version}"
+
+	compileOnly "net.fabricmc:sponge-mixin:0.17.0+mixin.0.8.7"
+	compileOnly "io.github.llamalad7:mixinextras-fabric:0.5.0"
+
+	implementation("dev.ftb.mods:ftb-library:${rootProject.ftb_library_version}")
+	implementation("dev.ftb.mods:ftb-teams:${rootProject.ftb_teams_version}")
+}
+
+test {
+	useJUnitPlatform()
 }
 
 publishing {
 	publications {
-		mavenForge(MavenPublication) {
+		mavenCommon(MavenPublication) {
 			artifactId = "${rootProject.archives_base_name}"
 			version ftbPublishing.mavenVersion
 			from components.java

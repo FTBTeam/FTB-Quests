@@ -1,32 +1,26 @@
 package dev.ftb.mods.ftbquests.client.gui.quests;
 
-import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.network.chat.Component;
-import net.minecraft.world.item.ItemStack;
-
-import dev.architectury.networking.NetworkManager;
-
 import dev.ftb.mods.ftblibrary.client.gui.GuiHelper;
 import dev.ftb.mods.ftblibrary.client.gui.WidgetType;
 import dev.ftb.mods.ftblibrary.client.gui.input.Key;
 import dev.ftb.mods.ftblibrary.client.gui.input.MouseButton;
 import dev.ftb.mods.ftblibrary.client.gui.layout.CompactGridLayout;
 import dev.ftb.mods.ftblibrary.client.gui.theme.Theme;
-import dev.ftb.mods.ftblibrary.client.gui.widget.BaseScreen;
-import dev.ftb.mods.ftblibrary.client.gui.widget.Button;
-import dev.ftb.mods.ftblibrary.client.gui.widget.Panel;
-import dev.ftb.mods.ftblibrary.client.gui.widget.SimpleTextButton;
-import dev.ftb.mods.ftblibrary.client.gui.widget.Widget;
+import dev.ftb.mods.ftblibrary.client.gui.widget.*;
 import dev.ftb.mods.ftblibrary.client.icon.IconHelper;
 import dev.ftb.mods.ftblibrary.client.util.PositionedIngredient;
 import dev.ftb.mods.ftblibrary.icon.Color4I;
 import dev.ftb.mods.ftblibrary.icon.ItemIcon;
+import dev.ftb.mods.ftblibrary.platform.network.Play2ServerNetworking;
 import dev.ftb.mods.ftblibrary.util.TooltipList;
 import dev.ftb.mods.ftbquests.FTBQuests;
 import dev.ftb.mods.ftbquests.client.ClientQuestFile;
 import dev.ftb.mods.ftbquests.client.gui.FTBQuestsTheme;
 import dev.ftb.mods.ftbquests.net.SubmitTaskMessage;
 import dev.ftb.mods.ftbquests.quest.task.ItemTask;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
+import net.minecraft.network.chat.Component;
+import net.minecraft.world.item.ItemStack;
 
 import java.util.List;
 import java.util.Optional;
@@ -64,7 +58,7 @@ public class ValidItemsScreen extends BaseScreen {
 			}
 
 			@Override
-			public void drawBackground(GuiGraphics graphics, Theme theme, int x, int y, int w, int h) {
+			public void drawBackground(GuiGraphicsExtractor graphics, Theme theme, int x, int y, int w, int h) {
 				theme.drawButton(graphics, x - 1, y - 1, w + 2, h + 2, WidgetType.NORMAL);
 			}
 		};
@@ -88,7 +82,7 @@ public class ValidItemsScreen extends BaseScreen {
 			@Override
 			public void onClicked(MouseButton button) {
 				playClickSound();
-				NetworkManager.sendToServer(new SubmitTaskMessage(task.id));
+				Play2ServerNetworking.send(new SubmitTaskMessage(task.id));
 				onBack();
 			}
 
@@ -125,9 +119,9 @@ public class ValidItemsScreen extends BaseScreen {
 	}
 
 	@Override
-	public void drawBackground(GuiGraphics matrixStack, Theme theme, int x, int y, int w, int h) {
-		super.drawBackground(matrixStack, theme, x, y, w, h);
-		theme.drawString(matrixStack, title, x + w / 2, y + 6, Color4I.WHITE, Theme.CENTERED);
+	public void drawBackground(GuiGraphicsExtractor graphics, Theme theme, int x, int y, int w, int h) {
+		super.drawBackground(graphics, theme, x, y, w, h);
+		theme.drawString(graphics, title, x + w / 2, y + 6, Color4I.WHITE, Theme.CENTERED);
 	}
 
 	@Override
@@ -173,7 +167,7 @@ public class ValidItemsScreen extends BaseScreen {
 		}
 
 		@Override
-		public void draw(GuiGraphics graphics, Theme theme, int x, int y, int w, int h) {
+		public void draw(GuiGraphicsExtractor graphics, Theme theme, int x, int y, int w, int h) {
 			if (isMouseOver()) {
 				IconHelper.renderIcon(Color4I.WHITE.withAlpha(33), graphics, x, y, w, h);
 			}

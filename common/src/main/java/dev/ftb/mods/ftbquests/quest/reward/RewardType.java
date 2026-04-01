@@ -1,20 +1,19 @@
 package dev.ftb.mods.ftbquests.quest.reward;
 
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.network.chat.Component;
-import net.minecraft.resources.Identifier;
-import net.minecraft.util.Util;
-
+import de.marhali.json5.Json5Object;
 import dev.ftb.mods.ftblibrary.client.gui.widget.Panel;
 import dev.ftb.mods.ftblibrary.icon.Icon;
 import dev.ftb.mods.ftbquests.api.FTBQuestsAPI;
 import dev.ftb.mods.ftbquests.client.GuiProviders;
 import dev.ftb.mods.ftbquests.quest.Quest;
+import net.minecraft.network.chat.Component;
+import net.minecraft.resources.Identifier;
+import net.minecraft.util.Util;
+import org.apache.commons.lang3.Validate;
+import org.jspecify.annotations.Nullable;
 
 import java.util.function.Consumer;
 import java.util.function.Supplier;
-import org.apache.commons.lang3.Validate;
-import org.jspecify.annotations.Nullable;
 
 public final class RewardType {
 	private final Identifier typeId;
@@ -59,12 +58,12 @@ public final class RewardType {
 		return provider.create(id, quest);
 	}
 
-	public String getTypeForNBT() {
+	public String getTypeForSerialization() {
 		return typeId.getNamespace().equals(FTBQuestsAPI.MOD_ID) ? typeId.getPath() : typeId.toString();
 	}
 
-	public CompoundTag makeExtraNBT() {
-		return Util.make(new CompoundTag(), t -> t.putString("type", getTypeForNBT()));
+	public Json5Object makeExtraJson() {
+		return Util.make(new Json5Object(), t -> t.addProperty("type", getTypeForSerialization()));
 	}
 
 	public Component getDisplayName() {

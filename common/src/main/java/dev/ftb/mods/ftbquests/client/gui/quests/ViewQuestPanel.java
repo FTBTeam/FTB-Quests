@@ -1,24 +1,6 @@
 package dev.ftb.mods.ftbquests.client.gui.quests;
 
-import net.minecraft.ChatFormatting;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.client.gui.screens.ConfirmLinkScreen;
-import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.network.chat.ClickEvent;
-import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.HoverEvent;
-import net.minecraft.network.chat.MutableComponent;
-import net.minecraft.network.chat.Style;
-import net.minecraft.util.Mth;
-import net.minecraft.util.Util;
-import net.minecraft.world.item.Item;
-import net.minecraft.world.item.Items;
-import net.minecraft.world.item.TooltipFlag;
 import com.mojang.datafixers.util.Pair;
-
-import dev.architectury.networking.NetworkManager;
-
 import dev.ftb.mods.ftblibrary.client.config.EditableConfigGroup;
 import dev.ftb.mods.ftblibrary.client.config.editable.EditableImageResource;
 import dev.ftb.mods.ftblibrary.client.config.editable.EditableList;
@@ -38,6 +20,7 @@ import dev.ftb.mods.ftblibrary.icon.Color4I;
 import dev.ftb.mods.ftblibrary.icon.Icon;
 import dev.ftb.mods.ftblibrary.icon.Icons;
 import dev.ftb.mods.ftblibrary.icon.ItemIcon;
+import dev.ftb.mods.ftblibrary.platform.network.Play2ServerNetworking;
 import dev.ftb.mods.ftblibrary.util.Lazy;
 import dev.ftb.mods.ftblibrary.util.TooltipList;
 import dev.ftb.mods.ftbquests.api.FTBQuestsAPI;
@@ -60,19 +43,26 @@ import dev.ftb.mods.ftbquests.quest.theme.QuestTheme;
 import dev.ftb.mods.ftbquests.quest.theme.property.ThemeProperties;
 import dev.ftb.mods.ftbquests.quest.translation.TranslationKey;
 import dev.ftb.mods.ftbquests.util.TextUtils;
+import it.unimi.dsi.fastutil.longs.Long2IntMap;
+import it.unimi.dsi.fastutil.longs.Long2IntOpenHashMap;
+import net.minecraft.ChatFormatting;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
+import net.minecraft.client.gui.screens.ConfirmLinkScreen;
+import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.network.chat.*;
+import net.minecraft.util.Mth;
+import net.minecraft.util.Util;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.Items;
+import net.minecraft.world.item.TooltipFlag;
+import org.jspecify.annotations.Nullable;
+import org.lwjgl.glfw.GLFW;
 
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.Locale;
-import java.util.Objects;
+import java.util.*;
 import java.util.function.BiConsumer;
-import it.unimi.dsi.fastutil.longs.Long2IntMap;
-import it.unimi.dsi.fastutil.longs.Long2IntOpenHashMap;
-import org.jspecify.annotations.Nullable;
-import org.lwjgl.glfw.GLFW;
 
 public class ViewQuestPanel extends ModalPanel {
 	public static final Icon<?> PAGEBREAK_ICON = Icon.getIcon(FTBQuestsAPI.id("textures/gui/pagebreak.png"));
@@ -568,7 +558,7 @@ public class ViewQuestPanel extends ModalPanel {
 	}
 
 	private void syncQuestToServer() {
-		NetworkManager.sendToServer(EditObjectMessage.forQuestObject(quest));
+		Play2ServerNetworking.send(EditObjectMessage.forQuestObject(quest));
 	}
 
 	private void showList(Collection<QuestObject> c, boolean dependencies) {
@@ -644,10 +634,10 @@ public class ViewQuestPanel extends ModalPanel {
 		for (Panel panel : List.of(panelTasks, panelRewards)) {
 			for (Widget w : panel.getWidgets()) {
 				if (w instanceof TaskButton b && b.isMouseOver()) {
-					NetworkManager.sendToServer(new ReorderItemMessage(b.task.getId(), moveRight));
+					Play2ServerNetworking.send(new ReorderItemMessage(b.task.getId(), moveRight));
 					return;
 				} else if (w instanceof RewardButton b && b.isMouseOver()) {
-					NetworkManager.sendToServer(new ReorderItemMessage(b.reward.getId(), moveRight));
+					Play2ServerNetworking.send(new ReorderItemMessage(b.reward.getId(), moveRight));
 					return;
 				}
 			}
@@ -672,7 +662,7 @@ public class ViewQuestPanel extends ModalPanel {
 		EditStringConfigOverlay<String> overlay = new EditStringConfigOverlay<>(getGui(), c, accepted -> {
 			if (accepted) {
 				qo.setRawTitle(c.getValue());
-				NetworkManager.sendToServer(EditObjectMessage.forQuestObject(qo));
+				Play2ServerNetworking.send(EditObjectMessage.forQuestObject(qo));
 			}
 		}, Component.translatable("ftbquests.title.tooltip")).atPosition(titleField.getX(), titleField.getY() - 14);
 		overlay.setWidth(Math.max(150, overlay.getWidth()));
@@ -836,7 +826,7 @@ public class ViewQuestPanel extends ModalPanel {
 	}
 
 	@Override
-	public void draw(GuiGraphics graphics, Theme theme, int x, int y, int w, int h) {
+	public void draw(GuiGraphicsExtractor graphics, Theme theme, int x, int y, int w, int h) {
 		if (quest != null) {
 			QuestObjectBase prev = QuestTheme.setFallbackQuestObject(quest);
 			super.draw(graphics, theme, x, y, w, h);
@@ -845,7 +835,7 @@ public class ViewQuestPanel extends ModalPanel {
 	}
 
 	@Override
-	public void drawBackground(GuiGraphics graphics, Theme theme, int x, int y, int w, int h) {
+	public void drawBackground(GuiGraphicsExtractor graphics, Theme theme, int x, int y, int w, int h) {
 		IconHelper.renderIcon(ThemeProperties.QUEST_VIEW_BACKGROUND.get(), graphics, x, y, w, h);
 
 		int iconSize = Math.min(16, titleField.height + 2);
@@ -906,7 +896,7 @@ public class ViewQuestPanel extends ModalPanel {
 		}
 
 		@Override
-		public void draw(GuiGraphics graphics, Theme theme, int x, int y, int w, int h) {
+		public void draw(GuiGraphicsExtractor graphics, Theme theme, int x, int y, int w, int h) {
 			if (xlateWarning.get()) {
 				IconHelper.renderIcon(Color4I.RED.withAlpha(40), graphics, x, y, w, h);
 			}
@@ -1013,7 +1003,7 @@ public class ViewQuestPanel extends ModalPanel {
 				TooltipFlag flag = mc.options.advancedItemTooltips ? TooltipFlag.Default.ADVANCED : TooltipFlag.Default.NORMAL;
 				switch (style.getHoverEvent()) {
 					case HoverEvent.ShowItem showItem ->
-							showItem.item().getTooltipLines(Item.TooltipContext.of(mc.level), mc.player, flag).forEach(list::add);
+							showItem.item().create().getTooltipLines(Item.TooltipContext.of(mc.level), mc.player, flag).forEach(list::add);
 					case HoverEvent.ShowEntity showEntity when flag.isAdvanced() ->
 							showEntity.entity().getTooltipLines().forEach(list::add);
 					case HoverEvent.ShowText showText ->
@@ -1034,7 +1024,7 @@ public class ViewQuestPanel extends ModalPanel {
 		}
 
 		@Override
-		public void draw(GuiGraphics graphics, Theme theme, int x, int y, int w, int h) {
+		public void draw(GuiGraphicsExtractor graphics, Theme theme, int x, int y, int w, int h) {
 			drawIcon(graphics, theme, x + 1, y + 1, w - 2, h - 2);
 		}
 	}
@@ -1101,7 +1091,7 @@ public class ViewQuestPanel extends ModalPanel {
 		@Override
 		public void onClicked(MouseButton button) {
 			playClickSound();
-			NetworkManager.sendToServer(new TogglePinnedMessage(quest.id));
+			Play2ServerNetworking.send(new TogglePinnedMessage(quest.id));
 		}
 	}
 
@@ -1133,7 +1123,7 @@ public class ViewQuestPanel extends ModalPanel {
 		}
 
 		@Override
-		public void drawBackground(GuiGraphics graphics, Theme theme, int x, int y, int w, int h) {
+		public void drawBackground(GuiGraphicsExtractor graphics, Theme theme, int x, int y, int w, int h) {
 		}
 	}
 

@@ -1,9 +1,8 @@
 package dev.ftb.mods.ftbquests.integration;
 
+import dev.ftb.mods.ftblibrary.integration.permissions.PermissionHelper;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.permissions.Permissions;
-
-import dev.ftb.mods.ftblibrary.integration.permissions.PermissionHelper;
 
 public class PermissionsHelper {
     public static final String EDITOR_PERM = "ftbquests.editor";

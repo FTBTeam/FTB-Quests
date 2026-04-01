@@ -2,7 +2,6 @@ package dev.ftb.mods.ftbquests.client;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
-
 import org.joml.Matrix4f;
 
 public class RenderUtil {

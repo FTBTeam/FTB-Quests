@@ -1,9 +1,5 @@
 package dev.ftb.mods.ftbquests.quest;
 
-import net.minecraft.client.Minecraft;
-import net.minecraft.resources.Identifier;
-import net.minecraft.server.packs.resources.Resource;
-
 import dev.ftb.mods.ftblibrary.client.icon.IconRenderer;
 import dev.ftb.mods.ftblibrary.icon.Icon;
 import dev.ftb.mods.ftblibrary.icon.ImageIcon;
@@ -12,13 +8,12 @@ import dev.ftb.mods.ftblibrary.util.Lazy;
 import dev.ftb.mods.ftblibrary.util.NameMap;
 import dev.ftb.mods.ftbquests.api.FTBQuestsAPI;
 import dev.ftb.mods.ftbquests.client.QuestShapeRenderer;
+import net.minecraft.client.Minecraft;
+import net.minecraft.resources.Identifier;
+import net.minecraft.server.packs.resources.Resource;
 
 import java.io.InputStream;
-import java.util.Collections;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 
 public final class QuestShape extends Icon<QuestShape> {
 	private static final Map<String, QuestShape> MAP = new LinkedHashMap<>();

@@ -1,10 +1,9 @@
 package dev.ftb.mods.ftbquests.client.gui.quests;
 
-import net.minecraft.client.gui.GuiGraphics;
-
 import dev.ftb.mods.ftblibrary.client.gui.theme.Theme;
 import dev.ftb.mods.ftblibrary.client.gui.widget.Widget;
 import dev.ftb.mods.ftblibrary.client.icon.IconHelper;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 
 public class ExpandChaptersButton extends Widget {
 	private final QuestScreen questScreen;
@@ -15,7 +14,7 @@ public class ExpandChaptersButton extends Widget {
 	}
 
 	@Override
-	public void draw(GuiGraphics graphics, Theme theme, int x, int y, int w, int h) {
+	public void draw(GuiGraphicsExtractor graphics, Theme theme, int x, int y, int w, int h) {
 		if (!questScreen.chapterPanel.isExpanded()) {
 			IconHelper.renderIcon(ChapterPanel.ARROW_COLLAPSED, graphics, x + (w - 12) / 2, y + (h - 12) / 2, 12, 12);
 		}

@@ -1,15 +1,13 @@
 package dev.ftb.mods.ftbquests.net;
 
+import dev.ftb.mods.ftblibrary.platform.network.PacketContext;
+import dev.ftb.mods.ftbquests.api.FTBQuestsAPI;
+import dev.ftb.mods.ftbquests.quest.ServerQuestFile;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.server.level.ServerPlayer;
-
-import dev.architectury.networking.NetworkManager;
-
-import dev.ftb.mods.ftbquests.api.FTBQuestsAPI;
-import dev.ftb.mods.ftbquests.quest.ServerQuestFile;
 
 /**
  * Received on: SERVER
@@ -31,11 +29,9 @@ public record RequestTranslationTableMessage(String locale) implements CustomPac
         return TYPE;
     }
 
-    public static void handle(RequestTranslationTableMessage message, NetworkManager.PacketContext context) {
-        context.queue(() -> {
-            if (ServerQuestFile.getInstance() != null && context.getPlayer() instanceof ServerPlayer sp) {
-                ServerQuestFile.getInstance().getTranslationManager().sendTableToPlayer(sp, message.locale);
-            }
-        });
+    public static void handle(RequestTranslationTableMessage message, PacketContext context) {
+        if (ServerQuestFile.exists() && context.player() instanceof ServerPlayer sp) {
+            ServerQuestFile.getInstance().getTranslationManager().sendTableToPlayer(sp, message.locale);
+        }
     }
 }

@@ -1,38 +1,6 @@
 package dev.ftb.mods.ftbquests.client;
 
-import net.minecraft.client.KeyMapping;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.client.player.LocalPlayer;
-import net.minecraft.client.renderer.block.model.BakedQuad;
-import net.minecraft.client.renderer.block.model.BlockModelPart;
-import net.minecraft.client.renderer.block.model.BlockStateModel;
-import net.minecraft.client.renderer.chunk.ChunkSectionLayer;
-import net.minecraft.client.renderer.texture.TextureAtlasSprite;
-import net.minecraft.core.BlockPos;
-import net.minecraft.core.Direction;
-import net.minecraft.core.HolderLookup;
-import net.minecraft.core.registries.Registries;
-import net.minecraft.network.chat.Component;
-import net.minecraft.resources.Identifier;
-import net.minecraft.server.packs.PackType;
-import net.minecraft.util.RandomSource;
-import net.minecraft.world.InteractionHand;
-import net.minecraft.world.entity.EntityType;
-import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.item.CreativeModeTab;
-import net.minecraft.world.item.CreativeModeTabs;
-import net.minecraft.world.level.block.state.BlockState;
 import com.mojang.blaze3d.platform.InputConstants;
-
-import dev.architectury.event.events.client.ClientLifecycleEvent;
-import dev.architectury.networking.NetworkManager;
-import dev.architectury.platform.Platform;
-import dev.architectury.registry.ReloadListenerRegistry;
-import dev.architectury.registry.client.keymappings.KeyMappingRegistry;
-import dev.architectury.registry.client.rendering.RenderTypeRegistry;
-import dev.architectury.registry.registries.RegistrarManager;
-
 import dev.ftb.mods.ftblibrary.FTBLibrary;
 import dev.ftb.mods.ftblibrary.client.config.editable.EditableEntityFace;
 import dev.ftb.mods.ftblibrary.client.config.editable.EditableImageResource;
@@ -44,6 +12,8 @@ import dev.ftb.mods.ftblibrary.client.util.ClientUtils;
 import dev.ftb.mods.ftblibrary.config.manager.ConfigManager;
 import dev.ftb.mods.ftblibrary.icon.Icon;
 import dev.ftb.mods.ftblibrary.icon.Icons;
+import dev.ftb.mods.ftblibrary.platform.client.PlatformClient;
+import dev.ftb.mods.ftblibrary.platform.network.Play2ServerNetworking;
 import dev.ftb.mods.ftbquests.FTBQuests;
 import dev.ftb.mods.ftbquests.api.FTBQuestsAPI;
 import dev.ftb.mods.ftbquests.block.entity.BaseBarrierBlockEntity;
@@ -59,56 +29,60 @@ import dev.ftb.mods.ftbquests.quest.QuestObject;
 import dev.ftb.mods.ftbquests.quest.QuestObjectBase;
 import dev.ftb.mods.ftbquests.quest.TeamData;
 import dev.ftb.mods.ftbquests.quest.theme.ThemeLoader;
-import dev.ftb.mods.ftbquests.registry.ModBlocks;
-
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
+import net.minecraft.client.KeyMapping;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.player.LocalPlayer;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.core.HolderLookup;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.network.chat.Component;
+import net.minecraft.resources.Identifier;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.CreativeModeTab;
+import net.minecraft.world.item.CreativeModeTabs;
+import net.minecraft.world.level.block.state.BlockState;
 import org.jspecify.annotations.Nullable;
 
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
+
 public class FTBQuestsClient {
-	public static KeyMapping KEY_QUESTS;
-	private static final KeyMapping.Category FTB_QUESTS_KEY_CATEGORY = new KeyMapping.Category(FTBQuestsAPI.id("keys"));
+	public static final Identifier GUI_OVERLAY_ID = FTBQuestsAPI.id("tracked_quests");
 
-	public static void init() {
-		maybeMigrateClientConfig();
+	private static final KeyMapping.Category FTB_QUESTS_KEY_CATEGORY
+			= new KeyMapping.Category(FTBQuestsAPI.id("keys"));
+	public static final KeyMapping KEY_QUESTS
+			= new KeyMapping("key.ftbquests.quests", InputConstants.Type.KEYSYM, -1, FTB_QUESTS_KEY_CATEGORY);
 
+	public final FTBQuestsClientEventHandler eventHandler;
+
+	public FTBQuestsClient() {
 		ConfigManager.getInstance().registerClientConfig(FTBQuestsClientConfig.CONFIG, FTBQuestsAPI.MOD_ID, FTBQuestsClientConfig::onEdited);
 
-		ClientLifecycleEvent.CLIENT_SETUP.register(FTBQuestsClient::onClientSetup);
-		ReloadListenerRegistry.register(PackType.CLIENT_RESOURCES, new QuestFileCacheReloader(), FTBQuestsAPI.id("file_cache"));
-		ReloadListenerRegistry.register(PackType.CLIENT_RESOURCES, new ThemeLoader(), FTBQuestsAPI.id("themes"));
-		KeyMappingRegistry.register(KEY_QUESTS = new KeyMapping("key.ftbquests.quests", InputConstants.Type.KEYSYM, -1, FTB_QUESTS_KEY_CATEGORY));
+		PlatformClient.get().addResourcePackReloadListeners(FTBQuestsAPI.MOD_ID, Map.of(
+				FTBQuestsAPI.id("file_cache"), new QuestFileCacheReloader(),
+				FTBQuestsAPI.id("themes"), new ThemeLoader()
+		));
 
-		new FTBQuestsClientEventHandler().init();
+		PlatformClient.get().registerKeyMapping(FTBQuestsAPI.MOD_ID, KEY_QUESTS);
+
+		eventHandler = new FTBQuestsClientEventHandler();
 	}
 
-	private static void maybeMigrateClientConfig() {
-		// TODO delete in 1.22
-		Path oldConfig = Platform.getGameFolder().resolve("local/ftbquests/client-config.snbt");
-		Path newConfig = Platform.getConfigFolder().resolve("ftbquests-client.snbt");
 
-		if (Files.exists(oldConfig) && !Files.exists(newConfig)) {
-			try {
-				Files.move(oldConfig, newConfig);
-				FTBQuests.LOGGER.info("migrated {} to {}", oldConfig, newConfig);
-			} catch (IOException e) {
-				FTBQuests.LOGGER.error("can't migrate {} to {}: {}", oldConfig, newConfig, e.getMessage());
-			}
-		}
-	}
-
-	private static void onClientSetup(Minecraft minecraft) {
-		RenderTypeRegistry.register(ChunkSectionLayer.TRANSLUCENT, ModBlocks.BARRIER.get());
-		RenderTypeRegistry.register(ChunkSectionLayer.TRANSLUCENT, ModBlocks.STAGE_BARRIER.get());
-		RenderTypeRegistry.register(ChunkSectionLayer.SOLID, ModBlocks.TASK_SCREEN_1.get());
-		RenderTypeRegistry.register(ChunkSectionLayer.SOLID, ModBlocks.TASK_SCREEN_3.get());
-		RenderTypeRegistry.register(ChunkSectionLayer.SOLID, ModBlocks.TASK_SCREEN_5.get());
-		RenderTypeRegistry.register(ChunkSectionLayer.SOLID, ModBlocks.TASK_SCREEN_7.get());
-		RenderTypeRegistry.register(ChunkSectionLayer.SOLID, ModBlocks.AUX_SCREEN.get());
+	public void onClientSetup(Minecraft minecraft) {
+//		RenderTypeRegistry.register(ChunkSectionLayer.TRANSLUCENT, ModBlocks.BARRIER.get());
+//		RenderTypeRegistry.register(ChunkSectionLayer.TRANSLUCENT, ModBlocks.STAGE_BARRIER.get());
+//		RenderTypeRegistry.register(ChunkSectionLayer.SOLID, ModBlocks.TASK_SCREEN_1.get());
+//		RenderTypeRegistry.register(ChunkSectionLayer.SOLID, ModBlocks.TASK_SCREEN_3.get());
+//		RenderTypeRegistry.register(ChunkSectionLayer.SOLID, ModBlocks.TASK_SCREEN_5.get());
+//		RenderTypeRegistry.register(ChunkSectionLayer.SOLID, ModBlocks.TASK_SCREEN_7.get());
+//		RenderTypeRegistry.register(ChunkSectionLayer.SOLID, ModBlocks.AUX_SCREEN.get());
 		GuiProviders.setTaskGuiProviders();
 		GuiProviders.setRewardGuiProviders();
 	}
@@ -151,12 +125,12 @@ public class FTBQuestsClient {
 		editable.onClicked(null, MouseButton.LEFT, accepted -> {
 			if (accepted) {
 				// TODO minor code smell here
-				if (editable.getValue() instanceof Identifier rl) {
-					CustomIconItem.setIcon(player.getItemInHand(hand), editable.isEmpty() ? null : rl);
-					NetworkManager.sendToServer(new SetCustomImageMessage(hand, false, rl));
+				if (editable.getValue() instanceof Identifier id) {
+					CustomIconItem.setIcon(player.getItemInHand(hand), editable.isEmpty() ? null : id);
+					Play2ServerNetworking.send(new SetCustomImageMessage(hand, false, id));
 				} else if (editable.getValue() instanceof EntityType<?> et) {
 					CustomIconItem.setFaceIcon(player.getItemInHand(hand), editable.isEmpty() ? EditableEntityFace.NONE : et);
-					NetworkManager.sendToServer(new SetCustomImageMessage(hand, true, RegistrarManager.getId(et, Registries.ENTITY_TYPE)));
+					Play2ServerNetworking.send(new SetCustomImageMessage(hand, true, BuiltInRegistries.ENTITY_TYPE.getKey(et)));
 				}
 			}
 			Minecraft.getInstance().setScreen(null);
@@ -175,17 +149,19 @@ public class FTBQuestsClient {
 		}
 	}
 
-	public static float[] getTextureUV(BlockState state, Direction face) {
-		if (state == null) return null;
-		BlockStateModel model = Minecraft.getInstance().getBlockRenderer().getBlockModel(state);
-		List<BlockModelPart> blockModelParts = model.collectParts(RandomSource.create());
-		List<BakedQuad> quads = blockModelParts.getFirst().getQuads(face);
-		if (!quads.isEmpty()) {
-			TextureAtlasSprite sprite = quads.getFirst().sprite();
-			return new float[] { sprite.getU0(), sprite.getV0(), sprite.getU1(), sprite.getV1() };
-		} else {
-			return new float[0];
-		}
+	// TODO how does this work now in 26.1?
+	public static float[] getTextureUV(@Nullable BlockState state, Direction face) {
+		if (state == null) return new float[0];
+//		BlockStateModel model = Minecraft.getInstance().getBlockRenderer().getBlockModel(state);
+//		List<BlockModelPart> blockModelParts = model.collectParts(RandomSource.create());
+//		List<BakedQuad> quads = blockModelParts.getFirst().getQuads(face);
+//		if (!quads.isEmpty()) {
+//			TextureAtlasSprite sprite = quads.getFirst().sprite();
+//			return new float[] { sprite.getU0(), sprite.getV0(), sprite.getU1(), sprite.getV1() };
+//		} else {
+//			return new float[0];
+//		}
+		return new float[0];
 	}
 
 	/**

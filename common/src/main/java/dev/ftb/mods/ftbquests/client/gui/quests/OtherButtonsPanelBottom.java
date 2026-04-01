@@ -1,20 +1,12 @@
 package dev.ftb.mods.ftbquests.client.gui.quests;
 
-import net.minecraft.ChatFormatting;
-import net.minecraft.client.Minecraft;
-import net.minecraft.network.chat.ClickEvent;
-import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.Style;
-import net.minecraft.server.permissions.Permissions;
-
-import dev.architectury.networking.NetworkManager;
-
 import dev.ftb.mods.ftblibrary.client.gui.input.MouseButton;
 import dev.ftb.mods.ftblibrary.client.gui.layout.WidgetLayout;
 import dev.ftb.mods.ftblibrary.client.gui.widget.ContextMenuItem;
 import dev.ftb.mods.ftblibrary.client.gui.widget.Panel;
 import dev.ftb.mods.ftblibrary.client.util.ClientUtils;
 import dev.ftb.mods.ftblibrary.icon.Icons;
+import dev.ftb.mods.ftblibrary.platform.network.Play2ServerNetworking;
 import dev.ftb.mods.ftblibrary.util.TooltipList;
 import dev.ftb.mods.ftbquests.client.ClientQuestFile;
 import dev.ftb.mods.ftbquests.client.FTBQuestsClient;
@@ -25,6 +17,12 @@ import dev.ftb.mods.ftbquests.net.ForceSaveMessage;
 import dev.ftb.mods.ftbquests.net.ToggleEditingModeMessage;
 import dev.ftb.mods.ftbquests.quest.task.StructureTask;
 import dev.ftb.mods.ftbquests.quest.theme.property.ThemeProperties;
+import net.minecraft.ChatFormatting;
+import net.minecraft.client.Minecraft;
+import net.minecraft.network.chat.ClickEvent;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.Style;
+import net.minecraft.server.permissions.Permissions;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -80,7 +78,7 @@ public class OtherButtonsPanelBottom extends OtherButtonsPanel {
 				StructureTask.maybeRequestStructureSync();
 			}
 
-			NetworkManager.sendToServer(ToggleEditingModeMessage.INSTANCE);
+			Play2ServerNetworking.send(ToggleEditingModeMessage.INSTANCE);
 		}
 	}
 
@@ -134,7 +132,7 @@ public class OtherButtonsPanelBottom extends OtherButtonsPanel {
 			contextMenu.add(new TooltipContextMenuItem(Component.translatable("ftbquests.reward_tables"), ThemeProperties.REWARD_TABLE_ICON.get(),
 					b -> new RewardTablesScreen(questScreen).openGui(), Component.literal("[Ctrl + T]").withStyle(ChatFormatting.DARK_GRAY)));
 			contextMenu.add(new ContextMenuItem(Component.translatable("ftbquests.gui.save_on_server"), ThemeProperties.SAVE_ICON.get(),
-					b -> NetworkManager.sendToServer(ForceSaveMessage.INSTANCE)));
+					b -> Play2ServerNetworking.send(ForceSaveMessage.INSTANCE)));
 			contextMenu.add(new ContextMenuItem(Component.translatable("ftbquests.gui.save_as_file"), ThemeProperties.DOWNLOAD_ICON.get(),
 					b -> saveLocally()));
 
@@ -149,6 +147,9 @@ public class OtherButtonsPanelBottom extends OtherButtonsPanel {
 		private void saveLocally() {
 			try {
 				Calendar time = Calendar.getInstance();
+				ClientQuestFile questFile = ClientQuestFile.getInstance();
+				Minecraft mc = Minecraft.getInstance();
+
 				StringBuilder fileName = new StringBuilder("local/ftbquests/saved/");
 				appendNum(fileName, time.get(Calendar.YEAR), '-');
 				appendNum(fileName, time.get(Calendar.MONTH) + 1, '-');
@@ -156,14 +157,14 @@ public class OtherButtonsPanelBottom extends OtherButtonsPanel {
 				appendNum(fileName, time.get(Calendar.HOUR_OF_DAY), '-');
 				appendNum(fileName, time.get(Calendar.MINUTE), '-');
 				appendNum(fileName, time.get(Calendar.SECOND), '\0');
-				File file = new File(Minecraft.getInstance().gameDirectory, fileName.toString()).getCanonicalFile();
-				ClientQuestFile.getInstance().writeDataFull(file.toPath(), ClientQuestFile.getInstance().holderLookup());
-				ClientQuestFile.getInstance().getTranslationManager().saveToNBT(file.toPath().resolve("lang"), true);
+				File file = new File(mc.gameDirectory, fileName.toString()).getCanonicalFile();
+				questFile.writeDataFull(file.toPath(), questFile.holderLookup());
+				questFile.getTranslationManager().saveToFile(questFile, file.toPath().resolve("lang"), true);
 
-                String p = "." + file.getPath().replace(Minecraft.getInstance().gameDirectory.getCanonicalFile().getAbsolutePath(), "");
+                String p = "." + file.getPath().replace(mc.gameDirectory.getCanonicalFile().getAbsolutePath(), "");
 				Component component = Component.translatable("ftbquests.gui.saved_as_file", p)
 						.withStyle(Style.EMPTY.withClickEvent(new ClickEvent.OpenFile(p)));
-				Minecraft.getInstance().player.displayClientMessage(component, false);
+				mc.player.sendSystemMessage(component);
 			} catch (Exception ex) {
 				ex.printStackTrace();
 			}

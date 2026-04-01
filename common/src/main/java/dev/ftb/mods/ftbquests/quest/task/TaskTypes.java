@@ -1,15 +1,14 @@
 package dev.ftb.mods.ftbquests.quest.task;
 
-import net.minecraft.resources.Identifier;
-import net.minecraft.world.level.material.Fluids;
-
-import dev.architectury.fluid.FluidStack;
-
 import dev.ftb.mods.ftblibrary.client.util.ClientUtils;
+import dev.ftb.mods.ftblibrary.client.util.TextureAtlasSpriteRef;
 import dev.ftb.mods.ftblibrary.icon.Color4I;
 import dev.ftb.mods.ftblibrary.icon.Icon;
 import dev.ftb.mods.ftblibrary.icon.Icons;
+import dev.ftb.mods.ftblibrary.platform.fluid.FluidStack;
 import dev.ftb.mods.ftbquests.api.FTBQuestsAPI;
+import net.minecraft.resources.Identifier;
+import net.minecraft.world.level.material.Fluids;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -50,9 +49,7 @@ public interface TaskTypes {
 	TaskType STAGE = TaskTypes.register(FTBQuestsAPI.id("gamestage"), StageTask::new,
 			() -> Icons.CONTROLLER);
 	TaskType FLUID = TaskTypes.register(FTBQuestsAPI.id("fluid"), FluidTask::new,
-			() -> Icon.getIcon(Optional.ofNullable(ClientUtils.getStillTexture(FluidStack.create(Fluids.WATER, 1000L)))
-							.map(Identifier::toString)
-							.orElse("missingno")).withTint(Color4I.rgb(0x8080FF))
+			() -> new TextureAtlasSpriteRef(ClientUtils.getStillTexture(new FluidStack(Fluids.WATER, 1000L))).createIcon()
 					.combineWith(Icon.getIcon(FluidTask.TANK_TEXTURE.toString()))
 	);
 

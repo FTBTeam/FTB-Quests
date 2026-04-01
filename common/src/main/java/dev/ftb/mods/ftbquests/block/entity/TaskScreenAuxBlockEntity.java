@@ -1,5 +1,6 @@
 package dev.ftb.mods.ftbquests.block.entity;
 
+import dev.ftb.mods.ftbquests.registry.ModBlockEntityTypes;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
@@ -11,14 +12,12 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.storage.ValueInput;
 import net.minecraft.world.level.storage.ValueOutput;
-
-import dev.ftb.mods.ftbquests.registry.ModBlockEntityTypes;
+import org.jetbrains.annotations.NotNull;
+import org.jspecify.annotations.Nullable;
 
 import java.lang.ref.WeakReference;
 import java.util.Optional;
 import java.util.UUID;
-import org.jetbrains.annotations.NotNull;
-import org.jspecify.annotations.Nullable;
 
 public class TaskScreenAuxBlockEntity extends BlockEntity implements ITaskScreen, Nameable {
     @NotNull
@@ -104,7 +103,6 @@ public class TaskScreenAuxBlockEntity extends BlockEntity implements ITaskScreen
         return getCoreScreen().map(s -> s.hasPermissionToEdit(player)).orElse(false);
     }
 
-    @NotNull
     @Override
     public UUID getTeamId() {
         return getCoreScreen().map(TaskScreenBlockEntity::getTeamId).orElse(Util.NIL_UUID);

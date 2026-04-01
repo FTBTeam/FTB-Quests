@@ -1,18 +1,16 @@
 package dev.ftb.mods.ftbquests.net;
 
-import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.network.codec.ByteBufCodecs;
-import net.minecraft.network.codec.StreamCodec;
-import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
-
-import dev.architectury.networking.NetworkManager;
-
+import dev.ftb.mods.ftblibrary.platform.network.PacketContext;
 import dev.ftb.mods.ftbquests.api.FTBQuestsAPI;
 import dev.ftb.mods.ftbquests.client.ClientQuestFile;
 import dev.ftb.mods.ftbquests.quest.Quest;
 import dev.ftb.mods.ftbquests.quest.QuestObjectBase;
 import dev.ftb.mods.ftbquests.quest.reward.Reward;
 import dev.ftb.mods.ftbquests.quest.task.Task;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.codec.ByteBufCodecs;
+import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 
 import java.util.List;
 import java.util.Objects;
@@ -34,25 +32,23 @@ public record ReorderItemResponseMessage(long questId, List<Long> itemIds, boole
         return new ReorderItemResponseMessage(quest.id, quest.getRewards().stream().map(QuestObjectBase::getId).toList(), false);
     }
 
-    public static void handle(ReorderItemResponseMessage message, NetworkManager.PacketContext context) {
-        context.queue(() -> {
-            ClientQuestFile file = ClientQuestFile.getInstance();
-            Quest q = file.getQuest(message.questId);
-            if (q != null) {
-                if (message.task) {
-                    List<Task> tasks = message.itemIds.stream().map(file::getTask).filter(Objects::nonNull).toList();
-                    if (tasks.size() == message.itemIds.size()) {
-                        q.setTaskList(tasks);
-                    }
-                } else {
-                    List<Reward> rewards = message.itemIds.stream().map(file::getReward).filter(Objects::nonNull).toList();
-                    if (rewards.size() == message.itemIds.size()) {
-                        q.setRewardList(rewards);
-                    }
+    public static void handle(ReorderItemResponseMessage message, PacketContext ignoredContext) {
+        ClientQuestFile file = ClientQuestFile.getInstance();
+        Quest q = file.getQuest(message.questId);
+        if (q != null) {
+            if (message.task) {
+                List<Task> tasks = message.itemIds.stream().map(file::getTask).filter(Objects::nonNull).toList();
+                if (tasks.size() == message.itemIds.size()) {
+                    q.setTaskList(tasks);
                 }
-                q.editedFromGUI();
+            } else {
+                List<Reward> rewards = message.itemIds.stream().map(file::getReward).filter(Objects::nonNull).toList();
+                if (rewards.size() == message.itemIds.size()) {
+                    q.setRewardList(rewards);
+                }
             }
-        });
+            q.editedFromGUI();
+        }
     }
 
     @Override

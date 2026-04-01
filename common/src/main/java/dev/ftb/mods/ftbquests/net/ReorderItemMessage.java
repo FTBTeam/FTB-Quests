@@ -1,19 +1,18 @@
 package dev.ftb.mods.ftbquests.net;
 
-import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.network.codec.ByteBufCodecs;
-import net.minecraft.network.codec.StreamCodec;
-import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
-
-import dev.architectury.networking.NetworkManager;
-
-import dev.ftb.mods.ftblibrary.util.NetworkHelper;
+import dev.ftb.mods.ftblibrary.platform.network.PacketContext;
+import dev.ftb.mods.ftblibrary.platform.network.Server2PlayNetworking;
 import dev.ftb.mods.ftbquests.api.FTBQuestsAPI;
 import dev.ftb.mods.ftbquests.quest.QuestObjectBase;
 import dev.ftb.mods.ftbquests.quest.ServerQuestFile;
 import dev.ftb.mods.ftbquests.quest.reward.Reward;
 import dev.ftb.mods.ftbquests.quest.task.Task;
 import dev.ftb.mods.ftbquests.util.NetUtils;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.codec.ByteBufCodecs;
+import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import net.minecraft.server.level.ServerLevel;
 
 /**
  * Sent by client to move a task or reward left/right from the quest view panel
@@ -28,27 +27,25 @@ public record ReorderItemMessage(long id, boolean moveRight) implements CustomPa
             ReorderItemMessage::new
     );
 
-    public static void handle(ReorderItemMessage message, NetworkManager.PacketContext context) {
-        context.queue(() -> {
-            if (NetUtils.canEdit(context)) {
-                QuestObjectBase object = ServerQuestFile.getInstance().getBase(message.id);
-                if (object instanceof Task task) {
-                    if (message.moveRight) {
-                        task.getQuest().moveTaskRight(task);
-                    } else {
-                        task.getQuest().moveTaskLeft(task);
-                    }
-                    NetworkHelper.sendToAll(context.getPlayer().level().getServer(), ReorderItemResponseMessage.tasks(task.getQuest()));
-                } else if (object instanceof Reward reward) {
-                    if (message.moveRight) {
-                        reward.getQuest().moveRewardRight(reward);
-                    } else {
-                        reward.getQuest().moveRewardLeft(reward);
-                    }
-                    NetworkHelper.sendToAll(context.getPlayer().level().getServer(), ReorderItemResponseMessage.rewards(reward.getQuest()));
+    public static void handle(ReorderItemMessage message, PacketContext context) {
+        if (NetUtils.canEdit(context) && context.player().level() instanceof ServerLevel serverLevel) {
+            QuestObjectBase object = ServerQuestFile.getInstance().getBase(message.id);
+            if (object instanceof Task task) {
+                if (message.moveRight) {
+                    task.getQuest().moveTaskRight(task);
+                } else {
+                    task.getQuest().moveTaskLeft(task);
                 }
+                Server2PlayNetworking.sendToAllPlayers(serverLevel.getServer(), ReorderItemResponseMessage.tasks(task.getQuest()));
+            } else if (object instanceof Reward reward) {
+                if (message.moveRight) {
+                    reward.getQuest().moveRewardRight(reward);
+                } else {
+                    reward.getQuest().moveRewardLeft(reward);
+                }
+                Server2PlayNetworking.sendToAllPlayers(serverLevel.getServer(), ReorderItemResponseMessage.rewards(reward.getQuest()));
             }
-        });
+        }
     }
 
     @Override

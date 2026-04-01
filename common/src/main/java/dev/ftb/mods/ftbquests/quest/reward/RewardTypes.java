@@ -1,10 +1,9 @@
 package dev.ftb.mods.ftbquests.quest.reward;
 
-import net.minecraft.resources.Identifier;
-
 import dev.ftb.mods.ftblibrary.icon.Icon;
 import dev.ftb.mods.ftblibrary.icon.Icons;
 import dev.ftb.mods.ftbquests.api.FTBQuestsAPI;
+import net.minecraft.resources.Identifier;
 
 import java.util.LinkedHashMap;
 import java.util.Map;

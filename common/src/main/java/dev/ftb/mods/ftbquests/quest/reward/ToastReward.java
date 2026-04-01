@@ -1,15 +1,15 @@
 package dev.ftb.mods.ftbquests.quest.reward;
 
-import net.minecraft.core.HolderLookup;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.network.RegistryFriendlyByteBuf;
-import net.minecraft.server.level.ServerPlayer;
-
-import dev.architectury.networking.NetworkManager;
-
+import de.marhali.json5.Json5Object;
 import dev.ftb.mods.ftblibrary.client.config.EditableConfigGroup;
+import dev.ftb.mods.ftblibrary.json5.Json5Util;
+import dev.ftb.mods.ftblibrary.platform.network.Server2PlayNetworking;
 import dev.ftb.mods.ftbquests.net.CustomToastMessage;
 import dev.ftb.mods.ftbquests.quest.Quest;
+import net.minecraft.core.HolderLookup;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.server.level.ServerPlayer;
+import org.jetbrains.annotations.UnknownNullability;
 
 public class ToastReward extends Reward {
 	private String description;
@@ -29,15 +29,15 @@ public class ToastReward extends Reward {
 	}
 
 	@Override
-	public void writeData(CompoundTag nbt, HolderLookup.Provider provider) {
-		super.writeData(nbt, provider);
-		nbt.putString("description", description);
+	public void writeData(@UnknownNullability Json5Object json, HolderLookup.Provider provider) {
+		super.writeData(json, provider);
+		json.addProperty("description", description);
 	}
 
 	@Override
-	public void readData(CompoundTag nbt, HolderLookup.Provider provider) {
-		super.readData(nbt, provider);
-		description = nbt.getString("description").orElseThrow();
+	public void readData(@UnknownNullability Json5Object json, HolderLookup.Provider provider) {
+		super.readData(json, provider);
+		description = Json5Util.getString(json, "description").orElseThrow();
 	}
 
 	@Override
@@ -60,6 +60,6 @@ public class ToastReward extends Reward {
 
 	@Override
 	public void claim(ServerPlayer player, boolean notify) {
-		NetworkManager.sendToPlayer(player, new CustomToastMessage(getId()));
+		Server2PlayNetworking.send(player, new CustomToastMessage(getId()));
 	}
 }

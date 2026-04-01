@@ -1,19 +1,11 @@
 package dev.ftb.mods.ftbquests.quest.reward;
 
-import net.minecraft.core.HolderLookup;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.network.RegistryFriendlyByteBuf;
-import net.minecraft.network.chat.Component;
-import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.util.RandomSource;
-import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.level.block.entity.BlockEntity;
-
+import de.marhali.json5.Json5Object;
 import dev.ftb.mods.ftblibrary.client.config.EditableConfigGroup;
 import dev.ftb.mods.ftblibrary.client.gui.widget.Widget;
 import dev.ftb.mods.ftblibrary.client.util.PositionedIngredient;
 import dev.ftb.mods.ftblibrary.icon.Icon;
-import dev.ftb.mods.ftblibrary.snbt.SNBTCompoundTag;
+import dev.ftb.mods.ftblibrary.json5.Json5Util;
 import dev.ftb.mods.ftblibrary.util.TooltipList;
 import dev.ftb.mods.ftbquests.client.config.EditableQuestObject;
 import dev.ftb.mods.ftbquests.quest.BaseQuestFile;
@@ -21,11 +13,19 @@ import dev.ftb.mods.ftbquests.quest.Quest;
 import dev.ftb.mods.ftbquests.quest.QuestObjectType;
 import dev.ftb.mods.ftbquests.quest.loot.RewardTable;
 import dev.ftb.mods.ftbquests.quest.loot.WeightedReward;
+import net.minecraft.core.HolderLookup;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.chat.Component;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.util.RandomSource;
+import net.minecraft.util.Util;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import org.jspecify.annotations.Nullable;
 
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
-import org.jspecify.annotations.Nullable;
 
 public class RandomReward extends Reward {
 	@Nullable
@@ -42,33 +42,30 @@ public class RandomReward extends Reward {
 	}
 
 	@Override
-	public void writeData(CompoundTag nbt, HolderLookup.Provider provider) {
-		super.writeData(nbt, provider);
+	public void writeData(Json5Object json, HolderLookup.Provider provider) {
+		super.writeData(json, provider);
 
 		if (getTable() != null) {
-			nbt.putLong("table_id", table.id);
-
+			json.addProperty("table_id", table.id);
 			if (table.id == -1L) {
-				SNBTCompoundTag tag = new SNBTCompoundTag();
-				table.writeData(tag, provider);
-				nbt.put("table_data", tag);
+				json.add("table_data", Util.make(new Json5Object(), o -> table.writeData(o, provider)));
 			}
 		}
 	}
 
 	@Override
-	public void readData(CompoundTag nbt, HolderLookup.Provider provider) {
-		super.readData(nbt, provider);
+	public void readData(Json5Object json, HolderLookup.Provider provider) {
+		super.readData(json, provider);
 		table = null;
 		BaseQuestFile file = getQuestFile();
 
-		nbt.getLong("table_id").ifPresent(tableId -> {
+		Json5Util.getLong(json, "table_id").ifPresent(tableId -> {
 			if (tableId != 0L) {
 				table = file.getRewardTable(tableId);
 			}
 
 			if (table == null) return;
-			nbt.getCompound("table_data").ifPresent(tag -> {
+			Json5Util.getJson5Object(json, "table_data").ifPresent(tag -> {
 				table.readData(tag, provider);
 				table.setRawTitle("Internal");
 			});

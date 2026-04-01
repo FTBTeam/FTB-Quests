@@ -1,5 +1,18 @@
 package dev.ftb.mods.ftbquests.block;
 
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.MapCodec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
+import dev.ftb.mods.ftblibrary.platform.network.Server2PlayNetworking;
+import dev.ftb.mods.ftbquests.FTBQuestsPlatform;
+import dev.ftb.mods.ftbquests.block.entity.ITaskScreen;
+import dev.ftb.mods.ftbquests.block.entity.TaskScreenAuxBlockEntity;
+import dev.ftb.mods.ftbquests.block.entity.TaskScreenBlockEntity;
+import dev.ftb.mods.ftbquests.item.ScreenBlockItem;
+import dev.ftb.mods.ftbquests.net.BlockConfigRequestMessage;
+import dev.ftb.mods.ftbquests.net.BlockConfigRequestMessage.BlockType;
+import dev.ftb.mods.ftbquests.quest.ServerQuestFile;
+import dev.ftb.mods.ftbquests.registry.ModBlocks;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -19,28 +32,11 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.HorizontalDirectionalBlock;
 import net.minecraft.world.level.block.RenderShape;
 import net.minecraft.world.level.block.entity.BlockEntity;
-import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.EnumProperty;
 import net.minecraft.world.level.levelgen.structure.BoundingBox;
 import net.minecraft.world.phys.BlockHitResult;
-import com.mojang.serialization.Codec;
-import com.mojang.serialization.MapCodec;
-import com.mojang.serialization.codecs.RecordCodecBuilder;
-
-import dev.architectury.injectables.annotations.ExpectPlatform;
-import dev.architectury.networking.NetworkManager;
-
-import dev.ftb.mods.ftbquests.block.entity.ITaskScreen;
-import dev.ftb.mods.ftbquests.block.entity.TaskScreenAuxBlockEntity;
-import dev.ftb.mods.ftbquests.block.entity.TaskScreenBlockEntity;
-import dev.ftb.mods.ftbquests.item.ScreenBlockItem;
-import dev.ftb.mods.ftbquests.net.BlockConfigRequestMessage;
-import dev.ftb.mods.ftbquests.net.BlockConfigRequestMessage.BlockType;
-import dev.ftb.mods.ftbquests.quest.ServerQuestFile;
-import dev.ftb.mods.ftbquests.registry.ModBlocks;
-
 import org.jspecify.annotations.Nullable;
 
 public class TaskScreenBlock extends BaseEntityBlock {
@@ -79,17 +75,7 @@ public class TaskScreenBlock extends BaseEntityBlock {
     @Nullable
     @Override
     public BlockEntity newBlockEntity(BlockPos blockPos, BlockState blockState) {
-        return blockEntityProvider().create(blockPos, blockState);
-    }
-
-    @ExpectPlatform
-    public static BlockEntityType.BlockEntitySupplier<TaskScreenBlockEntity> blockEntityProvider() {
-        throw new AssertionError();
-    }
-
-    @ExpectPlatform
-    public static BlockEntityType.BlockEntitySupplier<TaskScreenAuxBlockEntity> blockEntityAuxProvider() {
-        throw new AssertionError();
+        return FTBQuestsPlatform.get().taskScreenBlockEntityProvider().create(blockPos, blockState);
     }
 
     @Override
@@ -156,9 +142,9 @@ public class TaskScreenBlock extends BaseEntityBlock {
         if (player instanceof ServerPlayer sp && level.getBlockEntity(blockPos) instanceof ITaskScreen taskScreen) {
             if (taskScreen.hasPermissionToEdit(sp)) {
                 taskScreen.getCoreScreen().ifPresent(coreScreen ->
-                        NetworkManager.sendToPlayer(sp, new BlockConfigRequestMessage(coreScreen.getBlockPos(), BlockType.TASK_SCREEN)));
+                        Server2PlayNetworking.send(sp, new BlockConfigRequestMessage(coreScreen.getBlockPos(), BlockType.TASK_SCREEN)));
             } else {
-                sp.displayClientMessage(Component.translatable("block.ftbquests.screen.no_permission").withStyle(ChatFormatting.RED), true);
+                sp.sendOverlayMessage(Component.translatable("block.ftbquests.screen.no_permission").withStyle(ChatFormatting.RED));
                 return InteractionResult.FAIL;
             }
         }
@@ -192,7 +178,7 @@ public class TaskScreenBlock extends BaseEntityBlock {
 
         @Override
         public @Nullable BlockEntity newBlockEntity(BlockPos blockPos, BlockState blockState) {
-            return blockEntityAuxProvider().create(blockPos, blockState);
+            return FTBQuestsPlatform.get().taskScreenAuxBlockEntityProvider().create(blockPos, blockState);
         }
 
         @Override

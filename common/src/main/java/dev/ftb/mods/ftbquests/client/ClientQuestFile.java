@@ -1,40 +1,31 @@
 package dev.ftb.mods.ftbquests.client;
 
-import net.minecraft.ChatFormatting;
-import net.minecraft.client.Minecraft;
-import net.minecraft.core.HolderLookup;
-import net.minecraft.network.chat.Component;
-import net.minecraft.world.entity.player.Player;
-import com.mojang.blaze3d.platform.InputConstants;
-
-import dev.architectury.networking.NetworkManager;
-import dev.architectury.utils.Env;
-
 import dev.ftb.mods.ftblibrary.client.util.ClientUtils;
-import dev.ftb.mods.ftblibrary.icon.Icons;
+import dev.ftb.mods.ftblibrary.platform.Env;
+import dev.ftb.mods.ftblibrary.platform.network.Play2ServerNetworking;
 import dev.ftb.mods.ftblibrary.util.TooltipList;
 import dev.ftb.mods.ftbquests.FTBQuests;
-import dev.ftb.mods.ftbquests.client.gui.CustomToast;
 import dev.ftb.mods.ftbquests.client.gui.quests.QuestScreen;
 import dev.ftb.mods.ftbquests.net.DeleteObjectMessage;
-import dev.ftb.mods.ftbquests.quest.BaseQuestFile;
-import dev.ftb.mods.ftbquests.quest.Chapter;
-import dev.ftb.mods.ftbquests.quest.Quest;
-import dev.ftb.mods.ftbquests.quest.QuestObject;
-import dev.ftb.mods.ftbquests.quest.TeamData;
+import dev.ftb.mods.ftbquests.quest.*;
 import dev.ftb.mods.ftbquests.quest.task.StructureTask;
 import dev.ftb.mods.ftbquests.quest.theme.QuestTheme;
 import dev.ftb.mods.ftbquests.quest.translation.TranslationKey;
 import dev.ftb.mods.ftbquests.util.TextUtils;
 import dev.ftb.mods.ftbteams.api.FTBTeamsAPI;
 import dev.ftb.mods.ftbteams.api.client.KnownClientPlayer;
+import net.minecraft.ChatFormatting;
+import net.minecraft.core.HolderLookup;
+import net.minecraft.network.chat.Component;
+import net.minecraft.world.entity.player.Player;
+import org.jspecify.annotations.Nullable;
 
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
-import org.jspecify.annotations.Nullable;
-import org.lwjgl.glfw.GLFW;
 
+// NOTE: don't import anything from net.minecraft.client into this class
+// ClientQuestFile.exists() can theoretically be called from either side
 public class ClientQuestFile extends BaseQuestFile {
 	private static final List<String> MISSING_DATA_ERR = List.of(
 			"Unable to open Quest GUI: no quest book data received from server!",
@@ -83,9 +74,9 @@ public class ClientQuestFile extends BaseQuestFile {
 
 	@Override
 	public boolean canEdit() {
-		return Minecraft.getInstance().player != null && hasEditorPermission()
-				&& selfTeamData.isValid()
-				&& selfTeamData.getCanEdit(Minecraft.getInstance().player);
+        return hasEditorPermission() && ClientUtils.getOptionalClientPlayer()
+				.map(player -> selfTeamData.isValid() && selfTeamData.getCanEdit(player))
+				.orElse(false);
 	}
 
 	@Override
@@ -95,12 +86,7 @@ public class ClientQuestFile extends BaseQuestFile {
 		if (questScreen != null) {
 			persistedData = questScreen.getPersistedScreenData();
 			if (ClientUtils.getCurrentGuiAs(QuestScreen.class) != null) {
-				double mx = Minecraft.getInstance().mouseHandler.xpos();
-				double my = Minecraft.getInstance().mouseHandler.ypos();
-				Minecraft.getInstance().setScreen(null);  // ensures prevScreen is null, so we can close correctly
-				questScreen = new QuestScreen(this, persistedData);
-				questScreen.openGui();
-				InputConstants.grabOrReleaseMouse(Minecraft.getInstance().getWindow(), GLFW.GLFW_CURSOR_NORMAL, mx, my);
+				questScreen = QuestScreen.reopen(this, persistedData);
 			}
 		}
 	}
@@ -114,10 +100,9 @@ public class ClientQuestFile extends BaseQuestFile {
 		if (INSTANCE != null) {
 			return INSTANCE.openQuestGui();
 		} else {
-			Player player = Minecraft.getInstance().player;
-			if (player != null) {
-				MISSING_DATA_ERR.forEach(s -> player.displayClientMessage(Component.literal(s).withStyle(ChatFormatting.RED), false));
-			}
+			ClientUtils.getOptionalClientPlayer().ifPresent(player ->
+					MISSING_DATA_ERR.forEach(s -> player.sendSystemMessage(Component.literal(s).withStyle(ChatFormatting.RED)))
+			);
 			return null;
 		}
 	}
@@ -162,7 +147,7 @@ public class ClientQuestFile extends BaseQuestFile {
 
 	@Override
 	public void deleteObject(long id) {
-		NetworkManager.sendToServer(new DeleteObjectMessage(id));
+		Play2ServerNetworking.send(new DeleteObjectMessage(id));
 	}
 
 	@Override
@@ -215,7 +200,7 @@ public class ClientQuestFile extends BaseQuestFile {
 	@Override
 	public String getLocale() {
 		String locale = FTBQuestsClientConfig.EDITING_LOCALE.get();
-		return locale.isEmpty() ? Minecraft.getInstance().options.languageCode : locale;
+		return locale.isEmpty() ? ClientUtils.getCurrentLanguageCode() : locale;
 	}
 
 	@Override

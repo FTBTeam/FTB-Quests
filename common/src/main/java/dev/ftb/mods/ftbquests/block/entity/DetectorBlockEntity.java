@@ -1,5 +1,10 @@
 package dev.ftb.mods.ftbquests.block.entity;
 
+import dev.ftb.mods.ftblibrary.platform.Platform;
+import dev.ftb.mods.ftbquests.quest.QuestObjectBase;
+import dev.ftb.mods.ftbquests.quest.ServerQuestFile;
+import dev.ftb.mods.ftbquests.registry.ModBlockEntityTypes;
+import dev.ftb.mods.ftbquests.util.ProgressChange;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.level.Level;
@@ -8,13 +13,6 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.storage.ValueInput;
 import net.minecraft.world.level.storage.ValueOutput;
 import net.minecraft.world.phys.AABB;
-
-import dev.architectury.hooks.level.entity.PlayerHooks;
-
-import dev.ftb.mods.ftbquests.quest.QuestObjectBase;
-import dev.ftb.mods.ftbquests.quest.ServerQuestFile;
-import dev.ftb.mods.ftbquests.registry.ModBlockEntityTypes;
-import dev.ftb.mods.ftbquests.util.ProgressChange;
 
 public class DetectorBlockEntity extends BlockEntity {
 	private long objectId = 0L;
@@ -43,7 +41,7 @@ public class DetectorBlockEntity extends BlockEntity {
 	}
 
 	private static boolean isRealPlayer(ServerPlayer player) {
-		return !PlayerHooks.isFake(player);
+		return !Platform.get().misc().isFakePlayer(player);
 	}
 
 	public void onPowered(Level level, BlockPos pos) {

@@ -1,18 +1,11 @@
 package dev.ftb.mods.ftbquests.client.gui;
 
-import net.minecraft.ChatFormatting;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.client.gui.components.Whence;
-import net.minecraft.client.input.CharacterEvent;
-import net.minecraft.client.input.KeyEvent;
-import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.ComponentSerialization;
-import net.minecraft.resources.Identifier;
-import net.minecraft.util.Util;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonPrimitive;
 import com.mojang.blaze3d.platform.InputConstants;
 import com.mojang.serialization.JsonOps;
-
 import dev.ftb.mods.ftblibrary.client.config.ConfigCallback;
 import dev.ftb.mods.ftblibrary.client.config.EditableConfigGroup;
 import dev.ftb.mods.ftblibrary.client.config.editable.EditableColor;
@@ -24,16 +17,8 @@ import dev.ftb.mods.ftblibrary.client.gui.input.Key;
 import dev.ftb.mods.ftblibrary.client.gui.input.MouseButton;
 import dev.ftb.mods.ftblibrary.client.gui.theme.NordColors;
 import dev.ftb.mods.ftblibrary.client.gui.theme.Theme;
-import dev.ftb.mods.ftblibrary.client.gui.widget.BaseScreen;
-import dev.ftb.mods.ftblibrary.client.gui.widget.ColorSelectorPanel;
-import dev.ftb.mods.ftblibrary.client.gui.widget.ContextMenu;
-import dev.ftb.mods.ftblibrary.client.gui.widget.ContextMenuItem;
-import dev.ftb.mods.ftblibrary.client.gui.widget.MultilineTextBox;
+import dev.ftb.mods.ftblibrary.client.gui.widget.*;
 import dev.ftb.mods.ftblibrary.client.gui.widget.MultilineTextBox.StringExtents;
-import dev.ftb.mods.ftblibrary.client.gui.widget.Panel;
-import dev.ftb.mods.ftblibrary.client.gui.widget.PanelScrollBar;
-import dev.ftb.mods.ftblibrary.client.gui.widget.ScrollBar;
-import dev.ftb.mods.ftblibrary.client.gui.widget.SimpleTextButton;
 import dev.ftb.mods.ftblibrary.client.icon.IconHelper;
 import dev.ftb.mods.ftblibrary.client.util.ClientUtils;
 import dev.ftb.mods.ftblibrary.client.util.ImageComponent;
@@ -51,23 +36,22 @@ import dev.ftb.mods.ftbquests.quest.Quest;
 import dev.ftb.mods.ftbquests.quest.QuestObject;
 import dev.ftb.mods.ftbquests.quest.QuestObjectType;
 import dev.ftb.mods.ftbquests.util.TextUtils;
-
-import java.util.ArrayDeque;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Deque;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.function.BooleanSupplier;
-import java.util.regex.Pattern;
-import com.google.gson.JsonArray;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonPrimitive;
+import net.minecraft.ChatFormatting;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
+import net.minecraft.client.gui.components.Whence;
+import net.minecraft.client.input.CharacterEvent;
+import net.minecraft.client.input.KeyEvent;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.ComponentSerialization;
+import net.minecraft.resources.Identifier;
+import net.minecraft.util.Util;
 import org.jetbrains.annotations.NotNull;
 import org.jspecify.annotations.Nullable;
+
+import java.util.*;
+import java.util.function.BooleanSupplier;
+import java.util.regex.Pattern;
 
 public class MultilineTextEditorScreen extends BaseScreen {
 	public static final Icon<?> LINK_ICON = Icon.getIcon(FTBQuestsAPI.id("textures/gui/chain_link.png")).withPadding(2);
@@ -177,10 +161,10 @@ public class MultilineTextEditorScreen extends BaseScreen {
 	}
 
 	@Override
-	public void drawBackground(GuiGraphics matrixStack, Theme theme, int x, int y, int w, int h) {
-		super.drawBackground(matrixStack, theme, x, y, w, h);
+	public void drawBackground(GuiGraphicsExtractor graphics, Theme theme, int x, int y, int w, int h) {
+		super.drawBackground(graphics, theme, x, y, w, h);
 
-		theme.drawString(matrixStack, title, x + (width - theme.getStringWidth(title)) / 2, y - theme.getFontHeight() - 2, Theme.SHADOW);
+		theme.drawString(graphics, title, x + (width - theme.getStringWidth(title)) / 2, y - theme.getFontHeight() - 2, Theme.SHADOW);
 	}
 
 	@Override
@@ -449,7 +433,7 @@ public class MultilineTextEditorScreen extends BaseScreen {
 		}
 
 		@Override
-		public void drawBackground(GuiGraphics graphics, Theme theme, int x, int y, int w, int h) {
+		public void drawBackground(GuiGraphicsExtractor graphics, Theme theme, int x, int y, int w, int h) {
 			theme.drawPanelBackground(graphics, x, y, w, h);
 		}
 
@@ -648,7 +632,7 @@ public class MultilineTextEditorScreen extends BaseScreen {
 		}
 
 		@Override
-		public void drawBackground(GuiGraphics graphics, Theme theme, int x, int y, int w, int h) {
+		public void drawBackground(GuiGraphicsExtractor graphics, Theme theme, int x, int y, int w, int h) {
 			IconHelper.renderIcon(NordColors.POLAR_NIGHT_0, graphics, x, y, w, h);
 			theme.drawPanelBackground(graphics, x, y, w, h);
 		}
@@ -696,7 +680,7 @@ public class MultilineTextEditorScreen extends BaseScreen {
 		}
 
 		@Override
-		public void draw(GuiGraphics graphics, Theme theme, int x, int y, int w, int h) {
+		public void draw(GuiGraphicsExtractor graphics, Theme theme, int x, int y, int w, int h) {
 			if (visible) {
 				super.draw(graphics, theme, x, y, w, h);
 			}

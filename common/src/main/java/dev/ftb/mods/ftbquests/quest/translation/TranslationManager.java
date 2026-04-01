@@ -1,35 +1,26 @@
 package dev.ftb.mods.ftbquests.quest.translation;
 
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.util.Util;
-
-import dev.architectury.networking.NetworkManager;
-
-import dev.ftb.mods.ftblibrary.snbt.SNBT;
+import de.marhali.json5.Json5Object;
+import dev.ftb.mods.ftblibrary.json5.Json5Util;
+import dev.ftb.mods.ftblibrary.platform.network.Server2PlayNetworking;
 import dev.ftb.mods.ftbquests.FTBQuests;
 import dev.ftb.mods.ftbquests.client.FTBQuestsClientConfig;
 import dev.ftb.mods.ftbquests.net.SyncTranslationTableMessage;
 import dev.ftb.mods.ftbquests.quest.BaseQuestFile;
 import dev.ftb.mods.ftbquests.quest.QuestObjectBase;
 import dev.ftb.mods.ftbquests.quest.ServerQuestFile;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.util.Util;
 
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
-import org.jetbrains.annotations.NotNull;
 
 public class TranslationManager {
-    private static final Pattern LANG_FILE_PAT = Pattern.compile("^\\w+\\.snbt$");
+    private static final Pattern LANG_FILE_PAT = Pattern.compile("^\\w+$");
 
     private final Map<String, TranslationTable> map = new HashMap<>();
 
@@ -46,29 +37,22 @@ public class TranslationManager {
         return object.getQuestFile().getFallbackLocale();
     }
 
-    public void loadFromNBT(BaseQuestFile file, Path langFolder) {
+    public void loadFromFile(BaseQuestFile file, Path langFolder) {
         map.clear();
 
-        if (!Files.exists(langFolder)) {
-            // the first run, hopefully...
-            try {
-                Files.createDirectory(langFolder);
-            } catch (IOException e) {
-                FTBQuests.LOGGER.error("can't create lang folder {}: {}", langFolder, e.getMessage());
-                return;
-            }
+        try {
+            Files.createDirectories(langFolder);
+        } catch (IOException e) {
+            FTBQuests.LOGGER.error("can't create lang folder {}: {}", langFolder, e.getMessage());
+            return;
         }
 
         try (Stream<Path> s = Files.list(langFolder)) {
-            s.filter(TranslationManager::isValidLangFile).forEach(path -> {
-                try {
-                    var langNBT = SNBT.tryRead(path);
-                    String locale = (path.getFileName().toString().split("\\.", 2))[0].toLowerCase(Locale.ROOT);
-                    map.put(locale, TranslationTable.fromNBT(langNBT));
-                } catch (IOException e) {
-                    FTBQuests.LOGGER.error("can't read lang file {}", path);
-                }
+            s.filter(TranslationManager::isValidLangDirectory).forEach(langDir -> {
+                String locale = langDir.getFileName().toString();
+                map.put(locale, TranslationTable.loadAndCombine(langDir));
             });
+
             if (!map.containsKey(file.getFallbackLocale())) {
                 map.put(file.getFallbackLocale(), new TranslationTable());
             }
@@ -78,25 +62,32 @@ public class TranslationManager {
         }
     }
 
-    public void saveToNBT(Path langFolder, boolean force) {
+    public void saveToFile(BaseQuestFile file, Path langFolder, boolean force) {
         map.forEach((locale, table) -> {
-            if (force || table.isSaveNeeded()) {
-                boolean prevSort = SNBT.setShouldSortKeysOnWrite(true);
-                Path savePath = langFolder.resolve(locale + ".snbt");
-                try {
-                    SNBT.tryWrite(savePath, table.saveToNBT());
-                } catch (IOException e) {
-                    FTBQuests.LOGGER.error("can't write lang file {}", savePath);
-                    throw new RuntimeException(e);
+            Path localeDir = langFolder.resolve(locale);
+            try {
+                Files.createDirectories(localeDir);
+                if (force || table.isSaveNeeded()) {
+                    table.splitAndSerialize(file).forEach((path, json) -> {
+                        Path fullPath = localeDir.resolve(path);
+                        try {
+                            Files.createDirectories(fullPath.getParent());
+                            Json5Util.tryWrite(fullPath, json);
+                        } catch (IOException e) {
+                            FTBQuests.LOGGER.error("can't write lang file {}", fullPath);
+                        }
+                    });
+                    table.setSaveNeeded(false);
                 }
-                table.setSaveNeeded(false);
-                SNBT.setShouldSortKeysOnWrite(prevSort);
+            } catch (IOException e) {
+                FTBQuests.LOGGER.error("can't create lang directory structure {}", langFolder);
             }
         });
     }
 
-    private static boolean isValidLangFile(Path p) {
-        return LANG_FILE_PAT.matcher(p.getFileName().toString()).matches();
+
+    private static boolean isValidLangDirectory(Path p) {
+        return Files.isDirectory(p) && LANG_FILE_PAT.matcher(p.getFileName().toString()).matches();
     }
 
     public Optional<String> getStringTranslation(QuestObjectBase object, String locale, TranslationKey subKey) {
@@ -163,7 +154,7 @@ public class TranslationManager {
         });
     }
 
-    private static @NotNull String makeKey(QuestObjectBase object, TranslationKey subKey) {
+    private static String makeKey(QuestObjectBase object, TranslationKey subKey) {
         return String.format("%s.%s.%s", object.getObjectType().getId(), QuestObjectBase.getCodeString(object), subKey.getName());
     }
 
@@ -184,26 +175,29 @@ public class TranslationManager {
 
     public void sendTableToPlayer(ServerPlayer player, String locale) {
         if (map.containsKey(locale)) {
-            NetworkManager.sendToPlayer(player, new SyncTranslationTableMessage(locale, map.getOrDefault(locale, new TranslationTable())));
+            Server2PlayNetworking.send(player, new SyncTranslationTableMessage(locale, map.getOrDefault(locale, new TranslationTable())));
         }
     }
 
-    public void addInitialTranslation(CompoundTag extra, String locale, TranslationKey translationKey, String value) {
-        extra.putString("locale", locale);
-        extra.put("translate", Util.make(new CompoundTag(), t -> t.putString(TranslationKey.NAME_MAP.getName(translationKey), value)));
+    public void addInitialTranslation(Json5Object extra, String locale, TranslationKey translationKey, String value) {
+        extra.addProperty("locale", locale);
+        extra.add("translate", Util.make(new Json5Object(),
+                o -> o.addProperty(TranslationKey.NAME_MAP.getName(translationKey), value))
+        );
     }
 
-    public void processInitialTranslation(CompoundTag extra, QuestObjectBase object) {
-        if (extra.contains("locale") && extra.contains("translate")) {
-            String locale = extra.getStringOr("locale", "en_us");
+    public void processInitialTranslation(Json5Object extra, QuestObjectBase object) {
+        if (extra.has("locale") && extra.has("translate")) {
+            String locale = Json5Util.getString(extra,"locale").orElse("en_us");
             TranslationTable table = map.computeIfAbsent(locale, k -> new TranslationTable());
-            CompoundTag tag = extra.getCompound("translate").orElse(new CompoundTag());
-            for (String keyStr : tag.keySet()) {
-                TranslationKey key = TranslationKey.NAME_MAP.getNullable(keyStr);
-                if (key != null) {
-                    table.put(makeKey(object, key), tag.getString(keyStr).orElse(""));
-                }
-            }
+            Json5Util.getJson5Object(extra, "translate").ifPresent(translations -> {
+                translations.asMap().forEach((keyStr, val) -> {
+                    TranslationKey key = TranslationKey.NAME_MAP.getNullable(keyStr);
+                    if (key != null) {
+                        table.put(makeKey(object, key), val.getAsString());
+                    }
+                });
+            });
         }
     }
 }

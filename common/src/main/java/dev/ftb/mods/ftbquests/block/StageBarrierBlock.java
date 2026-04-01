@@ -1,15 +1,10 @@
 package dev.ftb.mods.ftbquests.block;
 
+import com.mojang.serialization.MapCodec;
+import dev.ftb.mods.ftbquests.FTBQuestsPlatform;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.block.entity.BlockEntity;
-import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
-import com.mojang.serialization.MapCodec;
-
-import dev.architectury.injectables.annotations.ExpectPlatform;
-
-import dev.ftb.mods.ftbquests.block.entity.QuestBarrierBlockEntity;
-
 import org.jspecify.annotations.Nullable;
 
 public class StageBarrierBlock extends QuestBarrierBlock {
@@ -22,16 +17,11 @@ public class StageBarrierBlock extends QuestBarrierBlock {
 	@Nullable
 	@Override
 	public BlockEntity newBlockEntity(BlockPos blockPos, BlockState blockState) {
-		return stageBlockEntityProvider().create(blockPos, blockState);
+		return FTBQuestsPlatform.get().stageBarrierBlockEntityProvider().create(blockPos, blockState);
 	}
 
 	@Override
 	protected MapCodec<StageBarrierBlock> codec() {
 		return CODEC;
-	}
-
-	@ExpectPlatform
-	public static BlockEntityType.BlockEntitySupplier<QuestBarrierBlockEntity> stageBlockEntityProvider() {
-		throw new AssertionError();
 	}
 }

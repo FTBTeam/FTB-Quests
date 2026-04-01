@@ -1,21 +1,18 @@
 package dev.ftb.mods.ftbquests.command;
 
-import net.minecraft.commands.CommandSourceStack;
-import net.minecraft.commands.Commands;
-import net.minecraft.server.level.ServerPlayer;
 import com.mojang.brigadier.Command;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
-
-import dev.architectury.networking.NetworkManager;
-
+import dev.ftb.mods.ftblibrary.platform.network.Server2PlayNetworking;
 import dev.ftb.mods.ftbquests.net.OpenQuestBookMessage;
 import dev.ftb.mods.ftbquests.quest.Chapter;
 import dev.ftb.mods.ftbquests.quest.Quest;
 import dev.ftb.mods.ftbquests.quest.QuestObject;
 import dev.ftb.mods.ftbquests.quest.ServerQuestFile;
-
+import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.commands.Commands;
+import net.minecraft.server.level.ServerPlayer;
 import org.jspecify.annotations.Nullable;
 
 import static net.minecraft.commands.Commands.argument;
@@ -31,11 +28,11 @@ public class OpenBookCommand {
 
     private static int openQuest(ServerPlayer player, @Nullable String qobId) throws CommandSyntaxException {
         if (qobId == null) {
-            NetworkManager.sendToPlayer(player, OpenQuestBookMessage.lastOpenedQuest());
+            Server2PlayNetworking.send(player, OpenQuestBookMessage.lastOpenedQuest());
             return Command.SINGLE_SUCCESS;
         } else {
             if (FTBQuestsCommands.getQuestObjectForString(qobId) instanceof QuestObject qo && playerCanSeeQuestObject(player, qo)) {
-                NetworkManager.sendToPlayer(player, new OpenQuestBookMessage(qo.id));
+                Server2PlayNetworking.send(player, new OpenQuestBookMessage(qo.id));
                 return Command.SINGLE_SUCCESS;
             }
         }

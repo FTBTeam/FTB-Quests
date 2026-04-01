@@ -1,5 +1,12 @@
 package dev.ftb.mods.ftbquests.quest.task;
 
+import com.mojang.brigadier.StringReader;
+import de.marhali.json5.Json5Object;
+import dev.ftb.mods.ftblibrary.client.config.EditableConfigGroup;
+import dev.ftb.mods.ftblibrary.json5.Json5Util;
+import dev.ftb.mods.ftblibrary.util.NameMap;
+import dev.ftb.mods.ftbquests.quest.Quest;
+import dev.ftb.mods.ftbquests.quest.TeamData;
 import net.minecraft.ChatFormatting;
 import net.minecraft.IdentifierException;
 import net.minecraft.commands.arguments.blocks.BlockInput;
@@ -7,7 +14,6 @@ import net.minecraft.commands.arguments.blocks.BlockStateParser;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
-import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
@@ -21,17 +27,10 @@ import net.minecraft.world.level.block.state.pattern.BlockInWorld;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.EntityHitResult;
 import net.minecraft.world.phys.HitResult;
-import com.mojang.brigadier.StringReader;
-
-import dev.architectury.registry.registries.RegistrarManager;
-
-import dev.ftb.mods.ftblibrary.client.config.EditableConfigGroup;
-import dev.ftb.mods.ftblibrary.util.NameMap;
-import dev.ftb.mods.ftbquests.quest.Quest;
-import dev.ftb.mods.ftbquests.quest.TeamData;
+import org.jetbrains.annotations.UnknownNullability;
+import org.jspecify.annotations.Nullable;
 
 import java.util.Optional;
-import org.jspecify.annotations.Nullable;
 
 public class ObservationTask extends AbstractBooleanTask {
 	private long timer;
@@ -60,19 +59,19 @@ public class ObservationTask extends AbstractBooleanTask {
 	}
 
 	@Override
-	public void writeData(CompoundTag nbt, HolderLookup.Provider provider) {
-		super.writeData(nbt, provider);
-		nbt.putLong("timer", timer);
-		nbt.putInt("observe_type", observeType.ordinal());
-		nbt.putString("to_observe", toObserve);
+	public void writeData(@UnknownNullability Json5Object json, HolderLookup.Provider provider) {
+		super.writeData(json, provider);
+		json.addProperty("timer", timer);
+		json.addProperty("observe_type", ObserveType.NAME_MAP.getName(observeType));
+		json.addProperty("to_observe", toObserve);
 	}
 
 	@Override
-	public void readData(CompoundTag nbt, HolderLookup.Provider provider) {
-		super.readData(nbt, provider);
-		timer = nbt.getLong("timer").orElseThrow();
-		observeType = ObserveType.values()[nbt.getInt("observe_type").orElseThrow()];
-		toObserve = nbt.getString("to_observe").orElseThrow();
+	public void readData(@UnknownNullability Json5Object json, HolderLookup.Provider provider) {
+		super.readData(json, provider);
+		timer = Json5Util.getLong(json, "timer").orElseThrow();
+		observeType = ObserveType.NAME_MAP.get(Json5Util.getString(json, "observe_type").orElseThrow());
+		toObserve = Json5Util.getString(json, "to_observe").orElseThrow();
 	}
 
 	@Override
@@ -134,11 +133,11 @@ public class ObservationTask extends AbstractBooleanTask {
 
 			switch (observeType) {
 				case BLOCK -> {
-					return String.valueOf(RegistrarManager.getId(block, Registries.BLOCK)).equals(toObserve);
+					return String.valueOf(BuiltInRegistries.BLOCK.getKey(block)).equals(toObserve);
 				}
 				case BLOCK_TAG -> {
-					return asTagRL(toObserve)
-							.map(rl -> state.is(TagKey.create(Registries.BLOCK, rl)))
+					return asTagId(toObserve)
+							.map(id -> state.is(TagKey.create(Registries.BLOCK, id)))
 							.orElse(false);
 				}
 				case BLOCK_STATE -> {
@@ -150,7 +149,7 @@ public class ObservationTask extends AbstractBooleanTask {
 					return stateNbtMatch != null && stateNbtMatch.test(blockInWorld);
 				}
 				case BLOCK_ENTITY_TYPE -> {
-					return blockEntity != null && toObserve.equals(String.valueOf(RegistrarManager.getId(blockEntity.getType(), Registries.BLOCK_ENTITY_TYPE)));
+					return blockEntity != null && toObserve.equals(String.valueOf(BuiltInRegistries.BLOCK_ENTITY_TYPE.getKey(blockEntity.getType())));
 				}
 				default -> {
 					return false;
@@ -158,10 +157,10 @@ public class ObservationTask extends AbstractBooleanTask {
 			}
 		} else if (result instanceof EntityHitResult entityResult) {
 			if (observeType == ObserveType.ENTITY_TYPE) {
-				return toObserve.equals(String.valueOf(RegistrarManager.getId(entityResult.getEntity().getType(), Registries.ENTITY_TYPE)));
+				return toObserve.equals(String.valueOf(BuiltInRegistries.ENTITY_TYPE.getKey(entityResult.getEntity().getType())));
 			} else if (observeType == ObserveType.ENTITY_TYPE_TAG) {
-				return asTagRL(toObserve)
-						.map(rl -> entityResult.getEntity().getType().is(TagKey.create(Registries.ENTITY_TYPE, rl)))
+				return asTagId(toObserve)
+						.map(rl -> entityResult.getEntity().is(TagKey.create(Registries.ENTITY_TYPE, rl)))
 						.orElse(false);
 			}
 		}
@@ -169,7 +168,7 @@ public class ObservationTask extends AbstractBooleanTask {
 		return false;
 	}
 
-	private Optional<Identifier> asTagRL(String str) {
+	private Optional<Identifier> asTagId(String str) {
 		try {
 			return Optional.ofNullable(Identifier.tryParse(str.startsWith("#") ? str.substring(1) : str));
 		} catch (IdentifierException e) {

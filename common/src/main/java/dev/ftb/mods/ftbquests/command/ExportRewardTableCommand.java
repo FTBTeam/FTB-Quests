@@ -1,5 +1,13 @@
 package dev.ftb.mods.ftbquests.command;
 
+import com.mojang.brigadier.Command;
+import com.mojang.brigadier.arguments.StringArgumentType;
+import com.mojang.brigadier.builder.LiteralArgumentBuilder;
+import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import dev.ftb.mods.ftblibrary.platform.Platform;
+import dev.ftb.mods.ftbquests.quest.loot.RewardTable;
+import dev.ftb.mods.ftbquests.quest.loot.WeightedReward;
+import dev.ftb.mods.ftbquests.quest.reward.ItemReward;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.arguments.coordinates.BlockPosArgument;
@@ -9,20 +17,11 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.item.ItemStack;
-import com.mojang.brigadier.Command;
-import com.mojang.brigadier.arguments.StringArgumentType;
-import com.mojang.brigadier.builder.LiteralArgumentBuilder;
-import com.mojang.brigadier.exceptions.CommandSyntaxException;
-
-import dev.ftb.mods.ftbquests.quest.loot.RewardTable;
-import dev.ftb.mods.ftbquests.quest.loot.WeightedReward;
-import dev.ftb.mods.ftbquests.quest.reward.ItemReward;
-import dev.ftb.mods.ftbquests.util.InventoryUtil;
+import org.jspecify.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-import org.jspecify.annotations.Nullable;
 
 import static net.minecraft.commands.Commands.argument;
 
@@ -62,7 +61,7 @@ public class ExportRewardTableCommand {
                 items.add(itemReward.getItem());
             }
         }
-        InventoryUtil.putItemsInInventory(items, level, pos, Direction.UP, true);
+        Platform.get().transfer().simple().blockEntity().putItems(items, level, pos, Direction.UP);
 
         source.sendSuccess(() -> Component.translatable("commands.ftbquests.command.feedback.table_exported", table.getTitle(), items.size()), false);
 

@@ -1,81 +1,40 @@
 plugins {
-	id "com.github.johnrengelman.shadow" version "7.1.0"
-}
-
-configurations {
-	shadowCommon
-}
-
-architectury {
-	platformSetupLoomIde()
-	fabric()
+	id 'net.fabricmc.fabric-loom'
 }
 
 loom {
-	accessWidenerPath = project(":common").file("src/main/resources/ftbquests.accesswidener")
-}
+	accessWidenerPath = project(":common").file("src/main/resources/${mod_id}.accesswidener")
 
-configurations {
-	common
-	shadowCommon // Don't use shadow from the shadow plugin because we don't want IDEA to index this.
-	compileClasspath.extendsFrom common
-	runtimeClasspath.extendsFrom common
-	developmentFabric.extendsFrom common
+	runs {
+		configureEach {
+			ideConfigGenerated = true
+		}
+	}
+
+	mods {
+		"${project.mod_id}" {
+			sourceSet sourceSets.main
+			sourceSet("main", project(":common"))
+		}
+	}
+
+	mixin {
+		useLegacyMixinAp = false
+	}
 }
 
 dependencies {
-	modApi "net.fabricmc:fabric-loader:${rootProject.fabric_loader_version}"
+	minecraft "com.mojang:minecraft:${project.minecraft_version}"
 
-	modApi "net.fabricmc.fabric-api:fabric-api:${rootProject.fabric_api_version}"
-	modApi "dev.architectury:architectury-fabric:${rootProject.architectury_api_version}"
+	api "net.fabricmc:fabric-loader:${rootProject.fabric_loader_version}"
+	api "net.fabricmc.fabric-api:fabric-api:${rootProject.fabric_api_version}"
 
-	include modApi("teamreborn:energy:${rootProject.teamreborn_energy_version}") {
+	include api("teamreborn:energy:${rootProject.teamreborn_energy_version}") {
 		exclude(group: "net.fabricmc.fabric-api")
 	}
 
-	modApi("dev.ftb.mods:ftb-library-fabric:${rootProject.ftb_library_version}")
-
-	modApi("dev.ftb.mods:ftb-teams-fabric:${rootProject.ftb_teams_version}") { transitive false }
-
-	common(project(path: ":common", configuration: "namedElements")) { transitive false }
-	shadowCommon(project(path: ":common", configuration: "transformProductionFabric")) { transitive false }
-}
-
-apply from: "https://raw.githubusercontent.com/FTBTeam/mods-meta/main/gradle/extra-local-mods.gradle"
-
-processResources {
-	inputs.property "version", project.version
-
-	filesMatching("fabric.mod.json") {
-		expand "version": project.version,
-				"archversion": project.architectury_api_version,
-				"fabricapiversionrange": project.fabric_api_version_range,
-				"mcversion": project.minecraft_version,
-				"ftblibraryversion": project.ftb_library_version,
-				"ftbteamsversion": project.ftb_teams_version
-	}
-}
-
-shadowJar {
-	configurations = [project.configurations.shadowCommon]
-	setArchiveClassifier("dev-shadow")
-}
-
-remapJar {
-	input.set shadowJar.archiveFile
-	dependsOn shadowJar
-	archiveBaseName.set "${rootProject.archives_base_name}-${project.name}"
-	archiveClassifier.set null
-}
-
-jar {
-	setArchiveClassifier("dev")
-}
-
-components.java {
-	withVariantsFromConfiguration(project.configurations.shadowRuntimeElements) {
-		skip()
-	}
+	implementation("dev.ftb.mods:ftb-library-fabric:${rootProject.ftb_library_version}")
+	implementation("dev.ftb.mods:ftb-teams-fabric:${rootProject.ftb_teams_version}")
 }
 
 publishing {

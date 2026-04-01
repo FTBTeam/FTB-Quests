@@ -1,5 +1,24 @@
 package dev.ftb.mods.ftbquests.block.entity;
 
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
+import dev.ftb.mods.ftblibrary.client.config.EditableConfigGroup;
+import dev.ftb.mods.ftblibrary.client.util.ClientUtils;
+import dev.ftb.mods.ftblibrary.platform.network.Play2ServerNetworking;
+import dev.ftb.mods.ftbquests.api.FTBQuestsAPI;
+import dev.ftb.mods.ftbquests.block.TaskScreenBlock;
+import dev.ftb.mods.ftbquests.client.FTBQuestsClient;
+import dev.ftb.mods.ftbquests.client.config.EditableQuestObject;
+import dev.ftb.mods.ftbquests.net.BlockConfigResponseMessage;
+import dev.ftb.mods.ftbquests.quest.BaseQuestFile;
+import dev.ftb.mods.ftbquests.quest.QuestObjectBase;
+import dev.ftb.mods.ftbquests.quest.TeamData;
+import dev.ftb.mods.ftbquests.quest.task.ItemTask;
+import dev.ftb.mods.ftbquests.quest.task.Task;
+import dev.ftb.mods.ftbquests.registry.ModBlockEntityTypes;
+import dev.ftb.mods.ftbquests.registry.ModBlocks;
+import dev.ftb.mods.ftbquests.registry.ModDataComponents;
+import dev.ftb.mods.ftbteams.api.FTBTeamsAPI;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -23,32 +42,11 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.storage.ValueInput;
 import net.minecraft.world.level.storage.ValueOutput;
-import com.mojang.serialization.Codec;
-import com.mojang.serialization.codecs.RecordCodecBuilder;
-
-import dev.architectury.networking.NetworkManager;
-
-import dev.ftb.mods.ftblibrary.client.config.EditableConfigGroup;
-import dev.ftb.mods.ftblibrary.client.util.ClientUtils;
-import dev.ftb.mods.ftbquests.api.FTBQuestsAPI;
-import dev.ftb.mods.ftbquests.block.TaskScreenBlock;
-import dev.ftb.mods.ftbquests.client.FTBQuestsClient;
-import dev.ftb.mods.ftbquests.client.config.EditableQuestObject;
-import dev.ftb.mods.ftbquests.net.BlockConfigResponseMessage;
-import dev.ftb.mods.ftbquests.quest.BaseQuestFile;
-import dev.ftb.mods.ftbquests.quest.QuestObjectBase;
-import dev.ftb.mods.ftbquests.quest.TeamData;
-import dev.ftb.mods.ftbquests.quest.task.ItemTask;
-import dev.ftb.mods.ftbquests.quest.task.Task;
-import dev.ftb.mods.ftbquests.registry.ModBlockEntityTypes;
-import dev.ftb.mods.ftbquests.registry.ModBlocks;
-import dev.ftb.mods.ftbquests.registry.ModDataComponents;
-import dev.ftb.mods.ftbteams.api.FTBTeamsAPI;
+import org.jetbrains.annotations.NotNull;
+import org.jspecify.annotations.Nullable;
 
 import java.util.Optional;
 import java.util.UUID;
-import org.jetbrains.annotations.NotNull;
-import org.jspecify.annotations.Nullable;
 
 import static dev.ftb.mods.ftbquests.block.TaskScreenBlock.FACING;
 
@@ -231,7 +229,7 @@ public class TaskScreenBlockEntity extends EditableBlockEntity implements ITaskS
     public EditableConfigGroup fillConfigGroup(TeamData data) {
         EditableConfigGroup cg0 = new EditableConfigGroup("task_screen", accepted -> {
             if (accepted) {
-                NetworkManager.sendToServer(new BlockConfigResponseMessage(getBlockPos(), saveWithoutMetadata(getLevel().registryAccess())));
+                Play2ServerNetworking.send(new BlockConfigResponseMessage(getBlockPos(), saveWithoutMetadata(getLevel().registryAccess())));
             }
         });
 

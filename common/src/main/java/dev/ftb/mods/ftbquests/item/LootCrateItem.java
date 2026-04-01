@@ -1,5 +1,16 @@
 package dev.ftb.mods.ftbquests.item;
 
+import com.mojang.serialization.MapCodec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
+import dev.ftb.mods.ftblibrary.platform.Env;
+import dev.ftb.mods.ftblibrary.platform.Platform;
+import dev.ftb.mods.ftbquests.FTBQuests;
+import dev.ftb.mods.ftbquests.client.ClientQuestFile;
+import dev.ftb.mods.ftbquests.client.gui.RewardNotificationsScreen;
+import dev.ftb.mods.ftbquests.quest.loot.LootCrate;
+import dev.ftb.mods.ftbquests.quest.loot.WeightedReward;
+import dev.ftb.mods.ftbquests.registry.ModDataComponents;
+import dev.ftb.mods.ftbquests.registry.ModItems;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.color.item.ItemTintSource;
 import net.minecraft.client.multiplayer.ClientLevel;
@@ -12,6 +23,7 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.ExtraCodecs;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.LivingEntity;
@@ -24,23 +36,10 @@ import net.minecraft.world.item.component.CustomModelData;
 import net.minecraft.world.item.component.TooltipDisplay;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
-import com.mojang.serialization.MapCodec;
-import com.mojang.serialization.codecs.RecordCodecBuilder;
-
-import dev.architectury.platform.Platform;
-import net.fabricmc.api.EnvType;
-
-import dev.ftb.mods.ftbquests.FTBQuests;
-import dev.ftb.mods.ftbquests.client.ClientQuestFile;
-import dev.ftb.mods.ftbquests.client.gui.RewardNotificationsScreen;
-import dev.ftb.mods.ftbquests.quest.loot.LootCrate;
-import dev.ftb.mods.ftbquests.quest.loot.WeightedReward;
-import dev.ftb.mods.ftbquests.registry.ModDataComponents;
-import dev.ftb.mods.ftbquests.registry.ModItems;
+import org.jspecify.annotations.Nullable;
 
 import java.util.List;
 import java.util.function.Consumer;
-import org.jspecify.annotations.Nullable;
 
 public class LootCrateItem extends Item {
 	public LootCrateItem(ResourceKey<Item> id) {
@@ -61,13 +60,11 @@ public class LootCrateItem extends Item {
 
 	@Nullable
 	public static LootCrate getCrate(ItemStack stack) {
-		return getCrate(stack, Platform.getEnv() == EnvType.CLIENT);
+		return getCrate(stack, Platform.get().env() == Env.CLIENT);
 	}
 
-
-
 	@Override
-	public InteractionResult use(Level world, Player player, InteractionHand hand) {
+	public InteractionResult use(Level level, Player player, InteractionHand hand) {
 		ItemStack stack = player.getItemInHand(hand);
 		LootCrate crate = getCrate(stack, player.level().isClientSide());
 
@@ -76,26 +73,27 @@ public class LootCrateItem extends Item {
 		}
 
 		int nItems = player.isCrouching() ? stack.getCount() : 1;
+		RandomSource random = level.getRandom();
 
-		if (!world.isClientSide()) {
+		if (!level.isClientSide()) {
 			for (WeightedReward wr : crate.getTable().generateWeightedRandomRewards(player.getRandom(), nItems, true)) {
 				wr.getReward().claim((ServerPlayer) player, true);
 			}
 
-			world.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.ITEM_BREAK, SoundSource.PLAYERS, 0.8F, 0.8F + world.random.nextFloat() * 0.4F);
+			level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.ITEM_BREAK, SoundSource.PLAYERS, 0.8F, 0.8F + random.nextFloat() * 0.4F);
 		} else {
 			new RewardNotificationsScreen().openGui();
 
 			for (int i = 0; i < 5; i++) {
-				Vec3 vec3d = new Vec3(((double) world.random.nextFloat() - 0.5D) * 0.1D, Math.random() * 0.1D + 0.1D, 0.0D);
+				Vec3 vec3d = new Vec3(((double) random.nextFloat() - 0.5D) * 0.1D, Math.random() * 0.1D + 0.1D, 0.0D);
 				vec3d = vec3d.xRot(-player.getXRot() * 0.017453292F);
 				vec3d = vec3d.yRot(-player.getYRot() * 0.017453292F);
-				double d0 = (double) (-world.random.nextFloat()) * 0.6D - 0.3D;
-				Vec3 vec3d1 = new Vec3(((double) world.random.nextFloat() - 0.5D) * 0.3D, d0, 0.6D);
+				double d0 = (double) (-random.nextFloat()) * 0.6D - 0.3D;
+				Vec3 vec3d1 = new Vec3(((double) random.nextFloat() - 0.5D) * 0.3D, d0, 0.6D);
 				vec3d1 = vec3d1.xRot(-player.getXRot() * 0.017453292F);
 				vec3d1 = vec3d1.yRot(-player.getYRot() * 0.017453292F);
 				vec3d1 = vec3d1.add(player.getX(), player.getY() + (double) player.getEyeHeight(), player.getZ());
-				world.addParticle(new ItemParticleOption(ParticleTypes.ITEM, stack), vec3d1.x, vec3d1.y, vec3d1.z, vec3d.x, vec3d.y + 0.05D, vec3d.z);
+				level.addParticle(new ItemParticleOption(ParticleTypes.ITEM, stack.getItem()), vec3d1.x, vec3d1.y, vec3d1.z, vec3d.x, vec3d.y + 0.05D, vec3d.z);
 			}
 		}
 

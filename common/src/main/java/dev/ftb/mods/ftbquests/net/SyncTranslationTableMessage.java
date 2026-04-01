@@ -1,16 +1,14 @@
 package dev.ftb.mods.ftbquests.net;
 
-import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.network.codec.ByteBufCodecs;
-import net.minecraft.network.codec.StreamCodec;
-import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
-
-import dev.architectury.networking.NetworkManager;
-
+import dev.ftb.mods.ftblibrary.platform.network.PacketContext;
 import dev.ftb.mods.ftbquests.FTBQuests;
 import dev.ftb.mods.ftbquests.api.FTBQuestsAPI;
 import dev.ftb.mods.ftbquests.client.ClientQuestFile;
 import dev.ftb.mods.ftbquests.quest.translation.TranslationTable;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.codec.ByteBufCodecs;
+import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 
 /**
  * Received on: CLIENT
@@ -33,12 +31,10 @@ public record SyncTranslationTableMessage(String locale, TranslationTable table)
         return TYPE;
     }
 
-    public static void handle(SyncTranslationTableMessage message, NetworkManager.PacketContext context) {
-        context.queue(() -> {
-            ClientQuestFile.getInstance().getTranslationManager().syncTableFromServer(message.locale, message.table);
-            ClientQuestFile.getInstance().clearCachedData();
-            ClientQuestFile.getInstance().refreshGui();
-            FTBQuests.LOGGER.info("received translation table {} (with {} entries) from server", message.locale, message.table.size());
-        });
+    public static void handle(SyncTranslationTableMessage message, PacketContext context) {
+        ClientQuestFile.getInstance().getTranslationManager().syncTableFromServer(message.locale, message.table);
+        ClientQuestFile.getInstance().clearCachedData();
+        ClientQuestFile.getInstance().refreshGui();
+        FTBQuests.LOGGER.info("received translation table {} (with {} entries) from server", message.locale, message.table.size());
     }
 }

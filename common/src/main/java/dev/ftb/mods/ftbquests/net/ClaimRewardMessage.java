@@ -1,16 +1,14 @@
 package dev.ftb.mods.ftbquests.net;
 
+import dev.ftb.mods.ftblibrary.platform.network.PacketContext;
+import dev.ftb.mods.ftbquests.api.FTBQuestsAPI;
+import dev.ftb.mods.ftbquests.quest.ServerQuestFile;
+import dev.ftb.mods.ftbquests.quest.reward.Reward;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.server.level.ServerPlayer;
-
-import dev.architectury.networking.NetworkManager;
-
-import dev.ftb.mods.ftbquests.api.FTBQuestsAPI;
-import dev.ftb.mods.ftbquests.quest.ServerQuestFile;
-import dev.ftb.mods.ftbquests.quest.reward.Reward;
 
 public record ClaimRewardMessage(long id, boolean shouldNotify) implements CustomPacketPayload {
 	public static final Type<ClaimRewardMessage> TYPE = new Type<>(FTBQuestsAPI.id("claim_reward_message"));
@@ -26,17 +24,15 @@ public record ClaimRewardMessage(long id, boolean shouldNotify) implements Custo
 		return TYPE;
 	}
 
-	public static void handle(ClaimRewardMessage message, NetworkManager.PacketContext context) {
-		context.queue(() -> {
-			Reward reward = ServerQuestFile.getInstance().getReward(message.id);
+	public static void handle(ClaimRewardMessage message, PacketContext context) {
+		Reward reward = ServerQuestFile.getInstance().getReward(message.id);
 
-			if (reward != null && context.getPlayer() instanceof ServerPlayer player) {
-				ServerQuestFile.getInstance().getTeamData(player).ifPresent(teamData -> {
-					if (teamData.isCompleted(reward.getQuest())) {
-						teamData.claimReward(player, reward, message.shouldNotify);
-					}
-				});
-			}
-		});
+		if (reward != null && context.player() instanceof ServerPlayer player) {
+			ServerQuestFile.getInstance().getTeamData(player).ifPresent(teamData -> {
+				if (teamData.isCompleted(reward.getQuest())) {
+					teamData.claimReward(player, reward, message.shouldNotify);
+				}
+			});
+		}
 	}
 }

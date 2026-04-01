@@ -1,13 +1,6 @@
 package dev.ftb.mods.ftbquests.client.gui.quests;
 
-import net.minecraft.ChatFormatting;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.MutableComponent;
-import net.minecraft.util.Util;
 import com.mojang.blaze3d.platform.InputConstants;
-
 import dev.ftb.mods.ftblibrary.client.config.EditableConfigGroup;
 import dev.ftb.mods.ftblibrary.client.config.gui.EditConfigScreen;
 import dev.ftb.mods.ftblibrary.client.gui.WidgetType;
@@ -29,12 +22,18 @@ import dev.ftb.mods.ftbquests.quest.ChapterImage;
 import dev.ftb.mods.ftbquests.quest.Movable;
 import dev.ftb.mods.ftbquests.quest.theme.property.ThemeProperties;
 import dev.ftb.mods.ftbquests.util.TextUtils;
+import net.minecraft.ChatFormatting;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.util.Util;
+import org.jetbrains.annotations.NotNull;
+import org.joml.Matrix3x2fStack;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.BiFunction;
-import org.jetbrains.annotations.NotNull;
-import org.joml.Matrix3x2fStack;
 
 public class ChapterImageButton extends Button implements QuestPositionableButton {
 	private final QuestScreen questScreen;
@@ -212,7 +211,7 @@ public class ChapterImageButton extends Button implements QuestPositionableButto
 	}
 
 	@Override
-	public void draw(GuiGraphics graphics, Theme theme, int x, int y, int w, int h) {
+	public void draw(GuiGraphicsExtractor graphics, Theme theme, int x, int y, int w, int h) {
 		Icon<?> image = chapterImage.getImage();
 
 		// if we've got this far and the image shouldn't normally be drawn, we must be in edit mode

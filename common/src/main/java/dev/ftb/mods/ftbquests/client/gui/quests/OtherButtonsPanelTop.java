@@ -1,18 +1,16 @@
 package dev.ftb.mods.ftbquests.client.gui.quests;
 
-import net.minecraft.network.chat.Component;
-
-import dev.architectury.networking.NetworkManager;
-import dev.architectury.platform.Platform;
-
 import dev.ftb.mods.ftblibrary.client.gui.input.MouseButton;
 import dev.ftb.mods.ftblibrary.client.gui.layout.WidgetLayout;
 import dev.ftb.mods.ftblibrary.client.gui.widget.Panel;
 import dev.ftb.mods.ftblibrary.icon.Icons;
+import dev.ftb.mods.ftblibrary.platform.Platform;
+import dev.ftb.mods.ftblibrary.platform.network.Play2ServerNetworking;
 import dev.ftb.mods.ftbquests.client.ClientQuestFile;
 import dev.ftb.mods.ftbquests.net.TogglePinnedMessage;
 import dev.ftb.mods.ftbquests.quest.TeamData;
 import dev.ftb.mods.ftbquests.quest.theme.property.ThemeProperties;
+import net.minecraft.network.chat.Component;
 
 public class OtherButtonsPanelTop extends OtherButtonsPanel {
 	public OtherButtonsPanelTop(Panel panel) {
@@ -27,11 +25,11 @@ public class OtherButtonsPanelTop extends OtherButtonsPanel {
 
 		add(new KeyReferenceButton(this));
 
-		if (Platform.isModLoaded("ftbguides")) {
+		if (Platform.get().isModLoaded("ftbguides")) {
 			add(new OpenGuidesButton(this));
 		}
 
-		if (!questScreen.file.getEmergencyItems().isEmpty() && (questScreen.file.selfTeamData != null || questScreen.file.canEdit())) {
+		if (!questScreen.file.getEmergencyItems().isEmpty() && (questScreen.file.selfTeamData != TeamData.NONE || questScreen.file.canEdit())) {
 			add(new EmergencyItemsButton(this));
 		}
 
@@ -39,7 +37,7 @@ public class OtherButtonsPanelTop extends OtherButtonsPanel {
 			add(new WikiButton(this));
 		}
 
-		if (Platform.isModLoaded("ftbmoney")) {
+		if (Platform.get().isModLoaded("ftbmoney")) {
 			add(new OpenShopButton(this));
 		}
 	}
@@ -76,7 +74,7 @@ public class OtherButtonsPanelTop extends OtherButtonsPanel {
 		@Override
 		public void onClicked(MouseButton button) {
 			playClickSound();
-			NetworkManager.sendToServer(new TogglePinnedMessage(TeamData.AUTO_PIN_ID));
+			Play2ServerNetworking.send(new TogglePinnedMessage(TeamData.AUTO_PIN_ID));
 		}
 	}
 

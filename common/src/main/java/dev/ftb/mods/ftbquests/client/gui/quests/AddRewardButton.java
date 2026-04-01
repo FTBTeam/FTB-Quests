@@ -1,20 +1,18 @@
 package dev.ftb.mods.ftbquests.client.gui.quests;
 
-import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.network.chat.Component;
-
-import dev.architectury.networking.NetworkManager;
-
 import dev.ftb.mods.ftblibrary.client.gui.input.MouseButton;
 import dev.ftb.mods.ftblibrary.client.gui.theme.Theme;
 import dev.ftb.mods.ftblibrary.client.gui.widget.Button;
 import dev.ftb.mods.ftblibrary.client.gui.widget.ContextMenuItem;
 import dev.ftb.mods.ftblibrary.client.gui.widget.Panel;
+import dev.ftb.mods.ftblibrary.platform.network.Play2ServerNetworking;
 import dev.ftb.mods.ftbquests.net.CreateObjectMessage;
 import dev.ftb.mods.ftbquests.quest.Quest;
 import dev.ftb.mods.ftbquests.quest.reward.RewardType;
 import dev.ftb.mods.ftbquests.quest.reward.RewardTypes;
 import dev.ftb.mods.ftbquests.quest.theme.property.ThemeProperties;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
+import net.minecraft.network.chat.Component;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -38,7 +36,7 @@ public class AddRewardButton extends Button {
 				contextMenu.add(new ContextMenuItem(type.getDisplayName(), type.getIconSupplier(), b -> {
 					playClickSound();
 					type.getGuiProvider().openCreationGui(parent, quest, reward ->
-							NetworkManager.sendToServer(CreateObjectMessage.create(reward, type.makeExtraNBT()))
+							Play2ServerNetworking.send(CreateObjectMessage.create(reward, type.makeExtraJson()))
 					);
 				}));
 			}
@@ -48,9 +46,9 @@ public class AddRewardButton extends Button {
 	}
 
 	@Override
-	public void drawBackground(GuiGraphics matrixStack, Theme theme, int x, int y, int w, int h) {
+	public void drawBackground(GuiGraphicsExtractor graphics, Theme theme, int x, int y, int w, int h) {
 		if (isMouseOver()) {
-			super.drawBackground(matrixStack, theme, x, y, w, h);
+			super.drawBackground(graphics, theme, x, y, w, h);
 		}
 	}
 }

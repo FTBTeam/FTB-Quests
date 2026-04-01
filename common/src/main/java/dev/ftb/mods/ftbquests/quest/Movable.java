@@ -1,14 +1,12 @@
 package dev.ftb.mods.ftbquests.quest;
 
-import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.network.chat.Component;
-
-import dev.architectury.networking.NetworkManager;
-
 import dev.ftb.mods.ftblibrary.client.icon.IconHelper;
 import dev.ftb.mods.ftblibrary.icon.Color4I;
+import dev.ftb.mods.ftblibrary.platform.network.Play2ServerNetworking;
 import dev.ftb.mods.ftbquests.client.FTBQuestsClient;
 import dev.ftb.mods.ftbquests.net.MoveMovableMessage;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
+import net.minecraft.network.chat.Component;
 
 /**
  * Represents a quest object that can be moved around on screen, and between chapters.
@@ -48,7 +46,7 @@ public interface Movable {
 	 * @param y new Y pos
 	 */
 	default void initiateMoveClientSide(Chapter to, double x, double y) {
-		NetworkManager.sendToServer(new MoveMovableMessage(getMovableID(), to.getId(), x, y));
+		Play2ServerNetworking.send(new MoveMovableMessage(getMovableID(), to.getId(), x, y));
 	}
 
 	/**
@@ -87,7 +85,7 @@ public interface Movable {
 	 *
 	 * @param graphics the graphics context
 	 */
-	default void drawMoved(GuiGraphics graphics) {
+	default void drawMoved(GuiGraphicsExtractor graphics) {
 		IconHelper.renderIcon(QuestShape.get(getShape()).getShape().withColor(Color4I.WHITE.withAlpha(30)), graphics, 0, 0, 1, 1);
 	}
 }

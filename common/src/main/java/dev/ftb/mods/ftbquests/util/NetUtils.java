@@ -1,20 +1,21 @@
 package dev.ftb.mods.ftbquests.util;
 
+import de.marhali.json5.Json5Element;
+import de.marhali.json5.Json5Object;
+import dev.ftb.mods.ftblibrary.platform.network.PacketContext;
+import dev.ftb.mods.ftbquests.api.FTBQuestsAPI;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.world.entity.player.Player;
-
-import dev.architectury.networking.NetworkManager;
-
-import dev.ftb.mods.ftbquests.api.FTBQuestsAPI;
-
-import java.util.Collection;
-import java.util.function.BiConsumer;
-import java.util.function.Function;
 import org.jspecify.annotations.Nullable;
 
+import java.util.Collection;
+import java.util.Optional;
+import java.util.function.BiConsumer;
+import java.util.function.Function;
+
 public class NetUtils {
-	public static boolean canEdit(NetworkManager.PacketContext context) {
-		return canEdit(context.getPlayer());
+	public static boolean canEdit(PacketContext context) {
+		return canEdit(context.player());
 	}
 
 	public static boolean canEdit(@Nullable Player player) {
@@ -39,5 +40,12 @@ public class NetUtils {
 
 	public static void readStrings(FriendlyByteBuf buffer, Collection<String> list) {
 		read(buffer, list, b -> b.readUtf(Short.MAX_VALUE));
+	}
+
+	public static Json5Object jsonObjectFromOptionalElement(Optional<Json5Element> element) {
+		return element
+				.filter(Json5Element::isJson5Object)
+				.map(Json5Element::getAsJson5Object)
+				.orElseGet(Json5Object::new);
 	}
 }

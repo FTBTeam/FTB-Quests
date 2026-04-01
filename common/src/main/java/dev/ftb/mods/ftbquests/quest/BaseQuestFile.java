@@ -1,12 +1,49 @@
 package dev.ftb.mods.ftbquests.quest;
 
+import com.mojang.logging.LogUtils;
+import de.marhali.json5.Json5Array;
+import de.marhali.json5.Json5Element;
+import de.marhali.json5.Json5Object;
+import de.marhali.json5.Json5Primitive;
+import dev.ftb.mods.ftblibrary.client.config.EditableConfigGroup;
+import dev.ftb.mods.ftblibrary.client.config.editable.EditableItemStack;
+import dev.ftb.mods.ftblibrary.icon.Icon;
+import dev.ftb.mods.ftblibrary.json5.Json5Util;
+import dev.ftb.mods.ftblibrary.math.MathUtils;
+import dev.ftb.mods.ftblibrary.platform.Env;
+import dev.ftb.mods.ftblibrary.platform.event.NativeEventPosting;
+import dev.ftb.mods.ftblibrary.platform.network.Server2PlayNetworking;
+import dev.ftb.mods.ftbquests.FTBQuests;
+import dev.ftb.mods.ftbquests.api.QuestFile;
+import dev.ftb.mods.ftbquests.client.FTBQuestsClient;
+import dev.ftb.mods.ftbquests.client.config.EditableLocaleConfig;
+import dev.ftb.mods.ftbquests.events.ClearFileCacheEvent;
+import dev.ftb.mods.ftbquests.events.CustomTaskEvent;
+import dev.ftb.mods.ftbquests.events.progress.FileProgressEvent;
+import dev.ftb.mods.ftbquests.events.progress.ProgressEventData;
+import dev.ftb.mods.ftbquests.events.progress.ProgressType;
+import dev.ftb.mods.ftbquests.integration.RecipeModHelper;
+import dev.ftb.mods.ftbquests.net.DeleteObjectResponseMessage;
+import dev.ftb.mods.ftbquests.quest.loot.EntityWeight;
+import dev.ftb.mods.ftbquests.quest.loot.LootCrate;
+import dev.ftb.mods.ftbquests.quest.loot.RewardTable;
+import dev.ftb.mods.ftbquests.quest.reward.Reward;
+import dev.ftb.mods.ftbquests.quest.reward.RewardAutoClaim;
+import dev.ftb.mods.ftbquests.quest.reward.RewardType;
+import dev.ftb.mods.ftbquests.quest.reward.RewardTypes;
+import dev.ftb.mods.ftbquests.quest.task.*;
+import dev.ftb.mods.ftbquests.quest.theme.property.ThemeProperties;
+import dev.ftb.mods.ftbquests.quest.translation.TranslationManager;
+import dev.ftb.mods.ftbteams.api.FTBTeamsAPI;
+import dev.ftb.mods.ftbteams.api.Team;
+import dev.ftb.mods.ftbteams.api.client.ClientTeamManager;
+import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
+import it.unimi.dsi.fastutil.longs.Long2IntOpenHashMap;
+import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.core.HolderLookup;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.NumericTag;
 import net.minecraft.nbt.StringTag;
-import net.minecraft.nbt.Tag;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
@@ -17,45 +54,10 @@ import net.minecraft.util.Util;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
-import com.mojang.logging.LogUtils;
-
-import dev.architectury.utils.Env;
-
-import dev.ftb.mods.ftblibrary.client.config.EditableConfigGroup;
-import dev.ftb.mods.ftblibrary.client.config.editable.EditableItemStack;
-import dev.ftb.mods.ftblibrary.icon.Icon;
-import dev.ftb.mods.ftblibrary.math.MathUtils;
-import dev.ftb.mods.ftblibrary.snbt.SNBT;
-import dev.ftb.mods.ftblibrary.snbt.SNBTCompoundTag;
-import dev.ftb.mods.ftblibrary.util.NetworkHelper;
-import dev.ftb.mods.ftbquests.FTBQuests;
-import dev.ftb.mods.ftbquests.api.QuestFile;
-import dev.ftb.mods.ftbquests.client.FTBQuestsClient;
-import dev.ftb.mods.ftbquests.client.config.EditableLocaleConfig;
-import dev.ftb.mods.ftbquests.events.ClearFileCacheEvent;
-import dev.ftb.mods.ftbquests.events.CustomTaskEvent;
-import dev.ftb.mods.ftbquests.events.ObjectCompletedEvent;
-import dev.ftb.mods.ftbquests.events.ObjectStartedEvent;
-import dev.ftb.mods.ftbquests.events.QuestProgressEventData;
-import dev.ftb.mods.ftbquests.integration.RecipeModHelper;
-import dev.ftb.mods.ftbquests.net.DeleteObjectResponseMessage;
-import dev.ftb.mods.ftbquests.quest.loot.EntityWeight;
-import dev.ftb.mods.ftbquests.quest.loot.LootCrate;
-import dev.ftb.mods.ftbquests.quest.loot.RewardTable;
-import dev.ftb.mods.ftbquests.quest.reward.Reward;
-import dev.ftb.mods.ftbquests.quest.reward.RewardAutoClaim;
-import dev.ftb.mods.ftbquests.quest.reward.RewardType;
-import dev.ftb.mods.ftbquests.quest.reward.RewardTypes;
-import dev.ftb.mods.ftbquests.quest.task.CustomTask;
-import dev.ftb.mods.ftbquests.quest.task.ItemTask;
-import dev.ftb.mods.ftbquests.quest.task.Task;
-import dev.ftb.mods.ftbquests.quest.task.TaskType;
-import dev.ftb.mods.ftbquests.quest.task.TaskTypes;
-import dev.ftb.mods.ftbquests.quest.theme.property.ThemeProperties;
-import dev.ftb.mods.ftbquests.quest.translation.TranslationManager;
-import dev.ftb.mods.ftbteams.api.FTBTeamsAPI;
-import dev.ftb.mods.ftbteams.api.Team;
-import dev.ftb.mods.ftbteams.api.client.ClientTeamManager;
+import org.apache.commons.lang3.mutable.MutableInt;
+import org.jetbrains.annotations.UnknownNullability;
+import org.jspecify.annotations.Nullable;
+import org.slf4j.Logger;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -64,14 +66,9 @@ import java.util.*;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
-import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
-import it.unimi.dsi.fastutil.longs.Long2IntOpenHashMap;
-import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
-import org.apache.commons.lang3.mutable.MutableInt;
-import org.jspecify.annotations.Nullable;
-import org.slf4j.Logger;
 
 public abstract class BaseQuestFile extends QuestObject implements QuestFile {
+	public static final String FILE_SUFFIX = ".json5";
 	public static int VERSION = 13;
 	private static final Logger LOGGER = LogUtils.getLogger();
 
@@ -103,7 +100,7 @@ public abstract class BaseQuestFile extends QuestObject implements QuestFile {
 	private boolean defaultQuestDisableJEI;
 	private boolean hideExcludedQuests;
 	private boolean dropLootCrates;
-	private final EntityWeight lootCrateNoDrop;
+	private EntityWeight lootCrateNoDrop;
 	private boolean disableGui;
 	private double gridScale;
 	private boolean pauseGame;
@@ -145,10 +142,7 @@ public abstract class BaseQuestFile extends QuestObject implements QuestFile {
 		defaultQuestShape = "circle";
 		defaultQuestDisableJEI = false;
 		dropLootCrates = false;
-		lootCrateNoDrop = new EntityWeight();
-		lootCrateNoDrop.passive = 4000;
-		lootCrateNoDrop.monster = 600;
-		lootCrateNoDrop.boss = 0;
+		lootCrateNoDrop = new EntityWeight(4000, 600, 0);
 		disableGui = false;
 		gridScale = 0.5D;
 		pauseGame = false;
@@ -214,18 +208,18 @@ public abstract class BaseQuestFile extends QuestObject implements QuestFile {
 	}
 
 	@Override
-	public void onStarted(QuestProgressEventData<?> data) {
-		data.setStarted(id);
-		ObjectStartedEvent.FILE.invoker().act(new ObjectStartedEvent.FileEvent(data.withObject(this)));
+	public void onStarted(ProgressEventData<?> eventData) {
+		eventData.setStarted(id);
+		NativeEventPosting.get().postEvent(new FileProgressEvent.Data(ProgressType.STARTED, eventData.withObject(this)));
 	}
 
 	@Override
-	public void onCompleted(QuestProgressEventData<?> data) {
-		data.setCompleted(id);
-		ObjectCompletedEvent.FILE.invoker().act(new ObjectCompletedEvent.FileEvent(data.withObject(this)));
+	public void onCompleted(ProgressEventData<?> eventData) {
+		eventData.setCompleted(id);
+		NativeEventPosting.get().postEvent(new FileProgressEvent.Data(ProgressType.COMPLETED, eventData.withObject(this)));
 
 		if (!disableToast) {
-			data.notifyPlayers(id);
+			eventData.notifyPlayers(id);
 		}
 	}
 
@@ -380,26 +374,26 @@ public abstract class BaseQuestFile extends QuestObject implements QuestFile {
 		rewardTables.forEach(table -> table.getWeightedRewards().forEach(wr -> questObjectMap.put(wr.getReward().id, wr.getReward())));
 	}
 
-	public QuestObjectBase create(long id, QuestObjectType type, long parent, CompoundTag extra) {
+	public QuestObjectBase create(long id, QuestObjectType type, long parent, Json5Object extraData) {
 		switch (type) {
 			case CHAPTER -> {
-				return new Chapter(id, this, getChapterGroup(extra.getLong("group").orElse(0L)));
+				return new Chapter(id, this, getChapterGroup(Json5Util.getLong(extraData, "group").orElse(0L)));
 			}
 			case QUEST -> {
 				return new Quest(id, getChapterOrThrow(parent));
 			}
 			case QUEST_LINK -> {
-                return new QuestLink(id, getChapterOrThrow(parent), 0L);
-            }
+				return new QuestLink(id, getChapterOrThrow(parent), 0L);
+			}
 			case TASK -> {
 				Quest quest = getQuest(parent);
 				if (quest != null) {
-                    return TaskType.createTask(id, quest, extra.getString("type").orElse(""));
-                }
+					return TaskType.createTask(id, quest, Json5Util.getString(extraData, "type").orElse(""));
+				}
 				throw new IllegalArgumentException("Parent quest not found!");
 			}
 			case REWARD -> {
-				String rewardType = extra.getString("type").orElse("");
+				String rewardType = Json5Util.getString(extraData, "type").orElse("");
 				if (RewardTable.isFakeQuestId(parent)) {
 					return RewardTable.createRewardForTable(id, rewardType, this);
 				} else {
@@ -421,71 +415,62 @@ public abstract class BaseQuestFile extends QuestObject implements QuestFile {
 	}
 
 	@Override
-	public final void writeData(CompoundTag nbt, HolderLookup.Provider provider) {
-		super.writeData(nbt, provider);
-		nbt.putBoolean("default_reward_team", defaultPerTeamReward);
-		nbt.putBoolean("default_consume_items", defaultTeamConsumeItems);
-		nbt.putString("default_autoclaim_rewards", defaultRewardAutoClaim.getId());
-		nbt.putString("default_quest_shape", defaultQuestShape);
-		nbt.putBoolean("default_quest_disable_jei", defaultQuestDisableJEI);
-
+	public final void writeData(Json5Object json, HolderLookup.Provider provider) {
+		super.writeData(json, provider);
+		json.addProperty("default_reward_team", defaultPerTeamReward);
+		json.addProperty("default_consume_items", defaultTeamConsumeItems);
+		json.addProperty("default_autoclaim_rewards", defaultRewardAutoClaim.getId());
+		json.addProperty("default_quest_shape", defaultQuestShape);
+		json.addProperty("default_quest_disable_jei", defaultQuestDisableJEI);
 		if (!emergencyItems.isEmpty()) {
-			nbt.store("emergency_items", ItemStack.CODEC.listOf(), emergencyItems);
+			Json5Util.store(json, "emergency_items", ItemStack.CODEC.listOf(), emergencyItems);
 		}
-
-		nbt.putInt("emergency_items_cooldown", emergencyItemsCooldown);
-		nbt.putBoolean("drop_loot_crates", dropLootCrates);
-
-		SNBTCompoundTag lootCrateNoDropTag = new SNBTCompoundTag();
-		lootCrateNoDrop.writeData(lootCrateNoDropTag);
-		nbt.put("loot_crate_no_drop", lootCrateNoDropTag);
-		nbt.putBoolean("disable_gui", disableGui);
-		nbt.putDouble("grid_scale", gridScale);
-		nbt.putBoolean("pause_game", pauseGame);
-		nbt.putString("lock_message", lockMessage);
-		nbt.putString("progression_mode", progressionMode.getId());
-		nbt.putInt("detection_delay", detectionDelay);
-		nbt.putBoolean("show_lock_icons", showLockIcons);
-		nbt.putBoolean("drop_book_on_death", dropBookOnDeath);
-		nbt.putBoolean("hide_excluded_quests", hideExcludedQuests);
-		nbt.putString("fallback_locale", fallbackLocale);
-		nbt.putBoolean("verify_on_load", verifyOnLoad);
+		json.addProperty("emergency_items_cooldown", emergencyItemsCooldown);
+		json.addProperty("drop_loot_crates", dropLootCrates);
+		Json5Util.store(json, "loot_crate_no_drop", EntityWeight.CODEC, lootCrateNoDrop);
+		json.addProperty("disable_gui", disableGui);
+		json.addProperty("grid_scale", gridScale);
+		json.addProperty("pause_game", pauseGame);
+		json.addProperty("lock_message", lockMessage);
+		json.addProperty("progression_mode", progressionMode.getId());
+		json.addProperty("detection_delay", detectionDelay);
+		json.addProperty("show_lock_icons", showLockIcons);
+		json.addProperty("drop_book_on_death", dropBookOnDeath);
+		json.addProperty("hide_excluded_quests", hideExcludedQuests);
+		json.addProperty("fallback_locale", fallbackLocale);
+		json.addProperty("verify_on_load", verifyOnLoad);
 	}
 
 	@Override
-	public final void readData(CompoundTag nbt, HolderLookup.Provider provider) {
-		super.readData(nbt, provider);
+	public final void readData(@UnknownNullability Json5Object json, HolderLookup.Provider provider) {
+		super.readData(json, provider);
 
-		defaultPerTeamReward = nbt.getBoolean("default_reward_team").orElseThrow();
-		defaultTeamConsumeItems = nbt.getBoolean("default_consume_items").orElseThrow();
-		defaultRewardAutoClaim = RewardAutoClaim.NAME_MAP_NO_DEFAULT.get(nbt.getString("default_autoclaim_rewards").orElseThrow());
-		defaultQuestShape = nbt.getString("default_quest_shape").orElseThrow();
-
+		defaultPerTeamReward = Json5Util.getBoolean(json, "default_reward_team").orElseThrow();
+		defaultTeamConsumeItems = Json5Util.getBoolean(json, "default_consume_items").orElseThrow();
+		defaultRewardAutoClaim = RewardAutoClaim.NAME_MAP_NO_DEFAULT.get(json.get("default_autoclaim_rewards").getAsString());
+		defaultQuestShape = Json5Util.getString(json, "default_quest_shape").orElseThrow();
 		if (defaultQuestShape.equals("default")) {
 			defaultQuestShape = "";
 		}
+		defaultQuestDisableJEI = Json5Util.getBoolean(json, "default_quest_disable_jei").orElseThrow();
 
-		defaultQuestDisableJEI = nbt.getBoolean("default_quest_disable_jei").orElseThrow();
 		emergencyItems.clear();
+		Json5Util.fetch(json, "emergency_items", ItemStack.CODEC.listOf()).ifPresent(emergencyItems::addAll);
 
-		nbt.getList("emergency_items").ifPresent(itemsTag -> emergencyItems.add(itemOrMissingFromNBT(itemsTag, provider)));
-
-		emergencyItemsCooldown = nbt.getInt("emergency_items_cooldown").orElseThrow();
-		dropLootCrates = nbt.getBoolean("drop_loot_crates").orElseThrow();
-
-		nbt.getCompound("loot_crate_no_drop").ifPresent(lootCrateNoDrop::readData);
-
-		disableGui = nbt.getBooleanOr("disable_gui", false);
-		gridScale = nbt.getDoubleOr("grid_scale", 0.5D);
-		pauseGame = nbt.getBooleanOr("pause_game", false);
-		lockMessage = nbt.getStringOr("lock_message", "");
-		progressionMode = nbt.getString("progression_mode").map(ProgressionMode.NAME_MAP_NO_DEFAULT::get).orElse(ProgressionMode.LINEAR);
-		detectionDelay = nbt.getIntOr("detection_delay", 20);
-		showLockIcons = nbt.getBooleanOr("show_lock_icons", false);
-		dropBookOnDeath = nbt.getBooleanOr("drop_book_on_death", false);
-		hideExcludedQuests = nbt.getBooleanOr("hide_excluded_quests", false);
-		fallbackLocale = nbt.getStringOr("fallback_locale", TranslationManager.DEFAULT_FALLBACK_LOCALE);
-		verifyOnLoad = nbt.getBooleanOr("verify_on_load", false);
+		emergencyItemsCooldown = Json5Util.getInt(json, "emergency_items_cooldown").orElseThrow();
+		dropLootCrates = Json5Util.getBoolean(json, "drop_loot_crates").orElseThrow();
+		lootCrateNoDrop = Json5Util.fetch(json, "loot_crate_no_drop", EntityWeight.CODEC).orElseGet(EntityWeight::zero);
+		disableGui = Json5Util.getBoolean(json, "disable_gui").orElse(false);
+		gridScale = Json5Util.getDouble(json, "grid_scale").orElse(0.5D);
+		pauseGame = Json5Util.getBoolean(json, "pause_game").orElse(false);
+		lockMessage = Json5Util.getString(json, "lock_message").orElse("");
+		progressionMode = Json5Util.getString(json, "progression_mode").map(ProgressionMode.NAME_MAP_NO_DEFAULT::get).orElse(ProgressionMode.LINEAR);
+		detectionDelay = Json5Util.getInt(json, "detection_delay").orElse(20);
+		showLockIcons = Json5Util.getBoolean(json, "show_lock_icons").orElse(false);
+		dropBookOnDeath = Json5Util.getBoolean(json, "drop_book_on_death").orElse(false);
+		hideExcludedQuests = Json5Util.getBoolean(json, "hide_excluded_quests").orElse(false);
+		fallbackLocale = Json5Util.getString(json, "fallback_locale").orElse(TranslationManager.DEFAULT_FALLBACK_LOCALE);
+		verifyOnLoad = Json5Util.getBoolean(json, "verify_on_load").orElse(false);
 	}
 
 	public final void writeDataFull(Path folder, HolderLookup.Provider provider) {
@@ -494,92 +479,91 @@ public abstract class BaseQuestFile extends QuestObject implements QuestFile {
 			// Sorting keys ensure consistent sort order in the saved quest file
 			// Since questbook data is commonly stored under version control, this minimizes extraneous
 			//  version control changes stemming from unpredictable hashmap key ordering
-			prev = SNBT.setShouldSortKeysOnWrite(true);
+//			prev = SNBT.setShouldSortKeysOnWrite(true);
 
-			SNBTCompoundTag fileNBT = new SNBTCompoundTag();
-			fileNBT.putInt("version", VERSION);
-			writeData(fileNBT, provider);
-			SNBT.tryWrite(folder.resolve("data.snbt"), fileNBT);
+			Json5Util.tryWrite(folder.resolve("data" + FILE_SUFFIX), Util.make(new Json5Object(), j -> {
+				j.addProperty("version", VERSION);
+				writeData(j, provider);
+			}));
 
-			for (ChapterGroup group : chapterGroups) {
-				for (int ci = 0; ci < group.getChapters().size(); ci++) {
-					Chapter chapter = group.getChapters().get(ci);
-					SNBTCompoundTag chapterNBT = new SNBTCompoundTag();
-					chapterNBT.putString("id", chapter.getCodeString());
-					chapterNBT.putString("group", group.isDefaultGroup() ? "" : group.getCodeString());
-					chapterNBT.putInt("order_index", ci);
-					chapter.writeData(chapterNBT, provider);
-
-					chapterNBT.put("quests", Util.make(new ListTag(), list -> {
-						for (Quest quest : chapter.getQuests()) {
-							if (quest.isValid()) {
-								list.add(Util.make(new SNBTCompoundTag(), questNBT -> {
-									quest.writeData(questNBT, provider);
-									questNBT.putString("id", quest.getCodeString());
-									if (!quest.getTasks().isEmpty()) {
-										quest.writeTasks(questNBT, provider);
-									}
-									if (!quest.getRewards().isEmpty()) {
-										quest.writeRewards(questNBT, provider);
-									}
-								}));
-							}
-						}
-					}));
-
-					chapterNBT.put("quest_links", Util.make(new ListTag(), list -> {
-						for (QuestLink link : chapter.getQuestLinks()) {
-							if (link.getQuest().isPresent()) {
-								list.add(Util.make(new SNBTCompoundTag(), linkNBT -> {
-									link.writeData(linkNBT, provider);
-									linkNBT.putString("id", link.getCodeString());
-								}));
-							}
-						}
-					}));
-
-					chapterNBT.put("images", Util.make(new ListTag(), list -> {
-						for (ChapterImage image : chapter.getImages()) {
-							list.add(Util.make(new SNBTCompoundTag(), imageNBT -> {
-								image.writeData(imageNBT, provider);
-								imageNBT.putString("id", image.getCodeString());
-							}));
-						}
-					}));
-
-					SNBT.tryWrite(folder.resolve("chapters/" + chapter.getFilename() + ".snbt"), chapterNBT);
-				}
-			}
-
-			for (int ri = 0; ri < rewardTables.size(); ri++) {
-				RewardTable table = rewardTables.get(ri);
-				SNBTCompoundTag tableNBT = new SNBTCompoundTag();
-				tableNBT.putString("id", table.getCodeString());
-				tableNBT.putInt("order_index", ri);
-				table.writeData(tableNBT, provider);
-				SNBT.tryWrite(folder.resolve("reward_tables/" + table.getFilename() + ".snbt"), tableNBT);
-			}
-
-			ListTag chapterGroupTag = new ListTag();
-
-			for (ChapterGroup group : chapterGroups) {
-				if (!group.isDefaultGroup()) {
-					SNBTCompoundTag groupTag = new SNBTCompoundTag();
-					groupTag.singleLine();
-					groupTag.putString("id", group.getCodeString());
-					group.writeData(groupTag, provider);
-					chapterGroupTag.add(groupTag);
-				}
-			}
-
-			SNBTCompoundTag groupNBT = new SNBTCompoundTag();
-			groupNBT.put("chapter_groups", chapterGroupTag);
-			SNBT.tryWrite(folder.resolve("chapter_groups.snbt"), groupNBT);
+			writeChapterJsonFiles(folder, provider);
+			writeRewardTableFiles(folder, provider);
+			writeChapterGroupsFile(folder, provider);
 		} catch (IOException e) {
 			LOGGER.error("Failed to save quest file.", e);
 		} finally {
-			SNBT.setShouldSortKeysOnWrite(prev);
+//			SNBT.setShouldSortKeysOnWrite(prev);
 		}
+	}
+
+	private void writeChapterJsonFiles(Path folder, HolderLookup.Provider provider) throws IOException {
+		for (ChapterGroup group : chapterGroups) {
+			for (int idx = 0; idx < group.getChapters().size(); idx++) {
+				Chapter chapter = group.getChapters().get(idx);
+				Json5Object chapterJson = new Json5Object();
+				chapterJson.addProperty("id", chapter.getCodeString());
+				chapterJson.addProperty("group", group.isDefaultGroup() ? "" : group.getCodeString());
+				chapterJson.addProperty("order_index", idx);
+				chapter.writeData(chapterJson, provider);
+
+				chapterJson.add("quests", Util.make(new Json5Array(), list -> {
+					for (Quest quest : chapter.getQuests()) {
+						if (quest.isValid()) {
+							list.add(quest.writeDataFull(provider));
+						}
+					}
+				}));
+
+				chapterJson.add("quest_links", Util.make(new Json5Array(), list -> {
+					for (QuestLink link : chapter.getQuestLinks()) {
+						if (link.getQuest().isPresent()) {
+							list.add(Util.make(new Json5Object(), linkNBT -> {
+								link.writeData(linkNBT, provider);
+								linkNBT.addProperty("id", link.getCodeString());
+							}));
+						}
+					}
+				}));
+
+				chapterJson.add("images", Util.make(new Json5Array(), list -> {
+					for (ChapterImage image : chapter.getImages()) {
+						list.add(Util.make(new Json5Object(), imageNBT -> {
+							image.writeData(imageNBT, provider);
+							imageNBT.addProperty("id", image.getCodeString());
+						}));
+					}
+				}));
+
+				Json5Util.tryWrite(folder.resolve("chapters").resolve(chapter.getFilename() + FILE_SUFFIX), chapterJson);
+			}
+		}
+	}
+
+	private void writeRewardTableFiles(Path folder, HolderLookup.Provider provider) throws IOException {
+		for (int ri = 0; ri < rewardTables.size(); ri++) {
+			RewardTable table = rewardTables.get(ri);
+			Json5Object tableNBT = new Json5Object();
+			tableNBT.addProperty("id", table.getCodeString());
+			tableNBT.addProperty("order_index", ri);
+			table.writeData(tableNBT, provider);
+			Json5Util.tryWrite(folder.resolve("reward_tables").resolve(table.getFilename() + FILE_SUFFIX), tableNBT);
+		}
+	}
+
+	private void writeChapterGroupsFile(Path folder, HolderLookup.Provider provider) throws IOException {
+		Json5Array chapterGroupJson = new Json5Array();
+		for (ChapterGroup group : chapterGroups) {
+			if (!group.isDefaultGroup()) {
+				Json5Object groupTag = new Json5Object();
+//					groupTag.singleLine();
+				groupTag.addProperty("id", group.getCodeString());
+				group.writeData(groupTag, provider);
+				chapterGroupJson.add(groupTag);
+			}
+		}
+		Json5Object groupJson = new Json5Object();
+		groupJson.add("chapter_groups", chapterGroupJson);
+		Json5Util.tryWrite(folder.resolve("chapter_groups" + FILE_SUFFIX), groupJson);
 	}
 
 	public final void readDataFull(Path folder, HolderLookup.Provider provider) {
@@ -593,37 +577,19 @@ public abstract class BaseQuestFile extends QuestObject implements QuestFile {
 		MutableInt chapterCounter = new MutableInt();
 		MutableInt questCounter = new MutableInt();
 
-		final Long2ObjectOpenHashMap<CompoundTag> dataCache = new Long2ObjectOpenHashMap<>();
+		final Long2ObjectOpenHashMap<Json5Object> dataCache = new Long2ObjectOpenHashMap<>();
 		try {
-			var fileNBT = SNBT.tryRead(folder.resolve("data.snbt"));
-			fileVersion = fileNBT.getInt("version").orElseThrow();
+			var fileJson = Json5Util.tryRead(folder.resolve("data" + FILE_SUFFIX));
+			fileVersion = Json5Util.getInt(fileJson, "version").orElseThrow();
 			questObjectMap.put(1, this);
-			readData(fileNBT, provider);
+			readData(fileJson, provider);
 		} catch (IOException e) {
 			LOGGER.error("Failed to load default data file.", e);
 		}
 
-		translationManager.loadFromNBT(this, folder.resolve("lang"));
+		translationManager.loadFromFile(this, folder.resolve("lang"));
 
-		Path groupsFile = folder.resolve("chapter_groups.snbt");
-		if (Files.exists(groupsFile)) {
-			try {
-				var chapterGroupsTag = SNBT.tryRead(groupsFile);
-				ListTag groupListTag = chapterGroupsTag.getList("chapter_groups").orElse(new ListTag());
-
-				for (int i = 0; i < groupListTag.size(); i++) {
-					groupListTag.getCompound(i).ifPresent(groupNBT -> {
-						ChapterGroup chapterGroup = new ChapterGroup(readID(groupNBT.get("id")), this);
-						questObjectMap.put(chapterGroup.id, chapterGroup);
-						dataCache.put(chapterGroup.id, groupNBT);
-						chapterGroups.add(chapterGroup);
-					});
-
-				}
-			} catch (IOException e) {
-				LOGGER.error("Failed to read chapter groups file.", e);
-			}
-		}
+		readChapterGroupsFile(folder, dataCache);
 
 		Path chaptersFolder = folder.resolve("chapters");
 
@@ -632,76 +598,29 @@ public abstract class BaseQuestFile extends QuestObject implements QuestFile {
 
 		if (Files.exists(chaptersFolder)) {
 			try (Stream<Path> s = Files.list(chaptersFolder)) {
-				s.filter(path -> path.toString().endsWith(".snbt")).forEach(path -> {
+				s.filter(path -> path.toString().endsWith(FILE_SUFFIX)).forEach(path -> {
 					try {
-						var chapterNBT = SNBT.tryRead(path);
-						Chapter chapter = new Chapter(readID(chapterNBT.get("id")),this,
-								getChapterGroup(getID(chapterNBT.get("group"))),
-								path.getFileName().toString().replace(".snbt", "")
+						var chapterJson = Json5Util.tryRead(path);
+						Chapter chapter = new Chapter(
+								readID(chapterJson.get("id")),
+								this,
+								getChapterGroup(getID(chapterJson.get("group"))),
+								path.getFileName().toString().replace(FILE_SUFFIX, "")
 						);
-						objectOrderMap.put(chapter.id, chapterNBT.getIntOr("order_index", 0));
+						objectOrderMap.put(chapter.id, (int) Json5Util.getInt(chapterJson, "order_index").orElse(0));
 						questObjectMap.put(chapter.id, chapter);
-						dataCache.put(chapter.id, chapterNBT);
+						dataCache.put(chapter.id, chapterJson);
 						chapter.getGroup().addChapter(chapter);
-
-						ListTag questList = chapterNBT.getList("quests").orElse(new ListTag());
-
-						for (int i = 0; i < questList.size(); i++) {
-							questList.getCompound(i).ifPresent(questNBT -> {
-								Quest quest = new Quest(readID(questNBT.get("id")), chapter);
-								questObjectMap.put(quest.id, quest);
-								dataCache.put(quest.id, questNBT);
-								chapter.addQuest(quest);
-
-								ListTag taskList = questNBT.getList("tasks").orElse(new ListTag());
-								for (int j = 0; j < taskList.size(); j++) {
-									taskList.getCompound(j).ifPresent(taskNBT -> {
-										long taskId = readID(taskNBT.get("id"));
-										Task task = TaskType.createTask(taskId, quest, taskNBT.getString("type").orElseThrow());
-										questObjectMap.put(task.id, task);
-										dataCache.put(task.id, taskNBT);
-										quest.addTask(task);
-									});
-								}
-
-								ListTag rewardList = questNBT.getList("rewards").orElse(new ListTag());
-
-								for (int j = 0; j < rewardList.size(); j++) {
-									rewardList.getCompound(j).ifPresent(rewardNBT -> {
-										long rewardId = readID(rewardNBT.get("id"));
-										Reward reward = RewardType.createReward(rewardId, quest, rewardNBT.getString("type").orElseThrow());
-										questObjectMap.put(reward.id, reward);
-										dataCache.put(reward.id, rewardNBT);
-										quest.addReward(reward);
-									});
-								}
-							});
-
-							questCounter.increment();
-						}
-
-						ListTag questLinks = chapterNBT.getList("quest_links").orElse(new ListTag());
-						for (int i = 0; i < questLinks.size(); i++) {
-							questLinks.getCompound(i).ifPresent(linkNBT -> {
-								QuestLink link = new QuestLink(readID(linkNBT.get("id")), chapter, readID(linkNBT.get("linked_quest")));
-								chapter.addQuestLink(link);
-								questObjectMap.put(link.id, link);
-								dataCache.put(link.id, linkNBT);
-							});
-						}
-
-						ListTag images = chapterNBT.getList("images").orElse(new ListTag());
-						for (int i = 0; i < images.size(); i++) {
-							images.getCompound(i).ifPresent(imgNBT -> {
-								// will generate a new id if the "id" field is missing, good for loading older data
-								ChapterImage image = new ChapterImage(readID(imgNBT.get("id")), chapter);
-								chapter.addImage(image);
-								questObjectMap.put(image.id, image);
-								dataCache.put(image.id, imgNBT);
-							});
-						}
-
 						chapterCounter.increment();
+
+						Json5Util.getJson5Array(chapterJson, "quests").ifPresent(questList -> {
+							readQuestsFromChapterJson(chapter, questList, dataCache);
+							questCounter.add(questList.size());
+						});
+						Json5Util.getJson5Array(chapterJson, "quest_links").ifPresent(questLinks ->
+								readQuestLinksFromChapterJson(chapter, questLinks, dataCache));
+						Json5Util.getJson5Array(chapterJson, "images").ifPresent(images ->
+								readImagesFromChapterJson(chapter, images, dataCache));
 					} catch (IOException e) {
 						LOGGER.error("Failed to load chapter {}", path, e);
 					}
@@ -712,30 +631,17 @@ public abstract class BaseQuestFile extends QuestObject implements QuestFile {
 		}
 
 		Path rewardTableFolder = folder.resolve("reward_tables");
-
 		if (Files.exists(rewardTableFolder)) {
 			try (Stream<Path> s = Files.list(rewardTableFolder)) {
-				s.filter(path -> path.toString().endsWith(".snbt")).forEach(path -> {
-					try {
-						var tableNBT = SNBT.tryRead(path);
-						String filename = path.getFileName().toString().replace(".snbt", "");
-						RewardTable table = new RewardTable(readID(tableNBT.get("id")), this, filename);
-						objectOrderMap.put(table.id, (int) tableNBT.getInt("order_index").orElse(0));
-						questObjectMap.put(table.id, table);
-						dataCache.put(table.id, tableNBT);
-						rewardTables.add(table);
-					} catch (IOException e) {
-						LOGGER.error("Failed to load reward table {}", path, e);
-					}
-				});
+				s.filter(path -> path.toString().endsWith(FILE_SUFFIX))
+						.forEach(path -> loadRewardTableFile(path, objectOrderMap, dataCache));
 			} catch (Exception ex) {
-				ex.printStackTrace();
+				FTBQuests.LOGGER.error("failed to load reward table data: {}", ex.getMessage());
 			}
 		}
 
 		for (QuestObjectBase object : questObjectMap.values()) {
-			CompoundTag data = dataCache.get(object.id);
-
+			var data = dataCache.get(object.id);
 			//noinspection ConstantValue
 			if (data != null) {
 				object.readData(data, provider);
@@ -762,8 +668,8 @@ public abstract class BaseQuestFile extends QuestObject implements QuestFile {
 		}
 
 		for (QuestObjectBase object : getAllObjects()) {
-			if (object instanceof CustomTask) {
-				CustomTaskEvent.EVENT.invoker().act(new CustomTaskEvent((CustomTask) object));
+			if (object instanceof CustomTask customTask) {
+				NativeEventPosting.get().postEvent(new CustomTaskEvent.Data(customTask));
 			}
 		}
 
@@ -772,6 +678,100 @@ public abstract class BaseQuestFile extends QuestObject implements QuestFile {
 		}
 
 		FTBQuests.LOGGER.info("Loaded {} chapter groups, {} chapters, {} quests, {} reward tables", chapterGroups.size(), chapterCounter, questCounter, rewardTables.size());
+	}
+
+	private void loadRewardTableFile(Path path, Long2IntOpenHashMap objectOrderMap, Long2ObjectOpenHashMap<Json5Object> dataCache) {
+		try {
+			var tableJson = Json5Util.tryRead(path);
+			String filename = path.getFileName().toString().replace(FILE_SUFFIX, "");
+
+			RewardTable table = new RewardTable(readID(tableJson.get("id")), this, filename);
+			objectOrderMap.put(table.id, (int) Json5Util.getInt(tableJson, "order_index").orElse(0));
+			questObjectMap.put(table.id, table);
+			dataCache.put(table.id, tableJson);
+
+			rewardTables.add(table);
+		} catch (IOException e) {
+			LOGGER.error("Failed to load reward table {}", path, e);
+		}
+	}
+
+	private void readQuestsFromChapterJson(Chapter chapter, Json5Array questList, Long2ObjectOpenHashMap<Json5Object> dataCache) {
+		for (var el : questList) {
+			if (el instanceof Json5Object questJson) {
+				Quest quest = new Quest(readID(questJson.get("id")), chapter);
+				questObjectMap.put(quest.id, quest);
+				dataCache.put(quest.id, questJson);
+				chapter.addQuest(quest);
+
+				Json5Util.getJson5Array(questJson, "tasks").ifPresent(taskList -> {
+					for (var taskEl : taskList) {
+						if (taskEl instanceof Json5Object taskJson) {
+							long taskId = readID(taskJson.get("id"));
+							Task task = TaskType.createTask(taskId, quest, Json5Util.getString(taskJson, "type").orElseThrow());
+							questObjectMap.put(task.id, task);
+							dataCache.put(task.id, taskJson);
+							quest.addTask(task);
+						}
+					}
+				});
+
+				Json5Util.getJson5Array(questJson, "rewards").ifPresent(rewardList -> {
+					for (var rewardEl : rewardList) {
+						if (rewardEl instanceof Json5Object rewardJson) {
+							long rewardId = readID(rewardJson.get("id"));
+							Reward reward = RewardType.createReward(rewardId, quest, Json5Util.getString(rewardJson, "type").orElseThrow());
+							questObjectMap.put(reward.id, reward);
+							dataCache.put(reward.id, rewardJson);
+							quest.addReward(reward);
+						}
+					}
+				});
+			}
+		}
+	}
+
+	private void readQuestLinksFromChapterJson(Chapter chapter, Json5Array questLinks, Long2ObjectOpenHashMap<Json5Object> dataCache) {
+		for (var e : questLinks) {
+			if (e instanceof Json5Object linkNBT) {
+				QuestLink link = new QuestLink(readID(linkNBT.get("id")), chapter, readID(linkNBT.get("linked_quest")));
+				chapter.addQuestLink(link);
+				questObjectMap.put(link.id, link);
+				dataCache.put(link.id, linkNBT);
+			}
+		}
+	}
+
+	private void readImagesFromChapterJson(Chapter chapter, Json5Array images, Long2ObjectOpenHashMap<Json5Object> dataCache) {
+		for (var e : images) {
+			if (e instanceof Json5Object imgNBT) {
+				// will generate a new id if the "id" field is missing, good for loading older data
+				ChapterImage image = new ChapterImage(readID(imgNBT.get("id")), chapter);
+				chapter.addImage(image);
+				questObjectMap.put(image.id, image);
+				dataCache.put(image.id, imgNBT);
+			}
+		}
+	}
+
+	private void readChapterGroupsFile(Path folder, Long2ObjectOpenHashMap<Json5Object> dataCache) {
+		Path groupsFile = folder.resolve("chapter_groups" + FILE_SUFFIX);
+		if (Files.exists(groupsFile)) {
+			try {
+				var chapterGroupsJson = Json5Util.tryRead(groupsFile);
+				Json5Util.getJson5Array(chapterGroupsJson, "chapter_groups").ifPresent(groups ->
+						groups.forEach(el -> {
+							if (el instanceof Json5Object groupJson) {
+								ChapterGroup chapterGroup = new ChapterGroup(readID(groupJson.get("id")), this);
+								questObjectMap.put(chapterGroup.id, chapterGroup);
+								dataCache.put(chapterGroup.id, groupJson);
+								chapterGroups.add(chapterGroup);
+							}
+						}));
+			} catch (IOException e) {
+				LOGGER.error("Failed to read chapter groups file.", e);
+			}
+		}
 	}
 
 	public void updateLootCrates() {
@@ -808,7 +808,7 @@ public abstract class BaseQuestFile extends QuestObject implements QuestFile {
 		buffer.writeUtf(defaultQuestShape, Short.MAX_VALUE);
 		buffer.writeBoolean(defaultQuestDisableJEI);
 		buffer.writeBoolean(dropLootCrates);
-		lootCrateNoDrop.writeNetData(buffer);
+		EntityWeight.STREAM_CODEC.encode(buffer, lootCrateNoDrop);
 		buffer.writeBoolean(disableGui);
 		buffer.writeDouble(gridScale);
 		buffer.writeBoolean(pauseGame);
@@ -834,7 +834,7 @@ public abstract class BaseQuestFile extends QuestObject implements QuestFile {
 		defaultQuestShape = buffer.readUtf(Short.MAX_VALUE);
 		defaultQuestDisableJEI = buffer.readBoolean();
 		dropLootCrates = buffer.readBoolean();
-		lootCrateNoDrop.readNetData(buffer);
+		lootCrateNoDrop = EntityWeight.STREAM_CODEC.decode(buffer);
 		disableGui = buffer.readBoolean();
 		gridScale = buffer.readDouble();
 		pauseGame = buffer.readBoolean();
@@ -1080,7 +1080,7 @@ public abstract class BaseQuestFile extends QuestObject implements QuestFile {
 
 	@Override
 	public TeamData getOrCreateTeamData(UUID teamId) {
-		return teamDataMap.computeIfAbsent(teamId, k -> new TeamData(teamId, isServerSide()));
+		return teamDataMap.computeIfAbsent(teamId, _ -> new TeamData(teamId, isServerSide()));
 	}
 
 	@Override
@@ -1164,7 +1164,7 @@ public abstract class BaseQuestFile extends QuestObject implements QuestFile {
 
 		clearCachedProgress();
 
-		ClearFileCacheEvent.EVENT.invoker().accept(this);
+		NativeEventPosting.get().postEvent(new ClearFileCacheEvent.Data(this));
 	}
 
 	public void clearCachedProgress() {
@@ -1185,15 +1185,17 @@ public abstract class BaseQuestFile extends QuestObject implements QuestFile {
 		return id;
 	}
 
-	public long readID(@Nullable Tag tag) {
-		if (tag instanceof NumericTag) {
-			markDirty();
-			return readID(tag.asLong().orElse(0L));
-		} else if (tag instanceof StringTag) {
-			try {
-				String id = tag.asString().orElse("");
-				return readID(Long.parseLong(id.charAt(0) == '#' ? id.substring(1) : id, 16));
-			} catch (Exception ignored) {
+	public long readID(@Nullable Json5Element tag) {
+		if (tag instanceof Json5Primitive p) {
+			if (p.isNumber()) {
+				markDirty();
+				return readID(tag.getAsLong());
+			} else if (p.isString()) {
+				try {
+					String id = tag.getAsString();
+					return readID(Long.parseLong(id.charAt(0) == '#' ? id.substring(1) : id, 16));
+				} catch (Exception ignored) {
+				}
 			}
 		}
 
@@ -1208,11 +1210,8 @@ public abstract class BaseQuestFile extends QuestObject implements QuestFile {
 			case Number n -> {
 				return n.longValue();
 			}
-			case NumericTag nt -> {
-				return nt.asLong().orElse(0L);
-			}
-			case StringTag st -> {
-				return getID(st.asString().orElse(""));
+			case Json5Primitive p -> {
+				return getID(p.getAsString());
 			}
 			default -> {
 			}
@@ -1355,7 +1354,7 @@ public abstract class BaseQuestFile extends QuestObject implements QuestFile {
 	}
 
 	public <T extends QuestObjectBase> List<T> collect(Class<T> clazz) {
-		return collect(clazz, o -> true);
+		return collect(clazz, _ -> true);
 	}
 
 	public String getDefaultQuestShape() {
@@ -1480,7 +1479,7 @@ public abstract class BaseQuestFile extends QuestObject implements QuestFile {
 					Files.delete(path);
 					del.increment();
 					table.invalid = true;
-					NetworkHelper.sendToAll(source.getServer(), new DeleteObjectResponseMessage(table.id));
+					Server2PlayNetworking.sendToAllPlayers(source.getServer(), new DeleteObjectResponseMessage(table.id));
 				} catch (IOException e) {
 					FTBQuests.LOGGER.error("can't delete file {}: {}", path, e.getMessage());
 				}

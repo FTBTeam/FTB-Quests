@@ -1,19 +1,19 @@
 package dev.ftb.mods.ftbquests.quest;
 
-import net.minecraft.core.HolderLookup;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.network.RegistryFriendlyByteBuf;
-
+import de.marhali.json5.Json5Object;
 import dev.ftb.mods.ftblibrary.client.config.EditableConfigGroup;
 import dev.ftb.mods.ftblibrary.icon.Color4I;
-import dev.ftb.mods.ftbquests.events.QuestProgressEventData;
+import dev.ftb.mods.ftblibrary.json5.Json5Util;
+import dev.ftb.mods.ftbquests.events.progress.ProgressEventData;
 import dev.ftb.mods.ftbquests.quest.theme.property.ThemeProperties;
 import dev.ftb.mods.ftbquests.util.ProgressChange;
+import net.minecraft.core.HolderLookup;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import org.jspecify.annotations.Nullable;
 
 import java.util.Collection;
 import java.util.List;
 import java.util.UUID;
-import org.jspecify.annotations.Nullable;
 
 public abstract class QuestObject extends QuestObjectBase {
 	protected boolean disableToast = false;
@@ -23,18 +23,16 @@ public abstract class QuestObject extends QuestObjectBase {
 	}
 
 	@Override
-	public void writeData(CompoundTag nbt, HolderLookup.Provider provider) {
-		super.writeData(nbt, provider);
+	public void writeData(Json5Object json, HolderLookup.Provider provider) {
+		super.writeData(json, provider);
 
-		if (disableToast) {
-			nbt.putBoolean("disable_toast", true);
-		}
+		if (disableToast) json.addProperty("disable_toast", true);
 	}
 
 	@Override
-	public void readData(CompoundTag nbt, HolderLookup.Provider provider) {
-		super.readData(nbt, provider);
-		disableToast = nbt.getBoolean("disable_toast").orElse(false);
+	public void readData(Json5Object json, HolderLookup.Provider provider) {
+		super.readData(json, provider);
+		disableToast = Json5Util.getBoolean(json, "disable_toast").orElse(false);
 	}
 
 	@Override
@@ -94,10 +92,10 @@ public abstract class QuestObject extends QuestObjectBase {
 		return data != null && isVisible(data);
 	}
 
-	public void onStarted(QuestProgressEventData<?> data) {
+	public void onStarted(ProgressEventData<?> data) {
 	}
 
-	public void onCompleted(QuestProgressEventData<?> data) {
+	public void onCompleted(ProgressEventData<?> data) {
 	}
 
 	protected void verifyDependenciesInternal(long original, int depth) {

@@ -10,10 +10,10 @@ import net.neoforged.neoforge.transfer.transaction.TransactionContext;
 import dev.ftb.mods.ftbquests.block.entity.LootCrateOpenerBlockEntity;
 import dev.ftb.mods.ftbquests.item.LootCrateItem;
 
-public class NeoForgeLootCrateOpenerBlockEntity extends LootCrateOpenerBlockEntity {
+public class NeoLootCrateOpenerBlockEntity extends LootCrateOpenerBlockEntity {
     private final LootCrateHandler lootCrateHandler = new LootCrateHandler();
 
-    public NeoForgeLootCrateOpenerBlockEntity(BlockPos blockPos, BlockState blockState) {
+    public NeoLootCrateOpenerBlockEntity(BlockPos blockPos, BlockState blockState) {
         super(blockPos, blockState);
     }
 
@@ -24,17 +24,17 @@ public class NeoForgeLootCrateOpenerBlockEntity extends LootCrateOpenerBlockEnti
     private class LootCrateHandler implements ResourceHandler<ItemResource> {
         @Override
         public int size() {
-            return NeoForgeLootCrateOpenerBlockEntity.this._getSlots();
+            return NeoLootCrateOpenerBlockEntity.this._getSlots();
         }
 
         @Override
         public ItemResource getResource(int slot) {
-            return ItemResource.of(NeoForgeLootCrateOpenerBlockEntity.this._getStackInSlot(slot));
+            return ItemResource.of(NeoLootCrateOpenerBlockEntity.this._getStackInSlot(slot));
         }
 
         @Override
         public long getAmountAsLong(int slot) {
-            return NeoForgeLootCrateOpenerBlockEntity.this._getStackInSlot(slot).getCount();
+            return NeoLootCrateOpenerBlockEntity.this._getStackInSlot(slot).getCount();
         }
 
         @Override
@@ -44,7 +44,7 @@ public class NeoForgeLootCrateOpenerBlockEntity extends LootCrateOpenerBlockEnti
 
         @Override
         public boolean isValid(int i, ItemResource resource) {
-            return NeoForgeLootCrateOpenerBlockEntity.this._isItemValid(i, resource.toStack());
+            return NeoLootCrateOpenerBlockEntity.this._isItemValid(i, resource.toStack());
         }
 
         @Override

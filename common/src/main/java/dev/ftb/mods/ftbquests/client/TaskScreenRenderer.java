@@ -1,5 +1,16 @@
 package dev.ftb.mods.ftbquests.client;
 
+import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.math.Axis;
+import dev.ftb.mods.ftblibrary.icon.AtlasSpriteIcon;
+import dev.ftb.mods.ftbquests.api.FTBQuestsAPI;
+import dev.ftb.mods.ftbquests.block.TaskScreenBlock;
+import dev.ftb.mods.ftbquests.block.entity.TaskScreenBlockEntity;
+import dev.ftb.mods.ftbquests.client.TaskScreenRenderState.ResourceSprite;
+import dev.ftb.mods.ftbquests.quest.TeamData;
+import dev.ftb.mods.ftbquests.quest.task.EnergyTask;
+import dev.ftb.mods.ftbquests.quest.task.FluidTask;
+import dev.ftb.mods.ftbquests.quest.task.Task;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
@@ -10,30 +21,14 @@ import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
 import net.minecraft.client.renderer.feature.ModelFeatureRenderer;
 import net.minecraft.client.renderer.item.ItemModelResolver;
 import net.minecraft.client.renderer.rendertype.RenderTypes;
-import net.minecraft.client.renderer.state.CameraRenderState;
+import net.minecraft.client.renderer.state.level.CameraRenderState;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
-import net.minecraft.data.AtlasIds;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.level.block.WallSignBlock;
 import net.minecraft.world.phys.Vec3;
-import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.math.Axis;
-
-import dev.architectury.hooks.client.fluid.ClientFluidStackHooks;
-
-import dev.ftb.mods.ftblibrary.icon.AtlasSpriteIcon;
-import dev.ftb.mods.ftbquests.api.FTBQuestsAPI;
-import dev.ftb.mods.ftbquests.block.TaskScreenBlock;
-import dev.ftb.mods.ftbquests.block.entity.TaskScreenBlockEntity;
-import dev.ftb.mods.ftbquests.client.TaskScreenRenderState.ResourceSprite;
-import dev.ftb.mods.ftbquests.quest.TeamData;
-import dev.ftb.mods.ftbquests.quest.task.EnergyTask;
-import dev.ftb.mods.ftbquests.quest.task.FluidTask;
-import dev.ftb.mods.ftbquests.quest.task.Task;
-
 import org.jspecify.annotations.Nullable;
 
 public class TaskScreenRenderer implements BlockEntityRenderer<TaskScreenBlockEntity, TaskScreenRenderState> {
@@ -62,7 +57,7 @@ public class TaskScreenRenderer implements BlockEntityRenderer<TaskScreenBlockEn
         TeamData data = ClientQuestFile.getInstance().getNullableTeamData(blockEntity.getTeamId());
         Task task = blockEntity.getTask();
 
-        if (task == null || data == null) {
+        if (task == null || data == null || !(blockEntity.getBlockState().getBlock() instanceof TaskScreenBlock tsb)) {
             renderState.shouldRender = false;
             return;
         }
@@ -75,6 +70,8 @@ public class TaskScreenRenderer implements BlockEntityRenderer<TaskScreenBlockEn
         renderState.textHasShadow = blockEntity.isTextShadow();
         renderState.taskName = task.getTitle();
         renderState.questName = task.getQuest().getTitle();
+        renderState.rotationAngle = blockEntity.getBlockState().getValue(WallSignBlock.FACING).toYRot() + 180f;
+        renderState.screenSize = tsb.getSize() / 2;
         long progress = data.getProgress(task);
         if (!task.hideProgressNumbers()) {
             ChatFormatting col = progress > 0 ? (progress >= task.getMaxProgress() ? ChatFormatting.GREEN : ChatFormatting.YELLOW) : ChatFormatting.GOLD;
@@ -82,9 +79,11 @@ public class TaskScreenRenderer implements BlockEntityRenderer<TaskScreenBlockEn
         }
         renderState.interpolatedProgress = (float) progress / task.getMaxProgress();
         if (task instanceof FluidTask fluidTask && fluidTask.getIcon() instanceof AtlasSpriteIcon as && FTBQuestsClientEventHandler.tankSprite != null) {
-            renderState.resourceSprite = new ResourceSprite(Minecraft.getInstance().getAtlasManager().getAtlasOrThrow(AtlasIds.BLOCKS).getSprite(as.getSpriteId()), true);
+            var state = fluidTask.getFluid().defaultFluidState();
+            var model = Minecraft.getInstance().getModelManager().getFluidStateModelSet().get(state);
+            renderState.resourceSprite = new ResourceSprite(model.stillMaterial().sprite(), true);
             renderState.overlaySprite = new ResourceSprite(FTBQuestsClientEventHandler.tankSprite, false);
-            renderState.resourceSpriteTint = ClientFluidStackHooks.getColor(fluidTask.getFluid()) | 0xFF000000;
+            renderState.resourceSpriteTint = 0xFF000000 | (model.tintSource() == null ? 0xFFFFF : model.tintSource().color(state.createLegacyBlock()));
         } else if (task instanceof EnergyTask energyTask) {
             renderState.resourceSprite = new ResourceSprite(energyTask.getClientData().getEmptyTexture(), false);
             renderState.overlaySprite = new ResourceSprite(energyTask.getClientData().getFullTexture(), true);
@@ -95,17 +94,16 @@ public class TaskScreenRenderer implements BlockEntityRenderer<TaskScreenBlockEn
 
     @Override
     public void submit(TaskScreenRenderState renderState, PoseStack poseStack, SubmitNodeCollector submitNodeCollector, CameraRenderState cameraRenderState) {
-        if (!renderState.shouldRender || !(renderState.blockState.getBlock() instanceof TaskScreenBlock taskScreenBlock)) return;
+        if (!renderState.shouldRender) return;
 
         poseStack.pushPose();
 
         poseStack.translate(0.5D, 0.5D, 0.5D);
-        float rotation = renderState.blockState.getValue(WallSignBlock.FACING).toYRot() + 180f;
         poseStack.mulPose(Axis.ZP.rotationDegrees(180f));
-        poseStack.mulPose(Axis.YP.rotationDegrees(rotation));
+        poseStack.mulPose(Axis.YP.rotationDegrees(renderState.rotationAngle));
         poseStack.translate(-0.5D, -0.5D, -0.5D);
 
-        int screenSize = taskScreenBlock.getSize() / 2;
+        int screenSize = renderState.screenSize;
         poseStack.translate(-screenSize, -screenSize * 2F, -0.02F);
         poseStack.scale(screenSize * 2F + 1F, screenSize * 2F + 1F, 1F);
 

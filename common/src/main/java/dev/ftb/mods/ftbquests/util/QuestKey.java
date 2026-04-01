@@ -1,16 +1,29 @@
 package dev.ftb.mods.ftbquests.util;
 
-import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.util.Util;
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
 import com.mojang.util.UndashedUuid;
-
 import dev.ftb.mods.ftbquests.quest.QuestObjectBase;
 import dev.ftb.mods.ftbquests.quest.reward.Reward;
-
-import java.util.UUID;
+import net.minecraft.core.UUIDUtil;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.codec.ByteBufCodecs;
+import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.util.Util;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.UUID;
+
 public record QuestKey(UUID uuid, long id) implements Comparable<QuestKey> {
+	public static final Codec<QuestKey> CODEC = RecordCodecBuilder.create(builder -> builder.group(
+			UUIDUtil.STRING_CODEC.fieldOf("uuid").forGetter(QuestKey::uuid),
+			Codec.LONG.fieldOf("id").forGetter(QuestKey::id)
+	).apply(builder, QuestKey::new));
+	public static final StreamCodec<FriendlyByteBuf, QuestKey> STREAM_CODEC = StreamCodec.composite(
+			UUIDUtil.STREAM_CODEC, QuestKey::uuid,
+			ByteBufCodecs.LONG, QuestKey::id,
+			QuestKey::new
+	);
 
 	public static QuestKey create(UUID uuid, long questObjectId) {
 		return new QuestKey(uuid, questObjectId);

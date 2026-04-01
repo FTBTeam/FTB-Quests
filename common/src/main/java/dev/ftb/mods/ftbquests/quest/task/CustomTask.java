@@ -1,21 +1,20 @@
 package dev.ftb.mods.ftbquests.quest.task;
 
-import net.minecraft.network.RegistryFriendlyByteBuf;
-import net.minecraft.server.MinecraftServer;
-import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.world.item.ItemStack;
-
-import dev.ftb.mods.ftblibrary.util.NetworkHelper;
+import dev.ftb.mods.ftblibrary.platform.network.Server2PlayNetworking;
 import dev.ftb.mods.ftbquests.net.EditObjectResponseMessage;
 import dev.ftb.mods.ftbquests.quest.Quest;
 import dev.ftb.mods.ftbquests.quest.QuestObjectBase;
 import dev.ftb.mods.ftbquests.quest.ServerQuestFile;
 import dev.ftb.mods.ftbquests.quest.TeamData;
-
-import java.util.function.Predicate;
 import it.unimi.dsi.fastutil.longs.LongOpenHashSet;
 import it.unimi.dsi.fastutil.longs.LongSet;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.item.ItemStack;
 import org.jspecify.annotations.Nullable;
+
+import java.util.function.Predicate;
 
 public class CustomTask extends Task {
 	public static final Predicate<QuestObjectBase> PREDICATE = object -> object instanceof CustomTask;
@@ -138,7 +137,7 @@ public class CustomTask extends Task {
 			if (!toSync.isEmpty() && ServerQuestFile.exists()) {
 				toSync.forEach(id -> {
 					if (ServerQuestFile.getInstance().get(id) instanceof CustomTask c) {
-						NetworkHelper.sendToAll(server, new EditObjectResponseMessage(c));
+						Server2PlayNetworking.sendToAllPlayers(server, new EditObjectResponseMessage(c));
 					}
                 });
 				toSync.clear();

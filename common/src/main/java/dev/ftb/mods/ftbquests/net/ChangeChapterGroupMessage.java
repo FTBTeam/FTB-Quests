@@ -1,18 +1,16 @@
 package dev.ftb.mods.ftbquests.net;
 
-import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.network.codec.ByteBufCodecs;
-import net.minecraft.network.codec.StreamCodec;
-import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
-
-import dev.architectury.networking.NetworkManager;
-
-import dev.ftb.mods.ftblibrary.util.NetworkHelper;
+import dev.ftb.mods.ftblibrary.platform.network.PacketContext;
+import dev.ftb.mods.ftblibrary.platform.network.Server2PlayNetworking;
 import dev.ftb.mods.ftbquests.api.FTBQuestsAPI;
 import dev.ftb.mods.ftbquests.quest.Chapter;
 import dev.ftb.mods.ftbquests.quest.ChapterGroup;
 import dev.ftb.mods.ftbquests.quest.ServerQuestFile;
 import dev.ftb.mods.ftbquests.util.NetUtils;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.codec.ByteBufCodecs;
+import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 
 public record ChangeChapterGroupMessage(long chapterId, long groupId) implements CustomPacketPayload {
 	public static final Type<ChangeChapterGroupMessage> TYPE = new Type<>(FTBQuestsAPI.id("change_chapter_group_message"));
@@ -28,7 +26,7 @@ public record ChangeChapterGroupMessage(long chapterId, long groupId) implements
 		return TYPE;
 	}
 
-	public static void handle(ChangeChapterGroupMessage message, NetworkManager.PacketContext context) {
+	public static void handle(ChangeChapterGroupMessage message, PacketContext context) {
 		if (NetUtils.canEdit(context)) {
 			ServerQuestFile.ifExists(file -> {
 				Chapter chapter = file.getChapter(message.chapterId);
@@ -40,7 +38,7 @@ public record ChangeChapterGroupMessage(long chapterId, long groupId) implements
 						group.addChapter(chapter);
 						chapter.file.clearCachedData();
 						chapter.file.markDirty();
-						NetworkHelper.sendToAll(file.server,
+						Server2PlayNetworking.sendToAllPlayers(file.server,
 								new ChangeChapterGroupResponseMessage(message.chapterId, message.groupId));
 					}
 				}
