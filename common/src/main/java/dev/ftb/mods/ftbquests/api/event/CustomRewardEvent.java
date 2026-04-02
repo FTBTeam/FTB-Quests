@@ -1,4 +1,4 @@
-package dev.ftb.mods.ftbquests.events;
+package dev.ftb.mods.ftbquests.api.event;
 
 import dev.ftb.mods.ftbquests.quest.reward.CustomReward;
 import net.minecraft.server.level.ServerPlayer;

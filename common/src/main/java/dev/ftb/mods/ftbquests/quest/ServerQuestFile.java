@@ -6,7 +6,7 @@ import dev.ftb.mods.ftblibrary.platform.Env;
 import dev.ftb.mods.ftblibrary.platform.Platform;
 import dev.ftb.mods.ftblibrary.platform.network.Server2PlayNetworking;
 import dev.ftb.mods.ftbquests.FTBQuests;
-import dev.ftb.mods.ftbquests.events.progress.ProgressEventData;
+import dev.ftb.mods.ftbquests.api.event.progress.ProgressEventData;
 import dev.ftb.mods.ftbquests.integration.PermissionsHelper;
 import dev.ftb.mods.ftbquests.net.*;
 import dev.ftb.mods.ftbquests.quest.reward.RewardType;

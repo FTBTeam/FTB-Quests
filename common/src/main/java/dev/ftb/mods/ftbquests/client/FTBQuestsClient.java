@@ -74,31 +74,10 @@ public class FTBQuestsClient {
 		eventHandler = new FTBQuestsClientEventHandler();
 	}
 
-
-	public void onClientSetup(Minecraft minecraft) {
-//		RenderTypeRegistry.register(ChunkSectionLayer.TRANSLUCENT, ModBlocks.BARRIER.get());
-//		RenderTypeRegistry.register(ChunkSectionLayer.TRANSLUCENT, ModBlocks.STAGE_BARRIER.get());
-//		RenderTypeRegistry.register(ChunkSectionLayer.SOLID, ModBlocks.TASK_SCREEN_1.get());
-//		RenderTypeRegistry.register(ChunkSectionLayer.SOLID, ModBlocks.TASK_SCREEN_3.get());
-//		RenderTypeRegistry.register(ChunkSectionLayer.SOLID, ModBlocks.TASK_SCREEN_5.get());
-//		RenderTypeRegistry.register(ChunkSectionLayer.SOLID, ModBlocks.TASK_SCREEN_7.get());
-//		RenderTypeRegistry.register(ChunkSectionLayer.SOLID, ModBlocks.AUX_SCREEN.get());
-		GuiProviders.setTaskGuiProviders();
-		GuiProviders.setRewardGuiProviders();
-	}
-
 	@Nullable
 	public static BaseQuestFile getClientQuestFile() {
 		return ClientQuestFile.getInstance();
 	}
-
-//	public static Player getClientPlayer() {
-//		return Objects.requireNonNull(Minecraft.getInstance().player);
-//	}
-//
-//	public static Level getClientLevel() {
-//		return Objects.requireNonNull(Minecraft.getInstance().level);
-//	}
 
 	public static boolean isClientDataLoaded() {
 		return ClientQuestFile.exists();

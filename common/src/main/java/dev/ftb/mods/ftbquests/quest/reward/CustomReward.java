@@ -1,7 +1,7 @@
 package dev.ftb.mods.ftbquests.quest.reward;
 
 import dev.ftb.mods.ftblibrary.platform.event.NativeEventPosting;
-import dev.ftb.mods.ftbquests.events.CustomRewardEvent;
+import dev.ftb.mods.ftbquests.api.event.CustomRewardEvent;
 import dev.ftb.mods.ftbquests.quest.Quest;
 import net.minecraft.server.level.ServerPlayer;
 

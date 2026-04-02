@@ -13,13 +13,7 @@ import net.minecraft.world.item.ItemStack;
 
 import java.util.List;
 
-public class FTBQuestsInventoryListener implements ContainerListener {
-	public final ServerPlayer player;
-
-	public FTBQuestsInventoryListener(ServerPlayer p) {
-		player = p;
-	}
-
+public record FTBQuestsInventoryListener(ServerPlayer player) implements ContainerListener {
 	public static void detect(ServerPlayer player, ItemStack craftedItem, long sourceTask) {
 		if (Platform.get().misc().isFakePlayer(player)) {
 			return;
@@ -47,13 +41,13 @@ public class FTBQuestsInventoryListener implements ContainerListener {
 	}
 
 	@Override
-	public void dataChanged(AbstractContainerMenu abstractContainerMenu, int i, int j) {
+	public void dataChanged(AbstractContainerMenu abstractContainerMenu, int id, int value) {
 	}
 
 	@Override
-	public void slotChanged(AbstractContainerMenu menu, int index, ItemStack stack) {
-		if (!stack.isEmpty() && menu.getSlot(index).container == player.getInventory()) {
-			int slotNum = menu.getSlot(index).getContainerSlot();
+	public void slotChanged(AbstractContainerMenu menu, int slotIndex, ItemStack stack) {
+		if (!stack.isEmpty() && menu.getSlot(slotIndex).container == player.getInventory()) {
+			int slotNum = menu.getSlot(slotIndex).getContainerSlot();
 			if (slotNum >= 0 && slotNum < player.getInventory().getContainerSize()) {
 				// Only checking for items in the main inventory & hotbar
 				// Armor slots can contain items with rapidly changing NBT (especially powered modded armor)

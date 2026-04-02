@@ -4,7 +4,7 @@ import de.marhali.json5.Json5Object;
 import dev.ftb.mods.ftblibrary.client.config.EditableConfigGroup;
 import dev.ftb.mods.ftblibrary.icon.Color4I;
 import dev.ftb.mods.ftblibrary.json5.Json5Util;
-import dev.ftb.mods.ftbquests.events.progress.ProgressEventData;
+import dev.ftb.mods.ftbquests.api.event.progress.ProgressEventData;
 import dev.ftb.mods.ftbquests.quest.theme.property.ThemeProperties;
 import dev.ftb.mods.ftbquests.util.ProgressChange;
 import net.minecraft.core.HolderLookup;

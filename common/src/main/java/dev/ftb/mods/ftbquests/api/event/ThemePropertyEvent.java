@@ -1,4 +1,4 @@
-package dev.ftb.mods.ftbquests.events;
+package dev.ftb.mods.ftbquests.api.event;
 
 // TODO doesn't seem to be used or fired at all... verify & remove
 public class ThemePropertyEvent {

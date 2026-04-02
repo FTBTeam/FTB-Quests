@@ -1,4 +1,4 @@
-package dev.ftb.mods.ftbquests.events.progress;
+package dev.ftb.mods.ftbquests.api.event.progress;
 
 import dev.ftb.mods.ftbquests.quest.Chapter;
 

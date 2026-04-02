@@ -9,11 +9,12 @@ import dev.ftb.mods.ftblibrary.client.icon.IconHelper;
 import dev.ftb.mods.ftblibrary.client.util.ClientUtils;
 import dev.ftb.mods.ftblibrary.icon.Color4I;
 import dev.ftb.mods.ftblibrary.platform.network.Play2ServerNetworking;
+import dev.ftb.mods.ftblibrary.util.Lazy;
 import dev.ftb.mods.ftbquests.api.FTBQuestsAPI;
+import dev.ftb.mods.ftbquests.api.event.ClearFileCacheEvent;
 import dev.ftb.mods.ftbquests.item.LootCrateItem;
 import dev.ftb.mods.ftbquests.net.RequestTranslationTableMessage;
 import dev.ftb.mods.ftbquests.net.SubmitTaskMessage;
-import dev.ftb.mods.ftbquests.quest.BaseQuestFile;
 import dev.ftb.mods.ftbquests.quest.TeamData;
 import dev.ftb.mods.ftbquests.quest.task.ObservationTask;
 import dev.ftb.mods.ftbquests.quest.task.StructureTask;
@@ -22,7 +23,6 @@ import net.minecraft.client.DeltaTracker;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.color.item.ItemTintSources;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
-import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.client.renderer.texture.TextureAtlas;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.network.chat.MutableComponent;
@@ -40,8 +40,7 @@ public class FTBQuestsClientEventHandler {
 
     static boolean creativeTabRebuildPending = false;
 
-    @Nullable
-    private List<ObservationTask> observationTasks = null;
+    private final Lazy<List<ObservationTask>> observationTasks = Lazy.of(() -> ClientQuestFile.getInstance().collect(ObservationTask.class));
     @Nullable
     private ObservationTask currentlyObserving = null;
     private long currentlyObservingTicks = 0L;
@@ -60,25 +59,16 @@ public class FTBQuestsClientEventHandler {
     public static TextureAtlasSprite trEnergyFullSprite;
 
     public void init() {
-//        SidebarButtonCreatedEvent.EVENT.register(this::onSidebarButtonCreated);
-//        CustomClickEvent.EVENT.register(this::onCustomClick);
-//
-//        ClearFileCacheEvent.EVENT.register(this::onFileCacheClear);
-//
-//        ClientLifecycleEvent.CLIENT_SETUP.register(this::registerBERs);
-//        ClientTickEvent.CLIENT_PRE.register(this::onKeyEvent);
-//        ClientTickEvent.CLIENT_PRE.register(this::onClientTick);
-//        ClientGuiEvent.RENDER_HUD.register(this::onScreenRender);
-//        ClientPlayerEvent.CLIENT_PLAYER_JOIN.register(this::onPlayerLogin);
-//        ClientPlayerEvent.CLIENT_PLAYER_QUIT.register(this::onPlayerLogout);
-
         ItemTintSources.ID_MAPPER.put(FTBQuestsAPI.id("loot_crate"), LootCrateItem.LootCrateItemTintSource.MAP_CODEC);
     }
 
-    // Note: Architectury doesn't have a texture stitch post event anymore,
-    // so this is handled by the Forge/NeoForge events, and a mixin on Fabric
+    public void onClientSetup(Minecraft ignoredMinecraft) {
+        GuiProviders.setTaskGuiProviders();
+        GuiProviders.setRewardGuiProviders();
+    }
+
     public static void onTextureStitchPost(TextureAtlas textureAtlas) {
-        if (textureAtlas.location().toString().equals("minecraft:textures/atlas/blocks.png")) {//InventoryMenu.BLOCK_ATLAS)) {
+        if (textureAtlas.location().equals(TextureAtlas.LOCATION_BLOCKS)) {
             inputOnlySprite = textureAtlas.getSprite(INPUT_ONLY_TEXTURE);
             tankSprite = textureAtlas.getSprite(TANK_TEXTURE);
             feEnergyEmptySprite = textureAtlas.getSprite(FE_ENERGY_EMPTY_TEXTURE);
@@ -88,40 +78,29 @@ public class FTBQuestsClientEventHandler {
         }
     }
 
-//    public void registerBERs(BiConsumer<BlockEntityType<?>, > minecraft) {
-//        BlockEntityRendererRegistry.register(ModBlockEntityTypes.CORE_TASK_SCREEN.get(), taskScreenRenderer());
-//    }
-
-//    @ExpectPlatform
-//    public static BlockEntityRendererProvider<TaskScreenBlockEntity, TaskScreenRenderState> taskScreenRenderer() {
-//        throw new AssertionError();
-//    }
-
     public void onSidebarButtonCreated(SidebarButtonCreatedEvent.Data event) {
         if (event.button().getId().equals(QUESTS_BUTTON)) {
             event.button().addOverlayRender(ButtonOverlayRender.ofSimpleString(() -> {
                 if (ClientQuestFile.exists()) {
-                    if (ClientQuestFile.getInstance().isDisableGui() && !ClientQuestFile.getInstance().canEdit()) {
-                        return "[X]";
-                    } else if (FTBQuestsClient.getClientPlayerData().isLocked()) {
+                    if (ClientQuestFile.getInstance().isDisableGui() && !ClientQuestFile.getInstance().canEdit()
+                            || FTBQuestsClient.getClientPlayerData().isLocked()) {
                         return "[X]";
                     } else if (FTBQuestsClient.getClientPlayerData().hasUnclaimedRewards(ClientUtils.getClientPlayer().getUUID(), ClientQuestFile.getInstance())) {
                         return "[!]";
                     }
                 }
-
                 return "";
             }));
         }
     }
 
-    public void onFileCacheClear(BaseQuestFile file) {
-        if (!file.isServerSide()) {
-            observationTasks = null;
+    public void onFileCacheClear(ClearFileCacheEvent.Data data) {
+        if (!data.file().isServerSide()) {
+            observationTasks.invalidate();
         }
     }
 
-    public void onKeyEvent() {
+    public void onKeyEvent(Minecraft minecraft) {
         if (ClientQuestFile.exists()
                 && (!ClientQuestFile.getInstance().isDisableGui() || ClientQuestFile.getInstance().canEdit())
                 && FTBQuestsClient.KEY_QUESTS.consumeClick()) {
@@ -149,27 +128,13 @@ public class FTBQuestsClientEventHandler {
         if (mc.level != null && ClientQuestFile.exists() && mc.player != null) {
             PinnedQuestsTracker.INSTANCE.tick(ClientQuestFile.getInstance());
 
-            if (observationTasks == null) {
-                observationTasks = ClientQuestFile.getInstance().collect(ObservationTask.class);
-            }
-
-            if (observationTasks.isEmpty()) {
+            if (observationTasks.get().isEmpty()) {
                 return;
             }
 
-            currentlyObserving = null;
-
             TeamData selfTeamData = ClientQuestFile.getInstance().selfTeamData;
-            if (mc.hitResult != null && mc.hitResult.getType() != HitResult.Type.MISS) {
-                for (ObservationTask task : observationTasks) {
-                    if (!selfTeamData.isCompleted(task) && task.observe(mc.player, mc.hitResult)
-                            && selfTeamData.canStartTasks(task.getQuest())) {
-                        currentlyObserving = task;
-                        break;
-                    }
-                }
-            }
 
+            currentlyObserving = findObservationTask(mc, selfTeamData);
             if (currentlyObserving != null) {
                 if (!mc.isPaused()) {
                     currentlyObservingTicks++;
@@ -187,7 +152,20 @@ public class FTBQuestsClientEventHandler {
         }
     }
 
-    public void onPlayerLogin(LocalPlayer localPlayer) {
+    @Nullable
+    private ObservationTask findObservationTask(Minecraft mc, TeamData selfTeamData) {
+        if (mc.hitResult != null && mc.hitResult.getType() != HitResult.Type.MISS) {
+            for (ObservationTask task : observationTasks.get()) {
+                if (!selfTeamData.isCompleted(task) && task.observe(mc.player, mc.hitResult)
+                        && selfTeamData.canStartTasks(task.getQuest())) {
+                    return task;
+                }
+            }
+        }
+        return null;
+    }
+
+    public void onPlayerLogin() {
         if (creativeTabRebuildPending) {
             FTBQuestsClient.rebuildCreativeTabs();
             creativeTabRebuildPending = false;
@@ -199,23 +177,22 @@ public class FTBQuestsClientEventHandler {
         }
     }
 
-    public void onPlayerLogout(@Nullable LocalPlayer localPlayer) {
+    public void onPlayerLogout() {
         StructureTask.syncKnownStructureList(List.of());
     }
 
-    public void onScreenRender(GuiGraphicsExtractor graphics, DeltaTracker tickDelta) {
-        if (!ClientQuestFile.exists()) {
+    public void renderGuiOverlay(GuiGraphicsExtractor graphics, DeltaTracker tickDelta) {
+        if (ClientQuestFile.exists()) {
+            renderCurrentObservationTask(Minecraft.getInstance(), graphics, tickDelta);
+            PinnedQuestsTracker.INSTANCE.render(Minecraft.getInstance(), graphics);
+        }
+    }
+
+    private void renderCurrentObservationTask(Minecraft mc, GuiGraphicsExtractor graphics, DeltaTracker tickDelta) {
+        if (currentlyObserving == null) {
             return;
         }
 
-        if (currentlyObserving != null) {
-            renderCurrentlyObserving(Minecraft.getInstance(), graphics, tickDelta);
-        }
-
-        PinnedQuestsTracker.INSTANCE.render(Minecraft.getInstance(), graphics);
-    }
-
-    private void renderCurrentlyObserving(Minecraft mc, GuiGraphicsExtractor graphics, DeltaTracker tickDelta) {
         int cx = mc.getWindow().getGuiScaledWidth() / 2;
         int cy = mc.getWindow().getGuiScaledHeight() / 2;
 

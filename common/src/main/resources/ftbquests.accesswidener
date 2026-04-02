@@ -3,4 +3,3 @@ accessible field net/minecraft/client/color/item/ItemTintSources ID_MAPPER Lnet/
 accessible method net/minecraft/world/level/block/entity/BlockEntityType <init> (Lnet/minecraft/world/level/block/entity/BlockEntityType$BlockEntitySupplier;Ljava/util/Set;)V
 extendable class net/minecraft/nbt/CompoundTag
 accessible class net/minecraft/world/level/block/entity/BlockEntityType$BlockEntitySupplier
-accessible method net/minecraft/client/gui/GuiGraphics submitBlit (Lcom/mojang/blaze3d/pipeline/RenderPipeline;Lcom/mojang/blaze3d/textures/GpuTextureView;Lcom/mojang/blaze3d/textures/GpuSampler;IIIIFFFFI)V

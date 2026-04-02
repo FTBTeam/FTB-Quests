@@ -1,4 +1,4 @@
-package dev.ftb.mods.ftbquests.events.progress;
+package dev.ftb.mods.ftbquests.api.event.progress;
 
 import dev.ftb.mods.ftblibrary.platform.network.Server2PlayNetworking;
 import dev.ftb.mods.ftbquests.net.NotifyCompletionMessage;

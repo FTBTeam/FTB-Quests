@@ -1,11 +1,11 @@
 package dev.ftb.mods.ftbquests.api.neoforge;
 
 import dev.ftb.mods.ftblibrary.api.neoforge.BaseEventWithData;
-import dev.ftb.mods.ftbquests.events.*;
-import dev.ftb.mods.ftbquests.events.progress.ChapterProgressEvent;
-import dev.ftb.mods.ftbquests.events.progress.FileProgressEvent;
-import dev.ftb.mods.ftbquests.events.progress.QuestProgressEvent;
-import dev.ftb.mods.ftbquests.events.progress.TaskProgressEvent;
+import dev.ftb.mods.ftbquests.api.event.*;
+import dev.ftb.mods.ftbquests.api.event.progress.ChapterProgressEvent;
+import dev.ftb.mods.ftbquests.api.event.progress.FileProgressEvent;
+import dev.ftb.mods.ftbquests.api.event.progress.QuestProgressEvent;
+import dev.ftb.mods.ftbquests.api.event.progress.TaskProgressEvent;
 
 public class FTBQuestsEvent {
     public static class ClearFileCache extends BaseEventWithData<ClearFileCacheEvent.Data> {
@@ -16,6 +16,12 @@ public class FTBQuestsEvent {
 
     public static class CustomTask extends BaseEventWithData<CustomTaskEvent.Data> {
         public CustomTask(CustomTaskEvent.Data data) {
+            super(data);
+        }
+    }
+
+    public static class CustomReward extends BaseEventWithData<CustomRewardEvent.Data> {
+        public CustomReward(CustomRewardEvent.Data data) {
             super(data);
         }
     }

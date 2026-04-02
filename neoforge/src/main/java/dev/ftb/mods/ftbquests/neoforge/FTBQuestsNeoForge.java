@@ -5,17 +5,16 @@ import dev.ftb.mods.ftblibrary.icon.Icon;
 import dev.ftb.mods.ftblibrary.util.neoforge.NeoEventHelper;
 import dev.ftb.mods.ftbquests.FTBQuests;
 import dev.ftb.mods.ftbquests.api.FTBQuestsAPI;
-import dev.ftb.mods.ftbquests.api.event.CustomFilterDisplayItemsEvent;
+import dev.ftb.mods.ftbquests.api.event.*;
+import dev.ftb.mods.ftbquests.api.event.progress.ChapterProgressEvent;
+import dev.ftb.mods.ftbquests.api.event.progress.FileProgressEvent;
+import dev.ftb.mods.ftbquests.api.event.progress.QuestProgressEvent;
+import dev.ftb.mods.ftbquests.api.event.progress.TaskProgressEvent;
 import dev.ftb.mods.ftbquests.api.neoforge.FTBQuestsClientEvent;
 import dev.ftb.mods.ftbquests.api.neoforge.FTBQuestsEvent;
 import dev.ftb.mods.ftbquests.block.neoforge.NeoLootCrateOpenerBlockEntity;
 import dev.ftb.mods.ftbquests.block.neoforge.NeoTaskScreenAuxBlockEntity;
 import dev.ftb.mods.ftbquests.block.neoforge.NeoTaskScreenBlockEntity;
-import dev.ftb.mods.ftbquests.events.*;
-import dev.ftb.mods.ftbquests.events.progress.ChapterProgressEvent;
-import dev.ftb.mods.ftbquests.events.progress.FileProgressEvent;
-import dev.ftb.mods.ftbquests.events.progress.QuestProgressEvent;
-import dev.ftb.mods.ftbquests.events.progress.TaskProgressEvent;
 import dev.ftb.mods.ftbquests.quest.loot.LootCrate;
 import dev.ftb.mods.ftbquests.quest.task.TaskTypes;
 import dev.ftb.mods.ftbquests.quest.task.neoforge.ForgeEnergyTask;
@@ -31,10 +30,8 @@ import net.neoforged.neoforge.event.BuildCreativeModeTabContentsEvent;
 
 @Mod(FTBQuestsAPI.MOD_ID)
 public class FTBQuestsNeoForge {
-	private final FTBQuests quests;
-
 	public FTBQuestsNeoForge(IEventBus modEventBus) {
-		quests = new FTBQuests();
+		FTBQuests quests = new FTBQuests();
 
 		ArgumentTypes.COMMAND_ARGUMENT_TYPES.register(modEventBus);
 
@@ -44,7 +41,7 @@ public class FTBQuestsNeoForge {
 		NeoEventHandler.init(quests.eventHandler);
 
 		modEventBus.addListener(this::addCreativeTabContents);
-		modEventBus.addListener(FTBQuestsNeoForge::registerCaps);
+		modEventBus.addListener(FTBQuestsNeoForge::registerCapabilities);
 
 		registerNeoEventPosters();
 	}
@@ -55,6 +52,7 @@ public class FTBQuestsNeoForge {
 		NeoEventHelper.registerNeoEventPoster(bus, CustomFilterDisplayItemsEvent.Data.class, FTBQuestsClientEvent.CustomFilterDisplayItems::new);
 		NeoEventHelper.registerNeoEventPoster(bus, ClearFileCacheEvent.Data.class, FTBQuestsEvent.ClearFileCache::new);
 		NeoEventHelper.registerNeoEventPoster(bus, CustomTaskEvent.Data.class, FTBQuestsEvent.CustomTask::new);
+		NeoEventHelper.registerNeoEventPoster(bus, CustomRewardEvent.Data.class, FTBQuestsEvent.CustomReward::new);
 		NeoEventHelper.registerNeoEventPoster(bus, FileProgressEvent.Data.class, FTBQuestsEvent.FileProgress::new);
 		NeoEventHelper.registerNeoEventPoster(bus, ChapterProgressEvent.Data.class, FTBQuestsEvent.ChapterProgress::new);
 		NeoEventHelper.registerNeoEventPoster(bus, QuestProgressEvent.Data.class, FTBQuestsEvent.QuestProgress::new);
@@ -73,7 +71,7 @@ public class FTBQuestsNeoForge {
 		}
 	}
 
-	public static void registerCaps(RegisterCapabilitiesEvent event) {
+	public static void registerCapabilities(RegisterCapabilitiesEvent event) {
 		event.registerBlockEntity(Capabilities.Item.BLOCK, ModBlockEntityTypes.CORE_TASK_SCREEN.get(),
 				(be, _) -> ((NeoTaskScreenBlockEntity) be).getItemHandler());
 		event.registerBlockEntity(Capabilities.Fluid.BLOCK, ModBlockEntityTypes.CORE_TASK_SCREEN.get(),

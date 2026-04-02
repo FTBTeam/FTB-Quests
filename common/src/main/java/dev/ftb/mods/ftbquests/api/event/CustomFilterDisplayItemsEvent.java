@@ -18,7 +18,7 @@ import java.util.function.Consumer;
 ///      event.add('minecraft:diamond_axe {display:{Name:{text:\"Test Axe 2!\"}}, Damage: 300}')
 ///   })
 /// </pre>
-public interface CustomFilterDisplayItemsEvent extends Consumer<ItemStack> {
+public interface CustomFilterDisplayItemsEvent extends Consumer<CustomFilterDisplayItemsEvent.Data> {
     record Data(Consumer<ItemStack> consumer) {
         public void add(ItemStack stack) {
             consumer.accept(stack);
