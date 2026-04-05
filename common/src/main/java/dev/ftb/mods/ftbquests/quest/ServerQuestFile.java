@@ -179,11 +179,15 @@ public class ServerQuestFile extends BaseQuestFile {
 
 		if (!data.isLocked()) {
 			withPlayerContext(player, () -> forAllQuests(quest -> {
+				if (!data.isCompleted(quest) && quest.getProgressionMode() == ProgressionMode.FLEXIBLE && data.areDependenciesComplete(quest)) {
+					for (Task task : quest.getTasks()) {
+						if (!data.isCompleted(task) && data.getProgress(task) >= task.getMaxProgress()) {
+							data.markTaskCompleted(task);
+						}
+					}
+				}
+
 				if (!data.isCompleted(quest) && quest.isCompletedRaw(data)) {
-					// Handles possible situation where quest book has been modified to remove a task from a quest
-					// It can leave a player having completed all the other tasks, but unable to complete the quest
-					//   since quests are normally marked completed when the last task in that quest is completed
-					// https://github.com/FTBBeta/Beta-Testing-Issues/issues/755
 					quest.onCompleted(new QuestProgressEventData<>(new Date(), data, quest, data.getOnlineMembers(), Collections.singletonList(player)));
 				}
 
