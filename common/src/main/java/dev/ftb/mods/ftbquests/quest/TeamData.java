@@ -623,7 +623,13 @@ public class TeamData {
 	public Collection<ServerPlayer> getOnlineMembers() {
 		return FTBTeamsAPI.api().getManager().getTeamByID(teamId)
 				.map(Team::getOnlineMembers)
-				.orElse(List.of());
+				.orElseGet(() -> {
+					if (file instanceof ServerQuestFile sqf) {
+						ServerPlayer p = sqf.server.getPlayerList().getPlayer(teamId);
+						return p != null ? List.of(p) : List.of();
+					}
+					return List.of();
+				});
 	}
 
 	public void checkAutoCompletion(Quest quest) {
