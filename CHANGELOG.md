@@ -4,6 +4,18 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2001.4.20]
+
+### Fixed
+
+- Quest progression blocking issue with flexible quests
+- Exclusion logic issues with flexible quests.
+
+## [2001.4.19]
+
+### Fixed
+* The `/ftbquests open_book` command now works again for chapter ID's
+
 ## [2001.4.18]
 
 ### Added
