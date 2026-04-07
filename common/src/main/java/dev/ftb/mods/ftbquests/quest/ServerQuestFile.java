@@ -185,7 +185,7 @@ public class ServerQuestFile extends BaseQuestFile {
 
 	public void playerLoggedIn(PlayerLoggedInAfterTeamEvent event) {
 		ServerPlayer player = event.getPlayer();
-		TeamData data = getOrCreateTeamData(event.getTeam());
+		TeamData data = getTeamData(player).orElseGet(() -> getOrCreateTeamData(player.getUUID()));
 
 		// Sync the quest book data
 		// - client will respond to this with a RequestTeamData message
@@ -244,7 +244,7 @@ public class ServerQuestFile extends BaseQuestFile {
 
 		addData(data, false);
 
-		if (event.getTeam() instanceof PartyTeam) {
+		if (isShareProgressWithTeam() && event.getTeam() instanceof PartyTeam) {
 			FTBTeamsAPI.api().getManager().getPlayerTeamForPlayerID(event.getCreator().getUUID()).ifPresent(playerTeam -> {
 				TeamData oldTeamData = getOrCreateTeamData(playerTeam);
 				data.copyData(oldTeamData);
@@ -255,6 +255,13 @@ public class ServerQuestFile extends BaseQuestFile {
 	}
 
 	public void playerChangedTeam(PlayerChangedTeamEvent event) {
+		if (!isShareProgressWithTeam()) {
+			ServerPlayer player = event.getPlayer();
+			TeamData personal = getOrCreateTeamData(player);
+			if (personal.getName().isEmpty()) personal.setName(player.getScoreboardName());
+			NetworkManager.sendToPlayer(player, new SyncTeamDataMessage(personal));
+			return;
+		}
 		event.getPreviousTeam().ifPresent(prevTeam -> {
 			Team curTeam = event.getTeam();
 			TeamData oldTeamData = getOrCreateTeamData(prevTeam);
@@ -278,6 +285,7 @@ public class ServerQuestFile extends BaseQuestFile {
 
 	@Override
 	public boolean isPlayerOnTeam(Player player, TeamData teamData) {
+		if (!isShareProgressWithTeam()) return player.getUUID().equals(teamData.getTeamId());
 		return FTBTeamsAPI.api().getManager().getTeamForPlayerID(player.getUUID())
 				.map(team -> team.getTeamId().equals(teamData.getTeamId()))
 				.orElse(false);

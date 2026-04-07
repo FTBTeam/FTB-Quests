@@ -1,5 +1,6 @@
 package dev.ftb.mods.ftbquests.quest;
 
+import dev.architectury.networking.NetworkManager;
 import dev.architectury.utils.Env;
 import dev.ftb.mods.ftblibrary.config.ConfigGroup;
 import dev.ftb.mods.ftblibrary.config.ItemStackConfig;
@@ -15,6 +16,7 @@ import dev.ftb.mods.ftbquests.client.config.LocaleConfig;
 import dev.ftb.mods.ftbquests.events.*;
 import dev.ftb.mods.ftbquests.integration.RecipeModHelper;
 import dev.ftb.mods.ftbquests.net.DeleteObjectResponseMessage;
+import dev.ftb.mods.ftbquests.net.SyncTeamDataMessage;
 import dev.ftb.mods.ftbquests.quest.loot.EntityWeight;
 import dev.ftb.mods.ftbquests.quest.loot.LootCrate;
 import dev.ftb.mods.ftbquests.quest.loot.RewardTable;
@@ -42,6 +44,8 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
@@ -108,6 +112,7 @@ public abstract class BaseQuestFile extends QuestObject implements QuestFile {
 	private boolean dropBookOnDeath;
 	private String fallbackLocale;
 	private boolean verifyOnLoad;
+	private boolean shareProgressWithTeam;
 
 	private List<Task> allTasks;
 	private List<Task> submitTasks;
@@ -149,6 +154,7 @@ public abstract class BaseQuestFile extends QuestObject implements QuestFile {
 		dropBookOnDeath = false;
 		hideExcludedQuests = false;
 		verifyOnLoad = false;
+		shareProgressWithTeam = true;
 
 		allTasks = null;
 
@@ -454,6 +460,7 @@ public abstract class BaseQuestFile extends QuestObject implements QuestFile {
 		nbt.putBoolean("hide_excluded_quests", hideExcludedQuests);
 		nbt.putString("fallback_locale", fallbackLocale);
 		nbt.putBoolean("verify_on_load", verifyOnLoad);
+		nbt.putBoolean("share_progress_with_team", shareProgressWithTeam);
 	}
 
 	@Override
@@ -497,6 +504,7 @@ public abstract class BaseQuestFile extends QuestObject implements QuestFile {
 		hideExcludedQuests = nbt.getBoolean("hide_excluded_quests");
 		fallbackLocale = nbt.getString("fallback_locale");
 		verifyOnLoad = nbt.getBoolean("verify_on_load");
+		shareProgressWithTeam = !nbt.contains("share_progress_with_team") || nbt.getBoolean("share_progress_with_team");
 	}
 
 	public final void writeDataFull(Path folder, HolderLookup.Provider provider) {
@@ -868,6 +876,7 @@ public abstract class BaseQuestFile extends QuestObject implements QuestFile {
 		buffer.writeBoolean(dropBookOnDeath);
 		buffer.writeBoolean(hideExcludedQuests);
 		buffer.writeUtf(fallbackLocale);
+		buffer.writeBoolean(shareProgressWithTeam);
 	}
 
 	@Override
@@ -894,6 +903,7 @@ public abstract class BaseQuestFile extends QuestObject implements QuestFile {
 		dropBookOnDeath = buffer.readBoolean();
 		hideExcludedQuests = buffer.readBoolean();
 		fallbackLocale = buffer.readUtf();
+		shareProgressWithTeam = buffer.readBoolean();
 	}
 
 	public final void writeNetDataFull(RegistryFriendlyByteBuf buffer) {
@@ -1123,6 +1133,22 @@ public abstract class BaseQuestFile extends QuestObject implements QuestFile {
 
 	@Override
 	public TeamData getOrCreateTeamData(Entity player) {
+		if (!shareProgressWithTeam) {
+			UUID pid = player.getUUID();
+			boolean isNew = !teamDataMap.containsKey(pid);
+			TeamData data = getOrCreateTeamData(pid);
+
+			if (player instanceof Player p && data.getName().isEmpty()) { data.setName(String.valueOf(p.getDisplayName())); }
+
+			if (isNew && isServerSide()) {
+				FTBTeamsAPI.api().getManager().getTeamForPlayerID(pid).ifPresent(team -> {
+					TeamData shared = getOrCreateTeamData(team);
+					data.copyData(shared);
+				});
+			}
+
+			return data;
+		}
 		return FTBTeamsAPI.api().getManager().getTeamForPlayerID(player.getUUID())
 				.map(this::getOrCreateTeamData)
 				.orElse(null);
@@ -1130,6 +1156,7 @@ public abstract class BaseQuestFile extends QuestObject implements QuestFile {
 
 	@Override
 	public Optional<TeamData> getTeamData(Player player) {
+		if (!shareProgressWithTeam) { return Optional.of(getOrCreateTeamData(player.getUUID())); }
 		return player.level().isClientSide ?
 				getClientTeamData(player) :
 				FTBTeamsAPI.api().getManager().getTeamForPlayerID(player.getUUID())
@@ -1173,6 +1200,7 @@ public abstract class BaseQuestFile extends QuestObject implements QuestFile {
 		config.addDouble("grid_scale", gridScale, v -> gridScale = v, 0.5D, 1D / 32D, 8D);
 		config.addString("lock_message", lockMessage, v -> lockMessage = v, "");
 		config.addEnum("progression_mode", progressionMode, v -> progressionMode = v, ProgressionMode.NAME_MAP_NO_DEFAULT);
+		config.addBool("share_progress_with_team", shareProgressWithTeam, v -> shareProgressWithTeam = v, true);
 		config.addInt("detection_delay", detectionDelay, v -> detectionDelay = v, 20, 0, 200);
 		config.addBool("pause_game", pauseGame, v -> pauseGame = v, false);
 		config.addBool("show_lock_icons", showLockIcons, v -> showLockIcons = v, true).setNameKey("ftbquests.ui.show_lock_icon");
@@ -1212,6 +1240,16 @@ public abstract class BaseQuestFile extends QuestObject implements QuestFile {
 
 	public void clearCachedProgress() {
 		getAllTeamData().forEach(TeamData::clearCachedProgress);
+	}
+
+	@Override
+	public void editedFromGUIOnServer() {
+		if (this instanceof ServerQuestFile sqf) {
+			MinecraftServer server = sqf.server;
+			for (ServerPlayer p : server.getPlayerList().getPlayers()) {
+				sqf.getTeamData(p).ifPresent(td -> NetworkManager.sendToPlayer(p, new SyncTeamDataMessage(td)));
+			}
+		}
 	}
 
 	public long newID() {
@@ -1462,6 +1500,10 @@ public abstract class BaseQuestFile extends QuestObject implements QuestFile {
 
 	public boolean isDefaultTeamConsumeItems() {
 		return defaultTeamConsumeItems;
+	}
+
+	public boolean isShareProgressWithTeam() {
+		return shareProgressWithTeam;
 	}
 
 	public RewardAutoClaim getDefaultRewardAutoClaim() {
