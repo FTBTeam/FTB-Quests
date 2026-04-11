@@ -4,6 +4,11 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2001.4.21]
+
+### Fixed
+* [#2025](https://github.com/FTBTeam/FTB-Mods-Issues/issues/2025) Reward toasts not working.
+
 ## [2001.4.20]
 
 ### Fixed
