@@ -16,7 +16,6 @@ import net.minecraft.core.registries.Registries;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
-import net.minecraft.resources.Identifier;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.tags.TagKey;
@@ -123,14 +122,14 @@ public class BiomeTask extends AbstractBooleanTask {
 		if (KNOWN_BIOMES.isEmpty()) {
 			RegistryAccess registryAccess = ClientUtils.getClientPlayer().level().registryAccess();
 			KNOWN_BIOMES.addAll(registryAccess
-					.getOrThrow(Registries.BIOME).value().keySet().stream()
-					.map(Identifier::toString)
+					.lookupOrThrow(Registries.BIOME).entrySet().stream()
+					.map(e -> e.getKey().identifier().toString())
 					.sorted(String::compareTo)
 					.toList()
 			);
 			KNOWN_BIOMES.addAll(registryAccess
-					.getOrThrow(Registries.BIOME).tags()
-					.map(o -> "#" + o.location())
+					.lookupOrThrow(Registries.BIOME).getTags()
+					.map(o -> "#" + o.key().location())
 					.sorted(String::compareTo)
 					.toList()
 			);
