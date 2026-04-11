@@ -1,6 +1,7 @@
 package dev.ftb.mods.ftbquests.quest.reward;
 
 import dev.ftb.mods.ftblibrary.config.ConfigGroup;
+import dev.ftb.mods.ftbquests.net.CustomToastMessage;
 import dev.ftb.mods.ftbquests.quest.Quest;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -14,6 +15,10 @@ public class ToastReward extends Reward {
 	public ToastReward(long id, Quest quest) {
 		super(id, quest);
 		description = "";
+	}
+
+	public String getDescription() {
+		return description;
 	}
 
 	@Override
@@ -54,5 +59,6 @@ public class ToastReward extends Reward {
 
 	@Override
 	public void claim(ServerPlayer player, boolean notify) {
+		new CustomToastMessage(getId()).sendTo(player);
 	}
 }
