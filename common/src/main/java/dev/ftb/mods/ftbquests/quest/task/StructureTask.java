@@ -110,7 +110,7 @@ public class StructureTask extends AbstractBooleanTask {
 		StructureManager mgr = level.structureManager();
 		return structure.map(
 				key -> {
-					Structure structure = mgr.registryAccess().getOrThrow(Registries.STRUCTURE).value().getValue(key);
+					Structure structure = mgr.registryAccess().lookupOrThrow(Registries.STRUCTURE).getValue(key);
 					return structure != null && mgr.getStructureWithPieceAt(player.blockPosition(), structure).isValid();
 				},
 				tag -> mgr.getStructureWithPieceAt(player.blockPosition(), tag).isValid()
