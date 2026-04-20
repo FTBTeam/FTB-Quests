@@ -1,6 +1,5 @@
 package dev.ftb.mods.ftbquests.client;
 
-import dev.architectury.hooks.item.ItemStackHooks;
 import dev.ftb.mods.ftblibrary.icon.Icon;
 import dev.ftb.mods.ftblibrary.icon.ItemIcon;
 import dev.ftb.mods.ftblibrary.ui.Panel;
@@ -11,7 +10,9 @@ import dev.ftb.mods.ftbquests.client.gui.quests.QuestScreen;
 import dev.ftb.mods.ftbquests.net.TeamDataUpdate;
 import dev.ftb.mods.ftbquests.quest.*;
 import dev.ftb.mods.ftbquests.quest.reward.Reward;
+import dev.ftb.mods.ftbquests.quest.reward.ToastReward;
 import dev.ftb.mods.ftbquests.quest.task.Task;
+import dev.architectury.hooks.item.ItemStackHooks;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.nbt.CompoundTag;
@@ -274,4 +275,8 @@ public class FTBQuestsNetClient {
 			ClientQuestFile.INSTANCE.setEditorPermission(hasPermission);
 		}
 	}
+
+    public static void displayCustomToast(ToastReward toastReward) {
+		Minecraft.getInstance().getToasts().addToast(new RewardToast(toastReward.getTitle(), Component.literal(toastReward.getDescription()), toastReward.getIcon()));
+    }
 }

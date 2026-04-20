@@ -1,9 +1,9 @@
 package dev.ftb.mods.ftbquests.net;
 
+import dev.ftb.mods.ftbquests.api.FTBQuestsAPI;
 import dev.architectury.injectables.annotations.ExpectPlatform;
 import dev.architectury.networking.simple.MessageType;
 import dev.architectury.networking.simple.SimpleNetworkManager;
-import dev.ftb.mods.ftbquests.api.FTBQuestsAPI;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.world.item.ItemStack;
 
@@ -24,6 +24,7 @@ public interface FTBQuestsNetHandler {
 	MessageType DISPLAY_COMPLETION_TOAST = NET.registerS2C("display_completion_toast", DisplayCompletionToastMessage::new);
 	MessageType DISPLAY_REWARD_TOAST = NET.registerS2C("display_reward_toast", DisplayRewardToastMessage::new);
 	MessageType DISPLAY_ITEM_REWARD_TOAST = NET.registerS2C("display_item_reward_toast", DisplayItemRewardToastMessage::new);
+	MessageType CUSTOM_TOAST_MESSAGE = NET.registerS2C("custom_reward_toast", CustomToastMessage::new);
 	MessageType TOGGLE_PINNED = NET.registerC2S("toggle_pinned", TogglePinnedMessage::new);
 	MessageType TOGGLE_PINNED_RESPONSE = NET.registerS2C("toggle_pinned_response", TogglePinnedResponseMessage::new);
 	MessageType TOGGLE_CHAPTER_PINNED = NET.registerC2S("toggle_chapter_pinned", ToggleChapterPinnedMessage::new);
