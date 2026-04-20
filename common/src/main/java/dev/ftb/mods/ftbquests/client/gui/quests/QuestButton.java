@@ -193,7 +193,7 @@ public class QuestButton extends Button implements QuestPositionableButton {
 				}
 				questScreen.toggleSelected(moveAndDeleteFocus());
 			} else if (isKeyDown(InputConstants.KEY_LALT) && canEdit) {
-				quest.onEditButtonClicked(questScreen);
+				theQuestObject().onEditButtonClicked(questScreen);
 			} else if (isKeyDown(InputConstants.KEY_RALT) && canEdit) {
 				quest.copyToClipboard();
 				Minecraft.getInstance().getToasts().addToast(new CustomToast(Component.translatable("ftbquests.quest.copied"),
