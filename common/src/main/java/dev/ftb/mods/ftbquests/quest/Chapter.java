@@ -176,7 +176,7 @@ public final class Chapter extends QuestObject {
 	}
 
 	@Override
-	public void writeData(@UnknownNullability Json5Object json, HolderLookup.Provider provider) {
+	public void writeData(Json5Object json, HolderLookup.Provider provider) {
 		super.writeData(json, provider);
 
 		json.addProperty("filename", filename);
@@ -198,7 +198,7 @@ public final class Chapter extends QuestObject {
 	}
 
 	@Override
-	public void readData(@UnknownNullability Json5Object json, HolderLookup.Provider provider) {
+	public void readData(Json5Object json, HolderLookup.Provider provider) {
 		super.readData(json, provider);
 
 		filename = Json5Util.getString(json, "filename").orElseThrow();

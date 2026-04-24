@@ -387,6 +387,7 @@ public class QuestButton extends Button implements QuestPositionableButton {
 
 		if (shape.shouldDraw()) {
 			IconHelper.renderIcon(shape.getShape().withColor(Color4I.DARK_GRAY), graphics, x, y, w, h);
+			graphics.nextStratum();
 			IconHelper.renderIcon(shape.getBackground().withColor(Color4I.WHITE.withAlpha(150)), graphics, x, y, w, h);
 			IconHelper.renderIcon(shape.getOutline().withColor(outlineColor), graphics, x, y, w, h);
 		}
@@ -415,6 +416,8 @@ public class QuestButton extends Button implements QuestPositionableButton {
 				lockIcon = ThemeProperties.LOCK_ICON.get();
 			}
 		}
+
+		graphics.nextStratum();
 
 		if (isMouseOver()) {
 			IconHelper.renderIcon(shape.getShape().withColor(Color4I.WHITE.withAlpha(100)), graphics, x, y, w, h);

@@ -94,7 +94,7 @@ public class ItemTask extends Task implements Predicate<ItemStack> {
 	}
 
 	@Override
-	public void readData(@UnknownNullability Json5Object json, HolderLookup.Provider provider) {
+	public void readData(Json5Object json, HolderLookup.Provider provider) {
 		super.readData(json, provider);
 		itemStack = itemOrMissingFromJson(Json5Util.getJson5Object(json, "item").orElseThrow(), provider);
 		count = Math.max(Json5Util.getLong(json, "count").orElse(1L), 1L);

@@ -52,14 +52,14 @@ public class StatTask extends Task {
 	}
 
 	@Override
-	public void writeData(@UnknownNullability Json5Object json, HolderLookup.Provider provider) {
+	public void writeData(Json5Object json, HolderLookup.Provider provider) {
 		super.writeData(json, provider);
 		Json5Util.store(json, "stat", Identifier.CODEC, stat);
 		json.addProperty("value", value);
 	}
 
 	@Override
-	public void readData(@UnknownNullability Json5Object json, HolderLookup.Provider provider) {
+	public void readData(Json5Object json, HolderLookup.Provider provider) {
 		super.readData(json, provider);
 		stat = Json5Util.fetch(json, "stat", Identifier.CODEC).orElseThrow();
 		value = Json5Util.getInt(json, "value").orElseThrow();

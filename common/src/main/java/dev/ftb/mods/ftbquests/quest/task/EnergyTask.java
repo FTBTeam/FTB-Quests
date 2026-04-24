@@ -26,7 +26,7 @@ public abstract class EnergyTask extends Task implements ISingleLongValueTask {
 	}
 
 	@Override
-	public void writeData(@UnknownNullability Json5Object json, HolderLookup.Provider provider) {
+	public void writeData(Json5Object json, HolderLookup.Provider provider) {
 		super.writeData(json, provider);
 
 		json.addProperty("value", value);
@@ -34,7 +34,7 @@ public abstract class EnergyTask extends Task implements ISingleLongValueTask {
 	}
 
 	@Override
-	public void readData(@UnknownNullability Json5Object json, HolderLookup.Provider provider) {
+	public void readData(Json5Object json, HolderLookup.Provider provider) {
 		super.readData(json, provider);
 
 		value = Math.max(1L, Json5Util.getLong(json, "value").orElseThrow());

@@ -40,7 +40,6 @@ import net.minecraft.client.renderer.state.gui.GuiElementRenderState;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.ARGB;
 import net.minecraft.util.Mth;
-import org.jetbrains.annotations.UnknownNullability;
 import org.joml.Matrix3x2f;
 import org.joml.Matrix3x2fStack;
 import org.jspecify.annotations.Nullable;
@@ -385,7 +384,7 @@ public class QuestPanel extends Panel {
 		}
 	}
 
-	private void drawStatusBar(GuiGraphicsExtractor graphics, Theme theme, @UnknownNullability Matrix3x2fStack poseStack) {
+	private void drawStatusBar(GuiGraphicsExtractor graphics, Theme theme, Matrix3x2fStack poseStack) {
 		if (questScreen.selectedChapter == null) {
 			return;
 		}
@@ -470,7 +469,7 @@ public class QuestPanel extends Panel {
 			double qy = questY;
 
 			for (TaskType type : TaskTypes.TYPES.values()) {
-				contextMenu.add(new ContextMenuItem(type.getDisplayName(), type.getIconSupplier(), b -> {
+				contextMenu.add(new ContextMenuItem(type.getDisplayName(), type.getIconSupplier(), _ -> {
 					playClickSound();
 					type.getGuiProvider().openCreationGui(this, new Quest(0L, questScreen.selectedChapter),
 							(task, extra) -> {
@@ -485,7 +484,7 @@ public class QuestPanel extends Panel {
 				}));
 			}
 
-			contextMenu.add(new ContextMenuItem(Component.translatable("ftbquests.chapter.image"), Icons.ART, b -> showImageCreationScreen(qx, qy)));
+			contextMenu.add(new ContextMenuItem(Component.translatable("ftbquests.chapter.image"), Icons.ART, _ -> showImageCreationScreen(qx, qy)));
 
 			QuestObjectBase.parseHexId(getClipboardString()).ifPresent(questId -> {
 				QuestObjectBase qo = questScreen.file.getBase(questId);
@@ -494,28 +493,28 @@ public class QuestPanel extends Panel {
 						contextMenu.add(ContextMenuItem.SEPARATOR);
 						contextMenu.add(new PasteQuestMenuItem(quest, Component.translatable("ftbquests.gui.paste"),
                                 Icons.ADD,
-                                b -> Play2ServerNetworking.send(new CopyQuestMessage(quest.id, questScreen.selectedChapter.id, qx, qy, true))));
+                                _ -> Play2ServerNetworking.send(new CopyQuestMessage(quest.id, questScreen.selectedChapter.id, qx, qy, true))));
                         if (quest.hasDependencies()) {
                             contextMenu.add(new PasteQuestMenuItem(quest, Component.translatable("ftbquests.gui.paste_no_deps"),
                                     Icons.ADD_GRAY.withTint(Color4I.rgb(0x008000)),
-                                    b -> Play2ServerNetworking.send(new CopyQuestMessage(quest.id, questScreen.selectedChapter.id, qx, qy, false))));
+                                    _ -> Play2ServerNetworking.send(new CopyQuestMessage(quest.id, questScreen.selectedChapter.id, qx, qy, false))));
                         }
                         contextMenu.add(new PasteQuestMenuItem(quest, Component.translatable("ftbquests.gui.paste_link"),
                                 Icons.ADD_GRAY.withTint(Color4I.rgb(0x8080C0)),
-                                b -> {
+                                _ -> {
                                     QuestLink link = new QuestLink(0L, questScreen.selectedChapter, quest.id).setPosition(qx, qy);
                                     Play2ServerNetworking.send(CreateObjectMessage.create(link, null));
                                 }));
                     }
                     case Task task -> {
 						contextMenu.add(ContextMenuItem.SEPARATOR);
-                        contextMenu.add(new AddTaskButton.PasteTaskMenuItem(task, b -> copyAndCreateTask(task, qx, qy)));
+                        contextMenu.add(new AddTaskButton.PasteTaskMenuItem(task, _ -> copyAndCreateTask(task, qx, qy)));
                     }
                     case ChapterImage img -> {
 						contextMenu.add(ContextMenuItem.SEPARATOR);
                         contextMenu.add(new TooltipContextMenuItem(Component.translatable("ftbquests.gui.paste_image"),
                                 Icons.ADD,
-                                b -> Play2ServerNetworking.send(new CopyChapterImageMessage(img.getId(), questScreen.selectedChapter.getId(), qx, qy)),
+                                _ -> Play2ServerNetworking.send(new CopyChapterImageMessage(img.getId(), questScreen.selectedChapter.getId(), qx, qy)),
                                 Component.literal(img.getImage().toString()).withStyle(ChatFormatting.GRAY)));
                     }
                     case null, default -> {}

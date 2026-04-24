@@ -32,14 +32,14 @@ public class StageTask extends AbstractBooleanTask {
 	}
 
 	@Override
-	public void writeData(@UnknownNullability Json5Object json, HolderLookup.Provider provider) {
+	public void writeData(Json5Object json, HolderLookup.Provider provider) {
 		super.writeData(json, provider);
 		json.addProperty("stage", stage);
 		if (teamStage) json.addProperty("team_stage", true);
 	}
 
 	@Override
-	public void readData(@UnknownNullability Json5Object json, HolderLookup.Provider provider) {
+	public void readData(Json5Object json, HolderLookup.Provider provider) {
 		super.readData(json, provider);
 		stage = Json5Util.getString(json, "stage").orElseThrow();
 		teamStage = Json5Util.getBoolean(json, "team_stage").orElse(false);

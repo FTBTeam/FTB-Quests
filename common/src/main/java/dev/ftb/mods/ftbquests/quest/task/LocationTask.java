@@ -56,7 +56,7 @@ public class LocationTask extends AbstractBooleanTask {
 	}
 
 	@Override
-	public void writeData(@UnknownNullability Json5Object json, HolderLookup.Provider provider) {
+	public void writeData(Json5Object json, HolderLookup.Provider provider) {
 		super.writeData(json, provider);
 		Json5Util.store(json, "dimension", Identifier.CODEC, dimension.identifier());
 		json.addProperty("ignore_dimension", ignoreDimension);
@@ -65,7 +65,7 @@ public class LocationTask extends AbstractBooleanTask {
 	}
 
 	@Override
-	public void readData(@UnknownNullability Json5Object json, HolderLookup.Provider provider) {
+	public void readData(Json5Object json, HolderLookup.Provider provider) {
 		super.readData(json, provider);
 		dimension = ResourceKey.create(Registries.DIMENSION, Json5Util.fetch(json, "dimension", Identifier.CODEC).orElseThrow());
 		ignoreDimension = Json5Util.getBoolean(json, "ignore_dimension").orElseThrow();

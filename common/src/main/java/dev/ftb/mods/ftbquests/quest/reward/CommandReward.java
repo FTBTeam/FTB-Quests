@@ -50,7 +50,7 @@ public class CommandReward extends Reward {
 	}
 
 	@Override
-	public void writeData(@UnknownNullability Json5Object json, HolderLookup.Provider provider) {
+	public void writeData(Json5Object json, HolderLookup.Provider provider) {
 		super.writeData(json, provider);
 		json.addProperty("command", command);
 		if (permissionLevel > 0) json.addProperty("permission_level", permissionLevel);
@@ -59,7 +59,7 @@ public class CommandReward extends Reward {
 	}
 
 	@Override
-	public void readData(@UnknownNullability Json5Object json, HolderLookup.Provider provider) {
+	public void readData(Json5Object json, HolderLookup.Provider provider) {
 		super.readData(json, provider);
 		command = Json5Util.getString(json, "command").orElse(DEFAULT_COMMAND);
 		if (Json5Util.getBoolean(json,"elevate_perms").orElse(false)) {

@@ -365,15 +365,21 @@ public class TeamData {
 		json.addProperty("name", name);
 		json.addProperty("lock", locked);
 		json.addProperty("rewards_blocked", rewardsBlocked);
-		Json5Util.store(json, "task_progress", FTBQCodecs.LONG_LONG_MAP_CODEC, taskProgress);
-		Json5Util.store(json, "started", FTBQCodecs.LONG_LONG_MAP_CODEC, started);
-		Json5Util.store(json, "completed", FTBQCodecs.LONG_LONG_MAP_CODEC, completed);
-		Json5Util.store(json, "repeatable", FTBQCodecs.LONG_LONG_MAP_CODEC, questRepeatableTime);
-		Json5Util.store(json, "completion_count", FTBQCodecs.LONG_INT_MAP_CODEC, completionCount);
-		Json5Util.store(json, "claimed_rewards", FTBQCodecs.CLAIMED_REWARDS_CODEC, claimedRewards);
+		storeJsonCompressed(json, "task_progress", FTBQCodecs.LONG_LONG_MAP_CODEC, taskProgress);
+		storeJsonCompressed(json, "started", FTBQCodecs.LONG_LONG_MAP_CODEC, started);
+		storeJsonCompressed(json, "completed", FTBQCodecs.LONG_LONG_MAP_CODEC, completed);
+		storeJsonCompressed(json, "repeatable", FTBQCodecs.LONG_LONG_MAP_CODEC, questRepeatableTime);
+		storeJsonCompressed(json, "completion_count", FTBQCodecs.LONG_INT_MAP_CODEC, completionCount);
+		storeJsonCompressed(json, "claimed_rewards", FTBQCodecs.CLAIMED_REWARDS_CODEC, claimedRewards);
 		Json5Util.store(json, "player_data", PerPlayerData.MAP_CODEC, perPlayerData);
 
 		return json;
+	}
+
+	public static <T> void storeJsonCompressed(Json5Object json, String field, Codec<T> codec, T object) {
+		codec.encodeStart(Json5Ops.COMPRESSED, object)
+				.resultOrPartial(err -> FTBQuests.LOGGER.error("can't encode map while writing team data: {}", err))
+				.ifPresent(el -> json.add(field, el));
 	}
 
 	public void deserializeJson(Json5Object json) {
@@ -394,7 +400,7 @@ public class TeamData {
 
 		claimedRewards.clear();
 		FTBQCodecs.CLAIMED_REWARDS_CODEC.parse(Json5Ops.INSTANCE, json.get("claimed_rewards")).result()
-						.ifPresent(claimedRewards::putAll);
+				.ifPresent(claimedRewards::putAll);
 
 		perPlayerData.clear();
 		PerPlayerData.MAP_CODEC.parse(Json5Ops.INSTANCE, json.get("player_data")).result()
@@ -797,7 +803,9 @@ public class TeamData {
 
 	private static <K,V> void decodeMapFromJson(Codec<Map<K,V>> codec, Map<K,V> map, Json5Element el) {
 		map.clear();
-		codec.parse(Json5Ops.INSTANCE, el).result().ifPresent(map::putAll);
+		codec.parse(Json5Ops.COMPRESSED, el)
+				.resultOrPartial(err -> FTBQuests.LOGGER.error("can't decode map while loading team progress data: {}", err))
+				.ifPresent(map::putAll);
 	}
 
 	private static class PerPlayerData {

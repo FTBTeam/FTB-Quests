@@ -56,13 +56,3 @@ jar {
 		])
 	}
 }
-
-publishing {
-	publications {
-		mavenForge(MavenPublication) {
-			artifactId = "${rootProject.archives_base_name}-${project.name}"
-			version ftbPublishing.mavenVersion
-			from components.java
-		}
-	}
-}

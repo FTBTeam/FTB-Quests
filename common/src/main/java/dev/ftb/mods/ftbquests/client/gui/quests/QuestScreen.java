@@ -1,5 +1,6 @@
 package dev.ftb.mods.ftbquests.client.gui.quests;
 
+import com.mojang.blaze3d.platform.InputConstants;
 import com.mojang.datafixers.util.Pair;
 import dev.ftb.mods.ftblibrary.client.config.EditableConfigGroup;
 import dev.ftb.mods.ftblibrary.client.config.editable.EditableConfigValue;
@@ -105,6 +106,7 @@ public class QuestScreen extends BaseScreen {
 		Minecraft.getInstance().setScreen(null);  // ensures prevScreen is null, so we can close correctly
 		QuestScreen questScreen = new QuestScreen(file, persistedData);
 		questScreen.openGui();
+		InputConstants.grabOrReleaseMouse(Minecraft.getInstance().getWindow(), GLFW.GLFW_CURSOR_NORMAL, mx, my);
 		return questScreen;
 	}
 
@@ -606,19 +608,23 @@ public class QuestScreen extends BaseScreen {
 		EditableQuestObject<QuestObject> c = new EditableQuestObject<>(QuestObjectType.CHAPTER.or(QuestObjectType.QUEST).or(QuestObjectType.QUEST_LINK));
 		new SelectQuestObjectScreen<>(c, accepted -> {
 			if (accepted) {
-				if (c.getValue() instanceof Chapter chapter) {
-					selectChapter(chapter);
-				} else if (c.getValue() instanceof Quest quest) {
-					zoom = 20;
-					selectChapter(quest.getChapter());
-					questPanel.scrollTo(quest.getX(), quest.getY());
-					viewQuest(quest);
-				} else if (c.getValue() instanceof QuestLink link) {
-					zoom = 20;
-					selectChapter(link.getChapter());
-					questPanel.scrollTo(link.getX(), link.getY());
-					link.getQuest().ifPresent(this::viewQuest);
-				}
+                switch (c.getValue()) {
+                    case Chapter chapter -> selectChapter(chapter);
+                    case Quest quest -> {
+                        zoom = 20;
+                        selectChapter(quest.getChapter());
+                        questPanel.scrollTo(quest.getX(), quest.getY());
+                        viewQuest(quest);
+                    }
+                    case QuestLink link -> {
+                        zoom = 20;
+                        selectChapter(link.getChapter());
+                        questPanel.scrollTo(link.getX(), link.getY());
+                        link.getQuest().ifPresent(this::viewQuest);
+                    }
+                    default -> {
+                    }
+                }
 			}
 			QuestScreen.this.openGui();
 		}).openGui();
@@ -692,13 +698,13 @@ public class QuestScreen extends BaseScreen {
 			if (grabbed.isLeft()) {
 
 				if (scrollWidth > questPanel.width) {
-					questPanel.setScrollX(Math.max(Math.min(questPanel.getScrollX() + (prevMouseX - mx), scrollWidth - questPanel.width), 0));
+					questPanel.setScrollX(Math.clamp(questPanel.getScrollX() + (prevMouseX - mx), 0, scrollWidth - questPanel.width));
 				} else {
 					questPanel.setScrollX((scrollWidth - questPanel.width) / 2);
 				}
 
 				if (scrollHeight > questPanel.height) {
-					questPanel.setScrollY(Math.max(Math.min(questPanel.getScrollY() + (prevMouseY - my), scrollHeight - questPanel.height), 0));
+					questPanel.setScrollY(Math.clamp(questPanel.getScrollY() + (prevMouseY - my), 0, scrollHeight - questPanel.height));
 				} else {
 					questPanel.setScrollY((scrollHeight - questPanel.height) / 2);
 				}

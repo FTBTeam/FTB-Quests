@@ -25,7 +25,7 @@ side = "BOTH"
 [[dependencies.ftbquests]]
 modId = "minecraft"
 type = "required"
-versionRange = "[${mcversion},)"
+versionRange = "${minecraft_version_range_maven}"
 ordering = "NONE"
 side = "BOTH"
 

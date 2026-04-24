@@ -59,7 +59,7 @@ public class ObservationTask extends AbstractBooleanTask {
 	}
 
 	@Override
-	public void writeData(@UnknownNullability Json5Object json, HolderLookup.Provider provider) {
+	public void writeData(Json5Object json, HolderLookup.Provider provider) {
 		super.writeData(json, provider);
 		json.addProperty("timer", timer);
 		json.addProperty("observe_type", ObserveType.NAME_MAP.getName(observeType));
@@ -67,7 +67,7 @@ public class ObservationTask extends AbstractBooleanTask {
 	}
 
 	@Override
-	public void readData(@UnknownNullability Json5Object json, HolderLookup.Provider provider) {
+	public void readData(Json5Object json, HolderLookup.Provider provider) {
 		super.readData(json, provider);
 		timer = Json5Util.getLong(json, "timer").orElseThrow();
 		observeType = ObserveType.NAME_MAP.get(Json5Util.getString(json, "observe_type").orElseThrow());

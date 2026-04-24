@@ -282,7 +282,7 @@ public final class Quest extends QuestObject implements Movable, Excludable {
 	}
 
 	@Override
-	public void readData(@UnknownNullability Json5Object json, HolderLookup.Provider provider) {
+	public void readData(Json5Object json, HolderLookup.Provider provider) {
 		super.readData(json, provider);
 
 		x = Json5Util.getDouble(json, "x").orElseThrow();

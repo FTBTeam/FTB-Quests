@@ -440,7 +440,7 @@ public abstract class BaseQuestFile extends QuestObject implements QuestFile {
 	}
 
 	@Override
-	public final void readData(@UnknownNullability Json5Object json, HolderLookup.Provider provider) {
+	public final void readData(Json5Object json, HolderLookup.Provider provider) {
 		super.readData(json, provider);
 
 		defaultPerTeamReward = Json5Util.getBoolean(json, "default_reward_team").orElseThrow();

@@ -27,8 +27,8 @@
 		"ftbquests-fabric.mixins.json"
 	],
 	"depends": {
-		"fabric": "${fabricapiversionrange}",
-		"minecraft": "~${mcversion}",
+		"fabric-api": "${fabricapiversionrange}",
+		"minecraft": "${minecraft_version_range_semver}",
 		"ftblibrary": ">=${ftblibraryversion}",
 		"ftbteams": ">=${ftbteamsversion}"
 	},

@@ -36,13 +36,3 @@ dependencies {
 	implementation("dev.ftb.mods:ftb-library-fabric:${rootProject.ftb_library_version}")
 	implementation("dev.ftb.mods:ftb-teams-fabric:${rootProject.ftb_teams_version}")
 }
-
-publishing {
-	publications {
-		mavenFabric(MavenPublication) {
-			artifactId = "${rootProject.archives_base_name}-${project.name}"
-			version ftbPublishing.mavenVersion
-			from components.java
-		}
-	}
-}
