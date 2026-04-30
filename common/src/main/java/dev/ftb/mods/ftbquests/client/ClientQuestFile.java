@@ -5,6 +5,7 @@ import dev.ftb.mods.ftblibrary.platform.Env;
 import dev.ftb.mods.ftblibrary.platform.network.Play2ServerNetworking;
 import dev.ftb.mods.ftblibrary.util.TooltipList;
 import dev.ftb.mods.ftbquests.FTBQuests;
+import dev.ftb.mods.ftbquests.client.gui.EmergencyItemsScreen;
 import dev.ftb.mods.ftbquests.client.gui.quests.QuestScreen;
 import dev.ftb.mods.ftbquests.net.DeleteObjectMessage;
 import dev.ftb.mods.ftbquests.quest.*;
@@ -69,6 +70,7 @@ public class ClientQuestFile extends BaseQuestFile {
 		selfTeamData = TeamData.NONE;
 
 		refreshGui();
+		EmergencyItemsScreen.initCooldown();
 		FTBQuests.getRecipeModHelper().refreshRecipes(this);
 	}
 
