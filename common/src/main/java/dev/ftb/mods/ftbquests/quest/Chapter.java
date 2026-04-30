@@ -17,7 +17,6 @@ import net.minecraft.core.HolderLookup;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
-import org.jetbrains.annotations.UnknownNullability;
 
 import java.util.*;
 import java.util.regex.Pattern;
@@ -404,7 +403,7 @@ public final class Chapter extends QuestObject {
 
 	@Override
 	public Optional<String> getPath() {
-		return Optional.of("chapters/" + getFilename() + ".snbt");
+		return Optional.of("chapters/" + getFilename() + Json5Util.FILE_EXT);
 	}
 
 	@Override

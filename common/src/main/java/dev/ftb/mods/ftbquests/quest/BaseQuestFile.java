@@ -15,13 +15,13 @@ import dev.ftb.mods.ftblibrary.platform.event.NativeEventPosting;
 import dev.ftb.mods.ftblibrary.platform.network.Server2PlayNetworking;
 import dev.ftb.mods.ftbquests.FTBQuests;
 import dev.ftb.mods.ftbquests.api.QuestFile;
-import dev.ftb.mods.ftbquests.client.FTBQuestsClient;
-import dev.ftb.mods.ftbquests.client.config.EditableLocaleConfig;
 import dev.ftb.mods.ftbquests.api.event.ClearFileCacheEvent;
 import dev.ftb.mods.ftbquests.api.event.CustomTaskEvent;
 import dev.ftb.mods.ftbquests.api.event.progress.FileProgressEvent;
 import dev.ftb.mods.ftbquests.api.event.progress.ProgressEventData;
 import dev.ftb.mods.ftbquests.api.event.progress.ProgressType;
+import dev.ftb.mods.ftbquests.client.FTBQuestsClient;
+import dev.ftb.mods.ftbquests.client.config.EditableLocaleConfig;
 import dev.ftb.mods.ftbquests.integration.RecipeModHelper;
 import dev.ftb.mods.ftbquests.net.DeleteObjectResponseMessage;
 import dev.ftb.mods.ftbquests.quest.loot.EntityWeight;
@@ -53,7 +53,6 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import org.apache.commons.lang3.mutable.MutableInt;
-import org.jetbrains.annotations.UnknownNullability;
 import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
 
@@ -479,7 +478,7 @@ public abstract class BaseQuestFile extends QuestObject implements QuestFile {
 			//  version control changes stemming from unpredictable hashmap key ordering
 //			prev = SNBT.setShouldSortKeysOnWrite(true);
 
-			Json5Util.tryWrite(folder.resolve("data" + FILE_SUFFIX), Util.make(new Json5Object(), j -> {
+			Json5Util.save(folder.resolve("data" + FILE_SUFFIX), Util.make(new Json5Object(), j -> {
 				j.addProperty("version", VERSION);
 				writeData(j, provider);
 			}));
@@ -532,7 +531,7 @@ public abstract class BaseQuestFile extends QuestObject implements QuestFile {
 					}
 				}));
 
-				Json5Util.tryWrite(folder.resolve("chapters").resolve(chapter.getFilename() + FILE_SUFFIX), chapterJson);
+				Json5Util.save(folder.resolve("chapters").resolve(chapter.getFilename() + FILE_SUFFIX), chapterJson);
 			}
 		}
 	}
@@ -544,7 +543,7 @@ public abstract class BaseQuestFile extends QuestObject implements QuestFile {
 			tableNBT.addProperty("id", table.getCodeString());
 			tableNBT.addProperty("order_index", ri);
 			table.writeData(tableNBT, provider);
-			Json5Util.tryWrite(folder.resolve("reward_tables").resolve(table.getFilename() + FILE_SUFFIX), tableNBT);
+			Json5Util.save(folder.resolve("reward_tables").resolve(table.getFilename() + FILE_SUFFIX), tableNBT);
 		}
 	}
 
@@ -561,7 +560,7 @@ public abstract class BaseQuestFile extends QuestObject implements QuestFile {
 		}
 		Json5Object groupJson = new Json5Object();
 		groupJson.add("chapter_groups", chapterGroupJson);
-		Json5Util.tryWrite(folder.resolve("chapter_groups" + FILE_SUFFIX), groupJson);
+		Json5Util.save(folder.resolve("chapter_groups" + FILE_SUFFIX), groupJson);
 	}
 
 	public final void readDataFull(Path folder, HolderLookup.Provider provider) {
@@ -577,7 +576,7 @@ public abstract class BaseQuestFile extends QuestObject implements QuestFile {
 
 		final Long2ObjectOpenHashMap<Json5Object> dataCache = new Long2ObjectOpenHashMap<>();
 		try {
-			var fileJson = Json5Util.tryRead(folder.resolve("data" + FILE_SUFFIX));
+			var fileJson = Json5Util.load(folder.resolve("data" + FILE_SUFFIX));
 			fileVersion = Json5Util.getInt(fileJson, "version").orElseThrow();
 			questObjectMap.put(1, this);
 			readData(fileJson, provider);
@@ -598,7 +597,7 @@ public abstract class BaseQuestFile extends QuestObject implements QuestFile {
 			try (Stream<Path> s = Files.list(chaptersFolder)) {
 				s.filter(path -> path.toString().endsWith(FILE_SUFFIX)).forEach(path -> {
 					try {
-						var chapterJson = Json5Util.tryRead(path);
+						var chapterJson = Json5Util.load(path);
 						Chapter chapter = new Chapter(
 								readID(chapterJson.get("id")),
 								this,
@@ -680,7 +679,7 @@ public abstract class BaseQuestFile extends QuestObject implements QuestFile {
 
 	private void loadRewardTableFile(Path path, Long2IntOpenHashMap objectOrderMap, Long2ObjectOpenHashMap<Json5Object> dataCache) {
 		try {
-			var tableJson = Json5Util.tryRead(path);
+			var tableJson = Json5Util.load(path);
 			String filename = path.getFileName().toString().replace(FILE_SUFFIX, "");
 
 			RewardTable table = new RewardTable(readID(tableJson.get("id")), this, filename);
@@ -756,7 +755,7 @@ public abstract class BaseQuestFile extends QuestObject implements QuestFile {
 		Path groupsFile = folder.resolve("chapter_groups" + FILE_SUFFIX);
 		if (Files.exists(groupsFile)) {
 			try {
-				var chapterGroupsJson = Json5Util.tryRead(groupsFile);
+				var chapterGroupsJson = Json5Util.load(groupsFile);
 				Json5Util.getJson5Array(chapterGroupsJson, "chapter_groups").ifPresent(groups ->
 						groups.forEach(el -> {
 							if (el instanceof Json5Object groupJson) {

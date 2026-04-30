@@ -72,7 +72,7 @@ public class TranslationManager {
                         Path fullPath = localeDir.resolve(path);
                         try {
                             Files.createDirectories(fullPath.getParent());
-                            Json5Util.tryWrite(fullPath, json);
+                            Json5Util.save(fullPath, json);
                         } catch (IOException e) {
                             FTBQuests.LOGGER.error("can't write lang file {}", fullPath);
                         }

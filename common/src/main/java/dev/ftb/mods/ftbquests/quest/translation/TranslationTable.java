@@ -52,7 +52,7 @@ public class TranslationTable {
             stream.filter(p -> Files.isRegularFile(p) && p.getFileName().toString().endsWith(BaseQuestFile.FILE_SUFFIX))
                     .forEach(p -> {
                         try {
-                            Json5Util.tryRead(p).asMap().forEach(combinedJson::add);
+                            Json5Util.load(p).asMap().forEach(combinedJson::add);
                         } catch (IOException ex) {
                             FTBQuests.LOGGER.error("can't read lang file {}: {}", p, ex.getMessage());
                         }

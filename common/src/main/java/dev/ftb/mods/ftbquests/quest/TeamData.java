@@ -145,7 +145,7 @@ public class TeamData {
 		if (shouldSave && serverSide && ServerQuestFile.exists()) {
 			Path path = ServerQuestFile.getInstance().server.getWorldPath(ServerQuestFile.FTBQUESTS_DATA);
 			try {
-				Json5Util.tryWrite(path.resolve(teamId + ".snbt"), toJson());
+				Json5Util.save(path.resolve(teamId + Json5Util.FILE_EXT), toJson());
 			} catch (IOException e) {
 				FTBQuests.LOGGER.error("Could not save data for team {}", teamId, e);
 			}

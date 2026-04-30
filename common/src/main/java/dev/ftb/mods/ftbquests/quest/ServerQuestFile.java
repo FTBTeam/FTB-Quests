@@ -114,9 +114,9 @@ public class ServerQuestFile extends BaseQuestFile {
 
 			if (Files.exists(path)) {
 				try (Stream<Path> s = Files.list(path)) {
-					s.filter(p -> p.getFileName().toString().contains("-") && p.getFileName().toString().endsWith(".snbt")).forEach(path1 -> {
+					s.filter(p -> p.getFileName().toString().contains("-") && p.getFileName().toString().endsWith(Json5Util.FILE_EXT)).forEach(path1 -> {
 						try {
-							var json = Json5Util.tryRead(path1);
+							var json = Json5Util.load(path1);
 							UUID uuid = UndashedUuid.fromString(Json5Util.getString(json, "uuid").orElseThrow());
 							TeamData data = new TeamData(uuid, true);
 							addData(data, true);

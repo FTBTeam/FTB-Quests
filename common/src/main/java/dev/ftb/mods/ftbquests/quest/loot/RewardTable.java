@@ -379,7 +379,7 @@ public class RewardTable extends QuestObjectBase {
 
 	@Override
 	public Optional<String> getPath() {
-		return Optional.of("reward_tables/" + getFilename() + ".snbt");
+		return Optional.of("reward_tables/" + getFilename() + Json5Util.FILE_EXT);
 	}
 
 	@Override
