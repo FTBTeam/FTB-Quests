@@ -2,6 +2,7 @@ package dev.ftb.mods.ftbquests.client.gui.quests;
 
 import dev.ftb.mods.ftblibrary.ui.Panel;
 import dev.ftb.mods.ftblibrary.ui.input.MouseButton;
+import dev.ftb.mods.ftblibrary.util.TooltipList;
 import dev.ftb.mods.ftbquests.client.gui.EmergencyItemsScreen;
 import dev.ftb.mods.ftbquests.quest.theme.property.ThemeProperties;
 import net.minecraft.network.chat.Component;
@@ -15,5 +16,12 @@ public class EmergencyItemsButton extends TabButton {
 	public void onClicked(MouseButton button) {
 		playClickSound();
 		new EmergencyItemsScreen().openGui();
+	}
+
+	@Override
+	public void addMouseOverText(TooltipList list) {
+		super.addMouseOverText(list);
+
+		list.add(EmergencyItemsScreen.getCooldownSeconds());
 	}
 }

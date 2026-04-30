@@ -30,10 +30,6 @@ public class EmergencyItemsScreen extends BaseScreen {
 	private final Panel itemPanel;
 
 	public EmergencyItemsScreen() {
-		if (endTime < Util.getEpochMillis()) {
-			endTime = Util.getEpochMillis() + ClientQuestFile.INSTANCE.getEmergencyItemsCooldown() * 1000L;
-		}
-
 		itemPanel = new ItemPanel();
 		cancelButton = SimpleTextButton.cancel(this, mb -> closeGui());
 		getItemsButton = new SimpleTextButton(this, Component.translatable("ftbquests.file.emergency_items.get_items"), Icons.ACCEPT) {
@@ -42,7 +38,7 @@ public class EmergencyItemsScreen extends BaseScreen {
 				if (Util.getEpochMillis() >= endTime) {
 					playClickSound();
 					NetworkManager.sendToServer(GetEmergencyItemsMessage.INSTANCE);
-					endTime = Util.getEpochMillis() + ClientQuestFile.INSTANCE.getEmergencyItemsCooldown() * 1000L;
+					resetCooldown();
 				}
 			}
 
@@ -51,11 +47,27 @@ public class EmergencyItemsScreen extends BaseScreen {
 				MutableComponent c = Component.translatable("ftbquests.file.emergency_items.get_items");
 				setTitle(Util.getEpochMillis() >= endTime ? c : c.withStyle(ChatFormatting.DARK_GRAY));
 			}
-        };
+
+			@Override
+			public WidgetType getWidgetType() {
+				return Util.getEpochMillis() < endTime ? WidgetType.DISABLED : super.getWidgetType();
+			}
+		};
+	}
+
+	public static void initCooldown() {
+		if (endTime == 0L) {
+			endTime = Util.getEpochMillis() + ClientQuestFile.INSTANCE.getEmergencyItemsCooldown() * 1000L;
+		}
 	}
 
 	public static void resetCooldown() {
-		endTime = 0L;
+		endTime = Util.getEpochMillis() + ClientQuestFile.INSTANCE.getEmergencyItemsCooldown() * 1000L;
+	}
+
+	public static Component getCooldownSeconds() {
+		long seconds = Math.max(0, (endTime - Util.getEpochMillis()) / 1000L * 1000L + 1000L);
+		return Component.literal(seconds == 0L ? "00:00" : TimeUtils.getTimeString(seconds));
 	}
 
 	@Override
@@ -86,8 +98,7 @@ public class EmergencyItemsScreen extends BaseScreen {
 		poseStack.pushPose();
 		poseStack.translate((int) (w / 2D), (int) (h / 2.5D), 0);
 		poseStack.scale(4F, 4F, 1F);
-		long timeLeft = endTime - Util.getEpochMillis();
-		String timeStr = timeLeft <= 0L ? "00:00" : TimeUtils.getTimeString(timeLeft / 1000L * 1000L + 1000L);
+		Component timeStr = getCooldownSeconds();
 		int x1 = -theme.getStringWidth(timeStr) / 2;
 		theme.drawString(graphics, timeStr, x1 - 1, 0, Color4I.BLACK, 0);
 		theme.drawString(graphics, timeStr, x1 + 1, 0, Color4I.BLACK, 0);
