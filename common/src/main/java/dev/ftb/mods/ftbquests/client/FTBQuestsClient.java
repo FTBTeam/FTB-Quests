@@ -74,7 +74,6 @@ public class FTBQuestsClient {
 		eventHandler = new FTBQuestsClientEventHandler();
 	}
 
-	@Nullable
 	public static BaseQuestFile getClientQuestFile() {
 		return ClientQuestFile.getInstance();
 	}
