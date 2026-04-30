@@ -217,6 +217,10 @@ public class ServerQuestFile extends BaseQuestFile {
 						}
 					}
 
+					// Handles possible situation where quest book has been modified to remove a task from a quest
+					// It can leave a player having completed all the other tasks, but unable to complete the quest
+					//   since quests are normally marked completed when the last task in that quest is completed
+					// https://github.com/FTBBeta/Beta-Testing-Issues/issues/755
 					if (!data.isCompleted(quest) && quest.isCompletedRaw(data)) {
 						quest.onCompleted(new QuestProgressEventData<>(now, data, quest, onlineMembers, pList));
 					}
