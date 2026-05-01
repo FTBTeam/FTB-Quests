@@ -154,9 +154,9 @@ public class FTBQuestsClientEventHandler {
 
     @Nullable
     private ObservationTask findObservationTask(Minecraft mc, TeamData selfTeamData) {
-        if (mc.hitResult != null && mc.hitResult.getType() != HitResult.Type.MISS) {
+        if (mc.player != null && mc.hitResult != null && mc.hitResult.getType() != HitResult.Type.MISS) {
             for (ObservationTask task : observationTasks.get()) {
-                if (!selfTeamData.isCompleted(task) && task.observe(mc.player, mc.hitResult)
+                if (!selfTeamData.isCompleted(task.getQuest()) && !selfTeamData.isCompleted(task) && task.observe(mc.player, mc.hitResult)
                         && selfTeamData.canStartTasks(task.getQuest())) {
                     return task;
                 }
