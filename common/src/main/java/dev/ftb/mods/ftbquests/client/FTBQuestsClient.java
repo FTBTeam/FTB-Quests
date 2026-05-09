@@ -1,6 +1,5 @@
 package dev.ftb.mods.ftbquests.client;
 
-import com.mojang.blaze3d.platform.InputConstants;
 import dev.ftb.mods.ftblibrary.FTBLibrary;
 import dev.ftb.mods.ftblibrary.client.config.editable.EditableEntityFace;
 import dev.ftb.mods.ftblibrary.client.config.editable.EditableImageResource;
@@ -29,7 +28,6 @@ import dev.ftb.mods.ftbquests.quest.QuestObject;
 import dev.ftb.mods.ftbquests.quest.QuestObjectBase;
 import dev.ftb.mods.ftbquests.quest.TeamData;
 import dev.ftb.mods.ftbquests.quest.theme.ThemeLoader;
-import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.player.LocalPlayer;
@@ -54,11 +52,6 @@ import java.util.Optional;
 public class FTBQuestsClient {
 	public static final Identifier GUI_OVERLAY_ID = FTBQuestsAPI.id("tracked_quests");
 
-	private static final KeyMapping.Category FTB_QUESTS_KEY_CATEGORY
-			= new KeyMapping.Category(FTBQuestsAPI.id("keys"));
-	public static final KeyMapping KEY_QUESTS
-			= new KeyMapping("key.ftbquests.quests", InputConstants.Type.KEYSYM, -1, FTB_QUESTS_KEY_CATEGORY);
-
 	public final FTBQuestsClientEventHandler eventHandler;
 
 	public FTBQuestsClient() {
@@ -69,7 +62,7 @@ public class FTBQuestsClient {
 				FTBQuestsAPI.id("themes"), new ThemeLoader()
 		));
 
-		PlatformClient.get().registerKeyMapping(FTBQuestsAPI.MOD_ID, KEY_QUESTS);
+		FTBQuestKeys.init();
 
 		eventHandler = new FTBQuestsClientEventHandler();
 	}

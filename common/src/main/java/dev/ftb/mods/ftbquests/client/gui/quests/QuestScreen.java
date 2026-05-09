@@ -1,7 +1,5 @@
 package dev.ftb.mods.ftbquests.client.gui.quests;
 
-import com.mojang.blaze3d.platform.InputConstants;
-import com.mojang.datafixers.util.Pair;
 import dev.ftb.mods.ftblibrary.client.config.EditableConfigGroup;
 import dev.ftb.mods.ftblibrary.client.config.editable.EditableConfigValue;
 import dev.ftb.mods.ftblibrary.client.config.editable.EditableVariantConfig;
@@ -21,10 +19,7 @@ import dev.ftb.mods.ftblibrary.math.MathUtils;
 import dev.ftb.mods.ftblibrary.platform.network.Play2ServerNetworking;
 import dev.ftb.mods.ftblibrary.util.TooltipList;
 import dev.ftb.mods.ftbquests.api.FTBQuestsAPI;
-import dev.ftb.mods.ftbquests.client.ClientQuestFile;
-import dev.ftb.mods.ftbquests.client.FTBQuestsClient;
-import dev.ftb.mods.ftbquests.client.FTBQuestsClientConfig;
-import dev.ftb.mods.ftbquests.client.PinnedQuestsTracker;
+import dev.ftb.mods.ftbquests.client.*;
 import dev.ftb.mods.ftbquests.client.config.EditableQuestObject;
 import dev.ftb.mods.ftbquests.client.gui.CustomToast;
 import dev.ftb.mods.ftbquests.client.gui.FTBQuestsTheme;
@@ -38,6 +33,8 @@ import dev.ftb.mods.ftbquests.quest.task.Task;
 import dev.ftb.mods.ftbquests.quest.theme.QuestTheme;
 import dev.ftb.mods.ftbquests.quest.theme.ThemeLoader;
 import dev.ftb.mods.ftbquests.quest.theme.property.ThemeProperties;
+import com.mojang.blaze3d.platform.InputConstants;
+import com.mojang.datafixers.util.Pair;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
@@ -481,14 +478,14 @@ public class QuestScreen extends BaseScreen {
 			return true;
 		} else if (super.keyPressed(key)) {
 			return true;
-		} else if (FTBQuestsClient.KEY_QUESTS.matches(key.event())) {
+		} else if (FTBQuestKeys.KEY_QUESTS.matches(key.event())) {
 			closeGui(true);
 			return true;
 		}
 
 		List<Chapter> visibleChapters = file.getVisibleChapters(file.selfTeamData);
 
-		if (key.is(GLFW.GLFW_KEY_TAB)) {
+		if (FTBQuestKeys.NEXT_CHAPTER.matches(key.event())) {
 			if (selectedChapter != null && visibleChapters.size() > 1) {
 				selectChapter(visibleChapters.get(MathUtils.mod(visibleChapters.indexOf(selectedChapter) + (isShiftKeyDown() ? -1 : 1), visibleChapters.size())));
 				selectedChapter.getAutofocus().ifPresent(this::scrollTo);
@@ -497,40 +494,43 @@ public class QuestScreen extends BaseScreen {
 			return true;
 		}
 
-		if (key.is(GLFW.GLFW_KEY_SPACE)) {
+		if (FTBQuestKeys.RESET_SCROLL.matches(key.event())) {
 			questPanel.resetScroll();
 			return true;
 		}
 
-		if (key.is(GLFW.GLFW_KEY_R) && key.modifiers().onlyControl()) {
+		if (FTBQuestKeys.TOGGLE_GRID.matches(key.event())) {
 			grid = !grid;
 			return true;
 		}
 
-		if (key.is(GLFW.GLFW_KEY_F) && key.modifiers().onlyControl()) {
+		if (FTBQuestKeys.SEARCH.matches(key.event())) {
 			openQuestSelectionGUI();
 			return true;
 		}
 
-		if (key.is(GLFW.GLFW_KEY_0)) {
+		if (FTBQuestKeys.RESET_ZOOM.matches(key.event())) {
 			addZoom((16 - zoom) / 4.0);
 			return true;
 		}
 
-		if (key.event().key() >= GLFW.GLFW_KEY_1 && key.event().key() <= GLFW.GLFW_KEY_9) {
-			int i = key.event().key() - GLFW.GLFW_KEY_1;
+		// TODO: Review if this is worth keeping.
+		//		 - It's only good for the first 9 chapters, and only if they are all visible, which is a pretty narrow use case
+		//       - Tab behaviour is arguably more intuitive for switching between chapters, and doesn't have the above limitations, so maybe this is just unnecessary?
+//		if (key.event().key() >= GLFW.GLFW_KEY_1 && key.event().key() <= GLFW.GLFW_KEY_9) {
+//			int i = key.event().key() - GLFW.GLFW_KEY_1;
+//
+//			if (i < visibleChapters.size()) {
+//				selectChapter(visibleChapters.get(i));
+//				if (selectedChapter != null) {
+//					selectedChapter.getAutofocus().ifPresent(this::scrollTo);
+//				}
+//			}
+//
+//			return true;
+//		}
 
-			if (i < visibleChapters.size()) {
-				selectChapter(visibleChapters.get(i));
-				if (selectedChapter != null) {
-					selectedChapter.getAutofocus().ifPresent(this::scrollTo);
-				}
-			}
-
-			return true;
-		}
-
-		if (key.is(GLFW.GLFW_KEY_P) && key.modifiers().onlyControl()) {
+		if (FTBQuestKeys.OPEN_SETTINGS.matches(key.event())) {
 			FTBQuestsClientConfig.openSettings(doesGuiPauseGame());
 		}
 
@@ -540,65 +540,68 @@ public class QuestScreen extends BaseScreen {
 
 		// all edit-mode keybinds handled below here
 
-		if (key.is(GLFW.GLFW_KEY_F5)) {
+		if (FTBQuestKeys.RELOAD_THEME.matches(key.event())) {
 			reloadTheme(!isShiftKeyDown());
 			return true;
 		}
 
-		if (key.is(GLFW.GLFW_KEY_DELETE) && !selectedObjects.isEmpty()) {
+		if (FTBQuestKeys.DELETE.matches(key.event()) && !selectedObjects.isEmpty()) {
 			if (!isShiftKeyDown()) {
 				Component title = Component.translatable("delete_item", Component.translatable("ftbquests.objects", selectedObjects.size()));
 				getGui().openYesNo(title, Component.empty(), this::deleteSelectedObjects);
 			} else {
 				deleteSelectedObjects();
 			}
-		} else if (key.modifiers().control()) {
-			double step = key.modifiers().shift() ? 0.1D : 0.5D;
+		}
 
-			switch (key.event().key()) {
-				case GLFW.GLFW_KEY_A -> {
-					if (selectedChapter != null) {
-						selectedObjects.addAll(selectedChapter.getQuests());
-						selectedObjects.addAll(selectedChapter.getQuestLinks());
-						selectedObjects.addAll(selectedChapter.getImages());
-					}
-					return true;
-				}
-				case GLFW.GLFW_KEY_D -> {
-					selectedObjects.clear();
-					return true;
-				}
-				case GLFW.GLFW_KEY_DOWN -> {
-					return moveSelectedQuests(0D, step);
-				}
-				case GLFW.GLFW_KEY_UP -> {
-					return moveSelectedQuests(0D, -step);
-				}
-				case GLFW.GLFW_KEY_LEFT -> {
-					return moveSelectedQuests(-step, 0D);
-				}
-				case GLFW.GLFW_KEY_RIGHT -> {
-					return moveSelectedQuests(step, 0D);
-				}
-				case GLFW.GLFW_KEY_C -> {
-					return copyObjectsToClipboard();
-				}
-				case GLFW.GLFW_KEY_V -> {
-					if (selectedChapter != null) {
-						if (key.modifiers().alt()) {
-							return pasteSelectedQuestLinks(selectedChapter);
-						} else {
-							return pasteSelectedQuest(!key.modifiers().shift(), selectedChapter);
-						}
-					}
-				}
-				case GLFW.GLFW_KEY_T -> {
-					if (key.modifiers().control()) {
-						new RewardTablesScreen(this).openGui();
-						return true;
-					}
-				}
+		double step = key.modifiers().shift() ? 0.1D : 0.5D;
+
+		if (FTBQuestKeys.SELECT_ALL.matches(key.event())) {
+			if (selectedChapter != null) {
+				selectedObjects.addAll(selectedChapter.getQuests());
+				selectedObjects.addAll(selectedChapter.getQuestLinks());
+				selectedObjects.addAll(selectedChapter.getImages());
 			}
+			return true;
+		}
+
+		if (FTBQuestKeys.DESELECT.matches(key.event())) {
+			selectedObjects.clear();
+			return true;
+		}
+
+		if (FTBQuestKeys.MOVE_DOWN.matches(key.event())) {
+			return moveSelectedQuests(0D, step);
+		}
+		if (FTBQuestKeys.MOVE_UP.matches(key.event())) {
+			return moveSelectedQuests(0D, -step);
+		}
+		if (FTBQuestKeys.MOVE_LEFT.matches(key.event())) {
+			return moveSelectedQuests(-step, 0D);
+		}
+		if (FTBQuestKeys.MOVE_RIGHT.matches(key.event())) {
+			return moveSelectedQuests(step, 0D);
+		}
+
+		if (FTBQuestKeys.COPY.matches(key.event())) {
+			return copyObjectsToClipboard();
+		}
+
+		if (FTBQuestKeys.PASTE_AS_LINK.matches(key.event())) {
+			if (selectedChapter != null) {
+				return pasteSelectedQuestLinks(selectedChapter);
+			}
+		}
+
+		if (FTBQuestKeys.PASTE.matches(key.event())) {
+			if (selectedChapter != null) {
+				return pasteSelectedQuest(!key.modifiers().shift(), selectedChapter);
+			}
+		}
+
+		if (FTBQuestKeys.OPEN_REWARDS_TABLE.matches(key.event())) {
+			new RewardTablesScreen(this).openGui();
+			return true;
 		}
 
 		return false;
