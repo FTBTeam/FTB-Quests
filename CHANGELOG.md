@@ -6,6 +6,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [2101.1.25]
 
+### Added
+* Reward selector screen now has a "Claim XP" button to claim only experience rewards
+
 ### Changed
 * Alt-clicking a quest link now open's the properties specific to the link, not the original quest
 
