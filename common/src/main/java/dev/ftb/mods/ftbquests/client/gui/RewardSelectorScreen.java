@@ -3,6 +3,7 @@ package dev.ftb.mods.ftbquests.client.gui;
 import dev.architectury.networking.NetworkManager;
 import dev.ftb.mods.ftblibrary.icon.Color4I;
 import dev.ftb.mods.ftblibrary.icon.Icons;
+import dev.ftb.mods.ftblibrary.icon.ItemIcon;
 import dev.ftb.mods.ftblibrary.ui.*;
 import dev.ftb.mods.ftblibrary.ui.misc.AbstractGroupedButtonListScreen;
 import dev.ftb.mods.ftblibrary.util.TooltipList;
@@ -14,6 +15,7 @@ import dev.ftb.mods.ftbquests.quest.Chapter;
 import dev.ftb.mods.ftbquests.quest.Quest;
 import dev.ftb.mods.ftbquests.quest.TeamData;
 import dev.ftb.mods.ftbquests.quest.reward.Reward;
+import dev.ftb.mods.ftbquests.quest.reward.RewardTypes;
 import net.minecraft.ChatFormatting;
 import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
@@ -21,6 +23,7 @@ import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.Items;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -36,6 +39,7 @@ public class RewardSelectorScreen extends AbstractGroupedButtonListScreen<Chapte
     private int widestQuestName;
     private int maxRewardCount;
     private int totalRewards;
+    private int xpRewards;
     private int excludedRewards;
     private int msgTimeout = 0;
     private Component message = Component.empty();
@@ -66,7 +70,7 @@ public class RewardSelectorScreen extends AbstractGroupedButtonListScreen<Chapte
         List<GroupData<Chapter,Quest>> groups = new ArrayList<>();
 
         Player player = Minecraft.getInstance().player;
-        widestQuestName = maxRewardCount = excludedRewards = totalRewards = 0;
+        widestQuestName = maxRewardCount = excludedRewards = totalRewards = xpRewards = 0;
 
         if (player != null && ClientQuestFile.exists()) {
             TeamData data = ClientQuestFile.INSTANCE.selfTeamData;
@@ -82,6 +86,9 @@ public class RewardSelectorScreen extends AbstractGroupedButtonListScreen<Chapte
                             if (!data.isRewardClaimed(player.getUUID(), reward)) {
                                 totalRewards++;
                                 unclaimed++;
+                                if (reward.getType() == RewardTypes.XP_LEVELS || reward.getType() == RewardTypes.XP) {
+                                    xpRewards++;
+                                }
                             }
                             if (reward.getExcludeFromClaimAll()) {
                                 excludedRewards++;
@@ -117,11 +124,14 @@ public class RewardSelectorScreen extends AbstractGroupedButtonListScreen<Chapte
         return true;
     }
 
-    private void doClaimAll() {
-        NetworkManager.sendToServer(ClaimAllRewardsMessage.INSTANCE);
-        message = excludedRewards > 0 ?
-                Component.translatable("ftbquests.gui.claim_all_exclusion", excludedRewards) :
-                Component.translatable("ftbquests.gui.all_rewards_claimed");
+    private void doClaimAll(boolean xpOnly) {
+        NetworkManager.sendToServer(new ClaimAllRewardsMessage(xpOnly));
+        message = xpOnly ?
+                Component.translatable("ftbquests.gui.xp_rewards_claimed") :
+                (excludedRewards > 0 ?
+                        Component.translatable("ftbquests.gui.claim_all_exclusion", excludedRewards) :
+                        Component.translatable("ftbquests.gui.all_rewards_claimed")
+                );
         msgTimeout = REFRESH_TIME;
     }
 
@@ -220,6 +230,7 @@ public class RewardSelectorScreen extends AbstractGroupedButtonListScreen<Chapte
 
     private class CustomBottomPanel extends Panel {
         private Button buttonClaimAll;
+        private Button buttonClaimXP;
         private final Button buttonClose;
 
         public CustomBottomPanel() {
@@ -235,11 +246,16 @@ public class RewardSelectorScreen extends AbstractGroupedButtonListScreen<Chapte
                     new Component[] { Component.translatable("ftbquests.gui.claim_all_exclusion", excludedRewards) } :
                     new Component[0];
             buttonClaimAll = SimpleTextButton.create(this, Component.translatable("ftbquests.reward.claim_all"),
-                    Icons.MONEY_BAG, mb -> doClaimAll(), tooltip);
+                    Icons.MONEY_BAG, mb -> doClaimAll(false), tooltip);
+            buttonClaimXP = SimpleTextButton.create(this, Component.translatable("ftbquests.reward.claim_xp"),
+                    ItemIcon.getItemIcon(Items.EXPERIENCE_BOTTLE),mb -> doClaimAll(true));
 
             add(buttonClose);
             if (totalRewards - excludedRewards > 0) {
                 add(buttonClaimAll);
+            }
+            if (xpRewards > 0) {
+                add(buttonClaimXP);
             }
         }
 
@@ -247,6 +263,7 @@ public class RewardSelectorScreen extends AbstractGroupedButtonListScreen<Chapte
         public void alignWidgets() {
             buttonClose.setPos(width - buttonClose.width - 5, 3);
             buttonClaimAll.setPos(buttonClose.posX - buttonClaimAll.width - 5, 3);
+            buttonClaimXP.setPos(buttonClose.posX - buttonClaimAll.width - buttonClaimXP.width - 10, 3);
         }
 
         @Override
