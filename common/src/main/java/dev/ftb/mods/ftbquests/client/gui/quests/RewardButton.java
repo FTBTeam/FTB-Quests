@@ -148,6 +148,8 @@ public class RewardButton extends Button {
 			return;
 		}
 
+		graphics.nextStratum();
+
 		Matrix3x2fStack poseStack = graphics.pose();
 
 		poseStack.pushMatrix();

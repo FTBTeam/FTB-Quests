@@ -205,6 +205,8 @@ public class TaskButton extends Button {
 		drawBackground(graphics, theme, x, y, w, h);
 		drawIcon(graphics, theme, x + (w - bs) / 2, y + (h - bs) / 2, bs, bs);
 
+		graphics.nextStratum();
+
 		Matrix3x2fStack poseStack = graphics.pose();
 		if (FTBQuestsClient.getClientPlayerData().isCompleted(task)) {
 			poseStack.pushMatrix();
