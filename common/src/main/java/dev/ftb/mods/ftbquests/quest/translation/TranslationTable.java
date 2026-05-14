@@ -2,6 +2,7 @@ package dev.ftb.mods.ftbquests.quest.translation;
 
 import com.google.common.collect.Maps;
 import com.mojang.datafixers.util.Either;
+import dev.ftb.mods.ftbquests.quest.ServerQuestFile;
 import net.minecraft.Util;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
@@ -11,10 +12,7 @@ import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 
 public class TranslationTable {
     public static final StreamCodec<FriendlyByteBuf, TranslationTable> STREAM_CODEC = StreamCodec.composite(
@@ -103,5 +101,16 @@ public class TranslationTable {
 
     public boolean contains(String key) {
         return map.containsKey(key);
+    }
+
+    public List<String> findStaleEntries(ServerQuestFile file) {
+        List<String> res = new ArrayList<>();
+        map.keySet().forEach(key -> {
+            long id = TranslationManager.getQuestIdFromKey(key);
+            if (id != 0L && file.get(id) == null) {
+                res.add(key);
+            }
+        });
+        return res;
     }
 }

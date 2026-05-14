@@ -6,10 +6,14 @@ import dev.ftb.mods.ftbquests.FTBQuests;
 import dev.ftb.mods.ftbquests.client.FTBQuestsClientConfig;
 import dev.ftb.mods.ftbquests.net.SyncTranslationTableMessage;
 import dev.ftb.mods.ftbquests.quest.BaseQuestFile;
+import dev.ftb.mods.ftbquests.quest.QuestObject;
 import dev.ftb.mods.ftbquests.quest.QuestObjectBase;
 import dev.ftb.mods.ftbquests.quest.ServerQuestFile;
+import net.minecraft.ChatFormatting;
 import net.minecraft.Util;
+import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 import org.jetbrains.annotations.NotNull;
 
@@ -147,16 +151,23 @@ public class TranslationManager {
     }
 
     public void removeAllTranslations(QuestObjectBase obj) {
+        if (obj instanceof QuestObject qo) {
+            qo.getChildren().forEach(this::removeAllTranslations);
+        }
         map.values().forEach(table -> {
             for (TranslationKey key : TranslationKey.values()) {
                 table.remove(makeKey(obj, key));
             }
-            table.setSaveNeeded(true);
         });
     }
 
     private static @NotNull String makeKey(QuestObjectBase object, TranslationKey subKey) {
         return String.format("%s.%s.%s", object.getObjectType().getId(), QuestObjectBase.getCodeString(object), subKey.getName());
+    }
+
+    static long getQuestIdFromKey(String key) {
+        String[] parts = key.split("\\.");
+        return parts.length == 3 ? QuestObjectBase.parseHexId(parts[1]).orElse(0L) : 0L;
     }
 
     public void syncTableFromServer(String locale, TranslationTable table) {
@@ -196,6 +207,22 @@ public class TranslationManager {
                     table.put(makeKey(object, key), tag.getString(keyStr));
                 }
             }
+        }
+    }
+
+    public void cleanupTranslations(CommandSourceStack source, boolean dryRun) {
+        ServerQuestFile file = ServerQuestFile.INSTANCE;
+        if (file != null && file.isValid()) {
+            map.forEach((locale, table) -> {
+                var toRemove = table.findStaleEntries(file);
+                if (dryRun) {
+                    source.sendSystemMessage(Component.literal(toRemove.size() + " stale translations to remove from " + locale));
+                    toRemove.forEach(pair -> source.sendSystemMessage(Component.literal("• " + pair).withStyle(ChatFormatting.GRAY)));
+                } else {
+                    toRemove.forEach(table::remove);
+                    source.sendSystemMessage(Component.literal(toRemove.size() + " stale translations removed from "+ locale));
+                }
+            });
         }
     }
 }
