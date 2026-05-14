@@ -7,6 +7,7 @@ import dev.ftb.mods.ftbquests.FTBQuests;
 import dev.ftb.mods.ftbquests.client.FTBQuestsClientConfig;
 import dev.ftb.mods.ftbquests.net.SyncTranslationTableMessage;
 import dev.ftb.mods.ftbquests.quest.BaseQuestFile;
+import dev.ftb.mods.ftbquests.quest.QuestObject;
 import dev.ftb.mods.ftbquests.quest.QuestObjectBase;
 import dev.ftb.mods.ftbquests.quest.ServerQuestFile;
 import net.minecraft.server.level.ServerPlayer;
@@ -146,6 +147,9 @@ public class TranslationManager {
     }
 
     public void removeAllTranslations(QuestObjectBase obj) {
+        if (obj instanceof QuestObject qo) {
+            qo.getChildren().forEach(this::removeAllTranslations);
+        }
         map.values().forEach(table -> {
             for (TranslationKey key : TranslationKey.values()) {
                 table.remove(makeKey(obj, key));
