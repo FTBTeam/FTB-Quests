@@ -34,8 +34,8 @@ public class FTBQuestsNeoforgeClient {
         bus.addListener(ClientStartedEvent.class, _ -> eventHandler.onClientSetup(Minecraft.getInstance()));
         bus.addListener(ClientTickEvent.Pre.class, _ -> eventHandler.onKeyEvent(Minecraft.getInstance()));
         bus.addListener(ClientTickEvent.Post.class, _ -> eventHandler.onClientTick(Minecraft.getInstance()));
-        bus.addListener(ClientPlayerNetworkEvent.LoggingIn.class, event -> eventHandler.onPlayerLogin());
-        bus.addListener(ClientPlayerNetworkEvent.LoggingOut.class, event -> eventHandler.onPlayerLogout());
+        bus.addListener(ClientPlayerNetworkEvent.LoggingIn.class, _ -> eventHandler.onPlayerLogin());
+        bus.addListener(ClientPlayerNetworkEvent.LoggingOut.class, _ -> eventHandler.onPlayerLogout());
 
         modBus.addListener(EntityRenderersEvent.RegisterRenderers.class, event ->
                 event.registerBlockEntityRenderer(ModBlockEntityTypes.CORE_TASK_SCREEN.get(), NeoForgeTaskScreenRenderer::new));

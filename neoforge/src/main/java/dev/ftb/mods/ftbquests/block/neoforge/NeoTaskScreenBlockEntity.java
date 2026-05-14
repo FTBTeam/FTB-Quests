@@ -24,8 +24,10 @@ import dev.ftb.mods.ftbquests.quest.task.Task;
 import java.util.function.LongConsumer;
 import java.util.function.LongSupplier;
 import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
 
 public class NeoTaskScreenBlockEntity extends TaskScreenBlockEntity {
+    @Nullable
     private AABB cachedRenderAABB = null;
 
     private final ResourceHandler<ItemResource> itemHandler = new TaskItemHandler();
