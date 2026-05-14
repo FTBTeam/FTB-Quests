@@ -296,7 +296,7 @@ public class TaskScreenBlockEntity extends EditableBlockEntity implements ITaskS
 
     public record TaskScreenSaveData(long taskId, ItemStack skin, boolean indestructible, boolean inputOnly, ItemStack inputModeIcon, boolean textShadow) {
         public static TaskScreenSaveData DEFAULT = new TaskScreenSaveData(
-                0L, ItemStack.EMPTY, false, true, ItemStack.EMPTY, false
+                0L, ItemStack.EMPTY, false, false, ItemStack.EMPTY, false
         );
 
         public static TaskScreenSaveData fromBlockEntity(TaskScreenBlockEntity b) {

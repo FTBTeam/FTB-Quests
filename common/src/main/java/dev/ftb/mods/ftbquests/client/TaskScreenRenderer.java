@@ -3,6 +3,7 @@ package dev.ftb.mods.ftbquests.client;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Axis;
 import dev.ftb.mods.ftblibrary.icon.AtlasSpriteIcon;
+import dev.ftb.mods.ftblibrary.icon.TextureAtlasSpriteIcon;
 import dev.ftb.mods.ftbquests.api.FTBQuestsAPI;
 import dev.ftb.mods.ftbquests.block.TaskScreenBlock;
 import dev.ftb.mods.ftbquests.block.entity.TaskScreenBlockEntity;
@@ -26,6 +27,7 @@ import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
+import net.minecraft.util.LightCoordsUtil;
 import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.level.block.WallSignBlock;
 import net.minecraft.world.phys.Vec3;
@@ -78,12 +80,12 @@ public class TaskScreenRenderer implements BlockEntityRenderer<TaskScreenBlockEn
             renderState.progressText = Component.literal(progress + " / " + task.getMaxProgress()).withStyle(col);
         }
         renderState.interpolatedProgress = (float) progress / task.getMaxProgress();
-        if (task instanceof FluidTask fluidTask && fluidTask.getIcon() instanceof AtlasSpriteIcon as && FTBQuestsClientEventHandler.tankSprite != null) {
+        if (task instanceof FluidTask fluidTask && fluidTask.getIcon() instanceof TextureAtlasSpriteIcon && FTBQuestsClientEventHandler.tankSprite != null) {
             var state = fluidTask.getFluid().defaultFluidState();
             var model = Minecraft.getInstance().getModelManager().getFluidStateModelSet().get(state);
             renderState.resourceSprite = new ResourceSprite(model.stillMaterial().sprite(), true);
             renderState.overlaySprite = new ResourceSprite(FTBQuestsClientEventHandler.tankSprite, false);
-            renderState.resourceSpriteTint = 0xFF000000 | (model.tintSource() == null ? 0xFFFFF : model.tintSource().color(state.createLegacyBlock()));
+            renderState.resourceSpriteTint = 0xFF000000 | (model.tintSource() == null ? 0xFFFFFFF : model.tintSource().color(state.createLegacyBlock()));
         } else if (task instanceof EnergyTask energyTask) {
             renderState.resourceSprite = new ResourceSprite(energyTask.getClientData().getEmptyTexture(), false);
             renderState.overlaySprite = new ResourceSprite(energyTask.getClientData().getFullTexture(), true);
@@ -190,7 +192,7 @@ public class TaskScreenRenderer implements BlockEntityRenderer<TaskScreenBlockEn
             }));
         } else if (!renderState.taskItem.isEmpty()) {
             poseStack.scale(1f, 1f, 0.1f * size);
-            renderState.taskItem.submit(poseStack, collector, RenderUtil.FULL_BRIGHT, OverlayTexture.NO_OVERLAY, 0);
+            renderState.taskItem.submit(poseStack, collector, LightCoordsUtil.FULL_BRIGHT, OverlayTexture.NO_OVERLAY, 0);
         }
 
         poseStack.popPose();
@@ -214,9 +216,9 @@ public class TaskScreenRenderer implements BlockEntityRenderer<TaskScreenBlockEn
 
             poseStack.scale(scale, scale, 1F);
             if (taskScreen.textHasShadow) {
-                collector.submitText(poseStack, -len / 2f, 0, text.getVisualOrderText(), true, Font.DisplayMode.NORMAL, RenderUtil.FULL_BRIGHT, 0xFFD8D8D8, 0, 0);
+                collector.submitText(poseStack, -len / 2f, 0, text.getVisualOrderText(), true, Font.DisplayMode.NORMAL, LightCoordsUtil.FULL_BRIGHT, 0xFFD8D8D8, 0, 0);
             }
-            collector.submitText(poseStack, -len / 2f, 0, text.getVisualOrderText(), false, Font.DisplayMode.POLYGON_OFFSET, RenderUtil.FULL_BRIGHT, 0xFFD8D8D8, 0, 0);
+            collector.submitText(poseStack, -len / 2f, 0, text.getVisualOrderText(), false, Font.DisplayMode.POLYGON_OFFSET, LightCoordsUtil.FULL_BRIGHT, 0xFFD8D8D8, 0, 0);
             poseStack.popPose();
         }
     }

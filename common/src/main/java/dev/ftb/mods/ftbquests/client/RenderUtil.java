@@ -2,17 +2,16 @@ package dev.ftb.mods.ftbquests.client;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
+import net.minecraft.util.LightCoordsUtil;
 import org.joml.Matrix4f;
 
 public class RenderUtil {
-    public static final int FULL_BRIGHT = 0x00F000F0;
-
     private final PoseStack.Pose pose;
     private final VertexConsumer builder;
     private final float x;
     private final float y;
 
-    private int packedLightIn = FULL_BRIGHT;
+    private int packedLightIn = LightCoordsUtil.FULL_BRIGHT;
     private float u1 = 0f;
     private float v1 = 0f;
     private float u2 = 1f;
