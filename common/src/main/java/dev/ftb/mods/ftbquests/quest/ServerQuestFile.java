@@ -212,12 +212,6 @@ public class ServerQuestFile extends BaseQuestFile {
 
 	public void playerLoggedIn(TeamPlayerLoggedInEvent.Data event) {
 		ServerPlayer player = event.player();
-		TeamData data = getOrCreateTeamData(event.team());
-
-		if (data.getName().isEmpty()) {
-			data.setName(player.getPlainTextName());
-			Server2PlayNetworking.send(player, new UpdateTeamDataMessage(data.getTeamId(), data.getName()));
-		}
 
 		// Sync the quest book data
 		// - client will respond to this with a RequestTeamData message
@@ -229,6 +223,13 @@ public class ServerQuestFile extends BaseQuestFile {
 		getTranslationManager().sendTranslationsToPlayer(player);
 
 		player.inventoryMenu.addSlotListener(new FTBQuestsInventoryListener(player));
+
+		TeamData data = getOrCreateTeamData(event.team());
+
+		if (data.getName().isEmpty()) {
+			data.setName(player.getPlainTextName());
+			Server2PlayNetworking.send(player, new UpdateTeamDataMessage(data.getTeamId(), data.getName()));
+		}
 
 		checkQuestBookOnLogin(data, player);
 	}

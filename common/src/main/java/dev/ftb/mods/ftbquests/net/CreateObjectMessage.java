@@ -62,25 +62,25 @@ public record CreateObjectMessage(long parent, QuestObjectType questObjectType, 
 	}
 
 	public static void handle(CreateObjectMessage message, PacketContext context) {
-			if (NetUtils.canEdit(context) && context.player() instanceof ServerPlayer sp && message.nbt instanceof Json5Object json) {
-				Json5Object extra = message.extra
-						.filter(e -> e instanceof Json5Object)
-						.map(Json5Element::getAsJson5Object)
-						.orElseGet(Json5Object::new);
+		if (NetUtils.canEdit(context) && context.player() instanceof ServerPlayer sp && message.nbt instanceof Json5Object json) {
+			Json5Object extra = message.extra
+					.filter(e -> e instanceof Json5Object)
+					.map(Json5Element::getAsJson5Object)
+					.orElseGet(Json5Object::new);
 
-				QuestObjectBase object = ServerQuestFile.getInstance().create(
-						ServerQuestFile.getInstance().newID(), message.questObjectType, message.parent, extra
-				);
-				object.readData(json, context.player().registryAccess());
+			QuestObjectBase object = ServerQuestFile.getInstance().create(
+					ServerQuestFile.getInstance().newID(), message.questObjectType, message.parent, extra
+			);
+			object.readData(json, context.player().registryAccess());
 
-				object.onCreated();
-				object.getQuestFile().refreshIDMap();
-				object.getQuestFile().clearCachedData();
-				object.getQuestFile().markDirty();
+			object.onCreated();
+			object.getQuestFile().refreshIDMap();
+			object.getQuestFile().clearCachedData();
+			object.getQuestFile().markDirty();
 
-				object.getQuestFile().getTranslationManager().processInitialTranslation(extra, object);
+			object.getQuestFile().getTranslationManager().processInitialTranslation(extra, object);
 
-				Server2PlayNetworking.sendToAllPlayers(sp.level().getServer(), CreateObjectResponseMessage.create(object, message.extra.orElse(null), message.openScreen ? sp.getUUID() : null));
-			}
+			Server2PlayNetworking.sendToAllPlayers(sp.level().getServer(), CreateObjectResponseMessage.create(object, message.extra.orElse(null), message.openScreen ? sp.getUUID() : null));
+		}
 	}
 }
