@@ -10,7 +10,6 @@ import net.minecraft.core.HolderLookup;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
-import org.jetbrains.annotations.UnknownNullability;
 
 public abstract class EnergyTask extends Task implements ISingleLongValueTask {
 	private long value = 1000L;

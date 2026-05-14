@@ -14,7 +14,6 @@ import net.minecraft.core.HolderLookup;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
-import org.jetbrains.annotations.UnknownNullability;
 
 public class CurrencyReward extends Reward {
     private int coinAmount;

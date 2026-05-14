@@ -27,7 +27,6 @@ import net.minecraft.world.level.block.state.pattern.BlockInWorld;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.EntityHitResult;
 import net.minecraft.world.phys.HitResult;
-import org.jetbrains.annotations.UnknownNullability;
 import org.jspecify.annotations.Nullable;
 
 import java.util.Optional;

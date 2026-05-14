@@ -18,7 +18,6 @@ import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.permissions.LevelBasedPermissionSet;
 import net.minecraft.server.permissions.PermissionSet;
-import org.jetbrains.annotations.UnknownNullability;
 
 import java.util.ArrayList;
 import java.util.HashMap;

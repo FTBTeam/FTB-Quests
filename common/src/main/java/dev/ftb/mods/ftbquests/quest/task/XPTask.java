@@ -13,7 +13,6 @@ import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
-import org.jetbrains.annotations.UnknownNullability;
 
 public class XPTask extends Task implements ISingleLongValueTask {
 	private long value = 1L;

@@ -22,7 +22,6 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.level.StructureManager;
 import net.minecraft.world.level.levelgen.structure.Structure;
-import org.jetbrains.annotations.UnknownNullability;
 
 import java.util.ArrayList;
 import java.util.List;

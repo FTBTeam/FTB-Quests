@@ -2,7 +2,6 @@ package dev.ftb.mods.ftbquests.client;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Axis;
-import dev.ftb.mods.ftblibrary.icon.AtlasSpriteIcon;
 import dev.ftb.mods.ftblibrary.icon.TextureAtlasSpriteIcon;
 import dev.ftb.mods.ftbquests.api.FTBQuestsAPI;
 import dev.ftb.mods.ftbquests.block.TaskScreenBlock;

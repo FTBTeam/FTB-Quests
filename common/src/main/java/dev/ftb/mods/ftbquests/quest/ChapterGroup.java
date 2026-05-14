@@ -4,8 +4,8 @@ import dev.ftb.mods.ftblibrary.client.config.EditableConfigGroup;
 import dev.ftb.mods.ftblibrary.client.util.ClientUtils;
 import dev.ftb.mods.ftblibrary.icon.AnimatedIcon;
 import dev.ftb.mods.ftblibrary.icon.Icon;
-import dev.ftb.mods.ftbquests.client.gui.quests.QuestScreen;
 import dev.ftb.mods.ftbquests.api.event.progress.ProgressEventData;
+import dev.ftb.mods.ftbquests.client.gui.quests.QuestScreen;
 import net.minecraft.network.chat.Component;
 import org.jspecify.annotations.Nullable;
 

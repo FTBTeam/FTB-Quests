@@ -1,7 +1,6 @@
 package dev.ftb.mods.ftbquests.net;
 
 import de.marhali.json5.Json5Object;
-import dev.ftb.mods.ftblibrary.json5.Json5Ops;
 import dev.ftb.mods.ftblibrary.platform.network.PacketContext;
 import dev.ftb.mods.ftblibrary.platform.network.Server2PlayNetworking;
 import dev.ftb.mods.ftbquests.api.FTBQuestsAPI;
@@ -10,7 +9,6 @@ import dev.ftb.mods.ftbquests.quest.reward.Reward;
 import dev.ftb.mods.ftbquests.quest.reward.RewardType;
 import dev.ftb.mods.ftbquests.quest.task.Task;
 import dev.ftb.mods.ftbquests.quest.task.TaskType;
-import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;

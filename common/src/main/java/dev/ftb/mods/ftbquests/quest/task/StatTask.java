@@ -16,7 +16,6 @@ import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.stats.Stats;
 import net.minecraft.world.item.ItemStack;
-import org.jetbrains.annotations.UnknownNullability;
 
 import java.util.ArrayList;
 import java.util.List;

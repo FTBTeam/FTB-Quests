@@ -16,7 +16,6 @@ import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.server.level.ServerPlayer;
-import org.jetbrains.annotations.UnknownNullability;
 
 public class StageTask extends AbstractBooleanTask {
 	private String stage = "";

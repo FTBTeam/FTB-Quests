@@ -22,7 +22,6 @@ import net.minecraft.util.RandomSource;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.block.entity.BlockEntity;
-import org.jetbrains.annotations.UnknownNullability;
 import org.jspecify.annotations.Nullable;
 
 import java.util.List;

@@ -2,7 +2,6 @@ package dev.ftb.mods.ftbquests.quest.task;
 
 import dev.ftb.mods.ftblibrary.client.util.ClientUtils;
 import dev.ftb.mods.ftblibrary.client.util.TextureAtlasSpriteRef;
-import dev.ftb.mods.ftblibrary.icon.Color4I;
 import dev.ftb.mods.ftblibrary.icon.Icon;
 import dev.ftb.mods.ftblibrary.icon.Icons;
 import dev.ftb.mods.ftblibrary.platform.fluid.FluidStack;
@@ -12,7 +11,6 @@ import net.minecraft.world.level.material.Fluids;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
-import java.util.Optional;
 import java.util.function.Supplier;
 
 public interface TaskTypes {

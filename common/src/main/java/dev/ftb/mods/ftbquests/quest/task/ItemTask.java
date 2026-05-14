@@ -28,7 +28,6 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
-import org.jetbrains.annotations.UnknownNullability;
 
 import java.util.ArrayList;
 import java.util.Collection;

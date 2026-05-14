@@ -20,7 +20,6 @@ import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerPlayer;
-import org.jetbrains.annotations.UnknownNullability;
 
 public class AdvancementTask extends AbstractBooleanTask {
 	private Identifier advancement = Identifier.parse("minecraft:story/root");

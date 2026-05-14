@@ -9,7 +9,6 @@ import dev.ftb.mods.ftbquests.quest.Quest;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.server.level.ServerPlayer;
-import org.jetbrains.annotations.UnknownNullability;
 
 public class ToastReward extends Reward {
 	private String description;

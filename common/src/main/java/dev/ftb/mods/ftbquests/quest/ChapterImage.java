@@ -16,7 +16,6 @@ import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
 import net.minecraft.util.Mth;
-import org.jetbrains.annotations.UnknownNullability;
 import org.jspecify.annotations.Nullable;
 
 import java.util.function.Predicate;

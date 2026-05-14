@@ -3,7 +3,6 @@ package dev.ftb.mods.ftbquests;
 import dev.ftb.mods.ftblibrary.platform.Platform;
 import dev.ftb.mods.ftbquests.api.FTBQuestsAPI;
 import dev.ftb.mods.ftbquests.client.ClientQuestFile;
-import dev.ftb.mods.ftbquests.client.FTBQClientProxy;
 import dev.ftb.mods.ftbquests.integration.RecipeModHelper;
 import dev.ftb.mods.ftbquests.net.ClearDisplayCacheMessage;
 import dev.ftb.mods.ftbquests.net.FTBQuestsNetHandler;

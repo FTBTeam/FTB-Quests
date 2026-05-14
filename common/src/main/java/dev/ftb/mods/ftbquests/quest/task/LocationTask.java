@@ -16,7 +16,6 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.util.Mth;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.StructureBlockEntity;
-import org.jetbrains.annotations.UnknownNullability;
 
 import java.util.List;
 
