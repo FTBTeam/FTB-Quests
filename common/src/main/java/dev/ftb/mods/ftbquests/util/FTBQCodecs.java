@@ -12,7 +12,7 @@ import java.util.function.Function;
 
 public class FTBQCodecs {
     public static final Codec<Map<QuestKey,Long>> CLAIMED_REWARDS_CODEC
-            = Codec.unboundedMap(QuestKey.CODEC, Codec.LONG).xmap(Object2LongOpenHashMap::new, Function.identity());
+            = Codec.unboundedMap(QuestKey.STRING_CODEC, Codec.LONG).xmap(Object2LongOpenHashMap::new, Function.identity());
     public static final StreamCodec<FriendlyByteBuf,Map<QuestKey,Long>> CLAIMED_REWARDS_STREAM_CODEC
             = ByteBufCodecs.map(Object2LongOpenHashMap::new, QuestKey.STREAM_CODEC, ByteBufCodecs.LONG);
 
