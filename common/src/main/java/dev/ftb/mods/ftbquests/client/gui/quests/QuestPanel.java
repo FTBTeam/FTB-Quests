@@ -16,9 +16,12 @@ import dev.ftb.mods.ftblibrary.icon.Icon;
 import dev.ftb.mods.ftblibrary.icon.Icons;
 import dev.ftb.mods.ftblibrary.icon.ImageIcon;
 import dev.ftb.mods.ftblibrary.math.MathUtils;
+import dev.ftb.mods.ftblibrary.platform.client.PlatformClient;
+import dev.ftb.mods.ftblibrary.platform.client.keys.KeyMap;
 import dev.ftb.mods.ftblibrary.platform.network.Play2ServerNetworking;
 import dev.ftb.mods.ftbquests.client.FTBQuestsClient;
 import dev.ftb.mods.ftbquests.client.FTBQuestsClientConfig;
+import dev.ftb.mods.ftbquests.client.FTBQuestsKeyMappings;
 import dev.ftb.mods.ftbquests.mixin.GuiGraphicsMixin;
 import dev.ftb.mods.ftbquests.net.CopyChapterImageMessage;
 import dev.ftb.mods.ftbquests.net.CopyQuestMessage;
@@ -591,9 +594,14 @@ public class QuestPanel extends Panel {
 
 	@Override
 	public boolean keyPressed(Key key) {
-		if (questScreen.selectedChapter != null && !questScreen.isViewingQuest() && (key.is(GLFW.GLFW_KEY_MINUS) || key.is(GLFW.GLFW_KEY_EQUAL))) {
-			questScreen.addZoom(key.is(GLFW.GLFW_KEY_MINUS) ? -1D : 1D);
-			return true;
+		if (questScreen.selectedChapter != null && !questScreen.isViewingQuest()) {
+			if (key.matches(FTBQuestsKeyMappings.KEY_GUI_ZOOM_IN)) {
+				questScreen.addZoom(1D);
+				return true;
+			} else if (key.matches(FTBQuestsKeyMappings.KEY_GUI_ZOOM_OUT)) {
+				questScreen.addZoom(-1D);
+				return true;
+			}
 		}
 		return super.keyPressed(key);
 	}

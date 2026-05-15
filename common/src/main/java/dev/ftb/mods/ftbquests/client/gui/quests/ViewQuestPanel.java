@@ -27,6 +27,7 @@ import dev.ftb.mods.ftbquests.api.FTBQuestsAPI;
 import dev.ftb.mods.ftbquests.client.ClientQuestFile;
 import dev.ftb.mods.ftbquests.client.FTBQuestsClient;
 import dev.ftb.mods.ftbquests.client.FTBQuestsClientConfig;
+import dev.ftb.mods.ftbquests.client.FTBQuestsKeyMappings;
 import dev.ftb.mods.ftbquests.client.gui.ImageComponentWidget;
 import dev.ftb.mods.ftbquests.client.gui.MultilineTextEditorScreen;
 import dev.ftb.mods.ftbquests.net.EditObjectMessage;
@@ -602,16 +603,24 @@ public class ViewQuestPanel extends ModalPanel {
 		if (quest == null) return false;
 
 		if (questScreen.file.canEdit()) {
-			switch (key.event().key()) {
-				case GLFW.GLFW_KEY_S -> editSubtitle();
-				case GLFW.GLFW_KEY_T -> editTitle();
-				case GLFW.GLFW_KEY_D -> editDescription();
-				case GLFW.GLFW_KEY_P -> addPageBreak();
-				case GLFW.GLFW_KEY_L -> editDescLine0(this, -1, null);
-				case GLFW.GLFW_KEY_I -> editDescLine0(this, -1, new ImageComponent());
-				case GLFW.GLFW_KEY_Q -> quest.onEditButtonClicked(questScreen);
-				case GLFW.GLFW_KEY_LEFT -> moveTasksAndRewards(false);
-				case GLFW.GLFW_KEY_RIGHT -> moveTasksAndRewards(true);
+			if (key.matches(FTBQuestsKeyMappings.KEY_GUI_EDIT_TITLE)) {
+				editTitle();
+			} else if (key.matches(FTBQuestsKeyMappings.KEY_GUI_EDIT_SUBTITLE)) {
+				editSubtitle();
+			} else if (key.matches(FTBQuestsKeyMappings.KEY_GUI_EDIT_DESC)) {
+				editDescription();
+			} else if (key.matches(FTBQuestsKeyMappings.KEY_GUI_ADD_PAGE_BREAK)) {
+				addPageBreak();
+			} else if (key.matches(FTBQuestsKeyMappings.KEY_GUI_ADD_LINE)) {
+				editDescLine0(this, -1, null);
+			} else if (key.matches(FTBQuestsKeyMappings.KEY_GUI_ADD_IMAGE)) {
+				editDescLine0(this, -1, new ImageComponent());
+			} else if (key.matches(FTBQuestsKeyMappings.KEY_GUI_EDIT_QUEST_PROPS)) {
+				quest.onEditButtonClicked(questScreen);
+			} else if (key.matches(FTBQuestsKeyMappings.KEY_GUI_LEFT)) {
+				moveTasksAndRewards(false);
+			} else if (key.matches(FTBQuestsKeyMappings.KEY_GUI_RIGHT)) {
+				moveTasksAndRewards(true);
 			}
 		} else {
 			switch (key.event().key()) {

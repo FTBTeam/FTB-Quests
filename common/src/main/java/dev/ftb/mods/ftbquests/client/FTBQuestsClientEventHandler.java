@@ -103,7 +103,7 @@ public class FTBQuestsClientEventHandler {
     public void onKeyEvent(Minecraft minecraft) {
         if (ClientQuestFile.exists()
                 && (!ClientQuestFile.getInstance().isDisableGui() || ClientQuestFile.getInstance().canEdit())
-                && FTBQuestsClient.KEY_QUESTS.consumeClick()) {
+                && FTBQuestsKeyMappings.KEY_QUESTS.consumeClick()) {
             ClientQuestFile.openGui();
         }
     }
