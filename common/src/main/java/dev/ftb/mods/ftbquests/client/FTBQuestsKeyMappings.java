@@ -13,7 +13,7 @@ public class FTBQuestsKeyMappings {
     private static final KeyMapping.Category FTB_QUESTS_KEY_CATEGORY
             = new KeyMapping.Category(FTBQuestsAPI.id("keys"));
     public static final KeyMapping KEY_QUESTS
-            = input().createKeyBinding(KeyMappingConfig.builder("quests", FTB_QUESTS_KEY_CATEGORY)
+            = input().createKeyMapping(KeyMappingConfig.builder("quests", FTB_QUESTS_KEY_CATEGORY)
             .conflictContext(KeyConflict.IN_GAME)
             .build());
 
@@ -27,7 +27,7 @@ public class FTBQuestsKeyMappings {
     public static final KeyMapping KEY_GUI_PLAYER_PREFS = guiKey("player_prefs", InputConstants.KEY_P, KeyModifier.CONTROL);
     public static final KeyMapping KEY_GUI_EXT_INFO = guiKey("extended_info", InputConstants.KEY_F1, KeyModifier.NONE);
     public static final KeyMapping KEY_GUI_NEXT_CHAPTER = guiKey("next_chapter", InputConstants.KEY_TAB, KeyModifier.NONE);
-    public static final KeyMapping KEY_GUI_PREV_CHAPTER = input().createKeyBinding(KeyMappingConfig.builder("prev_chapter", FTB_QUESTS_KEY_CATEGORY_GUI)
+    public static final KeyMapping KEY_GUI_PREV_CHAPTER = input().createKeyMapping(KeyMappingConfig.builder("prev_chapter", FTB_QUESTS_KEY_CATEGORY_GUI)
             .keyboard(InputConstants.KEY_TAB)
             .modifier(KeyModifier.SHIFT)
             .noModifierFallbackKey(InputConstants.UNKNOWN)
@@ -47,7 +47,7 @@ public class FTBQuestsKeyMappings {
     public static final KeyMapping KEY_GUI_PASTE = guiEditorKey("paste", InputConstants.KEY_V, KeyModifier.CONTROL);
     public static final KeyMapping KEY_GUI_RELOAD_THEME = guiEditorKey("reload_theme", InputConstants.KEY_F5, KeyModifier.NONE);
     public static final KeyMapping KEY_GUI_DELETE = guiEditorKey("delete", InputConstants.KEY_DELETE, KeyModifier.NONE);
-    public static final KeyMapping KEY_GUI_FORCE_DELETE = input().createKeyBinding(KeyMappingConfig.builder("force_delete", FTB_QUESTS_KEY_CATEGORY_GUI_EDITOR)
+    public static final KeyMapping KEY_GUI_FORCE_DELETE = input().createKeyMapping(KeyMappingConfig.builder("force_delete", FTB_QUESTS_KEY_CATEGORY_GUI_EDITOR)
             .keyboard(InputConstants.KEY_DELETE)
             .modifier(KeyModifier.SHIFT)
             .noModifierFallbackKey(InputConstants.UNKNOWN)
@@ -124,7 +124,7 @@ public class FTBQuestsKeyMappings {
     }
 
     private static KeyMapping makeKeyMapping(String name, int keyCode, KeyModifier modifier, KeyMapping.Category category) {
-        return input().createKeyBinding(KeyMappingConfig.builder(name, category)
+        return input().createKeyMapping(KeyMappingConfig.builder(name, category)
                 .keyboard(keyCode)
                 .modifier(modifier)
                 .build());
