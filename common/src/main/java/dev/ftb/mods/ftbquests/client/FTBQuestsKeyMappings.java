@@ -2,10 +2,10 @@ package dev.ftb.mods.ftbquests.client;
 
 import com.mojang.blaze3d.platform.InputConstants;
 import dev.ftb.mods.ftblibrary.platform.client.PlatformClient;
-import dev.ftb.mods.ftblibrary.platform.client.keys.KeyConflict;
-import dev.ftb.mods.ftblibrary.platform.client.keys.KeyMap;
-import dev.ftb.mods.ftblibrary.platform.client.keys.KeyMappingConfig;
-import dev.ftb.mods.ftblibrary.platform.client.keys.KeyModifier;
+import dev.ftb.mods.ftblibrary.platform.client.input.Input;
+import dev.ftb.mods.ftblibrary.platform.client.input.KeyConflict;
+import dev.ftb.mods.ftblibrary.platform.client.input.KeyMappingConfig;
+import dev.ftb.mods.ftblibrary.platform.client.input.KeyModifier;
 import dev.ftb.mods.ftbquests.api.FTBQuestsAPI;
 import net.minecraft.client.KeyMapping;
 
@@ -13,7 +13,7 @@ public class FTBQuestsKeyMappings {
     private static final KeyMapping.Category FTB_QUESTS_KEY_CATEGORY
             = new KeyMapping.Category(FTBQuestsAPI.id("keys"));
     public static final KeyMapping KEY_QUESTS
-            = keymap().createKeyBinding(KeyMappingConfig.builder("quests", FTB_QUESTS_KEY_CATEGORY)
+            = input().createKeyBinding(KeyMappingConfig.builder("quests", FTB_QUESTS_KEY_CATEGORY)
             .conflictContext(KeyConflict.IN_GAME)
             .build());
 
@@ -27,7 +27,7 @@ public class FTBQuestsKeyMappings {
     public static final KeyMapping KEY_GUI_PLAYER_PREFS = guiKey("player_prefs", InputConstants.KEY_P, KeyModifier.CONTROL);
     public static final KeyMapping KEY_GUI_EXT_INFO = guiKey("extended_info", InputConstants.KEY_F1, KeyModifier.NONE);
     public static final KeyMapping KEY_GUI_NEXT_CHAPTER = guiKey("next_chapter", InputConstants.KEY_TAB, KeyModifier.NONE);
-    public static final KeyMapping KEY_GUI_PREV_CHAPTER = keymap().createKeyBinding(KeyMappingConfig.builder("prev_chapter", FTB_QUESTS_KEY_CATEGORY_GUI)
+    public static final KeyMapping KEY_GUI_PREV_CHAPTER = input().createKeyBinding(KeyMappingConfig.builder("prev_chapter", FTB_QUESTS_KEY_CATEGORY_GUI)
             .keyboard(InputConstants.KEY_TAB)
             .modifier(KeyModifier.SHIFT)
             .noModifierFallbackKey(InputConstants.UNKNOWN)
@@ -47,7 +47,7 @@ public class FTBQuestsKeyMappings {
     public static final KeyMapping KEY_GUI_PASTE = guiEditorKey("paste", InputConstants.KEY_V, KeyModifier.CONTROL);
     public static final KeyMapping KEY_GUI_RELOAD_THEME = guiEditorKey("reload_theme", InputConstants.KEY_F5, KeyModifier.NONE);
     public static final KeyMapping KEY_GUI_DELETE = guiEditorKey("delete", InputConstants.KEY_DELETE, KeyModifier.NONE);
-    public static final KeyMapping KEY_GUI_FORCE_DELETE = keymap().createKeyBinding(KeyMappingConfig.builder("force_delete", FTB_QUESTS_KEY_CATEGORY_GUI_EDITOR)
+    public static final KeyMapping KEY_GUI_FORCE_DELETE = input().createKeyBinding(KeyMappingConfig.builder("force_delete", FTB_QUESTS_KEY_CATEGORY_GUI_EDITOR)
             .keyboard(InputConstants.KEY_DELETE)
             .modifier(KeyModifier.SHIFT)
             .noModifierFallbackKey(InputConstants.UNKNOWN)
@@ -68,10 +68,10 @@ public class FTBQuestsKeyMappings {
 
     public static void init() {
         // in-game category
-        keymap().registerKeyMapping(FTBQuestsAPI.MOD_ID, KEY_QUESTS);
+        input().registerKeyMapping(FTBQuestsAPI.MOD_ID, KEY_QUESTS);
 
         // gui category
-        keymap().registerKeyMapping(FTBQuestsAPI.MOD_ID,
+        input().registerKeyMapping(FTBQuestsAPI.MOD_ID,
                 KEY_GUI_SEARCH,
                 KEY_GUI_RECENTER,
                 KEY_GUI_ZOOM_IN,
@@ -87,7 +87,7 @@ public class FTBQuestsKeyMappings {
         );
 
         // gui editor mode category
-        keymap().registerKeyMapping(FTBQuestsAPI.MOD_ID,
+        input().registerKeyMapping(FTBQuestsAPI.MOD_ID,
                 KEY_GUI_TOGGLE_CROSSHAIRS,
                 KEY_GUI_SELECT_ALL,
                 KEY_GUI_SELECT_NONE,
@@ -100,7 +100,7 @@ public class FTBQuestsKeyMappings {
         );
 
         // gui editor mode (quest panel) category
-        keymap().registerKeyMapping(FTBQuestsAPI.MOD_ID,
+        input().registerKeyMapping(FTBQuestsAPI.MOD_ID,
                 KEY_GUI_EDIT_TITLE,
                 KEY_GUI_EDIT_SUBTITLE,
                 KEY_GUI_EDIT_DESC,
@@ -124,13 +124,13 @@ public class FTBQuestsKeyMappings {
     }
 
     private static KeyMapping makeKeyMapping(String name, int keyCode, KeyModifier modifier, KeyMapping.Category category) {
-        return keymap().createKeyBinding(KeyMappingConfig.builder(name, category)
+        return input().createKeyBinding(KeyMappingConfig.builder(name, category)
                 .keyboard(keyCode)
                 .modifier(modifier)
                 .build());
     }
 
-    private static KeyMap keymap() {
-        return PlatformClient.get().keymap();
+    private static Input input() {
+        return PlatformClient.get().input();
     }
 }

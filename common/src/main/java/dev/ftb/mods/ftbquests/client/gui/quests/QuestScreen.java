@@ -499,21 +499,14 @@ public class QuestScreen extends BaseScreen {
 		}
 
 		if (key.matches(FTBQuestsKeyMappings.KEY_GUI_NEXT_CHAPTER)) {
-			List<Chapter> visibleChapters = file.getVisibleChapters(file.selfTeamData);
-			cycleChapter(visibleChapters, visibleChapters.indexOf(selectedChapter) + 1);
-			return true;
+			return cycleChapter(1);
 		} else if (key.matches(FTBQuestsKeyMappings.KEY_GUI_PREV_CHAPTER)) {
-			List<Chapter> visibleChapters = file.getVisibleChapters(file.selfTeamData);
-			cycleChapter(visibleChapters, visibleChapters.indexOf(selectedChapter) - 1);
-			return true;
+			return cycleChapter(-1);
 		} else if (key.matches(FTBQuestsKeyMappings.KEY_GUI_RECENTER)) {
 			questPanel.resetScroll();
 			return true;
 		} else if (key.matches(FTBQuestsKeyMappings.KEY_GUI_TOGGLE_CROSSHAIRS)) {
 			grid = !grid;
-			return true;
-		} else if (key.matches(FTBQuestsKeyMappings.KEY_GUI_SEARCH)) {
-			openQuestSelectionGUI();
 			return true;
 		} else if (key.matches(FTBQuestsKeyMappings.KEY_GUI_ZOOM_RESET)) {
 			addZoom((16 - zoom) / 4.0);
@@ -588,13 +581,16 @@ public class QuestScreen extends BaseScreen {
 			return true;
 		}
 
-		return false;
+		return super.keyPressed(key);
 	}
 
 	@Override
 	public boolean keyReleased(Key key) {
 		if (key.matches(FTBQuestsKeyMappings.KEY_GUI_EXT_INFO)) {
 			showExtendedInfo = false;
+			return true;
+		} else if (key.matches(FTBQuestsKeyMappings.KEY_GUI_SEARCH)) {
+			openQuestSelectionGUI();
 			return true;
 		}
 
@@ -622,11 +618,14 @@ public class QuestScreen extends BaseScreen {
 		return true;
 	}
 
-	private void cycleChapter(List<Chapter> visibleChapters, int offset) {
+	private boolean cycleChapter(int offset) {
+		List<Chapter> visibleChapters = file.getVisibleChapters(file.selfTeamData);
+		int index = visibleChapters.indexOf(selectedChapter) + offset;
 		if (selectedChapter != null && visibleChapters.size() > 1) {
-			selectChapter(visibleChapters.get(MathUtils.mod(offset, visibleChapters.size())));
+			selectChapter(visibleChapters.get(MathUtils.mod(index, visibleChapters.size())));
 			selectedChapter.getAutofocus().ifPresent(this::scrollTo);
 		}
+		return true;
 	}
 
 	private void openQuestSelectionGUI() {
