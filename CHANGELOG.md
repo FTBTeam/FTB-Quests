@@ -14,6 +14,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 * Fixed emergency items screen resetting the cooldown if it was zero when the screen was opened
+* Fixed observation progress still showing for observation tasks in completed quests
+* Fixed items with custom component data not always properly encoding when sent from client to server
+* When any quest object is deleted, all related translations are now cleaned up
+  * Added `/ftbquests cleanup_stale_translations {show|execute}` commands to clean up stale translations
 
 ## [2101.1.24]
 
