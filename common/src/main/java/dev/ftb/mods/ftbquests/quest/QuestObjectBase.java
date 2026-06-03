@@ -292,7 +292,7 @@ public abstract class QuestObjectBase implements Comparable<QuestObjectBase> {
 
 	public void writeData(CompoundTag nbt, HolderLookup.Provider provider) {
 		if (!rawIcon.isEmpty()) {
-			ItemStack.SINGLE_ITEM_CODEC.encodeStart(NbtOps.INSTANCE, rawIcon).ifSuccess(t -> nbt.put("icon", t));
+			ItemStack.SINGLE_ITEM_CODEC.encodeStart(provider.createSerializationContext(NbtOps.INSTANCE), rawIcon).ifSuccess(t -> nbt.put("icon", t));
 		}
 
 		if (!tags.isEmpty()) {
