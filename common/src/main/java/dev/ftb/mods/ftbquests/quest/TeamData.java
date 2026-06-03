@@ -637,10 +637,12 @@ public class TeamData {
 			RewardAutoClaim auto = reward.getAutoClaimType();
 
 			if (auto != RewardAutoClaim.DISABLED) {
-				if (reward.isTeamReward() && ServerQuestFile.INSTANCE.getCurrentPlayer() != null) {
+				if (reward.isTeamReward()) {
 					// only the submitting player gets the reward if it's a team reward
-					// (assuming it's possible to determine who the submitting player is)
-					claimReward(ServerQuestFile.INSTANCE.getCurrentPlayer(), reward, auto == RewardAutoClaim.ENABLED);
+					// (assuming it's possible to determine who the submitting player is, which _should_ always be true...)
+					if (ServerQuestFile.INSTANCE.getCurrentPlayer() != null) {
+						claimReward(ServerQuestFile.INSTANCE.getCurrentPlayer(), reward, auto == RewardAutoClaim.ENABLED);
+					}
 				} else {
 					if (online == null) {
 						online = getOnlineMembers();

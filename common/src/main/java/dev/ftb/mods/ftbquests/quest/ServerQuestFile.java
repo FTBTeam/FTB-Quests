@@ -33,9 +33,7 @@ import net.minecraft.world.level.storage.LevelResource;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.Date;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Stream;
 
 public class ServerQuestFile extends BaseQuestFile {
@@ -47,7 +45,8 @@ public class ServerQuestFile extends BaseQuestFile {
 	private boolean shouldSave;
 	private boolean isLoading;
 	private Path folder;
-	private ServerPlayer currentPlayer = null;
+	private final Deque<ServerPlayer> playerContextStack = new ArrayDeque<>();
+//	private ServerPlayer currentPlayer = null;
 
 	public ServerQuestFile(MinecraftServer s) {
 		server = s;
@@ -171,15 +170,15 @@ public class ServerQuestFile extends BaseQuestFile {
 	}
 
 	public ServerPlayer getCurrentPlayer() {
-		return currentPlayer;
+		return playerContextStack.peek();
 	}
 
 	public void withPlayerContext(ServerPlayer player, Runnable toDo) {
-		currentPlayer = player;
+		playerContextStack.push(player);
 		try {
 			toDo.run();
 		} finally {
-			currentPlayer = null;
+			playerContextStack.pop();
 		}
 	}
 
