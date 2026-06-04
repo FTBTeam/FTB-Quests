@@ -33,9 +33,7 @@ import net.minecraft.world.level.storage.LevelResource;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.Date;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Stream;
 
 public class ServerQuestFile extends BaseQuestFile {
@@ -47,7 +45,8 @@ public class ServerQuestFile extends BaseQuestFile {
 	private boolean shouldSave;
 	private boolean isLoading;
 	private Path folder;
-	private ServerPlayer currentPlayer = null;
+	private final Deque<ServerPlayer> playerContextStack = new ArrayDeque<>();
+//	private ServerPlayer currentPlayer = null;
 
 	public ServerQuestFile(MinecraftServer s) {
 		server = s;
@@ -171,15 +170,15 @@ public class ServerQuestFile extends BaseQuestFile {
 	}
 
 	public ServerPlayer getCurrentPlayer() {
-		return currentPlayer;
+		return playerContextStack.peek();
 	}
 
 	public void withPlayerContext(ServerPlayer player, Runnable toDo) {
-		currentPlayer = player;
+		playerContextStack.push(player);
 		try {
 			toDo.run();
 		} finally {
-			currentPlayer = null;
+			playerContextStack.pop();
 		}
 	}
 
@@ -217,6 +216,10 @@ public class ServerQuestFile extends BaseQuestFile {
 						}
 					}
 
+					// Handles possible situation where quest book has been modified to remove a task from a quest
+					// It can leave a player having completed all the other tasks, but unable to complete the quest
+					//   since quests are normally marked completed when the last task in that quest is completed
+					// https://github.com/FTBBeta/Beta-Testing-Issues/issues/755
 					if (!data.isCompleted(quest) && quest.isCompletedRaw(data)) {
 						quest.onCompleted(new QuestProgressEventData<>(now, data, quest, onlineMembers, pList));
 					}

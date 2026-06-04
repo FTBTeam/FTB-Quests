@@ -4,11 +4,26 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2101.1.25]
+
+### Added
+* Reward selector screen now has a "Claim XP" button to claim only experience rewards
+
+### Changed
+* Alt-clicking a quest link now open's the properties specific to the link, not the original quest
+
+### Fixed
+* Fixed emergency items screen resetting the cooldown if it was zero when the screen was opened
+* Fixed observation progress still showing for observation tasks in completed quests
+* Fixed items with custom component data not always properly encoding when sent from client to server
+* When any quest object is deleted, all related translations are now cleaned up
+  * Added `/ftbquests cleanup_stale_translations {show|execute}` commands to clean up stale translations
+
 ## [2101.1.24]
 
 ### Fixed
 
-- Issue causing progression blocking with flexible quests
+* Issue causing progression blocking with flexible quests
 
 ## [2101.1.23]
 

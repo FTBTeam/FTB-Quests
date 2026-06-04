@@ -8,6 +8,7 @@ import dev.ftb.mods.ftblibrary.util.TooltipList;
 import dev.ftb.mods.ftblibrary.util.client.ClientUtils;
 import dev.ftb.mods.ftbquests.FTBQuests;
 import dev.ftb.mods.ftbquests.client.gui.CustomToast;
+import dev.ftb.mods.ftbquests.client.gui.EmergencyItemsScreen;
 import dev.ftb.mods.ftbquests.client.gui.quests.QuestScreen;
 import dev.ftb.mods.ftbquests.net.DeleteObjectMessage;
 import dev.ftb.mods.ftbquests.quest.*;
@@ -69,6 +70,7 @@ public class ClientQuestFile extends BaseQuestFile {
 
 		refreshGui();
 		FTBQuests.getRecipeModHelper().refreshRecipes(INSTANCE);
+		EmergencyItemsScreen.initCooldown();
 	}
 
 	@Override

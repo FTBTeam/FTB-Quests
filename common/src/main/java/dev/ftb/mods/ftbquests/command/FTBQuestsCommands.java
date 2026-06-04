@@ -187,8 +187,22 @@ public class FTBQuestsCommands {
 						.requires(FTBQuestsCommands::hasEditorPermission)
 						.executes(c -> clearDisplayCache(c.getSource()))
 				)
+				.then(literal("cleanup_stale_translations")
+						.requires(FTBQuestsCommands::hasEditorPermission)
+						.then(literal("show")
+								.executes(c -> cleanupTranslations(c.getSource(), true))
+						)
+						.then(literal("execute")
+								.executes(c -> cleanupTranslations(c.getSource(), false))
+						)
+				)
 		);
 	}
+
+    private static int cleanupTranslations(CommandSourceStack source, boolean dryRun) {
+		ServerQuestFile.INSTANCE.getTranslationManager().cleanupTranslations(source, dryRun);
+        return 0;
+    }
 
 	private static boolean isSSPOrEditor(CommandSourceStack s) {
 		// s.getServer() *can* be null here, whatever the IDE thinks!

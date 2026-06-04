@@ -171,7 +171,7 @@ public class FTBQuestsClientEventHandler {
             TeamData selfTeamData = ClientQuestFile.INSTANCE.selfTeamData;
             if (mc.hitResult != null && mc.hitResult.getType() != HitResult.Type.MISS) {
                 for (ObservationTask task : observationTasks) {
-                    if (!selfTeamData.isCompleted(task) && task.observe(mc.player, mc.hitResult)
+                    if (!selfTeamData.isCompleted(task.getQuest()) && !selfTeamData.isCompleted(task) && task.observe(mc.player, mc.hitResult)
                             && selfTeamData.canStartTasks(task.getQuest())) {
                         currentlyObserving = task;
                         break;
