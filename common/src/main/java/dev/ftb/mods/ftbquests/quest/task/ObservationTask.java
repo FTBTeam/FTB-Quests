@@ -1,6 +1,7 @@
 package dev.ftb.mods.ftbquests.quest.task;
 
 import com.mojang.brigadier.StringReader;
+import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import dev.architectury.registry.registries.RegistrarManager;
 import dev.ftb.mods.ftblibrary.config.ConfigGroup;
 import dev.ftb.mods.ftblibrary.config.NameMap;
@@ -11,17 +12,21 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.ChatFormatting;
 import net.minecraft.ResourceLocationException;
+import net.minecraft.Util;
 import net.minecraft.commands.arguments.blocks.BlockInput;
 import net.minecraft.commands.arguments.blocks.BlockStateParser;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.NbtUtils;
+import net.minecraft.nbt.TagParser;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.tags.TagKey;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
@@ -63,6 +68,7 @@ public class ObservationTask extends AbstractBooleanTask {
 	public void writeData(CompoundTag nbt, HolderLookup.Provider provider) {
 		super.writeData(nbt, provider);
 		nbt.putLong("timer", timer);
+		nbt.putString("observation_type", ObserveType.NAME_MAP.getName(observeType));
 		nbt.putInt("observe_type", observeType.ordinal());
 		nbt.putString("to_observe", toObserve);
 	}
@@ -71,7 +77,12 @@ public class ObservationTask extends AbstractBooleanTask {
 	public void readData(CompoundTag nbt, HolderLookup.Provider provider) {
 		super.readData(nbt, provider);
 		timer = nbt.getLong("timer");
-		observeType = ObserveType.values()[nbt.getInt("observe_type")];
+		if (nbt.contains("observe_type")) {
+			// legacy - remove in 26.1
+			observeType = ObserveType.values()[nbt.getInt("observe_type")];
+		} else {
+			observeType = ObserveType.NAME_MAP.get(nbt.getString("observation_type"));
+		}
 		toObserve = nbt.getString("to_observe");
 	}
 
@@ -163,7 +174,7 @@ public class ObservationTask extends AbstractBooleanTask {
 			}
 		} else if (result instanceof EntityHitResult entityResult) {
 			if (observeType == ObserveType.ENTITY_TYPE) {
-				return toObserve.equals(String.valueOf(RegistrarManager.getId(entityResult.getEntity().getType(), Registries.ENTITY_TYPE)));
+				return tryMatchEntity(entityResult.getEntity());
 			} else if (observeType == ObserveType.ENTITY_TYPE_TAG) {
 				return asTagRL(toObserve)
 						.map(rl -> entityResult.getEntity().getType().is(TagKey.create(Registries.ENTITY_TYPE, rl)))
@@ -173,6 +184,34 @@ public class ObservationTask extends AbstractBooleanTask {
 
 		return false;
 	}
+
+    private boolean tryMatchEntity(Entity entity) {
+		ResourceLocation entityType = RegistrarManager.getId(entity.getType(), Registries.ENTITY_TYPE);
+		if (entityType == null) return false;
+
+		int nbtStart = toObserve.indexOf('{');
+		int nbtEnd = nbtStart > 0 ? toObserve.indexOf('}', nbtStart) : -1;
+
+		String entityId = nbtStart < 0 ? toObserve : toObserve.substring(0, nbtStart);
+		String nbtFilter = nbtStart > 0 && nbtEnd > nbtStart ? toObserve.substring(nbtStart, nbtEnd + 1) : "";
+
+		return entityType.toString().equals(entityId) && matchEntityNBT(entity, nbtFilter);
+    }
+
+	static boolean matchEntityNBT(Entity entity, String nbtFilter) {
+        if (nbtFilter.isEmpty()) return true;
+		if (!nbtFilter.startsWith("{")) {
+			nbtFilter = "{" + nbtFilter + "}";
+		}
+
+		try {
+			var filterTag = TagParser.parseTag(nbtFilter);
+			CompoundTag entityTag = Util.make(new CompoundTag(), entity::saveWithoutId);
+			return NbtUtils.compareNbt(filterTag, entityTag, true);
+		} catch (CommandSyntaxException e) {
+			return false;
+		}
+    }
 
 	private Optional<ResourceLocation> asTagRL(String str) {
 		try {
@@ -184,7 +223,7 @@ public class ObservationTask extends AbstractBooleanTask {
 
 	private BlockInput tryMatchBlock(String string, boolean parseNbt) {
 		try {
-			BlockStateParser.BlockResult blockStateParser = BlockStateParser.parseForBlock(BuiltInRegistries.BLOCK.asLookup(), new StringReader(string), false);
+			BlockStateParser.BlockResult blockStateParser = BlockStateParser.parseForBlock(BuiltInRegistries.BLOCK.asLookup(), new StringReader(string), parseNbt);
 			return new BlockInput(blockStateParser.blockState(), blockStateParser.properties().keySet(), parseNbt ? blockStateParser.nbt() : null);
 		} catch (Exception ex) {
 			return null;
