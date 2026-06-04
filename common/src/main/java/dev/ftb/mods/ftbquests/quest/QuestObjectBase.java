@@ -293,7 +293,7 @@ public abstract class QuestObjectBase implements Comparable<QuestObjectBase> {
 
 	public void writeData(Json5Object json, HolderLookup.Provider provider) {
 		if (!rawIcon.isEmpty()) {
-			ItemStack.CODEC.encodeStart(Json5Ops.INSTANCE, rawIcon).ifSuccess(t -> json.add("icon", t));
+			ItemStack.CODEC.encodeStart(provider.createSerializationContext(Json5Ops.INSTANCE), rawIcon).ifSuccess(t -> json.add("icon", t));
 		}
 		if (!tags.isEmpty()) {
 			Json5Util.store(json, "tags", Codec.STRING.listOf(), tags);
