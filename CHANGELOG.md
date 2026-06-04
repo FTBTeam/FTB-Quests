@@ -4,6 +4,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2101.1.26]
+
+### Added
+* Added fuzzy NBT matching for Kill and Observation tasks
+  * Kill task has an extra "NBT Filter" property where a SNBT string can be specified, e.g. `{Color: 4b}` matches a yellow sheep
+  * Observation task includes the NBT filter in the "Observe" property, e.g. `minecraft:sheep{Color: 4b}`
+  * Also works for block entities in the Observation task, but note that matching is done clientside, so this will only work for NBT data that is sync'd from the server
+
 ## [2101.1.25]
 
 ### Added
