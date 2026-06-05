@@ -1,6 +1,7 @@
 package dev.ftb.mods.ftbquests.quest.task;
 
 import com.mojang.brigadier.StringReader;
+import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import de.marhali.json5.Json5Object;
 import dev.ftb.mods.ftblibrary.client.config.EditableConfigGroup;
 import dev.ftb.mods.ftblibrary.json5.Json5Util;
@@ -14,16 +15,22 @@ import net.minecraft.commands.arguments.blocks.BlockStateParser;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
+import net.minecraft.nbt.NbtUtils;
+import net.minecraft.nbt.TagParser;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.tags.TagKey;
+import net.minecraft.util.ProblemReporter;
+import net.minecraft.util.Util;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.pattern.BlockInWorld;
+import net.minecraft.world.level.storage.TagValueOutput;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.EntityHitResult;
 import net.minecraft.world.phys.HitResult;
@@ -61,7 +68,7 @@ public class ObservationTask extends AbstractBooleanTask {
 	public void writeData(Json5Object json, HolderLookup.Provider provider) {
 		super.writeData(json, provider);
 		json.addProperty("timer", timer);
-		json.addProperty("observe_type", ObserveType.NAME_MAP.getName(observeType));
+		json.addProperty("observation_type", ObserveType.NAME_MAP.getName(observeType));
 		json.addProperty("to_observe", toObserve);
 	}
 
@@ -156,7 +163,7 @@ public class ObservationTask extends AbstractBooleanTask {
 			}
 		} else if (result instanceof EntityHitResult entityResult) {
 			if (observeType == ObserveType.ENTITY_TYPE) {
-				return toObserve.equals(String.valueOf(BuiltInRegistries.ENTITY_TYPE.getKey(entityResult.getEntity().getType())));
+				return tryMatchEntity(entityResult.getEntity());
 			} else if (observeType == ObserveType.ENTITY_TYPE_TAG) {
 				return asTagId(toObserve)
 						.map(rl -> entityResult.getEntity().is(TagKey.create(Registries.ENTITY_TYPE, rl)))
@@ -165,6 +172,33 @@ public class ObservationTask extends AbstractBooleanTask {
 		}
 
 		return false;
+	}
+
+	private boolean tryMatchEntity(Entity entity) {
+		Identifier typeId = BuiltInRegistries.ENTITY_TYPE.getKey(entity.getType());
+
+		int nbtStart = toObserve.indexOf('{');
+		int nbtEnd = nbtStart > 0 ? toObserve.indexOf('}', nbtStart) : -1;
+
+		String entityId = nbtStart < 0 ? toObserve : toObserve.substring(0, nbtStart);
+		String nbtFilter = nbtStart > 0 && nbtEnd > nbtStart ? toObserve.substring(nbtStart, nbtEnd + 1) : "";
+
+		return typeId.toString().equals(entityId) && matchEntityNBT(entity, nbtFilter);
+	}
+
+	static boolean matchEntityNBT(Entity entity, String nbtFilter) {
+		if (nbtFilter.isEmpty()) return true;
+		if (!nbtFilter.startsWith("{")) {
+			nbtFilter = "{" + nbtFilter + "}";
+		}
+
+		try {
+			var filterTag = TagParser.parseCompoundFully(nbtFilter);
+			var output = Util.make(TagValueOutput.createWithoutContext(ProblemReporter.DISCARDING), entity::saveWithoutId);
+			return NbtUtils.compareNbt(filterTag, output.buildResult(), true);
+		} catch (CommandSyntaxException e) {
+			return false;
+		}
 	}
 
 	private Optional<Identifier> asTagId(String str) {

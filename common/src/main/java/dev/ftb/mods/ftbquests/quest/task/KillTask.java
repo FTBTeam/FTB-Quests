@@ -41,13 +41,14 @@ public class KillTask extends Task {
 
 	private static final Lazy<NameMap<Identifier>> entityNameMap = Lazy.of(KillTask::scanEntityTypes);
 	private static final Lazy<NameMap<String>> entityTagMap = Lazy.of(KillTask::scanEntityTags);
+	private static final Map<Identifier,Icon<?>> entityIcons = new HashMap<>();
 
 	private Identifier entityTypeId = ZOMBIE;
 	@Nullable
 	private TagKey<EntityType<?>> entityTypeTag = null;
 	private long value = 100L;
 	private String customName = "";
-	private static final Map<Identifier,Icon<?>> entityIcons = new HashMap<>();
+	private String nbtFilter = "";
 
 	public KillTask(long id, Quest quest) {
 		super(id, quest);
@@ -70,6 +71,7 @@ public class KillTask extends Task {
 		if (entityTypeTag != null) json.addProperty("entityTypeTag", entityTypeTag.location().toString());
 		json.addProperty("value", value);
 		if (!customName.isEmpty()) json.addProperty("custom_name", customName);
+		if (!nbtFilter.isEmpty()) json.addProperty("nbt_filter", customName);
 	}
 
 	@Override
@@ -79,6 +81,7 @@ public class KillTask extends Task {
 		entityTypeTag = parseTypeTag(Json5Util.getString(json,"entityTypeTag").orElse(""));
 		value = Json5Util.getLong(json, "value").orElse(0L);
 		customName = Json5Util.getString(json, "custom_name").orElse("");
+		nbtFilter = Json5Util.getString(json, "nbt_filter").orElse("");
 	}
 
 	@Override
@@ -88,6 +91,7 @@ public class KillTask extends Task {
 		buffer.writeUtf(entityTypeTag == null ? "" : entityTypeTag.location().toString());
 		buffer.writeVarLong(value);
 		buffer.writeUtf(customName);
+		buffer.writeUtf(nbtFilter);
 	}
 
 	@Override
@@ -97,6 +101,7 @@ public class KillTask extends Task {
 		entityTypeTag = parseTypeTag(buffer.readUtf());
 		value = buffer.readVarInt();
 		customName = buffer.readUtf();
+		nbtFilter = buffer.readUtf();
 	}
 
 	private static Identifier parseTypeId(String idStr) {
@@ -122,6 +127,7 @@ public class KillTask extends Task {
 		config.addEnum("entity_type_tag", getTypeTagStr(), v -> entityTypeTag = parseTypeTag(v), entityTagMap.get());
 		config.addLong("value", value, v -> value = v, 100L, 1L, Long.MAX_VALUE);
 		config.addString("custom_name", customName, v -> customName = v, "");
+		config.addString("nbt_filter", nbtFilter, v -> nbtFilter = v, "");
 	}
 
 	@Override
@@ -202,8 +208,8 @@ public class KillTask extends Task {
 
 	private boolean match(LivingEntity e) {
 		return entityTypeTag == null ?
-				entityTypeId.equals(BuiltInRegistries.ENTITY_TYPE.getKey(e.getType())) && nameMatchOK(e) :
-				e.is(entityTypeTag) && nameMatchOK(e);
+				entityTypeId.equals(BuiltInRegistries.ENTITY_TYPE.getKey(e.getType())) && nameMatchOK(e) && filterMatchOK(e) :
+				e.is(entityTypeTag) && nameMatchOK(e) && filterMatchOK(e);
 	}
 
 	private boolean nameMatchOK(LivingEntity e) {
@@ -211,6 +217,10 @@ public class KillTask extends Task {
 				(e instanceof Player p ?
 						p.getGameProfile().name().equals(customName) :
 						e.getName().getString().equals(customName));
+	}
+
+	private boolean filterMatchOK(LivingEntity e) {
+		return ObservationTask.matchEntityNBT(e, nbtFilter);
 	}
 
 	private static NameMap<Identifier> scanEntityTypes() {
