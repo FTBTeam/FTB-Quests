@@ -32,10 +32,7 @@ import org.jspecify.annotations.Nullable;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.Date;
-import java.util.List;
-import java.util.Objects;
-import java.util.UUID;
+import java.util.*;
 import java.util.function.Consumer;
 import java.util.stream.Stream;
 
@@ -49,8 +46,7 @@ public class ServerQuestFile extends BaseQuestFile {
 	private boolean shouldSave;
 	private boolean isLoading;
 	private final Path folder;
-	@Nullable
-	private ServerPlayer currentPlayer = null;
+	private final Deque<ServerPlayer> playerContextStack = new ArrayDeque<>();
 
 	public static void startup(MinecraftServer server) {
 		INSTANCE = new ServerQuestFile(server);
@@ -196,17 +192,16 @@ public class ServerQuestFile extends BaseQuestFile {
 		deleteSelf();
 	}
 
-	@Nullable
 	public ServerPlayer getCurrentPlayer() {
-		return currentPlayer;
+		return playerContextStack.peek();
 	}
 
-	public void withPlayerContext(@Nullable ServerPlayer player, Runnable toDo) {
-		currentPlayer = player;
+	public void withPlayerContext(ServerPlayer player, Runnable toDo) {
+		playerContextStack.push(player);
 		try {
 			toDo.run();
 		} finally {
-			currentPlayer = null;
+			playerContextStack.pop();
 		}
 	}
 
@@ -302,7 +297,9 @@ public class ServerQuestFile extends BaseQuestFile {
 				// player is joining an existing party team; merge all of their progress data into the party
 				newTeamData.mergeData(oldTeamData);
 				// also check if the party team has any outstanding auto-claim rewards that the player can claim
-				withPlayerContext(event.player(), () -> forAllQuests(newTeamData::checkAutoCompletion));
+				if (event.player() != null) {
+					withPlayerContext(event.player(), () -> forAllQuests(newTeamData::checkAutoCompletion));
+				}
 			} else if (prevTeam.isPartyTeam() && curTeam.isPlayerTeam()) {
 				// player is leaving an existing party team; they get their old progress back
 				// EXCEPT any rewards they've already claimed stay claimed! no claiming the reward again
