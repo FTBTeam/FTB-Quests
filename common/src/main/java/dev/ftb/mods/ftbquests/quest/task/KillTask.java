@@ -51,6 +51,7 @@ public class KillTask extends Task {
 	private TagKey<EntityType<?>> entityTypeTag = null;
 	private long value = 100L;
 	private String customName = "";
+	private String nbtFilter = "";
 	private static final Map<ResourceLocation,Icon> entityIcons = new HashMap<>();
 
 	public KillTask(long id, Quest quest) {
@@ -74,6 +75,7 @@ public class KillTask extends Task {
 		if (entityTypeTag != null) nbt.putString("entityTypeTag", entityTypeTag.location().toString());
 		nbt.putLong("value", value);
 		if (!customName.isEmpty()) nbt.putString("custom_name", customName);
+		if (!nbtFilter.isEmpty()) nbt.putString("nbt_filter", nbtFilter);
 	}
 
 	@Override
@@ -83,6 +85,7 @@ public class KillTask extends Task {
 		entityTypeTag = parseTypeTag(nbt.getString("entityTypeTag"));
 		value = nbt.getLong("value");
 		customName = nbt.getString("custom_name");
+		nbtFilter = nbt.getString("nbt_filter");
 	}
 
 	@Override
@@ -92,6 +95,7 @@ public class KillTask extends Task {
 		buffer.writeUtf(entityTypeTag == null ? "" : entityTypeTag.location().toString());
 		buffer.writeVarLong(value);
 		buffer.writeUtf(customName);
+		buffer.writeUtf(nbtFilter);
 	}
 
 	@Override
@@ -101,6 +105,7 @@ public class KillTask extends Task {
 		entityTypeTag = parseTypeTag(buffer.readUtf());
 		value = buffer.readVarInt();
 		customName = buffer.readUtf();
+		nbtFilter = buffer.readUtf();
 	}
 
 	private static @Nullable TagKey<EntityType<?>> parseTypeTag(String tag) {
@@ -123,6 +128,7 @@ public class KillTask extends Task {
 		config.addEnum("entity_type_tag", getTypeTagStr(), v -> entityTypeTag = parseTypeTag(v), entityTagMap.get());
 		config.addLong("value", value, v -> value = v, 100L, 1L, Long.MAX_VALUE);
 		config.addString("custom_name", customName, v -> customName = v, "");
+		config.addString("nbt_filter", nbtFilter, v -> nbtFilter = v, "");
 	}
 
 	private String getTypeTagStr() {
@@ -199,8 +205,8 @@ public class KillTask extends Task {
 
 	private boolean match(LivingEntity e) {
 		return entityTypeTag == null ?
-				entityTypeId.equals(RegistrarManager.getId(e.getType(), Registries.ENTITY_TYPE)) && nameMatchOK(e) :
-				e.getType().is(entityTypeTag) && nameMatchOK(e);
+				entityTypeId.equals(RegistrarManager.getId(e.getType(), Registries.ENTITY_TYPE)) && nameMatchOK(e) && filterMatchOK(e) :
+				e.getType().is(entityTypeTag) && nameMatchOK(e) && filterMatchOK(e);
 	}
 
 	private boolean nameMatchOK(LivingEntity e) {
@@ -208,6 +214,10 @@ public class KillTask extends Task {
 				(e instanceof Player p ?
 						p.getGameProfile().getName().equals(customName) :
 						e.getName().getString().equals(customName));
+	}
+
+	private boolean filterMatchOK(LivingEntity e) {
+		return ObservationTask.matchEntityNBT(e, nbtFilter);
 	}
 
 	private static @NotNull NameMap<ResourceLocation> scanEntityTypes() {
