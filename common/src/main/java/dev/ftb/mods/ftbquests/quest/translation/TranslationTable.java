@@ -107,7 +107,7 @@ public class TranslationTable {
         List<String> res = new ArrayList<>();
         map.keySet().forEach(key -> {
             long id = TranslationManager.getQuestIdFromKey(key);
-            if (id != 0L && file.get(id) == null) {
+            if (id != 0L && file.getBase(id) == null) {
                 res.add(key);
             }
         });
