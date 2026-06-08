@@ -6,6 +6,14 @@ neoForge {
 	version = project.neoforge_version
 //    accessTransformers = project.files('src/main/resources/META-INF/accesstransformer.cfg')
 
+	mods {
+		"${mod_id}" {
+			sourceSet(sourceSets.main)
+			sourceSet(sourceSets.test)
+			sourceSet(project(":common").sourceSets.main)
+		}
+	}
+
 	runs {
 		client {
 			client()
@@ -18,18 +26,35 @@ neoForge {
 			systemProperty 'neoforge.enabledGameTestNamespaces', project.mod_id
 		}
 
+		gameTestServer {
+			type = "gameTestServer"
+			loadedMods = [ mods.getByName(project.mod_id) ]
+			systemProperty 'neoforge.enabledGameTestNamespaces', project.mod_id
+			gameDirectory = project.file('run-gametest')
+		}
+
 		configureEach {
 			systemProperty 'forge.logging.markers', 'REGISTRIES'
 			logLevel = org.slf4j.event.Level.DEBUG
 		}
 	}
+}
 
-	mods {
-		"${mod_id}" {
-			sourceSet(sourceSets.main)
-			sourceSet(project(":common").sourceSets.main)
-		}
+sourceSets {
+	test {
+		compileClasspath += main.output + main.compileClasspath
+		runtimeClasspath += main.output + main.runtimeClasspath
 	}
+}
+
+tasks.named('test') { enabled = false }
+
+configurations {
+	runGameTestServerAdditionalRuntimeClasspath.extendsFrom runtimeClasspath
+}
+
+dependencies {
+	runGameTestServerAdditionalRuntimeClasspath files(sourceSets.test.output)
 }
 
 repositories {

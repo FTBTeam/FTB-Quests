@@ -27,6 +27,7 @@ logs
 # other
 eclipse
 run
+run-gametest
 .architectury-transformer/
 **/extra-mods-*
 .DS_Store
