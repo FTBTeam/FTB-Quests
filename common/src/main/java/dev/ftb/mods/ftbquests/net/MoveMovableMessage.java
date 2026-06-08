@@ -5,6 +5,7 @@ import dev.ftb.mods.ftblibrary.platform.network.Server2PlayNetworking;
 import dev.ftb.mods.ftbquests.api.FTBQuestsAPI;
 import dev.ftb.mods.ftbquests.quest.Movable;
 import dev.ftb.mods.ftbquests.quest.ServerQuestFile;
+import dev.ftb.mods.ftbquests.util.NetUtils;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
@@ -27,7 +28,7 @@ public record MoveMovableMessage(long id, long chapterID, double x, double y) im
 	}
 
 	public static void handle(MoveMovableMessage message, PacketContext context) {
-		if (ServerQuestFile.getInstance().getBase(message.id) instanceof Movable movable) {
+		if (ServerQuestFile.getInstance().getBase(message.id) instanceof Movable movable && NetUtils.canEdit(context)) {
 			movable.onMoved(message.x, message.y, message.chapterID);
 			ServerQuestFile.getInstance().markDirty();
 			Server2PlayNetworking.sendToAllPlayers(ServerQuestFile.getInstance().server, new MoveMovableResponseMessage(movable.getMovableID(), message.chapterID, message.x, message.y));

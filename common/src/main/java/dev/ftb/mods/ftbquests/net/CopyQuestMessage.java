@@ -9,6 +9,7 @@ import dev.ftb.mods.ftbquests.quest.reward.Reward;
 import dev.ftb.mods.ftbquests.quest.reward.RewardType;
 import dev.ftb.mods.ftbquests.quest.task.Task;
 import dev.ftb.mods.ftbquests.quest.task.TaskType;
+import dev.ftb.mods.ftbquests.util.NetUtils;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
@@ -36,7 +37,7 @@ public record CopyQuestMessage(long id, long chapterId, double qx, double qy, bo
 
     public static void handle(CopyQuestMessage message, PacketContext context) {
         BaseQuestFile file = ServerQuestFile.getInstance();
-        if (file.get(message.id) instanceof Quest toCopy && file.get(message.chapterId) instanceof Chapter chapter) {
+        if (file.get(message.id) instanceof Quest toCopy && file.get(message.chapterId) instanceof Chapter chapter && NetUtils.canEdit(context)) {
             // deep copy of the quest
             Quest newQuest = Objects.requireNonNull(QuestObjectBase.copy(toCopy, () -> new Quest(file.newID(), chapter)));
             if (!message.copyDeps) {
