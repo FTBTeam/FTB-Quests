@@ -12,6 +12,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   * Observation task includes the NBT filter in the "Observe" property, e.g. `minecraft:sheep{Color: 4b}`
   * Also works for block entities in the Observation task, but note that matching is done clientside, so this will only work for NBT data that is sync'd from the server
 
+### Fixed
+* Fixed `/ftbquests cleanup_stale_translations` wrongly removing reward and reward table translations
+
 ## [2101.1.25]
 
 ### Added
