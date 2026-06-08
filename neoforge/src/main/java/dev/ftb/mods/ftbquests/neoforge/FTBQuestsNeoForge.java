@@ -27,9 +27,6 @@ import net.neoforged.neoforge.capabilities.Capabilities;
 import net.neoforged.neoforge.capabilities.RegisterCapabilitiesEvent;
 import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.event.BuildCreativeModeTabContentsEvent;
-import net.neoforged.neoforge.event.RegisterGameTestsEvent;
-
-import java.lang.reflect.Method;
 
 @Mod(FTBQuestsAPI.MOD_ID)
 public class FTBQuestsNeoForge {
@@ -47,25 +44,6 @@ public class FTBQuestsNeoForge {
 		modEventBus.addListener(FTBQuestsNeoForge::registerCapabilities);
 
 		registerNeoEventPosters();
-
-		wireGameTests(modEventBus);
-	}
-
-	private static void wireGameTests(IEventBus modBus) {
-		try {
-			Class<?> reg = Class.forName("dev.ftb.mods.ftbquests.gametest.FTBQuestsGameTests");
-			Method handler = reg.getMethod("registerTests", RegisterGameTestsEvent.class);
-			modBus.addListener(RegisterGameTestsEvent.class, event -> {
-				try {
-					handler.invoke(null, event);
-				} catch (ReflectiveOperationException t) {
-					FTBQuests.LOGGER.error("Failed to invoke FTBQuestsGameTests.registerTests", t);
-				}
-			});
-		} catch (ClassNotFoundException expected) {
-		} catch (ReflectiveOperationException e) {
-			FTBQuests.LOGGER.error("Failed to wire gametest hooks", e);
-		}
 	}
 
 	private static void registerNeoEventPosters() {
