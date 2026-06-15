@@ -16,6 +16,9 @@
 		"main": [
 			"dev.ftb.mods.ftbquests.fabric.FTBQuestsFabric"
 		],
+		"client": [
+			"dev.ftb.mods.ftbquests.client.fabric.FTBQuestsFabricClient"
+		],
 		"rei_client": [
 		]
 	},
@@ -24,9 +27,8 @@
 		"ftbquests-fabric.mixins.json"
 	],
 	"depends": {
-		"fabric": "${fabricapiversionrange}",
-		"minecraft": "~${mcversion}",
-		"architectury": ">=${archversion}",
+		"fabric-api": "${fabricapiversionrange}",
+		"minecraft": "${minecraft_version_range_semver}",
 		"ftblibrary": ">=${ftblibraryversion}",
 		"ftbteams": ">=${ftbteamsversion}"
 	},

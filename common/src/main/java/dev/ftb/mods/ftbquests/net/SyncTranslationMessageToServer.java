@@ -1,19 +1,18 @@
 package dev.ftb.mods.ftbquests.net;
 
-import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.network.codec.ByteBufCodecs;
-import net.minecraft.network.codec.StreamCodec;
-import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import com.mojang.datafixers.util.Either;
-
-import dev.architectury.networking.NetworkManager;
-
+import dev.ftb.mods.ftblibrary.platform.network.PacketContext;
+import dev.ftb.mods.ftblibrary.platform.network.Server2PlayNetworking;
 import dev.ftb.mods.ftblibrary.util.NetworkHelper;
 import dev.ftb.mods.ftbquests.api.FTBQuestsAPI;
 import dev.ftb.mods.ftbquests.quest.QuestObjectBase;
 import dev.ftb.mods.ftbquests.quest.ServerQuestFile;
 import dev.ftb.mods.ftbquests.quest.translation.TranslationKey;
 import dev.ftb.mods.ftbquests.util.NetUtils;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.codec.ByteBufCodecs;
+import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -55,19 +54,17 @@ public record SyncTranslationMessageToServer(long id, String locale, Translation
         return TYPE;
     }
 
-    public static void handle(SyncTranslationMessageToServer message, NetworkManager.PacketContext context) {
-        context.queue(() -> {
-            if (NetUtils.canEdit(context)) {
-                ServerQuestFile file = ServerQuestFile.getInstance();
-                if (file.isValid()) {
-                    QuestObjectBase object = file.getBase(message.id);
-                    if (object != null) {
-                        message.val.ifLeft(str -> file.getTranslationManager().addTranslation(object, message.locale, message.subKey, str))
-                                .ifRight(list -> file.getTranslationManager().addTranslation(object, message.locale, message.subKey, list));
-                        NetworkHelper.sendToAll(file.server, message.createResponse());
-                    }
+    public static void handle(SyncTranslationMessageToServer message, PacketContext context) {
+        if (NetUtils.canEdit(context)) {
+            ServerQuestFile file = ServerQuestFile.getInstance();
+            if (file.isValid()) {
+                QuestObjectBase object = file.getBase(message.id);
+                if (object != null) {
+                    message.val.ifLeft(str -> file.getTranslationManager().addTranslation(object, message.locale, message.subKey, str))
+                            .ifRight(list -> file.getTranslationManager().addTranslation(object, message.locale, message.subKey, list));
+                    Server2PlayNetworking.sendToAllPlayers(file.server, message.createResponse());
                 }
             }
-        });
+        }
     }
 }

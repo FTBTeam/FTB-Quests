@@ -1,27 +1,26 @@
 package dev.ftb.mods.ftbquests.quest.task;
 
+import com.mojang.datafixers.util.Either;
+import de.marhali.json5.Json5Object;
+import dev.ftb.mods.ftblibrary.client.config.EditableConfigGroup;
+import dev.ftb.mods.ftblibrary.client.util.ClientUtils;
+import dev.ftb.mods.ftblibrary.json5.Json5Util;
+import dev.ftb.mods.ftblibrary.util.NameMap;
+import dev.ftb.mods.ftbquests.quest.Quest;
+import dev.ftb.mods.ftbquests.quest.TeamData;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.Holder;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.core.registries.Registries;
-import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
-import net.minecraft.resources.Identifier;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.biome.Biomes;
-import com.mojang.datafixers.util.Either;
-
-import dev.ftb.mods.ftblibrary.client.config.EditableConfigGroup;
-import dev.ftb.mods.ftblibrary.client.util.ClientUtils;
-import dev.ftb.mods.ftblibrary.util.NameMap;
-import dev.ftb.mods.ftbquests.quest.Quest;
-import dev.ftb.mods.ftbquests.quest.TeamData;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -44,15 +43,15 @@ public class BiomeTask extends AbstractBooleanTask {
 	}
 
 	@Override
-	public void writeData(CompoundTag nbt, HolderLookup.Provider provider) {
-		super.writeData(nbt, provider);
-		nbt.putString("biome", getBiome());
+	public void writeData(Json5Object json, HolderLookup.Provider provider) {
+		super.writeData(json, provider);
+		json.addProperty("biome", getBiome());
 	}
 
 	@Override
-	public void readData(CompoundTag nbt, HolderLookup.Provider provider) {
-		super.readData(nbt, provider);
-		setBiome(nbt.getString("biome").orElseThrow());
+	public void readData(Json5Object json, HolderLookup.Provider provider) {
+		super.readData(json, provider);
+		setBiome(Json5Util.getString(json, "biome").orElseThrow());
 	}
 
 	@Override
@@ -122,14 +121,14 @@ public class BiomeTask extends AbstractBooleanTask {
 		if (KNOWN_BIOMES.isEmpty()) {
 			RegistryAccess registryAccess = ClientUtils.getClientPlayer().level().registryAccess();
 			KNOWN_BIOMES.addAll(registryAccess
-					.getOrThrow(Registries.BIOME).value().keySet().stream()
-					.map(Identifier::toString)
+					.lookupOrThrow(Registries.BIOME).entrySet().stream()
+					.map(e -> e.getKey().identifier().toString())
 					.sorted(String::compareTo)
 					.toList()
 			);
 			KNOWN_BIOMES.addAll(registryAccess
-					.getOrThrow(Registries.BIOME).tags()
-					.map(o -> "#" + o.location())
+					.lookupOrThrow(Registries.BIOME).getTags()
+					.map(o -> "#" + o.key().location())
 					.sorted(String::compareTo)
 					.toList()
 			);

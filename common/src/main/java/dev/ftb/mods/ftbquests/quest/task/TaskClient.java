@@ -1,15 +1,14 @@
 package dev.ftb.mods.ftbquests.quest.task;
 
-import dev.architectury.networking.NetworkManager;
-
 import dev.ftb.mods.ftblibrary.client.gui.widget.Button;
+import dev.ftb.mods.ftblibrary.platform.network.Play2ServerNetworking;
 import dev.ftb.mods.ftbquests.net.SubmitTaskMessage;
 
 public interface TaskClient {
 	default void onButtonClicked(Task task, Button button, boolean canClick) {
 		if (canClick && task.autoSubmitOnPlayerTick() <= 0) {
 			button.playClickSound();
-			NetworkManager.sendToServer(new SubmitTaskMessage(task.id));
+			Play2ServerNetworking.send(new SubmitTaskMessage(task.id));
 		}
 	}
 

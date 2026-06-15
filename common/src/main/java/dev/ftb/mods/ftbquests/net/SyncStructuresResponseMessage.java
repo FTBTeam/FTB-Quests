@@ -1,5 +1,8 @@
 package dev.ftb.mods.ftbquests.net;
 
+import dev.ftb.mods.ftblibrary.platform.network.PacketContext;
+import dev.ftb.mods.ftbquests.api.FTBQuestsAPI;
+import dev.ftb.mods.ftbquests.quest.task.StructureTask;
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.FriendlyByteBuf;
@@ -8,11 +11,6 @@ import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.Identifier;
 import net.minecraft.server.MinecraftServer;
-
-import dev.architectury.networking.NetworkManager;
-
-import dev.ftb.mods.ftbquests.api.FTBQuestsAPI;
-import dev.ftb.mods.ftbquests.quest.task.StructureTask;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -54,7 +52,7 @@ public record SyncStructuresResponseMessage(List<String> data) implements Custom
         return TYPE;
     }
 
-    public static void handle(SyncStructuresResponseMessage message, NetworkManager.PacketContext context) {
-        context.queue(() -> StructureTask.syncKnownStructureList(message.data));
+    public static void handle(SyncStructuresResponseMessage message, PacketContext ignoredContext) {
+        StructureTask.syncKnownStructureList(message.data);
     }
 }

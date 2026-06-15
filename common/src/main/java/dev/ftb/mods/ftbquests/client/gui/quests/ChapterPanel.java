@@ -1,19 +1,7 @@
 package dev.ftb.mods.ftbquests.client.gui.quests;
 
-import net.minecraft.ChatFormatting;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.MutableComponent;
-import net.minecraft.network.chat.Style;
-import net.minecraft.network.chat.TextColor;
-import net.minecraft.util.Mth;
-import net.minecraft.util.Util;
 import com.mojang.blaze3d.platform.InputConstants;
-
-import dev.architectury.networking.NetworkManager;
-
+import de.marhali.json5.Json5Object;
 import dev.ftb.mods.ftblibrary.client.config.editable.EditableString;
 import dev.ftb.mods.ftblibrary.client.config.gui.EditStringConfigOverlay;
 import dev.ftb.mods.ftblibrary.client.gui.GuiHelper;
@@ -30,13 +18,13 @@ import dev.ftb.mods.ftblibrary.client.util.PositionedIngredient;
 import dev.ftb.mods.ftblibrary.icon.Color4I;
 import dev.ftb.mods.ftblibrary.icon.Icon;
 import dev.ftb.mods.ftblibrary.icon.Icons;
+import dev.ftb.mods.ftblibrary.platform.network.Play2ServerNetworking;
 import dev.ftb.mods.ftblibrary.util.TooltipList;
 import dev.ftb.mods.ftbquests.client.ClientQuestFile;
 import dev.ftb.mods.ftbquests.client.FTBQuestsClient;
 import dev.ftb.mods.ftbquests.client.FTBQuestsClientConfig;
 import dev.ftb.mods.ftbquests.client.gui.ChangeChapterGroupScreen;
 import dev.ftb.mods.ftbquests.client.gui.ContextMenuBuilder;
-import dev.ftb.mods.ftbquests.client.gui.CustomToast;
 import dev.ftb.mods.ftbquests.net.CreateObjectMessage;
 import dev.ftb.mods.ftbquests.net.MoveChapterGroupMessage;
 import dev.ftb.mods.ftbquests.net.MoveChapterMessage;
@@ -45,6 +33,15 @@ import dev.ftb.mods.ftbquests.quest.ChapterGroup;
 import dev.ftb.mods.ftbquests.quest.theme.property.ThemeProperties;
 import dev.ftb.mods.ftbquests.quest.translation.TranslationKey;
 import dev.ftb.mods.ftbquests.util.TextUtils;
+import net.minecraft.ChatFormatting;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.network.chat.Style;
+import net.minecraft.network.chat.TextColor;
+import net.minecraft.util.Mth;
+import net.minecraft.util.Util;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -144,7 +141,7 @@ public class ChapterPanel extends Panel {
 	}
 
 	@Override
-	public void drawBackground(GuiGraphics graphics, Theme theme, int x, int y, int w, int h) {
+	public void drawBackground(GuiGraphicsExtractor graphics, Theme theme, int x, int y, int w, int h) {
 		IconHelper.renderIcon(ThemeProperties.CHAPTER_PANEL_BACKGROUND.get(), graphics, x, y, w, h);
 	}
 
@@ -158,7 +155,7 @@ public class ChapterPanel extends Panel {
 	}
 
 	@Override
-	public void draw(GuiGraphics graphics, Theme theme, int x, int y, int w, int h) {
+	public void draw(GuiGraphicsExtractor graphics, Theme theme, int x, int y, int w, int h) {
 		graphics.pose().pushMatrix();
 		graphics.pose().translate(0, 0);
 		super.draw(graphics, theme, x, y, w, h);
@@ -233,9 +230,9 @@ public class ChapterPanel extends Panel {
 
 					if (accepted && !c.getValue().isEmpty()) {
 						Chapter chapter = new Chapter(0L, file, file.getDefaultChapterGroup(), Chapter.titleToID( c.getValue()).orElse(""));
-						CompoundTag extra = Util.make(new CompoundTag(), t -> t.putLong("group", 0L));
+						Json5Object extra = Util.make(new Json5Object(), t -> t.addProperty("group", 0L));
 						file.getTranslationManager().addInitialTranslation(extra, file.getLocale(), TranslationKey.TITLE, c.getValue());
-						NetworkManager.sendToServer(CreateObjectMessage.create(chapter, extra));
+						Play2ServerNetworking.send(CreateObjectMessage.create(chapter, extra));
 					}
 
 					run();
@@ -252,9 +249,9 @@ public class ChapterPanel extends Panel {
 
 					if (accepted) {
 						ChapterGroup group = new ChapterGroup(0L, ClientQuestFile.getInstance());
-						CompoundTag extra = Util.make(new CompoundTag(), t -> t.putLong("group", 0L));
+						Json5Object extra = Util.make(new Json5Object(), t -> t.addProperty("group", 0L));
 						file.getTranslationManager().addInitialTranslation(extra, file.getLocale(), TranslationKey.TITLE, c.getValue());
-						NetworkManager.sendToServer(CreateObjectMessage.create(group, extra));
+						Play2ServerNetworking.send(CreateObjectMessage.create(group, extra));
 					}
 				}, b.getTitle()).atMousePosition();
 				overlay.setWidth(150);
@@ -266,7 +263,7 @@ public class ChapterPanel extends Panel {
 		}
 
 		@Override
-		public void draw(GuiGraphics graphics, Theme theme, int x, int y, int w, int h) {
+		public void draw(GuiGraphicsExtractor graphics, Theme theme, int x, int y, int w, int h) {
 			if (isMouseOver()) {
 				IconHelper.renderIcon(Color4I.WHITE.withAlpha(40), graphics, x + 1, y + 1, w - 2, h - 2);
 			}
@@ -333,11 +330,11 @@ public class ChapterPanel extends Panel {
 				} else if (button.isRight() && !group.isDefaultGroup()) {
 					ContextMenuBuilder.create(group, chapterPanel.questScreen).insertAtTop(List.of(
 							new ContextMenuItem(Component.translatable("gui.move"), ThemeProperties.MOVE_UP_ICON.get(),
-									b -> NetworkManager.sendToServer(new MoveChapterGroupMessage(group.id, true)))
+									b -> Play2ServerNetworking.send(new MoveChapterGroupMessage(group.id, true)))
 									.setEnabled(!group.isFirstGroup())
 									.setCloseMenu(false),
 							new ContextMenuItem(Component.translatable("gui.move"), ThemeProperties.MOVE_DOWN_ICON.get(),
-									b -> NetworkManager.sendToServer(new MoveChapterGroupMessage(group.id, false)))
+									b -> Play2ServerNetworking.send(new MoveChapterGroupMessage(group.id, false)))
 									.setEnabled(!group.isLastGroup())
 									.setCloseMenu(false)
 					)).openContextMenu(chapterPanel.questScreen);
@@ -360,9 +357,9 @@ public class ChapterPanel extends Panel {
 
 				if (accepted && !c.getValue().isEmpty()) {
 					Chapter chapter = new Chapter(0L, file, file.getDefaultChapterGroup(), Chapter.titleToID( c.getValue()).orElse(""));
-					CompoundTag extra = Util.make(new CompoundTag(), t -> t.putLong("group", group.id));
+					Json5Object extra = Util.make(new Json5Object(), t -> t.addProperty("group", group.id));
 					file.getTranslationManager().addInitialTranslation(extra, file.getLocale(), TranslationKey.TITLE, c.getValue());
-					NetworkManager.sendToServer(CreateObjectMessage.create(chapter, extra));
+					Play2ServerNetworking.send(CreateObjectMessage.create(chapter, extra));
 				}
 
 				run();
@@ -373,7 +370,7 @@ public class ChapterPanel extends Panel {
 		}
 
 		@Override
-		public void draw(GuiGraphics graphics, Theme theme, int x, int y, int w, int h) {
+		public void draw(GuiGraphicsExtractor graphics, Theme theme, int x, int y, int w, int h) {
 			if (xlateWarning) {
 				IconHelper.renderIcon(Color4I.RED.withAlpha(40), graphics, x, y, w, h);
 			}
@@ -452,10 +449,10 @@ public class ChapterPanel extends Panel {
 			if (chapterPanel.questScreen.file.canEdit() && button.isRight()) {
 				ContextMenuBuilder.create(chapter, chapterPanel.questScreen).insertAtTop(List.of(
 						new ContextMenuItem(Component.translatable("gui.move"), ThemeProperties.MOVE_UP_ICON.get(),
-								b -> NetworkManager.sendToServer(new MoveChapterMessage(chapter.id, true)))
+								b -> Play2ServerNetworking.send(new MoveChapterMessage(chapter.id, true)))
 								.setEnabled(chapter.getIndex() > 0).setCloseMenu(false),
 						new ContextMenuItem(Component.translatable("gui.move"), ThemeProperties.MOVE_DOWN_ICON.get(),
-								b -> NetworkManager.sendToServer(new MoveChapterMessage(chapter.id, false)))
+								b -> Play2ServerNetworking.send(new MoveChapterMessage(chapter.id, false)))
 								.setEnabled(chapter.getIndex() < chapter.getGroup().getChapters().size() - 1).setCloseMenu(false),
 						new ContextMenuItem(Component.translatable("ftbquests.gui.change_group"), Icons.COLOR_RGB,
 								b -> new ChangeChapterGroupScreen(chapter, chapterPanel.questScreen).openGui())
@@ -464,7 +461,7 @@ public class ChapterPanel extends Panel {
 		}
 
 		@Override
-		public void draw(GuiGraphics graphics, Theme theme, int x, int y, int w, int h) {
+		public void draw(GuiGraphicsExtractor graphics, Theme theme, int x, int y, int w, int h) {
 //			GuiHelper.setupDrawing();
 
 			if (xlateWarningTitle || xlateWarningSubtitle) {

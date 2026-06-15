@@ -1,9 +1,5 @@
 package dev.ftb.mods.ftbquests.client.gui;
 
-import net.minecraft.ChatFormatting;
-import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.network.chat.Component;
-
 import dev.ftb.mods.ftblibrary.client.config.ConfigCallback;
 import dev.ftb.mods.ftblibrary.client.gui.GuiHelper;
 import dev.ftb.mods.ftblibrary.client.gui.input.Key;
@@ -18,20 +14,19 @@ import dev.ftb.mods.ftblibrary.icon.Color4I;
 import dev.ftb.mods.ftblibrary.util.TooltipList;
 import dev.ftb.mods.ftbquests.client.ClientQuestFile;
 import dev.ftb.mods.ftbquests.client.config.EditableQuestObject;
-import dev.ftb.mods.ftbquests.quest.Quest;
-import dev.ftb.mods.ftbquests.quest.QuestLink;
-import dev.ftb.mods.ftbquests.quest.QuestObject;
-import dev.ftb.mods.ftbquests.quest.QuestObjectBase;
-import dev.ftb.mods.ftbquests.quest.QuestObjectType;
+import dev.ftb.mods.ftbquests.quest.*;
 import dev.ftb.mods.ftbquests.quest.loot.RewardTable;
 import dev.ftb.mods.ftbquests.quest.reward.Reward;
 import dev.ftb.mods.ftbquests.quest.task.Task;
+import net.minecraft.ChatFormatting;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
+import net.minecraft.network.chat.Component;
+import org.jspecify.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.function.Function;
-import org.jspecify.annotations.Nullable;
 
 public class SelectQuestObjectScreen<T extends QuestObjectBase> extends AbstractButtonListScreen {
 	private final EditableQuestObject<T> config;
@@ -66,7 +61,7 @@ public class SelectQuestObjectScreen<T extends QuestObjectBase> extends Abstract
 	}
 
 	@Override
-	public void drawBackground(GuiGraphics graphics, Theme theme, int x, int y, int w, int h) {
+	public void drawBackground(GuiGraphicsExtractor graphics, Theme theme, int x, int y, int w, int h) {
 		super.drawBackground(graphics, theme, x, y, w, h);
 
 		GuiHelper.drawHollowRect(graphics, mainPanel.getX() - 1, mainPanel.getY() - 1, mainPanel.width + 2, mainPanel.height + 2,
@@ -190,7 +185,7 @@ public class SelectQuestObjectScreen<T extends QuestObjectBase> extends Abstract
 		}
 
 		@Override
-		public void drawBackground(GuiGraphics graphics, Theme theme, int x, int y, int w, int h) {
+		public void drawBackground(GuiGraphicsExtractor graphics, Theme theme, int x, int y, int w, int h) {
 			if (isMouseOver) {
 				IconHelper.renderIcon(Color4I.WHITE.withAlpha(30), graphics, x, y, w, h);
 			}

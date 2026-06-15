@@ -1,13 +1,12 @@
 package dev.ftb.mods.ftbquests.client.gui.quests;
 
-import net.minecraft.client.gui.GuiGraphics;
-
 import dev.ftb.mods.ftblibrary.client.gui.theme.Theme;
 import dev.ftb.mods.ftblibrary.client.icon.IconHelper;
 import dev.ftb.mods.ftbquests.quest.Quest;
 import dev.ftb.mods.ftbquests.quest.QuestLink;
 import dev.ftb.mods.ftbquests.quest.QuestObject;
 import dev.ftb.mods.ftbquests.quest.theme.property.ThemeProperties;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 
 public class QuestLinkButton extends QuestButton {
     private final QuestLink link;
@@ -28,7 +27,7 @@ public class QuestLinkButton extends QuestButton {
     }
 
     @Override
-    public void draw(GuiGraphics graphics, Theme theme, int x, int y, int w, int h) {
+    public void draw(GuiGraphicsExtractor graphics, Theme theme, int x, int y, int w, int h) {
         super.draw(graphics, theme, x, y, w, h);
 
         if (questScreen.file.canEdit()) {

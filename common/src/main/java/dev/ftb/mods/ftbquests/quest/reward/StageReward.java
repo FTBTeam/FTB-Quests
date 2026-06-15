@@ -1,18 +1,18 @@
 package dev.ftb.mods.ftbquests.quest.reward;
 
+import de.marhali.json5.Json5Object;
+import dev.ftb.mods.ftblibrary.client.config.EditableConfigGroup;
+import dev.ftb.mods.ftblibrary.integration.stages.StageHelper;
+import dev.ftb.mods.ftblibrary.json5.Json5Util;
+import dev.ftb.mods.ftbquests.quest.Quest;
+import dev.ftb.mods.ftbteams.api.FTBTeamsAPI;
+import dev.ftb.mods.ftbteams.api.TeamStagesHelper;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.HolderLookup;
-import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.server.level.ServerPlayer;
-
-import dev.ftb.mods.ftblibrary.client.config.EditableConfigGroup;
-import dev.ftb.mods.ftblibrary.integration.stages.StageHelper;
-import dev.ftb.mods.ftbquests.quest.Quest;
-import dev.ftb.mods.ftbteams.api.FTBTeamsAPI;
-import dev.ftb.mods.ftbteams.api.TeamStagesHelper;
 
 public class StageReward extends Reward {
 	private String stage;
@@ -34,20 +34,20 @@ public class StageReward extends Reward {
 	}
 
 	@Override
-	public void writeData(CompoundTag nbt, HolderLookup.Provider provider) {
-		super.writeData(nbt, provider);
-		nbt.putString("stage", stage);
+	public void writeData(Json5Object json, HolderLookup.Provider provider) {
+		super.writeData(json, provider);
+		json.addProperty("stage", stage);
 
 		if (remove) {
-			nbt.putBoolean("remove", true);
+			json.addProperty("remove", true);
 		}
 	}
 
 	@Override
-	public void readData(CompoundTag nbt, HolderLookup.Provider provider) {
-		super.readData(nbt, provider);
-		stage = nbt.getString("stage").orElseThrow();
-		remove = nbt.getBooleanOr("remove", false);
+	public void readData(Json5Object json, HolderLookup.Provider provider) {
+		super.readData(json, provider);
+		stage = Json5Util.getString(json, "stage").orElseThrow();
+		remove = Json5Util.getBoolean(json, "remove").orElse(false);
 	}
 
 	@Override

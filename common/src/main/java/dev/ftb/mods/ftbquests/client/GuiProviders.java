@@ -1,21 +1,8 @@
 package dev.ftb.mods.ftbquests.client;
 
-import net.minecraft.client.Minecraft;
-import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.network.chat.Component;
-import net.minecraft.util.Util;
-import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.block.entity.StructureBlockEntity;
-import net.minecraft.world.phys.BlockHitResult;
-
+import de.marhali.json5.Json5Object;
 import dev.ftb.mods.ftblibrary.client.config.EditableConfigGroup;
-import dev.ftb.mods.ftblibrary.client.config.editable.EditableFluid;
-import dev.ftb.mods.ftblibrary.client.config.editable.EditableInt;
-import dev.ftb.mods.ftblibrary.client.config.editable.EditableItemStack;
-import dev.ftb.mods.ftblibrary.client.config.editable.EditableLong;
-import dev.ftb.mods.ftblibrary.client.config.editable.EditableString;
-import dev.ftb.mods.ftblibrary.client.config.editable.EditableStringifiedConfig;
+import dev.ftb.mods.ftblibrary.client.config.editable.*;
 import dev.ftb.mods.ftblibrary.client.config.gui.EditConfigScreen;
 import dev.ftb.mods.ftblibrary.client.config.gui.EditStringConfigOverlay;
 import dev.ftb.mods.ftblibrary.client.config.gui.resource.SelectFluidScreen;
@@ -27,17 +14,16 @@ import dev.ftb.mods.ftbquests.client.gui.SelectQuestObjectScreen;
 import dev.ftb.mods.ftbquests.quest.Quest;
 import dev.ftb.mods.ftbquests.quest.QuestObjectType;
 import dev.ftb.mods.ftbquests.quest.loot.RewardTable;
-import dev.ftb.mods.ftbquests.quest.reward.CurrencyReward;
-import dev.ftb.mods.ftbquests.quest.reward.ItemReward;
-import dev.ftb.mods.ftbquests.quest.reward.RandomReward;
-import dev.ftb.mods.ftbquests.quest.reward.Reward;
-import dev.ftb.mods.ftbquests.quest.reward.RewardType;
-import dev.ftb.mods.ftbquests.quest.reward.RewardTypes;
-import dev.ftb.mods.ftbquests.quest.reward.StageReward;
-import dev.ftb.mods.ftbquests.quest.reward.XPLevelsReward;
-import dev.ftb.mods.ftbquests.quest.reward.XPReward;
+import dev.ftb.mods.ftbquests.quest.reward.*;
 import dev.ftb.mods.ftbquests.quest.task.*;
 import dev.ftb.mods.ftbquests.quest.translation.TranslationKey;
+import net.minecraft.client.Minecraft;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.network.chat.Component;
+import net.minecraft.util.Util;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.entity.StructureBlockEntity;
+import net.minecraft.world.phys.BlockHitResult;
 
 import java.util.function.BiConsumer;
 
@@ -83,7 +69,7 @@ public class GuiProviders {
                 EditStringConfigOverlay<Long> overlay = new EditStringConfigOverlay<>(panel.getGui(), editable, accepted -> {
                     if (accepted) {
                         slvTask.setValue(editable.getValue());
-                        callback.accept(task, task.getType().makeExtraNBT());
+                        callback.accept(task, task.getType().makeExtraJson());
                     }
                     panel.run();
                 }, task.getType().getDisplayName()).atMousePosition();
@@ -101,7 +87,7 @@ public class GuiProviders {
                 gui.run();
                 if (accepted) {
                     ItemTask itemTask = new ItemTask(0L, quest).setStackAndCount(editable.getValue(), editable.getValue().getCount());
-                    callback.accept(itemTask, itemTask.getType().makeExtraNBT());
+                    callback.accept(itemTask, itemTask.getType().makeExtraJson());
                 }
             }).openGui();
         });
@@ -114,7 +100,7 @@ public class GuiProviders {
                 if (accepted) {
                     CheckmarkTask checkmarkTask = new CheckmarkTask(0L, quest);
                     checkmarkTask.setRawTitle(editable.getValue());
-                    CompoundTag extra = checkmarkTask.getType().makeExtraNBT();
+                    Json5Object extra = checkmarkTask.getType().makeExtraJson();
                     quest.getQuestFile().getTranslationManager().addInitialTranslation(extra, quest.getQuestFile().getLocale(), TranslationKey.TITLE, editable.getValue());
                     callback.accept(checkmarkTask, extra);
                 }
@@ -129,7 +115,7 @@ public class GuiProviders {
                 gui.run();
                 if (accepted) {
                     FluidTask fluidTask = new FluidTask(0L, quest).setFluid(editable.getValue());
-                    callback.accept(fluidTask, fluidTask.getType().makeExtraNBT());
+                    callback.accept(fluidTask, fluidTask.getType().makeExtraJson());
                 }
             }).openGui();
         });
@@ -158,7 +144,7 @@ public class GuiProviders {
 
                 if (blockEntity instanceof StructureBlockEntity structure) {
                     task.initFromStructure(structure);
-                    callback.accept(task, task.getType().makeExtraNBT());
+                    callback.accept(task, task.getType().makeExtraJson());
                     return;
                 }
             }
@@ -167,11 +153,11 @@ public class GuiProviders {
         });
     }
 
-    private static void openSetupGui(Runnable gui, BiConsumer<Task, CompoundTag> callback, Task task) {
+    private static void openSetupGui(Runnable gui, BiConsumer<Task, Json5Object> callback, Task task) {
         EditableConfigGroup group = new EditableConfigGroup(FTBQuestsAPI.MOD_ID, accepted -> {
             gui.run();
             if (accepted) {
-                callback.accept(task, task.getType().makeExtraNBT());
+                callback.accept(task, task.getType().makeExtraJson());
             }
         });
         group.setNameKey(task.getType().getTypeId().toLanguageKey("ftbquests.task"));

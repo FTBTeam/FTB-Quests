@@ -1,24 +1,10 @@
 package dev.ftb.mods.ftbquests.command;
 
-import net.minecraft.commands.CommandSourceStack;
-import net.minecraft.commands.Commands;
-import net.minecraft.commands.arguments.coordinates.BlockPosArgument;
-import net.minecraft.core.BlockPos;
-import net.minecraft.core.Direction;
-import net.minecraft.core.registries.Registries;
-import net.minecraft.nbt.NbtOps;
-import net.minecraft.network.chat.Component;
-import net.minecraft.resources.Identifier;
-import net.minecraft.world.item.CreativeModeTabs;
-import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.Items;
 import com.mojang.brigadier.Command;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
-
-import dev.architectury.registry.registries.RegistrarManager;
-
-import dev.ftb.mods.ftblibrary.util.NetworkHelper;
+import dev.ftb.mods.ftblibrary.platform.Platform;
+import dev.ftb.mods.ftblibrary.platform.network.Server2PlayNetworking;
 import dev.ftb.mods.ftbquests.FTBQuests;
 import dev.ftb.mods.ftbquests.net.CreateObjectResponseMessage;
 import dev.ftb.mods.ftbquests.net.SyncTranslationMessageToClient;
@@ -27,7 +13,18 @@ import dev.ftb.mods.ftbquests.quest.Quest;
 import dev.ftb.mods.ftbquests.quest.ServerQuestFile;
 import dev.ftb.mods.ftbquests.quest.task.ItemTask;
 import dev.ftb.mods.ftbquests.quest.translation.TranslationKey;
-import dev.ftb.mods.ftbquests.util.InventoryUtil;
+import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.commands.Commands;
+import net.minecraft.commands.arguments.coordinates.BlockPosArgument;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.nbt.NbtOps;
+import net.minecraft.network.chat.Component;
+import net.minecraft.resources.Identifier;
+import net.minecraft.world.item.CreativeModeTabs;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 
 import java.util.Collection;
 import java.util.Comparator;
@@ -62,7 +59,7 @@ public class GenerateChapterCommand {
     }
 
     private static int generateChapterFromInv(CommandSourceStack source, BlockPos pos) {
-        return generateMultiItemChapter(source, InventoryUtil.getItemsInInventory(source.getLevel(), pos, Direction.UP));
+        return generateMultiItemChapter(source, Platform.get().transfer().simple().blockEntity().getItems(source.getLevel(), pos, Direction.UP));
     }
 
     private static int generateChapterFromPlayerInv(CommandSourceStack source) throws CommandSyntaxException {
@@ -70,10 +67,8 @@ public class GenerateChapterCommand {
     }
 
     private static int generateMultiItemChapter(CommandSourceStack source, Collection<ItemStack> allItems) {
-        //noinspection DataFlowIssue
         List<ItemStack> list = allItems.stream()
-                .filter(stack -> !stack.isEmpty() && RegistrarManager.getId(stack.getItem(), Registries.ITEM) != null)
-                .sorted(Comparator.comparing(a -> RegistrarManager.getId(a.getItem(), Registries.ITEM)))
+                .sorted(Comparator.comparing(stack -> BuiltInRegistries.ITEM.getKey(stack.getItem())))
                 .toList();
 
         if (list.isEmpty()) {
@@ -93,8 +88,8 @@ public class GenerateChapterCommand {
         chapter.setRawIcon(new ItemStack(Items.COMPASS));
         chapter.setDefaultQuestShape("rsquare");
 
-        NetworkHelper.sendToAll(source.getServer(), CreateObjectResponseMessage.create(chapter, null));
-        NetworkHelper.sendToAll(source.getServer(), SyncTranslationMessageToClient.create(chapter, file.getLocale(), TranslationKey.TITLE, chapter.getRawTitle()));
+        Server2PlayNetworking.sendToAllPlayers(source.getServer(), CreateObjectResponseMessage.create(chapter, null));
+        Server2PlayNetworking.sendToAllPlayers(source.getServer(), SyncTranslationMessageToClient.create(chapter, file.getLocale(), TranslationKey.TITLE, chapter.getRawTitle()));
 
         addItemsToChapter(source, list, chapter);
 
@@ -112,10 +107,7 @@ public class GenerateChapterCommand {
         String modid = null;
 
         for (ItemStack stack : list) {
-            Identifier id = RegistrarManager.getId(stack.getItem(), Registries.ITEM);
-            if (id == null) {
-                continue;
-            }
+            Identifier id = BuiltInRegistries.ITEM.getKey(stack.getItem());
             if (modid == null) {
                 modid = id.getNamespace();
             }
@@ -134,13 +126,13 @@ public class GenerateChapterCommand {
             quest.setY(row);
             quest.setRawSubtitle(ItemStack.CODEC.encodeStart(source.registryAccess().createSerializationContext(NbtOps.INSTANCE), stack).getOrThrow().toString());
 
-            NetworkHelper.sendToAll(source.getServer(), CreateObjectResponseMessage.create(quest, null));
+            Server2PlayNetworking.sendToAllPlayers(source.getServer(), CreateObjectResponseMessage.create(quest, null));
 
             ItemTask task = new ItemTask(chapter.file.newID(), quest);
             task.onCreated();
             task.setStackAndCount(stack, 1);//.setConsumeItems(Tristate.TRUE);
 
-            NetworkHelper.sendToAll(source.getServer(), CreateObjectResponseMessage.create(task, task.getType().makeExtraNBT()));
+            Server2PlayNetworking.sendToAllPlayers(source.getServer(), CreateObjectResponseMessage.create(task, task.getType().makeExtraJson()));
 
             col++;
         }

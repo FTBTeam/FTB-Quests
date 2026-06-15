@@ -1,15 +1,15 @@
 package dev.ftb.mods.ftbquests.quest.loot;
 
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.world.item.ItemStack;
-
+import de.marhali.json5.Json5Object;
 import dev.ftb.mods.ftblibrary.client.config.EditableConfigGroup;
 import dev.ftb.mods.ftblibrary.icon.Color4I;
+import dev.ftb.mods.ftblibrary.json5.Json5Util;
 import dev.ftb.mods.ftblibrary.util.NameMap;
 import dev.ftb.mods.ftbquests.quest.QuestObjectBase;
 import dev.ftb.mods.ftbquests.registry.ModDataComponents;
 import dev.ftb.mods.ftbquests.registry.ModItems;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.world.item.ItemStack;
 
 import java.util.Collection;
 import java.util.LinkedHashMap;
@@ -29,7 +29,7 @@ public final class LootCrate {
 	private String itemName = "";
 	private Color4I color = Color4I.WHITE;
 	private boolean glow = false;
-	private final EntityWeight drops = new EntityWeight();
+	private EntityWeight drops = new EntityWeight(0, 0, 0);
 
 	public LootCrate(RewardTable table, boolean initFromTable) {
 		this.table = table;
@@ -51,9 +51,7 @@ public final class LootCrate {
 		if (def != null) {
 			color = Color4I.rgb(def.color);
 			glow = def.glow;
-			drops.passive = def.passive;
-			drops.monster = def.monster;
-			drops.boss = def.boss;
+			drops = new EntityWeight(def.passive, def.monster, def.boss);
 		}
 		return id;
 	}
@@ -84,46 +82,36 @@ public final class LootCrate {
 		return drops;
 	}
 
-	public void writeData(CompoundTag nbt) {
-		nbt.putString("string_id", stringID);
-
-		if (!itemName.isEmpty()) {
-			nbt.putString("item_name", itemName);
-		}
-
-		nbt.putInt("color", color.rgb());
-
-		if (glow) {
-			nbt.putBoolean("glow", true);
-		}
-
-		CompoundTag nbt1 = new CompoundTag();
-		drops.writeData(nbt1);
-		nbt.put("drops", nbt1);
+	public void writeData(Json5Object json) {
+		json.addProperty("string_id", stringID);
+		json.addProperty("color", color.rgb());
+		if (!itemName.isEmpty()) json.addProperty("item_name", itemName);
+		if (glow) json.addProperty("glow", true);
+		Json5Util.store(json, "drops", EntityWeight.CODEC, drops);
 	}
 
-	public void readData(CompoundTag nbt) {
-		stringID = nbt.getString("string_id").orElseThrow();
-		color = Color4I.rgb(nbt.getInt("color").orElseThrow());
-		nbt.getString("item_name").ifPresent(s -> itemName = s);
-		nbt.getBoolean("glow").ifPresent(bool -> glow = bool);
-		nbt.getCompound("drops").ifPresent(drops::writeData);
+	public void readData(Json5Object json) {
+		stringID = Json5Util.getString(json, "string_id").orElseThrow();
+		color = Color4I.rgb(Json5Util.getInt(json, "color").orElseThrow());
+		Json5Util.getString(json,"item_name").ifPresent(s -> itemName = s);
+		Json5Util.getBoolean(json, "glow").ifPresent(bool -> glow = bool);
+		drops = Json5Util.fetch(json, "drops", EntityWeight.CODEC).orElse(EntityWeight.zero());
 	}
 
-	public void writeNetData(FriendlyByteBuf data) {
-		data.writeUtf(stringID, Short.MAX_VALUE);
-		data.writeUtf(itemName, Short.MAX_VALUE);
-		data.writeInt(color.rgb());
-		data.writeBoolean(glow);
-		drops.writeNetData(data);
+	public void writeNetData(FriendlyByteBuf buf) {
+		buf.writeUtf(stringID, Short.MAX_VALUE);
+		buf.writeUtf(itemName, Short.MAX_VALUE);
+		buf.writeInt(color.rgb());
+		buf.writeBoolean(glow);
+		EntityWeight.STREAM_CODEC.encode(buf, drops);
 	}
 
-	public void readNetData(FriendlyByteBuf data) {
-		stringID = data.readUtf(Short.MAX_VALUE);
-		itemName = data.readUtf(Short.MAX_VALUE);
-		color = Color4I.rgb(data.readInt());
-		glow = data.readBoolean();
-		drops.readNetData(data);
+	public void readNetData(FriendlyByteBuf buf) {
+		stringID = buf.readUtf(Short.MAX_VALUE);
+		itemName = buf.readUtf(Short.MAX_VALUE);
+		color = Color4I.rgb(buf.readInt());
+		glow = buf.readBoolean();
+		drops = EntityWeight.STREAM_CODEC.decode(buf);
 	}
 
 	public void fillConfigGroup(EditableConfigGroup config) {

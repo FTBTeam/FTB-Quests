@@ -11,7 +11,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Mixin(TextureAtlas.class)
-public class TextureAtlasMixin {
+public abstract class TextureAtlasMixin {
     @Inject(method = "upload", at = @At("RETURN"))
     private void onUpload(SpriteLoader.Preparations arg, CallbackInfo ci) {
         //noinspection DataFlowIssue

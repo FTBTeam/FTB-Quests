@@ -3,6 +3,10 @@
   "package": "dev.ftb.mods.ftbquests.fabric.mixin",
   "compatibilityLevel": "JAVA_8",
   "mixins": [
+    "FurnaceResultSlotMixin",
+    "ResultSlotMixin",
+    "ServerLevelMixin",
+    "ServerPlayerMixin"
   ],
   "client": [
     "TextureAtlasMixin"

@@ -1,15 +1,6 @@
 package dev.ftb.mods.ftbquests.client.gui;
 
-import net.minecraft.ChatFormatting;
-import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.network.chat.Component;
-import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
-import net.minecraft.util.Util;
-import net.minecraft.world.item.Items;
-
-import dev.architectury.networking.NetworkManager;
-
+import de.marhali.json5.Json5Object;
 import dev.ftb.mods.ftblibrary.client.config.editable.EditableString;
 import dev.ftb.mods.ftblibrary.client.config.gui.EditStringConfigOverlay;
 import dev.ftb.mods.ftblibrary.client.gui.input.Key;
@@ -23,6 +14,7 @@ import dev.ftb.mods.ftblibrary.client.icon.IconHelper;
 import dev.ftb.mods.ftblibrary.icon.Color4I;
 import dev.ftb.mods.ftblibrary.icon.Icons;
 import dev.ftb.mods.ftblibrary.icon.ItemIcon;
+import dev.ftb.mods.ftblibrary.platform.network.Play2ServerNetworking;
 import dev.ftb.mods.ftblibrary.util.TooltipList;
 import dev.ftb.mods.ftbquests.FTBQuests;
 import dev.ftb.mods.ftbquests.client.ClientQuestFile;
@@ -36,17 +28,23 @@ import dev.ftb.mods.ftbquests.quest.loot.RewardTable;
 import dev.ftb.mods.ftbquests.quest.reward.RandomReward;
 import dev.ftb.mods.ftbquests.quest.translation.TranslationKey;
 import dev.ftb.mods.ftbquests.registry.ModItems;
+import it.unimi.dsi.fastutil.ints.IntOpenHashSet;
+import it.unimi.dsi.fastutil.ints.IntSet;
+import net.minecraft.ChatFormatting;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import net.minecraft.util.Util;
+import net.minecraft.world.item.Items;
+import org.apache.commons.lang3.mutable.MutableInt;
+import org.jetbrains.annotations.NotNull;
+import org.lwjgl.glfw.GLFW;
 
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.function.Function;
 import java.util.stream.Collectors;
-import it.unimi.dsi.fastutil.ints.IntOpenHashSet;
-import it.unimi.dsi.fastutil.ints.IntSet;
-import org.apache.commons.lang3.mutable.MutableInt;
-import org.jetbrains.annotations.NotNull;
-import org.lwjgl.glfw.GLFW;
 
 public class RewardTablesScreen extends AbstractButtonListScreen {
 	private final QuestScreen questScreen;
@@ -162,7 +160,7 @@ public class RewardTablesScreen extends AbstractButtonListScreen {
 
 	private static CreateObjectMessage makeCreationPacket(RewardTable table) {
 		ClientQuestFile file = ClientQuestFile.getInstance();
-		CompoundTag extra = Util.make(new CompoundTag(), tag -> file.getTranslationManager().addInitialTranslation(
+		Json5Object extra = Util.make(new Json5Object(), tag -> file.getTranslationManager().addInitialTranslation(
 				tag, file.getLocale(), TranslationKey.TITLE, table.getRawTitle())
 		);
 		return CreateObjectMessage.create(table, extra);
@@ -175,7 +173,7 @@ public class RewardTablesScreen extends AbstractButtonListScreen {
 				RewardTable table = rewardTablesCopy.get(idx);
 				if (addNew && table.id == 0 || !addNew && table.id != 0) {
 					// id == 0 means table is only locally added, no need to sync an edit/delete for it
-					NetworkManager.sendToServer(func.apply(table));
+					Play2ServerNetworking.send(func.apply(table));
 					sent++;
 				}
 			}
@@ -195,7 +193,7 @@ public class RewardTablesScreen extends AbstractButtonListScreen {
 		}
 
 		@Override
-		public void draw(GuiGraphics graphics, Theme theme, int x, int y, int w, int h) {
+		public void draw(GuiGraphicsExtractor graphics, Theme theme, int x, int y, int w, int h) {
 			super.draw(graphics, theme, x, y, w, h);
 
 			theme.drawString(graphics, getGui().getTitle(), x + 6, y + 6, Theme.SHADOW);
@@ -247,7 +245,7 @@ public class RewardTablesScreen extends AbstractButtonListScreen {
 		}
 
 		@Override
-		public void drawBackground(GuiGraphics graphics, Theme theme, int x, int y, int w, int h) {
+		public void drawBackground(GuiGraphicsExtractor graphics, Theme theme, int x, int y, int w, int h) {
 			if (isMouseOver) {
 				IconHelper.renderIcon(Color4I.WHITE.withAlpha(30), graphics, x, y, w, h);
 				IconHelper.renderIcon(ItemIcon.ofItem(ModItems.LOOTCRATE.get()), graphics, x + w - 26, y + 2, 12, 12);
@@ -262,7 +260,7 @@ public class RewardTablesScreen extends AbstractButtonListScreen {
 		}
 
 		@Override
-		public void draw(GuiGraphics graphics, Theme theme, int x, int y, int w, int h) {
+		public void draw(GuiGraphicsExtractor graphics, Theme theme, int x, int y, int w, int h) {
 			super.draw(graphics, theme, x, y, w, h);
 
 			if (pendingDeleteIndexes.contains(idx)) {

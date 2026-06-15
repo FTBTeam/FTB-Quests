@@ -1,17 +1,15 @@
 package dev.ftb.mods.ftbquests.net;
 
+import dev.ftb.mods.ftblibrary.platform.network.PacketContext;
+import dev.ftb.mods.ftblibrary.util.NetworkHelper;
+import dev.ftb.mods.ftbquests.api.FTBQuestsAPI;
+import dev.ftb.mods.ftbquests.item.CustomIconItem;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.Identifier;
 import net.minecraft.world.InteractionHand;
-
-import dev.architectury.networking.NetworkManager;
-
-import dev.ftb.mods.ftblibrary.util.NetworkHelper;
-import dev.ftb.mods.ftbquests.api.FTBQuestsAPI;
-import dev.ftb.mods.ftbquests.item.CustomIconItem;
 
 public record SetCustomImageMessage(InteractionHand hand, boolean isEntityFace, Identifier texture) implements CustomPacketPayload {
 	public static final Type<SetCustomImageMessage> TYPE = new Type<>(FTBQuestsAPI.id("set_custom_image_message"));
@@ -28,15 +26,13 @@ public record SetCustomImageMessage(InteractionHand hand, boolean isEntityFace, 
 		return TYPE;
 	}
 
-	public static void handle(SetCustomImageMessage message, NetworkManager.PacketContext context) {
-		context.queue(() -> {
-			if (context.getPlayer().getItemInHand(message.hand).getItem() instanceof CustomIconItem) {
-				if (message.isEntityFace) {
-					CustomIconItem.setFaceIcon(context.getPlayer().getItemInHand(message.hand), message.texture);
-				} else {
-					CustomIconItem.setIcon(context.getPlayer().getItemInHand(message.hand), message.texture);
-				}
+	public static void handle(SetCustomImageMessage message, PacketContext context) {
+		if (context.player().getItemInHand(message.hand).getItem() instanceof CustomIconItem) {
+			if (message.isEntityFace) {
+				CustomIconItem.setFaceIcon(context.player().getItemInHand(message.hand), message.texture);
+			} else {
+				CustomIconItem.setIcon(context.player().getItemInHand(message.hand), message.texture);
 			}
-		});
+		}
 	}
 }

@@ -1,10 +1,5 @@
 package dev.ftb.mods.ftbquests.client.gui;
 
-import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.network.chat.Component;
-
-import dev.architectury.networking.NetworkManager;
-
 import dev.ftb.mods.ftblibrary.client.gui.input.MouseButton;
 import dev.ftb.mods.ftblibrary.client.gui.screens.AbstractButtonListScreen;
 import dev.ftb.mods.ftblibrary.client.gui.theme.Theme;
@@ -12,12 +7,14 @@ import dev.ftb.mods.ftblibrary.client.gui.widget.Panel;
 import dev.ftb.mods.ftblibrary.client.gui.widget.SimpleTextButton;
 import dev.ftb.mods.ftblibrary.client.icon.IconHelper;
 import dev.ftb.mods.ftblibrary.icon.Color4I;
+import dev.ftb.mods.ftblibrary.platform.network.Play2ServerNetworking;
 import dev.ftb.mods.ftbquests.client.ClientQuestFile;
 import dev.ftb.mods.ftbquests.client.gui.quests.QuestScreen;
 import dev.ftb.mods.ftbquests.net.ChangeChapterGroupMessage;
 import dev.ftb.mods.ftbquests.quest.Chapter;
 import dev.ftb.mods.ftbquests.quest.ChapterGroup;
-
+import net.minecraft.client.gui.GuiGraphicsExtractor;
+import net.minecraft.network.chat.Component;
 import org.jspecify.annotations.Nullable;
 
 public class ChangeChapterGroupScreen extends AbstractButtonListScreen {
@@ -52,7 +49,7 @@ public class ChangeChapterGroupScreen extends AbstractButtonListScreen {
 	@Override
 	protected void doAccept() {
 		if (newGroup != null) {
-			NetworkManager.sendToServer(new ChangeChapterGroupMessage(chapter.id, newGroup.id));
+			Play2ServerNetworking.send(new ChangeChapterGroupMessage(chapter.id, newGroup.id));
 		}
 		questScreen.open(chapter, false);
 	}
@@ -74,7 +71,7 @@ public class ChangeChapterGroupScreen extends AbstractButtonListScreen {
 		}
 
 		@Override
-		public void drawBackground(GuiGraphics graphics, Theme theme, int x, int y, int w, int h) {
+		public void drawBackground(GuiGraphicsExtractor graphics, Theme theme, int x, int y, int w, int h) {
 			if (isMouseOver) {
 				IconHelper.renderIcon(Color4I.WHITE.withAlpha(30), graphics, x, y, w, h);
 			}

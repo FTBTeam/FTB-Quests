@@ -1,18 +1,16 @@
 package dev.ftb.mods.ftbquests.net;
 
-import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.network.codec.ByteBufCodecs;
-import net.minecraft.network.codec.StreamCodec;
-import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import com.mojang.datafixers.util.Either;
-
-import dev.architectury.networking.NetworkManager;
-
+import dev.ftb.mods.ftblibrary.platform.network.PacketContext;
 import dev.ftb.mods.ftblibrary.util.NetworkHelper;
 import dev.ftb.mods.ftbquests.api.FTBQuestsAPI;
 import dev.ftb.mods.ftbquests.client.ClientQuestFile;
 import dev.ftb.mods.ftbquests.quest.QuestObjectBase;
 import dev.ftb.mods.ftbquests.quest.translation.TranslationKey;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.codec.ByteBufCodecs;
+import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -50,17 +48,15 @@ public record SyncTranslationMessageToClient(long id, String locale, Translation
         return TYPE;
     }
 
-    public static void handle(SyncTranslationMessageToClient message, NetworkManager.PacketContext context) {
-        context.queue(() -> {
-            ClientQuestFile file = ClientQuestFile.getInstance();
-            if (file.isValid()) {
-                QuestObjectBase object = file.getBase(message.id);
-                if (object != null) {
-                    message.val.ifLeft(str -> file.getTranslationManager().addTranslation(object, message.locale, message.subKey, str))
-                            .ifRight(list -> file.getTranslationManager().addTranslation(object, message.locale, message.subKey, list));
-                    object.clearCachedData();
-                }
+    public static void handle(SyncTranslationMessageToClient message, PacketContext context) {
+        ClientQuestFile file = ClientQuestFile.getInstance();
+        if (file.isValid()) {
+            QuestObjectBase object = file.getBase(message.id);
+            if (object != null) {
+                message.val.ifLeft(str -> file.getTranslationManager().addTranslation(object, message.locale, message.subKey, str))
+                        .ifRight(list -> file.getTranslationManager().addTranslation(object, message.locale, message.subKey, list));
+                object.clearCachedData();
             }
-        });
+        }
     }
 }

@@ -1,22 +1,22 @@
 package dev.ftb.mods.ftbquests.quest.reward;
 
-import net.minecraft.ChatFormatting;
-import net.minecraft.IdentifierException;
-import net.minecraft.advancements.AdvancementHolder;
-import net.minecraft.core.HolderLookup;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.network.RegistryFriendlyByteBuf;
-import net.minecraft.network.chat.Component;
-import net.minecraft.resources.Identifier;
-import net.minecraft.server.level.ServerPlayer;
-
+import de.marhali.json5.Json5Object;
 import dev.ftb.mods.ftblibrary.client.config.EditableConfigGroup;
 import dev.ftb.mods.ftblibrary.icon.Icon;
 import dev.ftb.mods.ftblibrary.icon.ItemIcon;
+import dev.ftb.mods.ftblibrary.json5.Json5Util;
 import dev.ftb.mods.ftblibrary.util.KnownServerRegistries;
 import dev.ftb.mods.ftblibrary.util.NameMap;
 import dev.ftb.mods.ftbquests.quest.Quest;
 import dev.ftb.mods.ftbquests.util.TextUtils;
+import net.minecraft.ChatFormatting;
+import net.minecraft.IdentifierException;
+import net.minecraft.advancements.AdvancementHolder;
+import net.minecraft.core.HolderLookup;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.chat.Component;
+import net.minecraft.resources.Identifier;
+import net.minecraft.server.level.ServerPlayer;
 
 public class AdvancementReward extends Reward {
 	private Identifier advancement;
@@ -34,17 +34,17 @@ public class AdvancementReward extends Reward {
 	}
 
 	@Override
-	public void writeData(CompoundTag nbt, HolderLookup.Provider provider) {
-		super.writeData(nbt, provider);
-		nbt.store("advancement", Identifier.CODEC, advancement);
-		nbt.putString("criterion", criterion);
+	public void writeData(Json5Object json, HolderLookup.Provider provider) {
+		super.writeData(json, provider);
+		Json5Util.store(json, "advancement", Identifier.CODEC, advancement);
+		json.addProperty("criterion", criterion);
 	}
 
 	@Override
-	public void readData(CompoundTag nbt, HolderLookup.Provider provider) {
-		super.readData(nbt, provider);
-		advancement = nbt.read("advancement", Identifier.CODEC).orElseThrow();
-		criterion = nbt.getString("criterion").orElseThrow();
+	public void readData(Json5Object json, HolderLookup.Provider provider) {
+		super.readData(json, provider);
+		advancement = Json5Util.fetch(json, "advancement", Identifier.CODEC).orElseThrow();
+		criterion = Json5Util.getString(json, "criterion").orElseThrow();
 	}
 
 	@Override

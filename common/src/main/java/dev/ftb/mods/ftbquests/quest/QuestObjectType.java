@@ -1,14 +1,13 @@
 package dev.ftb.mods.ftbquests.quest;
 
+import dev.ftb.mods.ftblibrary.util.NameMap;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.codec.StreamCodec;
-
-import dev.ftb.mods.ftblibrary.util.NameMap;
+import org.jspecify.annotations.Nullable;
 
 import java.util.function.Predicate;
-import org.jspecify.annotations.Nullable;
 
 public enum QuestObjectType implements Predicate<QuestObjectBase> {
 	NULL("null", ChatFormatting.BLACK),

@@ -1,11 +1,23 @@
 package dev.ftb.mods.ftbquests.quest.task;
 
+import de.marhali.json5.Json5Object;
+import dev.ftb.mods.ftblibrary.client.config.EditableConfigGroup;
+import dev.ftb.mods.ftblibrary.client.util.ClientUtils;
+import dev.ftb.mods.ftblibrary.icon.AnimatedIcon;
+import dev.ftb.mods.ftblibrary.icon.Icon;
+import dev.ftb.mods.ftblibrary.icon.Icons;
+import dev.ftb.mods.ftblibrary.icon.ItemIcon;
+import dev.ftb.mods.ftblibrary.json5.Json5Util;
+import dev.ftb.mods.ftblibrary.util.Lazy;
+import dev.ftb.mods.ftblibrary.util.NameMap;
+import dev.ftb.mods.ftbquests.FTBQuests;
+import dev.ftb.mods.ftbquests.quest.Quest;
+import dev.ftb.mods.ftbquests.quest.TeamData;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.Holder;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
-import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
@@ -20,41 +32,23 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.SpawnEggItem;
-
-import dev.architectury.registry.registries.RegistrarManager;
-
-import dev.ftb.mods.ftblibrary.client.config.EditableConfigGroup;
-import dev.ftb.mods.ftblibrary.client.util.ClientUtils;
-import dev.ftb.mods.ftblibrary.icon.AnimatedIcon;
-import dev.ftb.mods.ftblibrary.icon.Icon;
-import dev.ftb.mods.ftblibrary.icon.Icons;
-import dev.ftb.mods.ftblibrary.icon.ItemIcon;
-import dev.ftb.mods.ftblibrary.util.Lazy;
-import dev.ftb.mods.ftblibrary.util.NameMap;
-import dev.ftb.mods.ftbquests.FTBQuests;
-import dev.ftb.mods.ftbquests.quest.Quest;
-import dev.ftb.mods.ftbquests.quest.TeamData;
-
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
 import org.jspecify.annotations.Nullable;
+
+import java.util.*;
 
 public class KillTask extends Task {
 	private static final Identifier ZOMBIE = Identifier.withDefaultNamespace("zombie");
 
 	private static final Lazy<NameMap<Identifier>> entityNameMap = Lazy.of(KillTask::scanEntityTypes);
 	private static final Lazy<NameMap<String>> entityTagMap = Lazy.of(KillTask::scanEntityTags);
+	private static final Map<Identifier,Icon<?>> entityIcons = new HashMap<>();
 
 	private Identifier entityTypeId = ZOMBIE;
 	@Nullable
 	private TagKey<EntityType<?>> entityTypeTag = null;
 	private long value = 100L;
 	private String customName = "";
-	private static final Map<Identifier,Icon<?>> entityIcons = new HashMap<>();
+	private String nbtFilter = "";
 
 	public KillTask(long id, Quest quest) {
 		super(id, quest);
@@ -71,21 +65,23 @@ public class KillTask extends Task {
 	}
 
 	@Override
-	public void writeData(CompoundTag nbt, HolderLookup.Provider provider) {
-		super.writeData(nbt, provider);
-		nbt.putString("entity", entityTypeId.toString());
-		if (entityTypeTag != null) nbt.putString("entityTypeTag", entityTypeTag.location().toString());
-		nbt.putLong("value", value);
-		if (!customName.isEmpty()) nbt.putString("custom_name", customName);
+	public void writeData(Json5Object json, HolderLookup.Provider provider) {
+		super.writeData(json, provider);
+		json.addProperty("entity", entityTypeId.toString());
+		if (entityTypeTag != null) json.addProperty("entityTypeTag", entityTypeTag.location().toString());
+		json.addProperty("value", value);
+		if (!customName.isEmpty()) json.addProperty("custom_name", customName);
+		if (!nbtFilter.isEmpty()) json.addProperty("nbt_filter", customName);
 	}
 
 	@Override
-	public void readData(CompoundTag nbt, HolderLookup.Provider provider) {
-		super.readData(nbt, provider);
-		entityTypeId = parseTypeId(nbt.getString("entity").orElse(""));
-		entityTypeTag = parseTypeTag(nbt.getString("entityTypeTag").orElse(""));
-		value = nbt.getLong("value").orElse(0L);
-		customName = nbt.getString("custom_name").orElse("");
+	public void readData(Json5Object json, HolderLookup.Provider provider) {
+		super.readData(json, provider);
+		entityTypeId = parseTypeId(Json5Util.getString(json, "entity").orElse(""));
+		entityTypeTag = parseTypeTag(Json5Util.getString(json,"entityTypeTag").orElse(""));
+		value = Json5Util.getLong(json, "value").orElse(0L);
+		customName = Json5Util.getString(json, "custom_name").orElse("");
+		nbtFilter = Json5Util.getString(json, "nbt_filter").orElse("");
 	}
 
 	@Override
@@ -95,6 +91,7 @@ public class KillTask extends Task {
 		buffer.writeUtf(entityTypeTag == null ? "" : entityTypeTag.location().toString());
 		buffer.writeVarLong(value);
 		buffer.writeUtf(customName);
+		buffer.writeUtf(nbtFilter);
 	}
 
 	@Override
@@ -104,6 +101,7 @@ public class KillTask extends Task {
 		entityTypeTag = parseTypeTag(buffer.readUtf());
 		value = buffer.readVarInt();
 		customName = buffer.readUtf();
+		nbtFilter = buffer.readUtf();
 	}
 
 	private static Identifier parseTypeId(String idStr) {
@@ -129,6 +127,7 @@ public class KillTask extends Task {
 		config.addEnum("entity_type_tag", getTypeTagStr(), v -> entityTypeTag = parseTypeTag(v), entityTagMap.get());
 		config.addLong("value", value, v -> value = v, 100L, 1L, Long.MAX_VALUE);
 		config.addString("custom_name", customName, v -> customName = v, "");
+		config.addString("nbt_filter", nbtFilter, v -> nbtFilter = v, "");
 	}
 
 	@Override
@@ -141,7 +140,7 @@ public class KillTask extends Task {
 	}
 
 	private static Icon<?> getIconForEntityType(Identifier typeId) {
-		return entityIcons.computeIfAbsent(typeId, k -> {
+		return entityIcons.computeIfAbsent(typeId, _ -> {
 			Optional<Holder.Reference<EntityType<?>>> entityTypeOpt = BuiltInRegistries.ENTITY_TYPE.get(typeId);
 			if (entityTypeOpt.isEmpty()) {
 				return Icons.BARRIER;
@@ -152,7 +151,7 @@ public class KillTask extends Task {
 				return Icons.PLAYER;
 			}
 
-			Item item = SpawnEggItem.byId(entityType);
+			Item item = SpawnEggItem.byId(entityType).map(Holder::value).orElse(null);
 			if (item == null) {
 				Entity e = entityType.create(ClientUtils.getClientLevel(), EntitySpawnReason.TRIGGERED);
 				if (e != null) {
@@ -209,8 +208,8 @@ public class KillTask extends Task {
 
 	private boolean match(LivingEntity e) {
 		return entityTypeTag == null ?
-				entityTypeId.equals(RegistrarManager.getId(e.getType(), Registries.ENTITY_TYPE)) && nameMatchOK(e) :
-				e.getType().is(entityTypeTag) && nameMatchOK(e);
+				entityTypeId.equals(BuiltInRegistries.ENTITY_TYPE.getKey(e.getType())) && nameMatchOK(e) && filterMatchOK(e) :
+				e.is(entityTypeTag) && nameMatchOK(e) && filterMatchOK(e);
 	}
 
 	private boolean nameMatchOK(LivingEntity e) {
@@ -220,15 +219,20 @@ public class KillTask extends Task {
 						e.getName().getString().equals(customName));
 	}
 
+	private boolean filterMatchOK(LivingEntity e) {
+		return ObservationTask.matchEntityNBT(e, nbtFilter);
+	}
+
 	private static NameMap<Identifier> scanEntityTypes() {
 		List<Identifier> ids = new ArrayList<>();
 		BuiltInRegistries.ENTITY_TYPE.forEach(type -> {
+			var typeId = BuiltInRegistries.ENTITY_TYPE.getKey(type);
 			try {
 				if (type.create(ClientUtils.getClientLevel(), EntitySpawnReason.TRIGGERED) instanceof LivingEntity) {
-					ids.add(type.arch$registryName());
+					ids.add(typeId);
 				}
 			} catch (Exception e) {
-				FTBQuests.LOGGER.warn("Entity creation failed during kill task scanning for {}: {}", type.arch$registryName(), e.getMessage());
+				FTBQuests.LOGGER.warn("Entity creation failed during kill task scanning for {}: {}", typeId, e.getMessage());
 			}
 		});
 		ids.sort((r1, r2) -> {

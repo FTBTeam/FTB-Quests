@@ -1,15 +1,13 @@
 package dev.ftb.mods.ftbquests.net;
 
+import dev.ftb.mods.ftblibrary.platform.network.PacketContext;
+import dev.ftb.mods.ftblibrary.util.NetworkHelper;
+import dev.ftb.mods.ftbquests.api.FTBQuestsAPI;
+import dev.ftb.mods.ftbquests.client.FTBQuestsClient;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
-
-import dev.architectury.networking.NetworkManager;
-
-import dev.ftb.mods.ftblibrary.util.NetworkHelper;
-import dev.ftb.mods.ftbquests.api.FTBQuestsAPI;
-import dev.ftb.mods.ftbquests.client.FTBQuestsClient;
 
 public record BlockConfigRequestMessage(BlockPos pos, BlockType blockType) implements CustomPacketPayload {
     public static final Type<BlockConfigRequestMessage> TYPE = new Type<>(FTBQuestsAPI.id("block_config_request_message"));
@@ -25,13 +23,11 @@ public record BlockConfigRequestMessage(BlockPos pos, BlockType blockType) imple
         return TYPE;
     }
 
-    public static void handle(BlockConfigRequestMessage message, NetworkManager.PacketContext context) {
-        context.queue(() -> {
-            switch (message.blockType) {
-                case TASK_SCREEN -> FTBQuestsClient.openTaskScreenConfigGui(message.pos);
-                case BARRIER -> FTBQuestsClient.openBarrierConfigGui(message.pos);
-            }
-        });
+    public static void handle(BlockConfigRequestMessage message, PacketContext context) {
+        switch (message.blockType) {
+            case TASK_SCREEN -> FTBQuestsClient.openTaskScreenConfigGui(message.pos);
+            case BARRIER -> FTBQuestsClient.openBarrierConfigGui(message.pos);
+        }
     }
 
     public enum BlockType {

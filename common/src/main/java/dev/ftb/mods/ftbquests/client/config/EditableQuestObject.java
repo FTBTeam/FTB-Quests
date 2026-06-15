@@ -1,7 +1,5 @@
 package dev.ftb.mods.ftbquests.client.config;
 
-import net.minecraft.network.chat.Component;
-
 import dev.ftb.mods.ftblibrary.client.config.ConfigCallback;
 import dev.ftb.mods.ftblibrary.client.config.editable.EditableConfigValue;
 import dev.ftb.mods.ftblibrary.client.gui.input.MouseButton;
@@ -10,10 +8,11 @@ import dev.ftb.mods.ftblibrary.client.gui.widget.Widget;
 import dev.ftb.mods.ftblibrary.util.TooltipList;
 import dev.ftb.mods.ftbquests.client.gui.SelectQuestObjectScreen;
 import dev.ftb.mods.ftbquests.quest.QuestObjectBase;
+import net.minecraft.network.chat.Component;
+import org.jspecify.annotations.Nullable;
 
 import java.util.function.Function;
 import java.util.function.Predicate;
-import org.jspecify.annotations.Nullable;
 
 public class EditableQuestObject<T extends QuestObjectBase> extends EditableConfigValue<T> {
 	public final Predicate<QuestObjectBase> predicate;

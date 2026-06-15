@@ -1,5 +1,12 @@
 package dev.ftb.mods.ftbquests.block.entity;
 
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
+import dev.ftb.mods.ftbquests.item.LootCrateItem;
+import dev.ftb.mods.ftbquests.quest.loot.LootCrate;
+import dev.ftb.mods.ftbquests.quest.loot.WeightedReward;
+import dev.ftb.mods.ftbquests.registry.ModBlockEntityTypes;
+import dev.ftb.mods.ftbquests.registry.ModDataComponents;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.UUIDUtil;
 import net.minecraft.core.component.DataComponentGetter;
@@ -11,21 +18,9 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.storage.ValueInput;
 import net.minecraft.world.level.storage.ValueOutput;
-import com.mojang.serialization.Codec;
-import com.mojang.serialization.codecs.RecordCodecBuilder;
-
-import dev.ftb.mods.ftbquests.item.LootCrateItem;
-import dev.ftb.mods.ftbquests.quest.loot.LootCrate;
-import dev.ftb.mods.ftbquests.quest.loot.WeightedReward;
-import dev.ftb.mods.ftbquests.registry.ModBlockEntityTypes;
-import dev.ftb.mods.ftbquests.registry.ModDataComponents;
-
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
 import org.jspecify.annotations.Nullable;
+
+import java.util.*;
 
 public class LootCrateOpenerBlockEntity extends BlockEntity {
     private static final ItemEntry EMPTY_ENTRY = new ItemEntry(ItemStack.EMPTY);
@@ -81,7 +76,7 @@ public class LootCrateOpenerBlockEntity extends BlockEntity {
 
         outputs.clear();
         dataComponentGetter.getOrDefault(ModDataComponents.LOOT_CRATE_ITEMS.get(), ItemContainerContents.EMPTY)
-                .stream().forEach(stack -> outputs.put(new ItemEntry(stack), stack.getCount()));
+                .nonEmptyItemCopyStream().forEach(stack -> outputs.put(new ItemEntry(stack), stack.getCount()));
     }
 
     @Override
@@ -150,7 +145,7 @@ public class LootCrateOpenerBlockEntity extends BlockEntity {
         int nAttempts = stack.getCount();
         for (WeightedReward wr : crate.getTable().generateWeightedRandomRewards(level.getRandom(), nAttempts, true)) {
             List<ItemStack> stacks = new ArrayList<>();
-            if (wr.getReward().automatedClaimPre(this, stacks, level.random, owner, player)) {
+            if (wr.getReward().automatedClaimPre(this, stacks, level.getRandom(), owner, player)) {
                 update = true;
 
                 if (!simulate) {

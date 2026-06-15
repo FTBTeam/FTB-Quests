@@ -1,11 +1,6 @@
 package dev.ftb.mods.ftbquests.client.gui;
 
-import net.minecraft.ChatFormatting;
-import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.network.chat.Component;
-import net.minecraft.world.item.Items;
 import com.mojang.blaze3d.platform.InputConstants;
-
 import dev.ftb.mods.ftblibrary.client.config.EditableConfigGroup;
 import dev.ftb.mods.ftblibrary.client.config.editable.EditableDouble;
 import dev.ftb.mods.ftblibrary.client.config.gui.EditConfigScreen;
@@ -30,13 +25,17 @@ import dev.ftb.mods.ftbquests.quest.loot.RewardTable;
 import dev.ftb.mods.ftbquests.quest.loot.WeightedReward;
 import dev.ftb.mods.ftbquests.quest.reward.RewardType;
 import dev.ftb.mods.ftbquests.quest.reward.RewardTypes;
+import net.minecraft.ChatFormatting;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
+import net.minecraft.network.chat.Component;
+import net.minecraft.world.item.Items;
+import org.lwjgl.glfw.GLFW;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Consumer;
-import org.lwjgl.glfw.GLFW;
 
 public class EditRewardTableScreen extends AbstractButtonListScreen {
 	private final Runnable parentScreen;
@@ -137,7 +136,7 @@ public class EditRewardTableScreen extends AbstractButtonListScreen {
 		}
 
 		@Override
-		public void draw(GuiGraphics graphics, Theme theme, int x, int y, int w, int h) {
+		public void draw(GuiGraphicsExtractor graphics, Theme theme, int x, int y, int w, int h) {
 			super.draw(graphics, theme, x, y, w, h);
 
 			IconHelper.renderIcon(editedTable.getIcon(), graphics, x + 2, y + 2, 16, 16);
@@ -285,7 +284,7 @@ public class EditRewardTableScreen extends AbstractButtonListScreen {
 		}
 
 		@Override
-		public void drawBackground(GuiGraphics graphics, Theme theme, int x, int y, int w, int h) {
+		public void drawBackground(GuiGraphicsExtractor graphics, Theme theme, int x, int y, int w, int h) {
 			if (isMouseOver) {
 				IconHelper.renderIcon(Color4I.WHITE.withAlpha(30), graphics, x, y, w, h);
 				IconHelper.renderIcon(ItemIcon.ofItem(Items.ANVIL), graphics, x + w - 26, y + 2, 12, 12);

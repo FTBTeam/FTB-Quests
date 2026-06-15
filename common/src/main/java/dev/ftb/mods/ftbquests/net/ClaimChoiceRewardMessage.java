@@ -1,18 +1,16 @@
 package dev.ftb.mods.ftbquests.net;
 
-import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.network.codec.ByteBufCodecs;
-import net.minecraft.network.codec.StreamCodec;
-import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
-import net.minecraft.server.level.ServerPlayer;
-
-import dev.architectury.networking.NetworkManager;
-
+import dev.ftb.mods.ftblibrary.platform.network.PacketContext;
 import dev.ftb.mods.ftbquests.api.FTBQuestsAPI;
 import dev.ftb.mods.ftbquests.quest.ServerQuestFile;
 import dev.ftb.mods.ftbquests.quest.loot.RewardTable;
 import dev.ftb.mods.ftbquests.quest.reward.ChoiceReward;
 import dev.ftb.mods.ftbquests.quest.reward.Reward;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.codec.ByteBufCodecs;
+import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import net.minecraft.server.level.ServerPlayer;
 
 public record ClaimChoiceRewardMessage(long id, int index) implements CustomPacketPayload {
 	public static final Type<ClaimChoiceRewardMessage> TYPE = new Type<>(FTBQuestsAPI.id("claim_choice_reward_message"));
@@ -28,22 +26,20 @@ public record ClaimChoiceRewardMessage(long id, int index) implements CustomPack
 		return TYPE;
 	}
 
-	public static void handle(ClaimChoiceRewardMessage message, NetworkManager.PacketContext context) {
-		context.queue(() -> {
-			Reward reward = ServerQuestFile.getInstance().getReward(message.id);
+	public static void handle(ClaimChoiceRewardMessage message, PacketContext context) {
+		Reward reward = ServerQuestFile.getInstance().getReward(message.id);
 
-			if (reward instanceof ChoiceReward choiceReward && context.getPlayer() instanceof ServerPlayer serverPlayer) {
-				ServerQuestFile.getInstance().getTeamData(serverPlayer).ifPresent(data -> {
-					RewardTable table = choiceReward.getTable();
+		if (reward instanceof ChoiceReward choiceReward && context.player() instanceof ServerPlayer serverPlayer) {
+			ServerQuestFile.getInstance().getTeamData(serverPlayer).ifPresent(data -> {
+				RewardTable table = choiceReward.getTable();
 
-					if (table != null && data.isCompleted(reward.getQuest())) {
-						if (message.index >= 0 && message.index < table.getWeightedRewards().size()) {
-							table.getWeightedRewards().get(message.index).getReward().claim(serverPlayer, true);
-							data.claimReward(serverPlayer, reward, true);
-						}
+				if (table != null && data.isCompleted(reward.getQuest())) {
+					if (message.index >= 0 && message.index < table.getWeightedRewards().size()) {
+						table.getWeightedRewards().get(message.index).getReward().claim(serverPlayer, true);
+						data.claimReward(serverPlayer, reward, true);
 					}
-				});
-			}
-		});
+				}
+			});
+		}
 	}
 }

@@ -12,7 +12,7 @@ import java.util.function.Predicate;
  * implementations of this with {@link FTBQuestsAPI.API#registerFilterAdapter(ItemFilterAdapter)}.
  */
 public interface ItemFilterAdapter {
-    Matcher NO_MATCH = stack -> false;
+    Matcher NO_MATCH = _ -> false;
 
     /**
      * The human-readable mod name.
@@ -69,6 +69,7 @@ public interface ItemFilterAdapter {
     /**
      * Just a fancy name for an itemstack predicate!
      */
+    @FunctionalInterface
     interface Matcher extends Predicate<ItemStack> {
     }
 }

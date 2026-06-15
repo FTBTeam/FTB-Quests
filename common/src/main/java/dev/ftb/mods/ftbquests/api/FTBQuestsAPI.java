@@ -1,11 +1,10 @@
 package dev.ftb.mods.ftbquests.api;
 
-import net.minecraft.resources.Identifier;
-
 import dev.ftb.mods.ftbquests.quest.BaseQuestFile;
+import net.minecraft.resources.Identifier;
+import org.jetbrains.annotations.ApiStatus;
 
 import java.util.Objects;
-import org.jetbrains.annotations.ApiStatus;
 
 /**
  * Note: FTB Quests API for 1.20 is subject to change! More API will be added, but don't count on classes and methods

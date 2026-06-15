@@ -1,14 +1,5 @@
 package dev.ftb.mods.ftbquests.client;
 
-import net.minecraft.ChatFormatting;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.FormattedText;
-import net.minecraft.network.chat.MutableComponent;
-import net.minecraft.network.chat.Style;
-import net.minecraft.util.FormattedCharSequence;
-
 import dev.ftb.mods.ftblibrary.client.gui.GuiHelper;
 import dev.ftb.mods.ftblibrary.client.icon.IconHelper;
 import dev.ftb.mods.ftblibrary.client.util.ClientUtils;
@@ -17,11 +8,19 @@ import dev.ftb.mods.ftbquests.client.gui.quests.QuestScreen;
 import dev.ftb.mods.ftbquests.quest.Quest;
 import dev.ftb.mods.ftbquests.quest.TeamData;
 import dev.ftb.mods.ftbquests.quest.task.Task;
+import it.unimi.dsi.fastutil.longs.LongSet;
+import net.minecraft.ChatFormatting;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.FormattedText;
+import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.network.chat.Style;
+import net.minecraft.util.FormattedCharSequence;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-import it.unimi.dsi.fastutil.longs.LongSet;
 
 public enum PinnedQuestsTracker {
     INSTANCE;
@@ -102,7 +101,7 @@ public enum PinnedQuestsTracker {
         }
     }
 
-    void render(Minecraft mc, GuiGraphics graphics) {
+    void render(Minecraft mc, GuiGraphicsExtractor graphics) {
         if (pinnedQuestText.isEmpty()) {
             return;
         }
@@ -140,13 +139,13 @@ public enum PinnedQuestsTracker {
         IconHelper.renderIcon(Color4I.GRAY.withAlpha(50), graphics, 1, 1, width - 2, mc.font.lineHeight + 4);
         IconHelper.renderIcon(Color4I.BLACK, graphics, 0, mc.font.lineHeight + 4, width, 1);
 
-        graphics.drawString(mc.font, title, (width - titleWidth) / 2, 4, 0xFFFFFF00);
+        graphics.text(mc.font, title, (width - titleWidth) / 2, 4, 0xFFFFFF00);
         int yPos = mc.font.lineHeight + 8;
         for (FormattedCharSequence fcs : pinnedQuestText) {
             if (fcs == FormattedCharSequence.EMPTY) {
                 yPos += VERTICAL_SPACING;
             } else {
-                graphics.drawString(mc.font, fcs, 4, yPos, 0xFFFFFFFF);
+                graphics.text(mc.font, fcs, 4, yPos, 0xFFFFFFFF);
                 yPos += mc.font.lineHeight;
             }
         }

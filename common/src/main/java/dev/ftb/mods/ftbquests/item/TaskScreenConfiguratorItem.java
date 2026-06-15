@@ -1,5 +1,11 @@
 package dev.ftb.mods.ftbquests.item;
 
+import dev.ftb.mods.ftblibrary.platform.network.Server2PlayNetworking;
+import dev.ftb.mods.ftbquests.FTBQuests;
+import dev.ftb.mods.ftbquests.block.entity.ITaskScreen;
+import dev.ftb.mods.ftbquests.net.BlockConfigRequestMessage;
+import dev.ftb.mods.ftbquests.registry.ModDataComponents;
+import dev.ftb.mods.ftbquests.registry.ModItems;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.GlobalPos;
@@ -18,14 +24,6 @@ import net.minecraft.world.item.component.TooltipDisplay;
 import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.Level;
 
-import dev.architectury.networking.NetworkManager;
-
-import dev.ftb.mods.ftbquests.FTBQuests;
-import dev.ftb.mods.ftbquests.block.entity.ITaskScreen;
-import dev.ftb.mods.ftbquests.net.BlockConfigRequestMessage;
-import dev.ftb.mods.ftbquests.registry.ModDataComponents;
-import dev.ftb.mods.ftbquests.registry.ModItems;
-
 import java.util.Optional;
 import java.util.function.Consumer;
 
@@ -41,7 +39,7 @@ public class TaskScreenConfiguratorItem extends Item {
             if (level.getBlockEntity(ctx.getClickedPos()) instanceof ITaskScreen) {
                 storeBlockPos(ctx.getItemInHand(), ctx.getLevel(), ctx.getClickedPos());
                 ctx.getPlayer().level().playSound(null, ctx.getClickedPos(), SoundEvents.NOTE_BLOCK_CHIME.value(), SoundSource.BLOCKS, 1f, 1f);
-                ctx.getPlayer().displayClientMessage(Component.translatable("ftbquests.message.configurator_bound", posToString(ctx.getClickedPos())), true);
+                ctx.getPlayer().sendOverlayMessage(Component.translatable("ftbquests.message.configurator_bound", posToString(ctx.getClickedPos())));
             } else {
                 return tryUseOn(sp, ctx.getItemInHand()) ? InteractionResult.CONSUME : InteractionResult.FAIL;
             }
@@ -74,19 +72,19 @@ public class TaskScreenConfiguratorItem extends Item {
         return readBlockPos(stack).map(gPos -> {
             Level level = player.level().getServer().getLevel(gPos.dimension());
             if (level != player.level() || !player.level().isLoaded(gPos.pos())) {
-                player.displayClientMessage(Component.translatable("ftbquests.message.task_screen_inaccessible").withStyle(ChatFormatting.RED), true);
+                player.sendOverlayMessage(Component.translatable("ftbquests.message.task_screen_inaccessible").withStyle(ChatFormatting.RED));
                 return false;
             }
             if (level.getBlockEntity(gPos.pos()) instanceof ITaskScreen taskScreen) {
                 if (taskScreen.hasPermissionToEdit(player)) {
                     taskScreen.getCoreScreen().ifPresent(coreScreen ->
-                            NetworkManager.sendToPlayer(player, new BlockConfigRequestMessage(coreScreen.getBlockPos(), BlockConfigRequestMessage.BlockType.TASK_SCREEN)));
+                            Server2PlayNetworking.send(player, new BlockConfigRequestMessage(coreScreen.getBlockPos(), BlockConfigRequestMessage.BlockType.TASK_SCREEN)));
                     return true;
                 } else {
-                    player.displayClientMessage(Component.translatable("block.ftbquests.screen.no_permission").withStyle(ChatFormatting.RED), true);
+                    player.sendOverlayMessage(Component.translatable("block.ftbquests.screen.no_permission").withStyle(ChatFormatting.RED));
                 }
             } else {
-                player.displayClientMessage(Component.translatable("ftbquests.message.missing_task_screen").withStyle(ChatFormatting.RED), true);
+                player.sendOverlayMessage(Component.translatable("ftbquests.message.missing_task_screen").withStyle(ChatFormatting.RED));
             }
             return false;
         }).orElse(false);

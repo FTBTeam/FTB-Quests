@@ -1,8 +1,7 @@
 package dev.ftb.mods.ftbquests.quest.task;
 
-import dev.architectury.networking.NetworkManager;
-
 import dev.ftb.mods.ftblibrary.client.gui.widget.Button;
+import dev.ftb.mods.ftblibrary.platform.network.Play2ServerNetworking;
 import dev.ftb.mods.ftbquests.net.SubmitTaskMessage;
 
 public enum CustomTaskClient implements TaskClient {
@@ -16,7 +15,7 @@ public enum CustomTaskClient implements TaskClient {
 
         if (customTask.enableButton() && canClick) {
             button.playClickSound();
-            NetworkManager.sendToServer(new SubmitTaskMessage(customTask.id));
+            Play2ServerNetworking.send(new SubmitTaskMessage(customTask.id));
         }
     }
 }

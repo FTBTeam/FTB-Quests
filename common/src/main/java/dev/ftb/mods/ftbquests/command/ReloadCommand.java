@@ -1,20 +1,17 @@
 package dev.ftb.mods.ftbquests.command;
 
+import com.mojang.brigadier.Command;
+import com.mojang.brigadier.builder.LiteralArgumentBuilder;
+import dev.ftb.mods.ftblibrary.platform.network.Server2PlayNetworking;
+import dev.ftb.mods.ftbquests.net.SyncEditorPermissionMessage;
+import dev.ftb.mods.ftbquests.net.SyncQuestsMessage;
+import dev.ftb.mods.ftbquests.quest.ServerQuestFile;
 import net.minecraft.ChatFormatting;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.util.Util;
-import com.mojang.brigadier.Command;
-import com.mojang.brigadier.builder.LiteralArgumentBuilder;
-
-import dev.architectury.networking.NetworkManager;
-
-import dev.ftb.mods.ftblibrary.util.NetworkHelper;
-import dev.ftb.mods.ftbquests.net.SyncEditorPermissionMessage;
-import dev.ftb.mods.ftbquests.net.SyncQuestsMessage;
-import dev.ftb.mods.ftbquests.quest.ServerQuestFile;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -46,9 +43,9 @@ public class ReloadCommand {
         ServerPlayer sender = source.getPlayer();
 
         instance.load(quests, progression);
-        NetworkHelper.sendToAll(source.getServer(), new SyncQuestsMessage(instance));
+        Server2PlayNetworking.sendToAllPlayers(source.getServer(), new SyncQuestsMessage(instance));
         source.getServer().getPlayerList().getPlayers().forEach(p -> {
-            NetworkManager.sendToPlayer(p, SyncEditorPermissionMessage.forPlayer(p));
+            Server2PlayNetworking.send(p, SyncEditorPermissionMessage.forPlayer(p));
             instance.getTranslationManager().sendTranslationsToPlayer(p);
         });
 

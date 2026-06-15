@@ -1,7 +1,6 @@
 package dev.ftb.mods.ftbquests.quest.theme.property;
 
 import net.minecraft.util.Mth;
-
 import org.jspecify.annotations.Nullable;
 
 public class DoubleProperty extends ThemeProperty<Double> {
