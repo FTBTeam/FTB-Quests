@@ -49,6 +49,10 @@ sourceSets {
 
 tasks.named('test') { enabled = false }
 
+tasks.named('check') {
+	dependsOn 'runGameTestServer'
+}
+
 configurations {
 	runGameTestServerAdditionalRuntimeClasspath.extendsFrom runtimeClasspath
 }

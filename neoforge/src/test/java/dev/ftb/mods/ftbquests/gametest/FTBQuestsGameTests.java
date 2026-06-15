@@ -10,6 +10,7 @@ public final class FTBQuestsGameTests {
 	public static void registerTests(RegisterGameTestsEvent event) {
 		FTBQTestRegistrar registrar = new FTBQTestRegistrar(event);
 
+		SerializationTests.register(registrar);
 		ProgressionTests.register(registrar);
 		ResetTests.register(registrar);
 		OptionalDependencyTests.register(registrar);
