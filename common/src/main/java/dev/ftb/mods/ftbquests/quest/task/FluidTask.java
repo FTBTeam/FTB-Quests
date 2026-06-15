@@ -27,7 +27,6 @@ import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.resources.Identifier;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.material.Fluids;
-import org.jspecify.annotations.Nullable;
 
 import java.util.Optional;
 
@@ -173,7 +172,6 @@ public class FluidTask extends Task {
 	}
 
 	@Override
-	@Nullable
 	public Optional<PositionedIngredient> getIngredient(Widget widget) {
 		return PositionedIngredient.of(fluidStack, widget);
 	}

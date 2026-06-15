@@ -140,7 +140,7 @@ public class KillTask extends Task {
 	}
 
 	private static Icon<?> getIconForEntityType(Identifier typeId) {
-		return entityIcons.computeIfAbsent(typeId, k -> {
+		return entityIcons.computeIfAbsent(typeId, _ -> {
 			Optional<Holder.Reference<EntityType<?>>> entityTypeOpt = BuiltInRegistries.ENTITY_TYPE.get(typeId);
 			if (entityTypeOpt.isEmpty()) {
 				return Icons.BARRIER;
