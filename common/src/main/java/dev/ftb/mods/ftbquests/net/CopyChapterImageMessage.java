@@ -5,6 +5,7 @@ import dev.ftb.mods.ftblibrary.util.NetworkHelper;
 import dev.ftb.mods.ftbquests.api.FTBQuestsAPI;
 import dev.ftb.mods.ftbquests.quest.Chapter;
 import dev.ftb.mods.ftbquests.quest.ChapterImage;
+import dev.ftb.mods.ftbquests.util.NetUtils;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
@@ -28,10 +29,12 @@ public record CopyChapterImageMessage(ChapterImage img) implements CustomPacketP
 
     public static void handle(CopyChapterImageMessage message, NetworkManager.PacketContext context) {
         context.queue(() -> {
-            Chapter chapter = message.img.getChapter();
-            chapter.addImage(message.img);
-            chapter.file.markDirty();
-            NetworkHelper.sendToAll(context.getPlayer().getServer(), new EditObjectResponseMessage(chapter));
+            if (NetUtils.canEdit(context)) {
+                Chapter chapter = message.img.getChapter();
+                chapter.addImage(message.img);
+                chapter.file.markDirty();
+                NetworkHelper.sendToAll(context.getPlayer().getServer(), new EditObjectResponseMessage(chapter));
+            }
         });
     }
 
