@@ -38,7 +38,8 @@ public final class FTBQTestRegistrar {
 				Rotation.NONE
 		);
 		try {
-			event.registerTest(FTBQuestsAPI.id(name), new FTBQInlineTest(info, body));
+			FTBQTests.put(name, body);
+			event.registerTest(FTBQuestsAPI.id(name), new FTBQGameTest(info, name));
 		} catch (Throwable t) {
 			System.err.println("[FTBQGameTest] Failed to register " + name + ": " + t);
 			t.printStackTrace();
