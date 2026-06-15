@@ -61,12 +61,7 @@ public class CommandReward extends Reward {
 	public void readData(Json5Object json, HolderLookup.Provider provider) {
 		super.readData(json, provider);
 		command = Json5Util.getString(json, "command").orElse(DEFAULT_COMMAND);
-		if (Json5Util.getBoolean(json,"elevate_perms").orElse(false)) {
-			// legacy migration
-			permissionLevel = 2;
-		} else {
-			permissionLevel = Json5Util.getInt(json, "permission_level").orElse(0);
-		}
+		permissionLevel = Json5Util.getInt(json, "permission_level").orElse(0);
 		silent = Json5Util.getBoolean(json, "silent").orElse(false);
 		feedbackMessage = Json5Util.getString(json, "feedback_message").orElse("");
 	}

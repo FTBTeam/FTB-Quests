@@ -8,7 +8,6 @@ import dev.ftb.mods.ftblibrary.client.util.PositionedIngredient;
 import dev.ftb.mods.ftblibrary.client.util.TextureAtlasSpriteRef;
 import dev.ftb.mods.ftblibrary.icon.Color4I;
 import dev.ftb.mods.ftblibrary.icon.Icon;
-import dev.ftb.mods.ftblibrary.json5.Json5Ops;
 import dev.ftb.mods.ftblibrary.json5.Json5Util;
 import dev.ftb.mods.ftblibrary.platform.Platform;
 import dev.ftb.mods.ftblibrary.platform.fluid.FluidStack;
@@ -20,7 +19,6 @@ import net.minecraft.core.HolderLookup;
 import net.minecraft.core.component.DataComponentMap;
 import net.minecraft.core.component.DataComponentPatch;
 import net.minecraft.core.component.PatchedDataComponentMap;
-import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
@@ -86,34 +84,14 @@ public class FluidTask extends Task {
 	public void writeData(Json5Object json, HolderLookup.Provider provider) {
 		super.writeData(json, provider);
 
-		json.add("fluid", FluidStack.CODEC.encodeStart(provider.createSerializationContext(Json5Ops.INSTANCE), fluidStack).getOrThrow());
+		Json5Util.store(json, provider, "fluid", FluidStack.CODEC, fluidStack);
 	}
 
 	@Override
 	public void readData(Json5Object json, HolderLookup.Provider provider) {
 		super.readData(json, provider);
 
-		var stringComp = Json5Util.getString(json, "fluid");
-		if (stringComp.isPresent()) {
-			// legacy - fluid stored as string ID
-			Identifier id = Identifier.tryParse(stringComp.get());
-			long bucketAmount = Platform.get().misc().bucketFluidAmount();
-			if (id == null) {
-				// Default to water if invalid
-				fluidStack = new FluidStack(Fluids.WATER, bucketAmount);
-			} else {
-				BuiltInRegistries.FLUID.get(id).ifPresentOrElse(
-						stack -> fluidStack = new FluidStack(stack, Json5Util.getLong(json, "amount").orElse(bucketAmount)),
-						() -> fluidStack = new FluidStack(Fluids.WATER, bucketAmount)
-				);
-			}
-		} else {
-			Json5Util.getJson5Object(json, "fluid").ifPresentOrElse(
-					o -> fluidStack = FluidStack.CODEC.parse(provider.createSerializationContext(Json5Ops.INSTANCE), o).result()
-							.orElse(FluidStack.empty()),
-					() -> fluidStack = FluidStack.empty()
-			);
-		}
+		fluidStack = Json5Util.fetch(json, provider, "fluid", FluidStack.CODEC).orElse(FluidStack.empty());
 	}
 
 	@Override

@@ -88,42 +88,11 @@ public abstract class QuestObjectBase implements Comparable<QuestObjectBase> {
 	}
 
 	public static ItemStack itemOrMissingFromJson(Json5Object json, HolderLookup.Provider provider) {
-//		CompoundTag compoundTag = processItemTagData(tag);
 		return json.isEmpty() ?
 				ItemStack.EMPTY :
 				ItemStack.CODEC.parse(provider.createSerializationContext(Json5Ops.INSTANCE), json).result()
 								.orElse(createMissing(json));
 	}
-
-//	public static ItemStack singleItemOrMissingFromJson(Json5Object json, HolderLookup.Provider provider) {
-//		return json.isEmpty() ?
-//				ItemStack.EMPTY :
-//				ItemStack.CODEC.parse(provider.createSerializationContext(Json5Ops.INSTANCE), json).result()
-//						.orElse(createMissing(json));
-//	}
-
-	// support for importing SNBT for itemstacks from legacy (1.20 and older) quest book data
-//	private static CompoundTag processItemTagData(Json5Object tag) {
-//		if (tag instanceof StringTag s) {
-//			// 1.20 or earlier, item name only
-//			return Util.make(new CompoundTag(), t -> t.putString("id", s.asString().orElseThrow()));
-//		} else if (tag instanceof CompoundTag c) {
-//			if (c.contains("Count") || c.contains("tag")) {
-//				// 1.20 or earlier with count and/or NBT data; migrate, but no NBT -> component data conversion
-//				return Util.make(new CompoundTag(), t -> {
-//					t.putString("id", c.getString("id").orElseThrow());
-//					int count = c.getInt("Count").orElse(1);
-//					if (count != 0) t.putInt("count", count);
-//				});
-//			} else {
-//				// 1.21 or later; it's good as-is
-//				return c;
-//			}
-//		} else {
-//			// shouldn't get here?
-//			return new CompoundTag();
-//		}
-//	}
 
 	private static ItemStack createMissing(Json5Object json) {
 		String id = Json5Util.getString(json, "id").orElse("unknown");
