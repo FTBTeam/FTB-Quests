@@ -25,11 +25,10 @@ public final class SerializationTests {
 
 			for (var entry : registry.entrySet()) {
 				Identifier id = entry.getKey().identifier();
-				if (!id.getNamespace().equals(FTBQuestsAPI.MOD_ID)) {
-					continue;
+				if (id.getNamespace().equals(FTBQuestsAPI.MOD_ID)) {
+					DataResult<Tag> result = GameTestInstance.DIRECT_CODEC.encodeStart(ops, entry.getValue());
+					assertTrue(helper, result.isSuccess(), "test instance " + id + " must encode for registry sync: " + result.error().map(DataResult.Error::message).orElse(""));
 				}
-				DataResult<Tag> result = GameTestInstance.DIRECT_CODEC.encodeStart(ops, entry.getValue());
-				assertTrue(helper, result.isSuccess(), "test instance " + id + " must encode for registry sync: " + result.error().map(DataResult.Error::message).orElse(""));
 			}
 
 			helper.succeed();
