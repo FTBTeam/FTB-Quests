@@ -27,6 +27,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.util.Mth;
 import net.minecraft.util.Util;
 import org.jetbrains.annotations.NotNull;
 import org.joml.Matrix3x2fStack;
@@ -227,7 +228,7 @@ public class ChapterImageButton extends Button implements QuestPositionableButto
 
 		if (chapterImage.isAlignToCorner()) {
 			poseStack.translate(x, y);
-			poseStack.rotate((float) chapterImage.getRotation());
+			poseStack.rotate((float) (Mth.DEG_TO_RAD * chapterImage.getRotation()));
 			poseStack.scale(w, h);
 			IconHelper.renderIcon(image, graphics, 0, 0, 1, 1);
 			if (questScreen.selectedObjects.contains(moveAndDeleteFocus())) {
@@ -236,7 +237,7 @@ public class ChapterImageButton extends Button implements QuestPositionableButto
 			}
 		} else {
 			poseStack.translate((int) (x + w / 2D), (int) (y + h / 2D));
-			poseStack.rotate((float) chapterImage.getRotation());
+			poseStack.rotate((float) (Mth.DEG_TO_RAD * chapterImage.getRotation()));
 			poseStack.scale(w / 2F, h / 2F);
 			IconHelper.renderIcon(image, graphics, -1, -1, 2, 2);
 			if (questScreen.selectedObjects.contains(moveAndDeleteFocus())) {
