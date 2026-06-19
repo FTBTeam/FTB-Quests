@@ -67,7 +67,7 @@ public class FTBQuestsNetClient {
             object.readData(c.nbt(), FTBQuestsClient.holderLookup());
             file.getTranslationManager().processInitialTranslation(c.extra(), object);
             object.onCreated();
-//			file.clearCachedData();
+			file.clearCachedData();
 			object.editedFromGUI();
 			FTBQuests.getRecipeModHelper().refreshRecipes(object);
 			if (listener != null) {
@@ -108,9 +108,9 @@ public class FTBQuestsNetClient {
 				FTBQuests.getRecipeModHelper().refreshRecipes(object);
 				ClientQuestFile.INSTANCE.getTranslationManager().removeAllTranslations(object);
 			}
-			ClientQuestFile.INSTANCE.clearCachedData();
+//			ClientQuestFile.INSTANCE.clearCachedData();
 		}
-		ClientQuestFile.INSTANCE.clearCachedData();
+//		ClientQuestFile.INSTANCE.clearCacheedData();
 	}
 
 	public static void notifyPlayerOfCompletion(long id) {
