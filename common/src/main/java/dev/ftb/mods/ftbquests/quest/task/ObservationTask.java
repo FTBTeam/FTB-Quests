@@ -76,7 +76,7 @@ public class ObservationTask extends AbstractBooleanTask {
 	public void readData(Json5Object json, HolderLookup.Provider provider) {
 		super.readData(json, provider);
 		timer = Json5Util.getLong(json, "timer").orElseThrow();
-		observeType = ObserveType.NAME_MAP.get(Json5Util.getString(json, "observe_type").orElseThrow());
+		observeType = ObserveType.NAME_MAP.get(Json5Util.getString(json, "observation_type").orElseThrow());
 		toObserve = Json5Util.getString(json, "to_observe").orElseThrow();
 	}
 
