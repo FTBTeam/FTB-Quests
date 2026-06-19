@@ -314,6 +314,11 @@ public abstract class Reward extends QuestObjectBase {
 		return false;
 	}
 
+	@Override
+	public CompoundTag makeExtraCreationData() {
+		return Util.make(super.makeExtraCreationData(), t -> t.putString("type", getType().getTypeForNBT()));
+	}
+
 	public void addAnyProtoTranslations(CompoundTag tag) {
 		if (protoTranslations.containsKey(TranslationKey.TITLE)) {
 			getQuestFile().getTranslationManager().addInitialTranslation(tag, getQuestFile().getLocale(), TranslationKey.TITLE, protoTranslations.get(TranslationKey.TITLE));
