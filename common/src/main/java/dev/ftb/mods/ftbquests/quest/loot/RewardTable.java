@@ -360,6 +360,7 @@ public class RewardTable extends QuestObjectBase {
 	@Override
 	public void deleteSelf() {
 		file.removeRewardTable(this);
+
 		super.deleteSelf();
 	}
 
@@ -394,10 +395,6 @@ public class RewardTable extends QuestObjectBase {
 	@Override
 	public void onCreated() {
 		super.onCreated();
-
-//		if (filename.isEmpty()) {
-//			filename = file.generateRewardTableName(titleToID(getRawTitle()).orElse(toString()));
-//		}
 
 		file.addRewardTable(this);
 	}

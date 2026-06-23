@@ -366,17 +366,9 @@ public final class Chapter extends QuestObject {
 	public void deleteSelf() {
 		super.deleteSelf();
 
+        List.copyOf(quests).forEach(Quest::deleteSelf);
+
 		group.removeChapter(this);
-	}
-
-	@Override
-	public void deleteChildren() {
-		for (Quest quest : quests) {
-			quest.deleteChildren();
-			quest.invalid = true;
-		}
-
-		quests.clear();
 	}
 
 	@Override

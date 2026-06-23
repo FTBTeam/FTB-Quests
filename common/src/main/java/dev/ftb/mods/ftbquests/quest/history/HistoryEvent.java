@@ -109,7 +109,7 @@ public interface HistoryEvent {
             if (object != null) {
                 object.readData(editRecord.nbt(), file.server.registryAccess());
                 object.editedFromGUIOnServer();
-                file.clearCachedData();
+                object.clearCachedData();
             }
         });
         file.markDirty();

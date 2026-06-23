@@ -157,15 +157,6 @@ public abstract class Task extends QuestObject {
 	}
 
 	@Override
-	public final void deleteChildren() {
-		for (TeamData data : quest.getChapter().file.getAllTeamData()) {
-			data.resetProgress(this);
-		}
-
-		super.deleteChildren();
-	}
-
-	@Override
 	@Environment(EnvType.CLIENT)
 	public void editedFromGUI() {
 		QuestScreen gui = ClientUtils.getCurrentGuiAs(QuestScreen.class);

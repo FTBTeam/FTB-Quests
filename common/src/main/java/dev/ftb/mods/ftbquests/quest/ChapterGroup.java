@@ -96,11 +96,10 @@ public class ChapterGroup extends QuestObject {
 
 		file.chapterGroups.remove(this);
 
+		// rather than delete any chapters in this group, instead move them to the "default" chapter group
 		for (Chapter chapter : chapters) {
 			file.getDefaultChapterGroup().addChapter(chapter);
 		}
-
-		super.deleteSelf();
 	}
 
 	@Override

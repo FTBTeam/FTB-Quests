@@ -46,7 +46,7 @@ public class ClientQuestFile extends BaseQuestFile {
 	private boolean editorPermission;
 
 	public static boolean exists() {
-		return INSTANCE != null && !INSTANCE.invalid;
+		return INSTANCE != null && INSTANCE.isValid();
 	}
 
 	public static void syncFromServer(BaseQuestFile newInstance) {
@@ -56,7 +56,6 @@ public class ClientQuestFile extends BaseQuestFile {
 
 		if (INSTANCE != null) {
 			// clean up the previous instance
-			INSTANCE.deleteChildren();
 			INSTANCE.deleteSelf();
 		}
 

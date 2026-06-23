@@ -47,7 +47,7 @@ public abstract class QuestObjectBase implements Comparable<QuestObjectBase> {
 
 	public final long id;
 
-	protected boolean invalid = false;
+	private boolean invalid = false;
 	private ItemStack rawIcon = ItemStack.EMPTY;
 	private List<String> tags = new ArrayList<>(0);
 
@@ -64,6 +64,10 @@ public abstract class QuestObjectBase implements Comparable<QuestObjectBase> {
 
 	public long getId() {
 		return id;
+	}
+
+	public void invalidate() {
+		invalid = true;
 	}
 
 	public static boolean isNull(@Nullable QuestObjectBase object) {
@@ -411,13 +415,16 @@ public abstract class QuestObjectBase implements Comparable<QuestObjectBase> {
 
 	}
 
+	/**
+	 * Called on object deletion. Responsible for cleaning up any self data and also any child objects
+	 * (chapter -> quests, quest -> tasks etc.)
+	 */
 	public void deleteSelf() {
+		invalidate();
+
 		if (getQuestFile().removeFromMap(id) == null) {
 			FTBQuests.LOGGER.warn("tried to remove quest object {} from ID map, but it wasn't present!", this);
 		}
-	}
-
-	public void deleteChildren() {
 	}
 
 	@Environment(EnvType.CLIENT)
