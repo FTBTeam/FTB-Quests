@@ -101,16 +101,12 @@ public class FTBQuestsNetClient {
 		for (long id : ids) {
 			QuestObjectBase object = ClientQuestFile.INSTANCE.getBase(id);
 			if (object != null) {
-				object.deleteChildren();
 				object.deleteSelf();
-//			ClientQuestFile.INSTANCE.refreshIDMap();
 				object.editedFromGUI();
 				FTBQuests.getRecipeModHelper().refreshRecipes(object);
 				ClientQuestFile.INSTANCE.getTranslationManager().removeAllTranslations(object);
 			}
-//			ClientQuestFile.INSTANCE.clearCachedData();
 		}
-//		ClientQuestFile.INSTANCE.clearCacheedData();
 	}
 
 	public static void notifyPlayerOfCompletion(long id) {

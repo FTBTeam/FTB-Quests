@@ -73,8 +73,6 @@ public record CopyQuestMessage(long id, long chapterId, double qx, double qy, bo
                 toSync.addAll(newQuest.getRewards());
                 NetworkHelper.sendToAll(server, CreateObjectResponseMessage.create(toSync, null));
 
-                // and update the server quest map etc.
-//                ServerQuestFile.INSTANCE.refreshIDMap();
                 ServerQuestFile.INSTANCE.markDirty();
             }
         });

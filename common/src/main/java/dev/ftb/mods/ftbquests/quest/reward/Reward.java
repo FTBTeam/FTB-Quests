@@ -187,15 +187,6 @@ public abstract class Reward extends QuestObjectBase {
 	}
 
 	@Override
-	public final void deleteChildren() {
-		for (TeamData data : getQuestFile().getAllTeamData()) {
-			data.deleteReward(this);
-		}
-
-		super.deleteChildren();
-	}
-
-	@Override
 	@Environment(EnvType.CLIENT)
 	public void editedFromGUI() {
 		QuestScreen gui = ClientUtils.getCurrentGuiAs(QuestScreen.class);

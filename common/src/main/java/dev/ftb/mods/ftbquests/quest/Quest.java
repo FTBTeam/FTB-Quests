@@ -433,7 +433,7 @@ public final class Quest extends QuestObject implements Movable, Excludable {
 		buffer.writeVarInt(dependencies.size());
 
 		for (QuestObject d : dependencies) {
-			buffer.writeLong(d.invalid ? 0L : d.id);
+			buffer.writeLong(d.isValid() ? d.id : 0L);
 		}
 
 		if (size != 0D) {
@@ -617,29 +617,24 @@ public final class Quest extends QuestObject implements Movable, Excludable {
 
 		chapter.removeQuest(this);
 
-		List<Long> linksToDel = new ArrayList<>();
-		getQuestFile().forAllQuestLinks(l -> {
-			if (l.linksTo(this)) {
-				linksToDel.add(l.id);
+		// clean up any tasks & rewards
+		for (Task task : List.copyOf(tasks)) {
+			task.deleteSelf();
+		}
+		tasks.clear();
+		for (Reward reward : List.copyOf(rewards)) {
+			reward.deleteSelf();
+		}
+		rewards.clear();
+
+		// clean up any quest links which point to this quest
+		List<QuestLink> linksToDel = new ArrayList<>();
+		getQuestFile().forAllQuestLinks(link -> {
+			if (link.linksTo(this)) {
+				linksToDel.add(link);
 			}
 		});
-		getQuestFile().deleteObjects(linksToDel);
-	}
-
-	@Override
-	public void deleteChildren() {
-		for (Task task : tasks) {
-			task.deleteChildren();
-			task.invalid = true;
-		}
-
-		for (Reward reward : rewards) {
-			reward.deleteChildren();
-			reward.invalid = true;
-		}
-
-		tasks.clear();
-		rewards.clear();
+		linksToDel.forEach(QuestLink::deleteSelf);
 	}
 
 	@Override
@@ -820,18 +815,15 @@ public final class Quest extends QuestObject implements Movable, Excludable {
 	}
 
 	public boolean hasDependency(QuestObject object) {
-		if (object.invalid) {
-			return false;
-		}
-
-		for (QuestObject dependency : dependencies) {
-			if (dependency == object) {
-				return true;
-			}
-		}
-
-		return false;
-	}
+        if (object.isValid()) {
+            for (QuestObject dependency : dependencies) {
+                if (dependency == object) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
 
 	@Override
 	protected boolean validateEditedConfig() {
@@ -942,7 +934,7 @@ public final class Quest extends QuestObject implements Movable, Excludable {
 	public Collection<QuestObject> getDependants() {
 		return dependantIDs.stream()
 				.map(id -> getQuestFile().get(id))
-				.filter(q -> q != null && !q.invalid)
+				.filter(q -> q != null && q.isValid())
 				.toList();
 	}
 
@@ -1033,7 +1025,7 @@ public final class Quest extends QuestObject implements Movable, Excludable {
 		Iterator<QuestObject> iter = dependencies.iterator();
 		while (iter.hasNext()) {
 			QuestObject qo = iter.next();
-			if (qo == null || qo.invalid || qo == this) {
+			if (qo == null || !qo.isValid() || qo == this) {
 				iter.remove();
 				if (qo instanceof Quest q) {
 					q.removeDependant(id);
@@ -1103,7 +1095,7 @@ public final class Quest extends QuestObject implements Movable, Excludable {
 	@FunctionalInterface
 	private interface DependencyChecker {
 		default boolean check(QuestObject questObject) {
-			return !questObject.invalid && check0(questObject);
+			return questObject.isValid() && check0(questObject);
 		}
 		boolean check0(QuestObject questObject);
 	}

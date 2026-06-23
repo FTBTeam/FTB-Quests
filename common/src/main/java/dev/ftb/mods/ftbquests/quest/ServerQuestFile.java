@@ -137,24 +137,20 @@ public class ServerQuestFile extends BaseQuestFile {
 
 	@Override
 	public void deleteObjects(List<Long> ids) {
-		List<Long> deleted = new ArrayList<>();
+		List<Long> deletedIds = new ArrayList<>();
 		for (long id : ids) {
 			QuestObjectBase object = getBase(id);
 			if (object != null) {
 				getTranslationManager().removeAllTranslations(object);
-				object.deleteChildren();
 				object.deleteSelf();
-//				object.getQuestFile().clearCachedData();
 				object.getPath().ifPresent(path -> FileUtils.delete(getFolder().resolve(path).toFile()));
-				deleted.add(id);
+				deletedIds.add(id);
 			}
 		}
 
-		if (!deleted.isEmpty()) {
-			clearCachedData();
+		if (!deletedIds.isEmpty()) {
 			markDirty();
-
-			NetworkHelper.sendToAll(server, new DeleteObjectResponseMessage(deleted));
+			NetworkHelper.sendToAll(server, new DeleteObjectResponseMessage(deletedIds));
 		}
 	}
 
@@ -182,7 +178,6 @@ public class ServerQuestFile extends BaseQuestFile {
 
 	public void unload() {
 		saveNow();
-		deleteChildren();
 		deleteSelf();
 	}
 

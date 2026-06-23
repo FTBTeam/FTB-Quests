@@ -223,26 +223,17 @@ public abstract class BaseQuestFile extends QuestObject implements QuestFile {
 
 	@Override
 	public void deleteSelf() {
-		invalid = true;
-	}
+		invalidate();
 
-	@Override
-	public void deleteChildren() {
-		forAllChapters(chapter -> {
-			chapter.deleteChildren();
-			chapter.invalid = true;
-		});
+		List<Chapter> allChapters = new ArrayList<>();
+		forAllChapters(allChapters::add);
+		allChapters.forEach(Chapter::deleteSelf);
 
 		defaultChapterGroup.clearChapters();
 		chapterGroups.clear();
 		chapterGroups.add(defaultChapterGroup);
 
-		for (RewardTable table : rewardTables) {
-			table.deleteChildren();
-			table.invalid = true;
-		}
-
-		rewardTables.clear();
+		List.copyOf(rewardTables).forEach(RewardTable::deleteSelf);
 	}
 
 	@Nullable
@@ -254,7 +245,7 @@ public abstract class BaseQuestFile extends QuestObject implements QuestFile {
 		}
 
 		QuestObjectBase object = questObjectMap.get(id);
-		return object == null || object.invalid ? null : object;
+		return object == null || !object.isValid() ? null : object;
 	}
 
 	@Nullable
@@ -278,8 +269,7 @@ public abstract class BaseQuestFile extends QuestObject implements QuestFile {
 			if (object instanceof QuestObject qo) {
 				forAllQuests(quest -> quest.removeDependency(qo));
 			}
-			object.invalid = true;
-//			refreshIDMap();
+			object.invalidate();
 			return object;
 		}
 
@@ -357,7 +347,7 @@ public abstract class BaseQuestFile extends QuestObject implements QuestFile {
 	 * Rebuild the id -> quest object map after some object has been added or removed. Also clears all cached data for
 	 * all known objects, forcing a re-cache on the next access.
 	 */
-	private void refreshIDMap() {
+	protected void refreshIDMap() {
 		questObjectMap.clear();
 
 		chapterGroups.forEach(group -> questObjectMap.put(group.id, group));
@@ -1517,7 +1507,6 @@ public abstract class BaseQuestFile extends QuestObject implements QuestFile {
 		List<Long> idsToRemove = new ArrayList<>();
 		toRemove.forEach(table -> {
 			table.deleteSelf();
-			table.invalid = true;
 			FileUtils.delete(ServerQuestFile.INSTANCE.getFolder().resolve(table.getPath().orElseThrow()).toFile());
 			idsToRemove.add(table.id);
 		});
