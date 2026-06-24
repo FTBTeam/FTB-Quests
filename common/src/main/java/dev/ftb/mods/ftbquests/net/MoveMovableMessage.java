@@ -29,7 +29,7 @@ public record MoveMovableMessage(long id, long chapterID, double x, double y) im
 
 	public static void handle(MoveMovableMessage message, NetworkManager.PacketContext context) {
 		context.queue(() -> {
-			if (ServerQuestFile.INSTANCE.get(message.id) instanceof Movable movable && NetUtils.canEdit(context)) {
+			if (ServerQuestFile.INSTANCE.getBase(message.id) instanceof Movable movable && NetUtils.canEdit(context)) {
 				movable.onMoved(message.x, message.y, message.chapterID);
 				ServerQuestFile.INSTANCE.markDirty();
 				NetworkHelper.sendToAll(ServerQuestFile.INSTANCE.server, new MoveMovableResponseMessage(movable.getMovableID(), message.chapterID, message.x, message.y));

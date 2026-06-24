@@ -1,5 +1,7 @@
 package dev.ftb.mods.ftbquests.client.gui.quests;
 
+import com.mojang.datafixers.util.Pair;
+import dev.architectury.networking.NetworkManager;
 import dev.ftb.mods.ftblibrary.config.ConfigGroup;
 import dev.ftb.mods.ftblibrary.config.ConfigValue;
 import dev.ftb.mods.ftblibrary.config.ConfigWithVariants;
@@ -29,8 +31,6 @@ import dev.ftb.mods.ftbquests.quest.theme.QuestTheme;
 import dev.ftb.mods.ftbquests.quest.theme.ThemeLoader;
 import dev.ftb.mods.ftbquests.quest.theme.property.ThemeProperties;
 import dev.ftb.mods.ftbquests.util.ConfigQuestObject;
-import com.mojang.datafixers.util.Pair;
-import dev.architectury.networking.NetworkManager;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
@@ -404,25 +404,20 @@ public class QuestScreen extends BaseScreen {
 		return false;
     }
 
-	private boolean pasteSelectedQuest(boolean withDeps) {
-		if (ChapterImage.isImageInClipboard()) {
-			return pasteSelectedImage();
-		} else {
-			return QuestObjectBase.parseHexId(getClipboardString()).map(id -> {
-				Quest quest = file.getQuest(id);
-				if (quest == null) return false;
-				Pair<Double, Double> qxy = getSnappedXY();
-				NetworkManager.sendToServer(new CopyQuestMessage(quest.id, selectedChapter.id, qxy.getFirst(), qxy.getSecond(), withDeps));
-				return true;
-			}).orElse(false);
-		}
-	}
-
-	private boolean pasteSelectedImage() {
-		return ChapterImageButton.getClipboardImage().map(clipImg -> {
-			Pair<Double,Double> qxy = getSnappedXY();
-			NetworkManager.sendToServer(new CopyChapterImageMessage(clipImg, selectedChapter, qxy.getFirst(), qxy.getSecond()));
-			return true;
+	private boolean pasteSelectedQuest(boolean withDeps, Chapter chapter) {
+		return QuestObjectBase.parseHexId(getClipboardString()).map(id -> {
+			Pair<Double, Double> qxy = getSnappedXY();
+			return switch (file.getBase(id)) {
+				case Quest quest -> {
+					NetworkManager.sendToServer(new CopyQuestMessage(quest.getId(), chapter.getId(), qxy.getFirst(), qxy.getSecond(), withDeps));
+					yield true;
+				}
+				case ChapterImage img -> {
+					NetworkManager.sendToServer(new CopyChapterImageMessage(img.getId(), chapter.getId(), qxy.getFirst(), qxy.getSecond()));
+					yield true;
+				}
+				case null, default -> false;
+			};
 		}).orElse(false);
 	}
 
@@ -577,7 +572,7 @@ public class QuestScreen extends BaseScreen {
 					if (key.modifiers.alt()) {
 						return pasteSelectedQuestLinks();
 					} else {
-						return pasteSelectedQuest(!key.modifiers.shift());
+						return pasteSelectedQuest(!key.modifiers.shift(), selectedChapter);
 					}
 				}
 				case GLFW.GLFW_KEY_T -> {
@@ -836,7 +831,7 @@ public class QuestScreen extends BaseScreen {
 		selectedObjects.clear();
 		persistedData.selectedQuests.stream()
 				.mapToLong(id -> id)
-				.filter(id -> file.get(id) instanceof Movable)
+				.filter(id -> file.getBase(id) instanceof Movable)
 				.mapToObj(id -> (Movable) file.get(id))
 				.forEach(selectedObjects::add);
 

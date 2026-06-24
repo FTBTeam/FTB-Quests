@@ -65,8 +65,8 @@ public class ServerQuestFile extends BaseQuestFile {
 		int rewardTypeId = 0;
 
 		for (RewardType type : RewardTypes.TYPES.values()) {
-			type.intId = ++rewardTypeId;
-			rewardTypeIds.put(type.intId, type);
+			type.internalId = ++rewardTypeId;
+			rewardTypeIds.put(type.internalId, type);
 		}
 	}
 

@@ -301,23 +301,11 @@ public class QuestButton extends Button implements QuestPositionableButton {
 			}
 		}
 
-		if (title.getString().contains("\n")) {
-			// I'm not proud of this kludge but getting titles with embedded newlines and possible styling
-			// to work well as tooltips is not fun
-			title.visit((style, txt) -> {
-				for (String s : txt.split("\n")) {
-					if (!s.isEmpty()) list.add(Component.literal(s).withStyle(style));
-				}
-				return Optional.empty();
-			}, title.getStyle());
-		} else {
-			list.add(title);
-		}
+		TextUtils.processComponentWithPossibleNewlines(title, list::add);
 
-		Component description = quest.getSubtitle();
-
-		if (!TextUtils.isComponentEmpty(description)) {
-			list.add(description.copy().withStyle(ChatFormatting.GRAY));
+		Component subtitle = quest.getSubtitle();
+		if (!TextUtils.isComponentEmpty(subtitle)) {
+			list.add(subtitle.copy().withStyle(ChatFormatting.GRAY));
 		}
 
 		if (quest.isOptional()) {

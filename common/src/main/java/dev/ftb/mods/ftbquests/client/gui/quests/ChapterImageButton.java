@@ -15,6 +15,7 @@ import dev.ftb.mods.ftbquests.net.EditObjectMessage;
 import dev.ftb.mods.ftbquests.quest.ChapterImage;
 import dev.ftb.mods.ftbquests.quest.Movable;
 import dev.ftb.mods.ftbquests.quest.theme.property.ThemeProperties;
+import dev.ftb.mods.ftbquests.util.TextUtils;
 import net.minecraft.ChatFormatting;
 import net.minecraft.Util;
 import net.minecraft.client.gui.GuiGraphics;
@@ -23,10 +24,8 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import org.jetbrains.annotations.NotNull;
 
-import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 import java.util.function.BiFunction;
 
 public class ChapterImageButton extends Button implements QuestPositionableButton {
@@ -50,24 +49,13 @@ public class ChapterImageButton extends Button implements QuestPositionableButto
 		}
 	}
 
-	public ChapterImageButton(Panel panel, ChapterImage i) {
-		super(panel, Component.empty(), i.getImage());
+	public ChapterImageButton(Panel panel, ChapterImage chapterImage) {
+		super(panel, chapterImage.getTitle(), chapterImage.getImage());
+
 		questScreen = (QuestScreen) panel.getGui();
 		setSize(20, 20);
-		chapterImage = i;
+		this.chapterImage = chapterImage;
 		setDrawLayer(DrawLayer.BACKGROUND); // draw *before* connection lines & quest widgets
-	}
-
-	public static Optional<ChapterImage> getClipboardImage() {
-		ChapterImage img = ChapterImage.clipboard.get();
-		if (img != null) {
-			if (img.getChapter().isValid()) {
-				return Optional.of(img);
-			} else {
-				ChapterImage.clipboard = new WeakReference<>(null);
-			}
-		}
-		return Optional.empty();
 	}
 
 	@Override
@@ -110,7 +98,10 @@ public class ChapterImageButton extends Button implements QuestPositionableButto
 		if (questScreen.file.canEdit() && button.isRight()) {
 			List<ContextMenuItem> contextMenu = new ArrayList<>();
 
-			contextMenu.add(ContextMenuItem.title(Component.literal("\"").append(chapterImage.getTitle()).append(Component.literal("\""))));
+			Component title = chapterImage.getTitle().getString().isEmpty() ?
+					Component.literal(chapterImage.getImage().toString()) :
+					chapterImage.getTitle();
+			contextMenu.add(ContextMenuItem.title(title));
 			contextMenu.add(ContextMenuItem.SEPARATOR);
 
 			contextMenu.add(new ContextMenuItem(Component.translatable("selectServer.edit"), ThemeProperties.EDIT_ICON.get(), b -> openEditScreen()));
@@ -123,10 +114,10 @@ public class ChapterImageButton extends Button implements QuestPositionableButto
 				}
 			});
 
-			contextMenu.add(new ContextMenuItem(Component.translatable("gui.copy"), Icons.INFO, b -> chapterImage.copyToClipboard()) {
+			contextMenu.add(new ContextMenuItem(Component.translatable("ftbquests.gui.copy_id"), Icons.INFO, b -> chapterImage.copyToClipboard()) {
 				@Override
 				public void addMouseOverText(TooltipList list) {
-					list.add(Component.literal(chapterImage.getImage().toString()).withStyle(ChatFormatting.DARK_GRAY));
+					list.add(Component.literal(chapterImage.getCodeString()).withStyle(ChatFormatting.DARK_GRAY));
 				}
 			});
 
@@ -137,10 +128,12 @@ public class ChapterImageButton extends Button implements QuestPositionableButto
 						b -> chapterImage.fixupAspectRatio(false)));
 			}
 
-			contextMenu.add(new ContextMenuItem(Component.translatable("selectServer.delete"), ThemeProperties.DELETE_ICON.get(), b -> {
-				chapterImage.getChapter().removeImage(chapterImage);
-				EditObjectMessage.sendToServer(chapterImage.getChapter());
-			}).setYesNoText(Component.translatable("delete_item", chapterImage.getImage().toString())));
+			int nSelected = questScreen.selectedObjects.size();
+			Component yesNo = Component.translatable("delete_item", nSelected > 0 ?
+					Component.translatable("ftbquests.objects", nSelected) :
+					Component.literal(chapterImage.getImage().toString())
+			);
+			contextMenu.add(new ContextMenuItem(Component.translatable("selectServer.delete"), ThemeProperties.DELETE_ICON.get(), b -> handleDeletion()).setYesNoText(yesNo));
 
 			getGui().openContextMenu(contextMenu);
 		} else if (button.isLeft()) {
@@ -158,6 +151,14 @@ public class ChapterImageButton extends Button implements QuestPositionableButto
 			}
 
 			questScreen.movingObjects = true;
+		}
+	}
+
+	private void handleDeletion() {
+		if (questScreen.selectedObjects.isEmpty()) {
+			questScreen.file.deleteObjects(List.of(chapterImage.getId()));
+		} else {
+			questScreen.deleteSelectedObjects();
 		}
 	}
 
@@ -197,7 +198,7 @@ public class ChapterImageButton extends Button implements QuestPositionableButto
 
 	@Override
 	public void addMouseOverText(TooltipList list) {
-		chapterImage.addHoverText(list);
+		TextUtils.processComponentWithPossibleNewlines(getTitle(), list::add);
 	}
 
 	@Override

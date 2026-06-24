@@ -16,7 +16,10 @@ import dev.ftb.mods.ftblibrary.ui.input.Key;
 import dev.ftb.mods.ftblibrary.ui.input.MouseButton;
 import dev.ftb.mods.ftbquests.api.FTBQuestsAPI;
 import dev.ftb.mods.ftbquests.client.FTBQuestsClientConfig;
-import dev.ftb.mods.ftbquests.net.*;
+import dev.ftb.mods.ftbquests.net.CopyChapterImageMessage;
+import dev.ftb.mods.ftbquests.net.CopyQuestMessage;
+import dev.ftb.mods.ftbquests.net.CreateObjectMessage;
+import dev.ftb.mods.ftbquests.net.CreateQuestAndTaskMessage;
 import dev.ftb.mods.ftbquests.quest.*;
 import dev.ftb.mods.ftbquests.quest.task.Task;
 import dev.ftb.mods.ftbquests.quest.task.TaskType;
@@ -460,19 +463,18 @@ public class QuestPanel extends Panel {
 				contextMenu.add(new ContextMenuItem(type.getDisplayName(), type.getIconSupplier(), b -> {
 					playClickSound();
 					type.getGuiProvider().openCreationGui(this, new Quest(0L, questScreen.selectedChapter),
-                            task -> NetworkManager.sendToServer(CreateQuestAndTaskMessage.requestCreation(questScreen.selectedChapter, qx, qy, task))
+							task -> NetworkManager.sendToServer(CreateQuestAndTaskMessage.requestCreation(questScreen.selectedChapter, qx, qy, task))
 					);
 				}));
 			}
 
 			contextMenu.add(new ContextMenuItem(Component.translatable("ftbquests.chapter.image"), Icons.ART, b -> showImageCreationScreen(qx, qy)));
 
-			String clip = getClipboardString();
-			if (!ChapterImage.isImageInClipboard()) {
-				QuestObjectBase.parseHexId(clip).ifPresent(questId -> {
-					QuestObject qo = questScreen.file.get(questId);
-					contextMenu.add(ContextMenuItem.SEPARATOR);
-					if (qo instanceof Quest quest) {
+			QuestObjectBase.parseHexId(getClipboardString()).ifPresent(questId -> {
+				QuestObjectBase qo = questScreen.file.getBase(questId);
+				switch (qo) {
+					case Quest quest -> {
+						contextMenu.add(ContextMenuItem.SEPARATOR);
 						contextMenu.add(new PasteQuestMenuItem(quest, Component.translatable("ftbquests.gui.paste"),
 								Icons.ADD,
 								b -> NetworkManager.sendToServer(new CopyQuestMessage(quest.id, questScreen.selectedChapter.id, qx, qy, true))));
@@ -488,19 +490,21 @@ public class QuestPanel extends Panel {
 									link.setPosition(qx, qy);
 									NetworkManager.sendToServer(CreateObjectMessage.requestCreation(link));
 								}));
-					} else if (qo instanceof Task task) {
+					}
+					case Task task -> {
+						contextMenu.add(ContextMenuItem.SEPARATOR);
 						contextMenu.add(new AddTaskButton.PasteTaskMenuItem(task, b -> copyAndCreateTask(task, qx, qy)));
 					}
-				});
-			} else {
-				ChapterImageButton.getClipboardImage().ifPresent(clipImg -> {
-					contextMenu.add(ContextMenuItem.SEPARATOR);
-					contextMenu.add(new TooltipContextMenuItem(Component.translatable("ftbquests.gui.paste_image"),
-							Icons.ADD,
-							b -> NetworkManager.sendToServer(new CopyChapterImageMessage(clipImg, questScreen.selectedChapter, qx, qy)),
-							Component.literal(clipImg.getImage().toString()).withStyle(ChatFormatting.GRAY)));
-				});
-			}
+					case ChapterImage img -> {
+						contextMenu.add(ContextMenuItem.SEPARATOR);
+						contextMenu.add(new TooltipContextMenuItem(Component.translatable("ftbquests.gui.paste_image"),
+								Icons.ADD,
+								b -> NetworkManager.sendToServer(new CopyChapterImageMessage(img.getId(), questScreen.selectedChapter.getId(), qx, qy)),
+								Component.literal(img.getImage().toString()).withStyle(ChatFormatting.GRAY)));
+					}
+					case null, default -> {}
+				}
+			});
 
 			questScreen.openContextMenu(contextMenu).setExtraZlevel(900);
 			return true;
@@ -510,16 +514,19 @@ public class QuestPanel extends Panel {
 	}
 
 	private void showImageCreationScreen(double qx, double qy) {
+		if (questScreen.selectedChapter == null) {
+			return;
+		}
+
 		ImageResourceConfig imageConfig = new ImageResourceConfig();
 		new SelectImageResourceScreen(imageConfig, accepted -> {
 			if (accepted) {
 				playClickSound();
-				ChapterImage image = new ChapterImage(questScreen.selectedChapter)
+				ChapterImage image = new ChapterImage(0L, questScreen.selectedChapter)
 						.setImage(Icon.getIcon(imageConfig.getValue()))
 						.setPosition(qx, qy);
 				image.fixupAspectRatio(true);
-				questScreen.selectedChapter.addImage(image);
-				NetworkManager.sendToServer(EditObjectMessage.forQuestObject(questScreen.selectedChapter));
+				NetworkManager.sendToServer(CreateObjectMessage.requestCreation(image));
 			}
 			QuestPanel.this.questScreen.openGui();
 		}).openGui();

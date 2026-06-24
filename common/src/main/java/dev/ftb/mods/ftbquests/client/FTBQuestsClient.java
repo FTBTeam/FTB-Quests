@@ -219,8 +219,13 @@ public class FTBQuestsClient {
 		return Optional.empty();
 	}
 
+
 	public static void copyToClipboard(QuestObjectBase qo) {
 		Widget.setClipboardString(qo.getCodeString());
+	}
+
+	public static void copyToClipboard(String str) {
+		Widget.setClipboardString(str);
 	}
 
 	static void showCompletionToast(QuestObject qo) {
