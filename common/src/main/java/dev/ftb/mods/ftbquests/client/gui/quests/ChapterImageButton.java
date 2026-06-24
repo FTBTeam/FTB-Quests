@@ -2,16 +2,12 @@ package dev.ftb.mods.ftbquests.client.gui.quests;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Axis;
-import dev.ftb.mods.ftblibrary.config.ConfigGroup;
-import dev.ftb.mods.ftblibrary.config.ui.EditConfigScreen;
 import dev.ftb.mods.ftblibrary.icon.Color4I;
 import dev.ftb.mods.ftblibrary.icon.Icon;
 import dev.ftb.mods.ftblibrary.icon.Icons;
 import dev.ftb.mods.ftblibrary.ui.*;
 import dev.ftb.mods.ftblibrary.ui.input.MouseButton;
 import dev.ftb.mods.ftblibrary.util.TooltipList;
-import dev.ftb.mods.ftbquests.api.FTBQuestsAPI;
-import dev.ftb.mods.ftbquests.net.EditObjectMessage;
 import dev.ftb.mods.ftbquests.quest.ChapterImage;
 import dev.ftb.mods.ftbquests.quest.Movable;
 import dev.ftb.mods.ftbquests.quest.theme.property.ThemeProperties;
@@ -21,7 +17,6 @@ import net.minecraft.Util;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.MutableComponent;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
@@ -95,16 +90,18 @@ public class ChapterImageButton extends Button implements QuestPositionableButto
 
 	@Override
 	public void onClicked(MouseButton button) {
+		Component title = chapterImage.getTitle().getString().isEmpty() ?
+			Component.literal(chapterImage.getImage().toString()) :
+			chapterImage.getTitle();
+
 		if (questScreen.file.canEdit() && button.isRight()) {
 			List<ContextMenuItem> contextMenu = new ArrayList<>();
 
-			Component title = chapterImage.getTitle().getString().isEmpty() ?
-					Component.literal(chapterImage.getImage().toString()) :
-					chapterImage.getTitle();
 			contextMenu.add(ContextMenuItem.title(title));
 			contextMenu.add(ContextMenuItem.SEPARATOR);
 
-			contextMenu.add(new ContextMenuItem(Component.translatable("selectServer.edit"), ThemeProperties.EDIT_ICON.get(), b -> openEditScreen()));
+			contextMenu.add(new ContextMenuItem(Component.translatable("selectServer.edit"), ThemeProperties.EDIT_ICON.get(),
+					b -> chapterImage.onEditButtonClicked(questScreen, title)));
 
 			contextMenu.add(new ContextMenuItem(Component.translatable("gui.move"), ThemeProperties.MOVE_UP_ICON.get(chapterImage.getChapter()),
 					b -> questScreen.initiateMoving(chapterImage)) {
@@ -133,14 +130,15 @@ public class ChapterImageButton extends Button implements QuestPositionableButto
 					Component.translatable("ftbquests.objects", nSelected) :
 					Component.literal(chapterImage.getImage().toString())
 			);
-			contextMenu.add(new ContextMenuItem(Component.translatable("selectServer.delete"), ThemeProperties.DELETE_ICON.get(), b -> handleDeletion()).setYesNoText(yesNo));
+			contextMenu.add(new ContextMenuItem(Component.translatable("selectServer.delete"), ThemeProperties.DELETE_ICON.get(),
+					b -> handleDeletion()).setYesNoText(yesNo));
 
 			getGui().openContextMenu(contextMenu);
 		} else if (button.isLeft()) {
 			if (Screen.hasControlDown() && questScreen.file.canEdit()) {
 				questScreen.toggleSelected(chapterImage);
 			} else if (Screen.hasAltDown() && questScreen.file.canEdit()) {
-				openEditScreen();
+				chapterImage.onEditButtonClicked(questScreen, title);
 			} else if (!chapterImage.getClick().isEmpty()) {
 				playClickSound();
 				handleClick(chapterImage.getClick());
@@ -160,32 +158,6 @@ public class ChapterImageButton extends Button implements QuestPositionableButto
 		} else {
 			questScreen.deleteSelectedObjects();
 		}
-	}
-
-	private void openEditScreen() {
-		String name = chapterImage.getImage() instanceof Color4I ? chapterImage.getColor().toString() : chapterImage.getImage().toString();
-		ConfigGroup group = new ConfigGroup(FTBQuestsAPI.MOD_ID, accepted -> {
-			if (accepted) {
-				EditObjectMessage.sendToServer(chapterImage.getChapter());
-			}
-			run();
-		}) {
-			@Override
-			public Component getName() {
-				MutableComponent type = Component.literal(" [")
-						.append(Component.translatable("ftbquests.chapter.image"))
-						.append("]")
-						.withStyle(ChatFormatting.AQUA);
-				return Component.empty().append(Component.literal(name).withStyle(ChatFormatting.UNDERLINE)).append(type);
-			}
-		};
-		chapterImage.fillConfigGroup(group.getOrCreateSubgroup("chapter").getOrCreateSubgroup("image"));
-		new EditConfigScreen(group) {
-			@Override
-			public Component getTitle() {
-				return group.getName();
-			}
-		}.openGui();
 	}
 
 	@Override

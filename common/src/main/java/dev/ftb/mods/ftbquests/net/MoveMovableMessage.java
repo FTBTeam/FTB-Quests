@@ -5,11 +5,16 @@ import dev.ftb.mods.ftblibrary.util.NetworkHelper;
 import dev.ftb.mods.ftbquests.api.FTBQuestsAPI;
 import dev.ftb.mods.ftbquests.quest.Movable;
 import dev.ftb.mods.ftbquests.quest.ServerQuestFile;
+import dev.ftb.mods.ftbquests.quest.history.EditRecord;
+import dev.ftb.mods.ftbquests.quest.history.HistoryEvent;
 import dev.ftb.mods.ftbquests.util.NetUtils;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+
+import java.util.List;
+import java.util.Objects;
 
 public record MoveMovableMessage(long id, long chapterID, double x, double y) implements CustomPacketPayload {
 	public static final Type<MoveMovableMessage> TYPE = new Type<>(FTBQuestsAPI.rl("move_movable_message"));
@@ -28,12 +33,17 @@ public record MoveMovableMessage(long id, long chapterID, double x, double y) im
 	}
 
 	public static void handle(MoveMovableMessage message, NetworkManager.PacketContext context) {
-		context.queue(() -> {
-			if (ServerQuestFile.INSTANCE.getBase(message.id) instanceof Movable movable && NetUtils.canEdit(context)) {
+		context.queue(() -> ServerQuestFile.getInstance().ifPresent(sqf -> {
+			if (sqf.getBase(message.id) instanceof Movable movable && NetUtils.canEdit(context)) {
+				EditRecord oldRec = EditRecord.ofQuestObject(Objects.requireNonNull(sqf.getBase(message.id)));
 				movable.onMoved(message.x, message.y, message.chapterID);
-				ServerQuestFile.INSTANCE.markDirty();
-				NetworkHelper.sendToAll(ServerQuestFile.INSTANCE.server, new MoveMovableResponseMessage(movable.getMovableID(), message.chapterID, message.x, message.y));
+				EditRecord newRec = EditRecord.ofQuestObject(Objects.requireNonNull(sqf.getBase(message.id)));
+
+				sqf.getHistoryStack().add(new HistoryEvent.Modification(List.of(oldRec), List.of(newRec)));
+				sqf.markDirty();
+
+				NetworkHelper.sendToAll(sqf.server, new MoveMovableResponseMessage(movable.getMovableID(), message.chapterID, message.x, message.y));
 			}
-		});
+		}));
 	}
 }

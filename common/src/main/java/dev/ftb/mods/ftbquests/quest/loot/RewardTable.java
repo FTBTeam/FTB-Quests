@@ -438,7 +438,7 @@ public class RewardTable extends QuestObjectBase {
 
 	@Override
 	@Environment(EnvType.CLIENT)
-	public void onEditButtonClicked(Runnable gui) {
+	public void onEditButtonClicked(Runnable gui, Component title) {
 		new EditRewardTableScreen(gui, this, editedReward -> {
 			NetworkManager.sendToServer(EditObjectMessage.forQuestObject(editedReward));
 			clearCachedData();
