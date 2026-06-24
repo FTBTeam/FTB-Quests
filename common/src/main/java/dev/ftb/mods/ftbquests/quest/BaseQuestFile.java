@@ -259,7 +259,15 @@ public abstract class BaseQuestFile extends QuestObject implements QuestFile {
 
 	@Nullable
 	public QuestObject get(long id) {
-		return getBase(id) instanceof QuestObject qo ? qo : null;
+		QuestObjectBase base = getBase(id);
+		if (base != null) {
+			if (base instanceof QuestObject qo) {
+				return qo;
+			} else {
+				FTBQuests.LOGGER.error("object id {} exists but is not a QuestObject! ({})", getCodeString(id), base.getClass().getName());
+			}
+		}
+		return null;
 	}
 
 	@Nullable
