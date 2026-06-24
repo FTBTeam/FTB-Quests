@@ -468,7 +468,7 @@ public class QuestPanel extends Panel {
 				}));
 			}
 
-			contextMenu.add(new ContextMenuItem(Component.translatable("ftbquests.chapter.image"), Icons.ART, b -> showImageCreationScreen(qx, qy)));
+			contextMenu.add(new ContextMenuItem(Component.translatable("ftbquests.image"), Icons.ART, b -> showImageCreationScreen(qx, qy)));
 
 			QuestObjectBase.parseHexId(getClipboardString()).ifPresent(questId -> {
 				QuestObjectBase qo = questScreen.file.getBase(questId);

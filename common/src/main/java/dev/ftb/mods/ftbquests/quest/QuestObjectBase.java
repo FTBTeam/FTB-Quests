@@ -456,7 +456,7 @@ public abstract class QuestObjectBase implements Comparable<QuestObjectBase> {
 	}
 
 	@Environment(EnvType.CLIENT)
-	public void onEditButtonClicked(Runnable gui) {
+	public void onEditButtonClicked(Runnable gui, Component title) {
 		ConfigGroup group = new ConfigGroup(FTBQuestsAPI.MOD_ID, accepted -> {
 			gui.run();
 			if (accepted && validateEditedConfig()) {
@@ -466,7 +466,7 @@ public abstract class QuestObjectBase implements Comparable<QuestObjectBase> {
 			@Override
 			public Component getName() {
 				MutableComponent type = Component.literal(" [").append(Component.translatable("ftbquests." + getObjectType().getId())).append("]").withStyle(getObjectType().getColor());
-				return Component.empty().append(getTitle().copy().withStyle(ChatFormatting.UNDERLINE)).append(type);
+				return Component.empty().append(title.copy().withStyle(ChatFormatting.UNDERLINE)).append(type);
 			}
 		};
 
@@ -478,6 +478,10 @@ public abstract class QuestObjectBase implements Comparable<QuestObjectBase> {
 				return group.getName();
 			}
 		}.openGui();
+	}
+
+	public final void onEditButtonClicked(Runnable gui) {
+		onEditButtonClicked(gui, getTitle());
 	}
 
 	protected boolean validateEditedConfig() {
