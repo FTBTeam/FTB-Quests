@@ -23,7 +23,7 @@ public final class RewardType {
 	private Component displayName;
 	private GuiProvider guiProvider;
 	private boolean excludeFromListRewards = false;
-	public int intId;
+	public int internalId;
 
 	public RewardType(ResourceLocation typeId, Provider provider, Supplier<Icon> iconSupplier, boolean availableByDefault) {
 		this.typeId = typeId;
