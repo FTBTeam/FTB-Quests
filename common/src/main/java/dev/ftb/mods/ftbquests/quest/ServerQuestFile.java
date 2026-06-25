@@ -150,7 +150,6 @@ public class ServerQuestFile extends BaseQuestFile {
 
 		if (!deletedIds.isEmpty()) {
 			markDirty();
-			NetworkHelper.sendToAll(server, new DeleteObjectResponseMessage(deletedIds));
 		}
 	}
 

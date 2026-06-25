@@ -36,7 +36,7 @@ public record MoveMovableMessage(long id, long chapterID, double x, double y) im
 		context.queue(() -> ServerQuestFile.getInstance().ifPresent(sqf -> {
 			if (sqf.getBase(message.id) instanceof Movable movable && NetUtils.canEdit(context)) {
 				EditRecord oldRec = EditRecord.ofQuestObject(Objects.requireNonNull(sqf.getBase(message.id)));
-				movable.onMoved(message.x, message.y, message.chapterID);
+				movable.applyMove(message.x, message.y, message.chapterID);
 				EditRecord newRec = EditRecord.ofQuestObject(Objects.requireNonNull(sqf.getBase(message.id)));
 
 				sqf.getHistoryStack().add(new HistoryEvent.Modification(List.of(oldRec), List.of(newRec)));

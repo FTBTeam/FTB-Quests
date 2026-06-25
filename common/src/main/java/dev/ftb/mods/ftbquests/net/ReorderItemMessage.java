@@ -27,26 +27,26 @@ public record ReorderItemMessage(long id, boolean moveRight) implements CustomPa
     );
 
     public static void handle(ReorderItemMessage message, NetworkManager.PacketContext context) {
-        context.queue(() -> {
+        context.queue(() -> ServerQuestFile.getInstance().ifPresent(sqf -> {
             if (NetUtils.canEdit(context)) {
-                QuestObjectBase object = ServerQuestFile.INSTANCE.getBase(message.id);
+                QuestObjectBase object = sqf.getBase(message.id);
                 if (object instanceof Task task) {
                     if (message.moveRight) {
                         task.getQuest().moveTaskRight(task);
                     } else {
                         task.getQuest().moveTaskLeft(task);
                     }
-                    NetworkHelper.sendToAll(context.getPlayer().getServer(), ReorderItemResponseMessage.tasks(task.getQuest()));
+                    NetworkHelper.sendToAll(sqf.server, ReorderItemResponseMessage.tasks(task.getQuest()));
                 } else if (object instanceof Reward reward) {
                     if (message.moveRight) {
                         reward.getQuest().moveRewardRight(reward);
                     } else {
                         reward.getQuest().moveRewardLeft(reward);
                     }
-                    NetworkHelper.sendToAll(context.getPlayer().getServer(), ReorderItemResponseMessage.rewards(reward.getQuest()));
+                    NetworkHelper.sendToAll(sqf.server, ReorderItemResponseMessage.rewards(reward.getQuest()));
                 }
             }
-        });
+        }));
     }
 
     @Override

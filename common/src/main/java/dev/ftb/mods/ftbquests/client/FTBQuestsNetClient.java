@@ -16,7 +16,7 @@ import dev.ftb.mods.ftbquests.events.ObjectStartedEvent;
 import dev.ftb.mods.ftbquests.events.QuestProgressEventData;
 import dev.ftb.mods.ftbquests.net.TeamDataUpdate;
 import dev.ftb.mods.ftbquests.quest.*;
-import dev.ftb.mods.ftbquests.quest.history.CreateDeleteRecord;
+import dev.ftb.mods.ftbquests.quest.history.CreateOrDeleteRecord;
 import dev.ftb.mods.ftbquests.quest.reward.Reward;
 import dev.ftb.mods.ftbquests.quest.reward.ToastReward;
 import dev.ftb.mods.ftbquests.quest.task.Task;
@@ -57,12 +57,12 @@ public class FTBQuestsNetClient {
 		}
 	}
 
-	public static void createObjects(List<CreateDeleteRecord> creationRecords, UUID creator) {
+	public static void createObjects(List<CreateOrDeleteRecord> creationRecords, UUID creator) {
 		ClientQuestFile file = ClientQuestFile.INSTANCE;
 		QuestObjectUpdateListener listener = ClientUtils.getCurrentGuiAs(QuestObjectUpdateListener.class);
 		QuestObjectBase toOpen = null;
 
-        for (CreateDeleteRecord c : creationRecords) {
+        for (CreateOrDeleteRecord c : creationRecords) {
             QuestObjectBase object = file.create(c.id(), c.questObjectType(), c.parent(), c.extra());
             object.readData(c.nbt(), FTBQuestsClient.holderLookup());
             file.getTranslationManager().processInitialTranslation(c.extra(), object);
@@ -163,9 +163,9 @@ public class FTBQuestsNetClient {
 		}
 	}
 
-	public static void moveQuest(long id, long chapter, double x, double y) {
+	public static void moveMovableObject(long id, long chapter, double x, double y) {
 		if (ClientQuestFile.INSTANCE.getBase(id) instanceof Movable movable) {
-			movable.onMoved(x, y, chapter);
+			movable.applyMove(x, y, chapter);
 			QuestScreen gui = ClientUtils.getCurrentGuiAs(QuestScreen.class);
 			if (gui != null) {
 				gui.questPanel.withPreservedPos(Panel::refreshWidgets);

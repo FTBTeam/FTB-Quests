@@ -4,7 +4,7 @@ import dev.architectury.networking.NetworkManager;
 import dev.ftb.mods.ftbquests.api.FTBQuestsAPI;
 import dev.ftb.mods.ftbquests.client.FTBQuestsNetClient;
 import dev.ftb.mods.ftbquests.quest.QuestObjectBase;
-import dev.ftb.mods.ftbquests.quest.history.CreateDeleteRecord;
+import dev.ftb.mods.ftbquests.quest.history.CreateOrDeleteRecord;
 import net.minecraft.Util;
 import net.minecraft.core.UUIDUtil;
 import net.minecraft.network.FriendlyByteBuf;
@@ -18,11 +18,11 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
-public record CreateObjectResponseMessage(List<CreateDeleteRecord> creationRecords, Optional<UUID> creator) implements CustomPacketPayload {
+public record CreateObjectResponseMessage(List<CreateOrDeleteRecord> creationRecords, Optional<UUID> creator) implements CustomPacketPayload {
 	public static final Type<CreateObjectResponseMessage> TYPE = new Type<>(FTBQuestsAPI.rl("create_object_response_message"));
 
 	public static final StreamCodec<FriendlyByteBuf, CreateObjectResponseMessage> STREAM_CODEC = StreamCodec.composite(
-			CreateDeleteRecord.STREAM_CODEC.apply(ByteBufCodecs.list()), CreateObjectResponseMessage::creationRecords,
+			CreateOrDeleteRecord.STREAM_CODEC.apply(ByteBufCodecs.list()), CreateObjectResponseMessage::creationRecords,
 			ByteBufCodecs.optional(UUIDUtil.STREAM_CODEC), CreateObjectResponseMessage::creator,
 			CreateObjectResponseMessage::new
 	);
@@ -36,7 +36,7 @@ public record CreateObjectResponseMessage(List<CreateDeleteRecord> creationRecor
 	}
 
 	public static CreateObjectResponseMessage create(Collection<? extends QuestObjectBase> questObjects, @Nullable UUID creator) {
-		List<CreateDeleteRecord> creationRecords = questObjects.stream().map(CreateDeleteRecord::ofQuestObject).toList();
+		List<CreateOrDeleteRecord> creationRecords = questObjects.stream().map(CreateOrDeleteRecord::ofQuestObject).toList();
 		return new CreateObjectResponseMessage(creationRecords, Optional.ofNullable(creator));
 	}
 

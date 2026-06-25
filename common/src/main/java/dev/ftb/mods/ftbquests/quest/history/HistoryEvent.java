@@ -32,7 +32,11 @@ public interface HistoryEvent {
      */
     void applyUndo(ServerQuestFile file);
 
-    record Creation(List<CreateDeleteRecord> creationRecords) implements HistoryEvent {
+    record Creation(List<CreateOrDeleteRecord> creationRecords) implements HistoryEvent {
+        public Creation(CreateOrDeleteRecord rec) {
+            this(List.of(rec));
+        }
+
         @Override
         public void apply(ServerQuestFile file) {
             create(file, creationRecords);
@@ -44,7 +48,11 @@ public interface HistoryEvent {
         }
     }
 
-    record Deletion(List<CreateDeleteRecord> deletionRecords) implements HistoryEvent {
+    record Deletion(List<CreateOrDeleteRecord> deletionRecords) implements HistoryEvent {
+        public Deletion(CreateOrDeleteRecord rec) {
+            this(List.of(rec));
+        }
+
         @Override
         public void apply(ServerQuestFile file) {
             delete(file, deletionRecords);
@@ -87,7 +95,7 @@ public interface HistoryEvent {
         }
     }
 
-    private static void create(ServerQuestFile file, List<CreateDeleteRecord> records) {
+    private static void create(ServerQuestFile file, List<CreateOrDeleteRecord> records) {
         for (var creationRec : records) {
             QuestObjectBase qo = file.create(creationRec.id(), creationRec.questObjectType(), creationRec.parent(), creationRec.extra());
             qo.readData(creationRec.nbt(), file.server.registryAccess());
@@ -98,8 +106,8 @@ public interface HistoryEvent {
         file.markDirty();
     }
 
-    private static void delete(ServerQuestFile file, List<CreateDeleteRecord> records) {
-        List<Long> ids = records.stream().map(CreateDeleteRecord::id).toList();
+    private static void delete(ServerQuestFile file, List<CreateOrDeleteRecord> records) {
+        List<Long> ids = records.stream().map(CreateOrDeleteRecord::id).toList();
         file.deleteObjects(ids);
     }
 

@@ -3,7 +3,12 @@ package dev.ftb.mods.ftbquests.net;
 import dev.architectury.networking.NetworkManager;
 import dev.ftb.mods.ftblibrary.util.NetworkHelper;
 import dev.ftb.mods.ftbquests.api.FTBQuestsAPI;
-import dev.ftb.mods.ftbquests.quest.*;
+import dev.ftb.mods.ftbquests.quest.Chapter;
+import dev.ftb.mods.ftbquests.quest.Quest;
+import dev.ftb.mods.ftbquests.quest.QuestObjectBase;
+import dev.ftb.mods.ftbquests.quest.ServerQuestFile;
+import dev.ftb.mods.ftbquests.quest.history.CreateOrDeleteRecord;
+import dev.ftb.mods.ftbquests.quest.history.HistoryEvent;
 import dev.ftb.mods.ftbquests.quest.reward.Reward;
 import dev.ftb.mods.ftbquests.quest.reward.RewardType;
 import dev.ftb.mods.ftbquests.quest.task.Task;
@@ -37,44 +42,54 @@ public record CopyQuestMessage(long id, long chapterId, double qx, double qy, bo
     }
 
     public static void handle(CopyQuestMessage message, NetworkManager.PacketContext context) {
-        context.queue(() -> {
-            BaseQuestFile file = ServerQuestFile.INSTANCE;
-            if (file.get(message.id) instanceof Quest toCopy && file.get(message.chapterId) instanceof Chapter chapter && NetUtils.canEdit(context)) {
+        context.queue(() -> ServerQuestFile.getInstance().ifPresent(sqf -> {
+            if (sqf.get(message.id) instanceof Quest toCopy && sqf.get(message.chapterId) instanceof Chapter chapter && NetUtils.canEdit(context)) {
                 // deep copy of the quest
-                Quest newQuest = Objects.requireNonNull(QuestObjectBase.copy(toCopy, () -> new Quest(file.newID(), chapter)));
+                Quest newQuest = QuestObjectBase.copy(toCopy, () -> new Quest(sqf.newID(), chapter));
+                if (newQuest == null) {
+                    return;
+                }
                 if (!message.copyDeps) {
                     newQuest.clearDependencies();
                 }
-                newQuest.setX(message.qx);
-                newQuest.setY(message.qy);
-                newQuest.onCreated();
+                newQuest.setPosition(message.qx, message.qy);
 
                 // deep copy of all tasks and rewards
+                List<CreateOrDeleteRecord> newTasks = new ArrayList<>();
                 toCopy.getTasks().forEach(task -> {
                     Task newTask = QuestObjectBase.copy(task,
-                            () -> TaskType.createTask(file.newID(), newQuest, task.getType().getTypeForNBT()));
+                            () -> TaskType.createTask(sqf.newID(), newQuest, task.getType().getTypeForNBT()));
                     if (newTask != null) {
-                        newTask.onCreated();
+                        newTasks.add(CreateOrDeleteRecord.ofQuestObject(newTask));
                     }
                 });
+                List<CreateOrDeleteRecord> newRewards = new ArrayList<>();
                 for (Reward reward : toCopy.getRewards()) {
                     Reward newReward = QuestObjectBase.copy(reward,
-                            () -> RewardType.createReward(file.newID(), newQuest, reward.getType().getTypeForNBT()));
+                            () -> RewardType.createReward(sqf.newID(), newQuest, reward.getType().getTypeForNBT()));
                     if (newReward != null) {
-                        newReward.onCreated();
+                        newRewards.add(CreateOrDeleteRecord.ofQuestObject(newReward));
                     }
                 }
 
+                List<CreateOrDeleteRecord> recs = new ArrayList<>();
+                recs.add(CreateOrDeleteRecord.ofQuestObject(newQuest));
+                recs.addAll(newTasks);
+                recs.addAll(newRewards);
+
+                sqf.getHistoryStack().addAndApply(sqf, new HistoryEvent.Creation(recs));
+
                 // sync new objects to clients
                 MinecraftServer server = context.getPlayer().getServer();
+                Quest createdQuest = Objects.requireNonNull(sqf.getQuest(newQuest.getId()));
                 List<QuestObjectBase> toSync = new ArrayList<>();
-                toSync.add(newQuest);
-                toSync.addAll(newQuest.getTasks());
-                toSync.addAll(newQuest.getRewards());
+                toSync.add(createdQuest);
+                toSync.addAll(createdQuest.getTasks());
+                toSync.addAll(createdQuest.getRewards());
                 NetworkHelper.sendToAll(server, CreateObjectResponseMessage.create(toSync, null));
 
                 ServerQuestFile.INSTANCE.markDirty();
             }
-        });
+        }));
     }
 }

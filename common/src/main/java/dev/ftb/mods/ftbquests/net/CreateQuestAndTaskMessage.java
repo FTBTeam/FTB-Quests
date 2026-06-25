@@ -6,6 +6,8 @@ import dev.ftb.mods.ftbquests.api.FTBQuestsAPI;
 import dev.ftb.mods.ftbquests.quest.Chapter;
 import dev.ftb.mods.ftbquests.quest.Quest;
 import dev.ftb.mods.ftbquests.quest.ServerQuestFile;
+import dev.ftb.mods.ftbquests.quest.history.CreateOrDeleteRecord;
+import dev.ftb.mods.ftbquests.quest.history.HistoryEvent;
 import dev.ftb.mods.ftbquests.quest.task.Task;
 import dev.ftb.mods.ftbquests.quest.task.TaskType;
 import dev.ftb.mods.ftbquests.util.NetUtils;
@@ -57,29 +59,27 @@ public record CreateQuestAndTaskMessage(long chapterId, double x, double y, int 
 	}
 
 	public static void handle(CreateQuestAndTaskMessage message, NetworkManager.PacketContext context) {
-		context.queue(() -> {
+		context.queue(() -> ServerQuestFile.getInstance().ifPresent(sqf -> {
 			if (NetUtils.canEdit(context) && context.getPlayer() instanceof ServerPlayer sp) {
-				ServerQuestFile file = ServerQuestFile.INSTANCE;
-				Chapter chapter = file.getChapter(message.chapterId);
+				Chapter chapter = sqf.getChapter(message.chapterId);
 				TaskType taskType = ServerQuestFile.INSTANCE.getTaskType(message.taskTypeId);
 
 				if (chapter != null && taskType != null) {
-					Quest quest = new Quest(file.newID(), chapter);
-					quest.setX(message.x);
-					quest.setY(message.y);
-					quest.onCreated();
+					Quest quest = new Quest(sqf.newID(), chapter).setPosition(message.x, message.y);
 
-					Task task = taskType.createTask(file.newID(), quest);
+					Task task = taskType.createTask(sqf.newID(), quest);
 					task.readData(message.nbt, context.registryAccess());
-					task.onCreated();
 					CompoundTag extra = message.extra.orElse(new CompoundTag());
-					file.getTranslationManager().processInitialTranslation(extra, task);
+					sqf.getTranslationManager().processInitialTranslation(extra, task);
 
-					NetworkHelper.sendToAll(sp.getServer(), CreateObjectResponseMessage.create(List.of(quest, task), sp.getUUID()));
+					List<CreateOrDeleteRecord> recs = CreateOrDeleteRecord.ofQuestObjects(quest, task);
+					sqf.getHistoryStack().addAndApply(sqf, new HistoryEvent.Creation(recs));
 
-					file.markDirty();
+					NetworkHelper.sendToAll(sp.getServer(), new CreateObjectResponseMessage(recs, Optional.of(sp.getUUID())));
+
+					sqf.markDirty();
 				}
 			}
-		});
+		}));
 	}
 }

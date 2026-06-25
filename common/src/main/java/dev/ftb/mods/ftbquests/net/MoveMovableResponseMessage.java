@@ -25,6 +25,6 @@ public record MoveMovableResponseMessage(long id, long chapterId, double x, doub
 	}
 
 	public static void handle(MoveMovableResponseMessage message, NetworkManager.PacketContext context) {
-		context.queue(() -> FTBQuestsNetClient.moveQuest(message.id, message.chapterId, message.x, message.y));
+		context.queue(() -> FTBQuestsNetClient.moveMovableObject(message.id, message.chapterId, message.x, message.y));
 	}
 }
