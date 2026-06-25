@@ -1,10 +1,11 @@
 package dev.ftb.mods.ftbquests.net;
 
 import dev.architectury.networking.NetworkManager;
+import dev.ftb.mods.ftblibrary.util.NetworkHelper;
 import dev.ftb.mods.ftbquests.api.FTBQuestsAPI;
 import dev.ftb.mods.ftbquests.quest.QuestObjectBase;
 import dev.ftb.mods.ftbquests.quest.ServerQuestFile;
-import dev.ftb.mods.ftbquests.quest.history.CreateDeleteRecord;
+import dev.ftb.mods.ftbquests.quest.history.CreateOrDeleteRecord;
 import dev.ftb.mods.ftbquests.quest.history.HistoryEvent;
 import dev.ftb.mods.ftbquests.util.NetUtils;
 import net.minecraft.network.FriendlyByteBuf;
@@ -32,15 +33,15 @@ public record DeleteObjectMessage(List<Long> ids) implements CustomPacketPayload
 	}
 
 	public static void handle(DeleteObjectMessage message, NetworkManager.PacketContext context) {
-		context.queue(() -> {
+		context.queue(() -> ServerQuestFile.getInstance().ifPresent(sqf -> {
 			if (NetUtils.canEdit(context)) {
-				ServerQuestFile sqf = ServerQuestFile.INSTANCE;
-				List<CreateDeleteRecord> records = CreateDeleteRecord.fromIds(sqf, message.ids);
+				List<CreateOrDeleteRecord> records = CreateOrDeleteRecord.fromIds(sqf, message.ids);
 				if (!records.isEmpty()) {
 					sqf.getHistoryStack().addAndApply(sqf, new HistoryEvent.Deletion(records));
+
+					NetworkHelper.sendToAll(sqf.server, new DeleteObjectResponseMessage(records.stream().map(CreateOrDeleteRecord::id).toList()));
 				}
-//				sqf.deleteObject(message.id);
 			}
-		});
+		}));
 	}
 }

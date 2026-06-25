@@ -7,12 +7,13 @@ import dev.ftb.mods.ftbquests.quest.Chapter;
 import dev.ftb.mods.ftbquests.quest.ChapterImage;
 import dev.ftb.mods.ftbquests.quest.QuestObjectBase;
 import dev.ftb.mods.ftbquests.quest.ServerQuestFile;
+import dev.ftb.mods.ftbquests.quest.history.CreateOrDeleteRecord;
+import dev.ftb.mods.ftbquests.quest.history.HistoryEvent;
 import dev.ftb.mods.ftbquests.util.NetUtils;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
-import net.minecraft.server.MinecraftServer;
 
 import java.util.Objects;
 
@@ -33,14 +34,15 @@ public record CopyChapterImageMessage(long id, long chapterId, double qx, double
     }
 
     public static void handle(CopyChapterImageMessage message, NetworkManager.PacketContext context) {
-        context.queue(() -> ServerQuestFile.getInstance().ifPresent(file -> {
-            if (file.getBase(message.id) instanceof ChapterImage img && file.get(message.chapterId) instanceof Chapter chapter && NetUtils.canEdit(context)) {
-                ChapterImage newImage = Objects.requireNonNull(QuestObjectBase.copy(img, () -> new ChapterImage(file.newID(), chapter)));
+        context.queue(() -> ServerQuestFile.getInstance().ifPresent(sqf -> {
+            if (sqf.getBase(message.id) instanceof ChapterImage img && sqf.get(message.chapterId) instanceof Chapter chapter && NetUtils.canEdit(context)) {
+                ChapterImage newImage = Objects.requireNonNull(QuestObjectBase.copy(img, () -> new ChapterImage(sqf.newID(), chapter)));
                 newImage.setPosition(message.qx, message.qy);
-                newImage.onCreated();
-                MinecraftServer server = Objects.requireNonNull(context.getPlayer().level().getServer());
-                NetworkHelper.sendToAll(server, CreateObjectResponseMessage.create(newImage, null));
-                file.markDirty();
+                sqf.getHistoryStack().addAndApply(sqf, new HistoryEvent.Creation(CreateOrDeleteRecord.ofQuestObject(newImage)));
+
+                if (sqf.getBase(newImage.getId()) instanceof ChapterImage created) {
+                    NetworkHelper.sendToAll(sqf.server, CreateObjectResponseMessage.create(created, null));
+                }
             }
         }));
     }

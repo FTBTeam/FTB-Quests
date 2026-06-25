@@ -49,25 +49,13 @@ public record EditObjectMessage(List<EditRecord> editRecords) implements CustomP
 	}
 
 	public static void handle(EditObjectMessage message, NetworkManager.PacketContext context) {
-		context.queue(() -> {
+		context.queue(() -> ServerQuestFile.getInstance().ifPresent(sqf -> {
 			if (NetUtils.canEdit(context)) {
-				ServerQuestFile sqf = ServerQuestFile.INSTANCE;
 				HistoryEvent.Modification.fromEditRecords(sqf, message.editRecords).ifPresent(modification -> {
 					sqf.getHistoryStack().addAndApply(sqf, modification);
 					NetworkHelper.sendToAll(context.getPlayer().getServer(), new EditObjectResponseMessage(modification.newRecords()));
 				});
-//				{
-//					QuestObjectBase object = ServerQuestFile.INSTANCE.getBase(editRecord.id());
-//					if (object != null) {
-//						object.readData(editRecord.nbt(), context.registryAccess());
-//						object.editedFromGUIOnServer();
-//						object.getQuestFile().clearCachedData();
-//						responses.add(object);
-//					}
-//				});
-//				NetworkHelper.sendToAll(context.getPlayer().getServer(), new EditObjectResponseMessage(responses));
-//				ServerQuestFile.INSTANCE.markDirty();
 			}
-		});
+		}));
 	}
 }

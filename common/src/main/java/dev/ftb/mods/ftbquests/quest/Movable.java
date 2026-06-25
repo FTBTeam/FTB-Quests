@@ -55,7 +55,7 @@ public interface Movable {
 	 * @param newY new Y pos
 	 * @param newChapterId new chapter ID
 	 */
-	default void onMoved(double newX, double newY, long newChapterId) {
+	default void applyMove(double newX, double newY, long newChapterId) {
 		setPosition(newX, newY);
 
 		Chapter oldChapter = getChapter();
