@@ -721,13 +721,18 @@ public final class Quest extends QuestObject implements Movable, Excludable {
 
 	@Override
 	public void setChapter(Chapter newChapter) {
-		this.chapter = newChapter;
+		if (!Objects.equals(getChapter(), newChapter)) {
+			getChapter().removeQuest(this);
+			newChapter.addQuest(this);
+			this.chapter = newChapter;
+		}
 	}
 
 	@Override
 	public Quest setPosition(double x, double y) {
 		this.x = x;
 		this.y = y;
+		getQuestFile().markDirty();
 		return this;
 	}
 
@@ -1199,19 +1204,11 @@ public final class Quest extends QuestObject implements Movable, Excludable {
 		getQuestFile().markDirty();
 	}
 
-	public void moveTaskLeft(Task task) {
-		moveItem(tasks, task, -1);
+	public void moveTask(Task task, boolean moveRight) {
+		moveItem(tasks, task, moveRight ? 1 : -1);
 	}
 
-	public void moveTaskRight(Task task) {
-		moveItem(tasks, task, 1);
-	}
-
-	public void moveRewardLeft(Reward reward) {
-		moveItem(rewards, reward, -1);
-	}
-
-	public void moveRewardRight(Reward reward) {
-		moveItem(rewards, reward, 1);
+	public void moveReward(Reward reward, boolean moveRight) {
+		moveItem(rewards, reward, moveRight ? 1 : -1);
 	}
 }

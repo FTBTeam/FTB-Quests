@@ -136,44 +136,32 @@ public final class Chapter extends QuestObject {
 
 	public void addQuest(Quest quest) {
 		quests.add(quest);
+		file.markDirty();
 	}
 
 	public void removeQuest(Quest quest) {
 		quests.remove(quest);
+		file.markDirty();
 	}
 
 	public void addImage(ChapterImage image) {
 		images.add(image);
+		file.markDirty();
 	}
 
 	public void removeImage(ChapterImage image) {
 		images.remove(image);
+		file.markDirty();
 	}
 
 	public void addQuestLink(QuestLink link) {
 		questLinks.add(link);
+		file.markDirty();
 	}
 
 	public void removeQuestLink(QuestLink link) {
 		questLinks.remove(link);
-	}
-
-	public void addChildObject(Movable child) {
-		switch (child) {
-			case Quest q -> addQuest(q);
-			case QuestLink ql -> addQuestLink(ql);
-			case ChapterImage img -> addImage(img);
-			default -> throw new IllegalArgumentException("expecting quest, quest link or chapter image!");
-		}
-	}
-
-	public void removeChildObject(Movable child) {
-		switch (child) {
-			case Quest q -> removeQuest(q);
-			case QuestLink ql -> removeQuestLink(ql);
-			case ChapterImage img -> removeImage(img);
-			default -> throw new IllegalArgumentException("expecting quest, quest link or chapter image!");
-		}
+		file.markDirty();
 	}
 
 	@Override

@@ -19,6 +19,7 @@ import dev.ftb.mods.ftbquests.integration.item_filtering.ItemMatchingSystem;
 import dev.ftb.mods.ftbquests.net.EditObjectMessage;
 import dev.ftb.mods.ftbquests.net.GiveItemToPlayerMessage;
 import dev.ftb.mods.ftbquests.net.ReorderItemMessage;
+import dev.ftb.mods.ftbquests.quest.QuestObjectType;
 import dev.ftb.mods.ftbquests.quest.TeamData;
 import dev.ftb.mods.ftbquests.quest.task.ItemTask;
 import dev.ftb.mods.ftbquests.quest.task.Task;
@@ -84,10 +85,10 @@ public class TaskButton extends Button {
 			ContextMenuBuilder builder = ContextMenuBuilder.create(task, questScreen);
 
 			builder.insertAtTop(List.of(new ContextMenuItem(Component.translatable("ftbquests.gui.move_left"), Icons.LEFT,
-					b -> NetworkManager.sendToServer(new ReorderItemMessage(task.getId(), false))
+					b -> NetworkManager.sendToServer(new ReorderItemMessage(task.getId(), QuestObjectType.TASK, false))
 			)));
 			builder.insertAtTop(List.of(new ContextMenuItem(Component.translatable("ftbquests.gui.move_right"), Icons.RIGHT,
-					b -> NetworkManager.sendToServer(new ReorderItemMessage(task.getId(), true))
+					b -> NetworkManager.sendToServer(new ReorderItemMessage(task.getId(), QuestObjectType.TASK, true))
 			)));
 
 			if (task instanceof ItemTask itemTask && !itemTask.getItemStack().isEmpty()) {

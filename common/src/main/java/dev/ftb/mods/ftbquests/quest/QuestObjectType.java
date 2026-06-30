@@ -63,4 +63,8 @@ public enum QuestObjectType implements Predicate<QuestObjectBase> {
 	public Component getCompletedMessage() {
 		return Component.translatable(translationKey + ".completed");
 	}
+
+	public Component getDisplayString() {
+		return Component.translatable(translationKey).withStyle(getColor());
+	}
 }

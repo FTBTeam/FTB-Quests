@@ -83,8 +83,15 @@ public class ChapterPanel extends Panel {
 	public void alignWidgets() {
 		int wd = 100;
 
+		ChapterButton selected = null;
+
 		for (Widget w : widgets) {
-			wd = Math.min(Math.max(wd, ((ListButton) w).getActualWidth(questScreen)), 800);
+			if (w instanceof ListButton lb) {
+				wd = Math.clamp(wd, lb.getActualWidth(questScreen), 800);
+				if (lb instanceof ChapterButton cb && questScreen.selectedChapter == cb.chapter) {
+					selected = cb;
+				}
+			}
 		}
 
 		setPosAndSize(((expanded || isPinned())) ? 0 : -wd, 0, wd, questScreen.height);
@@ -97,6 +104,14 @@ public class ChapterPanel extends Panel {
 
 		if (getContentHeight() <= height) {
 			setScrollY(0);
+		} else if (selected != null) {
+			// try to keep selected chapter in view
+			int scrolledY = (int) (selected.posY - getScrollY());
+			if (scrolledY < 0) {
+				setScrollY(selected.posY);
+			} else if (scrolledY + selected.height > height) {
+				setScrollY(getScrollY() + (height - scrolledY + selected.height));
+			}
 		}
 
 		curX = expanded ? 0 : -width;

@@ -275,6 +275,13 @@ public class QuestPanel extends Panel {
 	public void draw(GuiGraphics graphics, Theme theme, int x, int y, int w, int h) {
 		super.draw(graphics, theme, x, y, w, h);
 
+		PoseStack poseStack = graphics.pose();
+
+		if (questScreen.file.canEdit()) {
+			drawStatusBar(graphics, theme, poseStack);
+			questScreen.file.getChangelog().draw(graphics, questScreen);
+		}
+
 		if (questScreen.selectedChapter != null && isMouseOver()) {
 			double dx = (questMaxX - questMinX);
 			double dy = (questMaxY - questMinY);
@@ -303,9 +310,6 @@ public class QuestPanel extends Panel {
 			}
 
 			if (questScreen.file.canEdit()) {
-				PoseStack poseStack = graphics.pose();
-
-				drawStatusBar(graphics, theme, poseStack);
 
 				double bs = questScreen.getQuestButtonSize();
 
@@ -380,6 +384,10 @@ public class QuestPanel extends Panel {
 	}
 
 	private void drawStatusBar(GuiGraphics graphics, Theme theme, PoseStack poseStack) {
+		if (questScreen.selectedChapter == null) {
+			return;
+		}
+
 		poseStack.pushPose();
 
 		int statusX = questScreen.chapterPanel.expanded ? questScreen.chapterPanel.width : questScreen.expandChaptersButton.width;
@@ -388,7 +396,7 @@ public class QuestPanel extends Panel {
 		Color4I.DARK_GRAY.draw(graphics, statusX, height - 9, statusWidth, 1);
 		statPanelBg.draw(graphics, statusX, height - 9, statusWidth, 10);
 
-		poseStack.translate(statusX, height - 6, 600);
+		poseStack.translate(statusX, height - 6, QuestScreen.Z_LEVEL);
 		poseStack.scale(0.5f, 0.5f, 0.5f);
 
 		String curStr = String.format("Cursor: [%+.2f, %+.2f]", questX, questY);
@@ -428,7 +436,7 @@ public class QuestPanel extends Panel {
 				}
 
 				for (Movable q : questScreen.selectedObjects) {
-					q.initiateMoveClientSide(questScreen.selectedChapter, questX + (q.getX() - minX), questY + (q.getY() - minY));
+					q.requestMove(questScreen.selectedChapter, questX + (q.getX() - minX), questY + (q.getY() - minY));
 				}
 			}
 
@@ -576,7 +584,9 @@ public class QuestPanel extends Panel {
 
 	@Override
 	public boolean keyPressed(Key key) {
-		if (questScreen.selectedChapter != null && !questScreen.isViewingQuest() && (key.is(GLFW.GLFW_KEY_MINUS) || key.is(GLFW.GLFW_KEY_EQUAL))) {
+		if (key.is(GLFW.GLFW_KEY_GRAVE_ACCENT)) {
+			FTBQuestsClientConfig.setAlwaysShowChangelog(!FTBQuestsClientConfig.CHANGELOG_ALWAYS_SHOW.get());
+		} else if (questScreen.selectedChapter != null && !questScreen.isViewingQuest() && (key.is(GLFW.GLFW_KEY_MINUS) || key.is(GLFW.GLFW_KEY_EQUAL))) {
 			questScreen.addZoom(key.is(GLFW.GLFW_KEY_MINUS) ? -1D : 1D);
 			return true;
 		}

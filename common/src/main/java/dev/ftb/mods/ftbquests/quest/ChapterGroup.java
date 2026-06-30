@@ -38,10 +38,14 @@ public class ChapterGroup extends QuestObject {
 	public void addChapter(Chapter chapter) {
 		chapters.add(chapter);
 		chapter.setGroup(this);
+		clearCachedData();
+		getQuestFile().markDirty();
 	}
 
 	public void removeChapter(Chapter chapter) {
 		chapters.remove(chapter);
+		clearCachedData();
+		getQuestFile().markDirty();
 	}
 
 	public void clearChapters() {
@@ -201,6 +205,8 @@ public class ChapterGroup extends QuestObject {
 		if (index != -1 && movingUp ? (index > 0) : (index < chapters.size() - 1)) {
 			chapters.remove(index);
 			chapters.add(movingUp ? index - 1 : index + 1, chapter);
+			clearCachedData();
+			getQuestFile().markDirty();
 			return true;
 		}
 		return false;

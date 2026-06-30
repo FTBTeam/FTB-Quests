@@ -1,5 +1,6 @@
 package dev.ftb.mods.ftbquests.quest.translation;
 
+import com.mojang.datafixers.util.Either;
 import dev.architectury.networking.NetworkManager;
 import dev.ftb.mods.ftblibrary.snbt.SNBT;
 import dev.ftb.mods.ftbquests.FTBQuests;
@@ -115,6 +116,12 @@ public class TranslationManager {
         }
     }
 
+    public Either<String, List<String>> getEntry(QuestObjectBase qob, String locale, TranslationKey subKey) {
+        String key = makeKey(qob, subKey);
+        TranslationTable table = map.get(locale);
+        return table != null ? table.getEntry(key, subKey.emptyValue()) : subKey.emptyValue();
+    }
+
     private Optional<TranslationTable> getTable(QuestObjectBase object, String locale) {
         return Optional.ofNullable(map.get(locale))
                 .or(() -> Optional.ofNullable(map.get(getFallbackLocale(object))));
@@ -136,10 +143,17 @@ public class TranslationManager {
 
     public void addTranslation(QuestObjectBase object, String locale, TranslationKey subKey, String message) {
         addTranslation(locale, makeKey(object, subKey), message);
+        object.getQuestFile().markDirty();
     }
 
     public void addTranslation(QuestObjectBase object, String locale, TranslationKey subKey, List<String> message) {
         addTranslation(locale, makeKey(object, subKey), message);
+        object.getQuestFile().markDirty();
+    }
+
+    public void removeTranslation(QuestObjectBase object, String locale, TranslationKey subKey) {
+        map.computeIfAbsent(locale, k -> new TranslationTable()).remove(makeKey(object, subKey));
+        object.getQuestFile().markDirty();
     }
 
     private void addTranslation(String locale, String key, List<String> message) {
@@ -150,15 +164,16 @@ public class TranslationManager {
         map.computeIfAbsent(locale, k -> new TranslationTable()).put(key, message);
     }
 
-    public void removeAllTranslations(QuestObjectBase obj) {
-        if (obj instanceof QuestObject qo) {
+    public void removeAllTranslations(QuestObjectBase object) {
+        if (object instanceof QuestObject qo) {
             qo.getChildren().forEach(this::removeAllTranslations);
         }
         map.values().forEach(table -> {
             for (TranslationKey key : TranslationKey.values()) {
-                table.remove(makeKey(obj, key));
+                table.remove(makeKey(object, key));
             }
         });
+        object.getQuestFile().markDirty();
     }
 
     private static @NotNull String makeKey(QuestObjectBase object, TranslationKey subKey) {

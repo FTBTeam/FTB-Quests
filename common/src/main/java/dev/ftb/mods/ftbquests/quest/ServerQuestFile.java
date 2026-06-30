@@ -200,11 +200,13 @@ public class ServerQuestFile extends BaseQuestFile {
 		// Sync the quest book data
 		// - client will respond to this with a RequestTeamData message
 		// - server will only then send a SyncTeamData message to the client
-		NetworkManager.sendToPlayer(player, new SyncQuestsMessage(this));
+		NetworkHelper.sendTo(player, new SyncQuestsMessage(this));
 
-		NetworkManager.sendToPlayer(player, new SyncEditorPermissionMessage(PermissionsHelper.hasEditorPermission(player, false)));
+		NetworkHelper.sendTo(player, new SyncEditorPermissionMessage(PermissionsHelper.hasEditorPermission(player, false)));
 
 		getTranslationManager().sendTranslationsToPlayer(player);
+
+		NetworkHelper.sendTo(player, historyStack.createInitialDescPacket(this));
 
 		player.inventoryMenu.addSlotListener(new FTBQuestsInventoryListener(player));
 
@@ -304,7 +306,6 @@ public class ServerQuestFile extends BaseQuestFile {
 		if (super.moveChapterGroup(id, movingUp)) {
 			markDirty();
 			clearCachedData();
-			NetworkHelper.sendToAll(server, new MoveChapterGroupResponseMessage(id, movingUp));
 			return true;
 		}
 		return false;

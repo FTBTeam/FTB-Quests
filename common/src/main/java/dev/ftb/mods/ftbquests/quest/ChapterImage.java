@@ -23,6 +23,7 @@ import net.minecraft.util.Mth;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.function.Predicate;
 
 public final class ChapterImage extends QuestObjectBase implements Movable {
@@ -71,6 +72,7 @@ public final class ChapterImage extends QuestObjectBase implements Movable {
 	public ChapterImage setPosition(double x, double y) {
 		this.x = x;
 		this.y = y;
+		getQuestFile().markDirty();
 		return this;
 	}
 
@@ -246,7 +248,8 @@ public final class ChapterImage extends QuestObjectBase implements Movable {
 
 	@Override
 	public Component getAltTitle() {
-		return Component.empty();
+		var p = image.toString().split("/");
+		return Component.literal(p[p.length - 1]);
 	}
 
 	@Override
@@ -266,7 +269,11 @@ public final class ChapterImage extends QuestObjectBase implements Movable {
 
 	@Override
 	public void setChapter(Chapter newChapter) {
-		this.chapter = newChapter;
+		if (!Objects.equals(newChapter, getChapter())) {
+			getChapter().removeImage(this);
+			newChapter.addImage(this);
+			this.chapter = newChapter;
+		}
 	}
 
 	@Override
@@ -323,7 +330,7 @@ public final class ChapterImage extends QuestObjectBase implements Movable {
 			} else {
 				height = width / image.aspectRatio();
 			}
-			NetworkManager.sendToServer(EditObjectMessage.forQuestObject(chapter));
+			NetworkManager.sendToServer(EditObjectMessage.forQuestObject(this));
 		}
 	}
 

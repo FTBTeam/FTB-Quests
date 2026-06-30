@@ -1608,6 +1608,7 @@ public abstract class BaseQuestFile extends QuestObject implements QuestFile {
 			if (index != -1 && movingUp ? (index > 1) : (index < chapterGroups.size() - 1)) {
 				chapterGroups.remove(index);
 				chapterGroups.add(movingUp ? index - 1 : index + 1, group);
+				group.clearCachedData();
 				return true;
 			}
 		}

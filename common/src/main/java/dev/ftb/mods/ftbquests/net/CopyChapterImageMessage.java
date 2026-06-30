@@ -1,14 +1,13 @@
 package dev.ftb.mods.ftbquests.net;
 
 import dev.architectury.networking.NetworkManager;
-import dev.ftb.mods.ftblibrary.util.NetworkHelper;
 import dev.ftb.mods.ftbquests.api.FTBQuestsAPI;
 import dev.ftb.mods.ftbquests.quest.Chapter;
 import dev.ftb.mods.ftbquests.quest.ChapterImage;
 import dev.ftb.mods.ftbquests.quest.QuestObjectBase;
 import dev.ftb.mods.ftbquests.quest.ServerQuestFile;
 import dev.ftb.mods.ftbquests.quest.history.CreateOrDeleteRecord;
-import dev.ftb.mods.ftbquests.quest.history.HistoryEvent;
+import dev.ftb.mods.ftbquests.quest.history.events.CreateQuestObjects;
 import dev.ftb.mods.ftbquests.util.NetUtils;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
@@ -38,11 +37,7 @@ public record CopyChapterImageMessage(long id, long chapterId, double qx, double
             if (sqf.getBase(message.id) instanceof ChapterImage img && sqf.get(message.chapterId) instanceof Chapter chapter && NetUtils.canEdit(context)) {
                 ChapterImage newImage = Objects.requireNonNull(QuestObjectBase.copy(img, () -> new ChapterImage(sqf.newID(), chapter)));
                 newImage.setPosition(message.qx, message.qy);
-                sqf.getHistoryStack().addAndApply(sqf, new HistoryEvent.Creation(CreateOrDeleteRecord.ofQuestObject(newImage)));
-
-                if (sqf.getBase(newImage.getId()) instanceof ChapterImage created) {
-                    NetworkHelper.sendToAll(sqf.server, CreateObjectResponseMessage.create(created, null));
-                }
+                sqf.getHistoryStack().addAndApply(sqf, new CreateQuestObjects(CreateOrDeleteRecord.ofQuestObject(newImage), null));
             }
         }));
     }

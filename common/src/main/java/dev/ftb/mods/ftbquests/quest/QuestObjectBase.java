@@ -500,6 +500,7 @@ public abstract class QuestObjectBase implements Comparable<QuestObjectBase> {
 		CompoundTag tag = new CompoundTag();
 		orig.writeData(tag, orig.holderLookup());
 		copied.readData(tag, orig.holderLookup());
+		copied.setRawTitle(orig.getRawTitle());
 		return copied;
 	}
 
