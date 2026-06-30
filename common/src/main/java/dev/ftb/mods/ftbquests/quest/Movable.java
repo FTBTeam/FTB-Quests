@@ -9,11 +9,31 @@ import net.fabricmc.api.Environment;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.network.chat.Component;
 
+/**
+ * Represents a quest object which
+ * <ul>
+ *     <li>Has a (X,Y) position on the screen, which can be adjusted</li>
+ *     <li>Belongs to a chapter, and can be moved to a different chapter</li>
+ * </ul>
+ */
 public interface Movable {
+	/**
+	 * Get the unique quest object ID for this movable.
+	 * @return the ID
+	 */
 	long getMovableID();
 
 	Chapter getChapter();
 
+	QuestObjectType getObjectType();
+
+	/**
+	 * Change the chapter for this movable object. This method is also responsible for updating the chapters,
+	 * to remove the object from the old one and add it to the new one. This is a no-op if the new chapter is the
+	 * same as the current chapter.
+	 *
+	 * @param newChapter the chapter to move to
+	 */
 	void setChapter(Chapter newChapter);
 
 	double getX();
@@ -43,34 +63,12 @@ public interface Movable {
 	 * @param x new X pos
 	 * @param y new Y pos
 	 */
-	default void initiateMoveClientSide(Chapter to, double x, double y) {
+	default void requestMove(Chapter to, double x, double y) {
 		NetworkManager.sendToServer(new MoveMovableMessage(getMovableID(), to.getId(), x, y));
 	}
 
 	/**
-	 * Called on both server and client to actually update the object's position; must also update any related objects,
-	 * e.g. chapter links if the chapter ID is changing.
-	 *
-	 * @param newX new X pos
-	 * @param newY new Y pos
-	 * @param newChapterId new chapter ID
-	 */
-	default void applyMove(double newX, double newY, long newChapterId) {
-		setPosition(newX, newY);
-
-		Chapter oldChapter = getChapter();
-		if (newChapterId != oldChapter.getId()) {
-			Chapter newChapter = oldChapter.getQuestFile().getChapter(newChapterId);
-			if (newChapter != null) {
-				oldChapter.removeChildObject(this);
-				newChapter.addChildObject(this);
-				setChapter(newChapter);
-			}
-		}
-	}
-
-	/**
-	 * Called on the client when the object is copied via context menu or pressing Ctrl-C
+	 * Called on the client when the object ID is copied via context menu or pressing Ctrl-C
 	 */
 	default void copyToClipboard() {
 		FTBQuestsClient.copyToClipboard(QuestObjectBase.getCodeString(getMovableID()));

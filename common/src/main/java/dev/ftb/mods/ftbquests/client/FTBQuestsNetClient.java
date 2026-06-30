@@ -62,11 +62,11 @@ public class FTBQuestsNetClient {
 		QuestObjectUpdateListener listener = ClientUtils.getCurrentGuiAs(QuestObjectUpdateListener.class);
 		QuestObjectBase toOpen = null;
 
-        for (CreateOrDeleteRecord c : creationRecords) {
-            QuestObjectBase object = file.create(c.id(), c.questObjectType(), c.parent(), c.extra());
-            object.readData(c.nbt(), FTBQuestsClient.holderLookup());
-            file.getTranslationManager().processInitialTranslation(c.extra(), object);
-            object.onCreated();
+		for (CreateOrDeleteRecord c : creationRecords) {
+			QuestObjectBase object = file.create(c.id(), c.questObjectType(), c.parent(), c.extra());
+			object.readData(c.nbt(), FTBQuestsClient.holderLookup());
+			file.getTranslationManager().processInitialTranslation(c.extra(), object);
+			object.onCreated();
 			file.clearCachedData();
 			object.editedFromGUI();
 			FTBQuests.getRecipeModHelper().refreshRecipes(object);
@@ -164,8 +164,11 @@ public class FTBQuestsNetClient {
 	}
 
 	public static void moveMovableObject(long id, long chapter, double x, double y) {
-		if (ClientQuestFile.INSTANCE.getBase(id) instanceof Movable movable) {
-			movable.applyMove(x, y, chapter);
+		ClientQuestFile cqf = ClientQuestFile.INSTANCE;
+		if (cqf.getBase(id) instanceof Movable movable && cqf.get(chapter) instanceof Chapter newChapter) {
+			movable.setPosition(x, y);
+			movable.setChapter(newChapter);
+
 			QuestScreen gui = ClientUtils.getCurrentGuiAs(QuestScreen.class);
 			if (gui != null) {
 				gui.questPanel.withPreservedPos(Panel::refreshWidgets);
@@ -206,16 +209,15 @@ public class FTBQuestsNetClient {
 	}
 
 	public static void changeChapterGroup(long id, long newGroupId) {
-		Chapter chapter = ClientQuestFile.INSTANCE.getChapter(id);
+		ClientQuestFile cqf = ClientQuestFile.INSTANCE;
 
-		if (chapter != null) {
-			ChapterGroup newGroup = ClientQuestFile.INSTANCE.getChapterGroup(newGroupId);
-
-			if (chapter.getGroup() != newGroup) {
-				chapter.getGroup().removeChapter(chapter);
-				newGroup.addChapter(chapter);
-				chapter.file.clearCachedData();
-				chapter.editedFromGUI();
+		if (cqf.getChapter(id) instanceof Chapter chapter && cqf.getChapterGroup(newGroupId) instanceof ChapterGroup newGroup) {
+			chapter.getGroup().removeChapter(chapter);
+			newGroup.addChapter(chapter);
+			QuestScreen gui = ClientUtils.getCurrentGuiAs(QuestScreen.class);
+			chapter.clearCachedData();
+			if (gui != null) {
+				gui.refreshChapterPanel();
 			}
 		}
 	}
@@ -296,14 +298,14 @@ public class FTBQuestsNetClient {
 
 	public static void resetReward(UUID teamId, UUID player, long rewardId) {
 		Reward reward = ClientQuestFile.INSTANCE.getReward(rewardId);
-        if (reward != null) {
-            TeamData teamData = ClientQuestFile.INSTANCE.getOrCreateTeamData(teamId);
+		if (reward != null) {
+			TeamData teamData = ClientQuestFile.INSTANCE.getOrCreateTeamData(teamId);
 
-            if (teamData.resetReward(player, reward)) {
-                refreshQuestScreenIfOpen();
-            }
-        }
-    }
+			if (teamData.resetReward(player, reward)) {
+				refreshQuestScreenIfOpen();
+			}
+		}
+	}
 
 	private static void refreshQuestScreenIfOpen() {
 		QuestScreen gui = ClientUtils.getCurrentGuiAs(QuestScreen.class);

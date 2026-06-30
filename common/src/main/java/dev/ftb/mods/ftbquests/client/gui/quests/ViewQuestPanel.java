@@ -26,10 +26,7 @@ import dev.ftb.mods.ftbquests.client.gui.MultilineTextEditorScreen;
 import dev.ftb.mods.ftbquests.net.EditObjectMessage;
 import dev.ftb.mods.ftbquests.net.ReorderItemMessage;
 import dev.ftb.mods.ftbquests.net.TogglePinnedMessage;
-import dev.ftb.mods.ftbquests.quest.Quest;
-import dev.ftb.mods.ftbquests.quest.QuestLink;
-import dev.ftb.mods.ftbquests.quest.QuestObject;
-import dev.ftb.mods.ftbquests.quest.QuestObjectBase;
+import dev.ftb.mods.ftbquests.quest.*;
 import dev.ftb.mods.ftbquests.quest.reward.Reward;
 import dev.ftb.mods.ftbquests.quest.reward.RewardAutoClaim;
 import dev.ftb.mods.ftbquests.quest.task.Task;
@@ -624,10 +621,10 @@ public class ViewQuestPanel extends ModalPanel {
 		for (Panel panel : List.of(panelTasks, panelRewards)) {
 			for (Widget w : panel.getWidgets()) {
 				if (w instanceof TaskButton b && b.isMouseOver()) {
-					NetworkManager.sendToServer(new ReorderItemMessage(b.task.getId(), moveRight));
+					NetworkManager.sendToServer(new ReorderItemMessage(b.task.getId(), QuestObjectType.TASK, moveRight));
 					return;
 				} else if (w instanceof RewardButton b && b.isMouseOver()) {
-					NetworkManager.sendToServer(new ReorderItemMessage(b.reward.getId(), moveRight));
+					NetworkManager.sendToServer(new ReorderItemMessage(b.reward.getId(), QuestObjectType.REWARD, moveRight));
 					return;
 				}
 			}

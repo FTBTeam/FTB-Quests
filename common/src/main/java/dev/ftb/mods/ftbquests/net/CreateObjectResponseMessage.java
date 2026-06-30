@@ -7,7 +7,7 @@ import dev.ftb.mods.ftbquests.quest.QuestObjectBase;
 import dev.ftb.mods.ftbquests.quest.history.CreateOrDeleteRecord;
 import net.minecraft.Util;
 import net.minecraft.core.UUIDUtil;
-import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
@@ -21,7 +21,7 @@ import java.util.UUID;
 public record CreateObjectResponseMessage(List<CreateOrDeleteRecord> creationRecords, Optional<UUID> creator) implements CustomPacketPayload {
 	public static final Type<CreateObjectResponseMessage> TYPE = new Type<>(FTBQuestsAPI.rl("create_object_response_message"));
 
-	public static final StreamCodec<FriendlyByteBuf, CreateObjectResponseMessage> STREAM_CODEC = StreamCodec.composite(
+	public static final StreamCodec<RegistryFriendlyByteBuf, CreateObjectResponseMessage> STREAM_CODEC = StreamCodec.composite(
 			CreateOrDeleteRecord.STREAM_CODEC.apply(ByteBufCodecs.list()), CreateObjectResponseMessage::creationRecords,
 			ByteBufCodecs.optional(UUIDUtil.STREAM_CODEC), CreateObjectResponseMessage::creator,
 			CreateObjectResponseMessage::new

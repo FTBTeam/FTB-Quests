@@ -11,6 +11,7 @@ import net.minecraft.nbt.Tag;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 
@@ -112,5 +113,9 @@ public class TranslationTable {
             }
         });
         return res;
+    }
+
+    public @Nullable Either<String, List<String>> getEntry(String key, Either<String, List<String>> def) {
+        return map.getOrDefault(key, def);
     }
 }

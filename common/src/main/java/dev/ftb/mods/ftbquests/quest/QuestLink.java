@@ -11,6 +11,7 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 
+import java.util.Objects;
 import java.util.Optional;
 
 public class QuestLink extends QuestObject implements Movable, Excludable {
@@ -165,6 +166,7 @@ public class QuestLink extends QuestObject implements Movable, Excludable {
     public Movable setPosition(double qx, double qy) {
         x = qx;
         y = qy;
+        getQuestFile().markDirty();
         return this;
     }
 
@@ -180,7 +182,11 @@ public class QuestLink extends QuestObject implements Movable, Excludable {
 
     @Override
     public void setChapter(Chapter newChapter) {
-        this.chapter = newChapter;
+        if (!Objects.equals(newChapter, getChapter())) {
+            getChapter().removeQuestLink(this);
+            newChapter.addQuestLink(this);
+            this.chapter = newChapter;
+        }
     }
 
     @Override

@@ -3,6 +3,7 @@ package dev.ftb.mods.ftbquests.net;
 import dev.architectury.networking.NetworkManager;
 import dev.ftb.mods.ftbquests.api.FTBQuestsAPI;
 import dev.ftb.mods.ftbquests.quest.ServerQuestFile;
+import dev.ftb.mods.ftbquests.quest.history.events.MoveChapterGroup;
 import dev.ftb.mods.ftbquests.util.NetUtils;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
@@ -24,10 +25,10 @@ public record MoveChapterGroupMessage(long id, boolean movingUp) implements Cust
 	}
 
 	public static void handle(MoveChapterGroupMessage message, NetworkManager.PacketContext context) {
-		context.queue(() -> {
+		context.queue(() -> ServerQuestFile.getInstance().ifPresent(sqf -> {
 			if (NetUtils.canEdit(context)) {
-				ServerQuestFile.INSTANCE.moveChapterGroup(message.id, message.movingUp);
+				sqf.getHistoryStack().addAndApply(sqf, new MoveChapterGroup(message.id, message.movingUp));
 			}
-		});
+		}));
 	}
 }

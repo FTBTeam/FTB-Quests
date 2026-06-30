@@ -65,6 +65,7 @@ public class QuestScreen extends BaseScreen {
 	static boolean grid = false;
 	private PersistedData pendingPersistedData;
 	private final Deque<Long> questViewHistory = new ArrayDeque<>();
+	private final Set<Panel> refreshPending = Collections.newSetFromMap(new IdentityHashMap<>());
 
 	public final QuestPanel questPanel;
 	public final OtherButtonsPanelBottom otherButtonsBottomPanel;
@@ -101,15 +102,19 @@ public class QuestScreen extends BaseScreen {
 	}
 
 	public void refreshChapterPanel() {
-		chapterPanel.refreshWidgets();
+		refreshPending.add(chapterPanel);
 	}
 
 	public void refreshQuestPanel() {
-		questPanel.refreshWidgets();
+		refreshPending.add(questPanel);
 	}
 
 	public void refreshViewQuestPanel() {
-		viewQuestPanel.refreshWidgets();
+		refreshPending.add(viewQuestPanel);
+	}
+
+	public int getChapterPanelRight() {
+		return chapterPanel.expanded ? chapterPanel.width : 20;
 	}
 
 	@Override
@@ -370,7 +375,7 @@ public class QuestScreen extends BaseScreen {
 	private boolean moveSelectedQuests(double x, double y) {
 		for (Movable movable : selectedObjects) {
 			if (movable.getChapter() == selectedChapter) {
-				movable.initiateMoveClientSide(selectedChapter, movable.getX() + x, movable.getY() + y);
+				movable.requestMove(selectedChapter, movable.getX() + x, movable.getY() + y);
 			}
 		}
 
@@ -402,7 +407,7 @@ public class QuestScreen extends BaseScreen {
 		}
 
 		return false;
-    }
+	}
 
 	private boolean pasteSelectedQuest(boolean withDeps, Chapter chapter) {
 		return QuestObjectBase.parseHexId(getClipboardString()).map(id -> {
@@ -443,23 +448,7 @@ public class QuestScreen extends BaseScreen {
 	}
 
 	void deleteSelectedObjects() {
-		List<Long> toDelete = new ArrayList<>();
-		List<Chapter> toUpdate = new ArrayList<>();
-
-		selectedObjects.forEach(movable -> {
-			if (movable instanceof Quest quest) {
-				toDelete.add(quest.id);
-			} else if (movable instanceof QuestLink questLink) {
-				toDelete.add(questLink.id);
-			} else if (movable instanceof ChapterImage img) {
-				img.getChapter().removeImage(img);
-				toUpdate.add(img.getChapter());
-			}
-		});
-
-		if (!toUpdate.isEmpty()) {
-			NetworkManager.sendToServer(EditObjectMessage.forQuestObjects(toUpdate));
-		}
+		List<Long> toDelete = selectedObjects.stream().map(Movable::getMovableID).toList();
 		file.deleteObjects(toDelete);
 		selectedObjects.clear();
 	}
@@ -477,9 +466,9 @@ public class QuestScreen extends BaseScreen {
 
 		if (key.is(GLFW.GLFW_KEY_TAB)) {
 			if (selectedChapter != null && visibleChapters.size() > 1) {
-                selectChapter(visibleChapters.get(MathUtils.mod(visibleChapters.indexOf(selectedChapter) + (isShiftKeyDown() ? -1 : 1), visibleChapters.size())));
-                selectedChapter.getAutofocus().ifPresent(this::scrollTo);
-            }
+				selectChapter(visibleChapters.get(MathUtils.mod(visibleChapters.indexOf(selectedChapter) + (isShiftKeyDown() ? -1 : 1), visibleChapters.size())));
+				selectedChapter.getAutofocus().ifPresent(this::scrollTo);
+			}
 
 			return true;
 		}
@@ -576,10 +565,16 @@ public class QuestScreen extends BaseScreen {
 					}
 				}
 				case GLFW.GLFW_KEY_T -> {
-					if (key.modifiers.control()) {
-						new RewardTablesScreen(this).openGui();
-						return true;
-					}
+					new RewardTablesScreen(this).openGui();
+					return true;
+				}
+				case GLFW.GLFW_KEY_Y -> {
+					NetworkManager.sendToServer(UndoRedoRequestMessage.redo());
+					return true;
+				}
+				case GLFW.GLFW_KEY_Z -> {
+					NetworkManager.sendToServer(UndoRedoRequestMessage.undo());
+					return true;
 				}
 			}
 		}
@@ -611,6 +606,11 @@ public class QuestScreen extends BaseScreen {
 
 	@Override
 	public void tick() {
+		if (!refreshPending.isEmpty()) {
+			refreshPending.forEach(Panel::refreshWidgets);
+			refreshPending.clear();
+		}
+
 		if (pendingPersistedData != null) {
 			restorePersistedScreenData(file, pendingPersistedData);
 			pendingPersistedData = null;

@@ -1,10 +1,9 @@
 package dev.ftb.mods.ftbquests.net;
 
 import dev.architectury.networking.NetworkManager;
-import dev.ftb.mods.ftblibrary.util.NetworkHelper;
 import dev.ftb.mods.ftbquests.api.FTBQuestsAPI;
-import dev.ftb.mods.ftbquests.quest.Chapter;
 import dev.ftb.mods.ftbquests.quest.ServerQuestFile;
+import dev.ftb.mods.ftbquests.quest.history.events.MoveChapterWithinGroup;
 import dev.ftb.mods.ftbquests.util.NetUtils;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
@@ -26,16 +25,10 @@ public record MoveChapterMessage(long id, boolean movingUp) implements CustomPac
 	}
 
 	public static void handle(MoveChapterMessage message, NetworkManager.PacketContext context) {
-		context.queue(() -> {
+		context.queue(() -> ServerQuestFile.getInstance().ifPresent(sqf -> {
 			if (NetUtils.canEdit(context)) {
-				Chapter chapter = ServerQuestFile.INSTANCE.getChapter(message.id);
-
-				if (chapter != null && chapter.getGroup().moveChapterWithinGroup(chapter, message.movingUp)) {
-					chapter.file.clearCachedData();
-					NetworkHelper.sendToAll(ServerQuestFile.INSTANCE.server, new MoveChapterResponseMessage(message.id, message.movingUp));
-					chapter.file.markDirty();
-				}
+				sqf.getHistoryStack().addAndApply(sqf, new MoveChapterWithinGroup(message.id, message.movingUp));
 			}
-		});
+		}));
 	}
 }

@@ -1,13 +1,12 @@
 package dev.ftb.mods.ftbquests.net;
 
 import dev.architectury.networking.NetworkManager;
-import dev.ftb.mods.ftblibrary.util.NetworkHelper;
 import dev.ftb.mods.ftbquests.api.FTBQuestsAPI;
 import dev.ftb.mods.ftbquests.quest.Chapter;
 import dev.ftb.mods.ftbquests.quest.Quest;
 import dev.ftb.mods.ftbquests.quest.ServerQuestFile;
 import dev.ftb.mods.ftbquests.quest.history.CreateOrDeleteRecord;
-import dev.ftb.mods.ftbquests.quest.history.HistoryEvent;
+import dev.ftb.mods.ftbquests.quest.history.events.CreateQuestObjects;
 import dev.ftb.mods.ftbquests.quest.task.Task;
 import dev.ftb.mods.ftbquests.quest.task.TaskType;
 import dev.ftb.mods.ftbquests.util.NetUtils;
@@ -73,11 +72,7 @@ public record CreateQuestAndTaskMessage(long chapterId, double x, double y, int 
 					sqf.getTranslationManager().processInitialTranslation(extra, task);
 
 					List<CreateOrDeleteRecord> recs = CreateOrDeleteRecord.ofQuestObjects(quest, task);
-					sqf.getHistoryStack().addAndApply(sqf, new HistoryEvent.Creation(recs));
-
-					NetworkHelper.sendToAll(sp.getServer(), new CreateObjectResponseMessage(recs, Optional.of(sp.getUUID())));
-
-					sqf.markDirty();
+					sqf.getHistoryStack().addAndApply(sqf, new CreateQuestObjects(recs, sp.getUUID()));
 				}
 			}
 		}));

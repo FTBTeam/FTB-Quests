@@ -1,14 +1,13 @@
 package dev.ftb.mods.ftbquests.net;
 
 import dev.architectury.networking.NetworkManager;
-import dev.ftb.mods.ftblibrary.util.NetworkHelper;
 import dev.ftb.mods.ftbquests.api.FTBQuestsAPI;
 import dev.ftb.mods.ftbquests.quest.QuestObjectBase;
 import dev.ftb.mods.ftbquests.quest.ServerQuestFile;
 import dev.ftb.mods.ftbquests.quest.history.EditRecord;
-import dev.ftb.mods.ftbquests.quest.history.HistoryEvent;
+import dev.ftb.mods.ftbquests.quest.history.events.ModifyQuestObjects;
 import dev.ftb.mods.ftbquests.util.NetUtils;
-import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
@@ -26,7 +25,7 @@ import java.util.List;
 public record EditObjectMessage(List<EditRecord> editRecords) implements CustomPacketPayload {
 	public static final Type<EditObjectMessage> TYPE = new Type<>(FTBQuestsAPI.rl("edit_object_message"));
 
-	public static final StreamCodec<FriendlyByteBuf, EditObjectMessage> STREAM_CODEC = StreamCodec.composite(
+	public static final StreamCodec<RegistryFriendlyByteBuf, EditObjectMessage> STREAM_CODEC = StreamCodec.composite(
 			EditRecord.STREAM_CODEC.apply(ByteBufCodecs.list()), EditObjectMessage::editRecords,
 			EditObjectMessage::new
 	);
@@ -51,10 +50,8 @@ public record EditObjectMessage(List<EditRecord> editRecords) implements CustomP
 	public static void handle(EditObjectMessage message, NetworkManager.PacketContext context) {
 		context.queue(() -> ServerQuestFile.getInstance().ifPresent(sqf -> {
 			if (NetUtils.canEdit(context)) {
-				HistoryEvent.Modification.fromEditRecords(sqf, message.editRecords).ifPresent(modification -> {
-					sqf.getHistoryStack().addAndApply(sqf, modification);
-					NetworkHelper.sendToAll(context.getPlayer().getServer(), new EditObjectResponseMessage(modification.newRecords()));
-				});
+				ModifyQuestObjects.fromEditRecords(sqf, message.editRecords)
+						.ifPresent(modification -> sqf.getHistoryStack().addAndApply(sqf, modification));
 			}
 		}));
 	}

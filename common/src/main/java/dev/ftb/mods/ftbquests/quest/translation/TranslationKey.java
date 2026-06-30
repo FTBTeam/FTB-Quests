@@ -39,6 +39,10 @@ public enum TranslationKey {
         return either;
     }
 
+    public Either<String, List<String>> emptyValue() {
+        return isListVal ? Either.right(List.of()) : Either.left("");
+    }
+
     public String getTranslationKey() {
         return "ftbquests.translation_key." + name;
     }

@@ -5,7 +5,7 @@ import dev.ftb.mods.ftbquests.api.FTBQuestsAPI;
 import dev.ftb.mods.ftbquests.client.FTBQuestsNetClient;
 import dev.ftb.mods.ftbquests.quest.QuestObjectBase;
 import dev.ftb.mods.ftbquests.quest.history.EditRecord;
-import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
@@ -23,7 +23,7 @@ import java.util.List;
 public record EditObjectResponseMessage(List<EditRecord> editRecords) implements CustomPacketPayload {
 	public static final Type<EditObjectResponseMessage> TYPE = new Type<>(FTBQuestsAPI.rl("edit_object_response_message"));
 
-	public static final StreamCodec<FriendlyByteBuf, EditObjectResponseMessage> STREAM_CODEC = StreamCodec.composite(
+	public static final StreamCodec<RegistryFriendlyByteBuf, EditObjectResponseMessage> STREAM_CODEC = StreamCodec.composite(
 			EditRecord.STREAM_CODEC.apply(ByteBufCodecs.list()), EditObjectResponseMessage::editRecords,
 			EditObjectResponseMessage::new
 	);

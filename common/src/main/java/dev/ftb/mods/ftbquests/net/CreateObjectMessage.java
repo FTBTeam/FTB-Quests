@@ -1,14 +1,13 @@
 package dev.ftb.mods.ftbquests.net;
 
 import dev.architectury.networking.NetworkManager;
-import dev.ftb.mods.ftblibrary.util.NetworkHelper;
 import dev.ftb.mods.ftbquests.api.FTBQuestsAPI;
 import dev.ftb.mods.ftbquests.quest.QuestObjectBase;
 import dev.ftb.mods.ftbquests.quest.ServerQuestFile;
 import dev.ftb.mods.ftbquests.quest.history.CreateOrDeleteRecord;
-import dev.ftb.mods.ftbquests.quest.history.HistoryEvent;
+import dev.ftb.mods.ftbquests.quest.history.events.CreateQuestObjects;
 import dev.ftb.mods.ftbquests.util.NetUtils;
-import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
@@ -16,7 +15,7 @@ import net.minecraft.server.level.ServerPlayer;
 
 import java.util.Collection;
 import java.util.List;
-import java.util.Optional;
+import java.util.UUID;
 
 /**
  * Received on: SERVER<br>
@@ -26,7 +25,7 @@ import java.util.Optional;
 public record CreateObjectMessage(List<CreateOrDeleteRecord> creationRecords, boolean openScreen) implements CustomPacketPayload {
 	public static final Type<CreateObjectMessage> TYPE = new Type<>(FTBQuestsAPI.rl("create_object_message"));
 
-	public static final StreamCodec<FriendlyByteBuf, CreateObjectMessage> STREAM_CODEC = StreamCodec.composite(
+	public static final StreamCodec<RegistryFriendlyByteBuf, CreateObjectMessage> STREAM_CODEC = StreamCodec.composite(
 			CreateOrDeleteRecord.STREAM_CODEC.apply(ByteBufCodecs.list()), CreateObjectMessage::creationRecords,
 			ByteBufCodecs.BOOL, CreateObjectMessage::openScreen,
 			CreateObjectMessage::new
@@ -59,9 +58,8 @@ public record CreateObjectMessage(List<CreateOrDeleteRecord> creationRecords, bo
 					// records will have arrived from client with an id of 0, so allocate some real id's now
 					List<CreateOrDeleteRecord> creationRecs = message.creationRecords.stream().map(r -> r.withNewID(sqf)).toList();
 
-					sqf.getHistoryStack().addAndApply(sqf, new HistoryEvent.Creation(creationRecs));
-
-					NetworkHelper.sendToAll(sp.getServer(), new CreateObjectResponseMessage(creationRecs, Optional.ofNullable(message.openScreen ? sp.getUUID() : null)));
+					UUID creatorId = message.openScreen ? sp.getUUID() : null;
+					sqf.getHistoryStack().addAndApply(sqf, new CreateQuestObjects(creationRecs, creatorId));
 				});
 			}
 		});
