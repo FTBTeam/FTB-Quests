@@ -10,8 +10,8 @@ import net.minecraft.network.chat.ComponentUtils;
 // TODO get artwork for proper buttons
 public enum ChangeType {
     INITIAL("", ChatFormatting.WHITE, "", Color4I.empty()),
-    UNDO("↶", ChatFormatting.DARK_GREEN, "ftbquests.gui.undo", Icons.LEFT),
-    REDO("↷", ChatFormatting.DARK_AQUA, "ftbquests.gui.redo", Icons.RIGHT);
+    UNDO("↶", ChatFormatting.DARK_GREEN, "ftbquests.gui.undo", Icons.UNDO),
+    REDO("↷", ChatFormatting.DARK_AQUA, "ftbquests.gui.redo", Icons.REDO);
 
     private final String symbol;
     private final ChatFormatting color;
