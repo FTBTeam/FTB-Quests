@@ -22,6 +22,7 @@ import dev.ftb.mods.ftbquests.FTBQuests;
 import dev.ftb.mods.ftbquests.api.FTBQuestsAPI;
 import dev.ftb.mods.ftbquests.block.entity.BaseBarrierBlockEntity;
 import dev.ftb.mods.ftbquests.block.entity.TaskScreenBlockEntity;
+import dev.ftb.mods.ftbquests.client.gui.CustomToast;
 import dev.ftb.mods.ftbquests.client.gui.RewardSelectorScreen;
 import dev.ftb.mods.ftbquests.client.gui.RewardToast;
 import dev.ftb.mods.ftbquests.client.gui.ToastQuestObject;
@@ -231,5 +232,9 @@ public class FTBQuestsClient {
 		if (screen == null || ClientUtils.getGuiAs(screen, RewardSelectorScreen.class) == null) {
 			Minecraft.getInstance().getToasts().addToast(new RewardToast(text, icon));
 		}
+	}
+
+	public static void showInfoToast(Component text, Icon icon, Component desc) {
+		Minecraft.getInstance().getToasts().addToast(new CustomToast(text, icon, desc));
 	}
 }
