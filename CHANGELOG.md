@@ -4,6 +4,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2101.1.28]
+
+### Added
+* JEI bookmarking support for Task & Reward buttons and valid items screen in FTB Quests
+  * Press 'A' (or whatever your keybinding for JEI bookmarking is) to toggle bookmarking for items for within FTB Quests
+  * FTB XMod Compat 2101.1.9+ is also required
+
 ## [2101.1.27]
 
 ### Fixed
