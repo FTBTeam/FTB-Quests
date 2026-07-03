@@ -7,10 +7,12 @@ import dev.ftb.mods.ftblibrary.icon.Color4I;
 import dev.ftb.mods.ftblibrary.icon.Icons;
 import dev.ftb.mods.ftblibrary.icon.ItemIcon;
 import dev.ftb.mods.ftblibrary.ui.*;
+import dev.ftb.mods.ftblibrary.ui.input.Key;
 import dev.ftb.mods.ftblibrary.ui.input.MouseButton;
 import dev.ftb.mods.ftblibrary.ui.misc.AbstractButtonListScreen;
 import dev.ftb.mods.ftblibrary.util.TooltipList;
 import dev.ftb.mods.ftblibrary.util.client.PositionedIngredient;
+import dev.ftb.mods.ftbquests.FTBQuests;
 import dev.ftb.mods.ftbquests.api.ItemFilterAdapter;
 import dev.ftb.mods.ftbquests.client.gui.ContextMenuBuilder;
 import dev.ftb.mods.ftbquests.integration.item_filtering.ItemMatchingSystem;
@@ -57,6 +59,12 @@ public class TaskButton extends Button {
 		}
 
 		return false;
+	}
+
+	@Override
+	public boolean keyPressed(Key key) {
+		return FTBQuests.getRecipeModHelper().tryToggleBookmark(this, key, task.getIcon().getIngredient())
+				|| super.keyPressed(key);
 	}
 
 	@Override

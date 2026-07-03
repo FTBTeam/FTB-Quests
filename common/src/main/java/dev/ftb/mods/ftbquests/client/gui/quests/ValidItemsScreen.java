@@ -174,5 +174,11 @@ public class ValidItemsScreen extends BaseScreen {
 			GuiHelper.drawItem(graphics, stack, 0, true, null);
 			graphics.pose().popPose();
 		}
+
+		@Override
+		public boolean keyPressed(Key key) {
+			return FTBQuests.getRecipeModHelper().tryToggleBookmark(this, key, stack)
+					|| super.keyPressed(key);
+		}
 	}
 }
