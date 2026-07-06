@@ -746,7 +746,6 @@ public class ViewQuestPanel extends ModalPanel {
 						mutableRawDesc.set(line, c.getValue());
 					}
 					quest.setRawDescription(List.copyOf(mutableRawDesc));
-//					syncQuestToServer();
 					refreshWidgets();
 				}
 			}).atPosition(clickedWidget.getX(), clickedWidget.getY());
@@ -756,7 +755,7 @@ public class ViewQuestPanel extends ModalPanel {
 	}
 
 	private void editImage(int line, ImageComponent component) {
-		ConfigGroup group = new ConfigGroup(FTBQuestsAPI.MOD_ID + ".chapter.image", accepted -> {
+		ConfigGroup group = new ConfigGroup(FTBQuestsAPI.MOD_ID + ".image", accepted -> {
 			openGui();
 			if (accepted) {
 				quest.modifyTranslatableListValue(TranslationKey.QUEST_DESC, mutableRawDesc -> {
@@ -766,7 +765,6 @@ public class ViewQuestPanel extends ModalPanel {
 						mutableRawDesc.set(line, component.toString());
 					}
 				});
-//				syncQuestToServer();
 
 				refreshWidgets();
 			}
@@ -802,7 +800,6 @@ public class ViewQuestPanel extends ModalPanel {
 			contextMenu.add(new ContextMenuItem(Component.translatable("selectServer.edit"), ThemeProperties.EDIT_ICON.get(), b -> editDescLine0(clickedWidget, line, type)));
 			contextMenu.add(new ContextMenuItem(Component.translatable("selectServer.delete"), ThemeProperties.DELETE_ICON.get(), b -> {
 				quest.modifyTranslatableListValue(TranslationKey.QUEST_DESC, mutableDesc -> mutableDesc.remove(line));
-//				syncQuestToServer();
 				refreshWidgets();
 			}));
 

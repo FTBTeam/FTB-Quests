@@ -457,13 +457,77 @@ public class QuestScreen extends BaseScreen {
 	public boolean keyPressed(Key key) {
 		if (super.keyPressed(key)) {
 			return true;
-		} else if (FTBQuestsClient.KEY_QUESTS.matches(key.keyCode, key.scanCode)) {
-			closeGui(true);
-			return true;
+		}
+
+		if (file.canEdit()) {
+			if (key.is(GLFW.GLFW_KEY_F5)) {
+				reloadTheme(!isShiftKeyDown());
+				return true;
+			}
+
+			if (key.is(GLFW.GLFW_KEY_DELETE) && !selectedObjects.isEmpty()) {
+				if (!isShiftKeyDown()) {
+					Component title = Component.translatable("delete_item", Component.translatable("ftbquests.objects", selectedObjects.size()));
+					getGui().openYesNo(title, Component.empty(), this::deleteSelectedObjects);
+				} else {
+					deleteSelectedObjects();
+				}
+				return true;
+			} else if (key.modifiers.control()) {
+				double step = key.modifiers.shift() ? 0.1D : 0.5D;
+
+				switch (key.keyCode) {
+					case GLFW.GLFW_KEY_A -> {
+						if (selectedChapter != null) {
+							selectedObjects.addAll(selectedChapter.getQuests());
+							selectedObjects.addAll(selectedChapter.getQuestLinks());
+							selectedObjects.addAll(selectedChapter.getImages());
+						}
+						return true;
+					}
+					case GLFW.GLFW_KEY_D -> {
+						selectedObjects.clear();
+						return true;
+					}
+					case GLFW.GLFW_KEY_DOWN -> {
+						return moveSelectedQuests(0D, step);
+					}
+					case GLFW.GLFW_KEY_UP -> {
+						return moveSelectedQuests(0D, -step);
+					}
+					case GLFW.GLFW_KEY_LEFT -> {
+						return moveSelectedQuests(-step, 0D);
+					}
+					case GLFW.GLFW_KEY_RIGHT -> {
+						return moveSelectedQuests(step, 0D);
+					}
+					case GLFW.GLFW_KEY_C -> {
+						return copyObjectsToClipboard();
+					}
+					case GLFW.GLFW_KEY_V -> {
+						if (key.modifiers.alt()) {
+							return pasteSelectedQuestLinks();
+						} else {
+							return pasteSelectedQuest(!key.modifiers.shift(), selectedChapter);
+						}
+					}
+					case GLFW.GLFW_KEY_T -> {
+						new RewardTablesScreen(this).openGui();
+						return true;
+					}
+					case GLFW.GLFW_KEY_Y -> {
+						NetworkManager.sendToServer(UndoRedoRequestMessage.redo());
+						return true;
+					}
+					case GLFW.GLFW_KEY_Z -> {
+						NetworkManager.sendToServer(UndoRedoRequestMessage.undo());
+						return true;
+					}
+				}
+			}
 		}
 
 		List<Chapter> visibleChapters = file.getVisibleChapters(file.selfTeamData);
-
 		if (key.is(GLFW.GLFW_KEY_TAB)) {
 			if (selectedChapter != null && visibleChapters.size() > 1) {
 				selectChapter(visibleChapters.get(MathUtils.mod(visibleChapters.indexOf(selectedChapter) + (isShiftKeyDown() ? -1 : 1), visibleChapters.size())));
@@ -506,77 +570,12 @@ public class QuestScreen extends BaseScreen {
 
 		if (key.is(GLFW.GLFW_KEY_P) && key.modifiers.onlyControl()) {
 			FTBQuestsClientConfig.openSettings(doesGuiPauseGame());
-		}
-
-		if (!file.canEdit()) {
-			return false;
-		}
-
-		// all edit-mode keybinds handled below here
-
-		if (key.is(GLFW.GLFW_KEY_F5)) {
-			reloadTheme(!isShiftKeyDown());
 			return true;
 		}
 
-		if (key.is(GLFW.GLFW_KEY_DELETE) && !selectedObjects.isEmpty()) {
-			if (!isShiftKeyDown()) {
-				Component title = Component.translatable("delete_item", Component.translatable("ftbquests.objects", selectedObjects.size()));
-				getGui().openYesNo(title, Component.empty(), this::deleteSelectedObjects);
-			} else {
-				deleteSelectedObjects();
-			}
-		} else if (key.modifiers.control()) {
-			double step = key.modifiers.shift() ? 0.1D : 0.5D;
-
-			switch (key.keyCode) {
-				case GLFW.GLFW_KEY_A -> {
-					if (selectedChapter != null) {
-						selectedObjects.addAll(selectedChapter.getQuests());
-						selectedObjects.addAll(selectedChapter.getQuestLinks());
-						selectedObjects.addAll(selectedChapter.getImages());
-					}
-					return true;
-				}
-				case GLFW.GLFW_KEY_D -> {
-					selectedObjects.clear();
-					return true;
-				}
-				case GLFW.GLFW_KEY_DOWN -> {
-					return moveSelectedQuests(0D, step);
-				}
-				case GLFW.GLFW_KEY_UP -> {
-					return moveSelectedQuests(0D, -step);
-				}
-				case GLFW.GLFW_KEY_LEFT -> {
-					return moveSelectedQuests(-step, 0D);
-				}
-				case GLFW.GLFW_KEY_RIGHT -> {
-					return moveSelectedQuests(step, 0D);
-				}
-				case GLFW.GLFW_KEY_C -> {
-					return copyObjectsToClipboard();
-				}
-				case GLFW.GLFW_KEY_V -> {
-					if (key.modifiers.alt()) {
-						return pasteSelectedQuestLinks();
-					} else {
-						return pasteSelectedQuest(!key.modifiers.shift(), selectedChapter);
-					}
-				}
-				case GLFW.GLFW_KEY_T -> {
-					new RewardTablesScreen(this).openGui();
-					return true;
-				}
-				case GLFW.GLFW_KEY_Y -> {
-					NetworkManager.sendToServer(UndoRedoRequestMessage.redo());
-					return true;
-				}
-				case GLFW.GLFW_KEY_Z -> {
-					NetworkManager.sendToServer(UndoRedoRequestMessage.undo());
-					return true;
-				}
-			}
+		if (FTBQuestsClient.KEY_QUESTS.matches(key.keyCode, key.scanCode)) {
+			closeGui(true);
+			return true;
 		}
 
 		return false;
