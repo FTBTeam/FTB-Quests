@@ -1,5 +1,6 @@
 package dev.ftb.mods.ftbquests.client.gui.quests;
 
+import com.mojang.datafixers.util.Pair;
 import dev.ftb.mods.ftblibrary.client.config.editable.EditableImageResource;
 import dev.ftb.mods.ftblibrary.client.config.gui.resource.SelectImageResourceScreen;
 import dev.ftb.mods.ftblibrary.client.gui.GuiHelper;
@@ -17,14 +18,12 @@ import dev.ftb.mods.ftblibrary.icon.Icons;
 import dev.ftb.mods.ftblibrary.icon.ImageIcon;
 import dev.ftb.mods.ftblibrary.math.MathUtils;
 import dev.ftb.mods.ftblibrary.platform.network.Play2ServerNetworking;
+import dev.ftb.mods.ftblibrary.util.Vec2d;
 import dev.ftb.mods.ftbquests.client.FTBQuestsClient;
 import dev.ftb.mods.ftbquests.client.FTBQuestsClientConfig;
 import dev.ftb.mods.ftbquests.client.FTBQuestsKeyMappings;
 import dev.ftb.mods.ftbquests.mixin.GuiGraphicsMixin;
-import dev.ftb.mods.ftbquests.net.CopyChapterImageMessage;
-import dev.ftb.mods.ftbquests.net.CopyQuestMessage;
-import dev.ftb.mods.ftbquests.net.CreateObjectMessage;
-import dev.ftb.mods.ftbquests.net.CreateTaskAtMessage;
+import dev.ftb.mods.ftbquests.net.*;
 import dev.ftb.mods.ftbquests.quest.*;
 import dev.ftb.mods.ftbquests.quest.task.Task;
 import dev.ftb.mods.ftbquests.quest.task.TaskType;
@@ -45,27 +44,30 @@ import org.joml.Matrix3x2f;
 import org.joml.Matrix3x2fStack;
 import org.jspecify.annotations.Nullable;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Comparator;
-import java.util.List;
+import java.util.*;
 import java.util.function.Consumer;
+import java.util.function.Supplier;
 
 public class QuestPanel extends Panel {
-//	private static final ImageIcon DEFAULT_DEPENDENCY_LINE_TEXTURE = (ImageIcon) Icon.getIcon(FTBQuestsAPI.MOD_ID + ":textures/gui/dependency.png");
-
 	private final QuestScreen questScreen;
 	protected double questX = 0;
 	protected double questY = 0;
+	protected double questXunsnapped = 0;
+	protected double questYunsnapped = 0;
 	double centerQuestX = 0;
 	double centerQuestY = 0;
 	@Nullable
 	QuestButton mouseOverQuest = null;
-	private double questMinX, questMinY, questMaxX, questMaxY;
+	double questMinX;
+    double questMinY;
+    private double questMaxX;
+    private double questMaxY;
+	final BezierController bezierController;
 
 	public QuestPanel(Panel panel) {
 		super(panel);
 		questScreen = (QuestScreen) panel.getGui();
+		bezierController = new BezierController();
 	}
 
 	public void updateMinMax() {
@@ -135,7 +137,8 @@ public class QuestPanel extends Panel {
 
 		questScreen.selectedChapter.getQuestLinks().forEach(link -> link.getQuest().ifPresent(quest -> add(new QuestLinkButton(this, link, quest))));
 
-		alignWidgets();
+		add(bezierController.control0);
+		add(bezierController.control1);
 	}
 
 	@Override
@@ -165,6 +168,11 @@ public class QuestPanel extends Panel {
 				double x = (qx - questMinX - qw / 2D) * (bs + bp) + bp / 2D + bp * (qw - 1D) / 2D;
 				double y = (qy - questMinY - qh / 2D) * (bs + bp) + bp / 2D + bp * (qh - 1D) / 2D;
 				w.setPosAndSize((int) Math.round(x), (int) Math.round(y), (int) Math.round(bs * qw), (int) Math.round(bs * qh));
+
+				if (w instanceof QuestButton qb) {
+					qb.positionControlPoints();
+					bezierController.repositionControlButtons(qb);
+				}
 			}
 		}
 
@@ -203,9 +211,9 @@ public class QuestPanel extends Panel {
 								ThemeProperties.DEPENDENCY_LINE_UNCOMPLETED_COLOR.get(questScreen.selectedChapter)
 						);
 
-				for (QuestButton button : qb.getDependencies()) {
+				for (QuestButton button : qb.getDependencies().values()) {
 					if (button.shouldDraw() && button.quest != selectedQuest && qb.quest != selectedQuest && !button.quest.shouldHideDependentLines()) {
-						renderConnection(graphics, dependencyLineTexture, widget, button, graphics.pose(), lineWidth,
+						renderConnection(graphics, dependencyLineTexture, qb, button, graphics.pose(), lineWidth,
 								c.redi(), c.greeni(), c.bluei(), c.alphai(), c.alphai(),
 								mu);
 					}
@@ -219,7 +227,7 @@ public class QuestPanel extends Panel {
 		List<QuestButton> toOutline = new ArrayList<>();
 		for (Widget widget : widgets) {
 			if (widget.shouldDraw() && widget instanceof QuestButton qb && (!qb.quest.shouldHideDependencyLines() || qb.isMouseOver())) {
-				for (QuestButton button : qb.getDependencies()) {
+				for (QuestButton button : qb.getDependencies().values()) {
 					if (button.shouldDraw()) {
 						if (button.quest == selectedQuest || button.isMouseOver()) {
 							Color4I c = ThemeProperties.DEPENDENCY_LINE_REQUIRED_FOR_COLOR.get(questScreen.selectedChapter);
@@ -231,10 +239,10 @@ public class QuestPanel extends Panel {
 								a2 = 30;
 								toOutline.add(qb);
 							}
-							renderConnection(graphics, dependencyLineTexture, widget, button, graphics.pose(), lineWidth, c.redi(), c.greeni(), c.bluei(), a2, a, ms);
+							renderConnection(graphics, dependencyLineTexture, qb, button, graphics.pose(), lineWidth, c.redi(), c.greeni(), c.bluei(), a2, a, ms);
 						} else if (qb.quest == selectedQuest || qb.isMouseOver()) {
 							Color4I c = ThemeProperties.DEPENDENCY_LINE_REQUIRES_COLOR.get(questScreen.selectedChapter);
-							renderConnection(graphics, dependencyLineTexture, widget, button, graphics.pose(), lineWidth, c.redi(), c.greeni(), c.bluei(), c.alphai(), c.alphai(), ms);
+							renderConnection(graphics, dependencyLineTexture, qb, button, graphics.pose(), lineWidth, c.redi(), c.greeni(), c.bluei(), c.alphai(), c.alphai(), ms);
 						}
 					}
 				}
@@ -251,34 +259,47 @@ public class QuestPanel extends Panel {
 		});
 	}
 
-	private void renderConnection(GuiGraphicsExtractor graphics, Icon<?> dependencyLineTexture, Widget widget, QuestButton button, Matrix3x2fStack poseStack, float s, int r, int g, int b, int a, int a1, float mu) {
+	private void renderConnection(GuiGraphicsExtractor graphics, Icon<?> dependencyLineTexture, QuestButton startWidget, QuestButton endWidget, Matrix3x2fStack poseStack, float s, int r, int g, int b, int a, int a1, float mu) {
 		if (!(dependencyLineTexture instanceof ImageIcon icon)) {
 			return;
 		}
 
-		float sx = widget.getX() + widget.width / 2.0f;
-		float sy = widget.getY() + widget.height / 2.0f;
+		float sx = startWidget.getX() + startWidget.width / 2.0f;
+		float sy = startWidget.getY() + startWidget.height / 2.0f;
+		float ex = endWidget.getX() + endWidget.width / 2.0f;
+		float ey = endWidget.getY() + endWidget.height / 2.0f;
+		float dist = (float) MathUtils.dist(sx, sy, ex, ey);
 
-		float ex = button.getX() + button.width / 2.0f;
-		float ey = button.getY() + button.height / 2.0f;
-		float len = (float) MathUtils.dist(sx, sy, ex, ey);
+		var points = startWidget.getConnectionPoints(endWidget, dist);
 
 		poseStack.pushMatrix();
 		poseStack.translate(sx, sy);
-		poseStack.rotate((float) Math.atan2(ey - sy, ex - sx));
 
-		var texture = Minecraft.getInstance().getTextureManager().getTexture(icon.texture);
-		GuiElementRenderState state = new BlitRenderState(
-				RenderPipelines.GUI_TEXTURED,
-				TextureSetup.singleTexture(texture.getTextureView(), texture.getSampler()),
-				new Matrix3x2f(poseStack),
-				0, (int) -s, (int) len, (int) s,
-				len / s / 2F + mu, mu, 0, 1,
-				ARGB.color(a, r, g, b),
-				null  // TODO null scissor stack could be a problem?
-		);
-		((GuiGraphicsMixin) graphics).getGuiRenderState().addGuiElement(state);
+		for (int i = 0; i < points.size() - 1; i++) {
+			Vec2d p1 = points.get(i);
+			Vec2d p2 = points.get(i + 1);
+			float len = (float) (Math.sqrt(p1.distanceToSqr(p2)) * 1.04f);
 
+			poseStack.pushMatrix();
+			poseStack.translate((float) p1.x(), (float) p1.y());
+			poseStack.rotate((float) Math.atan2(p2.y() - p1.y(), p2.x() - p1.x()));
+
+			var texture = Minecraft.getInstance().getTextureManager().getTexture(icon.texture);
+			GuiElementRenderState state = new BlitRenderState(
+					RenderPipelines.GUI_TEXTURED,
+					TextureSetup.singleTexture(texture.getTextureView(), texture.getSampler()),
+					new Matrix3x2f(poseStack),
+					0, (int) -s,
+					(int) len, (int) s,
+					len / s / 2F + mu, mu,
+					0f, 1f,
+					ARGB.color(a, r, g, b),
+					null  // TODO is a null scissor area OK here?
+			);
+			((GuiGraphicsMixin) graphics).getGuiRenderState().addGuiElement(state);
+
+			poseStack.popMatrix();
+		}
 		poseStack.popMatrix();
 	}
 
@@ -293,14 +314,14 @@ public class QuestPanel extends Panel {
 			double px = getX() - getScrollX();
 			double py = getY() - getScrollY();
 
-			double qx = (questScreen.getMouseX() - px) / questScreen.scrollWidth * dx + questMinX;
-			double qy = (questScreen.getMouseY() - py) / questScreen.scrollHeight * dy + questMinY;
+			questXunsnapped = (questScreen.getMouseX() - px) / questScreen.scrollWidth * dx + questMinX;
+			questYunsnapped = (questScreen.getMouseY() - py) / questScreen.scrollHeight * dy + questMinY;
 			centerQuestX = (questScreen.width / 2D - px) / questScreen.scrollWidth * dx + questMinX;
 			centerQuestY = (questScreen.height / 2D - py) / questScreen.scrollHeight * dy + questMinY;
 
 			if (isShiftKeyDown()) {
-				questX = qx;
-				questY = qy;
+				questX = questXunsnapped;
+				questY = questYunsnapped;
 			} else {
 				// grid-snapping size is based on the smallest selected item
 				//   although images always act as if they were size 1
@@ -309,14 +330,19 @@ public class QuestPanel extends Panel {
 						.min(Double::compare)
 						.orElse(1d);
 				double snap = 1D / (questScreen.file.getGridScale() * minSize);
-				questX = Mth.floor(qx * snap + 0.5D) / snap;
-				questY = Mth.floor(qy * snap + 0.5D) / snap;
+				questX = Mth.floor(questXunsnapped * snap + 0.5D) / snap;
+				questY = Mth.floor(questYunsnapped * snap + 0.5D) / snap;
 			}
 
 			if (questScreen.file.canEdit()) {
 				Matrix3x2fStack poseStack = graphics.pose();
 
 				drawStatusBar(graphics, theme, poseStack);
+
+				if (bezierController.isActive()) {
+					var bezierHint = Component.translatable("ftbquests.gui.editing_bezier");
+					graphics.text(theme.getFont(), bezierHint, width - theme.getStringWidth(bezierHint), 4, 0xFFC0C0C0);
+				}
 
 				double bs = questScreen.getQuestButtonSize();
 
@@ -462,7 +488,7 @@ public class QuestPanel extends Panel {
 			return true;
 		}
 
-		if (button.isRight() && questScreen.file.canEdit()) {
+		if (button.isRight() && questScreen.file.canEdit() && !bezierController.isActive()) {
 			playClickSound();
 			List<ContextMenuItem> contextMenu = new ArrayList<>();
 			double qx = questX;
@@ -623,6 +649,20 @@ public class QuestPanel extends Panel {
 		return false;
 	}
 
+	void editBezierControlPoints(QuestButton questButton, QuestObject dep) {
+		if (dep instanceof Quest quest) {
+			bezierController.activate(questButton, quest);
+		}
+	}
+
+	void finishEditingBezierControlPoints(boolean accepted) {
+		bezierController.deactivate(accepted);
+	}
+
+    public void clearBezierControlPoints(QuestButton qb, Quest dep) {
+        bezierController.clear(qb, dep);
+    }
+
 	private static class PasteQuestMenuItem extends TooltipContextMenuItem {
 		public PasteQuestMenuItem(Quest quest, Component title, Icon icon, @Nullable Consumer<Button> callback) {
 			super(title, icon, callback,
@@ -630,5 +670,190 @@ public class QuestPanel extends Panel {
 					Component.literal(QuestObjectBase.getCodeString(quest.id)).withStyle(ChatFormatting.DARK_GRAY)
 			);
 		}
+	}
+
+	class BezierController {
+		private final ControlPointButton control0;
+		private final ControlPointButton control1;
+
+		@Nullable
+		private Data data = null;
+
+		private BezierController() {
+			control0 = new ControlPointButton(QuestPanel.this, this, () -> Objects.requireNonNull(data).depButton, 0);
+			control1 = new ControlPointButton(QuestPanel.this, this, () -> Objects.requireNonNull(data).questButton, 1);
+        }
+
+        public void activate(QuestButton questButton, Quest depQuest) {
+			if (data == null) {
+				data = new Data(
+						questButton,
+						questButton.getDependencies().get(depQuest.getId()),
+						questButton.quest.getBezierControlPoints(depQuest).orElse(null)
+				);
+
+				var controlPoints = questButton.getControlPoints(depQuest);
+				if (controlPoints == null) {
+					// no control points yet - default to positions of button and its dependency button
+					control0.activate(data.depButton.getPosX() + data.depButton.getWidth() / 2, data.depButton.getPosY() + data.depButton.getHeight() / 2);
+					control1.activate(questButton.getPosX() + questButton.getWidth() / 2, questButton.getPosY() + questButton.getHeight() / 2);
+				} else {
+					control0.activate(controlPoints.getFirst());
+					control1.activate(controlPoints.getSecond());
+				}
+			}
+		}
+
+		public void deactivate(boolean acceptChange) {
+			if (data != null) {
+				control0.deactivate(acceptChange);
+				control1.deactivate(acceptChange);
+
+				if (acceptChange) {
+					Play2ServerNetworking.send(EditObjectMessage.forQuestObject(data.questButton.quest));
+				} else {
+					// operation canceled - restore to previous
+					data.questButton.quest.setBezierControlPoints(data.depButton.quest, data.savedControlPoints);
+					data.questButton.positionControlPoints();
+				}
+				data = null;
+			}
+		}
+
+		public void updateQuestButton(int index) {
+			// update quest-space control points in the quest object and recalculate screen-space coords
+			if (data != null) {
+				data.questButton.quest.setBezierControlPoint(data.depButton.quest, index, questXunsnapped, questYunsnapped);
+				data.questButton.positionControlPoints();
+			}
+		}
+
+        public boolean isActive() {
+            return data != null;
+        }
+
+        public void clear(QuestButton qb, Quest dep) {
+			qb.quest.setBezierControlPoints(dep, null);
+			qb.positionControlPoints();
+
+			Play2ServerNetworking.send(EditObjectMessage.forQuestObject(qb.quest));
+		}
+
+        public void repositionControlButtons(QuestButton qb) {
+			if (data != null && data.questButton == qb) {
+				Pair<Vec2d, Vec2d> controlPoints = qb.getControlPoints(data.depButton.quest);
+				if (controlPoints != null) {
+					control0.setPos((int) controlPoints.getFirst().x(), (int) controlPoints.getFirst().y());
+					control1.setPos((int) controlPoints.getSecond().x(), (int) controlPoints.getSecond().y());
+				}
+			}
+        }
+
+		private record Data(QuestButton questButton, QuestButton depButton, @Nullable Pair<Vec2d, Vec2d> savedControlPoints) {
+		}
+	}
+
+	private class ControlPointButton extends Button {
+        private final BezierController controller;
+		private final int index; // 0 or 1
+        private final Supplier<QuestButton> questButtonSupplier;
+
+        private boolean active = false;
+		private Vec2d startPosition = Vec2d.ZERO;  // screen coords
+		private boolean dragging = false;
+		private int dragOffsetX, dragOffsetY;
+
+        public ControlPointButton(Panel panel, BezierController controller, Supplier<QuestButton> questButtonSupplier, int index) {
+			super(panel, Component.empty(), Icons.MARKER);
+
+            this.controller = controller;
+            this.questButtonSupplier = questButtonSupplier;
+            this.index = index;
+
+            setSize(12, 12);
+        }
+
+		@Override
+		public void drawBackground(GuiGraphicsExtractor graphics, Theme theme, int x, int y, int w, int h) {
+		}
+
+		@Override
+		public void draw(GuiGraphicsExtractor graphics, Theme theme, int x, int y, int w, int h) {
+			int x0 = getX() + getWidth() / 2;
+			int y0 = getY() + getHeight() / 2;
+
+			int x1 = questButtonSupplier.get().getX() + questButtonSupplier.get().getWidth() / 2;
+			int y1 = questButtonSupplier.get().getY() + questButtonSupplier.get().getHeight() / 2;
+
+			float angle = (float) Mth.atan2(y1 - y0, x1 - x0);
+			float len = (float) Math.sqrt((x1 - x0) * (x1 - x0) + (y1 - y0) * (y1 - y0));
+
+			graphics.pose().pushMatrix();
+			graphics.pose().translate(x0, y0);
+			graphics.pose().rotate(angle);
+			graphics.horizontalLine(0, (int) len, 0, 0x40A0A0FF);
+			graphics.pose().popMatrix();
+
+			super.draw(graphics, theme, x, y, w, h);
+		}
+
+		@Override
+		public boolean mouseDragged(int button, double dragX, double dragY) {
+			if (isEnabled() && dragging) {
+				setPos(getMouseX() - dragOffsetX - QuestPanel.this.getX(), getMouseY() - dragOffsetY - QuestPanel.this.getY());
+				controller.updateQuestButton(index);
+				return true;
+			} else {
+				return super.mouseDragged(button, dragX, dragY);
+			}
+		}
+
+		@Override
+		public boolean mousePressed(MouseButton button) {
+			if (isEnabled() && isMouseOver) {
+				dragging = true;
+				dragOffsetX = getMouseX() - getX();
+				dragOffsetY = getMouseY() - getY();
+				return true;
+			}
+			return super.mousePressed(button);
+		}
+
+		@Override
+		public void mouseReleased(MouseButton button) {
+			dragging = false;
+		}
+
+		@Override
+		public void onClicked(MouseButton button) {
+		}
+
+		@Override
+		public boolean isEnabled() {
+			return active;
+		}
+
+		@Override
+		public boolean shouldDraw() {
+			return active;
+		}
+
+		private void activate(Vec2d position) {
+			active = true;
+			startPosition = position;
+			setPos((int) Math.round(position.x()), (int) Math.round(position.y()));
+		}
+
+		private void activate(int x, int y) {
+			activate(new Vec2d(x, y));
+		}
+
+        public void deactivate(boolean accepted) {
+			if (!accepted) {
+				// reset button position to what it was when we activated it
+				setPos((int) Math.round(startPosition.x()), (int) Math.round(startPosition.y()));
+			}
+			active = false;
+        }
 	}
 }

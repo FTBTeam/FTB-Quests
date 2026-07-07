@@ -77,7 +77,7 @@ public class TaskButton extends Button {
 		} else if (button.isRight() && questScreen.file.canEdit()) {
 			playClickSound();
 
-			ContextMenuBuilder builder = ContextMenuBuilder.create(task, questScreen);
+			ContextMenuBuilder builder = ContextMenuBuilder.create(task, questScreen, this);
 
 			builder.insertAtTop(List.of(new ContextMenuItem(Component.translatable("ftbquests.gui.move_left"), Icons.LEFT,
 					b -> Play2ServerNetworking.send(new ReorderItemMessage(task.getId(), false))

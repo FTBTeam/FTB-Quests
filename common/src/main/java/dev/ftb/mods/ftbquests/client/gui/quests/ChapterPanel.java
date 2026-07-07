@@ -328,7 +328,7 @@ public class ChapterPanel extends Panel {
 						return;
 					}
 				} else if (button.isRight() && !group.isDefaultGroup()) {
-					ContextMenuBuilder.create(group, chapterPanel.questScreen).insertAtTop(List.of(
+					ContextMenuBuilder.create(group, chapterPanel.questScreen, this).insertAtTop(List.of(
 							new ContextMenuItem(Component.translatable("gui.move"), ThemeProperties.MOVE_UP_ICON.get(),
 									b -> Play2ServerNetworking.send(new MoveChapterGroupMessage(group.id, true)))
 									.setEnabled(!group.isFirstGroup())
@@ -447,7 +447,7 @@ public class ChapterPanel extends Panel {
 			}
 
 			if (chapterPanel.questScreen.file.canEdit() && button.isRight()) {
-				ContextMenuBuilder.create(chapter, chapterPanel.questScreen).insertAtTop(List.of(
+				ContextMenuBuilder.create(chapter, chapterPanel.questScreen, this).insertAtTop(List.of(
 						new ContextMenuItem(Component.translatable("gui.move"), ThemeProperties.MOVE_UP_ICON.get(),
 								b -> Play2ServerNetworking.send(new MoveChapterMessage(chapter.id, true)))
 								.setEnabled(chapter.getIndex() > 0).setCloseMenu(false),

@@ -102,6 +102,10 @@ public class ChapterImageButton extends Button implements QuestPositionableButto
 
 	@Override
 	public void onClicked(MouseButton button) {
+		if (questScreen.questPanel.bezierController.isActive()) {
+			return;
+		}
+
 		if (questScreen.file.canEdit() && button.isRight()) {
 			List<ContextMenuItem> contextMenu = new ArrayList<>();
 
