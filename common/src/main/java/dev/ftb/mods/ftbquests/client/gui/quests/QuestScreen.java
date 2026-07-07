@@ -165,6 +165,7 @@ public class QuestScreen extends BaseScreen {
 			selectedChapter = chapter;
 			questPanel.refreshWidgets();
 			questPanel.resetScroll();
+			questPanel.bezierController.deactivate(false);
 		}
 	}
 
@@ -232,11 +233,12 @@ public class QuestScreen extends BaseScreen {
 	 * Add any relevant context menu entries for the given quest object
 	 *
 	 * @param contextMenu the menu to add to
+	 * @param button the button that was clicked to open the context menu
 	 * @param gui the gui to return to from any screens that might be opened
 	 * @param object the quest object to add menu operations for
 	 * @param deletionFocus the object to be deleted by the delete operation (which could be different from the quest object...)
 	 */
-	public void addObjectMenuItems(List<ContextMenuItem> contextMenu, Runnable gui, QuestObjectBase object, Movable deletionFocus) {
+	public void addObjectMenuItems(List<ContextMenuItem> contextMenu, Button button, Runnable gui, QuestObjectBase object, Movable deletionFocus) {
 		ConfigGroup group = new ConfigGroup(FTBQuestsAPI.MOD_ID);
 		ConfigGroup subGroup = object.createSubGroup(group);
 		object.fillConfigGroup(subGroup);
@@ -289,6 +291,22 @@ public class QuestScreen extends BaseScreen {
 				b -> ChangeProgressMessage.sendToServer(file.selfTeamData, object, progressChange -> progressChange.setReset(false))
 		).setYesNoText(Component.translatable("ftbquests.gui.complete_instantly_q")));
 
+		if (selectedChapter != null) {
+			if (selectedChapter.isAutofocus(object.id)) {
+				contextMenu.add(new ContextMenuItem(Component.translatable("ftbquests.gui.clear_autofocused"),
+						Icons.MARKER,
+						b -> setAutofocusedId(selectedChapter, 0L)));
+			} else if (object instanceof Quest || object instanceof QuestLink) {
+				contextMenu.add(new ContextMenuItem(Component.translatable("ftbquests.gui.set_autofocused"),
+						Icons.MARKER,
+						b -> setAutofocusedId(selectedChapter, object.id)));
+			}
+		}
+
+		if (button instanceof QuestButton qb) {
+			addBezierControlEntries(contextMenu, qb);
+		}
+
 		Component[] tooltip = object instanceof Quest ?
 				new Component[] {
 						Component.literal(QuestObjectBase.getCodeString(object)),
@@ -297,17 +315,6 @@ public class QuestScreen extends BaseScreen {
 				new Component[] {
 						Component.literal(QuestObjectBase.getCodeString(object))
 				};
-		if (selectedChapter != null) {
-			if (selectedChapter.isAutofocus(object.id)) {
-				contextMenu.add(new ContextMenuItem(Component.translatable("ftbquests.gui.clear_autofocused"),
-						Icons.MARKER,
-						b -> setAutofocusedId(0L)));
-			} else if (object instanceof Quest || object instanceof QuestLink) {
-				contextMenu.add(new ContextMenuItem(Component.translatable("ftbquests.gui.set_autofocused"),
-						Icons.MARKER,
-						b -> setAutofocusedId(object.id)));
-			}
-		}
 		contextMenu.add(new TooltipContextMenuItem(Component.translatable("ftbquests.gui.copy_id"),
 				ThemeProperties.WIKI_ICON.get(),
 				b -> setClipboardString(object.getCodeString()),
@@ -315,9 +322,45 @@ public class QuestScreen extends BaseScreen {
 		);
 	}
 
-	private void setAutofocusedId(long id) {
-		selectedChapter.setAutofocus(id);
-		NetworkManager.sendToServer(EditObjectMessage.forQuestObject(selectedChapter));
+	private void addBezierControlEntries(List<ContextMenuItem> contextMenu, QuestButton qb) {
+		var depQuests = qb.quest.streamDependencies()
+				.filter(qo -> qo instanceof Quest)
+				.map(qo -> (Quest) qo).toList();
+
+		if (depQuests.size() == 1) {
+			contextMenu.add(new ContextMenuItem(Component.translatable("ftbquests.gui.edit_bezier_points"), Icons.STAR,
+					b -> questPanel.editBezierControlPoints(qb, depQuests.getFirst())));
+			if (qb.quest.getBezierControlPoints(depQuests.getFirst()).isPresent()) {
+				contextMenu.add(new ContextMenuItem(Component.translatable("ftbquests.gui.clear_bezier_points"), Icons.BIN,
+						b -> questPanel.clearBezierControlPoints(qb, depQuests.getFirst())));
+			}
+		} else if (depQuests.size() > 1) {
+			contextMenu.add(new ContextMenuItem(Component.translatable("ftbquests.gui.edit_bezier_points").append(" ▶"), Icons.STAR, b -> {
+				List<ContextMenuItem> submenu = depQuests.stream()
+						.map(depQuest -> new ContextMenuItem(depQuest.getTitle(), Icons.MARKER,
+								b2 -> questPanel.editBezierControlPoints(qb, depQuest))
+						).toList();
+				openContextMenu(submenu);
+			}).setCloseMenu(false));
+
+			List<Quest> questsWithPoints = depQuests.stream().filter(depQuest -> qb.quest.getBezierControlPoints(depQuest).isPresent()).toList();
+			if (questsWithPoints.size() > 1) {
+				List<ContextMenuItem> submenu = questsWithPoints.stream()
+						.map(depQuest -> new ContextMenuItem(depQuest.getTitle(), Icons.MARKER,
+								b -> questPanel.clearBezierControlPoints(qb, depQuest))
+						).toList();
+				contextMenu.add(new ContextMenuItem(Component.translatable("ftbquests.gui.clear_bezier_points").append(" ▶"), Icons.BIN,
+						b -> openContextMenu(submenu)).setCloseMenu(false));
+			} else if (!questsWithPoints.isEmpty()) {
+				contextMenu.add(new ContextMenuItem(Component.translatable("ftbquests.gui.clear_bezier_points"), Icons.BIN,
+						b -> questPanel.clearBezierControlPoints(qb, questsWithPoints.getFirst())));
+			}
+		}
+	}
+
+	private void setAutofocusedId(Chapter chapter, long id) {
+		chapter.setAutofocus(id);
+		NetworkManager.sendToServer(EditObjectMessage.forQuestObject(chapter));
 	}
 
 	private List<ContextMenuItem> scanForConfigEntries(List<ContextMenuItem> res, QuestObjectBase object, ConfigGroup g) {
@@ -460,6 +503,16 @@ public class QuestScreen extends BaseScreen {
 		}
 
 		if (file.canEdit()) {
+			if (questPanel.bezierController.isActive()) {
+				if (key.enter()) {
+					questPanel.finishEditingBezierControlPoints(true);
+					return true;
+				} else if (key.esc()) {
+					questPanel.finishEditingBezierControlPoints(false);
+					return true;
+				}
+			}
+
 			if (key.is(GLFW.GLFW_KEY_F5)) {
 				reloadTheme(!isShiftKeyDown());
 				return true;

@@ -117,7 +117,7 @@ public class RewardButton extends Button {
 		} else if (button.isRight() && ClientQuestFile.exists() && ClientQuestFile.INSTANCE.canEdit()) {
 			playClickSound();
 
-			ContextMenuBuilder builder = ContextMenuBuilder.create(reward, questScreen);
+			ContextMenuBuilder builder = ContextMenuBuilder.create(reward, questScreen, this);
 
 			builder.insertAtTop(List.of(new ContextMenuItem(Component.translatable("ftbquests.gui.move_left"), Icons.LEFT,
 					b -> NetworkManager.sendToServer(new ReorderItemMessage(reward.getId(), QuestObjectType.REWARD, false))

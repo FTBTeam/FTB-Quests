@@ -2,6 +2,7 @@ package dev.ftb.mods.ftbquests.client.gui.quests;
 
 import com.mojang.blaze3d.platform.InputConstants;
 import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.datafixers.util.Pair;
 import dev.architectury.networking.NetworkManager;
 import dev.ftb.mods.ftblibrary.config.DoubleConfig;
 import dev.ftb.mods.ftblibrary.config.ui.EditStringConfigOverlay;
@@ -12,6 +13,7 @@ import dev.ftb.mods.ftblibrary.math.PixelBuffer;
 import dev.ftb.mods.ftblibrary.ui.*;
 import dev.ftb.mods.ftblibrary.ui.input.MouseButton;
 import dev.ftb.mods.ftblibrary.util.TooltipList;
+import dev.ftb.mods.ftblibrary.util.Vec2d;
 import dev.ftb.mods.ftblibrary.util.client.PositionedIngredient;
 import dev.ftb.mods.ftbquests.client.FTBQuestsClientConfig;
 import dev.ftb.mods.ftbquests.client.gui.ContextMenuBuilder;
@@ -25,11 +27,15 @@ import dev.ftb.mods.ftbquests.quest.reward.RewardType;
 import dev.ftb.mods.ftbquests.quest.reward.RewardTypes;
 import dev.ftb.mods.ftbquests.quest.theme.property.ThemeProperties;
 import dev.ftb.mods.ftbquests.util.TextUtils;
+import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
+import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.ComponentUtils;
 import net.minecraft.world.entity.player.Player;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -39,13 +45,18 @@ import java.util.Optional;
 public class QuestButton extends Button implements QuestPositionableButton {
 	protected final QuestScreen questScreen;
 	final Quest quest;
-	private Collection<QuestButton> dependencies = null;
+	@Nullable
+    private Long2ObjectMap<QuestButton> dependencies = null;
+	// bezier control points, mapped to screen coords
+	private final Long2ObjectMap<Pair<Vec2d, Vec2d>> controlPoints = new Long2ObjectOpenHashMap<>();
+	private final Long2ObjectMap<List<Vec2d>> bezierCache; // caches points for connection lines/curves
 
 	public QuestButton(Panel panel, Quest quest) {
 		super(panel, quest.getTitle(), quest.getIcon());
 		questScreen = (QuestScreen) panel.getGui();
 		setSize(20, 20);
 		this.quest = quest;
+		this.bezierCache = new Long2ObjectOpenHashMap<>();
 	}
 
 	@Override
@@ -105,19 +116,19 @@ public class QuestButton extends Button implements QuestPositionableButton {
 		}
 	}
 
-	public Collection<QuestButton> getDependencies() {
+	public Long2ObjectMap<QuestButton> getDependencies() {
 		if (dependencies == null) {
-			List<QuestButton> list = new ArrayList<>();
+			Long2ObjectMap<QuestButton> map = new Long2ObjectOpenHashMap<>();
 			quest.streamDependencies().forEach(dependency -> {
 				if (dependency.isValid() && dependency instanceof Quest) {
 					for (Widget widget : questScreen.questPanel.getWidgets()) {
 						if (widget instanceof QuestButton qb && dependency == qb.quest) {
-							list.add(qb);
+							map.put(dependency.getId(), qb);
 						}
 					}
 				}
 			});
-			dependencies = List.copyOf(list);
+			dependencies = map;
 		}
 
 		return dependencies;
@@ -125,6 +136,10 @@ public class QuestButton extends Button implements QuestPositionableButton {
 
 	@Override
 	public void onClicked(MouseButton button) {
+		if (questScreen.questPanel.bezierController.isActive()) {
+			return;
+		}
+
 		playClickSound();
 
 		boolean canEdit = questScreen.file.canEdit();
@@ -178,7 +193,7 @@ public class QuestButton extends Button implements QuestPositionableButton {
 
 				getGui().openContextMenu(contextMenu);
 			} else {
-				ContextMenuBuilder.create(theQuestObject(), questScreen)
+				ContextMenuBuilder.create(theQuestObject(), questScreen, this)
 						.withDeletionFocus(moveAndDeleteFocus())
 						.insertAtTop(List.of(new TooltipContextMenuItem(Component.translatable("gui.move"),
 								ThemeProperties.MOVE_UP_ICON.get(quest),
@@ -312,16 +327,14 @@ public class QuestButton extends Button implements QuestPositionableButton {
 			list.add(Component.literal("[").withStyle(ChatFormatting.GRAY).append(Component.translatable("ftbquests.quest.misc.optional")).append("]"));
 		}
 		if (quest.canBeRepeated()) {
-			list.add(Component.translatable("ftbquests.quest.misc.can_repeat").withStyle(ChatFormatting.GRAY));
-			if (teamData != null) {
-				int completionCount = teamData.getCompletionCount(quest);
-				if (completionCount > 0) {
-					String key = completionCount > 1 ? "ftbquests.quest.misc.completion_count.plural" : "ftbquests.quest.misc.completion_count";
-					list.add(Component.translatable(key, completionCount).withStyle(ChatFormatting.GRAY));
-				}
+			list.add(ComponentUtils.wrapInSquareBrackets(Component.translatable("ftbquests.quest.misc.can_repeat")).withStyle(ChatFormatting.GRAY));
+			int completionCount = teamData.getCompletionCount(quest);
+			if (completionCount > 0) {
+				String key = completionCount > 1 ? "ftbquests.quest.misc.completion_count.plural" : "ftbquests.quest.misc.completion_count";
+				list.add(Component.translatable(key, completionCount).withStyle(ChatFormatting.GRAY));
 			}
 		}
-		if (teamData != null && !teamData.canStartTasks(quest)) {
+		if (!teamData.canStartTasks(quest)) {
 			Component reason = teamData.getCannotStartReason(this.quest);
 			list.add(Component.literal("[").withStyle(ChatFormatting.DARK_GRAY).append(reason).append("]"));
 		}
@@ -471,5 +484,70 @@ public class QuestButton extends Button implements QuestPositionableButton {
 	@Override
 	public Movable moveAndDeleteFocus() {
 		return (Movable) theQuestObject();
+	}
+
+	public List<Vec2d> getConnectionPoints(QuestButton other, double dist) {
+		Vec2d ourPos = new Vec2d((float) (getX() + getWidth() / 2), (float) (getY() + getHeight() / 2));
+		Vec2d otherPos = new Vec2d((float) (other.getX() + other.getWidth() / 2), (float) (other.getY() + other.getHeight() / 2));
+
+		List<Vec2d> list = bezierCache.get(other.quest.getId());
+		if (list == null) {
+			var controlPts = controlPoints.get(other.quest.getId());
+			if (controlPts == null) {
+				// simple case - no control points, just a straight line from them to us
+				list = List.of(Vec2d.ZERO, otherPos.sub(ourPos));
+			} else {
+				// do a bezier calculation
+				int nPoints = Math.max(20, (int) (2.0 + dist / 20.0));
+				float incr = 1f / nPoints;
+				Vec2d panelOff = new Vec2d(questScreen.questPanel.getX(), questScreen.questPanel.getY());
+				Vec2d ctrl1 = controlPts.getFirst().add(panelOff);
+				Vec2d ctrl2 = controlPts.getSecond().add(panelOff);
+				list = new ArrayList<>();
+				for (float t = 0f; t <= 1f; t += incr) {
+					Vec2d point = ourPos.scale((1f - t) * (1f - t) * (1f - t))
+							.add(ctrl2.scale(3 * (1f - t) * (1f - t) * t))
+							.add(ctrl1.scale(3 * (1f - t) * t * t))
+							.add(otherPos.scale(t * t * t));
+					list.add((point.sub(ourPos)));
+				}
+				list.add(otherPos.sub(ourPos));  // ensure connection doesn't stop short
+			}
+			bezierCache.put(other.quest.getId(), list);
+		}
+		return list;
+	}
+
+	@Nullable
+	public Pair<Vec2d, Vec2d> getControlPoints(QuestObject qo) {
+		return controlPoints.get(qo.getId());
+	}
+
+	public void positionControlPoints() {
+		// convert control point data in the quest to coordinates in the widget's screen space
+		controlPoints.clear();
+		bezierCache.clear();
+
+		var questControlPoints = quest.getBezierControlPoints();
+		if (questControlPoints.isEmpty()) {
+			return;
+		}
+		double questMinX = questScreen.questPanel.questMinX;
+		double questMinY = questScreen.questPanel.questMinY;
+		double bs = questScreen.getQuestButtonSize();
+		double bp = questScreen.getQuestButtonSpacing();
+		double qw = getPosition().w();
+		double qh = getPosition().h();
+		questControlPoints.forEach((id, points) -> {
+			Vec2d p0 = points.getFirst();
+			float x0 = (float) ((p0.x() - questMinX - qw / 2D) * (bs + bp) + bp / 2D + bp * (qw - 1D) / 2D);
+			float y0 = (float) ((p0.y() - questMinY - qh / 2D) * (bs + bp) + bp / 2D + bp * (qh - 1D) / 2D);
+
+			Vec2d p1 = points.getSecond();
+			float x1 = (float) ((p1.x() - questMinX - qw / 2D) * (bs + bp) + bp / 2D + bp * (qw - 1D) / 2D);
+			float y1 = (float) ((p1.y() - questMinY - qh / 2D) * (bs + bp) + bp / 2D + bp * (qh - 1D) / 2D);
+
+			controlPoints.put(id.longValue(), Pair.of(new Vec2d(x0, y0), new Vec2d(x1, y1)));
+		});
 	}
 }

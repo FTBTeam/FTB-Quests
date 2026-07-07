@@ -8,6 +8,7 @@ import dev.ftb.mods.ftblibrary.math.Bits;
 import dev.ftb.mods.ftblibrary.snbt.SNBTCompoundTag;
 import dev.ftb.mods.ftblibrary.ui.Widget;
 import dev.ftb.mods.ftblibrary.ui.input.MouseButton;
+import dev.ftb.mods.ftblibrary.util.Vec2d;
 import dev.ftb.mods.ftblibrary.util.client.ClientUtils;
 import dev.ftb.mods.ftbquests.FTBQuests;
 import dev.ftb.mods.ftbquests.client.gui.MultilineTextEditorScreen;
@@ -22,19 +23,23 @@ import dev.ftb.mods.ftbquests.quest.task.Task;
 import dev.ftb.mods.ftbquests.quest.task.TaskType;
 import dev.ftb.mods.ftbquests.quest.translation.TranslationKey;
 import dev.ftb.mods.ftbquests.util.ConfigQuestObject;
+import dev.ftb.mods.ftbquests.util.FTBQCodecs;
 import dev.ftb.mods.ftbquests.util.ProgressChange;
 import dev.ftb.mods.ftbquests.util.TextUtils;
+import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.longs.LongOpenHashSet;
 import it.unimi.dsi.fastutil.longs.LongSet;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.Util;
 import net.minecraft.core.HolderLookup;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.ListTag;
-import net.minecraft.nbt.StringTag;
-import net.minecraft.nbt.Tag;
+import net.minecraft.nbt.*;
+import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.codec.ByteBufCodecs;
+import net.minecraft.network.codec.StreamCodec;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 import java.util.function.Predicate;
@@ -43,12 +48,16 @@ import java.util.stream.Stream;
 public final class Quest extends QuestObject implements Movable, Excludable {
 	public static final String PAGEBREAK_CODE = "{@pagebreak}";
 
+	public static final StreamCodec<FriendlyByteBuf, Map<Long, Pair<Vec2d, Vec2d>>> CONTROL_POINTS_STREAM_CODEC
+			= ByteBufCodecs.map(HashMap::new, ByteBufCodecs.VAR_LONG, FTBQCodecs.pair(Vec2d.STREAM_CODEC, Vec2d.STREAM_CODEC));
+
 	private Chapter chapter;
 	private double x, y;
 	private Tristate hideUntilDepsVisible;
 	private Tristate hideUntilDepsComplete;
 	private String shape;
 	private final List<QuestObject> dependencies;
+	private final Map<Long, Pair<Vec2d, Vec2d>> depControlPoints;  // for bezier curved depenendency lines
 	private final List<Task> tasks;
 	private final List<Reward> rewards;
 	private DependencyRequirement dependencyRequirement;
@@ -86,6 +95,7 @@ public final class Quest extends QuestObject implements Movable, Excludable {
 		y = 0;
 		shape = "";
 		dependencies = new ArrayList<>(0);
+		depControlPoints = new Long2ObjectOpenHashMap<>();
 		tasks = new ArrayList<>(1);
 		rewards = new ArrayList<>(1);
 		guidePage = "";
@@ -162,6 +172,8 @@ public final class Quest extends QuestObject implements Movable, Excludable {
 		return hideTextUntilComplete;
 	}
 
+	// used by FTB XMod Compat
+	@SuppressWarnings("unused")
 	public boolean showInRecipeMod() {
 		return !disableJEI.get(getQuestFile().isDefaultQuestDisableJEI());
 	}
@@ -260,6 +272,9 @@ public final class Quest extends QuestObject implements Movable, Excludable {
 				deps.add(StringTag.valueOf(dep.getCodeString()));
 			}
 			nbt.put("dependencies", deps);
+			if (!depControlPoints.isEmpty()) {
+				nbt.put("dep_control_pts", writeDepControlPoints());
+			}
 		}
 
 		disableJEI.write(nbt, "disable_recipe_mod");
@@ -321,6 +336,36 @@ public final class Quest extends QuestObject implements Movable, Excludable {
 		}
 	}
 
+	private Tag writeDepControlPoints() {
+		CompoundTag tag = new CompoundTag();
+		depControlPoints.forEach((id, points) ->
+				tag.put(QuestObjectBase.getCodeString(id), Util.make(new ListTag(), t -> {
+					t.add(DoubleTag.valueOf(points.getFirst().x()));
+					t.add(DoubleTag.valueOf(points.getFirst().y()));
+					t.add(DoubleTag.valueOf(points.getSecond().x()));
+					t.add(DoubleTag.valueOf(points.getSecond().y()));
+				}))
+		);
+		return tag;
+	}
+
+	private Map<Long, Pair<Vec2d, Vec2d>> readDepControlPoints(CompoundTag tag) {
+		Map<Long, Pair<Vec2d, Vec2d>> map = new HashMap<>();
+		for (String k : tag.getAllKeys()) {
+			try {
+				ListTag l = tag.getList(k, Tag.TAG_DOUBLE);
+				if (l.size() == 4) {
+					map.put(QuestObjectBase.parseCodeString(k), Pair.of(
+							new Vec2d(l.getDouble(0), l.getDouble(1)),
+							new Vec2d(l.getDouble(2), l.getDouble(3)))
+					);
+				}
+			} catch (NumberFormatException ignored) {
+			}
+		}
+		return map;
+	}
+
 	@Override
 	public void readData(CompoundTag nbt, HolderLookup.Provider provider) {
 		super.readData(nbt, provider);
@@ -358,6 +403,9 @@ public final class Quest extends QuestObject implements Movable, Excludable {
 					addDependency(object);
 				}
 			}
+		}
+		if (nbt.contains("dep_control_pts", Tag.TAG_COMPOUND)) {
+			depControlPoints.putAll(readDepControlPoints(nbt.getCompound("dep_control_pts")));
 		}
 
 		if (nbt.contains("hide", Tag.TAG_BYTE)) {
@@ -427,11 +475,9 @@ public final class Quest extends QuestObject implements Movable, Excludable {
 
 		buffer.writeVarInt(minRequiredDependencies);
 		DependencyRequirement.NAME_MAP.write(buffer, dependencyRequirement);
-		buffer.writeVarInt(dependencies.size());
 
-		for (QuestObject d : dependencies) {
-			buffer.writeLong(d.isValid() ? d.id : 0L);
-		}
+		FTBQCodecs.LONG_LIST_STREAM_CODEC.encode(buffer, dependencies.stream().map(QuestObject::getId).toList());
+		CONTROL_POINTS_STREAM_CODEC.encode(buffer, depControlPoints);
 
 		if (size != 0D) {
 			buffer.writeDouble(size);
@@ -474,16 +520,10 @@ public final class Quest extends QuestObject implements Movable, Excludable {
 
 		minRequiredDependencies = buffer.readVarInt();
 		dependencyRequirement = DependencyRequirement.NAME_MAP.read(buffer);
+
 		clearDependencies();
-		int d = buffer.readVarInt();
-
-		for (int i = 0; i < d; i++) {
-			QuestObject object = chapter.file.get(buffer.readLong());
-
-			if (object != null) {
-				addDependency(object);
-			}
-		}
+		FTBQCodecs.LONG_LIST_STREAM_CODEC.decode(buffer).forEach(this::addDependency);
+		depControlPoints.putAll(CONTROL_POINTS_STREAM_CODEC.decode(buffer));
 
 		size = Bits.getFlag(flags, 0x04) ? buffer.readDouble() : 0D;
 		iconScale = Bits.getFlag(flags, 0x20000) ? buffer.readDouble() : 1D;
@@ -560,13 +600,13 @@ public final class Quest extends QuestObject implements Movable, Excludable {
 	private void checkForDependantCompletion(TeamData data) {
 		getDependants().forEach(questObject -> {
 			if (questObject instanceof Quest quest) {
-                if (quest.getProgressionMode() == ProgressionMode.FLEXIBLE && quest.checkDependencies(data::isCompleted)) {
-                    quest.tasks.forEach(task -> {
-                        if (data.getProgress(task.id) >= task.getMaxProgress()) {
-                            data.markTaskCompleted(task);
-                        }
-                    });
-                }
+				if (quest.getProgressionMode() == ProgressionMode.FLEXIBLE && quest.checkDependencies(data::isCompleted)) {
+					quest.tasks.forEach(task -> {
+						if (data.getProgress(task.id) >= task.getMaxProgress()) {
+							data.markTaskCompleted(task);
+						}
+					});
+				}
 
 				data.checkAutoCompletion(quest);
 			}
@@ -823,15 +863,15 @@ public final class Quest extends QuestObject implements Movable, Excludable {
 	}
 
 	public boolean hasDependency(QuestObject object) {
-        if (object.isValid()) {
-            for (QuestObject dependency : dependencies) {
-                if (dependency == object) {
-                    return true;
-                }
-            }
-        }
-        return false;
-    }
+		if (object.isValid()) {
+			for (QuestObject dependency : dependencies) {
+				if (dependency == object) {
+					return true;
+				}
+			}
+		}
+		return false;
+	}
 
 	@Override
 	protected boolean validateEditedConfig() {
@@ -995,6 +1035,12 @@ public final class Quest extends QuestObject implements Movable, Excludable {
 		return dependencies.stream();
 	}
 
+	private void addDependency(long id) {
+		if (getQuestFile().get(id) instanceof QuestObject q) {
+			addDependency(q);
+		}
+	}
+
 	public void addDependency(QuestObject object) {
 		dependencies.add(object);
 		if (object instanceof Quest q) {
@@ -1006,6 +1052,7 @@ public final class Quest extends QuestObject implements Movable, Excludable {
 		dependencies.remove(object);
 		if (object instanceof Quest q) {
 			q.removeDependant(id);
+			depControlPoints.remove(id);
 		}
 	}
 
@@ -1029,6 +1076,7 @@ public final class Quest extends QuestObject implements Movable, Excludable {
 			}
 		});
 		dependencies.clear();
+		depControlPoints.clear();
 	}
 
 	private void addDependant(long id) {
@@ -1043,6 +1091,7 @@ public final class Quest extends QuestObject implements Movable, Excludable {
 		return tasks.stream().allMatch(task -> teamData.getProgress(task) >= task.getMaxProgress());
 	}
 
+	@SuppressWarnings("BooleanMethodIsAlwaysInverted")
 	public boolean hideDetailsUntilStartable() {
 		return hideDetailsUntilStartable.get(chapter.hideQuestDetailsUntilStartable());
 	}
@@ -1126,6 +1175,34 @@ public final class Quest extends QuestObject implements Movable, Excludable {
 		}
 
 		return index;
+	}
+
+	public Optional<Pair<Vec2d, Vec2d>> getBezierControlPoints(Quest other) {
+		return Optional.ofNullable(depControlPoints.get(other.getId()));
+	}
+
+	public Map<Long, Pair<Vec2d, Vec2d>> getBezierControlPoints() {
+		return depControlPoints;
+	}
+
+	public void setBezierControlPoint(Quest other, int index, double newX, double newY) {
+		var current= depControlPoints.getOrDefault(other.getId(),
+				Pair.of(new Vec2d(other.getX(), other.getY()), new Vec2d(getX(), getY()))
+		);
+		depControlPoints.put(other.getId(), Pair.of(
+				index == 0 ? new Vec2d(newX, newY) : current.getFirst(),
+				index == 1 ? new Vec2d(newX, newY) : current.getSecond()
+		));
+		getQuestFile().markDirty();
+	}
+
+	public void setBezierControlPoints(Quest other, @Nullable Pair<Vec2d, Vec2d> controlPoints) {
+		if (controlPoints == null) {
+			depControlPoints.remove(other.getId());
+		} else {
+			depControlPoints.put(other.id, controlPoints);
+		}
+		getQuestFile().markDirty();
 	}
 
 	@Override

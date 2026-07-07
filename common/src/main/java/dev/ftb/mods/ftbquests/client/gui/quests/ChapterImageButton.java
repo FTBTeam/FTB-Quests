@@ -90,14 +90,14 @@ public class ChapterImageButton extends Button implements QuestPositionableButto
 
 	@Override
 	public void onClicked(MouseButton button) {
-		Component title = chapterImage.getTitle().getString().isEmpty() ?
-			Component.literal(chapterImage.getImage().toString()) :
-			chapterImage.getTitle();
+		if (questScreen.questPanel.bezierController.isActive()) {
+			return;
+		}
 
 		if (questScreen.file.canEdit() && button.isRight()) {
 			List<ContextMenuItem> contextMenu = new ArrayList<>();
 
-			contextMenu.add(ContextMenuItem.title(title));
+			contextMenu.add(ContextMenuItem.title(Component.literal("\"").append(chapterImage.getTitle()).append(Component.literal("\""))));
 			contextMenu.add(ContextMenuItem.SEPARATOR);
 
 			contextMenu.add(new ContextMenuItem(Component.translatable("selectServer.edit"), ThemeProperties.EDIT_ICON.get(),
