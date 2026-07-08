@@ -67,7 +67,6 @@ public class FTBQuestsNetClient {
 			object.readData(c.nbt(), FTBQuestsClient.holderLookup());
 			file.getTranslationManager().processInitialTranslation(c.extra(), object);
 			object.onCreated();
-			file.clearCachedData();
 			object.editedFromGUI();
 			FTBQuests.getRecipeModHelper().refreshRecipes(object);
 			if (listener != null) {
