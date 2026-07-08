@@ -3,10 +3,7 @@ package dev.ftb.mods.ftbquests.quest.history.events;
 import com.mojang.datafixers.util.Either;
 import dev.ftb.mods.ftblibrary.util.NetworkHelper;
 import dev.ftb.mods.ftbquests.net.SyncTranslationMessageToClient;
-import dev.ftb.mods.ftbquests.quest.BaseQuestFile;
-import dev.ftb.mods.ftbquests.quest.QuestObjectBase;
-import dev.ftb.mods.ftbquests.quest.QuestObjectType;
-import dev.ftb.mods.ftbquests.quest.ServerQuestFile;
+import dev.ftb.mods.ftbquests.quest.*;
 import dev.ftb.mods.ftbquests.quest.history.ChangeType;
 import dev.ftb.mods.ftbquests.quest.history.QuestBookEditEvent;
 import dev.ftb.mods.ftbquests.quest.translation.TranslationKey;
@@ -70,5 +67,21 @@ public record UpdateTranslation(
                 Component.translatable(subKey.getTranslationKey()).withStyle(ChatFormatting.GRAY),
                 getTitle(file, questObjectId)
         ));
+    }
+
+    @Override
+    public Component getTitle(BaseQuestFile file, long id) {
+        QuestObjectBase qob = file.getBase(id);
+        if (qob == null) {
+            return Component.literal("<?>");
+        }
+        String s = switch (subKey) {
+            case QUEST_SUBTITLE -> qob instanceof Quest q ? q.getRawSubtitle() : "";
+            case QUEST_DESC -> qob instanceof Quest q && !q.getRawDescription().isEmpty() ? q.getRawDescription().getFirst() + " ..." : "";
+            case CHAPTER_SUBTITLE -> qob instanceof Chapter c && !c.getRawSubtitle().isEmpty() ? c.getRawSubtitle().getFirst() + " ..." : "";
+            default -> qob.getRawTitle();
+        };
+
+        return Component.literal(s);
     }
 }
