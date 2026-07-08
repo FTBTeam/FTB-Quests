@@ -33,18 +33,14 @@ import java.util.function.Supplier;
 public class FTBQuests {
 	public static final Logger LOGGER = LogManager.getLogger(FTBQuestsAPI.MOD_NAME);
 
-//	@Nullable
-//	private static IQuestProxy PROXY;
 	@Nullable
 	private static RecipeModHelper recipeModHelper;
-	private static final RecipeModHelper NO_OP_HELPER = new RecipeModHelper.NoOp();
+	private static final RecipeModHelper NO_RECIPEMOD_HELPER = new RecipeModHelper.NoOp();
 
 	public final FTBQuestsEventHandler eventHandler;
 
 	public FTBQuests() {
 		FTBQuestsAPI._init(FTBQuestsAPIImpl.INSTANCE);
-
-//		PROXY = EnvExecutor.getEnvSpecific(() -> FTBQClientProxy::new, () -> FTBQServerProxy::new);
 
 		eventHandler = new FTBQuestsEventHandler();
 
@@ -67,14 +63,11 @@ public class FTBQuests {
 	}
 
 	public static RecipeModHelper getRecipeModHelper() {
-		return Objects.requireNonNullElse(recipeModHelper, NO_OP_HELPER);
+		return Objects.requireNonNullElse(recipeModHelper, NO_RECIPEMOD_HELPER);
 	}
 
-//	public static IQuestProxy proxy() {
-//		return Objects.requireNonNull(PROXY);
-//	}
-
 	public static void setRecipeModHelper(RecipeModHelper recipeModHelper) {
+		// called from FTB XMod Compat
 		if (FTBQuests.recipeModHelper != null) {
 			throw new IllegalStateException("recipe mod helper has already been initialised!");
 		}

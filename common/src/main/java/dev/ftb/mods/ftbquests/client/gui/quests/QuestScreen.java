@@ -435,6 +435,10 @@ public class QuestScreen extends BaseScreen {
 		FTBQuestsClient.showErrorToast(Component.translatable("ftbquests.gui.error"), error);
 	}
 
+	public static void displayError(String msg, Object... args) {
+		displayError(Component.literal(String.format(msg, args)).withStyle(ChatFormatting.RED));
+	}
+
 	private boolean moveSelectedQuests(double x, double y) {
 		if (getViewedQuest() == null) {
 			for (Movable movable : selectedObjects) {

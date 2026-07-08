@@ -21,6 +21,8 @@ import dev.ftb.mods.ftbquests.client.gui.CustomToast;
 import dev.ftb.mods.ftbquests.client.gui.RewardSelectorScreen;
 import dev.ftb.mods.ftbquests.client.gui.RewardToast;
 import dev.ftb.mods.ftbquests.client.gui.ToastQuestObject;
+import dev.ftb.mods.ftbquests.integration.DocsMod;
+import dev.ftb.mods.ftbquests.integration.DocsModRegistry;
 import dev.ftb.mods.ftbquests.item.CustomIconItem;
 import dev.ftb.mods.ftbquests.net.SetCustomImageMessage;
 import dev.ftb.mods.ftbquests.quest.BaseQuestFile;

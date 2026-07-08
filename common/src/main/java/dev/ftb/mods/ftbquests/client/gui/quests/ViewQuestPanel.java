@@ -33,10 +33,7 @@ import dev.ftb.mods.ftbquests.client.gui.MultilineTextEditorScreen;
 import dev.ftb.mods.ftbquests.net.EditObjectMessage;
 import dev.ftb.mods.ftbquests.net.ReorderItemMessage;
 import dev.ftb.mods.ftbquests.net.TogglePinnedMessage;
-import dev.ftb.mods.ftbquests.quest.Quest;
-import dev.ftb.mods.ftbquests.quest.QuestLink;
-import dev.ftb.mods.ftbquests.quest.QuestObject;
-import dev.ftb.mods.ftbquests.quest.QuestObjectBase;
+import dev.ftb.mods.ftbquests.quest.*;
 import dev.ftb.mods.ftbquests.quest.reward.Reward;
 import dev.ftb.mods.ftbquests.quest.reward.RewardAutoClaim;
 import dev.ftb.mods.ftbquests.quest.task.Task;
@@ -49,20 +46,18 @@ import it.unimi.dsi.fastutil.longs.Long2IntOpenHashMap;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
-import net.minecraft.client.gui.screens.ConfirmLinkScreen;
-import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.*;
 import net.minecraft.util.Mth;
-import net.minecraft.util.Util;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.TooltipFlag;
 import org.jspecify.annotations.Nullable;
 import org.lwjgl.glfw.GLFW;
 
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+import java.util.Objects;
 import java.util.function.BiConsumer;
 
 public class ViewQuestPanel extends ModalPanel {
@@ -144,6 +139,10 @@ public class ViewQuestPanel extends ModalPanel {
 		if (quest != null) {
 			currentPages.put(quest.id, page);
 		}
+	}
+
+	public void setCurrentPage(long questId, int page) {
+		currentPages.put(questId, page);
 	}
 
 	@Override
@@ -934,18 +933,7 @@ public class ViewQuestPanel extends ModalPanel {
 						if (changePage.id().equals(MultilineTextEditorScreen.QUEST_LINK_ACTION)) {
 							tag.asCompound().ifPresent(compoundTag -> {
 								String idStr = compoundTag.getStringOr("quest_id", "0");
-								QuestObjectBase.parseHexId(idStr).ifPresentOrElse(questId -> {
-									QuestObject qo = quest.getQuestFile().get(questId);
-									if (qo != null) {
-										if (qo instanceof Quest) {
-											currentPages.put(questId.longValue(), compoundTag.getIntOr("page", 1) - 1);
-										}
-										playClickSound();
-										questScreen.open(qo, false);
-									} else {
-										errorToPlayer("Unknown quest object id: %s", idStr);
-									}
-								}, () -> errorToPlayer("Invalid quest object id: %s", idStr));
+								new ImageClickAction(ImageClickAction.ActionType.OPEN_QUEST, idStr).run();
 							});
 						}
 						return true;
@@ -953,24 +941,9 @@ public class ViewQuestPanel extends ModalPanel {
 				}
 				case ClickEvent.OpenUrl openUrl -> {
 					try {
-						URI uri = openUrl.uri();
-						String scheme = uri.getScheme();
-						if (scheme == null) {
-							throw new URISyntaxException(uri.toString(), "Missing protocol");
-						}
-						if (!scheme.equalsIgnoreCase("http") && !scheme.equalsIgnoreCase("https")) {
-							throw new URISyntaxException(uri.toString(), "Unsupported protocol: " + scheme.toLowerCase(Locale.ROOT));
-						}
-
-						final Screen curScreen = Minecraft.getInstance().screen;
-						Minecraft.getInstance().setScreen(new ConfirmLinkScreen(accepted -> {
-							if (accepted) {
-								Util.getPlatform().openUri(uri);
-							}
-							Minecraft.getInstance().setScreen(curScreen);
-						}, uri.toString(), false));
+						new ImageClickAction(ImageClickAction.ActionType.OPEN_URI, openUrl.uri().toString()).run();
 						return true;
-					} catch (URISyntaxException e) {
+					} catch (Exception e) {
 						errorToPlayer("Can't open url for %s (%s)", openUrl.uri(), e.getMessage());
 					}
 					return true;

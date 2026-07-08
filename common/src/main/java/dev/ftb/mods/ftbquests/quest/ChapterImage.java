@@ -3,6 +3,7 @@ package dev.ftb.mods.ftbquests.quest;
 import de.marhali.json5.Json5Object;
 import dev.ftb.mods.ftblibrary.client.config.EditableConfigGroup;
 import dev.ftb.mods.ftblibrary.client.config.editable.EditableImageResource;
+import dev.ftb.mods.ftblibrary.client.config.editable.EditableString;
 import dev.ftb.mods.ftblibrary.client.icon.IconHelper;
 import dev.ftb.mods.ftblibrary.icon.Color4I;
 import dev.ftb.mods.ftblibrary.icon.Icon;
@@ -28,7 +29,8 @@ public final class ChapterImage extends QuestObjectBase implements Movable {
 	private Icon<?> image;
 	private Color4I color;
 	private int alpha;
-	private String click;
+//	private String click;
+	private ImageClickAction clickAction;
 	private boolean editorsOnly;
 	private boolean alignToCorner;
 	@Nullable
@@ -47,7 +49,7 @@ public final class ChapterImage extends QuestObjectBase implements Movable {
 		image = Color4I.empty();
 		color = Color4I.WHITE;
 		alpha = 255;
-		click = "";
+//		click = "";
 		editorsOnly = false;
 		alignToCorner = false;
 		dependency = null;
@@ -92,9 +94,13 @@ public final class ChapterImage extends QuestObjectBase implements Movable {
 		return alignToCorner;
 	}
 
-	public String getClick() {
-		return click;
+	public ImageClickAction getClickAction() {
+		return clickAction;
 	}
+
+//	public String getClick() {
+//		return click;
+//	}
 
 	@Override
 	public void writeData(Json5Object json, HolderLookup.Provider provider) {
@@ -109,7 +115,9 @@ public final class ChapterImage extends QuestObjectBase implements Movable {
 		if (!color.equals(Color4I.WHITE)) json.addProperty("color", color.rgb());
 		if (alpha != 255) json.addProperty("alpha", alpha);
 		if (order != 0) json.addProperty("order", order);
-		if (!click.isEmpty()) json.addProperty("click", click);
+		if (clickAction.actionType() != ImageClickAction.ActionType.NONE) {
+			Json5Util.store(json, "click_action", ImageClickAction.CODEC, clickAction);
+		}
 		if (editorsOnly) json.addProperty("dev", true);
 		if (alignToCorner) json.addProperty("corner", true);
 		if (dependency != null) json.addProperty("dependency", dependency.getCodeString());
@@ -128,7 +136,12 @@ public final class ChapterImage extends QuestObjectBase implements Movable {
 		color = Json5Util.getInt(json, "color").map(Color4I::rgb).orElse(Color4I.WHITE);
 		alpha = Json5Util.getInt(json, "alpha").orElse(255);
 		order = Json5Util.getInt(json, "order").orElse(0);
-		click = Json5Util.getString(json, "click").orElse("");
+		if (json.has("click")) {
+			// TODO legacy, remove in 26.2+
+			clickAction = ImageClickAction.fromLegacy(Json5Util.getString(json, "click").orElse(""));
+		} else {
+			clickAction = Json5Util.fetch(json, "click_action", ImageClickAction.CODEC).orElse(ImageClickAction.NONE);
+		}
 		editorsOnly = Json5Util.getBoolean(json,"dev").orElse(false);
 		alignToCorner = Json5Util.getBoolean(json,"corner").orElse(false);
 		dependency = Json5Util.getString(json, "dependency")
@@ -149,7 +162,7 @@ public final class ChapterImage extends QuestObjectBase implements Movable {
 		buffer.writeInt(color.rgb());
 		buffer.writeInt(alpha);
 		buffer.writeInt(order);
-		buffer.writeUtf(click, Short.MAX_VALUE);
+		ImageClickAction.STREAM_CODEC.encode(buffer, clickAction);
 		buffer.writeBoolean(editorsOnly);
 		buffer.writeBoolean(alignToCorner);
 		buffer.writeLong(dependency == null ? 0L : dependency.id);
@@ -168,7 +181,7 @@ public final class ChapterImage extends QuestObjectBase implements Movable {
 		color = Color4I.rgb(buffer.readInt());
 		alpha = buffer.readInt();
 		order = buffer.readInt();
-		click = buffer.readUtf(Short.MAX_VALUE);
+		clickAction = ImageClickAction.STREAM_CODEC.decode(buffer);
 		editorsOnly = buffer.readBoolean();
 		alignToCorner = buffer.readBoolean();
 		dependency = chapter.file.getQuest(buffer.readLong());
@@ -203,7 +216,8 @@ public final class ChapterImage extends QuestObjectBase implements Movable {
 		config.addColor("color", color, v -> color = v, Color4I.WHITE);
 		config.addInt("order", order, v -> order = v, 0, Integer.MIN_VALUE, Integer.MAX_VALUE);
 		config.addInt("alpha", alpha, v -> alpha = v, 255, 0, 255);
-		config.addString("click", click, v -> click = v, "");
+		config.addEnum("click_action_type", clickAction.actionType(), v -> clickAction = clickAction.withType(v), ImageClickAction.ActionType.NAME_MAP);
+		config.addString("click_action_data", clickAction.actionData(), v -> clickAction = clickAction.withData(v), "");
 		config.addBool("dev", editorsOnly, v -> editorsOnly = v, false);
 		config.addBool("corner", alignToCorner, v -> alignToCorner = v, false);
 

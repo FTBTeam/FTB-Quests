@@ -71,7 +71,7 @@ public class ChapterImageButton extends Button implements QuestPositionableButto
 				|| questScreen.movingObjects
 				|| questScreen.viewQuestPanel.isMouseOver()
 				|| questScreen.chapterPanel.isMouseOver()
-				|| chapterImage.getClick().isEmpty() && !questScreen.file.canEdit()) {
+				|| chapterImage.getClickAction().isNone() && !questScreen.file.canEdit()) {
 			return false;
 		}
 
@@ -95,7 +95,7 @@ public class ChapterImageButton extends Button implements QuestPositionableButto
 			onClicked(button);
 			// returning false on left button click allows click-through for panning behaviour
 			//  (also, images with a click action defined should swallow the mouse click)
-			return !button.isLeft() || button.isLeft() && Minecraft.getInstance().hasAltDown() || !chapterImage.getClick().isEmpty();
+			return !button.isLeft() || button.isLeft() && Minecraft.getInstance().hasAltDown() || !chapterImage.getClickAction().isNone();
 		}
 		return false;
 	}
@@ -155,9 +155,9 @@ public class ChapterImageButton extends Button implements QuestPositionableButto
 			} else if (isKeyDown(InputConstants.KEY_RALT) && questScreen.file.canEdit()) {
 				chapterImage.copyToClipboard();
 				FTBQuestsClient.showInfoToast(Component.translatable("ftbquests.quest.copied"), Component.literal(moveAndDeleteFocus().getTitle().getString()));
-			} else if (!chapterImage.getClick().isEmpty()) {
+			} else if (!chapterImage.getClickAction().isNone()) {
 				playClickSound();
-				handleClick(chapterImage.getClick());
+				chapterImage.getClickAction().run();
 			}
 		} else if (questScreen.file.canEdit() && button.isMiddle()) {
 			if (!questScreen.selectedObjects.contains(chapterImage)) {
