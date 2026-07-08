@@ -7,7 +7,6 @@ import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.ComponentUtils;
 
-// TODO get artwork for proper buttons
 public enum ChangeType {
     INITIAL("", ChatFormatting.WHITE, "", Color4I.empty()),
     UNDO("↶", ChatFormatting.DARK_GREEN, "ftbquests.gui.undo", Icons.UNDO),

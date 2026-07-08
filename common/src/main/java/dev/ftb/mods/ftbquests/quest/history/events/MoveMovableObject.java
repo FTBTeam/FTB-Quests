@@ -44,10 +44,19 @@ public record MoveMovableObject(
 
     @Override
     public List<Component> description(BaseQuestFile file, ChangeType changeType) {
-        return List.of(Component.translatable("ftbquests.event.move_movable",
-                questObjectType.getDisplayString(),
-                title
-        ));
+        Chapter newChapter = file.getChapter(newChapterId);
+        return oldChapterId == newChapterId ?
+                List.of(Component.translatable("ftbquests.event.move_movable",
+                        questObjectType.getDisplayString(),
+                        title
+                )) :
+                List.of(Component.translatable("ftbquests.event.move_chapter_across",
+                        questObjectType.getDisplayString(),
+                        title,
+                        QuestObjectType.CHAPTER.getDisplayString(),
+                        newChapter != null ? newChapter.getTitle() : Component.literal("<?>")
+                ));
+
     }
 
     private void applyChange(ServerQuestFile file, double x, double y, long chapterId) {
