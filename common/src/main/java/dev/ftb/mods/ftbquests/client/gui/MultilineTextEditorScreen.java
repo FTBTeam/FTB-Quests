@@ -314,7 +314,7 @@ public class MultilineTextEditorScreen extends BaseScreen {
 		int pos = 0;
 		String thisLine = "";
 		for (String line : textBox.getText().split("\\n")) {
-			if (textBox.cursorPos() >= pos && textBox.cursorPos() < pos + line.length()) {
+			if (textBox.cursorPos() >= pos && textBox.cursorPos() <= pos + line.length()) {
 				thisLine = line;
 				break;
 			}
