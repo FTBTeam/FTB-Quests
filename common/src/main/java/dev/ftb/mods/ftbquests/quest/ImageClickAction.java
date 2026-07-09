@@ -56,12 +56,26 @@ public record ImageClickAction(ActionType actionType, String actionData) {
         }
     }
 
+    public static ImageClickAction fromString(String str) {
+        String[] parts = str.split(":", 2);
+        if (parts.length != 2) {
+            return NONE;
+        }
+        ActionType type = ActionType.NAME_MAP.getNullable(parts[0]);
+        return type == null ? NONE : new ImageClickAction(type, parts[1]);
+    }
+
     public void run() {
         try {
             actionType.accept(actionData);
         } catch (Exception ex) {
             logHandleClickException(ex);
         }
+    }
+
+    @Override
+    public String toString() {
+        return actionType.id + ":" + actionData;
     }
 
     private static void openUri(String uriStr) {

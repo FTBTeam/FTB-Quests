@@ -2,7 +2,6 @@ package dev.ftb.mods.ftbquests.client.gui.quests;
 
 import com.mojang.datafixers.util.Pair;
 import dev.ftb.mods.ftblibrary.client.config.EditableConfigGroup;
-import dev.ftb.mods.ftblibrary.client.config.editable.EditableImageResource;
 import dev.ftb.mods.ftblibrary.client.config.editable.EditableList;
 import dev.ftb.mods.ftblibrary.client.config.editable.EditableString;
 import dev.ftb.mods.ftblibrary.client.config.gui.EditConfigScreen;
@@ -777,9 +776,9 @@ public class ViewQuestPanel extends ModalPanel {
 	}
 
 	private void editImage(int line, ImageComponent component) {
-		EditableConfigGroup group = new EditableConfigGroup(FTBQuestsAPI.MOD_ID + ".chapter.image", accepted -> {
+		EditableConfigGroup group = ImageComponentWidget.makeEditGroup(component, accepted -> {
 			openGui();
-			if (accepted) {
+			if (accepted && quest != null) {
 				quest.modifyTranslatableListValue(TranslationKey.QUEST_DESC, mutableRawDesc -> {
 					if (line == -1) {
 						appendToPage(mutableRawDesc, List.of(component.toString()), getCurrentPage());
@@ -787,18 +786,9 @@ public class ViewQuestPanel extends ModalPanel {
 						mutableRawDesc.set(line, component.toString());
 					}
 				});
-//				syncQuestToServer();
-
 				refreshWidgets();
 			}
 		});
-
-		group.add("image", new EditableImageResource(), EditableImageResource.getIdentifier(component.getImage()),
-				v -> component.setImage(Icon.getIcon(v)), EditableImageResource.NONE);
-		group.addInt("width", component.getWidth(), component::setWidth, 0, 1, 1000);
-		group.addInt("height", component.getHeight(), component::setHeight, 0, 1, 1000);
-		group.addEnum("align", component.getAlign(), component::setAlign, ImageComponent.ImageAlign.NAME_MAP, ImageComponent.ImageAlign.CENTER);
-		group.addBool("fit", component.isFit(), component::setFit, false);
 
 		new EditConfigScreen(group).openGui();
 	}
