@@ -131,7 +131,7 @@ public record ImageClickAction(ActionType actionType, String actionData) {
         Preconditions.checkState(fields.length == 2, "data must be in format: '<docsmod>:<path>'");
 
         DocsModRegistry.INSTANCE.getDocsMod(fields[0]).ifPresentOrElse(
-                docsMod -> docsMod.openDocsPage(fields[1]),
+                docsMod -> docsMod.openDocsPage(Minecraft.getInstance().player, fields[1]),
                 () -> QuestScreen.displayError("Docs mod '%s' is not installed", fields[0]));
     }
 
