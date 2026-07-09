@@ -3,7 +3,6 @@ package dev.ftb.mods.ftbquests.client.gui.quests;
 import com.mojang.datafixers.util.Pair;
 import dev.architectury.networking.NetworkManager;
 import dev.ftb.mods.ftblibrary.config.ConfigGroup;
-import dev.ftb.mods.ftblibrary.config.ImageResourceConfig;
 import dev.ftb.mods.ftblibrary.config.ListConfig;
 import dev.ftb.mods.ftblibrary.config.StringConfig;
 import dev.ftb.mods.ftblibrary.config.ui.EditConfigScreen;
@@ -37,24 +36,21 @@ import dev.ftb.mods.ftbquests.util.TextUtils;
 import it.unimi.dsi.fastutil.longs.Long2IntMap;
 import it.unimi.dsi.fastutil.longs.Long2IntOpenHashMap;
 import net.minecraft.ChatFormatting;
-import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.client.gui.screens.ConfirmLinkScreen;
-import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.*;
 import net.minecraft.util.Mth;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.TooltipFlag;
-import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.lwjgl.glfw.GLFW;
 
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+import java.util.Optional;
 import java.util.function.BiConsumer;
 
 public class ViewQuestPanel extends ModalPanel {
@@ -134,6 +130,10 @@ public class ViewQuestPanel extends ModalPanel {
 		if (quest != null) {
 			currentPages.put(quest.id, page);
 		}
+	}
+
+	public void setCurrentPage(long questId, int page) {
+		currentPages.put(questId, page);
 	}
 
 	@Override
@@ -755,7 +755,7 @@ public class ViewQuestPanel extends ModalPanel {
 	}
 
 	private void editImage(int line, ImageComponent component) {
-		ConfigGroup group = new ConfigGroup(FTBQuestsAPI.MOD_ID + ".image", accepted -> {
+		ConfigGroup group = ImageComponentWidget.makeEditGroup(component, accepted -> {
 			openGui();
 			if (accepted) {
 				quest.modifyTranslatableListValue(TranslationKey.QUEST_DESC, mutableRawDesc -> {
@@ -769,13 +769,6 @@ public class ViewQuestPanel extends ModalPanel {
 				refreshWidgets();
 			}
 		});
-
-		group.add("image", new ImageResourceConfig(), ImageResourceConfig.getResourceLocation(component.getImage()),
-				v -> component.setImage(Icon.getIcon(v)), ImageResourceConfig.NONE);
-		group.addInt("width", component.getWidth(), component::setWidth, 0, 1, 1000);
-		group.addInt("height", component.getHeight(), component::setHeight, 0, 1, 1000);
-		group.addEnum("align", component.getAlign(), component::setAlign, ImageComponent.ImageAlign.NAME_MAP, ImageComponent.ImageAlign.CENTER);
-		group.addBool("fit", component.isFit(), component::setFit, false);
 
 		new EditConfigScreen(group).openGui();
 	}
@@ -912,39 +905,13 @@ public class ViewQuestPanel extends ModalPanel {
 			if (clickEvent == null) return false;
 
 			if (clickEvent.getAction() == ClickEvent.Action.CHANGE_PAGE) {
-				String[] fields = clickEvent.getValue().split("/");
-				QuestObjectBase.parseHexId(fields[0]).ifPresentOrElse(questId -> {
-					QuestObject qo = quest.getQuestFile().get(questId);
-					if (qo != null) {
-						if (qo instanceof Quest && fields.length >= 2 && StringUtils.isNumeric(fields[1])) {
-							currentPages.put(questId.longValue(), Integer.parseInt(fields[1]) - 1);
-						}
-						questScreen.open(qo, false);
-					} else {
-						errorToPlayer("Unknown quest object id: %s", clickEvent.getValue());
-					}
-				}, () -> errorToPlayer("Invalid quest object id: %s", clickEvent.getValue()));
+				new ImageClickAction(ImageClickAction.ActionType.OPEN_QUEST, clickEvent.getValue()).run();
 				return true;
 			} else if (clickEvent.getAction() == ClickEvent.Action.OPEN_URL) {
 				try {
-					URI uri = new URI(clickEvent.getValue());
-					String scheme = uri.getScheme();
-					if (scheme == null) {
-						throw new URISyntaxException(clickEvent.getValue(), "Missing protocol");
-					}
-					if (!scheme.equalsIgnoreCase("http") && !scheme.equalsIgnoreCase("https")) {
-						throw new URISyntaxException(clickEvent.getValue(), "Unsupported protocol: " + scheme.toLowerCase(Locale.ROOT));
-					}
-
-					final Screen curScreen = Minecraft.getInstance().screen;
-					Minecraft.getInstance().setScreen(new ConfirmLinkScreen(accepted -> {
-						if (accepted) {
-							Util.getPlatform().openUri(uri);
-						}
-						Minecraft.getInstance().setScreen(curScreen);
-					}, clickEvent.getValue(), false));
+					new ImageClickAction(ImageClickAction.ActionType.OPEN_URI, clickEvent.getValue()).run();
 					return true;
-				} catch (URISyntaxException e) {
+				} catch (Exception e) {
 					errorToPlayer("Can't open url for %s (%s)", clickEvent.getValue(), e.getMessage());
 				}
 				return true;

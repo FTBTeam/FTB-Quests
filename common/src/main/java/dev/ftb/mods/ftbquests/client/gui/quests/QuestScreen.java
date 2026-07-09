@@ -411,8 +411,11 @@ public class QuestScreen extends BaseScreen {
 	}
 
 	public static void displayError(Component error) {
-//		Minecraft.getInstance().getToasts().addToast(new SystemToast(SystemToast.SystemToastIds.TUTORIAL_HINT, Component.translatable("ftbquests.gui.error"), error));
 		Minecraft.getInstance().getToasts().addToast(new CustomToast(Component.translatable("ftbquests.gui.error"), Icons.BARRIER, error));
+	}
+
+	public static void displayError(String msg, Object... args) {
+		displayError(Component.literal(String.format(msg, args)).withStyle(ChatFormatting.RED));
 	}
 
 	private boolean moveSelectedQuests(double x, double y) {

@@ -66,6 +66,10 @@ public class ClientQuestFile extends BaseQuestFile {
 		INSTANCE.onReplaced();
 	}
 
+    public static ClientQuestFile getInstance() {
+        return INSTANCE;
+    }
+
 	private void onReplaced() {
 		selfTeamData = new TeamData(Util.NIL_UUID, INSTANCE, "Loading...");
 		selfTeamData.setLocked(true);

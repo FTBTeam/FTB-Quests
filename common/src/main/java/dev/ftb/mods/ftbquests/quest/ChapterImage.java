@@ -34,7 +34,7 @@ public final class ChapterImage extends QuestObjectBase implements Movable {
 	private Icon image;
 	private Color4I color;
 	private int alpha;
-	private String click;
+	private ImageClickAction clickAction;
 	private boolean editorsOnly;
 	private boolean alignToCorner;
 	private Quest dependency;
@@ -52,7 +52,7 @@ public final class ChapterImage extends QuestObjectBase implements Movable {
 		image = Color4I.empty();
 		color = Color4I.WHITE;
 		alpha = 255;
-		click = "";
+		clickAction = ImageClickAction.NONE;
 		editorsOnly = false;
 		alignToCorner = false;
 		dependency = null;
@@ -98,8 +98,8 @@ public final class ChapterImage extends QuestObjectBase implements Movable {
 		return alignToCorner;
 	}
 
-	public String getClick() {
-		return click;
+	public ImageClickAction getClickAction() {
+		return clickAction;
 	}
 
 	@Override
@@ -115,7 +115,9 @@ public final class ChapterImage extends QuestObjectBase implements Movable {
 		if (!color.equals(Color4I.WHITE)) nbt.putInt("color", color.rgb());
 		if (alpha != 255) nbt.putInt("alpha", alpha);
 		if (order != 0) nbt.putInt("order", order);
-		if (!click.isEmpty()) nbt.putString("click", click);
+		if (clickAction != ImageClickAction.NONE) {
+			nbt.putString("click_action", clickAction.toString());
+		}
 		if (editorsOnly) nbt.putBoolean("dev", true);
 		if (alignToCorner) nbt.putBoolean("corner", true);
 		if (dependency != null) nbt.putString("dependency", dependency.getCodeString());
@@ -145,7 +147,13 @@ public final class ChapterImage extends QuestObjectBase implements Movable {
 			setRawTitle(String.join("\\n", hover));
 		}
 
-		click = nbt.getString("click");
+		if (nbt.contains("click")) {
+			// legacy
+			clickAction = ImageClickAction.fromLegacy(nbt.getString("click"));
+		} else {
+			clickAction = ImageClickAction.fromString(nbt.getString("click_action"));
+		}
+
 		editorsOnly = nbt.getBoolean("dev");
 		alignToCorner = nbt.getBoolean("corner");
 
@@ -165,7 +173,7 @@ public final class ChapterImage extends QuestObjectBase implements Movable {
 		buffer.writeInt(color.rgb());
 		buffer.writeInt(alpha);
 		buffer.writeInt(order);
-		buffer.writeUtf(click, Short.MAX_VALUE);
+		ImageClickAction.STREAM_CODEC.encode(buffer, clickAction);
 		buffer.writeBoolean(editorsOnly);
 		buffer.writeBoolean(alignToCorner);
 		buffer.writeLong(dependency == null ? 0L : dependency.id);
@@ -184,7 +192,7 @@ public final class ChapterImage extends QuestObjectBase implements Movable {
 		color = Color4I.rgb(buffer.readInt());
 		alpha = buffer.readInt();
 		order = buffer.readInt();
-		click = buffer.readUtf(Short.MAX_VALUE);
+		clickAction = ImageClickAction.STREAM_CODEC.decode(buffer);
 		editorsOnly = buffer.readBoolean();
 		alignToCorner = buffer.readBoolean();
 		dependency = chapter.file.getQuest(buffer.readLong());
@@ -219,7 +227,8 @@ public final class ChapterImage extends QuestObjectBase implements Movable {
 		config.addColor("color", color, v -> color = v, Color4I.WHITE);
 		config.addInt("order", order, v -> order = v, 0, Integer.MIN_VALUE, Integer.MAX_VALUE);
 		config.addInt("alpha", alpha, v -> alpha = v, 255, 0, 255);
-		config.addString("click", click, v -> click = v, "");
+		config.addEnum("click_action_type", clickAction.actionType(), v -> clickAction = clickAction.withType(v), ImageClickAction.ActionType.NAME_MAP);
+		config.addString("click_action_data", clickAction.actionData(), v -> clickAction = clickAction.withData(v), "");
 		config.addBool("dev", editorsOnly, v -> editorsOnly = v, false);
 		config.addBool("corner", alignToCorner, v -> alignToCorner = v, false);
 
