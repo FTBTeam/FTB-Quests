@@ -28,7 +28,6 @@ import dev.ftb.mods.ftbquests.util.TextUtils;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.player.Player;
 
@@ -160,7 +159,9 @@ public class QuestButton extends Button implements QuestPositionableButton {
 							b -> openAddRewardContextMenu()));
 					contextMenu.add(new ContextMenuItem(Component.translatable("ftbquests.gui.clear_reward_all"),
 							ThemeProperties.CLOSE_ICON.get(quest),
-							b -> selected.forEach(q -> q.getRewards().forEach(r -> NetworkManager.sendToServer(new DeleteObjectMessage(r.id))))));
+							b -> selected.forEach(q -> NetworkManager.sendToServer(
+									new DeleteObjectMessage(q.getRewards().stream().map(QuestObjectBase::getId).toList())
+                            ))));
 					contextMenu.add(new ContextMenuItem(Component.translatable("ftbquests.gui.bulk_change_size"),
 							Icons.SETTINGS,
 							b -> bulkChangeSize()));
@@ -229,10 +230,8 @@ public class QuestButton extends Button implements QuestPositionableButton {
 
 		EditStringConfigOverlay<Double> overlay = new EditStringConfigOverlay<>(getGui(), c, accepted -> {
 			if (accepted) {
-				quests.forEach(q -> {
-					q.setSize(c.getValue());
-					NetworkManager.sendToServer(EditObjectMessage.forQuestObject(q));
-				});
+				quests.forEach(q -> q.setSize(c.getValue()));
+				NetworkManager.sendToServer(EditObjectMessage.forQuestObjects(quests));
 			}
 			run();
 		}, Component.translatable("ftbquests.quest.appearance.size")).atMousePosition();
@@ -245,18 +244,16 @@ public class QuestButton extends Button implements QuestPositionableButton {
 
 		for (RewardType type : RewardTypes.TYPES.values()) {
 			if (type.getGuiProvider() != null) {
-				contextMenu2.add(new ContextMenuItem(type.getDisplayName(), type.getIconSupplier(), b -> {
-					playClickSound();
-					type.getGuiProvider().openCreationGui(parent, quest, reward -> questScreen.getSelectedQuests().forEach(quest -> {
-						Reward newReward = QuestObjectBase.copy(reward, () -> type.createReward(0L, quest));
-						if (newReward != null) {
-							CompoundTag extra = new CompoundTag();
-							extra.putString("type", type.getTypeForNBT());
-							NetworkManager.sendToServer(CreateObjectMessage.create(newReward, extra));
-						}
-					}));
-				}));
-			}
+                contextMenu2.add(new ContextMenuItem(type.getDisplayName(), type.getIconSupplier(), b -> {
+                    playClickSound();
+                    type.getGuiProvider().openCreationGui(parent, quest, reward -> questScreen.getSelectedQuests().forEach(quest -> {
+                        Reward newReward = QuestObjectBase.copy(reward, () -> type.createReward(0L, quest));
+                        if (newReward != null) {
+                            NetworkManager.sendToServer(CreateObjectMessage.requestCreation(newReward));
+                        }
+                    }));
+                }));
+            }
 		}
 
 		getGui().openContextMenu(contextMenu2);
@@ -304,23 +301,11 @@ public class QuestButton extends Button implements QuestPositionableButton {
 			}
 		}
 
-		if (title.getString().contains("\n")) {
-			// I'm not proud of this kludge but getting titles with embedded newlines and possible styling
-			// to work well as tooltips is not fun
-			title.visit((style, txt) -> {
-				for (String s : txt.split("\n")) {
-					if (!s.isEmpty()) list.add(Component.literal(s).withStyle(style));
-				}
-				return Optional.empty();
-			}, title.getStyle());
-		} else {
-			list.add(title);
-		}
+		TextUtils.processComponentWithPossibleNewlines(title, list::add);
 
-		Component description = quest.getSubtitle();
-
-		if (!TextUtils.isComponentEmpty(description)) {
-			list.add(description.copy().withStyle(ChatFormatting.GRAY));
+		Component subtitle = quest.getSubtitle();
+		if (!TextUtils.isComponentEmpty(subtitle)) {
+			list.add(subtitle.copy().withStyle(ChatFormatting.GRAY));
 		}
 
 		if (quest.isOptional()) {

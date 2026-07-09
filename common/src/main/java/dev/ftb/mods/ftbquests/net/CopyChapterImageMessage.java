@@ -1,26 +1,31 @@
 package dev.ftb.mods.ftbquests.net;
 
 import dev.architectury.networking.NetworkManager;
-import dev.ftb.mods.ftblibrary.util.NetworkHelper;
 import dev.ftb.mods.ftbquests.api.FTBQuestsAPI;
 import dev.ftb.mods.ftbquests.quest.Chapter;
 import dev.ftb.mods.ftbquests.quest.ChapterImage;
+import dev.ftb.mods.ftbquests.quest.QuestObjectBase;
+import dev.ftb.mods.ftbquests.quest.ServerQuestFile;
+import dev.ftb.mods.ftbquests.quest.history.CreateOrDeleteRecord;
+import dev.ftb.mods.ftbquests.quest.history.events.CreateQuestObjects;
 import dev.ftb.mods.ftbquests.util.NetUtils;
 import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 
-public record CopyChapterImageMessage(ChapterImage img) implements CustomPacketPayload {
+import java.util.Objects;
+
+public record CopyChapterImageMessage(long id, long chapterId, double qx, double qy) implements CustomPacketPayload {
     public static final Type<CopyChapterImageMessage> TYPE = new Type<>(FTBQuestsAPI.rl("copy_chapter_image_message"));
 
     public static final StreamCodec<FriendlyByteBuf, CopyChapterImageMessage> STREAM_CODEC = StreamCodec.composite(
-            ChapterImage.STREAM_CODEC, CopyChapterImageMessage::img,
+            ByteBufCodecs.VAR_LONG, CopyChapterImageMessage::id,
+            ByteBufCodecs.VAR_LONG, CopyChapterImageMessage::chapterId,
+            ByteBufCodecs.DOUBLE, CopyChapterImageMessage::qx,
+            ByteBufCodecs.DOUBLE, CopyChapterImageMessage::qy,
             CopyChapterImageMessage::new
     );
-
-    public CopyChapterImageMessage(ChapterImage toCopy, Chapter chapter, double newX, double newY) {
-        this(toCopy.copy(chapter, newX, newY));
-    }
 
     @Override
     public Type<CopyChapterImageMessage> type() {
@@ -28,14 +33,12 @@ public record CopyChapterImageMessage(ChapterImage img) implements CustomPacketP
     }
 
     public static void handle(CopyChapterImageMessage message, NetworkManager.PacketContext context) {
-        context.queue(() -> {
-            if (NetUtils.canEdit(context)) {
-                Chapter chapter = message.img.getChapter();
-                chapter.addImage(message.img);
-                chapter.file.markDirty();
-                NetworkHelper.sendToAll(context.getPlayer().getServer(), new EditObjectResponseMessage(chapter));
+        context.queue(() -> ServerQuestFile.getInstance().ifPresent(sqf -> {
+            if (sqf.getBase(message.id) instanceof ChapterImage img && sqf.get(message.chapterId) instanceof Chapter chapter && NetUtils.canEdit(context)) {
+                ChapterImage newImage = Objects.requireNonNull(QuestObjectBase.copy(img, () -> new ChapterImage(sqf.newID(), chapter)));
+                newImage.setPosition(message.qx, message.qy);
+                sqf.getHistoryStack().addAndApply(sqf, new CreateQuestObjects(CreateOrDeleteRecord.ofQuestObject(newImage), null));
             }
-        });
+        }));
     }
-
 }

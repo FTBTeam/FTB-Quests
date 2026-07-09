@@ -247,7 +247,7 @@ public class RewardTable extends QuestObjectBase {
 				weightedRewards.add(new WeightedReward(reward, rewardTag.contains("weight") ? rewardTag.getFloat("weight") : 1));
 				prevRewards.remove(rewardId);
 				if (newReward && getFile() instanceof ServerQuestFile sqf) {
-					NetworkHelper.sendToAll(sqf.server, CreateObjectResponseMessage.create(reward, rewardTag));
+					NetworkHelper.sendToAll(sqf.server, CreateObjectResponseMessage.create(reward));
 				}
 			}
 		}
@@ -258,7 +258,7 @@ public class RewardTable extends QuestObjectBase {
 
 		// clean up translations for any rewards that are no longer in the list
 		if (getFile().isServerSide()) {
-			prevRewards.forEach(id -> getFile().deleteObject(id));
+			prevRewards.forEach(id -> getFile().deleteObjects(List.of(id)));
 		}
 
 		if (nbt.contains("loot_crate")) {
@@ -287,7 +287,7 @@ public class RewardTable extends QuestObjectBase {
 
 		for (WeightedReward wr : weightedRewards) {
 			buffer.writeLong(wr.getReward().getId());
-			buffer.writeVarInt(wr.getReward().getType().intId);
+			buffer.writeVarInt(wr.getReward().getType().internalId);
 			wr.getReward().writeNetData(buffer);
 			buffer.writeFloat(wr.getWeight());
 		}
@@ -360,6 +360,7 @@ public class RewardTable extends QuestObjectBase {
 	@Override
 	public void deleteSelf() {
 		file.removeRewardTable(this);
+
 		super.deleteSelf();
 	}
 
@@ -393,9 +394,7 @@ public class RewardTable extends QuestObjectBase {
 
 	@Override
 	public void onCreated() {
-//		if (filename.isEmpty()) {
-//			filename = file.generateRewardTableName(titleToID(getRawTitle()).orElse(toString()));
-//		}
+		super.onCreated();
 
 		file.addRewardTable(this);
 	}
@@ -439,7 +438,7 @@ public class RewardTable extends QuestObjectBase {
 
 	@Override
 	@Environment(EnvType.CLIENT)
-	public void onEditButtonClicked(Runnable gui) {
+	public void onEditButtonClicked(Runnable gui, Component title) {
 		new EditRewardTableScreen(gui, this, editedReward -> {
 			NetworkManager.sendToServer(EditObjectMessage.forQuestObject(editedReward));
 			clearCachedData();

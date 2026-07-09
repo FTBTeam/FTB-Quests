@@ -41,8 +41,8 @@ public class AddTaskButton extends Button {
 		for (TaskType type : TaskTypes.TYPES.values()) {
 			contextMenu.add(new ContextMenuItem(type.getDisplayName(), type.getIconSupplier(), b -> {
 				playClickSound();
-				type.getGuiProvider().openCreationGui(this.parent, quest, (task, extra) ->
-						NetworkManager.sendToServer(CreateObjectMessage.create(task, extra)));
+				type.getGuiProvider().openCreationGui(this.parent, quest, task ->
+						NetworkManager.sendToServer(CreateObjectMessage.requestCreation(task)));
 			}));
 		}
 
@@ -63,7 +63,7 @@ public class AddTaskButton extends Button {
 		Task newTask = QuestObjectBase.copy(task,
 				() -> TaskType.createTask(0L, quest, task.getType().getTypeId().toString()));
 		if (newTask != null) {
-			NetworkManager.sendToServer(CreateObjectMessage.create(newTask, newTask.getType().makeExtraNBT()));
+			NetworkManager.sendToServer(CreateObjectMessage.requestCreation(newTask));
 		}
 	}
 

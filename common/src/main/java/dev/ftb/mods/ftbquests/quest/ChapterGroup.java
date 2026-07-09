@@ -38,10 +38,14 @@ public class ChapterGroup extends QuestObject {
 	public void addChapter(Chapter chapter) {
 		chapters.add(chapter);
 		chapter.setGroup(this);
+		clearCachedData();
+		getQuestFile().markDirty();
 	}
 
 	public void removeChapter(Chapter chapter) {
 		chapters.remove(chapter);
+		clearCachedData();
+		getQuestFile().markDirty();
 	}
 
 	public void clearChapters() {
@@ -76,6 +80,8 @@ public class ChapterGroup extends QuestObject {
 
 	@Override
 	public void onCreated() {
+		super.onCreated();
+
 		file.chapterGroups.add(this);
 	}
 
@@ -90,13 +96,14 @@ public class ChapterGroup extends QuestObject {
 
 	@Override
 	public void deleteSelf() {
+		super.deleteSelf();
+
 		file.chapterGroups.remove(this);
 
+		// rather than delete any chapters in this group, instead move them to the "default" chapter group
 		for (Chapter chapter : chapters) {
 			file.getDefaultChapterGroup().addChapter(chapter);
 		}
-
-		super.deleteSelf();
 	}
 
 	@Override
@@ -198,6 +205,8 @@ public class ChapterGroup extends QuestObject {
 		if (index != -1 && movingUp ? (index > 0) : (index < chapters.size() - 1)) {
 			chapters.remove(index);
 			chapters.add(movingUp ? index - 1 : index + 1, chapter);
+			clearCachedData();
+			getQuestFile().markDirty();
 			return true;
 		}
 		return false;

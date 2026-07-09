@@ -16,13 +16,15 @@ import dev.ftb.mods.ftblibrary.ui.input.Key;
 import dev.ftb.mods.ftblibrary.ui.input.MouseButton;
 import dev.ftb.mods.ftbquests.api.FTBQuestsAPI;
 import dev.ftb.mods.ftbquests.client.FTBQuestsClientConfig;
-import dev.ftb.mods.ftbquests.net.*;
+import dev.ftb.mods.ftbquests.net.CopyChapterImageMessage;
+import dev.ftb.mods.ftbquests.net.CopyQuestMessage;
+import dev.ftb.mods.ftbquests.net.CreateObjectMessage;
+import dev.ftb.mods.ftbquests.net.CreateQuestAndTaskMessage;
 import dev.ftb.mods.ftbquests.quest.*;
 import dev.ftb.mods.ftbquests.quest.task.Task;
 import dev.ftb.mods.ftbquests.quest.task.TaskType;
 import dev.ftb.mods.ftbquests.quest.task.TaskTypes;
 import dev.ftb.mods.ftbquests.quest.theme.property.ThemeProperties;
-import dev.ftb.mods.ftbquests.quest.translation.TranslationKey;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.renderer.GameRenderer;
@@ -273,6 +275,13 @@ public class QuestPanel extends Panel {
 	public void draw(GuiGraphics graphics, Theme theme, int x, int y, int w, int h) {
 		super.draw(graphics, theme, x, y, w, h);
 
+		PoseStack poseStack = graphics.pose();
+
+		if (questScreen.file.canEdit()) {
+			drawStatusBar(graphics, theme, poseStack);
+			questScreen.file.getChangelog().draw(graphics, questScreen);
+		}
+
 		if (questScreen.selectedChapter != null && isMouseOver()) {
 			double dx = (questMaxX - questMinX);
 			double dy = (questMaxY - questMinY);
@@ -301,9 +310,6 @@ public class QuestPanel extends Panel {
 			}
 
 			if (questScreen.file.canEdit()) {
-				PoseStack poseStack = graphics.pose();
-
-				drawStatusBar(graphics, theme, poseStack);
 
 				double bs = questScreen.getQuestButtonSize();
 
@@ -378,6 +384,10 @@ public class QuestPanel extends Panel {
 	}
 
 	private void drawStatusBar(GuiGraphics graphics, Theme theme, PoseStack poseStack) {
+		if (questScreen.selectedChapter == null) {
+			return;
+		}
+
 		poseStack.pushPose();
 
 		int statusX = questScreen.chapterPanel.expanded ? questScreen.chapterPanel.width : questScreen.expandChaptersButton.width;
@@ -386,7 +396,7 @@ public class QuestPanel extends Panel {
 		Color4I.DARK_GRAY.draw(graphics, statusX, height - 9, statusWidth, 1);
 		statPanelBg.draw(graphics, statusX, height - 9, statusWidth, 10);
 
-		poseStack.translate(statusX, height - 6, 600);
+		poseStack.translate(statusX, height - 6, QuestScreen.Z_LEVEL);
 		poseStack.scale(0.5f, 0.5f, 0.5f);
 
 		String curStr = String.format("Cursor: [%+.2f, %+.2f]", questX, questY);
@@ -426,7 +436,7 @@ public class QuestPanel extends Panel {
 				}
 
 				for (Movable q : questScreen.selectedObjects) {
-					q.initiateMoveClientSide(questScreen.selectedChapter, questX + (q.getX() - minX), questY + (q.getY() - minY));
+					q.requestMove(questScreen.selectedChapter, questX + (q.getX() - minX), questY + (q.getY() - minY));
 				}
 			}
 
@@ -461,26 +471,18 @@ public class QuestPanel extends Panel {
 				contextMenu.add(new ContextMenuItem(type.getDisplayName(), type.getIconSupplier(), b -> {
 					playClickSound();
 					type.getGuiProvider().openCreationGui(this, new Quest(0L, questScreen.selectedChapter),
-							(task, extra) -> {
-								String str = task.getProtoTranslation(TranslationKey.TITLE);
-								if (!str.isEmpty()) {
-									questScreen.file.getTranslationManager().addInitialTranslation(extra, questScreen.file.getLocale(),
-											TranslationKey.TITLE, task.getProtoTranslation(TranslationKey.TITLE));
-								}
-								NetworkManager.sendToServer(CreateTaskAtMessage.create(questScreen.selectedChapter, qx, qy, task, extra));
-							}
+							task -> NetworkManager.sendToServer(CreateQuestAndTaskMessage.requestCreation(questScreen.selectedChapter, qx, qy, task))
 					);
 				}));
 			}
 
-			contextMenu.add(new ContextMenuItem(Component.translatable("ftbquests.chapter.image"), Icons.ART, b -> showImageCreationScreen(qx, qy)));
+			contextMenu.add(new ContextMenuItem(Component.translatable("ftbquests.image"), Icons.ART, b -> showImageCreationScreen(qx, qy)));
 
-			String clip = getClipboardString();
-			if (!ChapterImage.isImageInClipboard()) {
-				QuestObjectBase.parseHexId(clip).ifPresent(questId -> {
-					QuestObject qo = questScreen.file.get(questId);
-					contextMenu.add(ContextMenuItem.SEPARATOR);
-					if (qo instanceof Quest quest) {
+			QuestObjectBase.parseHexId(getClipboardString()).ifPresent(questId -> {
+				QuestObjectBase qo = questScreen.file.getBase(questId);
+				switch (qo) {
+					case Quest quest -> {
+						contextMenu.add(ContextMenuItem.SEPARATOR);
 						contextMenu.add(new PasteQuestMenuItem(quest, Component.translatable("ftbquests.gui.paste"),
 								Icons.ADD,
 								b -> NetworkManager.sendToServer(new CopyQuestMessage(quest.id, questScreen.selectedChapter.id, qx, qy, true))));
@@ -494,21 +496,23 @@ public class QuestPanel extends Panel {
 								b -> {
 									QuestLink link = new QuestLink(0L, questScreen.selectedChapter, quest.id);
 									link.setPosition(qx, qy);
-									NetworkManager.sendToServer(CreateObjectMessage.create(link, null));
+									NetworkManager.sendToServer(CreateObjectMessage.requestCreation(link));
 								}));
-					} else if (qo instanceof Task task) {
+					}
+					case Task task -> {
+						contextMenu.add(ContextMenuItem.SEPARATOR);
 						contextMenu.add(new AddTaskButton.PasteTaskMenuItem(task, b -> copyAndCreateTask(task, qx, qy)));
 					}
-				});
-			} else {
-				ChapterImageButton.getClipboardImage().ifPresent(clipImg -> {
-					contextMenu.add(ContextMenuItem.SEPARATOR);
-					contextMenu.add(new TooltipContextMenuItem(Component.translatable("ftbquests.gui.paste_image"),
-							Icons.ADD,
-							b -> NetworkManager.sendToServer(new CopyChapterImageMessage(clipImg, questScreen.selectedChapter, qx, qy)),
-							Component.literal(clipImg.getImage().toString()).withStyle(ChatFormatting.GRAY)));
-				});
-			}
+					case ChapterImage img -> {
+						contextMenu.add(ContextMenuItem.SEPARATOR);
+						contextMenu.add(new TooltipContextMenuItem(Component.translatable("ftbquests.gui.paste_image"),
+								Icons.ADD,
+								b -> NetworkManager.sendToServer(new CopyChapterImageMessage(img.getId(), questScreen.selectedChapter.getId(), qx, qy)),
+								Component.literal(img.getImage().toString()).withStyle(ChatFormatting.GRAY)));
+					}
+					case null, default -> {}
+				}
+			});
 
 			questScreen.openContextMenu(contextMenu).setExtraZlevel(900);
 			return true;
@@ -518,16 +522,19 @@ public class QuestPanel extends Panel {
 	}
 
 	private void showImageCreationScreen(double qx, double qy) {
+		if (questScreen.selectedChapter == null) {
+			return;
+		}
+
 		ImageResourceConfig imageConfig = new ImageResourceConfig();
 		new SelectImageResourceScreen(imageConfig, accepted -> {
 			if (accepted) {
 				playClickSound();
-				ChapterImage image = new ChapterImage(questScreen.selectedChapter)
+				ChapterImage image = new ChapterImage(0L, questScreen.selectedChapter)
 						.setImage(Icon.getIcon(imageConfig.getValue()))
 						.setPosition(qx, qy);
 				image.fixupAspectRatio(true);
-				questScreen.selectedChapter.addImage(image);
-				NetworkManager.sendToServer(EditObjectMessage.forQuestObject(questScreen.selectedChapter));
+				NetworkManager.sendToServer(CreateObjectMessage.requestCreation(image));
 			}
 			QuestPanel.this.questScreen.openGui();
 		}).openGui();
@@ -537,7 +544,7 @@ public class QuestPanel extends Panel {
 		Task newTask = QuestObjectBase.copy(task,
 				() -> TaskType.createTask(0L, new Quest(0L, questScreen.selectedChapter), task.getType().getTypeId().toString()));
 		if (newTask != null) {
-			NetworkManager.sendToServer(CreateTaskAtMessage.create(questScreen.selectedChapter, qx, qy, newTask, null));
+			NetworkManager.sendToServer(CreateQuestAndTaskMessage.requestCreation(questScreen.selectedChapter, qx, qy, newTask));
 		}
 	}
 
@@ -577,7 +584,9 @@ public class QuestPanel extends Panel {
 
 	@Override
 	public boolean keyPressed(Key key) {
-		if (questScreen.selectedChapter != null && !questScreen.isViewingQuest() && (key.is(GLFW.GLFW_KEY_MINUS) || key.is(GLFW.GLFW_KEY_EQUAL))) {
+		if (key.is(GLFW.GLFW_KEY_GRAVE_ACCENT)) {
+			FTBQuestsClientConfig.setAlwaysShowChangelog(!FTBQuestsClientConfig.CHANGELOG_ALWAYS_SHOW.get());
+		} else if (questScreen.selectedChapter != null && !questScreen.isViewingQuest() && (key.is(GLFW.GLFW_KEY_MINUS) || key.is(GLFW.GLFW_KEY_EQUAL))) {
 			questScreen.addZoom(key.is(GLFW.GLFW_KEY_MINUS) ? -1D : 1D);
 			return true;
 		}

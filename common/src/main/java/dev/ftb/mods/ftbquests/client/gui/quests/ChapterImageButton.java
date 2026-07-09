@@ -2,31 +2,25 @@ package dev.ftb.mods.ftbquests.client.gui.quests;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Axis;
-import dev.ftb.mods.ftblibrary.config.ConfigGroup;
-import dev.ftb.mods.ftblibrary.config.ui.EditConfigScreen;
 import dev.ftb.mods.ftblibrary.icon.Color4I;
 import dev.ftb.mods.ftblibrary.icon.Icon;
 import dev.ftb.mods.ftblibrary.icon.Icons;
 import dev.ftb.mods.ftblibrary.ui.*;
 import dev.ftb.mods.ftblibrary.ui.input.MouseButton;
 import dev.ftb.mods.ftblibrary.util.TooltipList;
-import dev.ftb.mods.ftbquests.api.FTBQuestsAPI;
-import dev.ftb.mods.ftbquests.net.EditObjectMessage;
 import dev.ftb.mods.ftbquests.quest.ChapterImage;
 import dev.ftb.mods.ftbquests.quest.Movable;
 import dev.ftb.mods.ftbquests.quest.theme.property.ThemeProperties;
+import dev.ftb.mods.ftbquests.util.TextUtils;
 import net.minecraft.ChatFormatting;
 import net.minecraft.Util;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.MutableComponent;
 import org.jetbrains.annotations.NotNull;
 
-import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 import java.util.function.BiFunction;
 
 public class ChapterImageButton extends Button implements QuestPositionableButton {
@@ -50,24 +44,13 @@ public class ChapterImageButton extends Button implements QuestPositionableButto
 		}
 	}
 
-	public ChapterImageButton(Panel panel, ChapterImage i) {
-		super(panel, Component.empty(), i.getImage());
+	public ChapterImageButton(Panel panel, ChapterImage chapterImage) {
+		super(panel, chapterImage.getTitle(), chapterImage.getImage());
+
 		questScreen = (QuestScreen) panel.getGui();
 		setSize(20, 20);
-		chapterImage = i;
+		this.chapterImage = chapterImage;
 		setDrawLayer(DrawLayer.BACKGROUND); // draw *before* connection lines & quest widgets
-	}
-
-	public static Optional<ChapterImage> getClipboardImage() {
-		ChapterImage img = ChapterImage.clipboard.get();
-		if (img != null) {
-			if (img.getChapter().isValid()) {
-				return Optional.of(img);
-			} else {
-				ChapterImage.clipboard = new WeakReference<>(null);
-			}
-		}
-		return Optional.empty();
 	}
 
 	@Override
@@ -107,13 +90,18 @@ public class ChapterImageButton extends Button implements QuestPositionableButto
 
 	@Override
 	public void onClicked(MouseButton button) {
+		Component title = chapterImage.getTitle().getString().isEmpty() ?
+			Component.literal(chapterImage.getImage().toString()) :
+			chapterImage.getTitle();
+
 		if (questScreen.file.canEdit() && button.isRight()) {
 			List<ContextMenuItem> contextMenu = new ArrayList<>();
 
-			contextMenu.add(ContextMenuItem.title(Component.literal("\"").append(chapterImage.getTitle()).append(Component.literal("\""))));
+			contextMenu.add(ContextMenuItem.title(title));
 			contextMenu.add(ContextMenuItem.SEPARATOR);
 
-			contextMenu.add(new ContextMenuItem(Component.translatable("selectServer.edit"), ThemeProperties.EDIT_ICON.get(), b -> openEditScreen()));
+			contextMenu.add(new ContextMenuItem(Component.translatable("selectServer.edit"), ThemeProperties.EDIT_ICON.get(),
+					b -> chapterImage.onEditButtonClicked(questScreen, title)));
 
 			contextMenu.add(new ContextMenuItem(Component.translatable("gui.move"), ThemeProperties.MOVE_UP_ICON.get(chapterImage.getChapter()),
 					b -> questScreen.initiateMoving(chapterImage)) {
@@ -123,10 +111,10 @@ public class ChapterImageButton extends Button implements QuestPositionableButto
 				}
 			});
 
-			contextMenu.add(new ContextMenuItem(Component.translatable("gui.copy"), Icons.INFO, b -> chapterImage.copyToClipboard()) {
+			contextMenu.add(new ContextMenuItem(Component.translatable("ftbquests.gui.copy_id"), Icons.INFO, b -> chapterImage.copyToClipboard()) {
 				@Override
 				public void addMouseOverText(TooltipList list) {
-					list.add(Component.literal(chapterImage.getImage().toString()).withStyle(ChatFormatting.DARK_GRAY));
+					list.add(Component.literal(chapterImage.getCodeString()).withStyle(ChatFormatting.DARK_GRAY));
 				}
 			});
 
@@ -137,17 +125,20 @@ public class ChapterImageButton extends Button implements QuestPositionableButto
 						b -> chapterImage.fixupAspectRatio(false)));
 			}
 
-			contextMenu.add(new ContextMenuItem(Component.translatable("selectServer.delete"), ThemeProperties.DELETE_ICON.get(), b -> {
-				chapterImage.getChapter().removeImage(chapterImage);
-				EditObjectMessage.sendToServer(chapterImage.getChapter());
-			}).setYesNoText(Component.translatable("delete_item", chapterImage.getImage().toString())));
+			int nSelected = questScreen.selectedObjects.size();
+			Component yesNo = Component.translatable("delete_item", nSelected > 0 ?
+					Component.translatable("ftbquests.objects", nSelected) :
+					Component.literal(chapterImage.getImage().toString())
+			);
+			contextMenu.add(new ContextMenuItem(Component.translatable("selectServer.delete"), ThemeProperties.DELETE_ICON.get(),
+					b -> handleDeletion()).setYesNoText(yesNo));
 
 			getGui().openContextMenu(contextMenu);
 		} else if (button.isLeft()) {
 			if (Screen.hasControlDown() && questScreen.file.canEdit()) {
 				questScreen.toggleSelected(chapterImage);
 			} else if (Screen.hasAltDown() && questScreen.file.canEdit()) {
-				openEditScreen();
+				chapterImage.onEditButtonClicked(questScreen, title);
 			} else if (!chapterImage.getClick().isEmpty()) {
 				playClickSound();
 				handleClick(chapterImage.getClick());
@@ -161,30 +152,12 @@ public class ChapterImageButton extends Button implements QuestPositionableButto
 		}
 	}
 
-	private void openEditScreen() {
-		String name = chapterImage.getImage() instanceof Color4I ? chapterImage.getColor().toString() : chapterImage.getImage().toString();
-		ConfigGroup group = new ConfigGroup(FTBQuestsAPI.MOD_ID, accepted -> {
-			if (accepted) {
-				EditObjectMessage.sendToServer(chapterImage.getChapter());
-			}
-			run();
-		}) {
-			@Override
-			public Component getName() {
-				MutableComponent type = Component.literal(" [")
-						.append(Component.translatable("ftbquests.chapter.image"))
-						.append("]")
-						.withStyle(ChatFormatting.AQUA);
-				return Component.empty().append(Component.literal(name).withStyle(ChatFormatting.UNDERLINE)).append(type);
-			}
-		};
-		chapterImage.fillConfigGroup(group.getOrCreateSubgroup("chapter").getOrCreateSubgroup("image"));
-		new EditConfigScreen(group) {
-			@Override
-			public Component getTitle() {
-				return group.getName();
-			}
-		}.openGui();
+	private void handleDeletion() {
+		if (questScreen.selectedObjects.isEmpty()) {
+			questScreen.file.deleteObjects(List.of(chapterImage.getId()));
+		} else {
+			questScreen.deleteSelectedObjects();
+		}
 	}
 
 	@Override
@@ -197,7 +170,7 @@ public class ChapterImageButton extends Button implements QuestPositionableButto
 
 	@Override
 	public void addMouseOverText(TooltipList list) {
-		chapterImage.addHoverText(list);
+		TextUtils.processComponentWithPossibleNewlines(getTitle(), list::add);
 	}
 
 	@Override

@@ -11,6 +11,7 @@ import dev.ftb.mods.ftbquests.FTBQuests;
 import dev.ftb.mods.ftbquests.events.QuestProgressEventData;
 import dev.ftb.mods.ftbquests.integration.PermissionsHelper;
 import dev.ftb.mods.ftbquests.net.*;
+import dev.ftb.mods.ftbquests.quest.history.HistoryStack;
 import dev.ftb.mods.ftbquests.quest.reward.RewardType;
 import dev.ftb.mods.ftbquests.quest.reward.RewardTypes;
 import dev.ftb.mods.ftbquests.quest.task.Task;
@@ -46,12 +47,13 @@ public class ServerQuestFile extends BaseQuestFile {
 	private boolean isLoading;
 	private Path folder;
 	private final Deque<ServerPlayer> playerContextStack = new ArrayDeque<>();
-//	private ServerPlayer currentPlayer = null;
+	private final HistoryStack historyStack;
 
 	public ServerQuestFile(MinecraftServer s) {
 		server = s;
 		shouldSave = false;
 		isLoading = false;
+		historyStack = new HistoryStack();
 
 		int taskTypeId = 0;
 
@@ -63,9 +65,13 @@ public class ServerQuestFile extends BaseQuestFile {
 		int rewardTypeId = 0;
 
 		for (RewardType type : RewardTypes.TYPES.values()) {
-			type.intId = ++rewardTypeId;
-			rewardTypeIds.put(type.intId, type);
+			type.internalId = ++rewardTypeId;
+			rewardTypeIds.put(type.internalId, type);
 		}
+	}
+
+	public static Optional<ServerQuestFile> getInstance() {
+		return Optional.ofNullable(INSTANCE);
 	}
 
 	public void load() {
@@ -130,24 +136,30 @@ public class ServerQuestFile extends BaseQuestFile {
 	}
 
 	@Override
-	public void deleteObject(long id) {
-		QuestObjectBase object = getBase(id);
-
-		if (object != null) {
-			getTranslationManager().removeAllTranslations(object);
-			object.deleteChildren();
-			object.deleteSelf();
-			refreshIDMap();
-			markDirty();
-			object.getPath().ifPresent(path -> FileUtils.delete(getFolder().resolve(path).toFile()));
+	public void deleteObjects(List<Long> ids) {
+		List<Long> deletedIds = new ArrayList<>();
+		for (long id : ids) {
+			QuestObjectBase object = getBase(id);
+			if (object != null) {
+				getTranslationManager().removeAllTranslations(object);
+				object.deleteSelf();
+				object.getPath().ifPresent(path -> FileUtils.delete(getFolder().resolve(path).toFile()));
+				deletedIds.add(id);
+			}
 		}
 
-		NetworkHelper.sendToAll(server, new DeleteObjectResponseMessage(id));
+		if (!deletedIds.isEmpty()) {
+			markDirty();
+		}
 	}
 
 	@Override
 	public void markDirty() {
 		shouldSave = true;
+	}
+
+	public HistoryStack getHistoryStack() {
+		return historyStack;
 	}
 
 	public void saveNow() {
@@ -165,7 +177,6 @@ public class ServerQuestFile extends BaseQuestFile {
 
 	public void unload() {
 		saveNow();
-		deleteChildren();
 		deleteSelf();
 	}
 
@@ -189,11 +200,13 @@ public class ServerQuestFile extends BaseQuestFile {
 		// Sync the quest book data
 		// - client will respond to this with a RequestTeamData message
 		// - server will only then send a SyncTeamData message to the client
-		NetworkManager.sendToPlayer(player, new SyncQuestsMessage(this));
+		NetworkHelper.sendTo(player, new SyncQuestsMessage(this));
 
-		NetworkManager.sendToPlayer(player, new SyncEditorPermissionMessage(PermissionsHelper.hasEditorPermission(player, false)));
+		NetworkHelper.sendTo(player, new SyncEditorPermissionMessage(PermissionsHelper.hasEditorPermission(player, false)));
 
 		getTranslationManager().sendTranslationsToPlayer(player);
+
+		NetworkHelper.sendTo(player, historyStack.createInitialDescPacket(this));
 
 		player.inventoryMenu.addSlotListener(new FTBQuestsInventoryListener(player));
 
@@ -293,7 +306,6 @@ public class ServerQuestFile extends BaseQuestFile {
 		if (super.moveChapterGroup(id, movingUp)) {
 			markDirty();
 			clearCachedData();
-			NetworkHelper.sendToAll(server, new MoveChapterGroupResponseMessage(id, movingUp));
 			return true;
 		}
 		return false;

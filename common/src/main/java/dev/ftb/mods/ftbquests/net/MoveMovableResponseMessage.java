@@ -3,6 +3,7 @@ package dev.ftb.mods.ftbquests.net;
 import dev.architectury.networking.NetworkManager;
 import dev.ftb.mods.ftbquests.api.FTBQuestsAPI;
 import dev.ftb.mods.ftbquests.client.FTBQuestsNetClient;
+import dev.ftb.mods.ftbquests.quest.Movable;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
@@ -19,12 +20,16 @@ public record MoveMovableResponseMessage(long id, long chapterId, double x, doub
 			MoveMovableResponseMessage::new
 	);
 
+	public static MoveMovableResponseMessage create(Movable movable) {
+		return new MoveMovableResponseMessage(movable.getMovableID(), movable.getChapter().getId(), movable.getX(), movable.getY());
+	}
+
 	@Override
 	public Type<MoveMovableResponseMessage> type() {
 		return TYPE;
 	}
 
 	public static void handle(MoveMovableResponseMessage message, NetworkManager.PacketContext context) {
-		context.queue(() -> FTBQuestsNetClient.moveQuest(message.id, message.chapterId, message.x, message.y));
+		context.queue(() -> FTBQuestsNetClient.moveMovableObject(message.id, message.chapterId, message.x, message.y));
 	}
 }

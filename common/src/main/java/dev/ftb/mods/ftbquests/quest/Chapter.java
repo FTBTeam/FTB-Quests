@@ -11,13 +11,11 @@ import dev.ftb.mods.ftbquests.events.ObjectCompletedEvent;
 import dev.ftb.mods.ftbquests.events.ObjectStartedEvent;
 import dev.ftb.mods.ftbquests.events.QuestProgressEventData;
 import dev.ftb.mods.ftbquests.quest.translation.TranslationKey;
-import dev.ftb.mods.ftbquests.util.NetUtils;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.Util;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.ListTag;
-import net.minecraft.nbt.Tag;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
@@ -138,10 +136,32 @@ public final class Chapter extends QuestObject {
 
 	public void addQuest(Quest quest) {
 		quests.add(quest);
+		file.markDirty();
 	}
 
 	public void removeQuest(Quest quest) {
 		quests.remove(quest);
+		file.markDirty();
+	}
+
+	public void addImage(ChapterImage image) {
+		images.add(image);
+		file.markDirty();
+	}
+
+	public void removeImage(ChapterImage image) {
+		images.remove(image);
+		file.markDirty();
+	}
+
+	public void addQuestLink(QuestLink link) {
+		questLinks.add(link);
+		file.markDirty();
+	}
+
+	public void removeQuestLink(QuestLink link) {
+		questLinks.remove(link);
+		file.markDirty();
 	}
 
 	@Override
@@ -158,18 +178,6 @@ public final class Chapter extends QuestObject {
 			nbt.putDouble("default_quest_size", defaultQuestSize);
 		}
 		nbt.putBoolean("default_hide_dependency_lines", defaultHideDependencyLines);
-
-		if (!images.isEmpty()) {
-			ListTag list = new ListTag();
-
-			for (ChapterImage image : images) {
-				SNBTCompoundTag nbt1 = new SNBTCompoundTag();
-				image.writeData(nbt1);
-				list.add(nbt1);
-			}
-
-			nbt.put("images", list);
-		}
 
 		if (defaultMinWidth > 0) {
 			nbt.putInt("default_min_width", defaultMinWidth);
@@ -209,16 +217,6 @@ public final class Chapter extends QuestObject {
 
 		defaultHideDependencyLines = nbt.getBoolean("default_hide_dependency_lines");
 
-		ListTag imgs = nbt.getList("images", Tag.TAG_COMPOUND);
-
-		images.clear();
-
-		for (int i = 0; i < imgs.size(); i++) {
-			ChapterImage image = new ChapterImage(this);
-			image.readData(imgs.getCompound(i));
-			images.add(image);
-		}
-
 		defaultMinWidth = nbt.getInt("default_min_width");
 		progressionMode = ProgressionMode.NAME_MAP.get(nbt.getString("progression_mode"));
 		consumeItems = Tristate.read(nbt, "consume_items");
@@ -237,10 +235,16 @@ public final class Chapter extends QuestObject {
 		buffer.writeUtf(filename, Short.MAX_VALUE);
 		buffer.writeUtf(defaultQuestShape, Short.MAX_VALUE);
 		buffer.writeDouble(defaultQuestSize);
-		buffer.writeCollection(images, (buf, img) -> img.writeNetData(buf));
+//		buffer.writeCollection(images, (buf, img) -> img.writeNetData(buf));
 		buffer.writeInt(defaultMinWidth);
 		ProgressionMode.NAME_MAP.write(buffer, progressionMode);
 
+		buffer.writeVarInt(makeFlags());
+
+		if (!autoFocusId.isEmpty()) buffer.writeLong(QuestObjectBase.parseHexId(autoFocusId).orElse(0L));
+	}
+
+	private int makeFlags() {
 		int flags = 0;
 		flags = Bits.setFlag(flags, 0x01, alwaysInvisible);
 		flags = Bits.setFlag(flags, 0x02, defaultHideDependencyLines);
@@ -253,9 +257,7 @@ public final class Chapter extends QuestObject {
 		flags = Bits.setFlag(flags, 0x100, !autoFocusId.isEmpty());
 		flags = Bits.setFlag(flags, 0x200, hideQuestUntilDepsVisible);
 		flags = Bits.setFlag(flags, 0x400, hideTextUntilComplete);
-		buffer.writeVarInt(flags);
-
-		if (!autoFocusId.isEmpty()) buffer.writeLong(QuestObjectBase.parseHexId(autoFocusId).orElse(0L));
+		return flags;
 	}
 
 	@Override
@@ -264,7 +266,7 @@ public final class Chapter extends QuestObject {
 		filename = buffer.readUtf(Short.MAX_VALUE);
 		defaultQuestShape = buffer.readUtf(Short.MAX_VALUE);
 		defaultQuestSize = buffer.readDouble();
-		NetUtils.read(buffer, images, buf -> ChapterImage.fromNet(this, buf));
+//		NetUtils.read(buffer, images, buf -> ChapterImage.fromNet(this, buf));
 		defaultMinWidth = buffer.readInt();
 		progressionMode = ProgressionMode.NAME_MAP.read(buffer);
 
@@ -364,21 +366,16 @@ public final class Chapter extends QuestObject {
 	@Override
 	public void deleteSelf() {
 		super.deleteSelf();
+
+        List.copyOf(quests).forEach(Quest::deleteSelf);
+
 		group.removeChapter(this);
 	}
 
 	@Override
-	public void deleteChildren() {
-		for (Quest quest : quests) {
-			quest.deleteChildren();
-			quest.invalid = true;
-		}
-
-		quests.clear();
-	}
-
-	@Override
 	public void onCreated() {
+		super.onCreated();
+
 		// filename should have been suggested by the client and available here
 		// but in case not, fall back to the chapter's hex object id
 		if (filename.isEmpty()) {
@@ -516,22 +513,6 @@ public final class Chapter extends QuestObject {
 		return hideQuestUntilDepsVisible;
 	}
 
-	public void addImage(ChapterImage image) {
-		images.add(image);
-	}
-
-	public void removeImage(ChapterImage image) {
-		images.remove(image);
-	}
-
-	public void addQuestLink(QuestLink link) {
-		questLinks.add(link);
-	}
-
-	public void removeQuestLink(QuestLink link) {
-		questLinks.remove(link);
-	}
-
 	public List<String> getRawSubtitle() {
 		return file.getTranslationManager().getStringListTranslation(this, file.getLocale(), TranslationKey.CHAPTER_SUBTITLE)
 				.orElse(List.of());
@@ -556,7 +537,7 @@ public final class Chapter extends QuestObject {
 	public Optional<Movable> getAutofocus() {
 		if (autoFocusId != null && !autoFocusId.isEmpty()) {
 			return QuestObjectBase.parseHexId(autoFocusId)
-					.flatMap(id -> file.get(id) instanceof Movable m && m.getChapter() == this ?
+					.flatMap(id -> file.getBase(id) instanceof Movable m && m.getChapter() == this ?
 							Optional.of(m) :
 							Optional.empty()
 					);
@@ -570,5 +551,10 @@ public final class Chapter extends QuestObject {
 
 	public boolean isAutofocus(long id) {
 		return id == getAutofocus().map(Movable::getMovableID).orElse(0L);
+	}
+
+	@Override
+	public CompoundTag makeExtraCreationData() {
+		return Util.make(super.makeExtraCreationData(), t -> t.putLong("group", group.id));
 	}
 }

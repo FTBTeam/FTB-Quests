@@ -17,6 +17,7 @@ import dev.ftb.mods.ftbquests.quest.translation.TranslationKey;
 import dev.ftb.mods.ftbquests.util.ProgressChange;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.Util;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.RegistryFriendlyByteBuf;
@@ -186,15 +187,6 @@ public abstract class Reward extends QuestObjectBase {
 	}
 
 	@Override
-	public final void deleteChildren() {
-		for (TeamData data : getQuestFile().getAllTeamData()) {
-			data.deleteReward(this);
-		}
-
-		super.deleteChildren();
-	}
-
-	@Override
 	@Environment(EnvType.CLIENT)
 	public void editedFromGUI() {
 		QuestScreen gui = ClientUtils.getCurrentGuiAs(QuestScreen.class);
@@ -206,6 +198,8 @@ public abstract class Reward extends QuestObjectBase {
 
 	@Override
 	public void onCreated() {
+		super.onCreated();
+
 		quest.addReward(this);
 	}
 
@@ -309,6 +303,11 @@ public abstract class Reward extends QuestObjectBase {
 
 	protected boolean isIgnoreRewardBlockingHardcoded() {
 		return false;
+	}
+
+	@Override
+	public CompoundTag makeExtraCreationData() {
+		return Util.make(super.makeExtraCreationData(), t -> t.putString("type", getType().getTypeForNBT()));
 	}
 
 	public void addAnyProtoTranslations(CompoundTag tag) {

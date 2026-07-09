@@ -26,10 +26,7 @@ import dev.ftb.mods.ftbquests.client.gui.MultilineTextEditorScreen;
 import dev.ftb.mods.ftbquests.net.EditObjectMessage;
 import dev.ftb.mods.ftbquests.net.ReorderItemMessage;
 import dev.ftb.mods.ftbquests.net.TogglePinnedMessage;
-import dev.ftb.mods.ftbquests.quest.Quest;
-import dev.ftb.mods.ftbquests.quest.QuestLink;
-import dev.ftb.mods.ftbquests.quest.QuestObject;
-import dev.ftb.mods.ftbquests.quest.QuestObjectBase;
+import dev.ftb.mods.ftbquests.quest.*;
 import dev.ftb.mods.ftbquests.quest.reward.Reward;
 import dev.ftb.mods.ftbquests.quest.reward.RewardAutoClaim;
 import dev.ftb.mods.ftbquests.quest.task.Task;
@@ -624,10 +621,10 @@ public class ViewQuestPanel extends ModalPanel {
 		for (Panel panel : List.of(panelTasks, panelRewards)) {
 			for (Widget w : panel.getWidgets()) {
 				if (w instanceof TaskButton b && b.isMouseOver()) {
-					NetworkManager.sendToServer(new ReorderItemMessage(b.task.getId(), moveRight));
+					NetworkManager.sendToServer(new ReorderItemMessage(b.task.getId(), QuestObjectType.TASK, moveRight));
 					return;
 				} else if (w instanceof RewardButton b && b.isMouseOver()) {
-					NetworkManager.sendToServer(new ReorderItemMessage(b.reward.getId(), moveRight));
+					NetworkManager.sendToServer(new ReorderItemMessage(b.reward.getId(), QuestObjectType.REWARD, moveRight));
 					return;
 				}
 			}
@@ -749,7 +746,6 @@ public class ViewQuestPanel extends ModalPanel {
 						mutableRawDesc.set(line, c.getValue());
 					}
 					quest.setRawDescription(List.copyOf(mutableRawDesc));
-//					syncQuestToServer();
 					refreshWidgets();
 				}
 			}).atPosition(clickedWidget.getX(), clickedWidget.getY());
@@ -759,7 +755,7 @@ public class ViewQuestPanel extends ModalPanel {
 	}
 
 	private void editImage(int line, ImageComponent component) {
-		ConfigGroup group = new ConfigGroup(FTBQuestsAPI.MOD_ID + ".chapter.image", accepted -> {
+		ConfigGroup group = new ConfigGroup(FTBQuestsAPI.MOD_ID + ".image", accepted -> {
 			openGui();
 			if (accepted) {
 				quest.modifyTranslatableListValue(TranslationKey.QUEST_DESC, mutableRawDesc -> {
@@ -769,7 +765,6 @@ public class ViewQuestPanel extends ModalPanel {
 						mutableRawDesc.set(line, component.toString());
 					}
 				});
-//				syncQuestToServer();
 
 				refreshWidgets();
 			}
@@ -805,7 +800,6 @@ public class ViewQuestPanel extends ModalPanel {
 			contextMenu.add(new ContextMenuItem(Component.translatable("selectServer.edit"), ThemeProperties.EDIT_ICON.get(), b -> editDescLine0(clickedWidget, line, type)));
 			contextMenu.add(new ContextMenuItem(Component.translatable("selectServer.delete"), ThemeProperties.DELETE_ICON.get(), b -> {
 				quest.modifyTranslatableListValue(TranslationKey.QUEST_DESC, mutableDesc -> mutableDesc.remove(line));
-//				syncQuestToServer();
 				refreshWidgets();
 			}));
 

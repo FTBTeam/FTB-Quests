@@ -24,14 +24,11 @@ import dev.ftb.mods.ftbquests.quest.QuestObjectBase;
 import dev.ftb.mods.ftbquests.quest.loot.LootCrate;
 import dev.ftb.mods.ftbquests.quest.loot.RewardTable;
 import dev.ftb.mods.ftbquests.quest.reward.RandomReward;
-import dev.ftb.mods.ftbquests.quest.translation.TranslationKey;
 import dev.ftb.mods.ftbquests.registry.ModItems;
 import it.unimi.dsi.fastutil.ints.IntOpenHashSet;
 import it.unimi.dsi.fastutil.ints.IntSet;
 import net.minecraft.ChatFormatting;
-import net.minecraft.Util;
 import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.world.item.Items;
@@ -148,21 +145,13 @@ public class RewardTablesScreen extends AbstractButtonListScreen {
 		}
 		editedIndexes.removeAll(pendingDeleteIndexes);
 
-		int nAdded = sendToServer(toCreate, RewardTablesScreen::makeCreationPacket, true);
+		int nAdded = sendToServer(toCreate, table -> CreateObjectMessage.requestCreation(table, false), true);
 		int nEdited = sendToServer(editedIndexes, EditObjectMessage::forQuestObject, false);
 		int nDeleted = sendToServer(pendingDeleteIndexes, DeleteObjectMessage::forQuestObject, false);
 
 		FTBQuests.LOGGER.debug("Sent {} new, {} edited, {} deleted reward tables to server", nAdded, nEdited, nDeleted);
 
 		questScreen.run();
-	}
-
-	private static CreateObjectMessage makeCreationPacket(RewardTable table) {
-		ClientQuestFile file = ClientQuestFile.INSTANCE;
-		CompoundTag extra = Util.make(new CompoundTag(), tag -> file.getTranslationManager().addInitialTranslation(
-				tag, file.getLocale(), TranslationKey.TITLE, table.getRawTitle())
-		);
-		return CreateObjectMessage.create(table, extra);
 	}
 
 	private <T extends CustomPacketPayload> int sendToServer(IntSet indexes, Function<RewardTable, T> func, boolean addNew) {

@@ -9,6 +9,7 @@ import dev.ftb.mods.ftblibrary.util.client.ClientUtils;
 import dev.ftb.mods.ftbquests.FTBQuests;
 import dev.ftb.mods.ftbquests.client.gui.CustomToast;
 import dev.ftb.mods.ftbquests.client.gui.EmergencyItemsScreen;
+import dev.ftb.mods.ftbquests.client.gui.QuestFileChangelog;
 import dev.ftb.mods.ftbquests.client.gui.quests.QuestScreen;
 import dev.ftb.mods.ftbquests.net.DeleteObjectMessage;
 import dev.ftb.mods.ftbquests.quest.*;
@@ -45,8 +46,10 @@ public class ClientQuestFile extends BaseQuestFile {
 	private QuestScreen.PersistedData persistedData;
 	private boolean editorPermission;
 
+	private final QuestFileChangelog changelog = new QuestFileChangelog();
+
 	public static boolean exists() {
-		return INSTANCE != null && !INSTANCE.invalid;
+		return INSTANCE != null && INSTANCE.isValid();
 	}
 
 	public static void syncFromServer(BaseQuestFile newInstance) {
@@ -56,7 +59,6 @@ public class ClientQuestFile extends BaseQuestFile {
 
 		if (INSTANCE != null) {
 			// clean up the previous instance
-			INSTANCE.deleteChildren();
 			INSTANCE.deleteSelf();
 		}
 
@@ -71,6 +73,10 @@ public class ClientQuestFile extends BaseQuestFile {
 		refreshGui();
 		FTBQuests.getRecipeModHelper().refreshRecipes(INSTANCE);
 		EmergencyItemsScreen.initCooldown();
+	}
+
+	public QuestFileChangelog getChangelog() {
+		return changelog;
 	}
 
 	@Override
@@ -148,8 +154,13 @@ public class ClientQuestFile extends BaseQuestFile {
 	}
 
 	@Override
-	public void deleteObject(long id) {
-		NetworkManager.sendToServer(new DeleteObjectMessage(id));
+	public void deleteObjects(List<Long> ids) {
+		// Don't actually delete the object(s) yet, but just send a deletion request to the server
+		// See FTBQuestNetClient#deleteObject for actual client-side deletion, done on receipt of
+		//   the server deletion response
+		if (!ids.isEmpty()) {
+			NetworkManager.sendToServer(new DeleteObjectMessage(ids));
+		}
 	}
 
 	@Override
@@ -188,7 +199,6 @@ public class ClientQuestFile extends BaseQuestFile {
 	@Override
 	public boolean moveChapterGroup(long id, boolean movingUp) {
 		if (super.moveChapterGroup(id, movingUp)) {
-			clearCachedData();
 			QuestScreen gui = ClientUtils.getCurrentGuiAs(QuestScreen.class);
 			if (gui != null) {
 				gui.refreshChapterPanel();

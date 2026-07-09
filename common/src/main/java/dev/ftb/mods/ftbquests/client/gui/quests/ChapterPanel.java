@@ -27,11 +27,9 @@ import dev.ftb.mods.ftbquests.quest.theme.property.ThemeProperties;
 import dev.ftb.mods.ftbquests.quest.translation.TranslationKey;
 import dev.ftb.mods.ftbquests.util.TextUtils;
 import net.minecraft.ChatFormatting;
-import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.Style;
@@ -85,8 +83,15 @@ public class ChapterPanel extends Panel {
 	public void alignWidgets() {
 		int wd = 100;
 
+		ChapterButton selected = null;
+
 		for (Widget w : widgets) {
-			wd = Math.min(Math.max(wd, ((ListButton) w).getActualWidth(questScreen)), 800);
+			if (w instanceof ListButton lb) {
+				wd = Math.clamp(wd, lb.getActualWidth(questScreen), 800);
+				if (lb instanceof ChapterButton cb && questScreen.selectedChapter == cb.chapter) {
+					selected = cb;
+				}
+			}
 		}
 
 		setPosAndSize(((expanded || isPinned())) ? 0 : -wd, 0, wd, questScreen.height);
@@ -99,6 +104,14 @@ public class ChapterPanel extends Panel {
 
 		if (getContentHeight() <= height) {
 			setScrollY(0);
+		} else if (selected != null) {
+			// try to keep selected chapter in view
+			int scrolledY = (int) (selected.posY - getScrollY());
+			if (scrolledY < 0) {
+				setScrollY(selected.posY);
+			} else if (scrolledY + selected.height > height) {
+				setScrollY(getScrollY() + (height - scrolledY + selected.height));
+			}
 		}
 
 		curX = expanded ? 0 : -width;
@@ -221,10 +234,9 @@ public class ChapterPanel extends Panel {
 					chapterPanel.questScreen.openGui();
 
 					if (accepted && !c.getValue().isEmpty()) {
-						Chapter chapter = new Chapter(0L, file, file.getDefaultChapterGroup(), Chapter.titleToID( c.getValue()).orElse(""));
-						CompoundTag extra = Util.make(new CompoundTag(), t -> t.putLong("group", 0L));
-						file.getTranslationManager().addInitialTranslation(extra, file.getLocale(), TranslationKey.TITLE, c.getValue());
-						NetworkManager.sendToServer(CreateObjectMessage.create(chapter, extra));
+						Chapter chapter = new Chapter(0L, file, file.getDefaultChapterGroup(), Chapter.titleToID(c.getValue()).orElse(""));
+						chapter.setRawTitle(c.getValue());
+						NetworkManager.sendToServer(CreateObjectMessage.requestCreation(chapter));
 					}
 
 					run();
@@ -241,9 +253,8 @@ public class ChapterPanel extends Panel {
 
 					if (accepted) {
 						ChapterGroup group = new ChapterGroup(0L, ClientQuestFile.INSTANCE);
-						CompoundTag extra = Util.make(new CompoundTag(), t -> t.putLong("group", 0L));
-						file.getTranslationManager().addInitialTranslation(extra, file.getLocale(), TranslationKey.TITLE, c.getValue());
-						NetworkManager.sendToServer(CreateObjectMessage.create(group, extra));
+						group.setRawTitle(c.getValue());
+						NetworkManager.sendToServer(CreateObjectMessage.requestCreation(group));
 					}
 				}, b.getTitle()).atMousePosition();
 				overlay.setWidth(150);
@@ -350,10 +361,9 @@ public class ChapterPanel extends Panel {
 				chapterPanel.questScreen.openGui();
 
 				if (accepted && !c.getValue().isEmpty()) {
-					Chapter chapter = new Chapter(0L, file, file.getDefaultChapterGroup(), Chapter.titleToID( c.getValue()).orElse(""));
-					CompoundTag extra = Util.make(new CompoundTag(), t -> t.putLong("group", group.id));
-					file.getTranslationManager().addInitialTranslation(extra, file.getLocale(), TranslationKey.TITLE, c.getValue());
-					NetworkManager.sendToServer(CreateObjectMessage.create(chapter, extra));
+					Chapter chapter = new Chapter(0L, file, group, Chapter.titleToID( c.getValue()).orElse(""));
+					chapter.setRawTitle(c.getValue());
+					NetworkManager.sendToServer(CreateObjectMessage.requestCreation(chapter));
 				}
 
 				run();

@@ -8,6 +8,7 @@ import dev.ftb.mods.ftblibrary.config.ui.EditConfigScreen;
 import dev.ftb.mods.ftblibrary.icon.Icon;
 import dev.ftb.mods.ftblibrary.math.Bits;
 import dev.ftb.mods.ftblibrary.snbt.SNBTCompoundTag;
+import dev.ftb.mods.ftbquests.FTBQuests;
 import dev.ftb.mods.ftbquests.api.FTBQuestsAPI;
 import dev.ftb.mods.ftbquests.client.ClientQuestFile;
 import dev.ftb.mods.ftbquests.client.ConfigIconItemStack;
@@ -46,7 +47,7 @@ public abstract class QuestObjectBase implements Comparable<QuestObjectBase> {
 
 	public final long id;
 
-	protected boolean invalid = false;
+	private boolean invalid = false;
 	private ItemStack rawIcon = ItemStack.EMPTY;
 	private List<String> tags = new ArrayList<>(0);
 
@@ -63,6 +64,10 @@ public abstract class QuestObjectBase implements Comparable<QuestObjectBase> {
 
 	public long getId() {
 		return id;
+	}
+
+	public void invalidate() {
+		invalid = true;
 	}
 
 	public static boolean isNull(@Nullable QuestObjectBase object) {
@@ -410,11 +415,16 @@ public abstract class QuestObjectBase implements Comparable<QuestObjectBase> {
 
 	}
 
+	/**
+	 * Called on object deletion. Responsible for cleaning up any self data and also any child objects
+	 * (chapter -> quests, quest -> tasks etc.)
+	 */
 	public void deleteSelf() {
-		getQuestFile().remove(id);
-	}
+		invalidate();
 
-	public void deleteChildren() {
+		if (getQuestFile().removeFromMap(id) == null) {
+			FTBQuests.LOGGER.warn("tried to remove quest object {} from ID map, but it wasn't present!", this);
+		}
 	}
 
 	@Environment(EnvType.CLIENT)
@@ -426,6 +436,9 @@ public abstract class QuestObjectBase implements Comparable<QuestObjectBase> {
 	}
 
 	public void onCreated() {
+		if (getQuestFile().addtoMap(this) != null) {
+			FTBQuests.LOGGER.warn("quest object {} already in ID map, overwriting!", this);
+		}
 	}
 
 	public Optional<String> getPath() {
@@ -443,7 +456,7 @@ public abstract class QuestObjectBase implements Comparable<QuestObjectBase> {
 	}
 
 	@Environment(EnvType.CLIENT)
-	public void onEditButtonClicked(Runnable gui) {
+	public void onEditButtonClicked(Runnable gui, Component title) {
 		ConfigGroup group = new ConfigGroup(FTBQuestsAPI.MOD_ID, accepted -> {
 			gui.run();
 			if (accepted && validateEditedConfig()) {
@@ -453,7 +466,7 @@ public abstract class QuestObjectBase implements Comparable<QuestObjectBase> {
 			@Override
 			public Component getName() {
 				MutableComponent type = Component.literal(" [").append(Component.translatable("ftbquests." + getObjectType().getId())).append("]").withStyle(getObjectType().getColor());
-				return Component.empty().append(getTitle().copy().withStyle(ChatFormatting.UNDERLINE)).append(type);
+				return Component.empty().append(title.copy().withStyle(ChatFormatting.UNDERLINE)).append(type);
 			}
 		};
 
@@ -465,6 +478,10 @@ public abstract class QuestObjectBase implements Comparable<QuestObjectBase> {
 				return group.getName();
 			}
 		}.openGui();
+	}
+
+	public final void onEditButtonClicked(Runnable gui) {
+		onEditButtonClicked(gui, getTitle());
 	}
 
 	protected boolean validateEditedConfig() {
@@ -483,6 +500,7 @@ public abstract class QuestObjectBase implements Comparable<QuestObjectBase> {
 		CompoundTag tag = new CompoundTag();
 		orig.writeData(tag, orig.holderLookup());
 		copied.readData(tag, orig.holderLookup());
+		copied.setRawTitle(orig.getRawTitle());
 		return copied;
 	}
 
@@ -504,5 +522,20 @@ public abstract class QuestObjectBase implements Comparable<QuestObjectBase> {
 		}
 
 		return Util.make(SNBTCompoundTag.of(stack.save(holderLookup())), SNBTCompoundTag::singleLine);
+	}
+
+	/**
+	 * Build the extra NBT data sent along with a quest object creation request to the server. Default is to include
+	 * the initial raw title text for insertion into the translation manager. Override to augment this with any other
+	 * extra data that needs to be handled in {@link BaseQuestFile#create(long, QuestObjectType, long, CompoundTag)}.
+	 *
+	 * @return some nbt data
+	 */
+	public CompoundTag makeExtraCreationData() {
+		CompoundTag tag = new CompoundTag();
+		if (getRawTitle() != null && !getRawTitle().isEmpty()) {
+			getQuestFile().getTranslationManager().addInitialTranslation(tag, getQuestFile().getLocale(), TranslationKey.TITLE, getRawTitle());
+		}
+		return tag;
 	}
 }

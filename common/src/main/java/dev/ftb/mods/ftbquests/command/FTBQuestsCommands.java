@@ -313,7 +313,7 @@ public class FTBQuestsCommands {
 		}
 
 		file.addRewardTable(table);
-		file.refreshIDMap();
+		file.refreshRewardTableRewardIDs();
 		file.clearCachedData();
 		file.markDirty();
 
@@ -466,7 +466,7 @@ public class FTBQuestsCommands {
 			task.onCreated();
 			task.setStackAndCount(stack, 1);//.setConsumeItems(Tristate.TRUE);
 
-			NetworkHelper.sendToAll(source.getServer(), CreateObjectResponseMessage.create(task, task.getType().makeExtraNBT()));
+			NetworkHelper.sendToAll(source.getServer(), CreateObjectMessage.requestCreation(task));
 
 			col++;
 		}

@@ -1,5 +1,7 @@
 package dev.ftb.mods.ftbquests.client.gui.quests;
 
+import com.mojang.datafixers.util.Pair;
+import dev.architectury.networking.NetworkManager;
 import dev.ftb.mods.ftblibrary.config.ConfigGroup;
 import dev.ftb.mods.ftblibrary.config.ConfigValue;
 import dev.ftb.mods.ftblibrary.config.ConfigWithVariants;
@@ -29,8 +31,6 @@ import dev.ftb.mods.ftbquests.quest.theme.QuestTheme;
 import dev.ftb.mods.ftbquests.quest.theme.ThemeLoader;
 import dev.ftb.mods.ftbquests.quest.theme.property.ThemeProperties;
 import dev.ftb.mods.ftbquests.util.ConfigQuestObject;
-import com.mojang.datafixers.util.Pair;
-import dev.architectury.networking.NetworkManager;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
@@ -65,6 +65,7 @@ public class QuestScreen extends BaseScreen {
 	static boolean grid = false;
 	private PersistedData pendingPersistedData;
 	private final Deque<Long> questViewHistory = new ArrayDeque<>();
+	private final Set<Panel> refreshPending = Collections.newSetFromMap(new IdentityHashMap<>());
 
 	public final QuestPanel questPanel;
 	public final OtherButtonsPanelBottom otherButtonsBottomPanel;
@@ -101,20 +102,24 @@ public class QuestScreen extends BaseScreen {
 	}
 
 	public void refreshChapterPanel() {
-		chapterPanel.refreshWidgets();
+		refreshPending.add(chapterPanel);
 	}
 
 	public void refreshQuestPanel() {
-		questPanel.refreshWidgets();
+		refreshPending.add(questPanel);
 	}
 
 	public void refreshViewQuestPanel() {
-		viewQuestPanel.refreshWidgets();
+		refreshPending.add(viewQuestPanel);
+	}
+
+	public int getChapterPanelRight() {
+		return chapterPanel.expanded ? chapterPanel.width : 20;
 	}
 
 	@Override
 	public boolean doesGuiPauseGame() {
-		return ClientQuestFile.INSTANCE.isPauseGame();
+		return file.isPauseGame();
 	}
 
 	@Override
@@ -263,11 +268,11 @@ public class QuestScreen extends BaseScreen {
 		}
 
 		long delId = deletionFocus == null ? object.id : deletionFocus.getMovableID();
-		QuestObjectBase delObject = ClientQuestFile.INSTANCE.getBase(delId);
+		QuestObjectBase delObject = file.getBase(delId);
 		if (delObject != null) {
 			ContextMenuItem delete = new ContextMenuItem(Component.translatable("selectServer.delete"),
 					ThemeProperties.DELETE_ICON.get(),
-					b -> ClientQuestFile.INSTANCE.deleteObject(delId));
+					b -> file.deleteObjects(List.of(delId)));
 			if (!isShiftKeyDown()) {
 				delete.setYesNoText(Component.translatable("delete_item", delObject.getTitle()));
 			}
@@ -370,7 +375,7 @@ public class QuestScreen extends BaseScreen {
 	private boolean moveSelectedQuests(double x, double y) {
 		for (Movable movable : selectedObjects) {
 			if (movable.getChapter() == selectedChapter) {
-				movable.initiateMoveClientSide(selectedChapter, movable.getX() + x, movable.getY() + y);
+				movable.requestMove(selectedChapter, movable.getX() + x, movable.getY() + y);
 			}
 		}
 
@@ -402,27 +407,22 @@ public class QuestScreen extends BaseScreen {
 		}
 
 		return false;
-    }
-
-	private boolean pasteSelectedQuest(boolean withDeps) {
-		if (ChapterImage.isImageInClipboard()) {
-			return pasteSelectedImage();
-		} else {
-			return QuestObjectBase.parseHexId(getClipboardString()).map(id -> {
-				Quest quest = file.getQuest(id);
-				if (quest == null) return false;
-				Pair<Double, Double> qxy = getSnappedXY();
-				NetworkManager.sendToServer(new CopyQuestMessage(quest.id, selectedChapter.id, qxy.getFirst(), qxy.getSecond(), withDeps));
-				return true;
-			}).orElse(false);
-		}
 	}
 
-	private boolean pasteSelectedImage() {
-		return ChapterImageButton.getClipboardImage().map(clipImg -> {
-			Pair<Double,Double> qxy = getSnappedXY();
-			NetworkManager.sendToServer(new CopyChapterImageMessage(clipImg, selectedChapter, qxy.getFirst(), qxy.getSecond()));
-			return true;
+	private boolean pasteSelectedQuest(boolean withDeps, Chapter chapter) {
+		return QuestObjectBase.parseHexId(getClipboardString()).map(id -> {
+			Pair<Double, Double> qxy = getSnappedXY();
+			return switch (file.getBase(id)) {
+				case Quest quest -> {
+					NetworkManager.sendToServer(new CopyQuestMessage(quest.getId(), chapter.getId(), qxy.getFirst(), qxy.getSecond(), withDeps));
+					yield true;
+				}
+				case ChapterImage img -> {
+					NetworkManager.sendToServer(new CopyChapterImageMessage(img.getId(), chapter.getId(), qxy.getFirst(), qxy.getSecond()));
+					yield true;
+				}
+				case null, default -> false;
+			};
 		}).orElse(false);
 	}
 
@@ -435,7 +435,7 @@ public class QuestScreen extends BaseScreen {
 			Pair<Double,Double> qxy = getSnappedXY();
 			QuestLink link = new QuestLink(0L, selectedChapter, id);
 			link.setPosition(qxy.getFirst(), qxy.getSecond());
-			NetworkManager.sendToServer(CreateObjectMessage.create(link, null, false));
+			NetworkManager.sendToServer(CreateObjectMessage.requestCreation(link, false));
 			return true;
 		}).orElse(false);
 	}
@@ -448,16 +448,8 @@ public class QuestScreen extends BaseScreen {
 	}
 
 	void deleteSelectedObjects() {
-		selectedObjects.forEach(movable -> {
-			if (movable instanceof Quest q) {
-				file.deleteObject(q.id);
-			} else if (movable instanceof QuestLink ql) {
-				file.deleteObject(ql.id);
-			} else if (movable instanceof ChapterImage img) {
-				img.getChapter().removeImage(img);
-				NetworkManager.sendToServer(EditObjectMessage.forQuestObject(img.getChapter()));
-			}
-		});
+		List<Long> toDelete = selectedObjects.stream().map(Movable::getMovableID).toList();
+		file.deleteObjects(toDelete);
 		selectedObjects.clear();
 	}
 
@@ -465,18 +457,82 @@ public class QuestScreen extends BaseScreen {
 	public boolean keyPressed(Key key) {
 		if (super.keyPressed(key)) {
 			return true;
-		} else if (FTBQuestsClient.KEY_QUESTS.matches(key.keyCode, key.scanCode)) {
-			closeGui(true);
-			return true;
+		}
+
+		if (file.canEdit()) {
+			if (key.is(GLFW.GLFW_KEY_F5)) {
+				reloadTheme(!isShiftKeyDown());
+				return true;
+			}
+
+			if (key.is(GLFW.GLFW_KEY_DELETE) && !selectedObjects.isEmpty()) {
+				if (!isShiftKeyDown()) {
+					Component title = Component.translatable("delete_item", Component.translatable("ftbquests.objects", selectedObjects.size()));
+					getGui().openYesNo(title, Component.empty(), this::deleteSelectedObjects);
+				} else {
+					deleteSelectedObjects();
+				}
+				return true;
+			} else if (key.modifiers.control()) {
+				double step = key.modifiers.shift() ? 0.1D : 0.5D;
+
+				switch (key.keyCode) {
+					case GLFW.GLFW_KEY_A -> {
+						if (selectedChapter != null) {
+							selectedObjects.addAll(selectedChapter.getQuests());
+							selectedObjects.addAll(selectedChapter.getQuestLinks());
+							selectedObjects.addAll(selectedChapter.getImages());
+						}
+						return true;
+					}
+					case GLFW.GLFW_KEY_D -> {
+						selectedObjects.clear();
+						return true;
+					}
+					case GLFW.GLFW_KEY_DOWN -> {
+						return moveSelectedQuests(0D, step);
+					}
+					case GLFW.GLFW_KEY_UP -> {
+						return moveSelectedQuests(0D, -step);
+					}
+					case GLFW.GLFW_KEY_LEFT -> {
+						return moveSelectedQuests(-step, 0D);
+					}
+					case GLFW.GLFW_KEY_RIGHT -> {
+						return moveSelectedQuests(step, 0D);
+					}
+					case GLFW.GLFW_KEY_C -> {
+						return copyObjectsToClipboard();
+					}
+					case GLFW.GLFW_KEY_V -> {
+						if (key.modifiers.alt()) {
+							return pasteSelectedQuestLinks();
+						} else {
+							return pasteSelectedQuest(!key.modifiers.shift(), selectedChapter);
+						}
+					}
+					case GLFW.GLFW_KEY_T -> {
+						new RewardTablesScreen(this).openGui();
+						return true;
+					}
+					case GLFW.GLFW_KEY_Y -> {
+						NetworkManager.sendToServer(UndoRedoRequestMessage.redo());
+						return true;
+					}
+					case GLFW.GLFW_KEY_Z -> {
+						NetworkManager.sendToServer(UndoRedoRequestMessage.undo());
+						return true;
+					}
+				}
+			}
 		}
 
 		List<Chapter> visibleChapters = file.getVisibleChapters(file.selfTeamData);
-
 		if (key.is(GLFW.GLFW_KEY_TAB)) {
 			if (selectedChapter != null && visibleChapters.size() > 1) {
-                selectChapter(visibleChapters.get(MathUtils.mod(visibleChapters.indexOf(selectedChapter) + (isShiftKeyDown() ? -1 : 1), visibleChapters.size())));
-                selectedChapter.getAutofocus().ifPresent(this::scrollTo);
-            }
+				selectChapter(visibleChapters.get(MathUtils.mod(visibleChapters.indexOf(selectedChapter) + (isShiftKeyDown() ? -1 : 1), visibleChapters.size())));
+				selectedChapter.getAutofocus().ifPresent(this::scrollTo);
+			}
 
 			return true;
 		}
@@ -514,71 +570,12 @@ public class QuestScreen extends BaseScreen {
 
 		if (key.is(GLFW.GLFW_KEY_P) && key.modifiers.onlyControl()) {
 			FTBQuestsClientConfig.openSettings(doesGuiPauseGame());
-		}
-
-		if (!file.canEdit()) {
-			return false;
-		}
-
-		// all edit-mode keybinds handled below here
-
-		if (key.is(GLFW.GLFW_KEY_F5)) {
-			reloadTheme(!isShiftKeyDown());
 			return true;
 		}
 
-		if (key.is(GLFW.GLFW_KEY_DELETE) && !selectedObjects.isEmpty()) {
-			if (!isShiftKeyDown()) {
-				Component title = Component.translatable("delete_item", Component.translatable("ftbquests.objects", selectedObjects.size()));
-				getGui().openYesNo(title, Component.empty(), this::deleteSelectedObjects);
-			} else {
-				deleteSelectedObjects();
-			}
-		} else if (key.modifiers.control()) {
-			double step = key.modifiers.shift() ? 0.1D : 0.5D;
-
-			switch (key.keyCode) {
-				case GLFW.GLFW_KEY_A -> {
-					if (selectedChapter != null) {
-						selectedObjects.addAll(selectedChapter.getQuests());
-						selectedObjects.addAll(selectedChapter.getQuestLinks());
-						selectedObjects.addAll(selectedChapter.getImages());
-					}
-					return true;
-				}
-				case GLFW.GLFW_KEY_D -> {
-					selectedObjects.clear();
-					return true;
-				}
-				case GLFW.GLFW_KEY_DOWN -> {
-					return moveSelectedQuests(0D, step);
-				}
-				case GLFW.GLFW_KEY_UP -> {
-					return moveSelectedQuests(0D, -step);
-				}
-				case GLFW.GLFW_KEY_LEFT -> {
-					return moveSelectedQuests(-step, 0D);
-				}
-				case GLFW.GLFW_KEY_RIGHT -> {
-					return moveSelectedQuests(step, 0D);
-				}
-				case GLFW.GLFW_KEY_C -> {
-					return copyObjectsToClipboard();
-				}
-				case GLFW.GLFW_KEY_V -> {
-					if (key.modifiers.alt()) {
-						return pasteSelectedQuestLinks();
-					} else {
-						return pasteSelectedQuest(!key.modifiers.shift());
-					}
-				}
-				case GLFW.GLFW_KEY_T -> {
-					if (key.modifiers.control()) {
-						new RewardTablesScreen(this).openGui();
-						return true;
-					}
-				}
-			}
+		if (FTBQuestsClient.KEY_QUESTS.matches(key.keyCode, key.scanCode)) {
+			closeGui(true);
+			return true;
 		}
 
 		return false;
@@ -608,6 +605,11 @@ public class QuestScreen extends BaseScreen {
 
 	@Override
 	public void tick() {
+		if (!refreshPending.isEmpty()) {
+			refreshPending.forEach(Panel::refreshWidgets);
+			refreshPending.clear();
+		}
+
 		if (pendingPersistedData != null) {
 			restorePersistedScreenData(file, pendingPersistedData);
 			pendingPersistedData = null;
@@ -770,13 +772,6 @@ public class QuestScreen extends BaseScreen {
 		return super.handleClick(scheme, path);
 	}
 
-	@Override
-	public void addMouseOverText(TooltipList list) {
-//		list.zOffset = 950;
-//		list.zOffsetItemTooltip = 500;
-		super.addMouseOverText(list);
-	}
-
 	public void addInfoTooltip(TooltipList list, QuestObjectBase object) {
 		if (isKeyDown(GLFW.GLFW_KEY_F1) || isShiftKeyDown() && isCtrlKeyDown()) {
 			list.add(Component.literal(object.getCodeString()).withStyle(ChatFormatting.DARK_GRAY));
@@ -835,7 +830,7 @@ public class QuestScreen extends BaseScreen {
 		selectedObjects.clear();
 		persistedData.selectedQuests.stream()
 				.mapToLong(id -> id)
-				.filter(id -> file.get(id) instanceof Movable)
+				.filter(id -> file.getBase(id) instanceof Movable)
 				.mapToObj(id -> (Movable) file.get(id))
 				.forEach(selectedObjects::add);
 

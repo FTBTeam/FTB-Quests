@@ -12,7 +12,7 @@ public class FTBQuestsNetHandler {
 		NetworkHelper.registerC2S(CopyChapterImageMessage.TYPE, CopyChapterImageMessage.STREAM_CODEC, CopyChapterImageMessage::handle);
 		NetworkHelper.registerC2S(CopyQuestMessage.TYPE, CopyQuestMessage.STREAM_CODEC, CopyQuestMessage::handle);
 		NetworkHelper.registerC2S(CreateObjectMessage.TYPE, CreateObjectMessage.STREAM_CODEC, CreateObjectMessage::handle);
-		NetworkHelper.registerC2S(CreateTaskAtMessage.TYPE, CreateTaskAtMessage.STREAM_CODEC, CreateTaskAtMessage::handle);
+		NetworkHelper.registerC2S(CreateQuestAndTaskMessage.TYPE, CreateQuestAndTaskMessage.STREAM_CODEC, CreateQuestAndTaskMessage::handle);
 		NetworkHelper.registerC2S(DeleteObjectMessage.TYPE, DeleteObjectMessage.STREAM_CODEC, DeleteObjectMessage::handle);
 		NetworkHelper.registerC2S(EditObjectMessage.TYPE, EditObjectMessage.STREAM_CODEC, EditObjectMessage::handle);
 		NetworkHelper.registerC2S(ForceSaveMessage.TYPE, ForceSaveMessage.STREAM_CODEC, ForceSaveMessage::handle);
@@ -31,6 +31,7 @@ public class FTBQuestsNetHandler {
 		NetworkHelper.registerC2S(BlockConfigResponseMessage.TYPE, BlockConfigResponseMessage.STREAM_CODEC, BlockConfigResponseMessage::handle);
 		NetworkHelper.registerC2S(ToggleEditingModeMessage.TYPE, ToggleEditingModeMessage.STREAM_CODEC, ToggleEditingModeMessage::handle);
 		NetworkHelper.registerC2S(TogglePinnedMessage.TYPE, TogglePinnedMessage.STREAM_CODEC, TogglePinnedMessage::handle);
+		NetworkHelper.registerC2S(UndoRedoRequestMessage.TYPE, UndoRedoRequestMessage.STREAM_CODEC, UndoRedoRequestMessage::handle);
 
 		NetworkHelper.registerS2C(ChangeChapterGroupResponseMessage.TYPE, ChangeChapterGroupResponseMessage.STREAM_CODEC, ChangeChapterGroupResponseMessage::handle);
 		NetworkHelper.registerS2C(ClaimRewardResponseMessage.TYPE, ClaimRewardResponseMessage.STREAM_CODEC, ClaimRewardResponseMessage::handle);
@@ -68,5 +69,6 @@ public class FTBQuestsNetHandler {
 		NetworkHelper.registerS2C(TogglePinnedResponseMessage.TYPE, TogglePinnedResponseMessage.STREAM_CODEC, TogglePinnedResponseMessage::handle);
 		NetworkHelper.registerS2C(UpdateTaskProgressMessage.TYPE, UpdateTaskProgressMessage.STREAM_CODEC, UpdateTaskProgressMessage::handle);
 		NetworkHelper.registerS2C(UpdateTeamDataMessage.TYPE, UpdateTeamDataMessage.STREAM_CODEC, UpdateTeamDataMessage::handle);
+		NetworkHelper.registerS2C(SendChangeDescPacket.TYPE, SendChangeDescPacket.STREAM_CODEC, SendChangeDescPacket::handle);
 	}
 }

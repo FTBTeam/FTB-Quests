@@ -1,7 +1,6 @@
 package dev.ftb.mods.ftbquests.quest;
 
 import com.mojang.datafixers.util.Pair;
-import dev.architectury.networking.NetworkManager;
 import dev.ftb.mods.ftblibrary.config.*;
 import dev.ftb.mods.ftblibrary.icon.Icon;
 import dev.ftb.mods.ftblibrary.icon.IconAnimation;
@@ -11,14 +10,12 @@ import dev.ftb.mods.ftblibrary.ui.Widget;
 import dev.ftb.mods.ftblibrary.ui.input.MouseButton;
 import dev.ftb.mods.ftblibrary.util.client.ClientUtils;
 import dev.ftb.mods.ftbquests.FTBQuests;
-import dev.ftb.mods.ftbquests.client.FTBQuestsClient;
 import dev.ftb.mods.ftbquests.client.gui.MultilineTextEditorScreen;
 import dev.ftb.mods.ftbquests.client.gui.quests.QuestScreen;
 import dev.ftb.mods.ftbquests.events.ObjectCompletedEvent;
 import dev.ftb.mods.ftbquests.events.ObjectStartedEvent;
 import dev.ftb.mods.ftbquests.events.QuestProgressEventData;
 import dev.ftb.mods.ftbquests.integration.RecipeModHelper;
-import dev.ftb.mods.ftbquests.net.MoveMovableMessage;
 import dev.ftb.mods.ftbquests.quest.reward.Reward;
 import dev.ftb.mods.ftbquests.quest.reward.RewardType;
 import dev.ftb.mods.ftbquests.quest.task.Task;
@@ -433,7 +430,7 @@ public final class Quest extends QuestObject implements Movable, Excludable {
 		buffer.writeVarInt(dependencies.size());
 
 		for (QuestObject d : dependencies) {
-			buffer.writeLong(d.invalid ? 0L : d.id);
+			buffer.writeLong(d.isValid() ? d.id : 0L);
 		}
 
 		if (size != 0D) {
@@ -614,35 +611,33 @@ public final class Quest extends QuestObject implements Movable, Excludable {
 	@Override
 	public void deleteSelf() {
 		super.deleteSelf();
+
 		chapter.removeQuest(this);
 
+		// clean up any tasks & rewards
+		for (Task task : List.copyOf(tasks)) {
+			task.deleteSelf();
+		}
+		tasks.clear();
+		for (Reward reward : List.copyOf(rewards)) {
+			reward.deleteSelf();
+		}
+		rewards.clear();
+
+		// clean up any quest links which point to this quest
 		List<QuestLink> linksToDel = new ArrayList<>();
-		getQuestFile().forAllQuestLinks(l -> {
-			if (l.linksTo(this)) {
-				linksToDel.add(l);
+		getQuestFile().forAllQuestLinks(link -> {
+			if (link.linksTo(this)) {
+				linksToDel.add(link);
 			}
 		});
-		linksToDel.forEach(l -> getQuestFile().deleteObject(l.id));
-	}
-
-	@Override
-	public void deleteChildren() {
-		for (Task task : tasks) {
-			task.deleteChildren();
-			task.invalid = true;
-		}
-
-		for (Reward reward : rewards) {
-			reward.deleteChildren();
-			reward.invalid = true;
-		}
-
-		tasks.clear();
-		rewards.clear();
+		linksToDel.forEach(QuestLink::deleteSelf);
 	}
 
 	@Override
 	public void onCreated() {
+		super.onCreated();
+
 		chapter.addQuest(this);
 
 		if (!tasks.isEmpty()) {
@@ -725,6 +720,23 @@ public final class Quest extends QuestObject implements Movable, Excludable {
 	}
 
 	@Override
+	public void setChapter(Chapter newChapter) {
+		if (!Objects.equals(getChapter(), newChapter)) {
+			getChapter().removeQuest(this);
+			newChapter.addQuest(this);
+			this.chapter = newChapter;
+		}
+	}
+
+	@Override
+	public Quest setPosition(double x, double y) {
+		this.x = x;
+		this.y = y;
+		getQuestFile().markDirty();
+		return this;
+	}
+
+	@Override
 	public double getX() {
 		return x;
 	}
@@ -747,12 +759,6 @@ public final class Quest extends QuestObject implements Movable, Excludable {
 	@Override
 	public String getShape() {
 		return shape.isEmpty() ? chapter.getDefaultQuestShape() : shape;
-	}
-
-	@Override
-	@Environment(EnvType.CLIENT)
-	public void initiateMoveClientSide(Chapter to, double x, double y) {
-		NetworkManager.sendToServer(new MoveMovableMessage(id, to.id, x, y));
 	}
 
 	@Override
@@ -817,18 +823,15 @@ public final class Quest extends QuestObject implements Movable, Excludable {
 	}
 
 	public boolean hasDependency(QuestObject object) {
-		if (object.invalid) {
-			return false;
-		}
-
-		for (QuestObject dependency : dependencies) {
-			if (dependency == object) {
-				return true;
-			}
-		}
-
-		return false;
-	}
+        if (object.isValid()) {
+            for (QuestObject dependency : dependencies) {
+                if (dependency == object) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
 
 	@Override
 	protected boolean validateEditedConfig() {
@@ -912,26 +915,6 @@ public final class Quest extends QuestObject implements Movable, Excludable {
 		}
 	}
 
-	@Override
-	public void onMoved(double newX, double newY, long newChapterId) {
-		x = newX;
-		y = newY;
-
-		if (newChapterId != chapter.id) {
-			Chapter newChapter = getQuestFile().getChapter(newChapterId);
-			if (newChapter != null) {
-				chapter.removeQuest(this);
-				newChapter.addQuest(this);
-				chapter = newChapter;
-			}
-		}
-	}
-
-	@Override
-	public void copyToClipboard() {
-		FTBQuestsClient.copyToClipboard(this);
-	}
-
 	/**
 	 * Get a collection of dependent quest ID's; quests which can't be progressed until this quest is completed.
 	 * @return a collection of quest objects, checked for validity
@@ -939,7 +922,7 @@ public final class Quest extends QuestObject implements Movable, Excludable {
 	public Collection<QuestObject> getDependants() {
 		return dependantIDs.stream()
 				.map(id -> getQuestFile().get(id))
-				.filter(q -> q != null && !q.invalid)
+				.filter(q -> q != null && q.isValid())
 				.toList();
 	}
 
@@ -1030,7 +1013,7 @@ public final class Quest extends QuestObject implements Movable, Excludable {
 		Iterator<QuestObject> iter = dependencies.iterator();
 		while (iter.hasNext()) {
 			QuestObject qo = iter.next();
-			if (qo == null || qo.invalid || qo == this) {
+			if (qo == null || !qo.isValid() || qo == this) {
 				iter.remove();
 				if (qo instanceof Quest q) {
 					q.removeDependant(id);
@@ -1100,7 +1083,7 @@ public final class Quest extends QuestObject implements Movable, Excludable {
 	@FunctionalInterface
 	private interface DependencyChecker {
 		default boolean check(QuestObject questObject) {
-			return !questObject.invalid && check0(questObject);
+			return questObject.isValid() && check0(questObject);
 		}
 		boolean check0(QuestObject questObject);
 	}
@@ -1221,19 +1204,11 @@ public final class Quest extends QuestObject implements Movable, Excludable {
 		getQuestFile().markDirty();
 	}
 
-	public void moveTaskLeft(Task task) {
-		moveItem(tasks, task, -1);
+	public void moveTask(Task task, boolean moveRight) {
+		moveItem(tasks, task, moveRight ? 1 : -1);
 	}
 
-	public void moveTaskRight(Task task) {
-		moveItem(tasks, task, 1);
-	}
-
-	public void moveRewardLeft(Reward reward) {
-		moveItem(rewards, reward, -1);
-	}
-
-	public void moveRewardRight(Reward reward) {
-		moveItem(rewards, reward, 1);
+	public void moveReward(Reward reward, boolean moveRight) {
+		moveItem(rewards, reward, moveRight ? 1 : -1);
 	}
 }

@@ -1,22 +1,23 @@
 package dev.ftb.mods.ftbquests.net;
 
 import dev.architectury.networking.NetworkManager;
-import dev.ftb.mods.ftblibrary.util.NetworkHelper;
 import dev.ftb.mods.ftbquests.api.FTBQuestsAPI;
+import dev.ftb.mods.ftbquests.quest.Chapter;
 import dev.ftb.mods.ftbquests.quest.Movable;
 import dev.ftb.mods.ftbquests.quest.ServerQuestFile;
+import dev.ftb.mods.ftbquests.quest.history.events.MoveMovableObject;
 import dev.ftb.mods.ftbquests.util.NetUtils;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 
-public record MoveMovableMessage(long id, long chapterID, double x, double y) implements CustomPacketPayload {
+public record MoveMovableMessage(long objectId, long newChapterID, double x, double y) implements CustomPacketPayload {
 	public static final Type<MoveMovableMessage> TYPE = new Type<>(FTBQuestsAPI.rl("move_movable_message"));
 
 	public static final StreamCodec<FriendlyByteBuf, MoveMovableMessage> STREAM_CODEC = StreamCodec.composite(
-			ByteBufCodecs.VAR_LONG, MoveMovableMessage::id,
-			ByteBufCodecs.VAR_LONG, MoveMovableMessage::chapterID,
+			ByteBufCodecs.VAR_LONG, MoveMovableMessage::objectId,
+			ByteBufCodecs.VAR_LONG, MoveMovableMessage::newChapterID,
 			ByteBufCodecs.DOUBLE, MoveMovableMessage::x,
 			ByteBufCodecs.DOUBLE, MoveMovableMessage::y,
 			MoveMovableMessage::new
@@ -28,12 +29,15 @@ public record MoveMovableMessage(long id, long chapterID, double x, double y) im
 	}
 
 	public static void handle(MoveMovableMessage message, NetworkManager.PacketContext context) {
-		context.queue(() -> {
-			if (ServerQuestFile.INSTANCE.get(message.id) instanceof Movable movable && NetUtils.canEdit(context)) {
-				movable.onMoved(message.x, message.y, message.chapterID);
-				ServerQuestFile.INSTANCE.markDirty();
-				NetworkHelper.sendToAll(ServerQuestFile.INSTANCE.server, new MoveMovableResponseMessage(movable.getMovableID(), message.chapterID, message.x, message.y));
-			}
-		});
+		context.queue(() -> ServerQuestFile.getInstance().ifPresent(sqf -> {
+			if (NetUtils.canEdit(context) && sqf.getBase(message.objectId) instanceof Movable movable) {
+                Chapter fromChapter = movable.getChapter();
+				Chapter toChapter = sqf.getChapter(message.newChapterID);
+                if (fromChapter != null && toChapter != null) {
+					MoveMovableObject.create(movable, toChapter, message.x(), message.y())
+							.ifPresent(event -> sqf.getHistoryStack().addAndApply(sqf, event));
+				}
+            }
+		}));
 	}
 }
