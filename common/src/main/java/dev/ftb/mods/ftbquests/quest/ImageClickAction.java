@@ -127,12 +127,17 @@ public record ImageClickAction(ActionType actionType, String actionData) {
     }
 
     private static void showDocs(String docsPath) {
-        String[] fields = docsPath.split(":", 2);
-        Preconditions.checkState(fields.length == 2, "data must be in format: '<docsmod>:<path>'");
+        String[] fields = docsPath.split(",", 3);
+        Preconditions.checkState(fields.length >= 2 && fields.length <= 4,
+                "data must be in format: '<docsmod>,<book-id>[,<page-id>[#anchor]]'");
+        String mod = fields[0];
+        ResourceLocation book = ResourceLocation.tryParse(fields[1]);
+        ResourceLocation page = fields.length >= 3 ? ResourceLocation.tryParse(fields[2]) : null;
+        String anchor = fields.length >= 4 ? fields[3] : "";
 
-        DocsModRegistry.INSTANCE.getDocsMod(fields[0]).ifPresentOrElse(
-                docsMod -> docsMod.openDocsPage(Minecraft.getInstance().player, fields[1]),
-                () -> QuestScreen.displayError("Docs mod '%s' is not installed", fields[0]));
+        DocsModRegistry.INSTANCE.getDocsMod(mod).ifPresentOrElse(
+                docsMod -> docsMod.openDocsPage(Minecraft.getInstance().player, book, page, anchor),
+                () -> QuestScreen.displayError("Docs mod '%s' is not installed", mod));
     }
 
     private void logHandleClickException(Throwable ex) {
