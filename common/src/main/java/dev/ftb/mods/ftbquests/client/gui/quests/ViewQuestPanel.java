@@ -918,13 +918,17 @@ public class ViewQuestPanel extends ModalPanel {
 
 		private boolean handleCustomClickEvent(Style style) {
 			switch (style.getClickEvent()) {
-				case ClickEvent.Custom changePage when quest != null -> {
-					return changePage.payload().map(tag -> {
-						if (changePage.id().equals(MultilineTextEditorScreen.QUEST_LINK_ACTION)) {
+				case ClickEvent.Custom customEvent when quest != null -> {
+					return customEvent.payload().map(tag -> {
+						if (customEvent.id().equals(MultilineTextEditorScreen.QUEST_LINK_ACTION)) {
 							tag.asCompound().ifPresent(compoundTag -> {
 								String idStr = compoundTag.getStringOr("quest_id", "0");
 								new ImageClickAction(ImageClickAction.ActionType.OPEN_QUEST, idStr).run();
 							});
+						} else if (customEvent.id().equals(MultilineTextEditorScreen.OPEN_DOCS_ACTION)) {
+							tag.asCompound()
+									.flatMap(c -> c.getString("location"))
+									.ifPresent(loc -> new ImageClickAction(ImageClickAction.ActionType.SHOW_DOCS, loc).run());
 						}
 						return true;
 					}).orElse(false);

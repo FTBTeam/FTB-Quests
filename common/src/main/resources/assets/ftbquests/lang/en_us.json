@@ -378,6 +378,8 @@
 	"ftbquests.gui.bulk_change_size": "Change Size for all...",
 	"ftbquests.gui.use_as_quest_icon": "Use Task Icon as Quest Icon",
 	"ftbquests.gui.clear_formatting": "Clear Formatting",
+	"ftbquests.gui.insert_url_link": "Insert URL/Docs Link",
+	"ftbquests.gui.insert_quest_link": "Insert Quest Link",
 	"ftbquests.gui.insert_link": "Insert Link",
 	"ftbquests.gui.page_break": "Add Page Break",
 	"ftbquests.gui.confirm_esc": "Discard Unsaved Changes?",
@@ -703,5 +705,6 @@
 	"ftbquests.custom_icon.entity": "Entity: %s",
 	"ftbquests.gui.error.selection_multiple_lines": "Selection extends over multiple lines!",
 	"ftbquests.gui.error.already_component": "Line is already text component JSON!",
+	"ftbquests.gui.url_or_docs": "URL or 'docs:' link",
 	"config.jade.plugin_ftbquests.barrier": "Barriers"
 }

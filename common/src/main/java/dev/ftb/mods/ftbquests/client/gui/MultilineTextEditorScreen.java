@@ -13,6 +13,7 @@ import dev.ftb.mods.ftblibrary.client.config.editable.EditableImageResource;
 import dev.ftb.mods.ftblibrary.client.config.editable.EditableList;
 import dev.ftb.mods.ftblibrary.client.config.editable.EditableString;
 import dev.ftb.mods.ftblibrary.client.config.gui.EditConfigScreen;
+import dev.ftb.mods.ftblibrary.client.config.gui.EditStringConfigOverlay;
 import dev.ftb.mods.ftblibrary.client.gui.input.Key;
 import dev.ftb.mods.ftblibrary.client.gui.input.MouseButton;
 import dev.ftb.mods.ftblibrary.client.gui.theme.NordColors;
@@ -28,12 +29,14 @@ import dev.ftb.mods.ftblibrary.icon.Icons;
 import dev.ftb.mods.ftblibrary.icon.RainbowIcon;
 import dev.ftb.mods.ftblibrary.util.TooltipList;
 import dev.ftb.mods.ftbquests.api.FTBQuestsAPI;
+import dev.ftb.mods.ftbquests.client.ClientQuestFile;
 import dev.ftb.mods.ftbquests.client.FTBQuestsClient;
 import dev.ftb.mods.ftbquests.client.config.EditableQuestObject;
 import dev.ftb.mods.ftbquests.client.gui.quests.QuestScreen;
 import dev.ftb.mods.ftbquests.client.gui.quests.ViewQuestPanel;
 import dev.ftb.mods.ftbquests.quest.Quest;
 import dev.ftb.mods.ftbquests.quest.QuestObject;
+import dev.ftb.mods.ftbquests.quest.QuestObjectBase;
 import dev.ftb.mods.ftbquests.quest.QuestObjectType;
 import dev.ftb.mods.ftbquests.util.TextUtils;
 import net.minecraft.ChatFormatting;
@@ -42,6 +45,8 @@ import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.Whence;
 import net.minecraft.client.input.CharacterEvent;
 import net.minecraft.client.input.KeyEvent;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.chat.ClickEvent;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.ComponentSerialization;
 import net.minecraft.resources.Identifier;
@@ -49,6 +54,7 @@ import net.minecraft.util.Util;
 import org.jetbrains.annotations.NotNull;
 import org.jspecify.annotations.Nullable;
 
+import java.net.URI;
 import java.util.*;
 import java.util.function.BooleanSupplier;
 import java.util.regex.Pattern;
@@ -60,8 +66,9 @@ public class MultilineTextEditorScreen extends BaseScreen {
 	private static final Pattern STRIP_FORMATTING_PATTERN = Pattern.compile("(?i)([&\\u00A7])([0-9A-FK-ORZ]|#[0-9A-Fa-f]{6})");
 	private static final int MAX_UNDO = 10;
 	public static final Identifier QUEST_LINK_ACTION = FTBQuestsAPI.id("link");
+	public static final Identifier OPEN_DOCS_ACTION = FTBQuestsAPI.id("docs");
 	protected static final String LINK_TEXT_TEMPLATE = """
-					{ "text": "%s", "underlined": true, "click_event": { "action": "custom", "id": "%s", "payload": { "quest_id": "%016X", "page": 1 } } }""";
+					{ "text": "%s", "underlined": true, "click_event": %s }""";
 
 	private final Component title;
 	private final EditableList<String, EditableString> config;
@@ -77,18 +84,19 @@ public class MultilineTextEditorScreen extends BaseScreen {
 	private long lastChange = 0L;
 	private final Deque<HistoryElement> redoStack = new ArrayDeque<>();
 
-	private final Map<Integer,Runnable> hotKeys = Map.of(
-			InputConstants.KEY_B, () -> insertFormatting(ChatFormatting.BOLD),
-			InputConstants.KEY_I, () -> insertFormatting(ChatFormatting.ITALIC),
-			InputConstants.KEY_U, () -> insertFormatting(ChatFormatting.UNDERLINE),
-			InputConstants.KEY_S, () -> insertFormatting(ChatFormatting.STRIKETHROUGH),
-			InputConstants.KEY_R, this::resetFormatting,
-			InputConstants.KEY_P, () -> insertAtEndOfLine("\n" + Quest.PAGEBREAK_CODE),
-			InputConstants.KEY_M, this::openImageSelector,
-			InputConstants.KEY_Z, this::undoLast,
-			InputConstants.KEY_L, this::openLinkInsert,
-			InputConstants.KEY_J, this::convertToJson
-	);
+	private final Map<Integer,Runnable> hotKeys = Util.make(new HashMap<>(), map -> {
+		map.put(InputConstants.KEY_B, () -> insertFormatting(ChatFormatting.BOLD));
+		map.put(InputConstants.KEY_I, () -> insertFormatting(ChatFormatting.ITALIC));
+		map.put(InputConstants.KEY_U, () -> insertFormatting(ChatFormatting.UNDERLINE));
+		map.put(InputConstants.KEY_S, () -> insertFormatting(ChatFormatting.STRIKETHROUGH));
+		map.put(InputConstants.KEY_R, this::resetFormatting);
+		map.put(InputConstants.KEY_P, () -> insertAtEndOfLine("\n" + Quest.PAGEBREAK_CODE));
+		map.put(InputConstants.KEY_M, this::openImageSelector);
+		map.put(InputConstants.KEY_Z, this::undoLast);
+		map.put(InputConstants.KEY_L, this::openTextLinkInsertScreen);
+		map.put(InputConstants.KEY_Q, this::openQuestLinkInsertScreen);
+		map.put(InputConstants.KEY_J, this::convertToJson);
+	});
 
 	public MultilineTextEditorScreen(Component title, EditableList<String, EditableString> config, ConfigCallback callback) {
 		this.title = title;
@@ -169,11 +177,13 @@ public class MultilineTextEditorScreen extends BaseScreen {
 
 	@Override
 	public boolean keyPressed(Key key) {
-		if (key.esc()) {
-			cancel();
-			return true;
-		} else if (key.enter() && key.event().hasShiftDown()) {
+		if (key.enter() && key.event().hasShiftDown()) {
 			saveAndExit();
+			return true;
+		} else if (super.keyPressed(key)) {
+			return true;
+		} else if (key.esc()) {
+			cancel();
 			return true;
 		} else if (textBox.isFocused()) {
 			textBox.keyPressed(key);
@@ -192,7 +202,7 @@ public class MultilineTextEditorScreen extends BaseScreen {
 	private boolean executeHotkey(int keycode, boolean checkModifier) {
 		if (hotKeys.containsKey(keycode) && (!checkModifier || isHotKeyModifierPressed(keycode))) {
 			hotKeys.get(keycode).run();
-			textBox.setFocused(true);
+			textBox.setFocused(!anyModalPanelOpen());
 			return true;
 		}
 
@@ -262,7 +272,7 @@ public class MultilineTextEditorScreen extends BaseScreen {
 	}
 
 	private JsonElement canonicalizeJson(JsonElement json) {
-        return json instanceof JsonPrimitive p ?
+		return json instanceof JsonPrimitive p ?
 				Util.make(new JsonObject(), o -> {
 					o.addProperty("text", "");
 					o.add("extra", Util.make(new JsonArray(), a -> a.add(p.getAsString())));
@@ -277,20 +287,48 @@ public class MultilineTextEditorScreen extends BaseScreen {
 				&& !line.startsWith("{@");
 	}
 
-	private void openLinkInsert() {
+	private void openQuestLinkInsertScreen() {
 		EditableQuestObject<QuestObject> config = new EditableQuestObject<>(QuestObjectType.QUEST.or(QuestObjectType.QUEST_LINK));
 		new SelectQuestObjectScreen<>(config, accepted -> {
 			int pos = textBox.cursorPos();
 			if (accepted && config.getValue() != null) {
-				doLinkInsertion(config.getValue().id);
+				CompoundTag payload = Util.make(new CompoundTag(), t -> {
+					t.putString("quest_id", QuestObjectBase.getCodeString(config.getValue().getId()));
+					t.putInt("page", 1);
+				});
+				doLinkInsertion(new ClickEvent.Custom(QUEST_LINK_ACTION, Optional.of(payload)));
 			}
 			run();
 			textBox.seekCursor(Whence.ABSOLUTE, pos);
 		}).openGui();
 	}
 
-	private void doLinkInsertion(long questID) {
+	private void openTextLinkInsertScreen() {
+		EditableString config = new EditableString();
+		var overlay = new EditStringConfigOverlay<>(this, config, accepted -> {
+			int pos = textBox.cursorPos();
+			if (accepted) {
+				if (config.getValue().startsWith("docs:")) {
+					CompoundTag payload = Util.make(new CompoundTag(), t -> t.putString("location", config.getValue().substring(5)));
+					doLinkInsertion(new ClickEvent.Custom(OPEN_DOCS_ACTION, Optional.of(payload)));
+				} else {
+					doLinkInsertion(new ClickEvent.OpenUrl(URI.create(config.getValue())));
+				}
+			}
+			run();
+			textBox.seekCursor(Whence.ABSOLUTE, pos);
+		}, Component.translatable("ftbquests.gui.url_or_docs")).atMousePosition();
+
+		overlay.setWidth(150);
+		overlay.setExtraZlevel(QuestScreen.Z_LEVEL);
+
+		getGui().pushModalPanel(overlay);
+	}
+
+	private void doLinkInsertion(ClickEvent clickEvent) {
 		String text = textBox.getSelectedText();
+		String eventText = ClickEvent.CODEC.encodeStart(ClientQuestFile.getInstance().holderLookup().createSerializationContext(JsonOps.INSTANCE), clickEvent).getPartialOrThrow().toString();
+
 		if (!text.contains("\n")) {
 			// a selection which doesn't extend over multiple physical lines; replace the selection in a smart way
 			StringExtents lineExtents = getPhysicalLineExtents();
@@ -314,7 +352,7 @@ public class MultilineTextEditorScreen extends BaseScreen {
 
 			StringBuilder builder = new StringBuilder("[ ");
 			if (!parts.get(0).isEmpty()) builder.append("\"").append(parts.get(0)).append("\", ");
-			builder.append(String.format(LINK_TEXT_TEMPLATE, parts.get(1).isEmpty() ? "EDIT HERE" : parts.get(1), QUEST_LINK_ACTION, questID));
+			builder.append(String.format(LINK_TEXT_TEMPLATE, parts.get(1).isEmpty() ? "EDIT HERE" : parts.get(1), eventText));
 			if (!parts.get(2).isEmpty()) builder.append(", ").append("\"").append(parts.get(2)).append("\"");
 			builder.append(" ]");
 
@@ -406,7 +444,7 @@ public class MultilineTextEditorScreen extends BaseScreen {
 		}
 	}
 
-	private static String stripFormatting(@NotNull String selectedText) {
+	private static String stripFormatting(String selectedText) {
 		return STRIP_FORMATTING_PATTERN.matcher(selectedText).replaceAll("");
 	}
 
@@ -419,7 +457,7 @@ public class MultilineTextEditorScreen extends BaseScreen {
 		if (redoStack.size() > 1) {
 			redoStack.removeLast();
 			HistoryElement h = redoStack.peekLast();
-			textBox.setValueListener(s -> {});
+			textBox.setValueListener(_ -> {});
 			textBox.setText(Objects.requireNonNull(h).text());
 			textBox.setValueListener(this::onValueChanged);
 			textBox.setSelecting(false);
@@ -497,7 +535,8 @@ public class MultilineTextEditorScreen extends BaseScreen {
 		private final ToolbarButton pageBreakButton;
 		private final ToolbarButton imageButton;
 		private final ToolbarButton undoButton;
-		private final ToolbarButton linkButton;
+		private final ToolbarButton questLinkButton;
+		private final ToolbarButton urlLinkButton;
 		private final ToolbarButton convertButton;
 
 		public ToolbarPanel(Panel outerPanel) {
@@ -524,9 +563,13 @@ public class MultilineTextEditorScreen extends BaseScreen {
 					.withTooltip(hotkey("S", "Alt"));
 			colorButton = new ToolbarButton(this, Component.empty(), Icons.COLOR_RGB.withPadding(2),
 					this::openColorContextMenu);
-			linkButton = new ToolbarButton(this, Component.empty(), LINK_ICON,
+			urlLinkButton = new ToolbarButton(this, Component.empty(), LINK_ICON,
 					() -> executeHotkey(InputConstants.KEY_L, false))
-					.withTooltip(Component.translatable("ftbquests.gui.insert_link"), hotkey("L", "Alt"))
+					.withTooltip(Component.translatable("ftbquests.gui.insert_url_link"), hotkey("L", "Alt"))
+					.withActivePredicate(this::isOkForLinkInsertion);
+			questLinkButton = new ToolbarButton(this, Component.literal("Q").withStyle(ChatFormatting.GREEN, ChatFormatting.BOLD),
+					() -> executeHotkey(InputConstants.KEY_Q, false))
+					.withTooltip(Component.translatable("ftbquests.gui.insert_quest_link"), hotkey("Q", "Alt"))
 					.withActivePredicate(this::isOkForLinkInsertion);
 			resetButton = new ToolbarButton(this, Component.empty(), CLEAR_FORMATTING_ICON,
 					() -> executeHotkey(InputConstants.KEY_R, false))
@@ -601,7 +644,8 @@ public class MultilineTextEditorScreen extends BaseScreen {
 					underlineButton,
 					strikethroughButton,
 					colorButton,
-					linkButton,
+					questLinkButton,
+					urlLinkButton,
 					resetButton,
 					pageBreakButton,
 					imageButton,
@@ -619,14 +663,15 @@ public class MultilineTextEditorScreen extends BaseScreen {
 			underlineButton.setPosAndSize(59, 1, 16, 16);
 			strikethroughButton.setPosAndSize(75, 1, 16, 16);
 			colorButton.setPosAndSize(91, 1, 16, 16);
-			linkButton.setPosAndSize(107, 1, 16, 16);
-			resetButton.setPosAndSize(123, 1, 16, 16);
+			urlLinkButton.setPosAndSize(107, 1, 16, 16);
+			questLinkButton.setPosAndSize(123, 1, 16, 16);
+			resetButton.setPosAndSize(139, 1, 16, 16);
 
-			pageBreakButton.setPosAndSize(149, 1, 16, 16);
-			imageButton.setPosAndSize(165, 1, 16, 16);
-			convertButton.setPosAndSize(181, 1, 16, 16);
+			pageBreakButton.setPosAndSize(165, 1, 16, 16);
+			imageButton.setPosAndSize(181, 1, 16, 16);
+			convertButton.setPosAndSize(197, 1, 16, 16);
 
-			undoButton.setPosAndSize(207, 1, 16, 16);
+			undoButton.setPosAndSize(223, 1, 16, 16);
 
 			cancelButton.setPosAndSize(width - 17, 1, 16, 16);
 		}
@@ -683,6 +728,9 @@ public class MultilineTextEditorScreen extends BaseScreen {
 		public void draw(GuiGraphicsExtractor graphics, Theme theme, int x, int y, int w, int h) {
 			if (visible) {
 				super.draw(graphics, theme, x, y, w, h);
+				if (!activePredicate.getAsBoolean()) {
+					IconHelper.renderIcon(Color4I.BLACK.withAlpha(128), graphics, x, y, w, h);
+				}
 			}
 		}
 
