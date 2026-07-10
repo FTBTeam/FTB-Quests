@@ -372,20 +372,20 @@ public abstract class QuestObjectBase implements Comparable<QuestObjectBase> {
 		config.addList("tags", tags, new StringConfig(TAG_PATTERN), "").setNameKey("ftbquests.tags").setOrder(-125);
 	}
 
-	@Environment(EnvType.CLIENT)
 	public abstract Component getAltTitle();
 
 	@Environment(EnvType.CLIENT)
 	public abstract Icon getAltIcon();
 
-	@Environment(EnvType.CLIENT)
 	public final Component getTitle() {
 		if (cachedTitle != null) {
 			return cachedTitle.copy();
 		}
 
 		if (!getRawTitle().isEmpty()) {
-			cachedTitle = TextUtils.parseRawText(getRawTitle(), holderLookup());
+			cachedTitle = getQuestFile().isServerSide() ?
+					Component.literal(getRawTitle()) :
+					TextUtils.parseRawText(getRawTitle(), holderLookup());
 		} else {
 			cachedTitle = getAltTitle();
 		}
@@ -393,9 +393,9 @@ public abstract class QuestObjectBase implements Comparable<QuestObjectBase> {
 		return cachedTitle.copy();
 	}
 
-	@Environment(EnvType.CLIENT)
 	public final MutableComponent getMutableTitle() {
-		return getTitle().copy();
+		Component t = getTitle();
+		return t instanceof MutableComponent m ? m : t.copy();
 	}
 
 	@Environment(EnvType.CLIENT)

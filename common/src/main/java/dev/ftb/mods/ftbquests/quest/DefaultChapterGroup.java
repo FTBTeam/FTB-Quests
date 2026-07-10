@@ -11,7 +11,6 @@ public class DefaultChapterGroup extends ChapterGroup {
 	}
 
 	@Override
-	@Environment(EnvType.CLIENT)
 	public Component getAltTitle() {
 		return file.getTitle();
 	}

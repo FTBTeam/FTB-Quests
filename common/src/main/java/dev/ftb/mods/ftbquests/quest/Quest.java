@@ -627,7 +627,6 @@ public final class Quest extends QuestObject implements Movable, Excludable {
 	}
 
 	@Override
-	@Environment(EnvType.CLIENT)
 	public Component getAltTitle() {
 		if (!tasks.isEmpty()) {
 			return tasks.getFirst().getTitle();

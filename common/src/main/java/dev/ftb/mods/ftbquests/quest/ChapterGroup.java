@@ -123,7 +123,6 @@ public class ChapterGroup extends QuestObject {
 	}
 
 	@Override
-	@Environment(EnvType.CLIENT)
 	public Component getAltTitle() {
 		return Component.literal("Unnamed Group");
 	}

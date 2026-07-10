@@ -135,7 +135,6 @@ public class RandomReward extends Reward {
 	}
 
 	@Override
-	@Environment(EnvType.CLIENT)
 	public Component getAltTitle() {
 		return getTable() == null ? super.getAltTitle() : getTable().getTitleOrElse(super.getAltTitle());
 	}

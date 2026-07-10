@@ -80,7 +80,6 @@ public class DimensionTask extends AbstractBooleanTask {
 	}
 
 	@Override
-	@Environment(EnvType.CLIENT)
 	public MutableComponent getAltTitle() {
 		return Component.translatable("ftbquests.task.ftbquests.dimension").append(": ").append(Component.literal(dimension.location().toString()).withStyle(ChatFormatting.DARK_GREEN));
 	}

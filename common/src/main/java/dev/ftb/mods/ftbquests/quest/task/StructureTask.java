@@ -87,7 +87,6 @@ public class StructureTask extends AbstractBooleanTask {
 	}
 
 	@Override
-	@Environment(EnvType.CLIENT)
 	public MutableComponent getAltTitle() {
 		return Component.translatable("ftbquests.task.ftbquests.structure")
 				.append(": ").append(Component.literal(getStructure()).withStyle(ChatFormatting.DARK_GREEN));

@@ -244,7 +244,6 @@ public abstract class Reward extends QuestObjectBase {
 	}
 
 	@Override
-	@Environment(EnvType.CLIENT)
 	public Component getAltTitle() {
 		return getType().getDisplayName();
 	}

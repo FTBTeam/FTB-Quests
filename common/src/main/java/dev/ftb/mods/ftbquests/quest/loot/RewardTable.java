@@ -413,10 +413,9 @@ public class RewardTable extends QuestObjectBase {
 	}
 
 	@Override
-	@Environment(EnvType.CLIENT)
 	public Component getAltTitle() {
 		return weightedRewards.size() == 1 ?
-				weightedRewards.get(0).getReward().getTitle() :
+				weightedRewards.getFirst().getReward().getTitle() :
 				Component.translatable("ftbquests.reward_table");
 
 	}

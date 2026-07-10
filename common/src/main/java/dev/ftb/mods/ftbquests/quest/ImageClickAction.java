@@ -11,10 +11,8 @@ import dev.ftb.mods.ftblibrary.util.NetworkHelper;
 import dev.ftb.mods.ftblibrary.util.client.ClientUtils;
 import dev.ftb.mods.ftbquests.FTBQuests;
 import dev.ftb.mods.ftbquests.client.ClientQuestFile;
+import dev.ftb.mods.ftbquests.client.FTBQuestsClient;
 import dev.ftb.mods.ftbquests.client.gui.quests.QuestScreen;
-import net.minecraft.Util;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.screens.ConfirmLinkScreen;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
@@ -78,21 +76,6 @@ public record ImageClickAction(ActionType actionType, String actionData) {
         return actionType.id + ":" + actionData;
     }
 
-    private static void openUri(String uriStr) {
-        URI uri = URI.create(uriStr);
-        if (Minecraft.getInstance().options.chatLinksPrompt().get()) {
-            final var currentScreen = Minecraft.getInstance().screen;
-            Minecraft.getInstance().setScreen(new ConfirmLinkScreen(accepted -> {
-                if (accepted) {
-                    Util.getPlatform().openUri(uri);
-                }
-                Minecraft.getInstance().setScreen(currentScreen);
-            }, uriStr, false));
-        } else {
-            Util.getPlatform().openUri(uri);
-        }
-    }
-
     private static void openQuest(String questIdStr) {
         String[] fields = questIdStr.split("/");
         QuestObjectBase.parseHexId(fields[0]).ifPresentOrElse(questId -> {
@@ -136,7 +119,7 @@ public record ImageClickAction(ActionType actionType, String actionData) {
         String anchor = fields.length >= 4 ? fields[3] : "";
 
         DocsModRegistry.INSTANCE.getDocsMod(mod).ifPresentOrElse(
-                docsMod -> docsMod.openDocsPage(Minecraft.getInstance().player, book, page, anchor),
+                docsMod -> docsMod.openDocsPage(FTBQuestsClient.getClientPlayer(), book, page, anchor),
                 () -> QuestScreen.displayError("Docs mod '%s' is not installed", mod));
     }
 
@@ -158,7 +141,7 @@ public record ImageClickAction(ActionType actionType, String actionData) {
 
     public enum ActionType implements Consumer<String>, StringRepresentable {
         NONE("none", s -> {}),
-        OPEN_URI("open_uri", ImageClickAction::openUri),
+        @SuppressWarnings("Convert2MethodRef") OPEN_URI("open_uri", uriStr -> FTBQuestsClient.openUri(uriStr)),
         OPEN_QUEST("open_quest", ImageClickAction::openQuest),
         RUN_COMMAND("run_command", ImageClickAction::runCommand),
         CUSTOM_EVENT("custom_event", ImageClickAction::postCustomEvent),

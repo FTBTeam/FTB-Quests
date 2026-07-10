@@ -71,7 +71,6 @@ public abstract class EnergyTask extends Task implements ISingleLongValueTask {
 	}
 
 	@Override
-	@Environment(EnvType.CLIENT)
 	public MutableComponent getAltTitle() {
 		return Component.literal(StringUtils.formatDouble(value, true));
 	}

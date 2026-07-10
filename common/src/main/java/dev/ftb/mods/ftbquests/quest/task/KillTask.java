@@ -163,7 +163,6 @@ public class KillTask extends Task {
 	}
 
 	@Override
-	@Environment(EnvType.CLIENT)
 	public MutableComponent getAltTitle() {
 		MutableComponent name = entityTypeTag == null ?
 				Component.translatable("entity." + entityTypeId.toLanguageKey()) :

@@ -179,7 +179,6 @@ public abstract class Task extends QuestObject {
 	}
 
 	@Override
-	@Environment(EnvType.CLIENT)
 	public Component getAltTitle() {
 		return getType().getDisplayName();
 	}

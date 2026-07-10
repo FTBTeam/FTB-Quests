@@ -96,11 +96,12 @@ public class AdvancementReward extends Reward {
 	}
 
 	@Override
-	@Environment(EnvType.CLIENT)
 	public Component getAltTitle() {
-		KnownServerRegistries.AdvancementInfo info = KnownServerRegistries.client == null ?
+		KnownServerRegistries reg = getQuestFile().isServerSide() ? KnownServerRegistries.server : KnownServerRegistries.client;
+
+		KnownServerRegistries.AdvancementInfo info = reg == null ?
 				null :
-				KnownServerRegistries.client.advancements().get(advancement);
+				reg.advancements().get(advancement);
 
 		if (info != null && !TextUtils.isComponentEmpty(info.name())) {
 			return Component.translatable("ftbquests.reward.ftbquests.advancement").append(": ").append(info.name().copy().withStyle(ChatFormatting.YELLOW));

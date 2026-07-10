@@ -75,7 +75,6 @@ public class BiomeTask extends AbstractBooleanTask {
 	}
 
 	@Override
-	@Environment(EnvType.CLIENT)
 	public MutableComponent getAltTitle() {
 		return Component.translatable("ftbquests.task.ftbquests.biome").append(": ")
 				.append(Component.literal(getBiome())).withStyle(ChatFormatting.DARK_GREEN);

@@ -1201,7 +1201,6 @@ public abstract class BaseQuestFile extends QuestObject implements QuestFile {
 	public abstract void deleteObjects(List<Long> ids);
 
 	@Override
-	@Environment(EnvType.CLIENT)
 	public MutableComponent getAltTitle() {
 		return Component.translatable("ftbquests.file");
 	}

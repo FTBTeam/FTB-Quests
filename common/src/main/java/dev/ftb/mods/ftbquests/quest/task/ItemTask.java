@@ -151,7 +151,6 @@ public class ItemTask extends Task implements Predicate<ItemStack> {
 	}
 
 	@Override
-	@Environment(EnvType.CLIENT)
 	public MutableComponent getAltTitle() {
 		if (count > 1) {
 			return Component.literal(count + "x ").append(itemStack.getHoverName());

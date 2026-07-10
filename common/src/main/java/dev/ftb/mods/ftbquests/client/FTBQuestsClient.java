@@ -34,8 +34,10 @@ import dev.ftb.mods.ftbquests.quest.QuestObjectBase;
 import dev.ftb.mods.ftbquests.quest.TeamData;
 import dev.ftb.mods.ftbquests.quest.theme.ThemeLoader;
 import dev.ftb.mods.ftbquests.registry.ModBlocks;
+import net.minecraft.Util;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.screens.ConfirmLinkScreen;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.client.renderer.RenderType;
@@ -60,6 +62,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.IOException;
+import java.net.URI;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
@@ -241,5 +244,20 @@ public class FTBQuestsClient {
 
 	public static void showInfoToast(Component text, Icon icon, Component desc) {
 		Minecraft.getInstance().getToasts().addToast(new CustomToast(text, icon, desc));
+	}
+
+	public static void openUri(String uriStr) {
+		URI uri = URI.create(uriStr);
+		if (Minecraft.getInstance().options.chatLinksPrompt().get()) {
+			final var currentScreen = Minecraft.getInstance().screen;
+			Minecraft.getInstance().setScreen(new ConfirmLinkScreen(accepted -> {
+				if (accepted) {
+					Util.getPlatform().openUri(uri);
+				}
+				Minecraft.getInstance().setScreen(currentScreen);
+			}, uriStr, false));
+		} else {
+			Util.getPlatform().openUri(uri);
+		}
 	}
 }

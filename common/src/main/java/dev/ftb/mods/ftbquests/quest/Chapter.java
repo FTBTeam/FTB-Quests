@@ -346,7 +346,6 @@ public final class Chapter extends QuestObject {
 	}
 
 	@Override
-	@Environment(EnvType.CLIENT)
 	public MutableComponent getAltTitle() {
 		return Component.translatable("ftbquests.unnamed");
 	}
