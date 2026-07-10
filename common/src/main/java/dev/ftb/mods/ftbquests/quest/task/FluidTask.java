@@ -4,10 +4,12 @@ import dev.architectury.fluid.FluidStack;
 import dev.ftb.mods.ftblibrary.config.ConfigGroup;
 import dev.ftb.mods.ftblibrary.icon.Color4I;
 import dev.ftb.mods.ftblibrary.icon.Icon;
+import dev.ftb.mods.ftblibrary.ui.Button;
 import dev.ftb.mods.ftblibrary.ui.Widget;
 import dev.ftb.mods.ftblibrary.util.StringUtils;
 import dev.ftb.mods.ftblibrary.util.client.ClientUtils;
 import dev.ftb.mods.ftblibrary.util.client.PositionedIngredient;
+import dev.ftb.mods.ftbquests.FTBQuests;
 import dev.ftb.mods.ftbquests.api.FTBQuestsAPI;
 import dev.ftb.mods.ftbquests.quest.Quest;
 import dev.ftb.mods.ftbquests.quest.TeamData;
@@ -72,6 +74,15 @@ public class FluidTask extends Task {
 	@Override
 	public String formatProgress(TeamData teamData, long progress) {
 		return getVolumeString((int) Math.min(Integer.MAX_VALUE, progress));
+	}
+
+	@Override
+	public void onButtonClicked(Button button, boolean canClick) {
+		if (FTBQuests.getRecipeModHelper().isRecipeModAvailable()) {
+			FTBQuests.getRecipeModHelper().showRecipes(fluidStack);
+		} else {
+			super.onButtonClicked(button, canClick);
+		}
 	}
 
 	@Override

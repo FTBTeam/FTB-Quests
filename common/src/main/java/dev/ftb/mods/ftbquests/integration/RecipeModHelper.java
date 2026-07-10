@@ -1,5 +1,6 @@
 package dev.ftb.mods.ftbquests.integration;
 
+import dev.architectury.fluid.FluidStack;
 import dev.ftb.mods.ftblibrary.config.Tristate;
 import dev.ftb.mods.ftblibrary.icon.ItemIcon;
 import dev.ftb.mods.ftblibrary.ui.Button;
@@ -18,6 +19,8 @@ public interface RecipeModHelper {
     void refreshRecipes(QuestObjectBase object);
 
     void showRecipes(ItemStack object);
+
+    void showRecipes(FluidStack fluid);
 
     default boolean isRecipeModAvailable() {
         return false;
@@ -66,6 +69,10 @@ public interface RecipeModHelper {
 
         @Override
         public void showRecipes(ItemStack object) {
+        }
+
+        @Override
+        public void showRecipes(FluidStack fluid) {
         }
 
         @Override
