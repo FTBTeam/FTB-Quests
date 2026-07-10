@@ -6,21 +6,19 @@ import com.mojang.serialization.codecs.RecordCodecBuilder;
 import dev.ftb.mods.ftblibrary.FTBLibrary;
 import dev.ftb.mods.ftblibrary.api.event.client.CustomClickEvent;
 import dev.ftb.mods.ftblibrary.client.util.ClientUtils;
+import dev.ftb.mods.ftblibrary.integration.docsmod.DocsModRegistry;
 import dev.ftb.mods.ftblibrary.util.NameMap;
 import dev.ftb.mods.ftblibrary.util.NetworkHelper;
 import dev.ftb.mods.ftbquests.FTBQuests;
 import dev.ftb.mods.ftbquests.client.ClientQuestFile;
+import dev.ftb.mods.ftbquests.client.FTBQuestsClient;
 import dev.ftb.mods.ftbquests.client.gui.quests.QuestScreen;
-import dev.ftb.mods.ftbquests.integration.DocsModRegistry;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.screens.ConfirmLinkScreen;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.resources.Identifier;
 import net.minecraft.util.StringRepresentable;
-import net.minecraft.util.Util;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import org.apache.commons.lang3.StringUtils;
@@ -78,21 +76,6 @@ public record ImageClickAction(ActionType actionType, String actionData) {
         return actionType.id + ":" + actionData;
     }
 
-    private static void openUri(String uriStr) {
-        URI uri = URI.create(uriStr);
-        if (Minecraft.getInstance().options.chatLinksPrompt().get()) {
-            final var currentScreen = Minecraft.getInstance().screen;
-            Minecraft.getInstance().setScreen(new ConfirmLinkScreen(accepted -> {
-                if (accepted) {
-                    Util.getPlatform().openUri(uri);
-                }
-                Minecraft.getInstance().setScreen(currentScreen);
-            }, uriStr, false));
-        } else {
-            Util.getPlatform().openUri(uri);
-        }
-    }
-
     private static void openQuest(String questIdStr) {
         String[] fields = questIdStr.split("/");
         QuestObjectBase.parseHexId(fields[0]).ifPresentOrElse(questId -> {
@@ -125,12 +108,17 @@ public record ImageClickAction(ActionType actionType, String actionData) {
     }
 
     private static void showDocs(String docsPath) {
-        String[] fields = docsPath.split(":", 2);
-        Preconditions.checkState(fields.length == 2, "data must be in format: '<docsmod>:<path>'");
+        String[] fields = docsPath.split(",\\s*", 4);
+        Preconditions.checkState(fields.length >= 2 && fields.length <= 4,
+                "data must be in format: '<mod-id>,<book-id>[,<page-id>[,anchor]]'");
+        String mod = fields[0];
+        Identifier book = Identifier.tryParse(fields[1]);
+        Identifier page = fields.length >= 3 ? Identifier.tryParse(fields[2]) : null;
+        String anchor = fields.length == 4 ? fields[3] : "";
 
-        DocsModRegistry.INSTANCE.getDocsMod(fields[0]).ifPresentOrElse(
-                docsMod -> docsMod.openDocsPage(fields[1]),
-                () -> QuestScreen.displayError("Docs mod '%s' is not installed", fields[0]));
+        DocsModRegistry.INSTANCE.getDocsMod(mod).ifPresentOrElse(
+                docsMod -> docsMod.openDocsPage(ClientUtils.getClientPlayer(), book, page, anchor),
+                () -> QuestScreen.displayError("Docs mod '%s' is not installed", mod));
     }
 
     private void logHandleClickException(Throwable ex) {
@@ -151,7 +139,7 @@ public record ImageClickAction(ActionType actionType, String actionData) {
 
     public enum ActionType implements Consumer<String>, StringRepresentable {
         NONE("none", _ -> {}),
-        OPEN_URI("open_uri", ImageClickAction::openUri),
+        OPEN_URI("open_uri", FTBQuestsClient::openUri),
         OPEN_QUEST("open_quest", ImageClickAction::openQuest),
         RUN_COMMAND("run_command", ImageClickAction::runCommand),
         CUSTOM_EVENT("custom_event", ImageClickAction::postCustomEvent),

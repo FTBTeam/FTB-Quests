@@ -188,7 +188,7 @@
 	"ftbquests.chapter.image.hover.tooltip": "You can use literal text or translation keys here",
 	"ftbquests.chapter.image.click_action_type": "Click Action",
 	"ftbquests.chapter.image.click_action_data": "Click Action Data",
-	"ftbquests.chapter.image.click_action_data.tooltip": "• Open URI: a http://, https:// or file:/// URL\n• Jump to a Quest: a quest ID - use 'Copy Quest ID' context menu entry\n• Run a Command: command to run on the server\n• Post Custom Event: ID argument (namespace:path) for CustomClickEvent listeners\n• Show Recipes for Item: item ID\n• Show a Docs Page: document mod id and docs page path (mod:path)",
+	"ftbquests.chapter.image.click_action_data.tooltip": "• Open URI: a http://, https:// or file:/// URL\n• Jump to a Quest: a quest ID - use 'Copy Quest ID' context menu entry\n• Run a Command: command to run on the server\n• Post Custom Event: ID argument (namespace:path) for CustomClickEvent listeners\n• Show Recipes for Item: item ID\n• Show a Docs Page: <mod>,<book-id>[,<page-id>[,<anchor>]]",
 	"ftbquests.chapter.image.dev": "Only visible in Editing Mode",
 	"ftbquests.chapter.image.corner": "Rotate and offset from corner",
 	"ftbquests.chapter.appearance.default_min_width": "Default Min Opened Quest Window Width",

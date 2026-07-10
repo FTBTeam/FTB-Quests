@@ -335,7 +335,9 @@ public abstract class QuestObjectBase implements Comparable<QuestObjectBase> {
 		}
 
 		if (!getRawTitle().isEmpty()) {
-			cachedTitle = TextUtils.parseRawText(getRawTitle(), holderLookup());
+			cachedTitle = getQuestFile().isServerSide() ?
+					Component.literal(getRawTitle()) :
+					TextUtils.parseRawText(getRawTitle(), holderLookup());
 		} else {
 			cachedTitle = getAltTitle();
 		}
@@ -344,7 +346,8 @@ public abstract class QuestObjectBase implements Comparable<QuestObjectBase> {
 	}
 
 	public final MutableComponent getMutableTitle() {
-		return getTitle().copy();
+		Component t = getTitle();
+		return t instanceof MutableComponent m ? m : t.copy();
 	}
 
 	public final Icon<?> getIcon() {
