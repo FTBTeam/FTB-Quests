@@ -903,16 +903,21 @@ public class ViewQuestPanel extends ModalPanel {
 
 			ClickEvent clickEvent = style.getClickEvent();
 			if (clickEvent == null) return false;
+			String value = clickEvent.getValue();
 
 			if (clickEvent.getAction() == ClickEvent.Action.CHANGE_PAGE) {
-				new ImageClickAction(ImageClickAction.ActionType.OPEN_QUEST, clickEvent.getValue()).run();
+				new ImageClickAction(ImageClickAction.ActionType.OPEN_QUEST, value).run();
 				return true;
 			} else if (clickEvent.getAction() == ClickEvent.Action.OPEN_URL) {
 				try {
-					new ImageClickAction(ImageClickAction.ActionType.OPEN_URI, clickEvent.getValue()).run();
+					if (value.startsWith("docs:")) {
+						new ImageClickAction(ImageClickAction.ActionType.SHOW_DOCS, value.substring(5)).run();
+					} else {
+						new ImageClickAction(ImageClickAction.ActionType.OPEN_URI, value).run();
+					}
 					return true;
 				} catch (Exception e) {
-					errorToPlayer("Can't open url for %s (%s)", clickEvent.getValue(), e.getMessage());
+					errorToPlayer("Can't open url for %s (%s)", value, e.getMessage());
 				}
 				return true;
 			}
