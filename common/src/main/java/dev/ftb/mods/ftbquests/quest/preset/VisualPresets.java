@@ -48,10 +48,8 @@ public class VisualPresets {
     public static VisualPresets makeDefaults() {
         Map<String, VisualPresetRecord> map = Util.make(new HashMap<>(), m -> {
             m.put("normal", new VisualPresetRecord("square", 1.0));
-            m.put("side", new VisualPresetRecord("rsquare", 1.0));
-            m.put("info", new VisualPresetRecord("hexagon", 1.25));
-            m.put("goal", new VisualPresetRecord("octagon", 2.0));
-            m.put("optional", new VisualPresetRecord("circle", 1.0));
+            m.put("info", new VisualPresetRecord("gear", 1.0));
+            m.put("goal", new VisualPresetRecord("hexagon", 2.0));
         });
 
         return new VisualPresets(map);
