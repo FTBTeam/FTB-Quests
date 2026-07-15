@@ -25,17 +25,17 @@ public record ClaimAllRewardsMessage(boolean xpOnly) implements CustomPacketPayl
 	}
 
 	public static void handle(ClaimAllRewardsMessage message, NetworkManager.PacketContext context) {
-		context.queue(() -> {
-			ServerPlayer player = (ServerPlayer) context.getPlayer();
-			ServerQuestFile.INSTANCE.getTeamData(player)
-					.ifPresent(data -> data.getFile().forAllQuests(quest -> {
-						if (data.isCompleted(quest)) {
-							quest.getRewards().stream()
-									.filter(message::shouldIncludeReward)
-									.forEach(reward -> data.claimReward(player, reward, true));
-						}
-					}));
-		});
+		context.queue(() -> ServerQuestFile.getInstance().ifPresent(sqf -> {
+			if (!sqf.shouldSuppressAllAutoclaiming() && context.getPlayer() instanceof ServerPlayer player) {
+				sqf.getTeamData(player).ifPresent(data -> data.getFile().forAllQuests(quest -> {
+					if (data.isCompleted(quest)) {
+						quest.getRewards().stream()
+								.filter(message::shouldIncludeReward)
+								.forEach(reward -> data.claimReward(player, reward, true));
+					}
+				}));
+			}
+		}));
 	}
 
 	private boolean shouldIncludeReward(Reward reward) {

@@ -208,6 +208,10 @@ public abstract class Reward extends QuestObjectBase {
 	}
 
 	public final RewardAutoClaim getAutoClaimType() {
+		if (quest.getQuestFile().shouldSuppressAllAutoclaiming()) {
+			return RewardAutoClaim.DISABLED;
+		}
+
 		if (quest.getChapter().isAlwaysInvisible() && (autoclaim == RewardAutoClaim.DEFAULT || autoclaim == RewardAutoClaim.DISABLED)) {
 			return RewardAutoClaim.ENABLED;
 		}

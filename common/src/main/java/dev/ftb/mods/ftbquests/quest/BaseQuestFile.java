@@ -109,6 +109,7 @@ public abstract class BaseQuestFile extends QuestObject implements QuestFile {
 	private boolean dropBookOnDeath;
 	private String fallbackLocale;
 	private boolean verifyOnLoad;
+	private boolean suppressAllAutoclaiming;
 
 	private List<Task> allTasks;
 	private List<Task> submitTasks;
@@ -446,6 +447,7 @@ public abstract class BaseQuestFile extends QuestObject implements QuestFile {
 		nbt.putBoolean("hide_excluded_quests", hideExcludedQuests);
 		nbt.putString("fallback_locale", fallbackLocale);
 		nbt.putBoolean("verify_on_load", verifyOnLoad);
+		if (suppressAllAutoclaiming) nbt.putBoolean("suppress_all_autoclaiming", true);
 	}
 
 	@Override
@@ -489,6 +491,7 @@ public abstract class BaseQuestFile extends QuestObject implements QuestFile {
 		hideExcludedQuests = nbt.getBoolean("hide_excluded_quests");
 		fallbackLocale = nbt.getString("fallback_locale");
 		verifyOnLoad = nbt.getBoolean("verify_on_load");
+		suppressAllAutoclaiming = nbt.getBoolean("suppress_all_autoclaiming");
 	}
 
 	public final void writeDataFull(Path folder, HolderLookup.Provider provider) {
@@ -902,6 +905,7 @@ public abstract class BaseQuestFile extends QuestObject implements QuestFile {
 		buffer.writeBoolean(dropBookOnDeath);
 		buffer.writeBoolean(hideExcludedQuests);
 		buffer.writeUtf(fallbackLocale);
+		buffer.writeBoolean(suppressAllAutoclaiming);
 	}
 
 	@Override
@@ -928,6 +932,7 @@ public abstract class BaseQuestFile extends QuestObject implements QuestFile {
 		dropBookOnDeath = buffer.readBoolean();
 		hideExcludedQuests = buffer.readBoolean();
 		fallbackLocale = buffer.readUtf();
+		suppressAllAutoclaiming = buffer.readBoolean();
 	}
 
 	public final void writeNetDataFull(RegistryFriendlyByteBuf buffer) {
@@ -1227,6 +1232,7 @@ public abstract class BaseQuestFile extends QuestObject implements QuestFile {
 		config.addBool("show_lock_icons", showLockIcons, v -> showLockIcons = v, true).setNameKey("ftbquests.ui.show_lock_icon");
 		config.addBool("drop_book_on_death", dropBookOnDeath, v -> dropBookOnDeath = v, true);
 		config.addBool("hide_excluded_quests", hideExcludedQuests, v -> hideExcludedQuests = v, false);
+		config.addBool("suppress_all_autoclaiming", suppressAllAutoclaiming, v -> suppressAllAutoclaiming = v, false);
 		config.add("fallback_locale", new LocaleConfig(), fallbackLocale, v -> fallbackLocale = v, "");
 
 		ConfigGroup defaultsGroup = config.getOrCreateSubgroup("defaults");
@@ -1626,5 +1632,9 @@ public abstract class BaseQuestFile extends QuestObject implements QuestFile {
 
 	public boolean dropBookOnDeath() {
 		return dropBookOnDeath;
+	}
+
+	public boolean shouldSuppressAllAutoclaiming() {
+		return suppressAllAutoclaiming;
 	}
 }
