@@ -47,6 +47,7 @@ public final class Chapter extends QuestObject {
 	private Tristate consumeItems;
 	private boolean requireSequentialTasks;
 	private String autoFocusId;
+	private String presetName;
 
 	public Chapter(long id, BaseQuestFile file, ChapterGroup group) {
 		this(id, file, group, "");
@@ -73,6 +74,7 @@ public final class Chapter extends QuestObject {
 		consumeItems = Tristate.DEFAULT;
 		requireSequentialTasks = false;
 		autoFocusId = "";
+		presetName = "";
 	}
 
 	public void setDefaultQuestShape(String defaultQuestShape) {
@@ -197,6 +199,7 @@ public final class Chapter extends QuestObject {
 		if (requireSequentialTasks) nbt.putBoolean("require_sequential_tasks", true);
 
 		if (!autoFocusId.isEmpty()) nbt.putString("autofocus_id", autoFocusId);
+		if (!presetName.isEmpty()) nbt.putString("preset", presetName);
 	}
 
 	@Override
@@ -227,6 +230,7 @@ public final class Chapter extends QuestObject {
 		defaultRepeatable = nbt.getBoolean("default_repeatable_quest");
 		requireSequentialTasks = nbt.getBoolean("require_sequential_tasks");
 		autoFocusId = nbt.getString("autofocus_id");
+		presetName = nbt.getString("preset");
 	}
 
 	@Override
@@ -242,6 +246,7 @@ public final class Chapter extends QuestObject {
 		buffer.writeVarInt(makeFlags());
 
 		if (!autoFocusId.isEmpty()) buffer.writeLong(QuestObjectBase.parseHexId(autoFocusId).orElse(0L));
+		buffer.writeUtf(presetName);
 	}
 
 	private int makeFlags() {
@@ -282,6 +287,7 @@ public final class Chapter extends QuestObject {
 		hideTextUntilComplete = Bits.getFlag(flags, 0x400);
 
 		autoFocusId = Bits.getFlag(flags, 0x100) ? QuestObjectBase.getCodeString(buffer.readLong()) : "";
+		presetName = buffer.readUtf();
 	}
 
 	public int getIndex() {
@@ -423,6 +429,7 @@ public final class Chapter extends QuestObject {
 		appearance.addEnum("default_quest_shape", defaultQuestShape.isEmpty() ? "default" : defaultQuestShape, v -> defaultQuestShape = v.equals("default") ? "" : v, QuestShape.idMapWithDefault);
 		appearance.addDouble("default_quest_size", defaultQuestSize, v -> defaultQuestSize = v, 1, 0.0625D, 8D);
 		appearance.addInt("default_min_width", defaultMinWidth, v -> defaultMinWidth = v, 0, 0, 3000);
+		appearance.addEnum("default_preset", presetName, v -> presetName = v, getQuestFile().getPresets().nameMap());
 
 		ConfigGroup visibility = config.getOrCreateSubgroup("visibility").setNameKey("ftbquests.quest.visibility");
 		visibility.addBool("always_invisible", alwaysInvisible, v -> alwaysInvisible = v, false);
@@ -556,4 +563,8 @@ public final class Chapter extends QuestObject {
 	public CompoundTag makeExtraCreationData() {
 		return Util.make(super.makeExtraCreationData(), t -> t.putLong("group", group.id));
 	}
+
+    public String getPresetName() {
+        return presetName.isEmpty() ? file.getPresetName() : presetName;
+    }
 }

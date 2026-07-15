@@ -44,9 +44,9 @@ public final class QuestShape extends Icon {
 		list.forEach(s -> MAP.put(s, new QuestShape(s)));
 
 		defaultShape = MAP.values().iterator().next();
-		idMap = NameMap.of(list.get(0), list).baseNameKey("ftbquests.quest.shape").create();
-		list.add(0, "default");
-		idMapWithDefault = NameMap.of(list.get(0), list).baseNameKey("ftbquests.quest.shape").create();
+		idMap = NameMap.of(list.getFirst(), list).baseNameKey("ftbquests.quest.shape").create();
+		list.addFirst("default");
+		idMapWithDefault = NameMap.of(list.getFirst(), list).baseNameKey("ftbquests.quest.shape").create();
 	}
 
 	public static QuestShape get(String id) {

@@ -12,6 +12,7 @@ import dev.ftb.mods.ftblibrary.icon.Icons;
 import dev.ftb.mods.ftblibrary.math.PixelBuffer;
 import dev.ftb.mods.ftblibrary.ui.*;
 import dev.ftb.mods.ftblibrary.ui.input.MouseButton;
+import dev.ftb.mods.ftblibrary.util.Lazy;
 import dev.ftb.mods.ftblibrary.util.TooltipList;
 import dev.ftb.mods.ftblibrary.util.Vec2d;
 import dev.ftb.mods.ftblibrary.util.client.PositionedIngredient;
@@ -45,11 +46,13 @@ import java.util.Optional;
 public class QuestButton extends Button implements QuestPositionableButton {
 	protected final QuestScreen questScreen;
 	final Quest quest;
-	@Nullable
-    private Long2ObjectMap<QuestButton> dependencies = null;
+
 	// bezier control points, mapped to screen coords
 	private final Long2ObjectMap<Pair<Vec2d, Vec2d>> controlPoints = new Long2ObjectOpenHashMap<>();
 	private final Long2ObjectMap<List<Vec2d>> bezierCache; // caches points for connection lines/curves
+
+	private final Lazy<Long2ObjectMap<QuestButton>> dependencies = Lazy.of(this::buildDependencies);
+	private final Lazy<QuestShape> shape = Lazy.of(() -> QuestShape.get(getShape()));
 
 	public QuestButton(Panel panel, Quest quest) {
 		super(panel, quest.getTitle(), quest.getIcon());
@@ -116,22 +119,22 @@ public class QuestButton extends Button implements QuestPositionableButton {
 		}
 	}
 
-	public Long2ObjectMap<QuestButton> getDependencies() {
-		if (dependencies == null) {
-			Long2ObjectMap<QuestButton> map = new Long2ObjectOpenHashMap<>();
-			quest.streamDependencies().forEach(dependency -> {
-				if (dependency.isValid() && dependency instanceof Quest) {
-					for (Widget widget : questScreen.questPanel.getWidgets()) {
-						if (widget instanceof QuestButton qb && dependency == qb.quest) {
-							map.put(dependency.getId(), qb);
-						}
+	private Long2ObjectMap<QuestButton> buildDependencies() {
+		Long2ObjectMap<QuestButton> deps = new Long2ObjectOpenHashMap<>();
+		quest.streamDependencies().forEach(dependency -> {
+			if (dependency.isValid() && dependency instanceof Quest) {
+				for (Widget widget : questScreen.questPanel.getWidgets()) {
+					if (widget instanceof QuestButton qb && dependency == qb.quest) {
+						deps.put(dependency.getId(), qb);
 					}
 				}
-			});
-			dependencies = map;
-		}
+			}
+		});
+		return deps;
+	}
 
-		return dependencies;
+	public Long2ObjectMap<QuestButton> getDependencies() {
+		return dependencies.get();
 	}
 
 	@Override
@@ -176,7 +179,7 @@ public class QuestButton extends Button implements QuestPositionableButton {
 							ThemeProperties.CLOSE_ICON.get(quest),
 							b -> selected.forEach(q -> NetworkManager.sendToServer(
 									new DeleteObjectMessage(q.getRewards().stream().map(QuestObjectBase::getId).toList())
-                            ))));
+							))));
 					contextMenu.add(new ContextMenuItem(Component.translatable("ftbquests.gui.bulk_change_size"),
 							Icons.SETTINGS,
 							b -> bulkChangeSize()));
@@ -259,16 +262,16 @@ public class QuestButton extends Button implements QuestPositionableButton {
 
 		for (RewardType type : RewardTypes.TYPES.values()) {
 			if (type.getGuiProvider() != null) {
-                contextMenu2.add(new ContextMenuItem(type.getDisplayName(), type.getIconSupplier(), b -> {
-                    playClickSound();
-                    type.getGuiProvider().openCreationGui(parent, quest, reward -> questScreen.getSelectedQuests().forEach(quest -> {
-                        Reward newReward = QuestObjectBase.copy(reward, () -> type.createReward(0L, quest));
-                        if (newReward != null) {
-                            NetworkManager.sendToServer(CreateObjectMessage.requestCreation(newReward));
-                        }
-                    }));
-                }));
-            }
+				contextMenu2.add(new ContextMenuItem(type.getDisplayName(), type.getIconSupplier(), b -> {
+					playClickSound();
+					type.getGuiProvider().openCreationGui(parent, quest, reward -> questScreen.getSelectedQuests().forEach(quest -> {
+						Reward newReward = QuestObjectBase.copy(reward, () -> type.createReward(0L, quest));
+						if (newReward != null) {
+							NetworkManager.sendToServer(CreateObjectMessage.requestCreation(newReward));
+						}
+					}));
+				}));
+			}
 		}
 
 		getGui().openContextMenu(contextMenu2);
@@ -387,12 +390,12 @@ public class QuestButton extends Button implements QuestPositionableButton {
 			hiddenIcon = ThemeProperties.HIDDEN_ICON.get();
 		}
 
-		QuestShape shape = QuestShape.get(getShape());
+		QuestShape questShape = shape.get();
 
-		if (shape.shouldDraw()) {
-			shape.getShape().withColor(Color4I.DARK_GRAY).draw(graphics, x, y, w, h);
-			shape.getBackground().withColor(Color4I.WHITE.withAlpha(150)).draw(graphics, x, y, w, h);
-			shape.getOutline().withColor(outlineColor).draw(graphics, x, y, w, h);
+		if (questShape.shouldDraw()) {
+			questShape.getShape().withColor(Color4I.DARK_GRAY).draw(graphics, x, y, w, h);
+			questShape.getBackground().withColor(Color4I.WHITE.withAlpha(150)).draw(graphics, x, y, w, h);
+			questShape.getOutline().withColor(outlineColor).draw(graphics, x, y, w, h);
 		}
 
 		PoseStack poseStack = graphics.pose();
@@ -413,14 +416,14 @@ public class QuestButton extends Button implements QuestPositionableButton {
 			poseStack.pushPose();
 			poseStack.translate(0, 0, 1);
 			Color4I col = Color4I.WHITE.withAlpha((int) (190D + Math.sin(System.currentTimeMillis() * 0.003D) * 50D));
-			shape.getOutline().withColor(col).draw(graphics, x, y, w, h);
-			shape.getBackground().withColor(col).draw(graphics, x, y, w, h);
+			questShape.getOutline().withColor(col).draw(graphics, x, y, w, h);
+			questShape.getBackground().withColor(col).draw(graphics, x, y, w, h);
 			poseStack.popPose();
 		}
 
 		if (!canStart || !teamData.areDependenciesComplete(quest)) {
-			if (shape.shouldDraw()) {
-				shape.getShape().withColor(Color4I.BLACK.withAlpha(100)).draw(graphics, x, y, w, h);
+			if (questShape.shouldDraw()) {
+				questShape.getShape().withColor(Color4I.BLACK.withAlpha(100)).draw(graphics, x, y, w, h);
 			}
 			if (quest.getQuestFile().showLockIcons() && FTBQuestsClientConfig.SHOW_LOCK_ICON.get()) {
 				lockIcon = ThemeProperties.LOCK_ICON.get();
@@ -428,7 +431,7 @@ public class QuestButton extends Button implements QuestPositionableButton {
 		}
 
 		if (isMouseOver()) {
-			shape.getShape().withColor(Color4I.WHITE.withAlpha(100)).draw(graphics, x, y, w, h);
+			questShape.getShape().withColor(Color4I.WHITE.withAlpha(100)).draw(graphics, x, y, w, h);
 		}
 
 		if (!questIcon.isEmpty()) {

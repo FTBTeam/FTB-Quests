@@ -12,12 +12,14 @@ import dev.ftb.mods.ftbquests.FTBQuests;
 import dev.ftb.mods.ftbquests.api.QuestFile;
 import dev.ftb.mods.ftbquests.client.FTBQuestsClient;
 import dev.ftb.mods.ftbquests.client.config.LocaleConfig;
+import dev.ftb.mods.ftbquests.client.config.VisualPresetsConfig;
 import dev.ftb.mods.ftbquests.events.*;
 import dev.ftb.mods.ftbquests.integration.RecipeModHelper;
 import dev.ftb.mods.ftbquests.net.DeleteObjectResponseMessage;
 import dev.ftb.mods.ftbquests.quest.loot.EntityWeight;
 import dev.ftb.mods.ftbquests.quest.loot.LootCrate;
 import dev.ftb.mods.ftbquests.quest.loot.RewardTable;
+import dev.ftb.mods.ftbquests.quest.preset.VisualPresets;
 import dev.ftb.mods.ftbquests.quest.reward.*;
 import dev.ftb.mods.ftbquests.quest.task.*;
 import dev.ftb.mods.ftbquests.quest.theme.property.ThemeProperties;
@@ -110,6 +112,8 @@ public abstract class BaseQuestFile extends QuestObject implements QuestFile {
 	private String fallbackLocale;
 	private boolean verifyOnLoad;
 	private boolean suppressAllAutoclaiming;
+	protected VisualPresets allPresets;
+	private String presetName;
 
 	private List<Task> allTasks;
 	private List<Task> submitTasks;
@@ -151,6 +155,9 @@ public abstract class BaseQuestFile extends QuestObject implements QuestFile {
 		dropBookOnDeath = false;
 		hideExcludedQuests = false;
 		verifyOnLoad = false;
+
+		allPresets = VisualPresets.EMPTY;
+		presetName = "";
 
 		allTasks = null;
 
@@ -448,6 +455,8 @@ public abstract class BaseQuestFile extends QuestObject implements QuestFile {
 		nbt.putString("fallback_locale", fallbackLocale);
 		nbt.putBoolean("verify_on_load", verifyOnLoad);
 		if (suppressAllAutoclaiming) nbt.putBoolean("suppress_all_autoclaiming", true);
+		nbt.put("presets", allPresets.serialize());
+		if (!presetName.isEmpty()) nbt.putString("preset", presetName);
 	}
 
 	@Override
@@ -492,6 +501,11 @@ public abstract class BaseQuestFile extends QuestObject implements QuestFile {
 		fallbackLocale = nbt.getString("fallback_locale");
 		verifyOnLoad = nbt.getBoolean("verify_on_load");
 		suppressAllAutoclaiming = nbt.getBoolean("suppress_all_autoclaiming");
+
+        allPresets = isServerSide() && !nbt.contains("presets") ?
+				VisualPresets.makeDefaults() :
+				VisualPresets.deserialize(nbt.getCompound("presets"));
+		presetName = nbt.getString("preset");
 	}
 
 	public final void writeDataFull(Path folder, HolderLookup.Provider provider) {
@@ -906,6 +920,7 @@ public abstract class BaseQuestFile extends QuestObject implements QuestFile {
 		buffer.writeBoolean(hideExcludedQuests);
 		buffer.writeUtf(fallbackLocale);
 		buffer.writeBoolean(suppressAllAutoclaiming);
+		VisualPresets.STREAM_CODEC.encode(buffer, allPresets);
 	}
 
 	@Override
@@ -933,6 +948,7 @@ public abstract class BaseQuestFile extends QuestObject implements QuestFile {
 		hideExcludedQuests = buffer.readBoolean();
 		fallbackLocale = buffer.readUtf();
 		suppressAllAutoclaiming = buffer.readBoolean();
+		allPresets = VisualPresets.STREAM_CODEC.decode(buffer);
 	}
 
 	public final void writeNetDataFull(RegistryFriendlyByteBuf buffer) {
@@ -1234,6 +1250,7 @@ public abstract class BaseQuestFile extends QuestObject implements QuestFile {
 		config.addBool("hide_excluded_quests", hideExcludedQuests, v -> hideExcludedQuests = v, false);
 		config.addBool("suppress_all_autoclaiming", suppressAllAutoclaiming, v -> suppressAllAutoclaiming = v, false);
 		config.add("fallback_locale", new LocaleConfig(), fallbackLocale, v -> fallbackLocale = v, "");
+		config.add("presets", new VisualPresetsConfig(), allPresets, v -> allPresets = v, VisualPresets.EMPTY);
 
 		ConfigGroup defaultsGroup = config.getOrCreateSubgroup("defaults");
 		defaultsGroup.addBool("reward_team", defaultPerTeamReward, v -> defaultPerTeamReward = v, false);
@@ -1241,6 +1258,7 @@ public abstract class BaseQuestFile extends QuestObject implements QuestFile {
 		defaultsGroup.addEnum("autoclaim_rewards", defaultRewardAutoClaim, v -> defaultRewardAutoClaim = v, RewardAutoClaim.NAME_MAP_NO_DEFAULT);
 		defaultsGroup.addEnum("quest_shape", defaultQuestShape, v -> defaultQuestShape = v, QuestShape.idMap);
 		defaultsGroup.addBool("quest_disable_jei", defaultQuestDisableJEI, v -> defaultQuestDisableJEI = v, false);
+		defaultsGroup.addEnum("default_preset", presetName, v -> presetName = v, getQuestFile().getPresets().nameMap());
 
 		ConfigGroup d = config.getOrCreateSubgroup("loot_crate_no_drop");
 		d.addInt("passive", lootCrateNoDrop.passive, v -> lootCrateNoDrop.passive = v, 0, 0, Integer.MAX_VALUE).setNameKey("ftbquests.loot.entitytype.passive");
@@ -1637,4 +1655,12 @@ public abstract class BaseQuestFile extends QuestObject implements QuestFile {
 	public boolean shouldSuppressAllAutoclaiming() {
 		return suppressAllAutoclaiming;
 	}
+
+    public String getPresetName() {
+        return presetName;
+    }
+
+    public VisualPresets getPresets() {
+        return allPresets;
+    }
 }
