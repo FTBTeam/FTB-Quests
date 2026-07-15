@@ -151,6 +151,8 @@
 	"ftbquests.file.fallback_locale": "Fallback Locale",
 	"ftbquests.file.fallback_locale.tooltip": "The locale used for translations not found in the current locale\nThis can be overridden on the client via Player Preferences\nDefaults to 'en_us' if empty",
 	"ftbquests.file.detection_delay.tooltip": "Minimum interval (in ticks) between checks of a player's inventory when it changes\nHigher values are kinder on server TPS, especially if players inventories change frequently, but mean longer delays for quest auto-completion messages.",
+	"ftbquests.file.suppress_all_autoclaiming": "Suppress all Reward Autoclaiming",
+	"ftbquests.file.suppress_all_autoclaiming.tooltip": "If true, no rewards can be autoclaimed, including via the \"Claim All\" button on the reward selector screen\nMay be useful during pack development to ensure testers read quests...",
 	"ftbquests.chapter.misc.progression_mode": "Default 'Progression Mode'",
 	"ftbquests.chapter.misc.default_repeatable": "Default 'Repeatable Quest'",
 	"ftbquests.chapter.misc.consume_items": "Default Item Task 'Consume Items'",
