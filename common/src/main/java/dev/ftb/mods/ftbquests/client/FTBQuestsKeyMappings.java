@@ -1,12 +1,12 @@
 package dev.ftb.mods.ftbquests.client;
 
-import com.mojang.blaze3d.platform.InputConstants;
 import dev.ftb.mods.ftblibrary.platform.client.PlatformClient;
 import dev.ftb.mods.ftblibrary.platform.client.input.Input;
 import dev.ftb.mods.ftblibrary.platform.client.input.KeyConflict;
 import dev.ftb.mods.ftblibrary.platform.client.input.KeyMappingConfig;
 import dev.ftb.mods.ftblibrary.platform.client.input.KeyModifier;
 import dev.ftb.mods.ftbquests.api.FTBQuestsAPI;
+import com.mojang.blaze3d.platform.InputConstants;
 import net.minecraft.client.KeyMapping;
 
 public class FTBQuestsKeyMappings {
@@ -127,6 +127,7 @@ public class FTBQuestsKeyMappings {
         return input().createKeyMapping(KeyMappingConfig.builder(name, category)
                 .keyboard(keyCode)
                 .modifier(modifier)
+                .conflictContext(KeyConflict.ANY_GUI)
                 .build());
     }
 
