@@ -1,5 +1,6 @@
 package dev.ftb.mods.ftbquests.client.gui.quests;
 
+import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.datafixers.util.Pair;
 import dev.ftb.mods.ftblibrary.client.config.editable.EditableImageResource;
 import dev.ftb.mods.ftblibrary.client.config.gui.resource.SelectImageResourceScreen;
@@ -43,6 +44,7 @@ import net.minecraft.util.Mth;
 import org.joml.Matrix3x2f;
 import org.joml.Matrix3x2fStack;
 import org.jspecify.annotations.Nullable;
+import org.lwjgl.glfw.GLFW;
 
 import java.util.*;
 import java.util.function.Consumer;
@@ -307,6 +309,13 @@ public class QuestPanel extends Panel {
 	public void draw(GuiGraphicsExtractor graphics, Theme theme, int x, int y, int w, int h) {
 		super.draw(graphics, theme, x, y, w, h);
 
+		var poseStack = graphics.pose();
+
+		if (questScreen.file.canEdit()) {
+			drawStatusBar(graphics, theme, poseStack);
+			questScreen.file.getChangelog().draw(graphics, questScreen);
+		}
+
 		if (questScreen.selectedChapter != null && isMouseOver()) {
 			double dx = (questMaxX - questMinX);
 			double dy = (questMaxY - questMinY);
@@ -335,10 +344,6 @@ public class QuestPanel extends Panel {
 			}
 
 			if (questScreen.file.canEdit()) {
-				Matrix3x2fStack poseStack = graphics.pose();
-
-				drawStatusBar(graphics, theme, poseStack);
-
 				if (bezierController.isActive()) {
 					var bezierHint = Component.translatable("ftbquests.gui.editing_bezier");
 					graphics.text(theme.getFont(), bezierHint, width - theme.getStringWidth(bezierHint), 4, 0xFFC0C0C0);
@@ -463,7 +468,7 @@ public class QuestPanel extends Panel {
 				}
 
 				for (Movable q : questScreen.selectedObjects) {
-					q.initiateMoveClientSide(questScreen.selectedChapter, questX + (q.getX() - minX), questY + (q.getY() - minY));
+					q.requestMove(questScreen.selectedChapter, questX + (q.getX() - minX), questY + (q.getY() - minY));
 				}
 			}
 
@@ -495,17 +500,10 @@ public class QuestPanel extends Panel {
 			double qy = questY;
 
 			for (TaskType type : TaskTypes.TYPES.values()) {
-				contextMenu.add(new ContextMenuItem(type.getDisplayName(), type.getIconSupplier(), _ -> {
+				contextMenu.add(new ContextMenuItem(type.getDisplayName(), type.getIconSupplier(), b -> {
 					playClickSound();
 					type.getGuiProvider().openCreationGui(this, new Quest(0L, questScreen.selectedChapter),
-							(task, extra) -> {
-								String str = task.getProtoTranslation(TranslationKey.TITLE);
-								if (!str.isEmpty()) {
-									questScreen.file.getTranslationManager().addInitialTranslation(extra, questScreen.file.getLocale(),
-											TranslationKey.TITLE, task.getProtoTranslation(TranslationKey.TITLE));
-								}
-								Play2ServerNetworking.send(CreateTaskAtMessage.create(questScreen.selectedChapter, qx, qy, task, extra));
-							}
+                            task -> Play2ServerNetworking.send(CreateQuestAndTaskMessage.requestCreation(questScreen.selectedChapter, qx, qy, task))
 					);
 				}));
 			}
@@ -529,7 +527,7 @@ public class QuestPanel extends Panel {
                                 Icons.ADD_GRAY.withTint(Color4I.rgb(0x8080C0)),
                                 _ -> {
                                     QuestLink link = new QuestLink(0L, questScreen.selectedChapter, quest.id).setPosition(qx, qy);
-                                    Play2ServerNetworking.send(CreateObjectMessage.create(link, null));
+                                    Play2ServerNetworking.send(CreateObjectMessage.requestCreation(link));
                                 }));
                     }
                     case Task task -> {
@@ -566,7 +564,7 @@ public class QuestPanel extends Panel {
 						.setImage(Icon.getIcon(imageConfig.getValue()))
 						.setPosition(qx, qy);
 				image.fixupAspectRatio(true);
-				Play2ServerNetworking.send(CreateObjectMessage.create(image, null));
+				Play2ServerNetworking.send(CreateObjectMessage.requestCreation(image));
 			}
 			QuestPanel.this.questScreen.openGui();
 		}).openGui();
@@ -578,7 +576,7 @@ public class QuestPanel extends Panel {
 		}
 		Task newTask = QuestObjectBase.copy(task,
 				() -> TaskType.createTask(0L, new Quest(0L, questScreen.selectedChapter), task.getType().getTypeId().toString()));
-		Play2ServerNetworking.send(CreateTaskAtMessage.create(questScreen.selectedChapter, qx, qy, newTask, null));
+		Play2ServerNetworking.send(CreateQuestAndTaskMessage.requestCreation(questScreen.selectedChapter, qx, qy, newTask));
 	}
 
 	@Override
@@ -617,7 +615,10 @@ public class QuestPanel extends Panel {
 
 	@Override
 	public boolean keyPressed(Key key) {
-		if (questScreen.selectedChapter != null && !questScreen.isViewingQuest()) {
+		if (key.matches(FTBQuestsKeyMappings.KEY_GUI_TOGGLE_CHANGELOG)) {
+			FTBQuestsClientConfig.setAlwaysShowChangelog(!FTBQuestsClientConfig.CHANGELOG_ALWAYS_SHOW.get());
+			return true;
+		} else if (questScreen.selectedChapter != null && !questScreen.isViewingQuest()) {
 			if (key.matches(FTBQuestsKeyMappings.KEY_GUI_ZOOM_IN)) {
 				questScreen.addZoom(1D);
 				return true;

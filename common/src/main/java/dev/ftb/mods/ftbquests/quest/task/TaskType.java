@@ -1,6 +1,5 @@
 package dev.ftb.mods.ftbquests.quest.task;
 
-import de.marhali.json5.Json5Object;
 import dev.ftb.mods.ftblibrary.client.gui.widget.Panel;
 import dev.ftb.mods.ftblibrary.icon.Icon;
 import dev.ftb.mods.ftbquests.api.FTBQuestsAPI;
@@ -8,10 +7,9 @@ import dev.ftb.mods.ftbquests.client.GuiProviders;
 import dev.ftb.mods.ftbquests.quest.Quest;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
-import net.minecraft.util.Util;
-import org.apache.commons.lang3.Validate;
+import org.jetbrains.annotations.Nullable;
 
-import java.util.function.BiConsumer;
+import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 public final class TaskType {
@@ -35,6 +33,7 @@ public final class TaskType {
 		return typeId;
 	}
 
+	@Nullable
 	public static Task createTask(long id, Quest quest, String typeId) {
 		if (typeId.isEmpty()) {
 			typeId = FTBQuestsAPI.MOD_ID + ":item";
@@ -43,8 +42,20 @@ public final class TaskType {
 		}
 
 		TaskType type = TaskTypes.TYPES.get(Identifier.tryParse(typeId));
-		Validate.isTrue(type != null, "Unknown task type: " + type);
+
+		if (type == null) {
+			return null;
+		}
+
 		return type.provider.create(id, quest);
+	}
+
+	public static Task requireCreateTask(long id, Quest quest, String typeId) {
+		Task task = createTask(id, quest, typeId);
+		if (task == null) {
+			throw new IllegalArgumentException("Unknown task type: '" + typeId + "'");
+		}
+		return task;
 	}
 
 	public Task createTask(long id, Quest quest) {
@@ -53,10 +64,6 @@ public final class TaskType {
 
 	public String getTypeForSerialization() {
 		return typeId.getNamespace().equals(FTBQuestsAPI.MOD_ID) ? typeId.getPath() : typeId.toString();
-	}
-
-	public Json5Object makeExtraJson() {
-		return Util.make(new Json5Object(), t -> t.addProperty("type", getTypeForSerialization()));
 	}
 
 	public Component getDisplayName() {
@@ -83,7 +90,7 @@ public final class TaskType {
 
 	@FunctionalInterface
 	public interface GuiProvider {
-		void openCreationGui(Panel panel, Quest quest, BiConsumer<Task,Json5Object> callback);
+		void openCreationGui(Panel panel, Quest quest, Consumer<Task> callback);
 	}
 
 }

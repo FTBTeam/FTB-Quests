@@ -1,41 +1,34 @@
 package dev.ftb.mods.ftbquests.gametest.base;
 
-import de.marhali.json5.Json5Element;
+import com.google.common.util.concurrent.AtomicDouble;
 import de.marhali.json5.Json5Object;
-import dev.ftb.mods.ftbquests.quest.Chapter;
-import dev.ftb.mods.ftbquests.quest.Quest;
-import dev.ftb.mods.ftbquests.quest.QuestObjectBase;
-import dev.ftb.mods.ftbquests.quest.QuestObjectType;
-import dev.ftb.mods.ftbquests.quest.ServerQuestFile;
-import dev.ftb.mods.ftbquests.quest.TeamData;
+import dev.ftb.mods.ftblibrary.json5.Json5Ops;
+import dev.ftb.mods.ftblibrary.platform.fluid.FluidStack;
+import dev.ftb.mods.ftbquests.quest.*;
+import dev.ftb.mods.ftbquests.quest.history.CreateOrDeleteRecord;
+import dev.ftb.mods.ftbquests.quest.history.events.CreateQuestObjects;
 import dev.ftb.mods.ftbquests.quest.reward.Reward;
 import dev.ftb.mods.ftbquests.quest.task.EnergyTask;
 import dev.ftb.mods.ftbquests.quest.task.FluidTask;
 import dev.ftb.mods.ftbquests.quest.task.ItemTask;
 import dev.ftb.mods.ftbquests.quest.task.Task;
 import net.minecraft.gametest.framework.GameTestHelper;
-import dev.ftb.mods.ftblibrary.client.config.Tristate;
-import dev.ftb.mods.ftblibrary.platform.fluid.FluidStack;
+import net.minecraft.network.chat.Component;
+import net.minecraft.util.Util;
 import net.minecraft.world.item.ItemStack;
 
-import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public final class QuestTestSupport {
+
+	private static final AtomicInteger chapterFileNumber = new AtomicInteger(1);
+	private static final AtomicDouble questXpos = new AtomicDouble(0.0);
 
 	private QuestTestSupport() {}
 
 	public static ServerQuestFile file() {
 		return ServerQuestFile.getInstance();
-	}
-
-	private static void applyConfig(QuestObjectBase object, Json5Object overrides) {
-		Json5Object json = new Json5Object();
-		object.writeData(json, file().holderLookup());
-		for (Map.Entry<String, Json5Element> entry : overrides.entrySet()) {
-			json.add(entry.getKey(), entry.getValue());
-		}
-		object.readData(json, file().holderLookup());
 	}
 
 	public static Chapter newChapter() {
@@ -44,12 +37,14 @@ public final class QuestTestSupport {
 
 	public static Chapter newChapter(Json5Object config) {
 		ServerQuestFile file = file();
-		Chapter chapter = (Chapter) file.create(file.newID(), QuestObjectType.CHAPTER, 1L, new Json5Object());
-		applyConfig(chapter, config);
-		chapter.onCreated();
-		file.refreshIDMap();
-		file.clearCachedData();
-		return chapter;
+		long chapterId = file.newID();
+		config.addProperty("filename", "test_chapter_" + chapterFileNumber.getAndIncrement());
+		file.getHistoryStack().addAndApply(file, new CreateQuestObjects(
+				new CreateOrDeleteRecord(chapterId, 1L, QuestObjectType.CHAPTER,
+						Component.empty(), config, new Json5Object()),
+				null)
+		);
+		return file.getQuestObjectOrThrow(chapterId, Chapter.class);
 	}
 
 	public static Quest newQuest(Chapter chapter) {
@@ -58,77 +53,68 @@ public final class QuestTestSupport {
 
 	public static Quest newQuest(Chapter chapter, Json5Object config) {
 		ServerQuestFile file = file();
-		Quest quest = (Quest) file.create(file.newID(), QuestObjectType.QUEST, chapter.id, new Json5Object());
-		applyConfig(quest, config);
-		quest.onCreated();
-		file.refreshIDMap();
-		file.clearCachedData();
-		return quest;
+		long questId = file.newID();
+		config.addProperty("x", questXpos.getAndAdd(2.0));
+		config.addProperty("y", 0.0);
+		file.getHistoryStack().addAndApply(file, new CreateQuestObjects(
+				new CreateOrDeleteRecord(questId, chapter.id, QuestObjectType.QUEST,
+						Component.empty(), config, new Json5Object()),
+				null)
+		);
+		return file.getQuestObjectOrThrow(questId, Quest.class);
 	}
 
 	public static Task newCheckmarkTask(Quest quest) {
 		return newCheckmarkTask(quest, false);
 	}
 
+	private static Task newTask(Quest quest, Json5Object config, String typeId) {
+		ServerQuestFile file = file();
+		long taskId = file.newID();
+		Json5Object metadata = Util.make(new Json5Object(), o -> o.addProperty("type", typeId));
+		file.getHistoryStack().addAndApply(file, new CreateQuestObjects(
+				new CreateOrDeleteRecord(taskId, quest.getId(), QuestObjectType.TASK, Component.empty(), config, metadata),
+				null)
+		);
+		return file.getQuestObjectOrThrow(taskId, Task.class);
+	}
+
 	public static Task newCheckmarkTask(Quest quest, boolean optional) {
-		ServerQuestFile file = file();
-		Json5Object extra = new Json5Object();
-		extra.addProperty("type", "checkmark");
-		Task task = (Task) file.create(file.newID(), QuestObjectType.TASK, quest.id, extra);
-		Json5Object config = new Json5Object();
-		if (optional) {
-			config.addProperty("optional_task", true);
-		}
-		applyConfig(task, config);
-		task.onCreated();
-		file.refreshIDMap();
-		file.clearCachedData();
-		return task;
-	}
-
-	private static Task newTask(Quest quest, String typeId) {
-		ServerQuestFile file = file();
-		Json5Object extra = new Json5Object();
-		extra.addProperty("type", typeId);
-		return (Task) file.create(file.newID(), QuestObjectType.TASK, quest.id, extra);
-	}
-
-	private static <T extends Task> T finishTask(T task) {
-		ServerQuestFile file = file();
-		task.onCreated();
-		file.refreshIDMap();
-		file.clearCachedData();
-		return task;
+		Json5Object config = Util.make(new Json5Object(), o -> {
+			if (optional) o.addProperty("optional_task", true);
+		});
+		return newTask(quest, config, "checkmark");
 	}
 
 	public static ItemTask newItemTask(Quest quest, ItemStack stack, int count) {
-		ItemTask task = (ItemTask) newTask(quest, "item");
-		task.setStackAndCount(stack, count);
-		task.setConsumeItems(Tristate.TRUE);
-		return finishTask(task);
+		Json5Object config = Util.make(new Json5Object(), o -> {
+			o.add("item", ItemStack.CODEC.encodeStart(quest.getQuestFile().holderLookup().createSerializationContext(Json5Ops.INSTANCE), stack).getOrThrow());
+			o.addProperty("count", count);
+			o.addProperty("consume_items", true);
+		});
+		return (ItemTask) newTask(quest, config, "item");
 	}
 
 	public static FluidTask newFluidTask(Quest quest, FluidStack fluid) {
-		FluidTask task = (FluidTask) newTask(quest, "fluid");
-		task.setFluid(fluid);
-		return finishTask(task);
+		Json5Object config = Util.make(new Json5Object(), o -> o.add("fluid", FluidStack.CODEC.encodeStart(quest.getQuestFile().holderLookup().createSerializationContext(Json5Ops.INSTANCE), fluid).getOrThrow()));
+		return (FluidTask) newTask(quest, config, "fluid");
 	}
 
 	public static EnergyTask newEnergyTask(Quest quest, long value) {
-		EnergyTask task = (EnergyTask) newTask(quest, "forge_energy");
-		task.setValue(value);
-		return finishTask(task);
+		Json5Object config = Util.make(new Json5Object(), o -> o.addProperty("value", value));
+		return (EnergyTask) newTask(quest, config, "forge_energy");
 	}
 
 	public static Reward newXpReward(Quest quest) {
 		ServerQuestFile file = file();
-		Json5Object extra = new Json5Object();
-		extra.addProperty("type", "xp");
-		Reward reward = (Reward) file.create(file.newID(), QuestObjectType.REWARD, quest.id, extra);
-		reward.onCreated();
-		file.refreshIDMap();
-		file.clearCachedData();
-		return reward;
+		long rewardID = file.newID();
+		Json5Object config = Util.make(new Json5Object(), o -> o.addProperty("xp", 10));
+		Json5Object metadata = Util.make(new Json5Object(), o -> o.addProperty("type", "xp"));
+		file.getHistoryStack().addAndApply(file, new CreateQuestObjects(
+				new CreateOrDeleteRecord(rewardID, quest.getId(), QuestObjectType.REWARD, Component.empty(), config, metadata),
+				null)
+		);
+		return file.getQuestObjectOrThrow(rewardID, Reward.class);
 	}
 
 	public static TeamData newTeam() {

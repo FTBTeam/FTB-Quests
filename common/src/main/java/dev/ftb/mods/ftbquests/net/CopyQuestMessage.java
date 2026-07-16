@@ -1,10 +1,13 @@
 package dev.ftb.mods.ftbquests.net;
 
-import de.marhali.json5.Json5Object;
 import dev.ftb.mods.ftblibrary.platform.network.PacketContext;
-import dev.ftb.mods.ftblibrary.platform.network.Server2PlayNetworking;
 import dev.ftb.mods.ftbquests.api.FTBQuestsAPI;
-import dev.ftb.mods.ftbquests.quest.*;
+import dev.ftb.mods.ftbquests.quest.Chapter;
+import dev.ftb.mods.ftbquests.quest.Quest;
+import dev.ftb.mods.ftbquests.quest.QuestObjectBase;
+import dev.ftb.mods.ftbquests.quest.ServerQuestFile;
+import dev.ftb.mods.ftbquests.quest.history.CreateOrDeleteRecord;
+import dev.ftb.mods.ftbquests.quest.history.events.CreateQuestObjects;
 import dev.ftb.mods.ftbquests.quest.reward.Reward;
 import dev.ftb.mods.ftbquests.quest.reward.RewardType;
 import dev.ftb.mods.ftbquests.quest.task.Task;
@@ -14,9 +17,9 @@ import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
-import net.minecraft.server.MinecraftServer;
 
-import java.util.Objects;
+import java.util.ArrayList;
+import java.util.List;
 
 public record CopyQuestMessage(long id, long chapterId, double qx, double qy, boolean copyDeps) implements CustomPacketPayload {
     public static final Type<CopyQuestMessage> TYPE = new Type<>(FTBQuestsAPI.id("copy_quest_message"));
@@ -36,47 +39,38 @@ public record CopyQuestMessage(long id, long chapterId, double qx, double qy, bo
     }
 
     public static void handle(CopyQuestMessage message, PacketContext context) {
-        BaseQuestFile file = ServerQuestFile.getInstance();
-        if (file.get(message.id) instanceof Quest toCopy && file.get(message.chapterId) instanceof Chapter chapter && NetUtils.canEdit(context)) {
+        ServerQuestFile sqf = ServerQuestFile.getInstance();
+        if (NetUtils.canEdit(context) && sqf.get(message.id) instanceof Quest toCopy && sqf.get(message.chapterId) instanceof Chapter chapter) {
             // deep copy of the quest
-            Quest newQuest = Objects.requireNonNull(QuestObjectBase.copy(toCopy, () -> new Quest(file.newID(), chapter)));
+            Quest newQuest = QuestObjectBase.copy(toCopy, () -> new Quest(sqf.newID(), chapter));
+            if (newQuest == null) {
+                return;
+            }
             if (!message.copyDeps) {
                 newQuest.clearDependencies();
             }
-            newQuest.setX(message.qx);
-            newQuest.setY(message.qy);
-            newQuest.onCreated();
+            newQuest.setPosition(message.qx, message.qy);
+            newQuest.setRawSubtitle(toCopy.getRawSubtitle());
+            newQuest.setRawDescription(toCopy.getRawDescription());
 
             // deep copy of all tasks and rewards
+            List<CreateOrDeleteRecord> newTasks = new ArrayList<>();
             toCopy.getTasks().forEach(task -> {
-                Task newTask = QuestObjectBase.copy(task,
-                        () -> TaskType.createTask(file.newID(), newQuest, task.getType().getTypeForSerialization()));
-                newTask.onCreated();
+                Task newTask = QuestObjectBase.copy(task, () -> TaskType.createTask(sqf.newID(), newQuest, task.getType().getTypeForSerialization()));
+                newTasks.add(CreateOrDeleteRecord.ofQuestObject(newTask));
             });
+            List<CreateOrDeleteRecord> newRewards = new ArrayList<>();
             for (Reward reward : toCopy.getRewards()) {
-                Reward newReward = QuestObjectBase.copy(reward,
-                        () -> RewardType.createReward(file.newID(), newQuest, reward.getType().getTypeForSerialization()));
-                newReward.onCreated();
+                Reward newReward = QuestObjectBase.copy(reward, () -> RewardType.createReward(sqf.newID(), newQuest, reward.getType().getTypeForSerialization()));
+                newRewards.add(CreateOrDeleteRecord.ofQuestObject(newReward));
             }
 
-            // sync new objects to clients
-            MinecraftServer server = Objects.requireNonNull(context.player().level().getServer());
-            Server2PlayNetworking.sendToAllPlayers(server, CreateObjectResponseMessage.create(newQuest, null));
-            newQuest.getTasks().forEach(task -> {
-                Json5Object extra = new Json5Object();
-                extra.addProperty("type", task.getType().getTypeForSerialization());
-                Server2PlayNetworking.sendToAllPlayers(server, CreateObjectResponseMessage.create(task, extra));
-            });
-            newQuest.getRewards().forEach(reward -> {
-                Json5Object extra = new Json5Object();
-                extra.addProperty("type", reward.getType().getTypeForSerialization());
-                Server2PlayNetworking.sendToAllPlayers(server, CreateObjectResponseMessage.create(reward, extra));
-            });
+            List<CreateOrDeleteRecord> recs = new ArrayList<>();
+            recs.add(CreateOrDeleteRecord.ofQuestObject(newQuest));
+            recs.addAll(newTasks);
+            recs.addAll(newRewards);
 
-            // and update the server quest map etc.
-            ServerQuestFile.getInstance().refreshIDMap();
-            ServerQuestFile.getInstance().clearCachedData();
-            ServerQuestFile.getInstance().markDirty();
+            sqf.getHistoryStack().addAndApply(sqf, new CreateQuestObjects(recs, null));
         }
     }
 }

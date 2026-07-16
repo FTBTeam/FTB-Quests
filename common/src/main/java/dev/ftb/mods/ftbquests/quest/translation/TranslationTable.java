@@ -8,7 +8,6 @@ import de.marhali.json5.Json5Object;
 import dev.ftb.mods.ftblibrary.json5.Json5Util;
 import dev.ftb.mods.ftbquests.FTBQuests;
 import dev.ftb.mods.ftbquests.quest.BaseQuestFile;
-import dev.ftb.mods.ftbquests.quest.QuestObject;
 import dev.ftb.mods.ftbquests.quest.QuestObjectBase;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
@@ -152,5 +151,9 @@ public class TranslationTable {
 
     public boolean contains(String key) {
         return map.containsKey(key);
+    }
+
+    public Either<String, List<String>> getEntry(String key, Either<String, List<String>> def) {
+        return map.getOrDefault(key, def);
     }
 }

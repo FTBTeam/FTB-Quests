@@ -78,7 +78,7 @@ public class ImageComponentWidget extends Widget {
 	}
 
 	public static EditableConfigGroup makeEditGroup(ImageComponent component, ConfigCallback callback) {
-		EditableConfigGroup config = new EditableConfigGroup(FTBQuestsAPI.MOD_ID + ".chapter.image", callback);
+		EditableConfigGroup config = new EditableConfigGroup(FTBQuestsAPI.MOD_ID + ".image", callback);
 
 		ImageClickAction clickAction = ImageClickAction.fromString(component.getClickAction());
 

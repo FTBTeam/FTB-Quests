@@ -17,6 +17,7 @@ import net.minecraft.core.HolderLookup;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.util.Util;
 
 import java.util.*;
 import java.util.regex.Pattern;
@@ -134,10 +135,12 @@ public final class Chapter extends QuestObject {
 
 	public void addQuest(Quest quest) {
 		quests.add(quest);
+		file.markDirty();
 	}
 
 	public void removeQuest(Quest quest) {
 		quests.remove(quest);
+		file.markDirty();
 	}
 
 	public void addImage(ChapterImage image) {
@@ -154,24 +157,6 @@ public final class Chapter extends QuestObject {
 
 	public void removeQuestLink(QuestLink link) {
 		questLinks.remove(link);
-	}
-
-	public void addChildObject(Movable child) {
-        switch (child) {
-            case Quest q -> addQuest(q);
-            case QuestLink ql -> addQuestLink(ql);
-            case ChapterImage img -> addImage(img);
-            default -> throw new IllegalArgumentException("expecting quest, quest link or chapter image!");
-        }
-	}
-
-	public void removeChildObject(Movable child) {
-		switch (child) {
-			case Quest q -> removeQuest(q);
-			case QuestLink ql -> removeQuestLink(ql);
-			case ChapterImage img -> removeImage(img);
-			default -> throw new IllegalArgumentException("expecting quest, quest link or chapter image!");
-		}
 	}
 
 	@Override
@@ -202,7 +187,7 @@ public final class Chapter extends QuestObject {
 
 		filename = Json5Util.getString(json, "filename").orElseThrow();
 		alwaysInvisible = Json5Util.getBoolean(json, "always_invisible").orElse(false);
-		defaultQuestShape = Json5Util.getString(json, "default_quest_shape").orElseThrow();
+		defaultQuestShape = Json5Util.getString(json, "default_quest_shape").orElse("");
 		defaultQuestSize = Json5Util.getDouble(json, "default_quest_size").orElse(1D);
 		defaultHideDependencyLines = Json5Util.getBoolean(json, "default_hide_dependency_lines").orElse(false);
 		defaultMinWidth = Json5Util.getInt(json, "default_min_width").orElse(0);
@@ -354,21 +339,16 @@ public final class Chapter extends QuestObject {
 	@Override
 	public void deleteSelf() {
 		super.deleteSelf();
+
+		List.copyOf(quests).forEach(Quest::deleteSelf);  // copy to avoid CME
+
 		group.removeChapter(this);
 	}
 
 	@Override
-	public void deleteChildren() {
-		for (Quest quest : quests) {
-			quest.deleteChildren();
-			quest.invalid = true;
-		}
-
-		quests.clear();
-	}
-
-	@Override
 	public void onCreated() {
+		super.onCreated();
+
 		// filename should have been suggested by the client and available here
 		// but in case not, fall back to the chapter's hex object id
 		if (filename.isEmpty()) {
@@ -451,6 +431,11 @@ public final class Chapter extends QuestObject {
 	}
 
 	@Override
+	public Json5Object makeCreationMetadata() {
+		return Util.make(super.makeCreationMetadata(), json -> json.addProperty("group", group.id));
+	}
+
+	@Override
 	protected void verifyDependenciesInternal(long original, int depth) {
 		if (depth >= 1000) {
 			throw new DependencyDepthException(this);
@@ -529,7 +514,7 @@ public final class Chapter extends QuestObject {
 	public Optional<Movable> getAutofocus() {
 		if (!autoFocusId.isEmpty()) {
 			return QuestObjectBase.parseHexId(autoFocusId)
-					.flatMap(id -> file.get(id) instanceof Movable m && m.getChapter() == this ?
+					.flatMap(id -> file.getBase(id) instanceof Movable m && m.getChapter() == this ?
 							Optional.of(m) :
 							Optional.empty()
 					);
@@ -544,4 +529,5 @@ public final class Chapter extends QuestObject {
 	public boolean isAutofocus(long id) {
 		return id == getAutofocus().map(Movable::getMovableID).orElse(0L);
 	}
+
 }

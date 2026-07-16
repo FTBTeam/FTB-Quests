@@ -161,7 +161,7 @@ public class ViewQuestPanel extends ModalPanel {
 
 		boolean canEdit = questScreen.file.canEdit();
 
-		titleField = new QuestDescriptionField(this, canEdit, TranslationKey.TITLE, (b, clickedW) -> editTitle())
+		titleField = new QuestDescriptionField(this, canEdit, TranslationKey.TITLE, (_, _) -> editTitle())
 				.addFlags(Theme.CENTERED)
 				.setMinWidth(150).setMaxWidth(500).setSpacing(9)
 				.setText(Component.empty().withColor(ThemeProperties.QUEST_VIEW_TITLE.get().rgb()).append(quest.getTitle()));
@@ -272,18 +272,17 @@ public class ViewQuestPanel extends ModalPanel {
 		linksButton.setPosAndSize(w - iconSize * 3 - 4, 0, iconSize, iconSize);
 
 		if (!quest.hasDependencies()) {
-			add(buttonOpenDependencies = new SimpleButton(this, Component.translatable("ftbquests.gui.no_dependencies"), Icon.getIcon(FTBQuestsAPI.MOD_ID + ":textures/gui/arrow_left.png").withTint(borderColor), (widget, button) -> {
-			}));
+			add(buttonOpenDependencies = new SimpleButton(this, Component.translatable("ftbquests.gui.no_dependencies"), Icon.getIcon(FTBQuestsAPI.MOD_ID + ":textures/gui/arrow_left.png").withTint(borderColor), (_, _) -> { }));
 		} else {
-			add(buttonOpenDependencies = new SimpleButton(this, Component.translatable("ftbquests.gui.view_dependencies"), Icon.getIcon(FTBQuestsAPI.MOD_ID + ":textures/gui/arrow_left.png").withTint(ThemeProperties.QUEST_VIEW_TITLE.get()), (widget, button) -> showList(quest.streamDependencies().toList(), true)));
+			add(buttonOpenDependencies = new SimpleButton(this, Component.translatable("ftbquests.gui.view_dependencies"), Icon.getIcon(FTBQuestsAPI.MOD_ID + ":textures/gui/arrow_left.png").withTint(ThemeProperties.QUEST_VIEW_TITLE.get()), (_, _) -> showList(quest.streamDependencies().toList(), true)));
 		}
 
 		Button buttonOpenDependants;
 		if (quest.getDependants().isEmpty()) {
-			add(buttonOpenDependants = new SimpleButton(this, Component.translatable("ftbquests.gui.no_dependants"), Icon.getIcon(FTBQuestsAPI.MOD_ID + ":textures/gui/arrow_right.png").withTint(borderColor), (widget, button) -> {
+			add(buttonOpenDependants = new SimpleButton(this, Component.translatable("ftbquests.gui.no_dependants"), Icon.getIcon(FTBQuestsAPI.MOD_ID + ":textures/gui/arrow_right.png").withTint(borderColor), (_, _) -> {
 			}));
 		} else {
-			add(buttonOpenDependants = new SimpleButton(this, Component.translatable("ftbquests.gui.view_dependants"), Icon.getIcon(FTBQuestsAPI.MOD_ID + ":textures/gui/arrow_right.png").withTint(ThemeProperties.QUEST_VIEW_TITLE.get()), (widget, button) -> showList(quest.getDependants(), false)));
+			add(buttonOpenDependants = new SimpleButton(this, Component.translatable("ftbquests.gui.view_dependants"), Icon.getIcon(FTBQuestsAPI.MOD_ID + ":textures/gui/arrow_right.png").withTint(ThemeProperties.QUEST_VIEW_TITLE.get()), (_, _) -> showList(quest.getDependants(), false)));
 		}
 
 		buttonOpenDependencies.setPosAndSize(0, panelContent.posY + 2, 13, 13);
@@ -353,7 +352,7 @@ public class ViewQuestPanel extends ModalPanel {
 		}
 
 		if (!TextUtils.isComponentEmpty(subtitle)) {
-			panelText.add(new QuestDescriptionField(panelText, canEdit, TranslationKey.QUEST_SUBTITLE, (b, clickedW) -> editSubtitle())
+			panelText.add(new QuestDescriptionField(panelText, canEdit, TranslationKey.QUEST_SUBTITLE, (_, _) -> editSubtitle())
 					.addFlags(Theme.CENTERED)
 					.setMinWidth(panelText.width).setMaxWidth(panelText.width)
 					.setSpacing(9)
@@ -367,7 +366,7 @@ public class ViewQuestPanel extends ModalPanel {
 
 		if (showText || canEdit) {
 			if (!showText) {
-				SimpleButton btn = new SimpleButton(panelText, List.of(Component.translatable("ftbquests.quest.text_hidden_outside_edit_mode")), ThemeProperties.HIDDEN_ICON.get().withTint(Color4I.rgb(0xA0A0A0)), (b, mb) -> {});
+				SimpleButton btn = new SimpleButton(panelText, List.of(Component.translatable("ftbquests.quest.text_hidden_outside_edit_mode")), ThemeProperties.HIDDEN_ICON.get().withTint(Color4I.rgb(0xA0A0A0)), (_, _) -> {});
 				btn.setSize(12, 12);
 				panelText.add(btn);
 			}
@@ -557,19 +556,24 @@ public class ViewQuestPanel extends ModalPanel {
 	}
 
 	private void syncQuestToServer() {
+		assert quest != null;
 		Play2ServerNetworking.send(EditObjectMessage.forQuestObject(quest));
 	}
 
 	private void showList(Collection<QuestObject> c, boolean dependencies) {
+		assert quest != null;
+
 		int hidden = 0;
 		List<ContextMenuItem> contextMenu = new ArrayList<>();
 
-		if (dependencies && quest.getMinRequiredDependencies() > 0) {
-			contextMenu.add(new ContextMenuItem(
-					Component.translatable("ftbquests.quest.min_required_header", quest.getMinRequiredDependencies())
-							.withStyle(ChatFormatting.UNDERLINE), Color4I.empty(), null).setEnabled(false)
-			);
-		}
+		if (dependencies) {
+            if (quest.getMinRequiredDependencies() > 0) {
+                contextMenu.add(new ContextMenuItem(
+                        Component.translatable("ftbquests.quest.min_required_header", quest.getMinRequiredDependencies())
+                                .withStyle(ChatFormatting.UNDERLINE), Color4I.empty(), null).setEnabled(false)
+                );
+            }
+        }
 
 		for (QuestObject object : c) {
 			if (questScreen.file.canEdit() || object.isSearchable(FTBQuestsClient.getClientPlayerData())) {
@@ -578,7 +582,7 @@ public class ViewQuestPanel extends ModalPanel {
 					Component suffix = Component.literal(" [").append(object.getQuestChapter().getTitle()).append("]").withStyle(ChatFormatting.GRAY);
 					title.append(suffix);
 				}
-				contextMenu.add(new ContextMenuItem(title, Color4I.empty(), button -> questScreen.open(object, true)));
+				contextMenu.add(new ContextMenuItem(title, Color4I.empty(), _ -> questScreen.open(object, true)));
 			} else {
 				hidden++;
 			}
@@ -641,10 +645,10 @@ public class ViewQuestPanel extends ModalPanel {
 		for (Panel panel : List.of(panelTasks, panelRewards)) {
 			for (Widget w : panel.getWidgets()) {
 				if (w instanceof TaskButton b && b.isMouseOver()) {
-					Play2ServerNetworking.send(new ReorderItemMessage(b.task.getId(), moveRight));
+					Play2ServerNetworking.send(new ReorderItemMessage(b.task.getId(), QuestObjectType.TASK, moveRight));
 					return;
 				} else if (w instanceof RewardButton b && b.isMouseOver()) {
-					Play2ServerNetworking.send(new ReorderItemMessage(b.reward.getId(), moveRight));
+					Play2ServerNetworking.send(new ReorderItemMessage(b.reward.getId(), QuestObjectType.REWARD, moveRight));
 					return;
 				}
 			}
@@ -656,6 +660,8 @@ public class ViewQuestPanel extends ModalPanel {
 	}
 
 	private void editTitle() {
+		assert quest != null;
+
 		EditableString c = new EditableString();
 
 		// pressing T while mousing over a task button allows editing the task title
@@ -677,6 +683,8 @@ public class ViewQuestPanel extends ModalPanel {
 	}
 
 	private void editSubtitle() {
+		assert quest != null;
+
 		EditableString c = new EditableString();
 		c.setValue(quest.getRawSubtitle());
 		EditStringConfigOverlay<String> overlay = new EditStringConfigOverlay<>(getGui(), c, accepted -> {
@@ -691,6 +699,8 @@ public class ViewQuestPanel extends ModalPanel {
 	}
 
 	private void editDescription() {
+		assert quest != null;
+
 		EditableList<String, EditableString> lc = new EditableList<>(new EditableString());
 
 		lc.setValue(new ArrayList<>(quest.getRawDescription()));
@@ -704,35 +714,37 @@ public class ViewQuestPanel extends ModalPanel {
 	}
 
 	private void openEditButtonContextMenu() {
+		assert quest != null;
+
 		List<ContextMenuItem> contextMenu = new ArrayList<>();
 
 		contextMenu.add(new ContextMenuItem(Component.translatable("ftbquests.title").append(hotkey("T")),
 				Icons.NOTES,
-				b -> editTitle()));
+				_ -> editTitle()));
 		contextMenu.add(new ContextMenuItem(Component.translatable("ftbquests.quest.subtitle").append(hotkey("S")),
 				Icons.NOTES,
-				b -> editSubtitle()));
+				_ -> editSubtitle()));
 		contextMenu.add(new ContextMenuItem(Component.translatable("ftbquests.quest.description").append(hotkey("D")),
 				Icons.NOTES,
-				b -> editDescription()));
+				_ -> editDescription()));
 
 		contextMenu.add(ContextMenuItem.SEPARATOR);
 
 		contextMenu.add(new ContextMenuItem(Component.translatable("ftbquests.gui.line").append(hotkey("L")),
 				Icons.NOTES,
-				b -> editDescLine0(this, -1, null)));
+				_ -> editDescLine0(this, -1, null)));
 		contextMenu.add(new ContextMenuItem(Component.translatable("ftbquests.gui.page_break").append(hotkey("P")),
 				PAGEBREAK_ICON,
-				b -> addPageBreak()));
+				_ -> addPageBreak()));
 		contextMenu.add(new ContextMenuItem(Component.translatable("ftbquests.gui.image").append(hotkey("I")),
 				Icons.ART,
-				b -> editDescLine0(this, -1, new ImageComponent())));
+				_ -> editDescLine0(this, -1, new ImageComponent())));
 
 		contextMenu.add(ContextMenuItem.SEPARATOR);
 
 		contextMenu.add(new ContextMenuItem(Component.translatable("ftbquests.gui.edit_quest_props").append(hotkey("Q")),
 				Icons.SETTINGS,
-				b -> quest.onEditButtonClicked(questScreen)));
+				_ -> quest.onEditButtonClicked(questScreen)));
 
 		getGui().openContextMenu(contextMenu);
 	}
@@ -742,6 +754,8 @@ public class ViewQuestPanel extends ModalPanel {
 	}
 
 	private void addPageBreak() {
+		assert quest != null;
+
 		quest.modifyTranslatableListValue(TranslationKey.QUEST_DESC, desc ->
 				appendToPage(desc, List.of(Quest.PAGEBREAK_CODE, "(new page placeholder text)"), getCurrentPage())
 		);
@@ -810,8 +824,8 @@ public class ViewQuestPanel extends ModalPanel {
 	public void editDescLine(Widget clickedWidget, int line, boolean context, @Nullable Object type) {
 		if (context) {
 			List<ContextMenuItem> contextMenu = new ArrayList<>();
-			contextMenu.add(new ContextMenuItem(Component.translatable("selectServer.edit"), ThemeProperties.EDIT_ICON.get(), b -> editDescLine0(clickedWidget, line, type)));
-			contextMenu.add(new ContextMenuItem(Component.translatable("selectServer.delete"), ThemeProperties.DELETE_ICON.get(), b -> {
+			contextMenu.add(new ContextMenuItem(Component.translatable("selectServer.edit"), ThemeProperties.EDIT_ICON.get(), _ -> editDescLine0(clickedWidget, line, type)));
+			contextMenu.add(new ContextMenuItem(Component.translatable("selectServer.delete"), ThemeProperties.DELETE_ICON.get(), _ -> {
 				quest.modifyTranslatableListValue(TranslationKey.QUEST_DESC, mutableDesc -> mutableDesc.remove(line));
 //				syncQuestToServer();
 				refreshWidgets();
@@ -1033,7 +1047,7 @@ public class ViewQuestPanel extends ModalPanel {
 			for (QuestLink link : links) {
 				link.getQuest().ifPresent(quest -> {
 					Component title = quest.getTitle().copy().append(": ").append(link.getChapter().getTitle().copy().withStyle(ChatFormatting.YELLOW));
-					items.add(new ContextMenuItem(title, quest.getIcon(), b -> gotoLink(link)));
+					items.add(new ContextMenuItem(title, quest.getIcon(), _ -> gotoLink(link)));
 				});
 			}
 			if (!items.isEmpty()) {

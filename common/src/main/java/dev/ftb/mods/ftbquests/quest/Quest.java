@@ -195,13 +195,6 @@ public final class Quest extends QuestObject implements Movable, Excludable {
 		cachedSubtitle = null;
 	}
 
-	@Override
-	public Quest setPosition(double x, double y) {
-		this.x = x;
-		this.y = y;
-		return this;
-	}
-
 	public void setX(double x) {
 		this.x = x;
 	}
@@ -382,7 +375,7 @@ public final class Quest extends QuestObject implements Movable, Excludable {
 		buffer.writeVarInt(minRequiredDependencies);
 		DependencyRequirement.NAME_MAP.write(buffer, dependencyRequirement);
 
-		FTBQCodecs.LONG_LIST_STREAM_CODEC.encode(buffer, dependencies.stream().map(QuestObject::getId).toList());
+		FTBQCodecs.LONG_LIST_STREAM_CODEC.encode(buffer, dependencies.stream().filter(QuestObjectBase::isValid).map(QuestObject::getId).toList());
 		CONTROL_POINTS_STREAM_CODEC.encode(buffer, depControlPoints);
 
 		if (size != 0D) {
@@ -555,35 +548,33 @@ public final class Quest extends QuestObject implements Movable, Excludable {
 	@Override
 	public void deleteSelf() {
 		super.deleteSelf();
+
 		chapter.removeQuest(this);
 
+		// clean up any tasks & rewards
+		for (Task task : List.copyOf(tasks)) {
+			task.deleteSelf();
+		}
+		tasks.clear();
+		for (Reward reward : List.copyOf(rewards)) {
+			reward.deleteSelf();
+		}
+		rewards.clear();
+
+		// clean up any quest links which point to this quest
 		List<QuestLink> linksToDel = new ArrayList<>();
-		getQuestFile().forAllQuestLinks(l -> {
-			if (l.linksTo(this)) {
-				linksToDel.add(l);
+		getQuestFile().forAllQuestLinks(link -> {
+			if (link.linksTo(this)) {
+				linksToDel.add(link);
 			}
 		});
-		linksToDel.forEach(l -> getQuestFile().deleteObject(l.id));
-	}
-
-	@Override
-	public void deleteChildren() {
-		for (Task task : tasks) {
-			task.deleteChildren();
-			task.invalid = true;
-		}
-
-		for (Reward reward : rewards) {
-			reward.deleteChildren();
-			reward.invalid = true;
-		}
-
-		tasks.clear();
-		rewards.clear();
+		linksToDel.forEach(QuestLink::deleteSelf);
 	}
 
 	@Override
 	public void onCreated() {
+		super.onCreated();
+
 		chapter.addQuest(this);
 
 		if (!tasks.isEmpty()) {
@@ -666,7 +657,19 @@ public final class Quest extends QuestObject implements Movable, Excludable {
 
 	@Override
 	public void setChapter(Chapter newChapter) {
-		this.chapter = newChapter;
+		if (!Objects.equals(getChapter(), newChapter)) {
+			getChapter().removeQuest(this);
+			newChapter.addQuest(this);
+			this.chapter = newChapter;
+		}
+	}
+
+	@Override
+	public Quest setPosition(double x, double y) {
+		this.x = x;
+		this.y = y;
+		getQuestFile().markDirty();
+		return this;
 	}
 
 	@Override
@@ -754,18 +757,8 @@ public final class Quest extends QuestObject implements Movable, Excludable {
 	}
 
 	public boolean hasDependency(QuestObject object) {
-		if (object.invalid) {
-			return false;
-		}
-
-		for (QuestObject dependency : dependencies) {
-			if (dependency == object) {
-				return true;
-			}
-		}
-
-		return false;
-	}
+        return object.isValid() && dependencies.stream().anyMatch(dependency -> dependency == object);
+    }
 
 	@Override
 	protected boolean validateEditedConfig() {
@@ -855,7 +848,7 @@ public final class Quest extends QuestObject implements Movable, Excludable {
 	public Collection<QuestObject> getDependants() {
 		return dependantIDs.stream()
 				.map(id -> getQuestFile().get(id))
-				.filter(q -> q != null && !q.invalid)
+				.filter(q -> q != null && q.isValid())
 				.toList();
 	}
 
@@ -964,7 +957,7 @@ public final class Quest extends QuestObject implements Movable, Excludable {
 		Iterator<@Nullable QuestObject> iter = dependencies.iterator();
 		while (iter.hasNext()) {
 			QuestObject qo = iter.next();
-			if (qo == null || qo.invalid || qo == this) {
+			if (qo == null || !qo.isValid() || qo == this) {
 				iter.remove();
 				if (qo instanceof Quest q) {
 					q.removeDependant(id);
@@ -1036,8 +1029,9 @@ public final class Quest extends QuestObject implements Movable, Excludable {
 	@FunctionalInterface
 	private interface DependencyChecker {
 		default boolean check(QuestObject questObject) {
-			return !questObject.invalid && check0(questObject);
+			return questObject.isValid() && check0(questObject);
 		}
+
 		boolean check0(QuestObject questObject);
 	}
 
@@ -1185,19 +1179,11 @@ public final class Quest extends QuestObject implements Movable, Excludable {
 		getQuestFile().markDirty();
 	}
 
-	public void moveTaskLeft(Task task) {
-		moveItem(tasks, task, -1);
+	public void moveTask(Task task, boolean moveRight) {
+		moveItem(tasks, task, moveRight ? 1 : -1);
 	}
 
-	public void moveTaskRight(Task task) {
-		moveItem(tasks, task, 1);
-	}
-
-	public void moveRewardLeft(Reward reward) {
-		moveItem(rewards, reward, -1);
-	}
-
-	public void moveRewardRight(Reward reward) {
-		moveItem(rewards, reward, 1);
+	public void moveReward(Reward reward, boolean moveRight) {
+		moveItem(rewards, reward, moveRight ? 1 : -1);
 	}
 }

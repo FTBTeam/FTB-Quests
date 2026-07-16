@@ -1,12 +1,12 @@
 package dev.ftb.mods.ftbquests.client;
 
-import de.marhali.json5.Json5Object;
 import dev.ftb.mods.ftblibrary.client.config.EditableConfigGroup;
 import dev.ftb.mods.ftblibrary.client.config.editable.*;
 import dev.ftb.mods.ftblibrary.client.config.gui.EditConfigScreen;
 import dev.ftb.mods.ftblibrary.client.config.gui.EditStringConfigOverlay;
 import dev.ftb.mods.ftblibrary.client.config.gui.resource.SelectFluidScreen;
 import dev.ftb.mods.ftblibrary.client.config.gui.resource.SelectItemStackScreen;
+import dev.ftb.mods.ftblibrary.client.util.ClientUtils;
 import dev.ftb.mods.ftblibrary.integration.currency.CurrencyHelper;
 import dev.ftb.mods.ftbquests.api.FTBQuestsAPI;
 import dev.ftb.mods.ftbquests.client.config.EditableQuestObject;
@@ -16,7 +16,6 @@ import dev.ftb.mods.ftbquests.quest.QuestObjectType;
 import dev.ftb.mods.ftbquests.quest.loot.RewardTable;
 import dev.ftb.mods.ftbquests.quest.reward.*;
 import dev.ftb.mods.ftbquests.quest.task.*;
-import dev.ftb.mods.ftbquests.quest.translation.TranslationKey;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
@@ -25,7 +24,7 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.StructureBlockEntity;
 import net.minecraft.world.phys.BlockHitResult;
 
-import java.util.function.BiConsumer;
+import java.util.function.Consumer;
 
 public class GuiProviders {
     public static RewardType.GuiProvider defaultRewardGuiProvider(RewardType.Provider provider) {
@@ -69,7 +68,7 @@ public class GuiProviders {
                 EditStringConfigOverlay<Long> overlay = new EditStringConfigOverlay<>(panel.getGui(), editable, accepted -> {
                     if (accepted) {
                         slvTask.setValue(editable.getValue());
-                        callback.accept(task, task.getType().makeExtraJson());
+                        callback.accept(task);
                     }
                     panel.run();
                 }, task.getType().getDisplayName()).atMousePosition();
@@ -86,8 +85,7 @@ public class GuiProviders {
             new SelectItemStackScreen(editable, accepted -> {
                 gui.run();
                 if (accepted) {
-                    ItemTask itemTask = new ItemTask(0L, quest).setStackAndCount(editable.getValue(), editable.getValue().getCount());
-                    callback.accept(itemTask, itemTask.getType().makeExtraJson());
+                    callback.accept(new ItemTask(0L, quest).setStackAndCount(editable.getValue(), editable.getValue().getCount()));
                 }
             }).openGui();
         });
@@ -100,9 +98,7 @@ public class GuiProviders {
                 if (accepted) {
                     CheckmarkTask checkmarkTask = new CheckmarkTask(0L, quest);
                     checkmarkTask.setRawTitle(editable.getValue());
-                    Json5Object extra = checkmarkTask.getType().makeExtraJson();
-                    quest.getQuestFile().getTranslationManager().addInitialTranslation(extra, quest.getQuestFile().getLocale(), TranslationKey.TITLE, editable.getValue());
-                    callback.accept(checkmarkTask, extra);
+                    callback.accept(checkmarkTask);
                 }
                 panel.run();
             }, TaskTypes.CHECKMARK.getDisplayName()).atMousePosition();
@@ -114,22 +110,21 @@ public class GuiProviders {
             new SelectFluidScreen(editable, accepted -> {
                 gui.run();
                 if (accepted) {
-                    FluidTask fluidTask = new FluidTask(0L, quest).setFluid(editable.getValue());
-                    callback.accept(fluidTask, fluidTask.getType().makeExtraJson());
+                    callback.accept(new FluidTask(0L, quest).setFluid(editable.getValue()));
                 }
             }).openGui();
         });
 
         TaskTypes.DIMENSION.setGuiProvider((gui, quest, callback) -> {
             DimensionTask task = new DimensionTask(0L, quest)
-                    .withDimension(Minecraft.getInstance().level.dimension());
+                    .withDimension(ClientUtils.getClientLevel().dimension());
             openSetupGui(gui, callback, task);
         });
 
         TaskTypes.OBSERVATION.setGuiProvider((gui, quest, callback) -> {
             ObservationTask task = new ObservationTask(0L, quest);
             if (Minecraft.getInstance().hitResult instanceof BlockHitResult bhr) {
-                Block block = Minecraft.getInstance().level.getBlockState(bhr.getBlockPos()).getBlock();
+                Block block = ClientUtils.getClientLevel().getBlockState(bhr.getBlockPos()).getBlock();
                 task.setToObserve(BuiltInRegistries.BLOCK.getKey(block).toString());
             }
             openSetupGui(gui, callback, task);
@@ -137,14 +132,13 @@ public class GuiProviders {
 
         TaskTypes.LOCATION.setGuiProvider((gui, quest, callback) -> {
             LocationTask task = new LocationTask(0L, quest);
-            Minecraft mc = Minecraft.getInstance();
 
-            if (mc.hitResult instanceof BlockHitResult bhr) {
-                var blockEntity = mc.level.getBlockEntity(bhr.getBlockPos());
+            if (Minecraft.getInstance().hitResult instanceof BlockHitResult bhr) {
+                var blockEntity = ClientUtils.getClientLevel().getBlockEntity(bhr.getBlockPos());
 
                 if (blockEntity instanceof StructureBlockEntity structure) {
                     task.initFromStructure(structure);
-                    callback.accept(task, task.getType().makeExtraJson());
+                    callback.accept(task);
                     return;
                 }
             }
@@ -153,11 +147,11 @@ public class GuiProviders {
         });
     }
 
-    private static void openSetupGui(Runnable gui, BiConsumer<Task, Json5Object> callback, Task task) {
+    private static void openSetupGui(Runnable gui, Consumer<Task> callback, Task task) {
         EditableConfigGroup group = new EditableConfigGroup(FTBQuestsAPI.MOD_ID, accepted -> {
             gui.run();
             if (accepted) {
-                callback.accept(task, task.getType().makeExtraJson());
+                callback.accept(task);
             }
         });
         group.setNameKey(task.getType().getTypeId().toLanguageKey("ftbquests.task"));

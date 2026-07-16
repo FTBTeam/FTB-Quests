@@ -11,6 +11,7 @@ import dev.ftb.mods.ftblibrary.json5.Json5Ops;
 import dev.ftb.mods.ftblibrary.json5.Json5Util;
 import dev.ftb.mods.ftblibrary.math.Bits;
 import dev.ftb.mods.ftblibrary.platform.network.Play2ServerNetworking;
+import dev.ftb.mods.ftbquests.FTBQuests;
 import dev.ftb.mods.ftbquests.api.FTBQuestsAPI;
 import dev.ftb.mods.ftbquests.client.ClientQuestFile;
 import dev.ftb.mods.ftbquests.client.config.EditableIconItemStack;
@@ -45,7 +46,7 @@ public abstract class QuestObjectBase implements Comparable<QuestObjectBase> {
 
 	public final long id;
 
-	protected boolean invalid = false;
+	private boolean invalid = false;
 	private ItemStack rawIcon = ItemStack.EMPTY;
 	private List<String> tags = new ArrayList<>(0);
 
@@ -366,12 +367,21 @@ public abstract class QuestObjectBase implements Comparable<QuestObjectBase> {
 
 	}
 
+	/**
+	 * Called on object deletion. Responsible for cleaning up any self data and also any child objects
+	 * (chapter -> quests, quest -> tasks etc.)
+	 */
 	public void deleteSelf() {
-		getQuestFile().remove(id);
+		invalidate();
+
+		if (getQuestFile().removeFromMap(id) == null) {
+			FTBQuests.LOGGER.warn("tried to remove quest object {} from ID map, but it wasn't present!", this);
+		}
 	}
 
-	public void deleteChildren() {
-	}
+    public void invalidate() {
+        invalid = true;
+    }
 
 	public void editedFromGUI() {
 		ClientQuestFile.getInstance().refreshGui();
@@ -381,6 +391,9 @@ public abstract class QuestObjectBase implements Comparable<QuestObjectBase> {
 	}
 
 	public void onCreated() {
+		if (getQuestFile().addToMap(this) != null) {
+			FTBQuests.LOGGER.warn("quest object {} already in ID map, overwriting!", this);
+		}
 	}
 
 	public Optional<String> getPath() {
@@ -397,7 +410,7 @@ public abstract class QuestObjectBase implements Comparable<QuestObjectBase> {
 		return group.getOrCreateSubgroup(getObjectType().getId());
 	}
 
-	public void onEditButtonClicked(Runnable gui) {
+	public void onEditButtonClicked(Runnable gui, Component title) {
 		EditableConfigGroup group = new EditableConfigGroup(FTBQuestsAPI.MOD_ID, accepted -> {
 			gui.run();
 			if (accepted && validateEditedConfig()) {
@@ -407,7 +420,7 @@ public abstract class QuestObjectBase implements Comparable<QuestObjectBase> {
 			@Override
 			public Component getName() {
 				MutableComponent type = Component.literal(" [").append(Component.translatable("ftbquests." + getObjectType().getId())).append("]").withStyle(getObjectType().getColor());
-				return Component.empty().append(getTitle().copy().withStyle(ChatFormatting.UNDERLINE)).append(type);
+				return Component.empty().append(title.copy().withStyle(ChatFormatting.UNDERLINE)).append(type);
 			}
 		};
 
@@ -419,6 +432,10 @@ public abstract class QuestObjectBase implements Comparable<QuestObjectBase> {
 				return group.getName();
 			}
 		}.openGui();
+	}
+
+	public final void onEditButtonClicked(Runnable gui) {
+		onEditButtonClicked(gui, getTitle());
 	}
 
 	protected boolean validateEditedConfig() {
@@ -434,6 +451,7 @@ public abstract class QuestObjectBase implements Comparable<QuestObjectBase> {
 		Json5Object tag = new Json5Object();
 		orig.writeData(tag, orig.holderLookup());
 		copied.readData(tag, orig.holderLookup());
+		copied.setRawTitle(orig.getRawTitle());
 		return copied;
 	}
 
@@ -449,11 +467,18 @@ public abstract class QuestObjectBase implements Comparable<QuestObjectBase> {
 		return getQuestFile().holderLookup();
 	}
 
-//	protected CompoundTag saveItemSingleLine(ItemStack stack) {
-//		if (stack.isEmpty()) {
-//			return new SNBTCompoundTag();
-//		}
-//
-//		return Util.make(SNBTCompoundTag.of(ItemStack.CODEC.encodeStart(holderLookup().createSerializationContext(NbtOps.INSTANCE), stack).getOrThrow()), SNBTCompoundTag::singleLine);
-//	}
+	/**
+	 * Build the extra NBT data sent along with a quest object creation request to the server. Default is to include
+	 * the initial raw title text for insertion into the translation manager. Override to augment this with any other
+	 * extra data that needs to be handled in {@link BaseQuestFile#create(long, QuestObjectType, long, Json5Object)}.
+	 *
+	 * @return some nbt data
+	 */
+	public Json5Object makeCreationMetadata() {
+		Json5Object json = new Json5Object();
+		if (!getRawTitle().isEmpty()) {
+			getQuestFile().getTranslationManager().addInitialTranslation(json, getQuestFile().getLocale(), TranslationKey.TITLE, getRawTitle());
+		}
+		return json;
+	}
 }

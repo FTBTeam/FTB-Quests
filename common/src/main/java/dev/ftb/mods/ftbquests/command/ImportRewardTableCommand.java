@@ -68,7 +68,7 @@ public class ImportRewardTableCommand {
         }
 
         file.addRewardTable(table);
-        file.refreshIDMap();
+        file.refreshRewardTableRewardIDs();
         file.clearCachedData();
         file.markDirty();
 

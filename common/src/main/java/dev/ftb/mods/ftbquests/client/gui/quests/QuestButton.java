@@ -2,7 +2,6 @@ package dev.ftb.mods.ftbquests.client.gui.quests;
 
 import com.mojang.blaze3d.platform.InputConstants;
 import com.mojang.datafixers.util.Pair;
-import de.marhali.json5.Json5Object;
 import dev.ftb.mods.ftblibrary.client.config.editable.EditableDouble;
 import dev.ftb.mods.ftblibrary.client.config.gui.EditStringConfigOverlay;
 import dev.ftb.mods.ftblibrary.client.gui.input.MouseButton;
@@ -197,36 +196,38 @@ public class QuestButton extends Button implements QuestPositionableButton {
 		if (!selected.contains(quest)) {
 			contextMenu.add(new ContextMenuItem(Component.translatable("ftbquests.gui.add_dependencies"),
 					ThemeProperties.ADD_ICON.get(),
-					b -> selected.forEach(q -> editDependency(quest, q, true)))
+					_ -> selected.forEach(q -> editDependency(quest, q, true)))
 			);
 			contextMenu.add(new ContextMenuItem(Component.translatable("ftbquests.gui.remove_dependencies"),
 					ThemeProperties.DELETE_ICON.get(),
-					b -> selected.forEach(q -> editDependency(quest, q, false)))
+					_ -> selected.forEach(q -> editDependency(quest, q, false)))
 			);
 			contextMenu.add(new ContextMenuItem(Component.translatable("ftbquests.gui.add_dependencies_self"),
 					ThemeProperties.ADD_ICON.get(),
-					b -> selected.forEach(q -> editDependency(q, quest, true)))
+					_ -> selected.forEach(q -> editDependency(q, quest, true)))
 			);
 			contextMenu.add(new ContextMenuItem(Component.translatable("ftbquests.gui.remove_dependencies_self"),
 					ThemeProperties.DELETE_ICON.get(),
-					b -> selected.forEach(q -> editDependency(q, quest, false)))
+					_ -> selected.forEach(q -> editDependency(q, quest, false)))
 			);
 		} else {
 			contextMenu.add(new ContextMenuItem(Component.translatable("gui.move"),
 					ThemeProperties.MOVE_UP_ICON.get(quest),
-					b -> questScreen.movingObjects = true));
+					_ -> questScreen.movingObjects = true));
 			contextMenu.add(new ContextMenuItem(Component.translatable("ftbquests.gui.add_reward_all"),
 					ThemeProperties.ADD_ICON.get(quest),
-					b -> openAddRewardContextMenu()));
+					_ -> openAddRewardContextMenu()));
 			contextMenu.add(new ContextMenuItem(Component.translatable("ftbquests.gui.clear_reward_all"),
 					ThemeProperties.CLOSE_ICON.get(quest),
-					b -> selected.forEach(q -> q.getRewards().forEach(r -> Play2ServerNetworking.send(new DeleteObjectMessage(r.id))))));
+					_ -> selected.forEach(q -> Play2ServerNetworking.send(
+							new DeleteObjectMessage(q.getRewards().stream().map(QuestObjectBase::getId).toList())
+					))));
 			contextMenu.add(new ContextMenuItem(Component.translatable("ftbquests.gui.bulk_change_size"),
 					Icons.SETTINGS,
-					b -> bulkChangeSize()));
+					_ -> bulkChangeSize()));
 			contextMenu.add(new ContextMenuItem(Component.translatable("selectServer.delete"),
 					ThemeProperties.DELETE_ICON.get(quest),
-					b -> questScreen.deleteSelectedObjects())
+					_ -> questScreen.deleteSelectedObjects())
 					.setYesNoText(Component.translatable("delete_item", Component.translatable("ftbquests.quests").append(" [" + questScreen.selectedObjects.size() + "]"))));
 		}
 
@@ -251,12 +252,8 @@ public class QuestButton extends Button implements QuestPositionableButton {
 
 		EditStringConfigOverlay<Double> overlay = new EditStringConfigOverlay<>(getGui(), editable, accepted -> {
 			if (accepted) {
-				quests.forEach(q -> {
-					if (editable.getValue() != null) {
-						q.setSize(editable.getValue());
-						Play2ServerNetworking.send(EditObjectMessage.forQuestObject(q));
-					}
-				});
+				quests.forEach(q -> q.setSize(editable.getValue()));
+				Play2ServerNetworking.send(EditObjectMessage.forQuestObjects(quests));
 			}
 			run();
 		}, Component.translatable("ftbquests.quest.appearance.size")).atMousePosition();
@@ -269,13 +266,11 @@ public class QuestButton extends Button implements QuestPositionableButton {
 
 		for (RewardType type : RewardTypes.TYPES.values()) {
 			if (type.getGuiProvider() != null) {
-				contextMenu2.add(new ContextMenuItem(type.getDisplayName(), type.getIconSupplier(), b -> {
+				contextMenu2.add(new ContextMenuItem(type.getDisplayName(), type.getIconSupplier(), _ -> {
 					playClickSound();
 					type.getGuiProvider().openCreationGui(parent, quest, reward -> questScreen.getSelectedQuests().forEach(quest -> {
 						Reward newReward = QuestObjectBase.copy(reward, () -> type.createReward(0L, quest));
-						Json5Object extra = new Json5Object();
-						extra.addProperty("type", type.getTypeForSerialization());
-						Play2ServerNetworking.send(CreateObjectMessage.create(newReward, extra));
+						Play2ServerNetworking.send(CreateObjectMessage.requestCreation(newReward));
 					}));
 				}));
 			}

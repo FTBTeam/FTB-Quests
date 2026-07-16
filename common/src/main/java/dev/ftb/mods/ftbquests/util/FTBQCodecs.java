@@ -3,6 +3,9 @@ package dev.ftb.mods.ftbquests.util;
 import com.mojang.datafixers.util.Pair;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.DataResult;
+import de.marhali.json5.Json5Element;
+import de.marhali.json5.Json5Object;
+import dev.ftb.mods.ftblibrary.json5.Json5NetPacker;
 import dev.ftb.mods.ftbquests.quest.QuestObjectBase;
 import io.netty.buffer.ByteBuf;
 import it.unimi.dsi.fastutil.longs.*;
@@ -47,6 +50,12 @@ public class FTBQCodecs {
             return DataResult.error(e::getMessage);
         }
     }, QuestObjectBase::getCodeString);
+
+    // TODO move to Json5NetPacker?
+    public static final StreamCodec<ByteBuf, Json5Object> JSON5_OBJECT_STREAM_CODEC = StreamCodec.of(
+            Json5NetPacker::pack,
+            Json5NetPacker::unpack
+    ).map(Json5Element::getAsJson5Object, Function.identity());
 
     public static <T, U, B extends ByteBuf> StreamCodec<B, Pair<T, U>> pair(StreamCodec<? super B, T> first, StreamCodec<? super B, U> second) {
         return StreamCodec.of(

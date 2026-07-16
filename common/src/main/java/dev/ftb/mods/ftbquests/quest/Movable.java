@@ -12,9 +12,15 @@ import net.minecraft.network.chat.Component;
  * Represents a quest object that can be moved around on screen, and between chapters.
  */
 public interface Movable {
+	/**
+	 * Get the unique quest object ID for this movable.
+	 * @return the ID
+	 */
 	long getMovableID();
 
 	Chapter getChapter();
+
+	QuestObjectType getObjectType();
 
 	void setChapter(Chapter newChapter);
 
@@ -45,30 +51,8 @@ public interface Movable {
 	 * @param x new X pos
 	 * @param y new Y pos
 	 */
-	default void initiateMoveClientSide(Chapter to, double x, double y) {
+	default void requestMove(Chapter to, double x, double y) {
 		Play2ServerNetworking.send(new MoveMovableMessage(getMovableID(), to.getId(), x, y));
-	}
-
-	/**
-	 * Called on both server and client to actually update the object's position; must also update any related objects,
-	 * e.g. chapter links if the chapter ID is changing.
-	 *
-	 * @param newX new X pos
-	 * @param newY new Y pos
-	 * @param newChapterId new chapter ID
-	 */
-	default void onMoved(double newX, double newY, long newChapterId) {
-		setPosition(newX, newY);
-
-		Chapter oldChapter = getChapter();
-		if (newChapterId != oldChapter.getId()) {
-			Chapter newChapter = oldChapter.getQuestFile().getChapter(newChapterId);
-			if (newChapter != null) {
-				oldChapter.removeChildObject(this);
-				newChapter.addChildObject(this);
-				setChapter(newChapter);
-			}
-		}
 	}
 
 	/**

@@ -22,8 +22,11 @@ public abstract class TabButton extends Button {
 
 	@Override
 	public void draw(GuiGraphicsExtractor graphics, Theme theme, int x, int y, int w, int h) {
-		IconHelper.renderIcon(icon, graphics, x + (w - 16) / 2, y + (h - 16) / 2, 16, 16);
-
+		if (isEnabled()) {
+			IconHelper.renderIcon(icon, graphics, x + (w - 16) / 2, y + (h - 16) / 2, 16, 16);
+		} else {
+			IconHelper.renderIcon(icon.withColor(Color4I.rgba(0x50FFFFFF)), graphics, x + (w - 16) / 2, y + (h - 16) / 2, 16, 16);
+		}
 		if (isMouseOver()) {
 			Color4I backgroundColor = ThemeProperties.WIDGET_BACKGROUND.get(questScreen.selectedChapter);
 			IconHelper.renderIcon(backgroundColor, graphics, x + 1, y, w - 2, h);

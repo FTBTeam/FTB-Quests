@@ -17,6 +17,7 @@ import dev.ftb.mods.ftblibrary.util.TooltipList;
 import dev.ftb.mods.ftbquests.client.ClientQuestFile;
 import dev.ftb.mods.ftbquests.client.gui.ContextMenuBuilder;
 import dev.ftb.mods.ftbquests.net.ReorderItemMessage;
+import dev.ftb.mods.ftbquests.quest.QuestObjectType;
 import dev.ftb.mods.ftbquests.quest.reward.ItemReward;
 import dev.ftb.mods.ftbquests.quest.reward.Reward;
 import dev.ftb.mods.ftbquests.quest.theme.property.ThemeProperties;
@@ -116,10 +117,10 @@ public class RewardButton extends Button {
 			ContextMenuBuilder builder = ContextMenuBuilder.create(reward, questScreen, this);
 
 			builder.insertAtTop(List.of(new ContextMenuItem(Component.translatable("ftbquests.gui.move_left"), Icons.LEFT,
-					b -> Play2ServerNetworking.send(new ReorderItemMessage(reward.getId(), false))
+                    _ -> Play2ServerNetworking.send(new ReorderItemMessage(reward.getId(), QuestObjectType.REWARD, false))
 			)));
 			builder.insertAtTop(List.of(new ContextMenuItem(Component.translatable("ftbquests.gui.move_right"), Icons.RIGHT,
-					b -> Play2ServerNetworking.send(new ReorderItemMessage(reward.getId(), true))
+                    _ -> Play2ServerNetworking.send(new ReorderItemMessage(reward.getId(), QuestObjectType.REWARD, true))
 			)));
 
 			builder.openContextMenu(getGui());

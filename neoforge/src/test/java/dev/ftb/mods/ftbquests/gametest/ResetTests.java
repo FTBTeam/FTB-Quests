@@ -58,7 +58,6 @@ public final class ResetTests {
 			Quest questB = QuestTestSupport.newQuest(chapter);
 			QuestTestSupport.newCheckmarkTask(questB);
 			questB.addDependency(questA);
-			QuestTestSupport.file().refreshIDMap();
 
 			TeamData data = QuestTestSupport.newTeam();
 
@@ -82,7 +81,6 @@ public final class ResetTests {
 			Quest quest = QuestTestSupport.newQuest(chapter, questConfig);
 			Task task = QuestTestSupport.newCheckmarkTask(quest);
 			Reward reward = QuestTestSupport.newXpReward(quest);
-			QuestTestSupport.file().refreshIDMap();
 
 			TeamData data = QuestTestSupport.newTeam();
 			UUID player = UUID.randomUUID();

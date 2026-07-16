@@ -2,11 +2,11 @@ package dev.ftb.mods.ftbquests.net;
 
 import com.mojang.datafixers.util.Either;
 import dev.ftb.mods.ftblibrary.platform.network.PacketContext;
-import dev.ftb.mods.ftblibrary.platform.network.Server2PlayNetworking;
 import dev.ftb.mods.ftblibrary.util.NetworkHelper;
 import dev.ftb.mods.ftbquests.api.FTBQuestsAPI;
 import dev.ftb.mods.ftbquests.quest.QuestObjectBase;
 import dev.ftb.mods.ftbquests.quest.ServerQuestFile;
+import dev.ftb.mods.ftbquests.quest.history.events.UpdateTranslation;
 import dev.ftb.mods.ftbquests.quest.translation.TranslationKey;
 import dev.ftb.mods.ftbquests.util.NetUtils;
 import net.minecraft.network.FriendlyByteBuf;
@@ -45,10 +45,6 @@ public record SyncTranslationMessageToServer(long id, String locale, Translation
         return new SyncTranslationMessageToServer(obj.id, locale, subKey, subKey.validate(Either.right(list)));
     }
 
-    public SyncTranslationMessageToClient createResponse() {
-        return new SyncTranslationMessageToClient(id, locale, subKey, val);
-    }
-
     @Override
     public Type<? extends CustomPacketPayload> type() {
         return TYPE;
@@ -56,14 +52,11 @@ public record SyncTranslationMessageToServer(long id, String locale, Translation
 
     public static void handle(SyncTranslationMessageToServer message, PacketContext context) {
         if (NetUtils.canEdit(context)) {
-            ServerQuestFile file = ServerQuestFile.getInstance();
-            if (file.isValid()) {
-                QuestObjectBase object = file.getBase(message.id);
-                if (object != null) {
-                    message.val.ifLeft(str -> file.getTranslationManager().addTranslation(object, message.locale, message.subKey, str))
-                            .ifRight(list -> file.getTranslationManager().addTranslation(object, message.locale, message.subKey, list));
-                    Server2PlayNetworking.sendToAllPlayers(file.server, message.createResponse());
-                }
+            ServerQuestFile sqf = ServerQuestFile.getInstance();
+            QuestObjectBase object = sqf.getBase(message.id);
+            if (object != null) {
+                UpdateTranslation.create(sqf, object, message.locale, message.subKey, message.val)
+                        .ifPresent(event -> sqf.getHistoryStack().addAndApply(sqf, event));
             }
         }
     }

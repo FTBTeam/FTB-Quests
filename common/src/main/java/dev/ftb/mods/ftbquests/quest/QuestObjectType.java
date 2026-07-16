@@ -19,7 +19,7 @@ public enum QuestObjectType implements Predicate<QuestObjectBase> {
 	REWARD_TABLE("reward_table", ChatFormatting.YELLOW),
 	CHAPTER_GROUP("chapter_group", ChatFormatting.YELLOW),
 	QUEST_LINK("quest_link", ChatFormatting.DARK_GREEN),
-	IMAGE("chapter.image", ChatFormatting.AQUA),
+	IMAGE("image", ChatFormatting.AQUA),
 	;
 
 	public static final NameMap<QuestObjectType> NAME_MAP = NameMap.of(NULL, values()).id(v -> v.id).nameKey(v -> v.translationKey).create();
@@ -53,5 +53,9 @@ public enum QuestObjectType implements Predicate<QuestObjectBase> {
 
 	public Component getCompletedMessage() {
 		return Component.translatable(translationKey + ".completed");
+	}
+
+	public Component getDisplayString() {
+		return Component.translatable(translationKey).withStyle(getColor());
 	}
 }

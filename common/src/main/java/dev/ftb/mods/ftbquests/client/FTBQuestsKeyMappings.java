@@ -55,6 +55,9 @@ public class FTBQuestsKeyMappings {
             .build());
 
     public static final KeyMapping KEY_GUI_REWARD_TABLES = guiEditorKey("reward_tables", InputConstants.KEY_T, KeyModifier.CONTROL);
+    public static final KeyMapping KEY_GUI_UNDO = guiEditorKey("undo", InputConstants.KEY_Z, KeyModifier.CONTROL);
+    public static final KeyMapping KEY_GUI_REDO = guiEditorKey("redo", InputConstants.KEY_Y, KeyModifier.CONTROL);
+    public static final KeyMapping KEY_GUI_TOGGLE_CHANGELOG = guiEditorKey("toggle_changelog", InputConstants.KEY_GRAVE, KeyModifier.NONE);
 
     private static final KeyMapping.Category FTB_QUESTS_KEY_CATEGORY_GUI_QUEST_PANEL
             = new KeyMapping.Category(FTBQuestsAPI.id("gui_quest_panel"));

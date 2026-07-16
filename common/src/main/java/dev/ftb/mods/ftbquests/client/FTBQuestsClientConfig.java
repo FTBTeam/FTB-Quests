@@ -34,6 +34,12 @@ public interface FTBQuestsClientConfig {
     StringValue FALLBACK_LOCALE = XLATE.add(new LocaleValue(XLATE,"fallback_locale", ""));
     BooleanValue HILITE_MISSING = XLATE.addBoolean("hilite_missing", true);
 
+    Config CHANGELOG = CONFIG.addGroup("changelog", 4);
+    BooleanValue CHANGELOG_ALWAYS_SHOW = CHANGELOG.addBoolean("always_show", false);
+    IntValue CHANGELOG_MAX_LINES = CHANGELOG.addInt("max_lines", 10, 1, 50);
+    DoubleValue CHANGELOG_SHOW_TIME = CHANGELOG.addDouble("show_time", 3.5, 1.0, 100.0);
+    DoubleValue CHANGELOG_FONT_SCALE = CHANGELOG.addDouble("font_scale", 0.75, 0.25, 2.0);
+
     // TODO migrate chapter-pinned and pinned-quests data out of per-player team data into here
 
     static void openSettings(boolean pauseGame) {
@@ -52,4 +58,10 @@ public interface FTBQuestsClientConfig {
         ClientQuestFile.getInstance().clearCachedData();
     }
 
+    static void setAlwaysShowChangelog(boolean show) {
+        if (show != CHANGELOG_ALWAYS_SHOW.get()) {
+            CHANGELOG_ALWAYS_SHOW.set(show);
+            ConfigManager.getInstance().save(KEY);
+        }
+    }
 }

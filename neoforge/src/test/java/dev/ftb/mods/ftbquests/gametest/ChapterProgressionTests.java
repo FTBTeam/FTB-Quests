@@ -52,7 +52,6 @@ public final class ChapterProgressionTests {
 			Quest flexible = QuestTestSupport.newQuest(chapter, progressionMode("flexible"));
 			QuestTestSupport.newCheckmarkTask(flexible);
 			flexible.addDependency(gate);
-			QuestTestSupport.file().refreshIDMap();
 
 			TeamData data = QuestTestSupport.newTeam();
 

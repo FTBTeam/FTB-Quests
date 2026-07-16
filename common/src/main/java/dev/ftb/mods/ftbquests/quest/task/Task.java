@@ -26,6 +26,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.util.Util;
 import net.minecraft.world.item.ItemStack;
 
 import java.util.EnumSet;
@@ -151,16 +152,9 @@ public abstract class Task extends QuestObject {
 	}
 
 	@Override
-	public final void deleteChildren() {
-		for (TeamData data : quest.getChapter().file.getAllTeamData()) {
-			data.resetProgress(this);
-		}
-
-		super.deleteChildren();
-	}
-
-	@Override
 	public void editedFromGUI() {
+		quest.clearCachedData();
+
 		QuestScreen gui = ClientUtils.getCurrentGuiAs(QuestScreen.class);
 		if (gui != null) {
 			gui.refreshChapterPanel();
@@ -171,6 +165,8 @@ public abstract class Task extends QuestObject {
 
 	@Override
 	public final void onCreated() {
+		super.onCreated();
+
 		quest.addTask(this);
 
 		if (this instanceof CustomTask customTask && getQuestFile().isServerSide()) {
@@ -332,5 +328,10 @@ public abstract class Task extends QuestObject {
 		}
 
 		return fallback;
+	}
+
+	@Override
+	public Json5Object makeCreationMetadata() {
+		return Util.make(super.makeCreationMetadata(), t -> t.addProperty("type", getType().getTypeForSerialization()));
 	}
 }

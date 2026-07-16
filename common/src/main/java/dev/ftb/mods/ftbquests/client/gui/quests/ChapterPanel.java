@@ -1,7 +1,6 @@
 package dev.ftb.mods.ftbquests.client.gui.quests;
 
 import com.mojang.blaze3d.platform.InputConstants;
-import de.marhali.json5.Json5Object;
 import dev.ftb.mods.ftblibrary.client.config.editable.EditableString;
 import dev.ftb.mods.ftblibrary.client.config.gui.EditStringConfigOverlay;
 import dev.ftb.mods.ftblibrary.client.gui.GuiHelper;
@@ -41,7 +40,6 @@ import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.Style;
 import net.minecraft.network.chat.TextColor;
 import net.minecraft.util.Mth;
-import net.minecraft.util.Util;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -90,8 +88,15 @@ public class ChapterPanel extends Panel {
 	public void alignWidgets() {
 		int wd = 100;
 
+		ChapterButton selected = null;
+
 		for (Widget w : widgets) {
-			wd = Math.min(Math.max(wd, ((ListButton) w).getActualWidth(questScreen)), 800);
+			if (w instanceof ListButton lb) {
+				wd = Math.clamp(wd, lb.getActualWidth(questScreen), 800);
+				if (lb instanceof ChapterButton cb && questScreen.selectedChapter == cb.chapter) {
+					selected = cb;
+				}
+			}
 		}
 
 		setPosAndSize(((expanded || isPinned())) ? 0 : -wd, 0, wd, questScreen.height);
@@ -104,6 +109,14 @@ public class ChapterPanel extends Panel {
 
 		if (getContentHeight() <= height) {
 			setScrollY(0);
+		} else if (selected != null) {
+			// try to keep selected chapter in view
+			int scrolledY = (int) (selected.posY - getScrollY());
+			if (scrolledY < 0) {
+				setScrollY(selected.posY);
+			} else if (scrolledY + selected.height > height) {
+				setScrollY(getScrollY() + (height - scrolledY + selected.height));
+			}
 		}
 
 		curX = expanded ? 0 : -width;
@@ -229,10 +242,9 @@ public class ChapterPanel extends Panel {
 					chapterPanel.questScreen.openGui();
 
 					if (accepted && !c.getValue().isEmpty()) {
-						Chapter chapter = new Chapter(0L, file, file.getDefaultChapterGroup(), Chapter.titleToID( c.getValue()).orElse(""));
-						Json5Object extra = Util.make(new Json5Object(), t -> t.addProperty("group", 0L));
-						file.getTranslationManager().addInitialTranslation(extra, file.getLocale(), TranslationKey.TITLE, c.getValue());
-						Play2ServerNetworking.send(CreateObjectMessage.create(chapter, extra));
+						Chapter chapter = new Chapter(0L, file, file.getDefaultChapterGroup(), Chapter.titleToID(c.getValue()).orElse(""));
+						chapter.setRawTitle(c.getValue());
+						Play2ServerNetworking.send(CreateObjectMessage.requestCreation(chapter));
 					}
 
 					run();
@@ -249,9 +261,8 @@ public class ChapterPanel extends Panel {
 
 					if (accepted) {
 						ChapterGroup group = new ChapterGroup(0L, ClientQuestFile.getInstance());
-						Json5Object extra = Util.make(new Json5Object(), t -> t.addProperty("group", 0L));
-						file.getTranslationManager().addInitialTranslation(extra, file.getLocale(), TranslationKey.TITLE, c.getValue());
-						Play2ServerNetworking.send(CreateObjectMessage.create(group, extra));
+						group.setRawTitle(c.getValue());
+						Play2ServerNetworking.send(CreateObjectMessage.requestCreation(group));
 					}
 				}, b.getTitle()).atMousePosition();
 				overlay.setWidth(150);
@@ -330,11 +341,11 @@ public class ChapterPanel extends Panel {
 				} else if (button.isRight() && !group.isDefaultGroup()) {
 					ContextMenuBuilder.create(group, chapterPanel.questScreen, this).insertAtTop(List.of(
 							new ContextMenuItem(Component.translatable("gui.move"), ThemeProperties.MOVE_UP_ICON.get(),
-									b -> Play2ServerNetworking.send(new MoveChapterGroupMessage(group.id, true)))
+                                    _ -> Play2ServerNetworking.send(new MoveChapterGroupMessage(group.id, true)))
 									.setEnabled(!group.isFirstGroup())
 									.setCloseMenu(false),
 							new ContextMenuItem(Component.translatable("gui.move"), ThemeProperties.MOVE_DOWN_ICON.get(),
-									b -> Play2ServerNetworking.send(new MoveChapterGroupMessage(group.id, false)))
+                                    _ -> Play2ServerNetworking.send(new MoveChapterGroupMessage(group.id, false)))
 									.setEnabled(!group.isLastGroup())
 									.setCloseMenu(false)
 					)).openContextMenu(chapterPanel.questScreen);
@@ -356,10 +367,9 @@ public class ChapterPanel extends Panel {
 				chapterPanel.questScreen.openGui();
 
 				if (accepted && !c.getValue().isEmpty()) {
-					Chapter chapter = new Chapter(0L, file, file.getDefaultChapterGroup(), Chapter.titleToID( c.getValue()).orElse(""));
-					Json5Object extra = Util.make(new Json5Object(), t -> t.addProperty("group", group.id));
-					file.getTranslationManager().addInitialTranslation(extra, file.getLocale(), TranslationKey.TITLE, c.getValue());
-					Play2ServerNetworking.send(CreateObjectMessage.create(chapter, extra));
+					Chapter chapter = new Chapter(0L, file, group, Chapter.titleToID( c.getValue()).orElse(""));
+					chapter.setRawTitle(c.getValue());
+					Play2ServerNetworking.send(CreateObjectMessage.requestCreation(chapter));
 				}
 
 				run();
@@ -449,13 +459,13 @@ public class ChapterPanel extends Panel {
 			if (chapterPanel.questScreen.file.canEdit() && button.isRight()) {
 				ContextMenuBuilder.create(chapter, chapterPanel.questScreen, this).insertAtTop(List.of(
 						new ContextMenuItem(Component.translatable("gui.move"), ThemeProperties.MOVE_UP_ICON.get(),
-								b -> Play2ServerNetworking.send(new MoveChapterMessage(chapter.id, true)))
+                                _ -> Play2ServerNetworking.send(new MoveChapterMessage(chapter.id, true)))
 								.setEnabled(chapter.getIndex() > 0).setCloseMenu(false),
 						new ContextMenuItem(Component.translatable("gui.move"), ThemeProperties.MOVE_DOWN_ICON.get(),
-								b -> Play2ServerNetworking.send(new MoveChapterMessage(chapter.id, false)))
+                                _ -> Play2ServerNetworking.send(new MoveChapterMessage(chapter.id, false)))
 								.setEnabled(chapter.getIndex() < chapter.getGroup().getChapters().size() - 1).setCloseMenu(false),
 						new ContextMenuItem(Component.translatable("ftbquests.gui.change_group"), Icons.COLOR_RGB,
-								b -> new ChangeChapterGroupScreen(chapter, chapterPanel.questScreen).openGui())
+                                _ -> new ChangeChapterGroupScreen(chapter, chapterPanel.questScreen).openGui())
 				)).openContextMenu(chapterPanel.questScreen);
 			}
 		}

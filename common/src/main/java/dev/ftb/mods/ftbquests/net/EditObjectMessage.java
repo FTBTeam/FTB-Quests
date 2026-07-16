@@ -1,38 +1,42 @@
 package dev.ftb.mods.ftbquests.net;
 
-import de.marhali.json5.Json5Element;
-import de.marhali.json5.Json5Object;
-import dev.ftb.mods.ftblibrary.json5.Json5NetPacker;
 import dev.ftb.mods.ftblibrary.platform.network.PacketContext;
 import dev.ftb.mods.ftblibrary.platform.network.Play2ServerNetworking;
-import dev.ftb.mods.ftblibrary.platform.network.Server2PlayNetworking;
-import dev.ftb.mods.ftbquests.FTBQuests;
 import dev.ftb.mods.ftbquests.api.FTBQuestsAPI;
-import dev.ftb.mods.ftbquests.client.ClientQuestFile;
 import dev.ftb.mods.ftbquests.quest.QuestObjectBase;
 import dev.ftb.mods.ftbquests.quest.ServerQuestFile;
+import dev.ftb.mods.ftbquests.quest.history.EditRecord;
+import dev.ftb.mods.ftbquests.quest.history.events.ModifyQuestObjects;
 import dev.ftb.mods.ftbquests.util.NetUtils;
-import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
-import net.minecraft.server.level.ServerLevel;
-import net.minecraft.util.Util;
 
-public record EditObjectMessage(long id, Json5Element json) implements CustomPacketPayload {
+import java.util.Collection;
+import java.util.List;
+
+/**
+ * Received on: SERVER
+ * <br>
+ * Sent by client whenever any quest object is being edited client-side.
+ *
+ * @param editRecords one or more of (questobject id, serialized questobject data)
+ */
+public record EditObjectMessage(List<EditRecord> editRecords) implements CustomPacketPayload {
 	public static final Type<EditObjectMessage> TYPE = new Type<>(FTBQuestsAPI.id("edit_object_message"));
 
-	public static final StreamCodec<FriendlyByteBuf, EditObjectMessage> STREAM_CODEC = StreamCodec.composite(
-			ByteBufCodecs.VAR_LONG, EditObjectMessage::id,
-			Json5NetPacker.CODEC, EditObjectMessage::json,
+	public static final StreamCodec<RegistryFriendlyByteBuf, EditObjectMessage> STREAM_CODEC = StreamCodec.composite(
+			EditRecord.STREAM_CODEC.apply(ByteBufCodecs.list()), EditObjectMessage::editRecords,
 			EditObjectMessage::new
 	);
 
 	public static EditObjectMessage forQuestObject(QuestObjectBase qo) {
-		FTBQuests.getRecipeModHelper().refreshRecipes(qo);
-		ClientQuestFile.getInstance().clearCachedData();
+		return EditObjectMessage.forQuestObjects(List.of(qo));
+	}
 
-		return new EditObjectMessage(qo.id, Util.make(new Json5Object(), o -> qo.writeData(o, ClientQuestFile.getInstance().holderLookup())));
+	public static EditObjectMessage forQuestObjects(Collection<? extends QuestObjectBase> list) {
+		return new EditObjectMessage(list.stream().map(EditRecord::ofQuestObject).toList());
 	}
 
 	public static void sendToServer(QuestObjectBase qo) {
@@ -45,15 +49,10 @@ public record EditObjectMessage(long id, Json5Element json) implements CustomPac
 	}
 
 	public static void handle(EditObjectMessage message, PacketContext context) {
-		if (NetUtils.canEdit(context) && message.json instanceof Json5Object json5Object && context.player().level() instanceof ServerLevel level) {
-			QuestObjectBase object = ServerQuestFile.getInstance().getBase(message.id);
-			if (object != null) {
-				object.readData(json5Object, level.registryAccess());
-				ServerQuestFile.getInstance().clearCachedData();
-				ServerQuestFile.getInstance().markDirty();
-				Server2PlayNetworking.sendToAllPlayers(level.getServer(), new EditObjectResponseMessage(object));
-				object.editedFromGUIOnServer();
-			}
+		if (NetUtils.canEdit(context)) {
+			ServerQuestFile sqf = ServerQuestFile.getInstance();
+			ModifyQuestObjects.fromEditRecords(sqf, message.editRecords)
+					.ifPresent(modification -> sqf.getHistoryStack().addAndApply(sqf, modification));
 		}
 	}
 }

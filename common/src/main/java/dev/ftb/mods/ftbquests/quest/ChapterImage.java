@@ -19,6 +19,7 @@ import net.minecraft.resources.Identifier;
 import net.minecraft.util.Mth;
 import org.jspecify.annotations.Nullable;
 
+import java.util.Objects;
 import java.util.function.Predicate;
 
 public final class ChapterImage extends QuestObjectBase implements Movable {
@@ -29,7 +30,6 @@ public final class ChapterImage extends QuestObjectBase implements Movable {
 	private Icon<?> image;
 	private Color4I color;
 	private int alpha;
-//	private String click;
 	private ImageClickAction clickAction;
 	private boolean editorsOnly;
 	private boolean alignToCorner;
@@ -49,7 +49,7 @@ public final class ChapterImage extends QuestObjectBase implements Movable {
 		image = Color4I.empty();
 		color = Color4I.WHITE;
 		alpha = 255;
-//		click = "";
+		clickAction = ImageClickAction.NONE;
 		editorsOnly = false;
 		alignToCorner = false;
 		dependency = null;
@@ -98,10 +98,6 @@ public final class ChapterImage extends QuestObjectBase implements Movable {
 		return clickAction;
 	}
 
-//	public String getClick() {
-//		return click;
-//	}
-
 	@Override
 	public void writeData(Json5Object json, HolderLookup.Provider provider) {
 		super.writeData(json, provider);
@@ -115,7 +111,7 @@ public final class ChapterImage extends QuestObjectBase implements Movable {
 		if (!color.equals(Color4I.WHITE)) json.addProperty("color", color.rgb());
 		if (alpha != 255) json.addProperty("alpha", alpha);
 		if (order != 0) json.addProperty("order", order);
-		if (clickAction.actionType() != ImageClickAction.ActionType.NONE) {
+		if (!clickAction.isNone()) {
 			Json5Util.store(json, "click_action", ImageClickAction.CODEC, clickAction);
 		}
 		if (editorsOnly) json.addProperty("dev", true);
@@ -227,12 +223,15 @@ public final class ChapterImage extends QuestObjectBase implements Movable {
 
 	@Override
 	public void onCreated() {
+		super.onCreated();
+
 		chapter.addImage(this);
 	}
 
 	@Override
 	public void deleteSelf() {
 		super.deleteSelf();
+
 		chapter.removeImage(this);
 	}
 
@@ -243,7 +242,8 @@ public final class ChapterImage extends QuestObjectBase implements Movable {
 
 	@Override
 	public Component getAltTitle() {
-		return Component.empty();
+		var p = image.toString().split("/");
+		return Component.literal(p[p.length - 1]);
 	}
 
 	@Override
@@ -263,7 +263,11 @@ public final class ChapterImage extends QuestObjectBase implements Movable {
 
 	@Override
 	public void setChapter(Chapter newChapter) {
-		this.chapter = newChapter;
+		if (!Objects.equals(newChapter, getChapter())) {
+			getChapter().removeImage(this);
+			newChapter.addImage(this);
+			this.chapter = newChapter;
+		}
 	}
 
 	@Override

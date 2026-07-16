@@ -1,16 +1,18 @@
 package dev.ftb.mods.ftbquests.net;
 
 import dev.ftb.mods.ftblibrary.platform.network.PacketContext;
-import dev.ftb.mods.ftblibrary.platform.network.Server2PlayNetworking;
 import dev.ftb.mods.ftbquests.api.FTBQuestsAPI;
-import dev.ftb.mods.ftbquests.quest.*;
+import dev.ftb.mods.ftbquests.quest.Chapter;
+import dev.ftb.mods.ftbquests.quest.ChapterImage;
+import dev.ftb.mods.ftbquests.quest.QuestObjectBase;
+import dev.ftb.mods.ftbquests.quest.ServerQuestFile;
+import dev.ftb.mods.ftbquests.quest.history.CreateOrDeleteRecord;
+import dev.ftb.mods.ftbquests.quest.history.events.CreateQuestObjects;
 import dev.ftb.mods.ftbquests.util.NetUtils;
-import io.netty.util.NetUtil;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
-import net.minecraft.server.MinecraftServer;
 
 import java.util.Objects;
 
@@ -31,17 +33,13 @@ public record CopyChapterImageMessage(long id, long chapterId, double qx, double
     }
 
     public static void handle(CopyChapterImageMessage message, PacketContext context) {
-        BaseQuestFile file = ServerQuestFile.getInstance();
-        if (file.getBase(message.id) instanceof ChapterImage img && file.get(message.chapterId) instanceof Chapter chapter && NetUtils.canEdit(context)) {
-            ChapterImage newImage = Objects.requireNonNull(QuestObjectBase.copy(img, () -> new ChapterImage(file.newID(), chapter)));
-            newImage.setPosition(message.qx, message.qy);
-            newImage.onCreated();
-            MinecraftServer server = Objects.requireNonNull(context.player().level().getServer());
-            Server2PlayNetworking.sendToAllPlayers(server, CreateObjectResponseMessage.create(newImage, null));
-
-            ServerQuestFile.getInstance().refreshIDMap();
-            ServerQuestFile.getInstance().clearCachedData();
-            ServerQuestFile.getInstance().markDirty();
+        if (NetUtils.canEdit(context)) {
+            ServerQuestFile sqf = ServerQuestFile.getInstance();
+            if (sqf.getBase(message.id) instanceof ChapterImage img && sqf.get(message.chapterId) instanceof Chapter chapter) {
+                ChapterImage newImage = Objects.requireNonNull(QuestObjectBase.copy(img, () -> new ChapterImage(sqf.newID(), chapter)));
+                newImage.setPosition(message.qx, message.qy);
+                sqf.getHistoryStack().addAndApply(sqf, new CreateQuestObjects(CreateOrDeleteRecord.ofQuestObject(newImage), null));
+            }
         }
     }
 }

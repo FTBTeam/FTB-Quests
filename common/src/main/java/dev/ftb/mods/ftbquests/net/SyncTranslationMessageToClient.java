@@ -5,6 +5,7 @@ import dev.ftb.mods.ftblibrary.platform.network.PacketContext;
 import dev.ftb.mods.ftblibrary.util.NetworkHelper;
 import dev.ftb.mods.ftbquests.api.FTBQuestsAPI;
 import dev.ftb.mods.ftbquests.client.ClientQuestFile;
+import dev.ftb.mods.ftbquests.client.gui.quests.QuestScreen;
 import dev.ftb.mods.ftbquests.quest.QuestObjectBase;
 import dev.ftb.mods.ftbquests.quest.translation.TranslationKey;
 import net.minecraft.network.FriendlyByteBuf;
@@ -48,7 +49,7 @@ public record SyncTranslationMessageToClient(long id, String locale, Translation
         return TYPE;
     }
 
-    public static void handle(SyncTranslationMessageToClient message, PacketContext context) {
+    public static void handle(SyncTranslationMessageToClient message, PacketContext ignoredContext) {
         ClientQuestFile file = ClientQuestFile.getInstance();
         if (file.isValid()) {
             QuestObjectBase object = file.getBase(message.id);
@@ -56,6 +57,7 @@ public record SyncTranslationMessageToClient(long id, String locale, Translation
                 message.val.ifLeft(str -> file.getTranslationManager().addTranslation(object, message.locale, message.subKey, str))
                         .ifRight(list -> file.getTranslationManager().addTranslation(object, message.locale, message.subKey, list));
                 object.clearCachedData();
+                file.getQuestScreen().ifPresent(QuestScreen::refreshQuestPanel);
             }
         }
     }

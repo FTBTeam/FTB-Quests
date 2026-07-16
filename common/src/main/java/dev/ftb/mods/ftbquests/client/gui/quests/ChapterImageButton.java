@@ -106,16 +106,20 @@ public class ChapterImageButton extends Button implements QuestPositionableButto
 			return;
 		}
 
+		Component title = chapterImage.getTitle().getString().isEmpty() ?
+				Component.literal(chapterImage.getImage().toString()) :
+				chapterImage.getTitle();
+
 		if (questScreen.file.canEdit() && button.isRight()) {
 			List<ContextMenuItem> contextMenu = new ArrayList<>();
 
-			contextMenu.add(ContextMenuItem.title(Component.literal("\"").append(chapterImage.getTitle()).append(Component.literal("\""))));
+			contextMenu.add(ContextMenuItem.title(title));
 			contextMenu.add(ContextMenuItem.SEPARATOR);
 
-			contextMenu.add(new ContextMenuItem(Component.translatable("selectServer.edit"), ThemeProperties.EDIT_ICON.get(), b -> openEditScreen()));
+			contextMenu.add(new ContextMenuItem(Component.translatable("selectServer.edit"), ThemeProperties.EDIT_ICON.get(), _ -> chapterImage.onEditButtonClicked(questScreen)));
 
 			contextMenu.add(new ContextMenuItem(Component.translatable("gui.move"), ThemeProperties.MOVE_UP_ICON.get(chapterImage.getChapter()),
-					b -> questScreen.initiateMoving(chapterImage)) {
+                    _ -> questScreen.initiateMoving(chapterImage)) {
 				@Override
 				public void addMouseOverText(TooltipList list) {
 					list.add(Component.translatable("ftbquests.gui.move_tooltip").withStyle(ChatFormatting.DARK_GRAY));
@@ -141,17 +145,14 @@ public class ChapterImageButton extends Button implements QuestPositionableButto
 					Component.translatable("ftbquests.objects", nSelected) :
 					Component.translatable("delete_item", chapterImage.getImage().toString())
 			);
-			contextMenu.add(new ContextMenuItem(Component.translatable("selectServer.delete"), ThemeProperties.DELETE_ICON.get(),
-					b -> handleDeletion())
-					.setYesNoText(yesNo)
-			);
+			contextMenu.add(new ContextMenuItem(Component.translatable("selectServer.delete"), ThemeProperties.DELETE_ICON.get(), _ -> handleDeletion()).setYesNoText(yesNo));
 
 			getGui().openContextMenu(contextMenu);
 		} else if (button.isLeft()) {
 			if (Minecraft.getInstance().hasControlDown() && questScreen.file.canEdit()) {
 				questScreen.toggleSelected(chapterImage);
 			} else if (isKeyDown(InputConstants.KEY_LALT) && questScreen.file.canEdit()) {
-				openEditScreen();
+				chapterImage.onEditButtonClicked(questScreen, title);
 			} else if (isKeyDown(InputConstants.KEY_RALT) && questScreen.file.canEdit()) {
 				chapterImage.copyToClipboard();
 				FTBQuestsClient.showInfoToast(Component.translatable("ftbquests.quest.copied"), Component.literal(moveAndDeleteFocus().getTitle().getString()));
@@ -170,36 +171,10 @@ public class ChapterImageButton extends Button implements QuestPositionableButto
 
 	private void handleDeletion() {
 		if (questScreen.selectedObjects.isEmpty()) {
-			questScreen.file.deleteObject(chapterImage.getId());
+			questScreen.file.deleteObjects(List.of(chapterImage.getId()));
 		} else {
 			questScreen.deleteSelectedObjects();
 		}
-	}
-
-	private void openEditScreen() {
-		String name = chapterImage.getImage() instanceof Color4I ? chapterImage.getColor().toString() : chapterImage.getImage().toString();
-		EditableConfigGroup group = new EditableConfigGroup(FTBQuestsAPI.MOD_ID, accepted -> {
-			if (accepted) {
-				EditObjectMessage.sendToServer(chapterImage);
-			}
-			run();
-		}) {
-			@Override
-			public Component getName() {
-				MutableComponent type = Component.literal(" [")
-						.append(Component.translatable("ftbquests.chapter.image"))
-						.append("]")
-						.withStyle(ChatFormatting.AQUA);
-				return Component.empty().append(Component.literal(name).withStyle(ChatFormatting.UNDERLINE)).append(type);
-			}
-		};
-		chapterImage.fillConfigGroup(group.getOrCreateSubgroup("chapter").getOrCreateSubgroup("image"));
-		new EditConfigScreen(group) {
-			@Override
-			public Component getTitle() {
-				return group.getName();
-			}
-		}.openGui();
 	}
 
 	@Override
