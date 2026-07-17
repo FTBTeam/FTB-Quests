@@ -7,6 +7,7 @@ import dev.ftb.mods.ftblibrary.platform.fluid.FluidStack;
 import dev.ftb.mods.ftbquests.quest.*;
 import dev.ftb.mods.ftbquests.quest.history.CreateOrDeleteRecord;
 import dev.ftb.mods.ftbquests.quest.history.events.CreateQuestObjects;
+import dev.ftb.mods.ftbquests.quest.history.events.DeleteQuestObjects;
 import dev.ftb.mods.ftbquests.quest.reward.Reward;
 import dev.ftb.mods.ftbquests.quest.task.EnergyTask;
 import dev.ftb.mods.ftbquests.quest.task.FluidTask;
@@ -122,6 +123,17 @@ public final class QuestTestSupport {
 		TeamData data = new TeamData(UUID.randomUUID(), true);
 		file.addData(data, true);
 		return data;
+	}
+
+	public static boolean deleteObject(QuestObjectBase qob) {
+		ServerQuestFile file = file();
+
+		Json5Object config = Util.make(new Json5Object(), o -> qob.writeData(o, file.holderLookup()));
+		file.getHistoryStack().addAndApply(file, new DeleteQuestObjects(new CreateOrDeleteRecord(qob.getId(), qob.getParentID(),
+				qob.getObjectType(), Component.empty(), config, qob.makeCreationMetadata()
+		)));
+
+		return file.getBase(qob.getId()) == null;
 	}
 
 	public static void complete(TeamData data, Task task) {

@@ -38,6 +38,12 @@ public class HistoryStack {
         });
     }
 
+    public void clear() {
+        // only intended for gametest purposes
+        undoStack.clear();
+        redoStack.clear();
+    }
+
     public SendChangeDescPacket createInitialDescPacket(ServerQuestFile file) {
         // sent to players on login to get their gui undo/redo buttons set up correctly
         return createDescPacket(file, NoAction.INSTANCE, ChangeType.INITIAL);
