@@ -137,9 +137,10 @@ public record ImageClickAction(ActionType actionType, String actionData) {
         return actionType == ActionType.NONE;
     }
 
+    // method refs cause class loading (unlike lambdas), don't use if it's a client-only class
     public enum ActionType implements Consumer<String>, StringRepresentable {
         NONE("none", _ -> {}),
-        OPEN_URI("open_uri", FTBQuestsClient::openUri),
+        @SuppressWarnings("Convert2MethodRef") OPEN_URI("open_uri", uriStr -> FTBQuestsClient.openUri(uriStr)),
         OPEN_QUEST("open_quest", ImageClickAction::openQuest),
         RUN_COMMAND("run_command", ImageClickAction::runCommand),
         CUSTOM_EVENT("custom_event", ImageClickAction::postCustomEvent),
