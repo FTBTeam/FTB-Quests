@@ -26,6 +26,7 @@ import dev.ftb.mods.ftbquests.client.config.EditableQuestObject;
 import dev.ftb.mods.ftbquests.client.gui.MultilineTextEditorScreen;
 import dev.ftb.mods.ftbquests.client.gui.quests.QuestScreen;
 import dev.ftb.mods.ftbquests.integration.RecipeModHelper;
+import dev.ftb.mods.ftbquests.quest.preset.VisualPreset;
 import dev.ftb.mods.ftbquests.quest.reward.Reward;
 import dev.ftb.mods.ftbquests.quest.task.Task;
 import dev.ftb.mods.ftbquests.quest.translation.TranslationKey;
@@ -84,6 +85,9 @@ public final class Quest extends QuestObject implements Movable, Excludable {
 	private boolean hideLockIcon;
 	private int maxCompletableDeps;
 	private int repeatCooldown; // seconds
+	private String presetName;
+	@Nullable
+	private VisualPreset cachedPreset;
 
 	@Nullable
 	private Component cachedSubtitle = null;
@@ -129,6 +133,7 @@ public final class Quest extends QuestObject implements Movable, Excludable {
 		hideLockIcon = false;
 		maxCompletableDeps = 0;
 		repeatCooldown = 0;
+		presetName = "";
 	}
 
 	@Override
@@ -204,6 +209,7 @@ public final class Quest extends QuestObject implements Movable, Excludable {
 	}
 
 	public double getSize() {
+		double size = getVisualPreset().size();
 		return size == 0D ? chapter.getDefaultQuestSize() : size;
 	}
 
@@ -221,6 +227,18 @@ public final class Quest extends QuestObject implements Movable, Excludable {
 
 	public boolean canBeRepeated() {
 		return canRepeat.get(chapter.isDefaultRepeatable());
+	}
+
+	private VisualPreset getVisualPreset() {
+		if (cachedPreset == null) {
+			String name = presetName.isEmpty() ? chapter.getPresetName() : presetName;
+			if (name.isEmpty()) {
+				cachedPreset = new FallbackVisualPreset();
+			} else {
+				cachedPreset = getQuestFile().getPresets().get(name).orElseGet(FallbackVisualPreset::new);
+			}
+		}
+		return cachedPreset;
 	}
 
 	public List<String> getRawDescription() {
@@ -286,6 +304,7 @@ public final class Quest extends QuestObject implements Movable, Excludable {
 		if (hideLockIcon) json.addProperty("hide_lock_icon", true);
 		if (maxCompletableDeps > 0) json.addProperty("max_completable_dependents", maxCompletableDeps);
 		if (repeatCooldown > 0) json.addProperty("repeat_cooldown", repeatCooldown);
+		if (!presetName.isEmpty()) json.addProperty("preset", presetName);
 	}
 
 	@Override
@@ -331,6 +350,7 @@ public final class Quest extends QuestObject implements Movable, Excludable {
 		hideLockIcon = Json5Util.getBoolean(json, "hide_lock_icon").orElse(false);
 		maxCompletableDeps = Json5Util.getInt(json, "max_completable_dependents").orElse(0);
 		repeatCooldown = Json5Util.getInt(json, "repeat_cooldown").orElse(0);
+		presetName = Json5Util.getString(json, "preset").orElse("");
 	}
 
 	@Override
@@ -400,6 +420,8 @@ public final class Quest extends QuestObject implements Movable, Excludable {
 		if (canRepeat.isTrue()) {
 			buffer.writeInt(repeatCooldown);
 		}
+
+		buffer.writeUtf(presetName);
 	}
 
 	@Override
@@ -440,6 +462,7 @@ public final class Quest extends QuestObject implements Movable, Excludable {
 		progressionMode = ProgressionMode.NAME_MAP.read(buffer);
 		maxCompletableDeps = buffer.readVarInt();
 		repeatCooldown = canRepeat.isTrue() ? buffer.readInt() : 0;
+		presetName = buffer.readUtf();
 	}
 
 	@Override
@@ -606,6 +629,7 @@ public final class Quest extends QuestObject implements Movable, Excludable {
 		appearance.addDouble("y", y, v -> y = v, 0, Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY);
 		appearance.addInt("min_width", minWidth, v -> minWidth = v, 0, 0, 3000);
 		appearance.addDouble("icon_scale", iconScale, v -> iconScale = v, 1f, 0.1, 2.0);
+		appearance.addEnum("preset", presetName, v -> presetName = v, getQuestFile().getPresets().nameMap());
 
 		EditableConfigGroup visibility = config.getOrCreateSubgroup("visibility");
 		visibility.addTristate("hide_until_deps_complete", hideUntilDepsComplete, v -> hideUntilDepsComplete = v);
@@ -694,6 +718,7 @@ public final class Quest extends QuestObject implements Movable, Excludable {
 
 	@Override
 	public String getShape() {
+		String shape = getVisualPreset().shapeName();
 		return shape.isEmpty() ? chapter.getDefaultQuestShape() : shape;
 	}
 
@@ -732,6 +757,7 @@ public final class Quest extends QuestObject implements Movable, Excludable {
 		super.clearCachedData();
 		cachedSubtitle = null;
 		cachedDescription = null;
+		cachedPreset = null;
 
 		for (Task task : tasks) {
 			task.clearCachedData();
@@ -1185,5 +1211,17 @@ public final class Quest extends QuestObject implements Movable, Excludable {
 
 	public void moveReward(Reward reward, boolean moveRight) {
 		moveItem(rewards, reward, moveRight ? 1 : -1);
+	}
+
+	private class FallbackVisualPreset implements VisualPreset {
+		@Override
+		public String shapeName() {
+			return shape;
+		}
+
+		@Override
+		public double size() {
+			return size;
+		}
 	}
 }

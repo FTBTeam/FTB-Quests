@@ -46,6 +46,7 @@ public final class Chapter extends QuestObject {
 	private Tristate consumeItems;
 	private boolean requireSequentialTasks;
 	private String autoFocusId;
+	private String presetName;
 
 	public Chapter(long id, BaseQuestFile file, ChapterGroup group) {
 		this(id, file, group, "");
@@ -72,6 +73,7 @@ public final class Chapter extends QuestObject {
 		consumeItems = Tristate.DEFAULT;
 		requireSequentialTasks = false;
 		autoFocusId = "";
+		presetName = "";
 	}
 
 	public void setDefaultQuestShape(String defaultQuestShape) {
@@ -177,7 +179,7 @@ public final class Chapter extends QuestObject {
 		if (hideTextUntilComplete) json.addProperty("hide_text_until_complete", true);
 		if (defaultRepeatable) json.addProperty("default_repeatable_quest", true);
 		if (requireSequentialTasks) json.addProperty("require_sequential_tasks", true);
-
+		if (!presetName.isEmpty()) json.addProperty("preset", presetName);
 		if (!autoFocusId.isEmpty()) json.addProperty("autofocus_id", autoFocusId);
 	}
 
@@ -199,6 +201,7 @@ public final class Chapter extends QuestObject {
 		hideTextUntilComplete = Json5Util.getBoolean(json, "hide_text_until_complete").orElse(false);
 		defaultRepeatable = Json5Util.getBoolean(json, "default_repeatable_quest").orElse(false);
 		requireSequentialTasks = Json5Util.getBoolean(json, "require_sequential_tasks").orElse(false);
+		presetName = Json5Util.getString(json, "preset").orElse("");
 		autoFocusId = Json5Util.getString(json, "autofocus_id").orElse("");
 
 		if (defaultQuestShape.equals("default")) {
@@ -218,6 +221,7 @@ public final class Chapter extends QuestObject {
 		buffer.writeVarInt(makeFlags());
 
 		if (!autoFocusId.isEmpty()) buffer.writeLong(QuestObjectBase.parseHexId(autoFocusId).orElse(0L));
+		buffer.writeUtf(presetName);
 	}
 
 	private int makeFlags() {
@@ -257,6 +261,8 @@ public final class Chapter extends QuestObject {
 		hideTextUntilComplete = Bits.getFlag(flags, 0x400);
 
 		autoFocusId = Bits.getFlag(flags, 0x100) ? QuestObjectBase.getCodeString(buffer.readLong()) : "";
+
+		presetName = buffer.readUtf();
 	}
 
 	public int getIndex() {
@@ -396,6 +402,7 @@ public final class Chapter extends QuestObject {
 		appearance.addEnum("default_quest_shape", defaultQuestShape.isEmpty() ? "default" : defaultQuestShape, v -> defaultQuestShape = v.equals("default") ? "" : v, QuestShape.idMapWithDefault);
 		appearance.addDouble("default_quest_size", defaultQuestSize, v -> defaultQuestSize = v, 1, 0.0625D, 8D);
 		appearance.addInt("default_min_width", defaultMinWidth, v -> defaultMinWidth = v, 0, 0, 3000);
+		appearance.addEnum("default_preset", presetName, v -> presetName = v, getQuestFile().getPresets().nameMap());
 
 		EditableConfigGroup visibility = config.getOrCreateSubgroup("visibility").setNameKey("ftbquests.quest.visibility");
 		visibility.addBool("always_invisible", alwaysInvisible, v -> alwaysInvisible = v, false);
@@ -529,5 +536,8 @@ public final class Chapter extends QuestObject {
 	public boolean isAutofocus(long id) {
 		return id == getAutofocus().map(Movable::getMovableID).orElse(0L);
 	}
-
+	
+	public String getPresetName() {
+		return presetName.isEmpty() ? file.getPresetName() : presetName;
+	}
 }
