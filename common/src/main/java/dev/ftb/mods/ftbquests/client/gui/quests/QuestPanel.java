@@ -1,6 +1,5 @@
 package dev.ftb.mods.ftbquests.client.gui.quests;
 
-import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.datafixers.util.Pair;
 import dev.ftb.mods.ftblibrary.client.config.editable.EditableImageResource;
 import dev.ftb.mods.ftblibrary.client.config.gui.resource.SelectImageResourceScreen;
@@ -30,7 +29,6 @@ import dev.ftb.mods.ftbquests.quest.task.Task;
 import dev.ftb.mods.ftbquests.quest.task.TaskType;
 import dev.ftb.mods.ftbquests.quest.task.TaskTypes;
 import dev.ftb.mods.ftbquests.quest.theme.property.ThemeProperties;
-import dev.ftb.mods.ftbquests.quest.translation.TranslationKey;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
@@ -44,7 +42,6 @@ import net.minecraft.util.Mth;
 import org.joml.Matrix3x2f;
 import org.joml.Matrix3x2fStack;
 import org.jspecify.annotations.Nullable;
-import org.lwjgl.glfw.GLFW;
 
 import java.util.*;
 import java.util.function.Consumer;
@@ -61,9 +58,9 @@ public class QuestPanel extends Panel {
 	@Nullable
 	QuestButton mouseOverQuest = null;
 	double questMinX;
-    double questMinY;
-    private double questMaxX;
-    private double questMaxY;
+	double questMinY;
+	private double questMaxX;
+	private double questMaxY;
 	final BezierController bezierController;
 
 	public QuestPanel(Panel panel) {
@@ -362,6 +359,8 @@ public class QuestPanel extends Panel {
 					}
 
 					for (Movable m : questScreen.selectedObjects) {
+						if (m.isPositionLocked()) continue;
+
 						double ox = m.getX() - ominX;
 						double oy = m.getY() - ominY;
 						double sx = (questX + ox - questMinX) / dx * questScreen.scrollWidth + px;
@@ -373,7 +372,7 @@ public class QuestPanel extends Panel {
 						} else {
 							poseStack.translate((float) sx, (float) sy);
 						}
-						poseStack.rotate((float) m.getRotation());
+						poseStack.rotate((float) (Mth.DEG_TO_RAD * m.getRotation()));
 						if (!m.isAlignToCorner()) {
 							poseStack.translate((float) (-bs * m.getWidth() / 2D), (float) (-bs * m.getHeight() / 2D));
 						}
@@ -503,46 +502,46 @@ public class QuestPanel extends Panel {
 				contextMenu.add(new ContextMenuItem(type.getDisplayName(), type.getIconSupplier(), b -> {
 					playClickSound();
 					type.getGuiProvider().openCreationGui(this, new Quest(0L, questScreen.selectedChapter),
-                            task -> Play2ServerNetworking.send(CreateQuestAndTaskMessage.requestCreation(questScreen.selectedChapter, qx, qy, task))
+							task -> Play2ServerNetworking.send(CreateQuestAndTaskMessage.requestCreation(questScreen.selectedChapter, qx, qy, task))
 					);
 				}));
 			}
 
-			contextMenu.add(new ContextMenuItem(Component.translatable("ftbquests.chapter.image"), Icons.ART, _ -> showImageCreationScreen(qx, qy)));
+			contextMenu.add(new ContextMenuItem(Component.translatable("ftbquests.image"), Icons.ART, _ -> showImageCreationScreen(qx, qy)));
 
 			QuestObjectBase.parseHexId(getClipboardString()).ifPresent(questId -> {
 				QuestObjectBase qo = questScreen.file.getBase(questId);
-                switch (qo) {
+				switch (qo) {
 					case Quest quest -> {
 						contextMenu.add(ContextMenuItem.SEPARATOR);
 						contextMenu.add(new PasteQuestMenuItem(quest, Component.translatable("ftbquests.gui.paste"),
-                                Icons.ADD,
-                                _ -> Play2ServerNetworking.send(new CopyQuestMessage(quest.id, questScreen.selectedChapter.id, qx, qy, true))));
-                        if (quest.hasDependencies()) {
-                            contextMenu.add(new PasteQuestMenuItem(quest, Component.translatable("ftbquests.gui.paste_no_deps"),
-                                    Icons.ADD_GRAY.withTint(Color4I.rgb(0x008000)),
-                                    _ -> Play2ServerNetworking.send(new CopyQuestMessage(quest.id, questScreen.selectedChapter.id, qx, qy, false))));
-                        }
-                        contextMenu.add(new PasteQuestMenuItem(quest, Component.translatable("ftbquests.gui.paste_link"),
-                                Icons.ADD_GRAY.withTint(Color4I.rgb(0x8080C0)),
-                                _ -> {
-                                    QuestLink link = new QuestLink(0L, questScreen.selectedChapter, quest.id).setPosition(qx, qy);
-                                    Play2ServerNetworking.send(CreateObjectMessage.requestCreation(link));
-                                }));
-                    }
-                    case Task task -> {
+								Icons.ADD,
+								_ -> Play2ServerNetworking.send(new CopyQuestMessage(quest.id, questScreen.selectedChapter.id, qx, qy, true))));
+						if (quest.hasDependencies()) {
+							contextMenu.add(new PasteQuestMenuItem(quest, Component.translatable("ftbquests.gui.paste_no_deps"),
+									Icons.ADD_GRAY.withTint(Color4I.rgb(0x008000)),
+									_ -> Play2ServerNetworking.send(new CopyQuestMessage(quest.id, questScreen.selectedChapter.id, qx, qy, false))));
+						}
+						contextMenu.add(new PasteQuestMenuItem(quest, Component.translatable("ftbquests.gui.paste_link"),
+								Icons.ADD_GRAY.withTint(Color4I.rgb(0x8080C0)),
+								_ -> {
+									QuestLink link = new QuestLink(0L, questScreen.selectedChapter, quest.id).setPosition(qx, qy);
+									Play2ServerNetworking.send(CreateObjectMessage.requestCreation(link));
+								}));
+					}
+					case Task task -> {
 						contextMenu.add(ContextMenuItem.SEPARATOR);
-                        contextMenu.add(new AddTaskButton.PasteTaskMenuItem(task, _ -> copyAndCreateTask(task, qx, qy)));
-                    }
-                    case ChapterImage img -> {
+						contextMenu.add(new AddTaskButton.PasteTaskMenuItem(task, _ -> copyAndCreateTask(task, qx, qy)));
+					}
+					case ChapterImage img -> {
 						contextMenu.add(ContextMenuItem.SEPARATOR);
-                        contextMenu.add(new TooltipContextMenuItem(Component.translatable("ftbquests.gui.paste_image"),
-                                Icons.ADD,
-                                _ -> Play2ServerNetworking.send(new CopyChapterImageMessage(img.getId(), questScreen.selectedChapter.getId(), qx, qy)),
-                                Component.literal(img.getImage().toString()).withStyle(ChatFormatting.GRAY)));
-                    }
-                    case null, default -> {}
-                }
+						contextMenu.add(new TooltipContextMenuItem(Component.translatable("ftbquests.gui.paste_image"),
+								Icons.ADD,
+								_ -> Play2ServerNetworking.send(new CopyChapterImageMessage(img.getId(), questScreen.selectedChapter.getId(), qx, qy)),
+								Component.literal(img.getImage().toString()).withStyle(ChatFormatting.GRAY)));
+					}
+					case null, default -> {}
+				}
 			});
 
 			questScreen.openContextMenu(contextMenu).setExtraZlevel(900);
@@ -660,9 +659,9 @@ public class QuestPanel extends Panel {
 		bezierController.deactivate(accepted);
 	}
 
-    public void clearBezierControlPoints(QuestButton qb, Quest dep) {
-        bezierController.clear(qb, dep);
-    }
+	public void clearBezierControlPoints(QuestButton qb, Quest dep) {
+		bezierController.clear(qb, dep);
+	}
 
 	private static class PasteQuestMenuItem extends TooltipContextMenuItem {
 		public PasteQuestMenuItem(Quest quest, Component title, Icon icon, @Nullable Consumer<Button> callback) {
@@ -683,9 +682,9 @@ public class QuestPanel extends Panel {
 		private BezierController() {
 			control0 = new ControlPointButton(QuestPanel.this, this, () -> Objects.requireNonNull(data).depButton, 0);
 			control1 = new ControlPointButton(QuestPanel.this, this, () -> Objects.requireNonNull(data).questButton, 1);
-        }
+		}
 
-        public void activate(QuestButton questButton, Quest depQuest) {
+		public void activate(QuestButton questButton, Quest depQuest) {
 			if (data == null) {
 				data = new Data(
 						questButton,
@@ -729,18 +728,18 @@ public class QuestPanel extends Panel {
 			}
 		}
 
-        public boolean isActive() {
-            return data != null;
-        }
+		public boolean isActive() {
+			return data != null;
+		}
 
-        public void clear(QuestButton qb, Quest dep) {
+		public void clear(QuestButton qb, Quest dep) {
 			qb.quest.setBezierControlPoints(dep, null);
 			qb.positionControlPoints();
 
 			Play2ServerNetworking.send(EditObjectMessage.forQuestObject(qb.quest));
 		}
 
-        public void repositionControlButtons(QuestButton qb) {
+		public void repositionControlButtons(QuestButton qb) {
 			if (data != null && data.questButton == qb) {
 				Pair<Vec2d, Vec2d> controlPoints = qb.getControlPoints(data.depButton.quest);
 				if (controlPoints != null) {
@@ -748,31 +747,31 @@ public class QuestPanel extends Panel {
 					control1.setPos((int) controlPoints.getSecond().x(), (int) controlPoints.getSecond().y());
 				}
 			}
-        }
+		}
 
 		private record Data(QuestButton questButton, QuestButton depButton, @Nullable Pair<Vec2d, Vec2d> savedControlPoints) {
 		}
 	}
 
 	private class ControlPointButton extends Button {
-        private final BezierController controller;
+		private final BezierController controller;
 		private final int index; // 0 or 1
-        private final Supplier<QuestButton> questButtonSupplier;
+		private final Supplier<QuestButton> questButtonSupplier;
 
-        private boolean active = false;
+		private boolean active = false;
 		private Vec2d startPosition = Vec2d.ZERO;  // screen coords
 		private boolean dragging = false;
 		private int dragOffsetX, dragOffsetY;
 
-        public ControlPointButton(Panel panel, BezierController controller, Supplier<QuestButton> questButtonSupplier, int index) {
+		public ControlPointButton(Panel panel, BezierController controller, Supplier<QuestButton> questButtonSupplier, int index) {
 			super(panel, Component.empty(), Icons.MARKER);
 
-            this.controller = controller;
-            this.questButtonSupplier = questButtonSupplier;
-            this.index = index;
+			this.controller = controller;
+			this.questButtonSupplier = questButtonSupplier;
+			this.index = index;
 
-            setSize(12, 12);
-        }
+			setSize(12, 12);
+		}
 
 		@Override
 		public void drawBackground(GuiGraphicsExtractor graphics, Theme theme, int x, int y, int w, int h) {
@@ -849,12 +848,12 @@ public class QuestPanel extends Panel {
 			activate(new Vec2d(x, y));
 		}
 
-        public void deactivate(boolean accepted) {
+		public void deactivate(boolean accepted) {
 			if (!accepted) {
 				// reset button position to what it was when we activated it
 				setPos((int) Math.round(startPosition.x()), (int) Math.round(startPosition.y()));
 			}
 			active = false;
-        }
+		}
 	}
 }

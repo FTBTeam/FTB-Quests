@@ -3,7 +3,6 @@ package dev.ftb.mods.ftbquests.quest;
 import de.marhali.json5.Json5Object;
 import dev.ftb.mods.ftblibrary.client.config.EditableConfigGroup;
 import dev.ftb.mods.ftblibrary.client.config.editable.EditableImageResource;
-import dev.ftb.mods.ftblibrary.client.config.editable.EditableString;
 import dev.ftb.mods.ftblibrary.client.icon.IconHelper;
 import dev.ftb.mods.ftblibrary.icon.Color4I;
 import dev.ftb.mods.ftblibrary.icon.Icon;
@@ -36,6 +35,7 @@ public final class ChapterImage extends QuestObjectBase implements Movable {
 	@Nullable
 	private Quest dependency;
 	private int order;
+	private boolean positionLocked;
 
 	public ChapterImage(long id, Chapter chapter) {
 		super(id);
@@ -54,6 +54,7 @@ public final class ChapterImage extends QuestObjectBase implements Movable {
 		alignToCorner = false;
 		dependency = null;
 		order = 0;
+		positionLocked = false;
 	}
 
 	public Icon<?> getImage() {
@@ -117,6 +118,7 @@ public final class ChapterImage extends QuestObjectBase implements Movable {
 		if (editorsOnly) json.addProperty("dev", true);
 		if (alignToCorner) json.addProperty("corner", true);
 		if (dependency != null) json.addProperty("dependency", dependency.getCodeString());
+		if (positionLocked) json.addProperty("position_locked", true);
 	}
 
 	@Override
@@ -143,6 +145,7 @@ public final class ChapterImage extends QuestObjectBase implements Movable {
 		dependency = Json5Util.getString(json, "dependency")
 				.map(dependency -> chapter.file.getQuest(chapter.file.getID(dependency)))
 				.orElse(null);
+		positionLocked = Json5Util.getBoolean(json, "position_locked").orElse(false);
 	}
 
 	@Override
@@ -162,6 +165,7 @@ public final class ChapterImage extends QuestObjectBase implements Movable {
 		buffer.writeBoolean(editorsOnly);
 		buffer.writeBoolean(alignToCorner);
 		buffer.writeLong(dependency == null ? 0L : dependency.id);
+		buffer.writeBoolean(positionLocked);
 	}
 
 	@Override
@@ -181,6 +185,7 @@ public final class ChapterImage extends QuestObjectBase implements Movable {
 		editorsOnly = buffer.readBoolean();
 		alignToCorner = buffer.readBoolean();
 		dependency = chapter.file.getQuest(buffer.readLong());
+		positionLocked = buffer.readBoolean();
 	}
 
 	@Override
@@ -216,6 +221,7 @@ public final class ChapterImage extends QuestObjectBase implements Movable {
 		config.addString("click_action_data", clickAction.actionData(), v -> clickAction = clickAction.withData(v), "");
 		config.addBool("dev", editorsOnly, v -> editorsOnly = v, false);
 		config.addBool("corner", alignToCorner, v -> alignToCorner = v, false);
+		config.addBool("position_locked", positionLocked, v -> positionLocked = v, false);
 
 		Predicate<@Nullable QuestObjectBase> depTypes = object -> object == null || object instanceof Quest;
 		config.add("dependency", new EditableQuestObject<>(depTypes), dependency, v -> dependency = v, null).setNameKey("ftbquests.dependency");
@@ -293,6 +299,11 @@ public final class ChapterImage extends QuestObjectBase implements Movable {
 	@Override
 	public String getShape() {
 		return "square";
+	}
+
+	@Override
+	public boolean isPositionLocked() {
+		return positionLocked;
 	}
 
 	@Override

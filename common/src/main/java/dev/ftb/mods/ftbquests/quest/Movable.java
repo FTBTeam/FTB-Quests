@@ -45,6 +45,13 @@ public interface Movable {
 	}
 
 	/**
+	 * {@return true if this object's position has been locked to prevent accidental moving}
+	 */
+	default boolean isPositionLocked() {
+		return false;
+	}
+
+	/**
 	 * Called client-side to initiate the actual move
 	 *
 	 * @param to new chapter
@@ -52,7 +59,9 @@ public interface Movable {
 	 * @param y new Y pos
 	 */
 	default void requestMove(Chapter to, double x, double y) {
-		Play2ServerNetworking.send(new MoveMovableMessage(getMovableID(), to.getId(), x, y));
+		if (!isPositionLocked()) {
+			Play2ServerNetworking.send(new MoveMovableMessage(getMovableID(), to.getId(), x, y));
+		}
 	}
 
 	/**

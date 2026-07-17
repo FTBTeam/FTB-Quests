@@ -579,7 +579,7 @@ public class MultilineTextEditorScreen extends BaseScreen {
 					.withTooltip(Component.translatable("ftbquests.gui.page_break"), hotkey("P", "Alt"));
 			imageButton = new ToolbarButton(this, Component.empty(), Icons.ART.withPadding(2),
 					() -> executeHotkey(InputConstants.KEY_M, false))
-					.withTooltip(Component.translatable("ftbquests.chapter.image"), hotkey("M", "Alt"));
+					.withTooltip(Component.translatable("ftbquests.image"), hotkey("M", "Alt"));
 			undoButton = new ToolbarButton(this, Component.empty(), Icons.REFRESH,
 					() -> executeHotkey(InputConstants.KEY_Z, false))
 					.withTooltip(Component.translatable("ftbquests.gui.undo"), hotkey("Z", "Ctrl"));
