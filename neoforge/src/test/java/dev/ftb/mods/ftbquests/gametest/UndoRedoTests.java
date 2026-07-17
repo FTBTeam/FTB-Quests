@@ -5,11 +5,9 @@ import dev.ftb.mods.ftbquests.gametest.base.FTBQTestRegistrar;
 import dev.ftb.mods.ftbquests.gametest.base.QuestTestSupport;
 import dev.ftb.mods.ftbquests.quest.Chapter;
 import dev.ftb.mods.ftbquests.quest.Quest;
-import dev.ftb.mods.ftbquests.quest.QuestObjectType;
 import dev.ftb.mods.ftbquests.quest.ServerQuestFile;
 import dev.ftb.mods.ftbquests.quest.history.events.MoveMovableObject;
 import dev.ftb.mods.ftbquests.quest.task.Task;
-import net.minecraft.network.chat.Component;
 import net.minecraft.util.Util;
 
 import static dev.ftb.mods.ftbquests.gametest.base.QuestTestSupport.assertFalse;
@@ -94,22 +92,15 @@ public class UndoRedoTests {
 
             assertTrue(helper, file.get(quest.id) instanceof Quest, "quest should exist after creation");
 
-            file.getHistoryStack().addAndApply(file, new MoveMovableObject(quest.getId(),
-                    QuestObjectType.QUEST, Component.empty(),
-                    chapter.getId(), chapter.getId(),
-                    origX, origY, origX + 5.0, origY + 2.0
-            ));
-
+            file.getHistoryStack().addAndApply(file, MoveMovableObject.create(quest, chapter, origX + 5.0, origY + 2.0).orElseThrow());
             assertTrue(helper, quest.getX() == origX + 5.0, "quest X should be " + origX + 5.0 + ", got " + quest.getX());
 
             file.getHistoryStack().tryUndo(file);
             assertTrue(helper, quest.getX() == origX, "quest X should be " + origX + ", got " + quest.getX());
 
-            file.getHistoryStack().addAndApply(file, new MoveMovableObject(quest.getId(),
-                    QuestObjectType.QUEST, Component.empty(),
-                    chapter.getId(), chapter2.getId(),
-                    origX, origY, origX, origY
-            ));
+            assertTrue(helper, MoveMovableObject.create(quest, chapter, origX, origY).isEmpty(), "no-op move should return empty optional");
+
+            file.getHistoryStack().addAndApply(file, MoveMovableObject.create(quest, chapter2, origX, origY).orElseThrow());
             assertTrue(helper, quest.getChapter().getId() == chapter2.getId(), "quest chapter ID should be " + chapter2.getId() + ", got " + quest.getChapter().getId());
 
             file.getHistoryStack().tryUndo(file);

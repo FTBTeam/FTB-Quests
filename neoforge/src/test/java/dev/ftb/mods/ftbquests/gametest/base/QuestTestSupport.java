@@ -128,10 +128,7 @@ public final class QuestTestSupport {
 	public static boolean deleteObject(QuestObjectBase qob) {
 		ServerQuestFile file = file();
 
-		Json5Object config = Util.make(new Json5Object(), o -> qob.writeData(o, file.holderLookup()));
-		file.getHistoryStack().addAndApply(file, new DeleteQuestObjects(new CreateOrDeleteRecord(qob.getId(), qob.getParentID(),
-				qob.getObjectType(), Component.empty(), config, qob.makeCreationMetadata()
-		)));
+		file.getHistoryStack().addAndApply(file, new DeleteQuestObjects(CreateOrDeleteRecord.ofQuestObject(qob)));
 
 		return file.getBase(qob.getId()) == null;
 	}
