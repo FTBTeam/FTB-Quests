@@ -35,6 +35,7 @@ public class FTBQuestsCommands {
 				.then(BlockRewardsCommand.register())
 				.then(OpenBookCommand.register())
 				.then(ClearItemDisplayCacheCommand.register())
+				.then(PauseProgressionCommand.register())
 		);
 	}
 

@@ -15,26 +15,26 @@ import java.util.Objects;
 
 import static net.minecraft.commands.Commands.argument;
 
-public class BlockRewardsCommand {
+public class PauseProgressionCommand {
     public static LiteralArgumentBuilder<CommandSourceStack> register() {
-        return Commands.literal("block_rewards")
+        return Commands.literal("pause_progression")
                 .requires(FTBQuestsCommands::hasEditorPermission)
-                .executes(c -> toggleRewardBlocking(c.getSource(), c.getSource().getPlayerOrException(), null))
+                .executes(c -> toggleProgression(c.getSource(), c.getSource().getPlayerOrException(), null))
                 .then(argument("enabled", BoolArgumentType.bool())
-                        .executes(c -> toggleRewardBlocking(c.getSource(), c.getSource().getPlayerOrException(), BoolArgumentType.getBool(c, "enabled")))
+                        .executes(c -> toggleProgression(c.getSource(), c.getSource().getPlayerOrException(), BoolArgumentType.getBool(c, "enabled")))
                         .then(argument("player", EntityArgument.player())
                                 .requires(FTBQuestsCommands::hasEditorPermission)
-                                .executes(c -> toggleRewardBlocking(c.getSource(), EntityArgument.getPlayer(c, "player"), BoolArgumentType.getBool(c, "enabled")))
+                                .executes(c -> toggleProgression(c.getSource(), EntityArgument.getPlayer(c, "player"), BoolArgumentType.getBool(c, "enabled")))
                         )
                 );
     }
 
-    private static int toggleRewardBlocking(CommandSourceStack source, ServerPlayer player, @Nullable Boolean doBlocking) {
+    private static int toggleProgression(CommandSourceStack source, ServerPlayer player, @Nullable Boolean pause) {
         return ServerQuestFile.getInstance().getTeamData(player).map(data -> {
-            boolean shouldBlock = Objects.requireNonNullElseGet(doBlocking, () -> !data.areRewardsBlocked());
-            data.setRewardsBlocked(shouldBlock);
+            boolean pauseProgression = Objects.requireNonNullElseGet(pause, () -> !data.isProgressionPaused(player));
+            data.setProgressionPaused(player, pauseProgression);
 
-            source.sendSuccess(() -> Component.translatable("commands.ftbquests.command.feedback.rewards_blocked", data.getName(), Component.translatable(data.areRewardsBlocked() ? "gui.yes": "gui.no")), false);
+            source.sendSuccess(() -> Component.translatable("commands.ftbquests.command.feedback.progression_paused", player.getName(), Component.translatable(data.isProgressionPaused(player) ? "gui.yes" : "gui.no")), false);
 
             return Command.SINGLE_SUCCESS;
         }).orElse(0);

@@ -263,7 +263,9 @@ public abstract class Task extends QuestObject {
 	}
 
 	public final void submitTask(TeamData teamData, ServerPlayer player) {
-		submitTask(teamData, player, ItemStack.EMPTY);
+		if (!teamData.isProgressionPaused(player)) {
+			submitTask(teamData, player, ItemStack.EMPTY);
+		}
 	}
 
 	protected final boolean checkTaskSequence(TeamData teamData) {

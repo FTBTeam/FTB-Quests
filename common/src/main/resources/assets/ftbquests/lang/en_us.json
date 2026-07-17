@@ -653,6 +653,7 @@
 	"commands.ftbquests.command.feedback.reloaded_progress": "Progression data reloaded from file!",
 	"commands.ftbquests.command.feedback.reloaded.disclaimer": "Note: Quest reloading is a quest developer convenience tool and not recommended for use on live servers.",
 	"commands.ftbquests.command.feedback.rewards_blocked": "Quest reward blocking for team '%s' set to: %s",
+	"commands.ftbquests.command.feedback.progression_paused": "Progression pause for player '%s' set to: %s",
 	"commands.ftbquests.command.feedback.clear_display_cache": "Item display cache has been cleared for all players",
 	"commands.ftbquests.command.delete_empty_reward_tables.text": "Deleted %s empty reward tables",
 	"commands.ftbquests.change_progress.text": "Progress has been changed!",
