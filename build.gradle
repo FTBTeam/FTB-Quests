@@ -1,6 +1,6 @@
 plugins {
-	id "architectury-plugin" version "3.4-SNAPSHOT"
-	id "dev.architectury.loom" version "1.10-SNAPSHOT" apply false
+	id "architectury-plugin" version "3.5-SNAPSHOT"
+	id "dev.architectury.loom" version "1.17-SNAPSHOT" apply false
 	id "me.modmuss50.mod-publish-plugin" version "2.0.0-beta.2"
 }
 
@@ -39,15 +39,17 @@ allprojects {
 	def ENV = System.getenv()
 	version = mod_version
 	group = project.maven_group
-	archivesBaseName = project.archives_base_name
+
+	base {
+		archivesName = project.archives_base_name
+	}
 
 	// needs to be done AFTER version is set
 	apply from: "https://raw.githubusercontent.com/FTBTeam/mods-meta/main/gradle/publishing.gradle"
 
-	sourceCompatibility = targetCompatibility = compileJava.sourceCompatibility = compileJava.targetCompatibility = 21
-
 	compileJava {
 		options.encoding = "UTF-8"
+		options.release = 21
 	}
 
 	repositories {
