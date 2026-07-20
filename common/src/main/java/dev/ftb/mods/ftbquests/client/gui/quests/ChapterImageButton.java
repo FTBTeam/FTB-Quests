@@ -117,13 +117,15 @@ public class ChapterImageButton extends Button implements QuestPositionableButto
 
 			contextMenu.add(new ContextMenuItem(Component.translatable("selectServer.edit"), ThemeProperties.EDIT_ICON.get(), _ -> chapterImage.onEditButtonClicked(questScreen)));
 
-			contextMenu.add(new ContextMenuItem(Component.translatable("gui.move"), ThemeProperties.MOVE_UP_ICON.get(chapterImage.getChapter()),
-                    _ -> questScreen.initiateMoving(chapterImage)) {
-				@Override
-				public void addMouseOverText(TooltipList list) {
-					list.add(Component.translatable("ftbquests.gui.move_tooltip").withStyle(ChatFormatting.DARK_GRAY));
-				}
-			});
+			if (!chapterImage.isPositionLocked()) {
+				contextMenu.add(new ContextMenuItem(Component.translatable("gui.move"), ThemeProperties.MOVE_UP_ICON.get(chapterImage.getChapter()),
+						_ -> questScreen.initiateMoving(chapterImage)) {
+					@Override
+					public void addMouseOverText(TooltipList list) {
+						list.add(Component.translatable("ftbquests.gui.move_tooltip").withStyle(ChatFormatting.DARK_GRAY));
+					}
+				});
+			}
 
 			contextMenu.add(new ContextMenuItem(Component.translatable("ftbquests.gui.copy_id"), Icons.INFO, _ -> chapterImage.copyToClipboard()) {
 				@Override
