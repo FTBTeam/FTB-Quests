@@ -1,10 +1,5 @@
 package dev.ftb.mods.ftbquests.client.gui.quests;
 
-import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.*;
-import com.mojang.datafixers.util.Pair;
-import com.mojang.math.Axis;
-import dev.architectury.networking.NetworkManager;
 import dev.ftb.mods.ftblibrary.config.ImageResourceConfig;
 import dev.ftb.mods.ftblibrary.config.ui.resource.SelectImageResourceScreen;
 import dev.ftb.mods.ftblibrary.icon.Color4I;
@@ -24,6 +19,11 @@ import dev.ftb.mods.ftbquests.quest.task.Task;
 import dev.ftb.mods.ftbquests.quest.task.TaskType;
 import dev.ftb.mods.ftbquests.quest.task.TaskTypes;
 import dev.ftb.mods.ftbquests.quest.theme.property.ThemeProperties;
+import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.blaze3d.vertex.*;
+import com.mojang.datafixers.util.Pair;
+import com.mojang.math.Axis;
+import dev.architectury.networking.NetworkManager;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.renderer.GameRenderer;
@@ -626,17 +626,22 @@ public class QuestPanel extends Panel {
 	}
 
 	@Override
-	public boolean scrollPanel(double scroll) {
+	public boolean scrollPanel(double xDelta, double yDelta) {
 		if (questScreen.selectedChapter != null && !questScreen.isViewingQuest() && isMouseOver()) {
+			var directionlessDelta = yDelta == 0 ? xDelta : yDelta;
+			// Legacy behaviour just zooms regardless of delta or modifier keys
 			if (FTBQuestsClientConfig.OLD_SCROLL_WHEEL.get()) {
-				questScreen.addZoom(scroll);
+				questScreen.addZoom(directionlessDelta);
 			} else {
+				// New behaviour: Shift + scroll = horizontal scroll, Ctrl + scroll = zoom, otherwise normal scroll
 				if (isShiftKeyDown()) {
-					setScrollX(getScrollX() - scroll * 15);
+					setScrollX(getScrollX() - directionlessDelta * 15);
 				} else if (isCtrlKeyDown()) {
-					questScreen.addZoom(scroll);
+					questScreen.addZoom(directionlessDelta);
 				} else {
-					setScrollY(getScrollY() - scroll * 15);
+					// Otherwise, behave like a normal scroll wheel, if a given delta is 0, it'll just not scroll in that direction
+					setScrollX(getScrollX() - xDelta * 15);
+					setScrollY(getScrollY() - yDelta * 15);
 				}
 			}
 			return true;
