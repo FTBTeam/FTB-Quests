@@ -1,11 +1,14 @@
 package dev.ftb.mods.ftbquests.quest;
 
 import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.serialization.Codec;
 import dev.architectury.networking.NetworkManager;
 import dev.ftb.mods.ftblibrary.config.ConfigGroup;
 import dev.ftb.mods.ftblibrary.config.ImageResourceConfig;
+import dev.ftb.mods.ftblibrary.config.NameMap;
 import dev.ftb.mods.ftblibrary.icon.Color4I;
 import dev.ftb.mods.ftblibrary.icon.Icon;
+import dev.ftb.mods.ftblibrary.math.Bits;
 import dev.ftb.mods.ftbquests.net.EditObjectMessage;
 import dev.ftb.mods.ftbquests.util.ConfigQuestObject;
 import dev.ftb.mods.ftbquests.util.NetUtils;
@@ -20,6 +23,7 @@ import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
+import net.minecraft.util.StringRepresentable;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -39,6 +43,12 @@ public final class ChapterImage extends QuestObjectBase implements Movable {
 	private boolean alignToCorner;
 	private Quest dependency;
 	private int order;
+	private boolean positionLocked;
+	private boolean textOnImage;
+	private TextAlign textHorizAlign;
+	private TextAlign textVertAlign;
+	private int textInset;
+	private boolean textShadow;
 
 	public ChapterImage(long id, Chapter chapter) {
 		super(id);
@@ -57,6 +67,12 @@ public final class ChapterImage extends QuestObjectBase implements Movable {
 		alignToCorner = false;
 		dependency = null;
 		order = 0;
+		positionLocked = false;
+		textOnImage = false;
+		textHorizAlign = TextAlign.MIDDLE;
+		textVertAlign = TextAlign.MIDDLE;
+		textInset = 0;
+		textShadow = false;
 	}
 
 	public Icon getImage() {
@@ -121,6 +137,14 @@ public final class ChapterImage extends QuestObjectBase implements Movable {
 		if (editorsOnly) nbt.putBoolean("dev", true);
 		if (alignToCorner) nbt.putBoolean("corner", true);
 		if (dependency != null) nbt.putString("dependency", dependency.getCodeString());
+
+		if (positionLocked) nbt.putBoolean("position_locked", true);
+		if (textOnImage) nbt.putBoolean("text_on_image", true);
+		if (textShadow) nbt.putBoolean("text_shadow", true);
+		if (textInset != 0) nbt.putInt("text_inset", textInset);
+		if (textHorizAlign != TextAlign.NAME_MAP.defaultValue) nbt.putString("text_h_align", textHorizAlign.id);
+		if (textVertAlign != TextAlign.NAME_MAP.defaultValue) nbt.putString("text_v_align", textVertAlign.id);
+
 	}
 
 	@Override
@@ -158,6 +182,13 @@ public final class ChapterImage extends QuestObjectBase implements Movable {
 		alignToCorner = nbt.getBoolean("corner");
 
 		dependency = nbt.contains("dependency") ? chapter.file.getQuest(chapter.file.getID(nbt.get("dependency"))) : null;
+
+		positionLocked = nbt.getBoolean("position_locked");
+		textOnImage = nbt.getBoolean("text_on_image");
+		textShadow = nbt.getBoolean("text_shadow");
+		textInset = nbt.getInt("text_inset");
+		textHorizAlign = TextAlign.NAME_MAP.get(nbt.getString("text_h_align"));
+		textVertAlign = TextAlign.NAME_MAP.get(nbt.getString("text_v_align"));
 	}
 
 	@Override
@@ -174,9 +205,19 @@ public final class ChapterImage extends QuestObjectBase implements Movable {
 		buffer.writeInt(alpha);
 		buffer.writeInt(order);
 		ImageClickAction.STREAM_CODEC.encode(buffer, clickAction);
-		buffer.writeBoolean(editorsOnly);
-		buffer.writeBoolean(alignToCorner);
 		buffer.writeLong(dependency == null ? 0L : dependency.id);
+
+		int flags = 0;
+		flags = Bits.setFlag(flags,0x01, editorsOnly);
+		flags = Bits.setFlag(flags,0x02, alignToCorner);
+		flags = Bits.setFlag(flags,0x04, positionLocked);
+		flags = Bits.setFlag(flags,0x08, textOnImage);
+		flags = Bits.setFlag(flags,0x10, textShadow);
+		buffer.writeByte(flags);
+
+		if (textOnImage) buffer.writeVarInt(textInset);
+		buffer.writeEnum(textHorizAlign);
+		buffer.writeEnum(textVertAlign);
 	}
 
 	@Override
@@ -193,9 +234,18 @@ public final class ChapterImage extends QuestObjectBase implements Movable {
 		alpha = buffer.readInt();
 		order = buffer.readInt();
 		clickAction = ImageClickAction.STREAM_CODEC.decode(buffer);
-		editorsOnly = buffer.readBoolean();
-		alignToCorner = buffer.readBoolean();
 		dependency = chapter.file.getQuest(buffer.readLong());
+
+		int flags = buffer.readByte();
+		editorsOnly = Bits.getFlag(flags, 0x01);
+		alignToCorner = Bits.getFlag(flags, 0x02);
+		positionLocked = Bits.getFlag(flags, 0x04);
+		textOnImage = Bits.getFlag(flags, 0x08);
+		textShadow = Bits.getFlag(flags, 0x10);
+
+		textInset = textOnImage ? buffer.readVarInt() : 0;
+		textHorizAlign = buffer.readEnum(TextAlign.class);
+		textVertAlign = buffer.readEnum(TextAlign.class);
 	}
 
 	@Override
@@ -231,6 +281,14 @@ public final class ChapterImage extends QuestObjectBase implements Movable {
 		config.addString("click_action_data", clickAction.actionData(), v -> clickAction = clickAction.withData(v), "");
 		config.addBool("dev", editorsOnly, v -> editorsOnly = v, false);
 		config.addBool("corner", alignToCorner, v -> alignToCorner = v, false);
+		config.addBool("position_locked", positionLocked, v -> positionLocked = v, false);
+
+		ConfigGroup text = config.getOrCreateSubgroup("text");
+		var editable = text.addBool("text_on_image", textOnImage, v -> textOnImage = v, false);
+		text.addEnum("text_h_align", textHorizAlign, v -> textHorizAlign = v, TextAlign.NAME_MAP).setCanEdit(editable::getValue);
+		text.addEnum("text_v_align", textVertAlign, v -> textVertAlign = v, TextAlign.NAME_MAP).setCanEdit(editable::getValue);
+		text.addBool("text_shadow", textShadow, v -> textShadow = v, false).setCanEdit(editable::getValue);
+		text.addInt("text_inset", textInset, v -> textInset = v, 0, 0, 50).setCanEdit(editable::getValue);
 
 		Predicate<QuestObjectBase> depTypes = object -> object == null || object instanceof Quest;
 		config.add("dependency", new ConfigQuestObject<>(depTypes), dependency, v -> dependency = v, null).setNameKey("ftbquests.dependency");
@@ -311,6 +369,31 @@ public final class ChapterImage extends QuestObjectBase implements Movable {
 	}
 
 	@Override
+	public boolean isPositionLocked() {
+		return positionLocked;
+	}
+
+	public boolean shouldDrawTextOnImage() {
+		return textOnImage;
+	}
+
+	public TextAlign getHorizontalTextAlign() {
+		return textHorizAlign;
+	}
+
+	public TextAlign getVerticalTextAlign() {
+		return textVertAlign;
+	}
+
+	public float getTextInset() {
+		return (float) textInset;
+	}
+
+	public boolean isTextShadow() {
+		return textShadow;
+	}
+
+	@Override
 	@Environment(EnvType.CLIENT)
 	public void drawMoved(GuiGraphics graphics) {
 		PoseStack poseStack = graphics.pose();
@@ -345,5 +428,27 @@ public final class ChapterImage extends QuestObjectBase implements Movable {
 
 	public boolean shouldShowImage(TeamData teamData) {
 		return !editorsOnly && (dependency == null || teamData.isCompleted(dependency));
+	}
+
+	public enum TextAlign implements StringRepresentable {
+		START("start"),
+		MIDDLE("middle"),
+		END("end");
+
+		public static final NameMap<TextAlign> NAME_MAP = NameMap.of(MIDDLE, TextAlign.values())
+				.baseNameKey("ftbquests.image.text_align")
+				.create();
+		public static final Codec<TextAlign> CODEC = StringRepresentable.fromEnum(TextAlign::values);
+
+		private final String id;
+
+		TextAlign(String id) {
+			this.id = id;
+		}
+
+		@Override
+		public String getSerializedName() {
+			return id;
+		}
 	}
 }

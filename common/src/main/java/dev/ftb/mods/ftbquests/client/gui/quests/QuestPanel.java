@@ -356,6 +356,8 @@ public class QuestPanel extends Panel {
 					}
 
 					for (Movable m : questScreen.selectedObjects) {
+						if (m.isPositionLocked()) continue;
+
 						double ox = m.getX() - ominX;
 						double oy = m.getY() - ominY;
 						double sx = (questX + ox - questMinX) / dx * questScreen.scrollWidth + px;
