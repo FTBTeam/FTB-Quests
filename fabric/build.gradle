@@ -62,7 +62,7 @@ shadowJar {
 }
 
 remapJar {
-	input.set shadowJar.archiveFile
+	inputFile.set shadowJar.archiveFile
 	dependsOn shadowJar
 	archiveBaseName.set "${rootProject.archives_base_name}-${project.name}"
 	archiveClassifier.set null

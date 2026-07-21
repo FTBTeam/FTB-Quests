@@ -18,6 +18,7 @@ import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -26,6 +27,10 @@ import java.util.function.BiFunction;
 public class ChapterImageButton extends Button implements QuestPositionableButton {
 	private final QuestScreen questScreen;
 	private final ChapterImage chapterImage;
+
+	@Nullable
+	private List<Component> splitText = null;
+	private float widestText = -1;
 
 	private static final BiFunction<XYPair, Double, XYPair> MEMOIZED_ROTATE = Util.memoize((xy, rotateDeg) -> {
 		// cartesian -> polar, rotate, polar -> cartesian
@@ -103,13 +108,15 @@ public class ChapterImageButton extends Button implements QuestPositionableButto
 			contextMenu.add(new ContextMenuItem(Component.translatable("selectServer.edit"), ThemeProperties.EDIT_ICON.get(),
 					b -> chapterImage.onEditButtonClicked(questScreen, title)));
 
-			contextMenu.add(new ContextMenuItem(Component.translatable("gui.move"), ThemeProperties.MOVE_UP_ICON.get(chapterImage.getChapter()),
-					b -> questScreen.initiateMoving(chapterImage)) {
-				@Override
-				public void addMouseOverText(TooltipList list) {
-					list.add(Component.translatable("ftbquests.gui.move_tooltip").withStyle(ChatFormatting.DARK_GRAY));
-				}
-			});
+			if (!chapterImage.isPositionLocked()) {
+				contextMenu.add(new ContextMenuItem(Component.translatable("gui.move"), ThemeProperties.MOVE_UP_ICON.get(chapterImage.getChapter()),
+						b -> questScreen.initiateMoving(chapterImage)) {
+					@Override
+					public void addMouseOverText(TooltipList list) {
+						list.add(Component.translatable("ftbquests.gui.move_tooltip").withStyle(ChatFormatting.DARK_GRAY));
+					}
+				});
+			}
 
 			contextMenu.add(new ContextMenuItem(Component.translatable("ftbquests.gui.copy_id"), Icons.INFO, b -> chapterImage.copyToClipboard()) {
 				@Override
@@ -143,7 +150,7 @@ public class ChapterImageButton extends Button implements QuestPositionableButto
 				playClickSound();
 				chapterImage.getClickAction().run();
 			}
-		} else if (questScreen.file.canEdit() && button.isMiddle()) {
+		} else if (questScreen.file.canEdit() && button.isMiddle() && !chapterImage.isPositionLocked()) {
 			if (!questScreen.selectedObjects.contains(chapterImage)) {
 				questScreen.toggleSelected(chapterImage);
 			}
@@ -186,29 +193,70 @@ public class ChapterImageButton extends Button implements QuestPositionableButto
 		}
 
 		PoseStack poseStack = graphics.pose();
+
+		float offsetX = chapterImage.isAlignToCorner() ? 0 : w / 2F;
+		float offsetY = chapterImage.isAlignToCorner() ? 0 : h / 2F;
+
 		poseStack.pushPose();
-
-		if (chapterImage.isAlignToCorner()) {
-			poseStack.translate(x, y, 0);
-			poseStack.mulPose(Axis.ZP.rotationDegrees((float) chapterImage.getRotation()));
-			poseStack.scale(w, h, 1);
-			image.draw(graphics, 0, 0, 1, 1);
-			if (questScreen.selectedObjects.contains(moveAndDeleteFocus())) {
-				Color4I col = Color4I.WHITE.withAlpha((int) (128D + Math.sin(System.currentTimeMillis() * 0.003D) * 50D));
-				col.draw(graphics, 0, 0, 1, 1);
-			}
-		} else {
-			poseStack.translate((int) (x + w / 2D), (int) (y + h / 2D), 0);
-			poseStack.mulPose(Axis.ZP.rotationDegrees((float) chapterImage.getRotation()));
-			poseStack.scale(w / 2F, h / 2F, 1);
-			image.draw(graphics, -1, -1, 2, 2);
-			if (questScreen.selectedObjects.contains(moveAndDeleteFocus())) {
-				Color4I col = Color4I.WHITE.withAlpha((int) (128D + Math.sin(System.currentTimeMillis() * 0.003D) * 50D));
-				col.draw(graphics, -1, -1, 2, 2);
-			}
+		poseStack.translate(x + offsetX, y + offsetY, 0);
+		poseStack.mulPose(Axis.ZP.rotationDegrees((float) chapterImage.getRotation()));
+		poseStack.translate(-offsetX, -offsetY, 0);
+		poseStack.scale(w, h, 1);
+		image.draw(graphics, 0, 0, 1, 1);
+		if (questScreen.selectedObjects.contains(moveAndDeleteFocus())) {
+			Color4I col = Color4I.WHITE.withAlpha((int) (128D + Math.sin(System.currentTimeMillis() * 0.003D) * 50D));
+			col.draw(graphics, 0, 0, 1, 1);
 		}
-
+		poseStack.scale(1F / w, 1F / h, 1);
+		maybeRenderText(graphics, theme, w, h);
 		poseStack.popPose();
+	}
+
+	private void maybeRenderText(GuiGraphics graphics, Theme theme, int w, int h) {
+		if (chapterImage.shouldDrawTextOnImage()) {
+			if (splitText == null || widestText < 0) {
+				splitText = new ArrayList<>();
+				TextUtils.processComponentWithPossibleNewlines(chapterImage.getTitle(), splitText::add);
+				for (Component l : splitText) {
+					widestText = Math.max(widestText, theme.getStringWidth(l));
+				}
+			}
+			if (splitText.isEmpty() || widestText == 0f) {
+				return;
+			}
+			float inset = chapterImage.getTextInset() / 100F;
+			int w0 = w, h0 = h;
+			if (inset != 0f) {
+				w = Math.round(w * (1f - inset * 2f));
+				h = Math.round(h * (1f - inset * 2f));
+			}
+
+			float scaleH = w / widestText;
+			float height = theme.getFontHeight() * splitText.size();
+			float scaleV = h / height;
+			float scale = Math.min(scaleH, scaleV);
+
+			float y1 = switch (chapterImage.getVerticalTextAlign()) {
+				case START -> 0;
+				case MIDDLE -> (h - height * scale) / 2;
+				case END -> h - height * scale;
+			};
+			graphics.pose().pushPose();
+			if (inset != 0f) {
+				graphics.pose().translate(w0 * inset, h0 * inset, 0);
+			}
+			graphics.pose().scale(scale, scale, scale);
+			for (Component l : splitText) {
+				float x1 = switch (chapterImage.getHorizontalTextAlign()) {
+					case START -> 0;
+					case MIDDLE -> (w - theme.getStringWidth(l) * scale) / 2;
+					case END -> w - theme.getStringWidth(l) * scale;
+				};
+				theme.drawString(graphics, l, (int) (x1 / scale), (int) (y1 / scale), Color4I.WHITE, chapterImage.isTextShadow() ? Theme.SHADOW : 0);
+				y1 += theme.getFontHeight() * scale;
+			}
+			graphics.pose().popPose();
+		}
 	}
 
 	@Override
