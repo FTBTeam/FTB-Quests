@@ -125,6 +125,7 @@ public final class Quest extends QuestObject implements Movable, Excludable {
 		hideLockIcon = false;
 		maxCompletableDeps = 0;
 		repeatCooldown = 0;
+		presetName = "";
 	}
 
 	@Override
