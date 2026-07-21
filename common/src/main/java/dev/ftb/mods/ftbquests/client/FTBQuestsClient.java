@@ -1,13 +1,5 @@
 package dev.ftb.mods.ftbquests.client;
 
-import com.mojang.blaze3d.platform.InputConstants;
-import dev.architectury.event.events.client.ClientLifecycleEvent;
-import dev.architectury.networking.NetworkManager;
-import dev.architectury.platform.Platform;
-import dev.architectury.registry.ReloadListenerRegistry;
-import dev.architectury.registry.client.keymappings.KeyMappingRegistry;
-import dev.architectury.registry.client.rendering.RenderTypeRegistry;
-import dev.architectury.registry.registries.RegistrarManager;
 import dev.ftb.mods.ftblibrary.FTBLibrary;
 import dev.ftb.mods.ftblibrary.config.EntityFaceConfig;
 import dev.ftb.mods.ftblibrary.config.ImageResourceConfig;
@@ -34,8 +26,13 @@ import dev.ftb.mods.ftbquests.quest.QuestObjectBase;
 import dev.ftb.mods.ftbquests.quest.TeamData;
 import dev.ftb.mods.ftbquests.quest.theme.ThemeLoader;
 import dev.ftb.mods.ftbquests.registry.ModBlocks;
+import dev.architectury.event.events.client.ClientLifecycleEvent;
+import dev.architectury.networking.NetworkManager;
+import dev.architectury.platform.Platform;
+import dev.architectury.registry.ReloadListenerRegistry;
+import dev.architectury.registry.client.rendering.RenderTypeRegistry;
+import dev.architectury.registry.registries.RegistrarManager;
 import net.minecraft.Util;
-import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.ConfirmLinkScreen;
 import net.minecraft.client.gui.screens.Screen;
@@ -69,8 +66,6 @@ import java.util.List;
 import java.util.Optional;
 
 public class FTBQuestsClient {
-	public static KeyMapping KEY_QUESTS;
-
 	public static void init() {
 		maybeMigrateClientConfig();
 
@@ -83,7 +78,7 @@ public class FTBQuestsClient {
 		if (Minecraft.getInstance() != null) {
 			ReloadListenerRegistry.register(PackType.CLIENT_RESOURCES, new QuestFileCacheReloader());
 			ReloadListenerRegistry.register(PackType.CLIENT_RESOURCES, new ThemeLoader());
-			KeyMappingRegistry.register(KEY_QUESTS = new KeyMapping("key.ftbquests.quests", InputConstants.Type.KEYSYM, -1, "key.categories.ftbquests"));
+			FTBQuestsKeyMappings.init();
 		}
 
 		new FTBQuestsClientEventHandler().init();

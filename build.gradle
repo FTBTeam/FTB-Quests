@@ -39,14 +39,13 @@ allprojects {
 	def ENV = System.getenv()
 	version = mod_version
 	group = project.maven_group
+
 	base {
 		archivesName = project.archives_base_name
 	}
 
 	// needs to be done AFTER version is set
 	apply from: "https://raw.githubusercontent.com/FTBTeam/mods-meta/main/gradle/publishing.gradle"
-
-//	sourceCompatibility = targetCompatibility = compileJava.sourceCompatibility = compileJava.targetCompatibility = 21
 
 	compileJava {
 		options.encoding = "UTF-8"
