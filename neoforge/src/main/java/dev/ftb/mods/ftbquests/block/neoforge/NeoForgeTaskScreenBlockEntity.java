@@ -73,10 +73,12 @@ public class NeoForgeTaskScreenBlockEntity extends TaskScreenBlockEntity {
         @NotNull
         @Override
         public ItemStack insertItem(int slot, @NotNull ItemStack stack, boolean simulate) {
-            TeamData data = getCachedTeamData();
-            if (getTask() instanceof ItemTask itemTask && data.canStartTasks(itemTask.getQuest())) {
-                // task.insert() handles testing the item is valid and the task isn't already completed
-                return itemTask.insert(data, stack, simulate);
+            if (slot == 1) {
+                TeamData data = getCachedTeamData();
+                if (getTask() instanceof ItemTask itemTask && data.canStartTasks(itemTask.getQuest())) {
+                    // task.insert() handles testing the item is valid and the task isn't already completed
+                    return itemTask.insert(data, stack, simulate);
+                }
             }
             return stack;
         }
@@ -84,7 +86,7 @@ public class NeoForgeTaskScreenBlockEntity extends TaskScreenBlockEntity {
         @NotNull
         @Override
         public ItemStack extractItem(int slot, int count, boolean simulate) {
-            if (!isInputOnly() && getTask() instanceof ItemTask itemTask && !ItemMatchingSystem.INSTANCE.isItemFilter(itemTask.getItemStack())) {
+            if (slot == 0 && !isInputOnly() && getTask() instanceof ItemTask itemTask && !ItemMatchingSystem.INSTANCE.isItemFilter(itemTask.getItemStack())) {
                 TeamData data = getCachedTeamData();
                 if (data != null && data.canStartTasks(itemTask.getQuest()) && !data.isCompleted(itemTask)) {
                     int itemsRemoved = (int) Math.min(data.getProgress(itemTask), count);
@@ -104,7 +106,7 @@ public class NeoForgeTaskScreenBlockEntity extends TaskScreenBlockEntity {
 
         @Override
         public boolean isItemValid(int slot, @NotNull ItemStack stack) {
-            return getTask() instanceof ItemTask itemTask && itemTask.test(stack);
+            return slot == 1 && getTask() instanceof ItemTask itemTask && itemTask.test(stack);
         }
     }
 
