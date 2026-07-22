@@ -11,7 +11,7 @@ import java.util.List;
 import java.util.function.Consumer;
 
 public class HistoryStack {
-    private static final int MAX_UNDO_SIZE = 20;
+    private static final int MAX_UNDO_SIZE = 100;
 
     private final Deque<QuestBookEditEvent> undoStack = new ArrayDeque<>();
     private final Deque<QuestBookEditEvent> redoStack = new ArrayDeque<>();
