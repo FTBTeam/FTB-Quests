@@ -153,6 +153,7 @@ public class QuestScreen extends BaseScreen {
 	public void onClosed() {
 		file.setPersistedScreenInfo(getPersistedScreenData());
 		PinnedQuestsTracker.INSTANCE.refresh();
+		QuestTheme.currentObject = null;
 
 		super.onClosed();
 	}

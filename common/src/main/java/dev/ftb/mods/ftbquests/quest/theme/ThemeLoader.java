@@ -29,6 +29,8 @@ public class ThemeLoader implements ResourceManagerReloadListener {
 	}
 
 	public static void loadTheme(ResourceManager resourceManager) {
+		QuestTheme.currentObject = null;
+
 		Map<ThemeSelector, SelectorProperties> map = new HashMap<>();
 
 		try {
@@ -81,7 +83,7 @@ public class ThemeLoader implements ResourceManagerReloadListener {
 		list.add("square");
 		list.add("rsquare");
 
-		for (String s : ThemeProperties.EXTRA_QUEST_SHAPES.get().split(",")) {
+		for (String s : theme.get(ThemeProperties.EXTRA_QUEST_SHAPES).split(",")) {
 			list.add(s.trim());
 		}
 

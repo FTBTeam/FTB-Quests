@@ -13,30 +13,6 @@ public class QuestTheme {
 	public static QuestTheme instance;
 	public static QuestObjectBase currentObject;
 
-	private static class QuestObjectPropertyKey {
-		private final String property;
-		private final long object;
-
-		private QuestObjectPropertyKey(String p, long o) {
-			property = p;
-			object = o;
-		}
-
-		@Override
-		public int hashCode() {
-			return Long.hashCode(property.hashCode() * 31L + object);
-		}
-
-		@Override
-		public boolean equals(Object o) {
-			if (o instanceof QuestObjectPropertyKey key) {
-				return object == key.object && property.equals(key.property);
-			}
-
-			return false;
-		}
-	}
-
 	public final List<SelectorProperties> selectors;
 	private final Map<QuestObjectPropertyKey, Object> cache;
 	private final Map<String, Object> defaultCache;
@@ -127,5 +103,8 @@ public class QuestTheme {
 		}
 
 		return original.equals(value) ? value : replaceVariables(value, iteration + 1);
+	}
+
+	private record QuestObjectPropertyKey(String property, long object) {
 	}
 }
