@@ -13,11 +13,17 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class FTBQuestsKeyMappings {
-    private static final String FTB_QUESTS_KEY_CATEGORY = category("keys");
-    public static final KeyMapping KEY_QUESTS
-            = input().createKeyMapping(KeyMappingConfig.builder("quests", FTB_QUESTS_KEY_CATEGORY)
-            .conflictContext(KeyConflict.IN_GAME)
-            .build());
+//    private static final String FTB_QUESTS_KEY_CATEGORY = category("keys");
+
+    // Special case: we're maintaining backwards compatibility here so players' existing key binding
+    //  for the "open quests" key doesn't get unexpectedly reset
+    public static final KeyMapping KEY_QUESTS = input().createKeyMapping(new KeyMappingConfig(
+            "quests", FTBQuestsAPI.MOD_ID,
+            new KeyMappingConfig.TypedKey(InputConstants.Type.KEYSYM, -1),
+            KeyModifier.NONE,
+            null,
+            KeyConflict.IN_GAME
+    ));
 
     private static final String FTB_QUESTS_KEY_CATEGORY_GUI
             = category("gui");

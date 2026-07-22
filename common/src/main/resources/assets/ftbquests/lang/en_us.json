@@ -76,7 +76,7 @@
 	"ftbquests.gui": "FTB Quests (GUI)",
 	"ftbquests.gui_editor": "FTB Quests (GUI Editor Mode)",
 	"ftbquests.gui_quest_panel": "FTB Quests (Quest View Panel)",
-	"key.ftbquests.keys.quests": "Open Quests",
+	"key.ftbquests.quests": "Open Quests",
 	"key.ftbquests.gui.search": "Search",
 	"key.ftbquests.gui.recenter": "Recenter GUI",
 	"key.ftbquests.gui.zoom_in": "Zoom In",
