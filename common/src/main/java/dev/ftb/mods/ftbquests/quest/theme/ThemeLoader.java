@@ -78,18 +78,18 @@ public class ThemeLoader implements ResourceManagerReloadListener {
 			}
 		}
 
-		LinkedHashSet<String> list = new LinkedHashSet<>();
-		list.add("circle");
-		list.add("square");
-		list.add("rsquare");
+		// autodetect available shapes based on existence of "textures/shapes/<shape>/background.png" resources
+		List<String> list = new ArrayList<>();
+		var shapesMap = resourceManager.listResources("textures/shapes",
+				loc -> loc.getPath().endsWith("background.png"));
+		shapesMap.forEach((key, resource) -> {
+			String[] parts = key.getPath().split("/");
+			if (parts.length == 4 && parts[0].equals("textures") && parts[1].equals("shapes") && parts[3].equals("background.png")) {
+				list.add(parts[2]);
+			}
+		});
 
-		for (String s : theme.get(ThemeProperties.EXTRA_QUEST_SHAPES).split(",")) {
-			list.add(s.trim());
-		}
-
-		list.add("none");
-
-		QuestShape.reload(new ArrayList<>(list));
+		QuestShape.reload(list);
 	}
 
 	private static void parse(Map<ThemeSelector, SelectorProperties> selectorPropertyMap, List<String> lines) {
