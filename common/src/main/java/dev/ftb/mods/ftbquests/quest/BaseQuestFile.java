@@ -687,7 +687,11 @@ public abstract class BaseQuestFile extends QuestObject implements QuestFile {
 		for (QuestObjectBase object : questObjectMap.values()) {
 			CompoundTag data = dataCache.get(object.id);
 			if (data != null) {
-				object.readData(data, provider);
+				try {
+					object.readData(data, provider);
+				} catch (Exception ex) {
+					FTBQuests.LOGGER.error("failed to read data for {} {}: {}", object.getClass().getSimpleName(), object.id, ex.getMessage());
+				}
 			}
 		}
 
@@ -1111,14 +1115,26 @@ public abstract class BaseQuestFile extends QuestObject implements QuestFile {
 
 					int taskCount = buffer.readVarInt();
 					for (int k = 0; k < taskCount; k++) {
-						TaskType type = taskTypeIds.get(buffer.readVarInt());
-						quest.addTask(type.createTask(buffer.readLong(), quest));
+						int typeId = buffer.readVarInt();
+						TaskType type = taskTypeIds.get(typeId);
+						long id = buffer.readLong();
+						if (type == null) {
+							throw new IllegalStateException("Received quest sync data for an unrecognized task type (internal id "
+									+ typeId + ") - client and server likely have a mismatched set of mods that register quest task/reward types");
+						}
+						quest.addTask(type.createTask(id, quest));
 					}
 
 					int rewardCount = buffer.readVarInt();
 					for (int k = 0; k < rewardCount; k++) {
-						RewardType type = rewardTypeIds.get(buffer.readVarInt());
-						quest.addReward(type.createReward(buffer.readLong(), quest));
+						int typeId = buffer.readVarInt();
+						RewardType type = rewardTypeIds.get(typeId);
+						long id = buffer.readLong();
+						if (type == null) {
+							throw new IllegalStateException("Received quest sync data for an unrecognized reward type (internal id "
+									+ typeId + ") - client and server likely have a mismatched set of mods that register quest task/reward types");
+						}
+						quest.addReward(type.createReward(id, quest));
 					}
 				}
 
