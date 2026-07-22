@@ -105,8 +105,13 @@ public class ServerQuestFile extends BaseQuestFile {
 			if (Files.exists(folder)) {
 				FTBQuests.LOGGER.info("Loading quests from {}", folder);
 				isLoading = true;
-				readDataFull(folder, server.registryAccess());
-				isLoading = false;
+				try {
+					readDataFull(folder, server.registryAccess());
+				} catch (Exception ex) {
+					FTBQuests.LOGGER.error("failed to load quest data from {}: {}", folder, ex.getMessage(), ex);
+				} finally {
+					isLoading = false;
+				}
 			}
 		}
 
