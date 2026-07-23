@@ -814,7 +814,7 @@ public class QuestPanel extends Panel {
 			if (isEnabled() && dragging) {
 				int newX = getMouseX() - dragOffsetX - QuestPanel.this.getX();
 				int newY = getMouseY() - dragOffsetY - QuestPanel.this.getY();
-				if (BaseScreen.isShiftKeyDown()) {
+				if (!BaseScreen.isShiftKeyDown()) {
 					newX = newX - (newX % 8);
 					newY = newY - (newY % 8);
 				}
