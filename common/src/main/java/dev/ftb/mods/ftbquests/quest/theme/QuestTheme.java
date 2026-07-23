@@ -2,26 +2,53 @@ package dev.ftb.mods.ftbquests.quest.theme;
 
 import dev.ftb.mods.ftbquests.quest.QuestObjectBase;
 import dev.ftb.mods.ftbquests.quest.theme.property.ThemeProperty;
+import dev.ftb.mods.ftbquests.quest.theme.selector.AllSelector;
+import dev.ftb.mods.ftbquests.quest.theme.selector.ThemeSelector;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+
+import static dev.ftb.mods.ftbquests.quest.theme.ThemeLoader.LOGGER;
 
 public class QuestTheme {
-	public static QuestTheme instance;
-	public static QuestObjectBase currentObject;
+	@Nullable
+	private static QuestTheme instance;
+	@Nullable
+	private static QuestObjectBase fallbackQuestObject;
 
-	public final List<SelectorProperties> selectors;
-	private final Map<QuestObjectPropertyKey, Object> cache;
+	// the default all-selector properties
+	private final SelectorProperties defaults;
+	// all selectors other than the default all-selector
+	private final List<SelectorProperties> selectors;
+	// simple prop-name -> value cache
 	private final Map<String, Object> defaultCache;
-	public SelectorProperties defaults;
+	// per-quest-object prop-name -> value cache
+	private final Map<QuestObjectPropertyKey, Object> cache;
 
-	public QuestTheme() {
-		selectors = new ArrayList<>();
+	private QuestTheme(Map<ThemeSelector, SelectorProperties> map) {
 		cache = new HashMap<>();
 		defaultCache = new HashMap<>();
+
+		var def = map.remove(AllSelector.INSTANCE);
+		defaults = Objects.requireNonNullElse(def, new SelectorProperties(AllSelector.INSTANCE));
+
+		selectors = new ArrayList<>(map.values().stream().sorted().toList());
+	}
+
+	static void reload(Map<ThemeSelector, SelectorProperties> map) {
+		instance = new QuestTheme(map);
+		instance.dumpDebugInfo();
+	}
+
+	public static QuestTheme getInstance() {
+		return Objects.requireNonNull(instance);
+	}
+
+	@Nullable
+	public static QuestObjectBase setFallbackQuestObject(@Nullable QuestObjectBase fallbackQuestObject) {
+		QuestObjectBase prev = QuestTheme.fallbackQuestObject;
+		QuestTheme.fallbackQuestObject = fallbackQuestObject;
+		return prev;
 	}
 
 	public void clearCache() {
@@ -52,7 +79,7 @@ public class QuestTheme {
 
 	public <T> T get(ThemeProperty<T> property, @Nullable QuestObjectBase object) {
 		if (object == null) {
-			object = currentObject;
+			object = fallbackQuestObject;
 		}
 
 		if (object == null) {
@@ -103,6 +130,25 @@ public class QuestTheme {
 		}
 
 		return original.equals(value) ? value : replaceVariables(value, iteration + 1);
+	}
+
+	public void dumpDebugInfo() {
+		LOGGER.debug("Theme:");
+		LOGGER.debug("");
+		LOGGER.debug("[*]");
+
+		for (Map.Entry<String, String> entry : defaults.properties.entrySet()) {
+			LOGGER.debug("{}: {}", entry.getKey(), replaceVariables(entry.getValue(), 0));
+		}
+
+		for (SelectorProperties selectorProperties : selectors) {
+			LOGGER.debug("");
+			LOGGER.debug("[{}]", selectorProperties.selector);
+
+			for (Map.Entry<String, String> entry : selectorProperties.properties.entrySet()) {
+				LOGGER.debug("{}: {}", entry.getKey(), replaceVariables(entry.getValue(), 0));
+			}
+		}
 	}
 
 	private record QuestObjectPropertyKey(String property, long object) {

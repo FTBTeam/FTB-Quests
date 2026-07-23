@@ -144,8 +144,7 @@ public class ViewQuestPanel extends ModalPanel {
 			return;
 		}
 
-		QuestObjectBase prev = QuestTheme.currentObject;
-		QuestTheme.currentObject = quest;
+		QuestObjectBase prev = QuestTheme.setFallbackQuestObject(quest);
 
 		setScrollX(0);
 		setScrollY(0);
@@ -397,7 +396,7 @@ public class ViewQuestPanel extends ModalPanel {
 		setPos((parent.width - width) / 2, (parent.height - height) / 2);
 		panelContent.setHeight(height - 17);
 
-		QuestTheme.currentObject = prev;
+		QuestTheme.setFallbackQuestObject(prev);
 	}
 
 	private void addDescriptionText(boolean canEdit, Component subtitle) {
@@ -805,10 +804,9 @@ public class ViewQuestPanel extends ModalPanel {
 	@Override
 	public void draw(GuiGraphics graphics, Theme theme, int x, int y, int w, int h) {
 		if (quest != null) {
-			QuestObjectBase prev = QuestTheme.currentObject;
-			QuestTheme.currentObject = quest;
+			QuestObjectBase prev = QuestTheme.setFallbackQuestObject(quest);
 			super.draw(graphics, theme, x, y, w, h);
-			QuestTheme.currentObject = prev;
+			QuestTheme.setFallbackQuestObject(prev);
 		}
 	}
 

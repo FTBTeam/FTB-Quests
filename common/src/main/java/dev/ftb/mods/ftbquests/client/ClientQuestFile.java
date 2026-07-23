@@ -171,7 +171,7 @@ public class ClientQuestFile extends BaseQuestFile {
 	public void clearCachedData() {
 		super.clearCachedData();
 
-		QuestTheme.instance.clearCache();
+		QuestTheme.getInstance().clearCache();
 	}
 
 	@Override

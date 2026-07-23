@@ -127,7 +127,7 @@ public class QuestScreen extends BaseScreen {
 
 	@Override
 	public void addWidgets() {
-		QuestTheme.currentObject = selectedChapter;
+		QuestTheme.setFallbackQuestObject(selectedChapter);
 		add(questPanel);
 		add(chapterPanel);
 		add(expandChaptersButton);
@@ -137,7 +137,7 @@ public class QuestScreen extends BaseScreen {
 
 	@Override
 	public void alignWidgets() {
-		QuestTheme.currentObject = selectedChapter;
+		QuestTheme.setFallbackQuestObject(selectedChapter);
 		otherButtonsBottomPanel.alignWidgets();
 		otherButtonsTopPanel.alignWidgets();
 		chapterPanel.alignWidgets();
@@ -153,7 +153,7 @@ public class QuestScreen extends BaseScreen {
 	public void onClosed() {
 		file.setPersistedScreenInfo(getPersistedScreenData());
 		PinnedQuestsTracker.INSTANCE.refresh();
-		QuestTheme.currentObject = null;
+		QuestTheme.setFallbackQuestObject(null);
 
 		super.onClosed();
 	}
@@ -741,7 +741,7 @@ public class QuestScreen extends BaseScreen {
 
 	@Override
 	public void drawBackground(GuiGraphics graphics, Theme theme, int x, int y, int w, int h) {
-		QuestTheme.currentObject = selectedChapter;
+		QuestTheme.setFallbackQuestObject(selectedChapter);
 		super.drawBackground(graphics, theme, x, y, w, h);
 
 		int pw = 20;
