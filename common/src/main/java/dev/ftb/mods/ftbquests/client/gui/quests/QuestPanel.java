@@ -426,8 +426,9 @@ public class QuestPanel extends Panel {
 
 		int statusX = questScreen.chapterPanel.expanded ? questScreen.chapterPanel.width : questScreen.expandChaptersButton.width;
 		int statusWidth = questScreen.chapterPanel.expanded ? width - statusX + questScreen.expandChaptersButton.width : width;
-		Color4I statPanelBg = ThemeProperties.WIDGET_BACKGROUND.get();
-		Color4I.DARK_GRAY.draw(graphics, statusX, height - 9, statusWidth, 1);
+		Color4I statPanelBorder = ThemeProperties.WIDGET_BORDER.get(questScreen.selectedChapter);
+		statPanelBorder.draw(graphics, statusX, height - 9, statusWidth, 1);
+		Color4I statPanelBg = ThemeProperties.WIDGET_BACKGROUND.get(questScreen.selectedChapter);
 		statPanelBg.draw(graphics, statusX, height - 9, statusWidth, 10);
 
 		poseStack.translate(statusX, height - 6, QuestScreen.Z_LEVEL);
