@@ -7,6 +7,9 @@ import dev.ftb.mods.ftbquests.quest.theme.selector.ThemeSelector;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
+import java.util.function.Consumer;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import static dev.ftb.mods.ftbquests.quest.theme.ThemeLoader.LOGGER;
 
@@ -24,6 +27,10 @@ public class QuestTheme {
 	private final Map<String, Object> defaultCache;
 	// per-quest-object prop-name -> value cache
 	private final Map<QuestObjectPropertyKey, Object> cache;
+	// known replacements (i.e. strings within "{{...}}" sequences in property values)
+	private final Set<String> knownReplacements;
+
+	private static final Pattern REPLACEMENT_PAT = Pattern.compile("\\{\\{(\\w+)}}");
 
 	private QuestTheme(Map<ThemeSelector, SelectorProperties> map) {
 		cache = new HashMap<>();
@@ -33,6 +40,19 @@ public class QuestTheme {
 		defaults = Objects.requireNonNullElse(def, new SelectorProperties(AllSelector.INSTANCE));
 
 		selectors = new ArrayList<>(map.values().stream().sorted().toList());
+
+		knownReplacements = new HashSet<>();
+		findReplacements(defaults, knownReplacements::add);
+		selectors.forEach(s -> findReplacements(s, knownReplacements::add));
+	}
+
+	private static void findReplacements(SelectorProperties properties, Consumer<String> rep) {
+		properties.properties.values().forEach(val -> {
+			Matcher matcher = REPLACEMENT_PAT.matcher(val);
+			while (matcher.find()) {
+				rep.accept(matcher.group(1));
+			}
+		});
 	}
 
 	static void reload(Map<ThemeSelector, SelectorProperties> map) {
@@ -66,7 +86,7 @@ public class QuestTheme {
 		String value = defaults.properties.get(property.getName());
 
 		if (value != null) {
-			cachedValue = property.parse(replaceVariables(value, 0));
+			cachedValue = property.parse(replaceVariables(defaults, value));
 
 			if (cachedValue != null) {
 				defaultCache.put(property.getName(), cachedValue);
@@ -101,7 +121,7 @@ public class QuestTheme {
 					String value = selectorProperties.properties.get(property.getName());
 
 					if (value != null) {
-						cachedValue = property.parse(replaceVariables(value, 0));
+						cachedValue = property.parse(replaceVariables(selectorProperties, value));
 
 						if (cachedValue != null) {
 							cache.put(key, cachedValue);
@@ -118,18 +138,16 @@ public class QuestTheme {
 		return get(property);
 	}
 
-	public String replaceVariables(String value, int iteration) {
-		if (iteration >= 30) {
-			return value;
+	public String replaceVariables(SelectorProperties selectorProperties, String value) {
+		int iter = 0;
+		while (iter++ < 30 && value.contains("{{") && value.contains("}}")) {
+			for (String k : knownReplacements) {
+				String replaced = Objects.requireNonNullElseGet(selectorProperties.properties.get(k), () -> defaults.properties.get(k));
+				value = value.replace("{{" + k + "}}", replaced);
+			}
 		}
 
-		String original = value;
-
-		for (String k : defaults.properties.keySet()) {
-			value = value.replace("{{" + k + "}}", defaults.properties.get(k));
-		}
-
-		return original.equals(value) ? value : replaceVariables(value, iteration + 1);
+		return value;
 	}
 
 	public void dumpDebugInfo() {
@@ -138,7 +156,7 @@ public class QuestTheme {
 		LOGGER.debug("[*]");
 
 		for (Map.Entry<String, String> entry : defaults.properties.entrySet()) {
-			LOGGER.debug("{}: {}", entry.getKey(), replaceVariables(entry.getValue(), 0));
+			LOGGER.debug("{}: {}", entry.getKey(), replaceVariables(defaults, entry.getValue()));
 		}
 
 		for (SelectorProperties selectorProperties : selectors) {
@@ -146,7 +164,7 @@ public class QuestTheme {
 			LOGGER.debug("[{}]", selectorProperties.selector);
 
 			for (Map.Entry<String, String> entry : selectorProperties.properties.entrySet()) {
-				LOGGER.debug("{}: {}", entry.getKey(), replaceVariables(entry.getValue(), 0));
+				LOGGER.debug("{}: {}", entry.getKey(), replaceVariables(selectorProperties, entry.getValue()));
 			}
 		}
 	}
