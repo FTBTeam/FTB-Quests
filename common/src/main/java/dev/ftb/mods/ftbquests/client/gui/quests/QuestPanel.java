@@ -778,13 +778,18 @@ public class QuestPanel extends Panel {
         }
 
 		@Override
+		public boolean checkMouseOver(int mouseX, int mouseY) {
+			return super.checkMouseOver(mouseX + width / 2, mouseY + width / 2);
+		}
+
+		@Override
 		public void drawBackground(GuiGraphics graphics, Theme theme, int x, int y, int w, int h) {
 		}
 
 		@Override
 		public void draw(GuiGraphics graphics, Theme theme, int x, int y, int w, int h) {
-			int x0 = getX() + getWidth() / 2;
-			int y0 = getY() + getHeight() / 2;
+			int x0 = getX();// + getWidth() / 2;
+			int y0 = getY();// + getHeight() / 2;
 
 			int x1 = questButtonSupplier.get().getX() + questButtonSupplier.get().getWidth() / 2;
 			int y1 = questButtonSupplier.get().getY() + questButtonSupplier.get().getHeight() / 2;
@@ -800,14 +805,20 @@ public class QuestPanel extends Panel {
 
 			graphics.pose().pushPose();
 			graphics.pose().translate(0, 0, QuestScreen.Z_LEVEL);
-			super.draw(graphics, theme, x, y, w, h);
+			super.draw(graphics, theme, x - w / 2, y - w / 2, w, h);
 			graphics.pose().popPose();
 		}
 
 		@Override
 		public boolean mouseDragged(int button, double dragX, double dragY) {
 			if (isEnabled() && dragging) {
-				setPos(getMouseX() - dragOffsetX - QuestPanel.this.getX(), getMouseY() - dragOffsetY - QuestPanel.this.getY());
+				int newX = getMouseX() - dragOffsetX - QuestPanel.this.getX();
+				int newY = getMouseY() - dragOffsetY - QuestPanel.this.getY();
+				if (BaseScreen.isShiftKeyDown()) {
+					newX = newX - (newX % 8);
+					newY = newY - (newY % 8);
+				}
+				setPos(newX, newY);
 				controller.updateQuestButton(index);
 				return true;
 			} else {
