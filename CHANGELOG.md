@@ -15,7 +15,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   * Fabric version of the mod has optional (but recommended) dependency on the Amecs mod to support modifier keys
 * Quest connection lines can now be Bézier curves
   * To edit curves, right client on the quest the connection points to and select "Edit Bézier Curves", then drag the control points
-* Added undo & redo functionality for all changes to the quest book
+* Added undo & redo functionality (up to 100 levels) for all changes to the quest book
   * New buttons on the lower right toolbar allow for undo/redo of the last 100 changes
   * Also added default keymappings of Ctrl-Z (undo) and Ctrl-Y (redo)
 * Added a visual preset system, encapsulating size & shape for quests on-screen, intended to make a common look & feel across the quest book easier
@@ -35,7 +35,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   * Checks the JEI keymapping in case you've changed it from the default 'A'
 
 ### Changed
-* `ftb_quests_theme.txt` no longer require the "extra_quest_shapes" property; all quest shapes are autodetected from available resourcepacks
+* `ftb_quests_theme.txt` no longer uses or requires the "extra_quest_shapes" property; all quest shapes are autodetected from available resourcepacks
   * Any resourcepack folder of path `quests/shapes/<shapename>` containing a `background.png` file is considered to be a shape
 
 ### Fixed
