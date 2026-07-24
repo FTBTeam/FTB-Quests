@@ -1,5 +1,6 @@
 package dev.ftb.mods.ftbquests.quest.theme;
 
+import dev.architectury.platform.Platform;
 import dev.ftb.mods.ftbquests.api.FTBQuestsAPI;
 import dev.ftb.mods.ftbquests.quest.QuestShape;
 import dev.ftb.mods.ftbquests.quest.theme.selector.*;
@@ -12,10 +13,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import java.util.function.Predicate;
 import java.util.regex.Pattern;
 
 public class ThemeLoader implements ResourceManagerReloadListener {
@@ -23,6 +22,10 @@ public class ThemeLoader implements ResourceManagerReloadListener {
 
 	static final Logger LOGGER = LoggerFactory.getLogger(ThemeLoader.class);
 	private static final Pattern WHITESPACE_PAT = Pattern.compile("\\s");
+
+	private static final Predicate<String> FROM_FTB_QUESTS = Platform.isDevelopmentEnvironment() ?
+			s -> s.startsWith("mod/generated_") :
+			s -> s.equals("mod/" + FTBQuestsAPI.MOD_ID);
 
 	@Override
 	public void onResourceManagerReload(ResourceManager resourceManager) {
@@ -36,11 +39,12 @@ public class ThemeLoader implements ResourceManagerReloadListener {
 
 		try {
 			ResourceLocation rl = FTBQuestsAPI.rl(THEME_TXT);
-			for (Resource resource : resourceManager.getResourceStack(rl)) {
+			var resources = resourceManager.getResourceStack(rl).stream().sorted(ThemeLoader::resourceSorter).toList();
+			for (Resource resource : resources) {
 				try (InputStream in = resource.open()) {
 					parse(map, FileUtils.read(in));
 				} catch (Exception ex) {
-                    LOGGER.error("Failed to load FTB Quests theme file from {}", rl, ex);
+					LOGGER.error("Failed to load FTB Quests theme file from {}", rl, ex);
 				}
 			}
 		} catch (Exception ex) {
@@ -54,6 +58,18 @@ public class ThemeLoader implements ResourceManagerReloadListener {
 		QuestTheme.reload(map);
 
 		QuestShape.reload(findShapes(resourceManager));
+	}
+
+	private static int resourceSorter(Resource r1, Resource r2) {
+		// need to ensure that "mod/ftbquests" ALWAYS comes first; everything else keeps its
+		// existing relative order (mods before file resource packs), courtesy of stream.sorted()
+		// being a stable sort - in dev, we are known as "mod/generated_XXXXXX"
+		boolean m1 = FROM_FTB_QUESTS.test(r1.sourcePackId());
+		boolean m2 = FROM_FTB_QUESTS.test(r2.sourcePackId());
+		if (m1 == m2) {
+			return 0;
+		}
+		return m1 ? -1 : 1;
 	}
 
 	private static void parse(Map<ThemeSelector, SelectorProperties> selectorPropertyMap, List<String> lines) {
