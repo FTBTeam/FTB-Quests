@@ -634,8 +634,8 @@ public final class Quest extends QuestObject implements Movable, Excludable {
 		EditableConfigGroup visibility = config.getOrCreateSubgroup("visibility");
 		visibility.addTristate("hide_until_deps_complete", hideUntilDepsComplete, v -> hideUntilDepsComplete = v);
 		visibility.addTristate("hide_until_deps_visible", hideUntilDepsVisible, v -> hideUntilDepsVisible = v);
-		visibility.addBool("invisible", invisibleUntilCompleted, v -> invisibleUntilCompleted = v, false);
-		visibility.addInt("invisible_until_tasks", invisibleUntilTasks, v -> invisibleUntilTasks = v, 0, 0, Integer.MAX_VALUE).setCanEdit(invisibleUntilCompleted);
+		var editableIUC =visibility.addBool("invisible", invisibleUntilCompleted, v -> invisibleUntilCompleted = v, false);
+		visibility.addInt("invisible_until_tasks", invisibleUntilTasks, v -> invisibleUntilTasks = v, 0, 0, Integer.MAX_VALUE).setCanEdit(editableIUC.getValue());
 		visibility.addTristate("hide_details_until_startable", hideDetailsUntilStartable, v -> hideDetailsUntilStartable = v);
 		visibility.addTristate("hide_text_until_complete", hideTextUntilComplete, v -> hideTextUntilComplete = v);
 		visibility.addBool("hide_lock_icon", hideLockIcon, v -> hideLockIcon = v, false);
