@@ -1,6 +1,7 @@
 package dev.ftb.mods.ftbquests.client.gui.quests;
 
 import dev.ftb.mods.ftblibrary.client.gui.WidgetType;
+import dev.ftb.mods.ftblibrary.client.gui.input.Key;
 import dev.ftb.mods.ftblibrary.client.gui.input.MouseButton;
 import dev.ftb.mods.ftblibrary.client.gui.screens.AbstractButtonListScreen;
 import dev.ftb.mods.ftblibrary.client.gui.theme.Theme;
@@ -15,6 +16,7 @@ import dev.ftb.mods.ftblibrary.icon.Icons;
 import dev.ftb.mods.ftblibrary.icon.ItemIcon;
 import dev.ftb.mods.ftblibrary.platform.network.Play2ServerNetworking;
 import dev.ftb.mods.ftblibrary.util.TooltipList;
+import dev.ftb.mods.ftbquests.FTBQuests;
 import dev.ftb.mods.ftbquests.api.ItemFilterAdapter;
 import dev.ftb.mods.ftbquests.client.FTBQuestsClient;
 import dev.ftb.mods.ftbquests.client.gui.ContextMenuBuilder;
@@ -50,6 +52,12 @@ public class TaskButton extends Button {
 		super(panel, task.getTitle(), Icons.ACCEPT);
 		questScreen = (QuestScreen) panel.getGui();
 		this.task = task;
+	}
+
+	@Override
+	public boolean keyPressed(Key key) {
+		return FTBQuests.getRecipeModHelper().tryToggleBookmark(this, key, task.getIcon().getIngredient())
+				|| super.keyPressed(key);
 	}
 
 	@Override

@@ -195,11 +195,15 @@ public class FTBQuestsClient {
 	}
 
 	public static void showErrorToast(Component text, Component desc) {
-		Minecraft.getInstance().getToastManager().addToast(new CustomToast(text, Icons.BARRIER, desc));
+		showInfoToast(text, Icons.BARRIER, desc);
 	}
 
 	public static void showInfoToast(Component text, Component desc) {
-		Minecraft.getInstance().getToastManager().addToast(new CustomToast(text, Icons.INFO, desc));
+		showInfoToast(text, Icons.INFO, desc);
+	}
+
+	public static void showInfoToast(Component text, Icon<?> icon, Component desc) {
+		Minecraft.getInstance().getToastManager().addToast(new CustomToast(text, icon, desc));
 	}
 
 	public static void openUri(String uriStr) {

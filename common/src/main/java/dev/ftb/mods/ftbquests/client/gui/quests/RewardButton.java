@@ -2,6 +2,7 @@ package dev.ftb.mods.ftbquests.client.gui.quests;
 
 import dev.ftb.mods.ftblibrary.client.gui.GuiHelper;
 import dev.ftb.mods.ftblibrary.client.gui.WidgetType;
+import dev.ftb.mods.ftblibrary.client.gui.input.Key;
 import dev.ftb.mods.ftblibrary.client.gui.input.MouseButton;
 import dev.ftb.mods.ftblibrary.client.gui.theme.Theme;
 import dev.ftb.mods.ftblibrary.client.gui.widget.Button;
@@ -14,6 +15,7 @@ import dev.ftb.mods.ftblibrary.icon.Color4I;
 import dev.ftb.mods.ftblibrary.icon.Icons;
 import dev.ftb.mods.ftblibrary.platform.network.Play2ServerNetworking;
 import dev.ftb.mods.ftblibrary.util.TooltipList;
+import dev.ftb.mods.ftbquests.FTBQuests;
 import dev.ftb.mods.ftbquests.client.ClientQuestFile;
 import dev.ftb.mods.ftbquests.client.gui.ContextMenuBuilder;
 import dev.ftb.mods.ftbquests.net.ReorderItemMessage;
@@ -87,6 +89,12 @@ public class RewardButton extends Button {
 		} else {
 			reward.addMouseOverText(list);
 		}
+	}
+
+	@Override
+	public boolean keyPressed(Key key) {
+		return FTBQuests.getRecipeModHelper().tryToggleBookmark(this, key, reward.getIcon().getIngredient())
+				|| super.keyPressed(key);
 	}
 
 	@Override
