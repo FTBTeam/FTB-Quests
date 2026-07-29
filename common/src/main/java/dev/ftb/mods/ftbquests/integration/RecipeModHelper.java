@@ -15,19 +15,29 @@ import org.jspecify.annotations.Nullable;
 import java.util.Collection;
 
 public interface RecipeModHelper {
-    void refreshAll(Components component);
+    RecipeModHelper NONE = new NoOp();
 
-    void refreshRecipes(QuestObjectBase object);
+    String getHelperName();
 
-    void showRecipes(ItemStack object);
+    default void refreshAll(Components component) {
+    }
 
-    void showRecipes(FluidStack fluid);
+    default void refreshRecipes(QuestObjectBase object) {
+    }
+
+    default void showRecipes(ItemStack object) {
+    }
+
+    default void showRecipes(FluidStack fluid) {
+    }
 
     default boolean isRecipeModAvailable() {
         return false;
     }
 
-    Tristate toggleBookmark(ItemStack stack);
+    default Tristate toggleBookmark(ItemStack stack) {
+        return Tristate.DEFAULT;
+    }
 
     /**
      * For supporting dynamic addition & removal of loot crates at runtime, based on reward table settings
@@ -37,9 +47,9 @@ public interface RecipeModHelper {
     default void updateItemsDynamic(Collection<ItemStack> toRemove, Collection<ItemStack> toAdd) {
     }
 
-    boolean isBookmarkKey(Key key);
-
-    String getHelperName();
+    default boolean isBookmarkKey(Key key) {
+        return false;
+    }
 
     @ApiStatus.NonExtendable
     default boolean tryToggleBookmark(Button button, Key key, @Nullable Object ingredient) {
@@ -61,34 +71,8 @@ public interface RecipeModHelper {
 
     class NoOp implements RecipeModHelper {
         @Override
-        public void refreshAll(Components component) {
-        }
-
-        @Override
-        public void refreshRecipes(QuestObjectBase object) {
-        }
-
-        @Override
-        public void showRecipes(ItemStack object) {
-        }
-
-        @Override
-        public void showRecipes(FluidStack fluid) {
-        }
-
-        @Override
-        public Tristate toggleBookmark(ItemStack stack) {
-            return Tristate.DEFAULT;
-        }
-
-        @Override
-        public boolean isBookmarkKey(Key key) {
-            return false;
-        }
-
-        @Override
         public String getHelperName() {
-            return "NO-OP";
+            return "<NONE>";
         }
     }
 }
