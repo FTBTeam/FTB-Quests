@@ -830,21 +830,21 @@ public class ViewQuestPanel extends ModalPanel {
 	}
 
 	@Override
-	public boolean mouseScrolled(double scroll) {
+	public boolean mouseScrolled(double mouseX, double mouseY, double xDelta, double yDelta) {
 		long now = System.currentTimeMillis();
 
-		if (super.mouseScrolled(scroll)) {
+		if (super.mouseScrolled(mouseX, mouseY, xDelta, yDelta)) {
 			lastScrollTime = now;
 			return true;
 		}
 
 		if (now - lastScrollTime > 500L) {
-			if (scroll < 0 && getCurrentPage() < pageIndices.size() - 1) {
+			if (yDelta < 0 && getCurrentPage() < pageIndices.size() - 1) {
 				setCurrentPage(getCurrentPage() + 1);
 				refreshWidgets();
 				lastScrollTime = now;
 				return true;
-			} else if (scroll > 0 && getCurrentPage() > 0) {
+			} else if (yDelta > 0 && getCurrentPage() > 0) {
 				setCurrentPage(getCurrentPage() - 1);
 				refreshWidgets();
 				lastScrollTime = now;

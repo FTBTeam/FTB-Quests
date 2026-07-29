@@ -152,6 +152,7 @@ public class FTBQuestsKeyMappings {
         return input().createKeyMapping(KeyMappingConfig.builder(name, category)
                 .keyboard(keyCode)
                 .modifier(modifier)
+                .conflictContext(KeyConflict.ANY_GUI)
                 .build());
     }
 

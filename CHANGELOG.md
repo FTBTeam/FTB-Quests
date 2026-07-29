@@ -4,6 +4,11 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2101.1.29]
+
+### Fixed
+* Fixed issue with last update which caused a GUI keymapping context conflict
+
 ## [2101.1.28]
 
 ### Added
@@ -31,8 +36,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 * Added support for simultaneous X/Y scrolling, e.g. with trackpad
 * Added "Suppress all Reward Autoclaiming" boolean to the top-level quest book
   * Intended for use during pack testing to ensure testers pay attention...
-* Pressing 'A' on items in task and reward buttons in the quest view panel now bookmarks them in JEI
-  * Checks the JEI keymapping in case you've changed it from the default 'A'
 
 ### Changed
 * `ftb_quests_theme.txt` no longer uses or requires the "extra_quest_shapes" property; all quest shapes are autodetected from available resourcepacks
