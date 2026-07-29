@@ -4,6 +4,41 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [26.1.2.3]
+
+* JEI bookmarking support for Task & Reward buttons and valid items screen in FTB Quests
+  * Press 'A' (or whatever your keybinding for JEI bookmarking is) to toggle bookmarking for items for within FTB Quests
+  * FTB XMod Compat 2101.1.9+ is also required
+* Quest connection lines can now be Bézier curves
+  * To edit curves, right-click on the quest the connection points to and select "Edit Bézier Curves", then drag the control points
+  * Hold Shift while dragging control points for fine adjust
+* Added undo & redo functionality (up to 100 levels) for all changes to the quest book
+  * New buttons on the lower right toolbar allow for undo/redo of the last 100 changes
+  * Also added default keymappings of Ctrl-Z (undo) and Ctrl-Y (redo)
+* Added a visual preset system, encapsulating size & shape for quests on-screen, intended to make a common look & feel across the quest book easier
+  * Quests have a "Visual Preset" property, defaulting to empty; there are also defaults in chapter and the top-level quest book
+  * When non-empty, this overrides the default "Size" and "Shape" properties of the quest
+  * Three default presets included: "normal", "goal", "info" (as well as empty/none)
+  * Visual Presets can be added/edited/removed via "Visual Presets" property in the top-level quest book
+* Chapter Images have been significantly improved
+  * Added "Lock Position" boolean property - when locked, images can't accidentally be moved (useful if overlapping with quests, for example)
+  * Added "Text on Image" boolean property along with some related properties - when true, title text is drawn directly on screen instead of being a tooltip
+  * Click actions have been overhauled; "Click" field is replaced with separate "Click Action" and "Click Action Data" fields
+* Added support for simultaneous X/Y scrolling, e.g. with trackpad
+* Added "Suppress all Reward Autoclaiming" boolean to the top-level quest book
+  * Intended for use during pack testing to ensure testers pay attention...
+
+### Changed
+* `ftb_quests_theme.txt` no longer uses or requires the "extra_quest_shapes" property; all quest shapes are autodetected from available resourcepacks
+  * Any resourcepack folder of path `quests/shapes/<shapename>` containing a `background.png` file is considered to be a shape
+
+### Fixed
+* Added missing key reference for `F5` and `Shift + F5` hotkeys for quest theme reloading in editor mode
+* Fixed issues with theme settings for default section not always getting picked on startup
+* Fixed item dupe issue with Task Screens and some higher-speed modded piping systems
+* Clicking fluids in a fluid task now shows the recipes (if any) for that fluid in JEI/REI
+  * FTB XMod Compat 26.1.2.3+ required
+
 ## [26.1.2.2]
 
 ### Fixed
