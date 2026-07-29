@@ -7,10 +7,7 @@ import dev.ftb.mods.ftblibrary.client.gui.GuiHelper;
 import dev.ftb.mods.ftblibrary.client.gui.input.Key;
 import dev.ftb.mods.ftblibrary.client.gui.input.MouseButton;
 import dev.ftb.mods.ftblibrary.client.gui.theme.Theme;
-import dev.ftb.mods.ftblibrary.client.gui.widget.Button;
-import dev.ftb.mods.ftblibrary.client.gui.widget.ContextMenuItem;
-import dev.ftb.mods.ftblibrary.client.gui.widget.Panel;
-import dev.ftb.mods.ftblibrary.client.gui.widget.Widget;
+import dev.ftb.mods.ftblibrary.client.gui.widget.*;
 import dev.ftb.mods.ftblibrary.client.icon.IconHelper;
 import dev.ftb.mods.ftblibrary.icon.Color4I;
 import dev.ftb.mods.ftblibrary.icon.Icon;
@@ -774,13 +771,18 @@ public class QuestPanel extends Panel {
 		}
 
 		@Override
+		public boolean checkMouseOver(int mouseX, int mouseY) {
+			return super.checkMouseOver(mouseX + width / 2, mouseY + width / 2);
+		}
+
+		@Override
 		public void drawBackground(GuiGraphicsExtractor graphics, Theme theme, int x, int y, int w, int h) {
 		}
 
 		@Override
 		public void draw(GuiGraphicsExtractor graphics, Theme theme, int x, int y, int w, int h) {
-			int x0 = getX() + getWidth() / 2;
-			int y0 = getY() + getHeight() / 2;
+			int x0 = getX();
+			int y0 = getY();
 
 			int x1 = questButtonSupplier.get().getX() + questButtonSupplier.get().getWidth() / 2;
 			int y1 = questButtonSupplier.get().getY() + questButtonSupplier.get().getHeight() / 2;
@@ -794,13 +796,19 @@ public class QuestPanel extends Panel {
 			graphics.horizontalLine(0, (int) len, 0, 0x40A0A0FF);
 			graphics.pose().popMatrix();
 
-			super.draw(graphics, theme, x, y, w, h);
+			super.draw(graphics, theme, x - w / 2, y - w / 2, w, h);
 		}
 
 		@Override
 		public boolean mouseDragged(int button, double dragX, double dragY) {
 			if (isEnabled() && dragging) {
-				setPos(getMouseX() - dragOffsetX - QuestPanel.this.getX(), getMouseY() - dragOffsetY - QuestPanel.this.getY());
+				int newX = getMouseX() - dragOffsetX - QuestPanel.this.getX();
+				int newY = getMouseY() - dragOffsetY - QuestPanel.this.getY();
+				if (!BaseScreen.isShiftKeyDown()) {
+					newX = newX - (newX % 8);
+					newY = newY - (newY % 8);
+				}
+				setPos(newX, newY);
 				controller.updateQuestButton(index);
 				return true;
 			} else {
