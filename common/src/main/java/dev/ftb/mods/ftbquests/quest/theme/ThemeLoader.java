@@ -33,6 +33,8 @@ public class ThemeLoader implements ResourceManagerReloadListener {
 	}
 
 	public static void loadTheme(ResourceManager resourceManager) {
+		QuestTheme.setFallbackQuestObject(null);
+
 		Map<ThemeSelector, SelectorProperties> map = new LinkedHashMap<>();
 
 		try {
