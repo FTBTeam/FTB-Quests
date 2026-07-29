@@ -628,17 +628,22 @@ public class QuestPanel extends Panel {
 	}
 
 	@Override
-	public boolean scrollPanel(double scroll) {
+	public boolean scrollPanel(double xDelta, double yDelta) {
 		if (questScreen.selectedChapter != null && !questScreen.isViewingQuest() && isMouseOver()) {
+			var directionlessDelta = yDelta == 0 ? xDelta : yDelta;
+			// Legacy behaviour just zooms regardless of delta or modifier keys
 			if (FTBQuestsClientConfig.OLD_SCROLL_WHEEL.get()) {
-				questScreen.addZoom(scroll);
+				questScreen.addZoom(directionlessDelta);
 			} else {
+				// New behaviour: Shift + scroll = horizontal scroll, Ctrl + scroll = zoom, otherwise normal scroll
 				if (isShiftKeyDown()) {
-					setScrollX(getScrollX() - scroll * 15);
+					setScrollX(getScrollX() - directionlessDelta * 15);
 				} else if (isCtrlKeyDown()) {
-					questScreen.addZoom(scroll);
+					questScreen.addZoom(directionlessDelta);
 				} else {
-					setScrollY(getScrollY() - scroll * 15);
+					// Otherwise, behave like a normal scroll wheel, if a given delta is 0, it'll just not scroll in that direction
+					setScrollX(getScrollX() - xDelta * 15);
+					setScrollY(getScrollY() - yDelta * 15);
 				}
 			}
 			return true;
