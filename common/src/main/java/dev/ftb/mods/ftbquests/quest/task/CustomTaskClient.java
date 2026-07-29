@@ -9,13 +9,11 @@ public enum CustomTaskClient implements TaskClient {
 
     @Override
     public void onButtonClicked(Task task, Button button, boolean canClick) {
-        if (!(task instanceof CustomTask customTask)) {
-            return;
-        }
-
-        if (customTask.enableButton() && canClick) {
-            button.playClickSound();
-            Play2ServerNetworking.send(new SubmitTaskMessage(customTask.id));
-        }
+        ensureTaskType(task, CustomTask.class).ifPresent(customTask -> {
+            if (customTask.enableButton() && canClick) {
+                button.playClickSound();
+                Play2ServerNetworking.send(new SubmitTaskMessage(task.getId()));
+            }
+        });
     }
 }
