@@ -404,7 +404,7 @@ public final class ChapterImage extends QuestObjectBase implements Movable {
 			} else {
 				height = width / aspect;
 			}
-			Play2ServerNetworking.send(EditObjectMessage.forQuestObject(chapter));
+			Play2ServerNetworking.send(EditObjectMessage.forQuestObject(this));
 		}
 	}
 
