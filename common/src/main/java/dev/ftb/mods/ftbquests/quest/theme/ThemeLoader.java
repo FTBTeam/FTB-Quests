@@ -19,10 +19,13 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Predicate;
 
 public class ThemeLoader implements ResourceManagerReloadListener {
 	static final Logger LOGGER = LoggerFactory.getLogger(ThemeLoader.class);
 	public static final String THEME_TXT = "ftb_quests_theme.txt";
+
+	private static final Predicate<String> FROM_FTB_QUESTS = s -> s.equals("mod/" + FTBQuestsAPI.MOD_ID);
 
 	@Override
 	public void onResourceManagerReload(ResourceManager resourceManager) {
@@ -34,7 +37,8 @@ public class ThemeLoader implements ResourceManagerReloadListener {
 
 		try {
 			Identifier rl = FTBQuestsAPI.id(THEME_TXT);
-			for (Resource resource : resourceManager.getResourceStack(rl)) {
+			var resources = resourceManager.getResourceStack(rl).stream().sorted(ThemeLoader::resourceSorter).toList();
+			for (Resource resource : resources) {
 				try (InputStream in = resource.open()) {
 					parse(map, IOUtils.readLines(in, StandardCharsets.UTF_8));
 				}
@@ -51,6 +55,18 @@ public class ThemeLoader implements ResourceManagerReloadListener {
 
 		// autodetect available shapes based on existence of "textures/shapes/<shape>/background.png" resources
 		QuestShape.reload(findShapes(resourceManager));
+	}
+
+	private static int resourceSorter(Resource r1, Resource r2) {
+		// need to ensure that "mod/ftbquests" ALWAYS comes first; everything else keeps its
+		// existing relative order (mods before file resource packs), courtesy of stream.sorted()
+		// being a stable sort
+		boolean m1 = FROM_FTB_QUESTS.test(r1.sourcePackId());
+		boolean m2 = FROM_FTB_QUESTS.test(r2.sourcePackId());
+		if (m1 == m2) {
+			return 0;
+		}
+		return m1 ? -1 : 1;
 	}
 
 	private static void parse(Map<ThemeSelector, SelectorProperties> selectorPropertyMap, List<String> lines) {
