@@ -1,17 +1,5 @@
 package dev.ftb.mods.ftbquests.block.neoforge;
 
-import net.minecraft.core.BlockPos;
-import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.phys.AABB;
-
-import net.neoforged.neoforge.transfer.ResourceHandler;
-import net.neoforged.neoforge.transfer.energy.EnergyHandler;
-import net.neoforged.neoforge.transfer.fluid.FluidResource;
-import net.neoforged.neoforge.transfer.item.ItemResource;
-import net.neoforged.neoforge.transfer.transaction.SnapshotJournal;
-import net.neoforged.neoforge.transfer.transaction.TransactionContext;
-
 import dev.ftb.mods.ftbquests.block.TaskScreenBlock;
 import dev.ftb.mods.ftbquests.block.entity.TaskScreenBlockEntity;
 import dev.ftb.mods.ftbquests.integration.item_filtering.ItemMatchingSystem;
@@ -19,12 +7,20 @@ import dev.ftb.mods.ftbquests.quest.TeamData;
 import dev.ftb.mods.ftbquests.quest.task.EnergyTask;
 import dev.ftb.mods.ftbquests.quest.task.FluidTask;
 import dev.ftb.mods.ftbquests.quest.task.ItemTask;
-import dev.ftb.mods.ftbquests.quest.task.Task;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.phys.AABB;
+import net.neoforged.neoforge.transfer.ResourceHandler;
+import net.neoforged.neoforge.transfer.energy.EnergyHandler;
+import net.neoforged.neoforge.transfer.fluid.FluidResource;
+import net.neoforged.neoforge.transfer.item.ItemResource;
+import net.neoforged.neoforge.transfer.transaction.SnapshotJournal;
+import net.neoforged.neoforge.transfer.transaction.TransactionContext;
+import org.jspecify.annotations.Nullable;
 
 import java.util.function.LongConsumer;
 import java.util.function.LongSupplier;
-import org.jspecify.annotations.NonNull;
-import org.jspecify.annotations.Nullable;
 
 public class NeoTaskScreenBlockEntity extends TaskScreenBlockEntity {
     @Nullable
@@ -36,16 +32,6 @@ public class NeoTaskScreenBlockEntity extends TaskScreenBlockEntity {
 
     public NeoTaskScreenBlockEntity(BlockPos blockPos, BlockState blockState) {
         super(blockPos, blockState);
-    }
-
-    @Override
-    public Task getTask() {
-        return super.getTask();
-    }
-
-    @Override
-    public void setTask(Task task) {
-        super.setTask(task);
     }
 
     public ResourceHandler<ItemResource> getItemHandler() {
@@ -91,7 +77,10 @@ public class NeoTaskScreenBlockEntity extends TaskScreenBlockEntity {
         @Override
         public long getAmountAsLong(int slot) {
             if (getTask() instanceof ItemTask itemTask) {
-                return Math.min(getCachedTeamData().getProgress(itemTask), itemTask.getItemStack().getMaxStackSize());
+                TeamData cachedTeamData = getCachedTeamData();
+                if (cachedTeamData != null) {
+                    return Math.min(cachedTeamData.getProgress(itemTask), itemTask.getItemStack().getMaxStackSize());
+                }
             }
 
             return 0;
@@ -108,10 +97,10 @@ public class NeoTaskScreenBlockEntity extends TaskScreenBlockEntity {
         }
 
         @Override
-        public int insert(int index, ItemResource resource, int amount, @NonNull TransactionContext transaction) {
+        public int insert(int index, ItemResource resource, int amount, TransactionContext transaction) {
             TeamData data = getCachedTeamData();
             ItemStack stack = resource.toStack(amount);
-            if (getTask() instanceof ItemTask itemTask && data.canStartTasks(itemTask.getQuest())) {
+            if (index == 1 && getTask() instanceof ItemTask itemTask && data != null && data.canStartTasks(itemTask.getQuest())) {
                 // task.insert() handles testing the item is valid and the task isn't already completed
                 ItemStack res = itemTask.insert(data, stack, true);
                 int nAdded = stack.getCount() - res.getCount();
@@ -126,7 +115,7 @@ public class NeoTaskScreenBlockEntity extends TaskScreenBlockEntity {
 
         @Override
         public int extract(int index, ItemResource resource, int amount, TransactionContext transaction) {
-            if (getTask() instanceof ItemTask itemTask && !isInputOnly() && !ItemMatchingSystem.INSTANCE.isItemFilter(itemTask.getItemStack())) {
+            if (index == 0 && getTask() instanceof ItemTask itemTask && !isInputOnly() && !ItemMatchingSystem.INSTANCE.isItemFilter(itemTask.getItemStack())) {
                 TeamData data = getCachedTeamData();
                 if (data != null && data.canStartTasks(itemTask.getQuest()) && !data.isCompleted(itemTask)) {
                     int nRemoved = (int) Math.min(data.getProgress(itemTask) - inserted, amount);
@@ -272,7 +261,10 @@ public class NeoTaskScreenBlockEntity extends TaskScreenBlockEntity {
             if (!originalState.equals(inserted)) {
                 TeamData data = getCachedTeamData();
                 if (data != null) {
-                    data.setProgress(getTask(), data.getProgress(getTask()) + inserted);
+                    var task = getTask();
+                    if (task != null) {
+                        data.setProgress(getTask(), data.getProgress(getTask()) + inserted);
+                    }
                 }
                 progressSetter.accept(0L);
             }
