@@ -269,23 +269,6 @@ public abstract class BaseQuestFile extends QuestObject implements QuestFile {
 		return null;
 	}
 
-//	@Nullable
-//	public QuestObjectBase remove(long id) {
-//		QuestObjectBase object = questObjectMap.remove(id);
-//
-//		//noinspection ConstantValue
-//		if (object != null) {
-//			if (object instanceof QuestObject qo) {
-//				forAllQuests(quest -> quest.removeDependency(qo));
-//			}
-//			object.invalidate();
-//			refreshIDMap();
-//			return object;
-//		}
-//
-//		return null;
-//	}
-
 	public <T extends QuestObjectBase> T getQuestObjectOrThrow(long id, Class<T> cls) {
 		QuestObjectBase object = getBase(id);
 		if (object == null) {
@@ -489,13 +472,10 @@ public abstract class BaseQuestFile extends QuestObject implements QuestFile {
 	}
 
 	public final void writeDataFull(Path folder, HolderLookup.Provider provider) {
-		boolean prev = false;
 		try {
 			// Sorting keys ensure consistent sort order in the saved quest file
 			// Since questbook data is commonly stored under version control, this minimizes extraneous
 			//  version control changes stemming from unpredictable hashmap key ordering
-//			prev = SNBT.setShouldSortKeysOnWrite(true);
-
 			Json5Util.save(folder.resolve("data" + FILE_SUFFIX), Util.make(new Json5Object(), j -> {
 				j.addProperty("version", VERSION);
 				writeData(j, provider);
@@ -506,8 +486,6 @@ public abstract class BaseQuestFile extends QuestObject implements QuestFile {
 			writeChapterGroupsFile(folder, provider);
 		} catch (IOException e) {
 			LOGGER.error("Failed to save quest file.", e);
-		} finally {
-//			SNBT.setShouldSortKeysOnWrite(prev);
 		}
 	}
 
@@ -728,9 +706,11 @@ public abstract class BaseQuestFile extends QuestObject implements QuestFile {
 						if (taskEl instanceof Json5Object taskJson) {
 							long taskId = readID(taskJson.get("id"));
 							Task task = TaskType.createTask(taskId, quest, Json5Util.getString(taskJson, "type").orElseThrow());
-							questObjectMap.put(task.id, task);
-							dataCache.put(task.id, taskJson);
-							quest.addTask(task);
+							if (task != null) {
+								questObjectMap.put(task.id, task);
+								dataCache.put(task.id, taskJson);
+								quest.addTask(task);
+							}
 						}
 					}
 				});
@@ -740,9 +720,11 @@ public abstract class BaseQuestFile extends QuestObject implements QuestFile {
 						if (rewardEl instanceof Json5Object rewardJson) {
 							long rewardId = readID(rewardJson.get("id"));
 							Reward reward = RewardType.createReward(rewardId, quest, Json5Util.getString(rewardJson, "type").orElseThrow());
-							questObjectMap.put(reward.id, reward);
-							dataCache.put(reward.id, rewardJson);
-							quest.addReward(reward);
+							if (reward != null) {
+								questObjectMap.put(reward.id, reward);
+								dataCache.put(reward.id, rewardJson);
+								quest.addReward(reward);
+							}
 						}
 					}
 				});

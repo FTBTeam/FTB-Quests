@@ -5,7 +5,6 @@ import dev.ftb.mods.ftblibrary.json5.Json5Util;
 import dev.ftb.mods.ftblibrary.platform.Env;
 import dev.ftb.mods.ftblibrary.platform.Platform;
 import dev.ftb.mods.ftblibrary.platform.network.Server2PlayNetworking;
-import dev.ftb.mods.ftblibrary.util.NetworkHelper;
 import dev.ftb.mods.ftbquests.FTBQuests;
 import dev.ftb.mods.ftbquests.api.event.progress.ProgressEventData;
 import dev.ftb.mods.ftbquests.integration.PermissionsHelper;
@@ -50,7 +49,7 @@ public class ServerQuestFile extends BaseQuestFile {
 	private boolean isLoading;
 	private final Path folder;
 	private final Deque<ServerPlayer> playerContextStack = new ArrayDeque<>();
-	private HistoryStack historyStack;
+	private final HistoryStack historyStack;
 
 	public static void startup(MinecraftServer server) {
 		INSTANCE = new ServerQuestFile(server);
@@ -207,6 +206,7 @@ public class ServerQuestFile extends BaseQuestFile {
 		deleteSelf();
 	}
 
+	@Nullable
 	public ServerPlayer getCurrentPlayer() {
 		return playerContextStack.peek();
 	}
@@ -283,7 +283,7 @@ public class ServerQuestFile extends BaseQuestFile {
 	public void teamCreated(TeamCreatedEvent.Data event) {
 		UUID id = event.team().getId();
 
-		TeamData data = teamDataMap.computeIfAbsent(id, k -> {
+		TeamData data = teamDataMap.computeIfAbsent(id, _ -> {
 			TeamData newTeamData = new TeamData(id, true);
 			newTeamData.markDirty();
 			return newTeamData;
