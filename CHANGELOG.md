@@ -8,7 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 * JEI bookmarking support for Task & Reward buttons and valid items screen in FTB Quests
   * Press 'A' (or whatever your keybinding for JEI bookmarking is) to toggle bookmarking for items for within FTB Quests
-  * FTB XMod Compat 2101.1.9+ is also required
+  * FTB XMod Compat 26.1.2.3+ is also required
 * Quest connection lines can now be Bézier curves
   * To edit curves, right-click on the quest the connection points to and select "Edit Bézier Curves", then drag the control points
   * Hold Shift while dragging control points for fine adjust
