@@ -17,12 +17,11 @@ import dev.ftb.mods.ftbquests.client.ClientQuestFile;
 import dev.ftb.mods.ftbquests.client.config.EditableIconItemStack;
 import dev.ftb.mods.ftbquests.integration.RecipeModHelper;
 import dev.ftb.mods.ftbquests.item.CustomIconItem;
+import dev.ftb.mods.ftbquests.item.MissingItem;
 import dev.ftb.mods.ftbquests.net.EditObjectMessage;
 import dev.ftb.mods.ftbquests.net.SyncTranslationMessageToServer;
 import dev.ftb.mods.ftbquests.quest.theme.property.ThemeProperties;
 import dev.ftb.mods.ftbquests.quest.translation.TranslationKey;
-import dev.ftb.mods.ftbquests.registry.ModDataComponents;
-import dev.ftb.mods.ftbquests.registry.ModItems;
 import dev.ftb.mods.ftbquests.util.NetUtils;
 import dev.ftb.mods.ftbquests.util.ProgressChange;
 import dev.ftb.mods.ftbquests.util.TextUtils;
@@ -31,7 +30,6 @@ import net.minecraft.core.HolderLookup;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
-import net.minecraft.util.Util;
 import net.minecraft.world.item.ItemStack;
 import org.jspecify.annotations.Nullable;
 
@@ -89,19 +87,16 @@ public abstract class QuestObjectBase implements Comparable<QuestObjectBase> {
 	}
 
 	public static ItemStack itemOrMissingFromJson(Json5Object json, HolderLookup.Provider provider) {
-		return json.isEmpty() ?
-				ItemStack.EMPTY :
-				ItemStack.CODEC.parse(provider.createSerializationContext(Json5Ops.INSTANCE), json).result()
-								.orElse(createMissing(json));
-	}
+		if (json.isEmpty()) {
+			return ItemStack.EMPTY;
+		}
 
-	private static ItemStack createMissing(Json5Object json) {
-		String id = Json5Util.getString(json, "id").orElse("unknown");
-		int count = Math.max(1, Json5Util.getInt(json, "count").orElse(1));
-		String text = count == 1 ? id : count + "x " + id;
-
-		return Util.make(new ItemStack(ModItems.MISSING_ITEM.get()),
-				stack -> stack.set(ModDataComponents.MISSING_ITEM_DESC.get(), text));
+		var res = ItemStack.CODEC.parse(provider.createSerializationContext(Json5Ops.INSTANCE), json);
+		if (res.isSuccess()) {
+			return MissingItem.maybeRestoreItem(res.getOrThrow(), provider);
+		} else {
+			return MissingItem.createFromJson(json);
+		}
 	}
 
 	public final boolean isValid() {

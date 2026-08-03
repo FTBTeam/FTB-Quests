@@ -1,6 +1,9 @@
 package dev.ftb.mods.ftbquests.registry;
 
 import com.mojang.serialization.Codec;
+import de.marhali.json5.Json5Element;
+import dev.ftb.mods.ftblibrary.json5.Json5NetPacker;
+import dev.ftb.mods.ftblibrary.json5.Json5Ops;
 import dev.ftb.mods.ftblibrary.platform.registry.XRegistry;
 import dev.ftb.mods.ftblibrary.platform.registry.XRegistryRef;
 import dev.ftb.mods.ftbquests.api.FTBQuestsAPI;
@@ -11,6 +14,7 @@ import net.minecraft.core.component.DataComponentType;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.resources.Identifier;
+import net.minecraft.util.ExtraCodecs;
 import net.minecraft.world.item.component.ItemContainerContents;
 
 public class ModDataComponents {
@@ -47,10 +51,20 @@ public class ModDataComponents {
             .networkSynchronized(GlobalPos.STREAM_CODEC)
             .build());
 
-    public static XRegistryRef<DataComponentType<String>> MISSING_ITEM_DESC
+    public static XRegistryRef<DataComponentType<String>> MISSING_ITEM_ID
             = COMPONENT_TYPES.register("missing_item", () -> new DataComponentType.Builder<String>()
             .persistent(Codec.STRING)
             .networkSynchronized(ByteBufCodecs.STRING_UTF8)
+            .build());
+    public static XRegistryRef<DataComponentType<Integer>> MISSING_ITEM_COUNT
+            = COMPONENT_TYPES.register("missing_item_count", () -> new DataComponentType.Builder<Integer>()
+            .persistent(Codec.INT)
+            .networkSynchronized(ByteBufCodecs.VAR_INT)
+            .build());
+    public static XRegistryRef<DataComponentType<Json5Element>> MISSING_ITEM_DATA
+            = COMPONENT_TYPES.register("missing_item_data", () -> new DataComponentType.Builder<Json5Element>()
+            .persistent(ExtraCodecs.converter(Json5Ops.INSTANCE))
+            .networkSynchronized(Json5NetPacker.CODEC)
             .build());
 
     public static XRegistryRef<DataComponentType<TaskScreenSaveData>> TASK_SCREEN_SAVED
