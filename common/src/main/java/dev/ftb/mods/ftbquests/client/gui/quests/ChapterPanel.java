@@ -26,6 +26,8 @@ import dev.ftb.mods.ftbquests.quest.ChapterGroup;
 import dev.ftb.mods.ftbquests.quest.theme.property.ThemeProperties;
 import dev.ftb.mods.ftbquests.quest.translation.TranslationKey;
 import dev.ftb.mods.ftbquests.util.TextUtils;
+import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
+import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
@@ -35,6 +37,7 @@ import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.Style;
 import net.minecraft.network.chat.TextColor;
 import net.minecraft.util.Mth;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -46,6 +49,7 @@ public class ChapterPanel extends Panel {
 	public static final Icon ARROW_EXPANDED = Icon.getIcon("ftbquests:textures/gui/arrow_expanded.png");
 	private static final Pattern NON_EMPTY_PAT = Pattern.compile("^.+$");
 
+	private final Long2ObjectMap<ChapterButton> chapterId2Button = new Long2ObjectOpenHashMap<>();
 	private final QuestScreen questScreen;
 	boolean expanded = isPinned();
 	int curX;
@@ -58,6 +62,8 @@ public class ChapterPanel extends Panel {
 
 	@Override
 	public void addWidgets() {
+		chapterId2Button.clear();
+
 		add(new ModpackButton(this, questScreen.file));
 
 		boolean canEdit = questScreen.file.canEdit();
@@ -72,7 +78,11 @@ public class ChapterPanel extends Panel {
 				if (canEdit || !button.visibleChapters.isEmpty()) {
 					add(button);
 					if (!group.isGuiCollapsed()) {
-						button.visibleChapters.forEach(chapter -> add(new ChapterButton(this, chapter)));
+						button.visibleChapters.forEach(chapter -> {
+							ChapterButton chapterButton = new ChapterButton(this, chapter);
+							add(chapterButton);
+							chapterId2Button.put(chapter.getId(), chapterButton);
+						});
 					}
 				}
 			}
@@ -83,14 +93,11 @@ public class ChapterPanel extends Panel {
 	public void alignWidgets() {
 		int wd = 100;
 
-		ChapterButton selected = null;
+		ChapterButton selected = questScreen.selectedChapter == null ? null : chapterId2Button.get(questScreen.selectedChapter.getId());
 
 		for (Widget w : widgets) {
 			if (w instanceof ListButton lb) {
 				wd = Math.clamp(wd, lb.getActualWidth(questScreen), 800);
-				if (lb instanceof ChapterButton cb && questScreen.selectedChapter == cb.chapter) {
-					selected = cb;
-				}
 			}
 		}
 
@@ -105,16 +112,27 @@ public class ChapterPanel extends Panel {
 		if (getContentHeight() <= height) {
 			setScrollY(0);
 		} else if (selected != null) {
-			// try to keep selected chapter in view
+			keepChapterButtonInView(selected);
+		}
+
+		curX = expanded ? 0 : -width;
+	}
+
+	public void keepChapterInView(@Nullable Chapter chapter) {
+		if (chapter != null) {
+			keepChapterButtonInView(chapterId2Button.get(chapter.getId()));
+		}
+	}
+
+	private void keepChapterButtonInView(@Nullable ChapterButton selected) {
+		if (selected != null) {
 			int scrolledY = (int) (selected.posY - getScrollY());
 			if (scrolledY < 0) {
 				setScrollY(selected.posY);
 			} else if (scrolledY + selected.height > height) {
-				setScrollY(getScrollY() + (height - scrolledY + selected.height));
+				setScrollY(selected.posY + selected.height - height);
 			}
 		}
-
-		curX = expanded ? 0 : -width;
 	}
 
 	@Override
@@ -214,13 +232,13 @@ public class ChapterPanel extends Panel {
 				FTBQuestsClientConfig.setChapterPanelPinned(!FTBQuestsClientConfig.CHAPTER_PANEL_PINNED.get());
 			} else {
 				ClientQuestFile file = chapterPanel.questScreen.file;
-                if (file.canEdit()) {
-                    if (getMouseX() > getX() + width - 34) {
-                        showAddChapterOrGroupDialog(file);
-                    } else if (button.isLeft() && Screen.hasAltDown()) {
+				if (file.canEdit()) {
+					if (getMouseX() > getX() + width - 34) {
+						showAddChapterOrGroupDialog(file);
+					} else if (button.isLeft() && Screen.hasAltDown()) {
 						file.onEditButtonClicked(chapterPanel.questScreen);
 					}
-                }
+				}
 			}
 		}
 
