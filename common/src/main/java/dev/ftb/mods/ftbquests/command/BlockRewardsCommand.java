@@ -31,10 +31,10 @@ public class BlockRewardsCommand {
 
     private static int toggleRewardBlocking(CommandSourceStack source, ServerPlayer player, @Nullable Boolean doBlocking) {
         return ServerQuestFile.getInstance().getTeamData(player).map(data -> {
-            boolean shouldBlock = Objects.requireNonNullElse(doBlocking, !data.areRewardsBlocked());
+            boolean shouldBlock = Objects.requireNonNullElseGet(doBlocking, () -> !data.areRewardsBlocked());
             data.setRewardsBlocked(shouldBlock);
 
-            source.sendSuccess(() -> Component.translatable("commands.ftbquests.command.feedback.rewards_blocked", data, data.areRewardsBlocked()), false);
+            source.sendSuccess(() -> Component.translatable("commands.ftbquests.command.feedback.rewards_blocked", data.getName(), Component.translatable(data.areRewardsBlocked() ? "gui.yes": "gui.no")), false);
 
             return Command.SINGLE_SUCCESS;
         }).orElse(0);

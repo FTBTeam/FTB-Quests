@@ -1,6 +1,7 @@
 package dev.ftb.mods.ftbquests.client.gui.quests;
 
 import dev.ftb.mods.ftblibrary.client.gui.WidgetType;
+import dev.ftb.mods.ftblibrary.client.gui.input.Key;
 import dev.ftb.mods.ftblibrary.client.gui.input.MouseButton;
 import dev.ftb.mods.ftblibrary.client.gui.screens.AbstractButtonListScreen;
 import dev.ftb.mods.ftblibrary.client.gui.theme.Theme;
@@ -15,6 +16,7 @@ import dev.ftb.mods.ftblibrary.icon.Icons;
 import dev.ftb.mods.ftblibrary.icon.ItemIcon;
 import dev.ftb.mods.ftblibrary.platform.network.Play2ServerNetworking;
 import dev.ftb.mods.ftblibrary.util.TooltipList;
+import dev.ftb.mods.ftbquests.FTBQuests;
 import dev.ftb.mods.ftbquests.api.ItemFilterAdapter;
 import dev.ftb.mods.ftbquests.client.FTBQuestsClient;
 import dev.ftb.mods.ftbquests.client.gui.ContextMenuBuilder;
@@ -22,6 +24,7 @@ import dev.ftb.mods.ftbquests.integration.item_filtering.ItemMatchingSystem;
 import dev.ftb.mods.ftbquests.net.EditObjectMessage;
 import dev.ftb.mods.ftbquests.net.GiveItemToPlayerMessage;
 import dev.ftb.mods.ftbquests.net.ReorderItemMessage;
+import dev.ftb.mods.ftbquests.quest.QuestObjectType;
 import dev.ftb.mods.ftbquests.quest.TeamData;
 import dev.ftb.mods.ftbquests.quest.task.CheckmarkTask;
 import dev.ftb.mods.ftbquests.quest.task.ItemTask;
@@ -52,6 +55,12 @@ public class TaskButton extends Button {
 	}
 
 	@Override
+	public boolean keyPressed(Key key) {
+		return FTBQuests.getRecipeModHelper().tryToggleBookmark(this, key, task.getIcon().getIngredient())
+				|| super.keyPressed(key);
+	}
+
+	@Override
 	public boolean mousePressed(MouseButton button) {
 		if (isMouseOver()) {
 			if (button.isRight() || getWidgetType() != WidgetType.DISABLED) {
@@ -77,13 +86,13 @@ public class TaskButton extends Button {
 		} else if (button.isRight() && questScreen.file.canEdit()) {
 			playClickSound();
 
-			ContextMenuBuilder builder = ContextMenuBuilder.create(task, questScreen);
+			ContextMenuBuilder builder = ContextMenuBuilder.create(task, questScreen, this);
 
 			builder.insertAtTop(List.of(new ContextMenuItem(Component.translatable("ftbquests.gui.move_left"), Icons.LEFT,
-					b -> Play2ServerNetworking.send(new ReorderItemMessage(task.getId(), false))
+                    _ -> Play2ServerNetworking.send(new ReorderItemMessage(task.getId(), QuestObjectType.TASK, false))
 			)));
 			builder.insertAtTop(List.of(new ContextMenuItem(Component.translatable("ftbquests.gui.move_right"), Icons.RIGHT,
-					b -> Play2ServerNetworking.send(new ReorderItemMessage(task.getId(), true))
+                    _ -> Play2ServerNetworking.send(new ReorderItemMessage(task.getId(), QuestObjectType.TASK, true))
 			)));
 
 			if (task instanceof ItemTask itemTask && !itemTask.getItemStack().isEmpty()) {

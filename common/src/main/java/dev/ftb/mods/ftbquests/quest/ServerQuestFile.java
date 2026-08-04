@@ -9,6 +9,7 @@ import dev.ftb.mods.ftbquests.FTBQuests;
 import dev.ftb.mods.ftbquests.api.event.progress.ProgressEventData;
 import dev.ftb.mods.ftbquests.integration.PermissionsHelper;
 import dev.ftb.mods.ftbquests.net.*;
+import dev.ftb.mods.ftbquests.quest.history.HistoryStack;
 import dev.ftb.mods.ftbquests.quest.reward.RewardType;
 import dev.ftb.mods.ftbquests.quest.reward.RewardTypes;
 import dev.ftb.mods.ftbquests.quest.task.Task;
@@ -27,6 +28,7 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.storage.LevelResource;
+import org.apache.commons.io.FileUtils;
 import org.jspecify.annotations.Nullable;
 
 import java.io.IOException;
@@ -47,6 +49,7 @@ public class ServerQuestFile extends BaseQuestFile {
 	private boolean isLoading;
 	private final Path folder;
 	private final Deque<ServerPlayer> playerContextStack = new ArrayDeque<>();
+	private final HistoryStack historyStack;
 
 	public static void startup(MinecraftServer server) {
 		INSTANCE = new ServerQuestFile(server);
@@ -60,7 +63,7 @@ public class ServerQuestFile extends BaseQuestFile {
 	}
 
 	public static boolean exists() {
-		return INSTANCE != null && !INSTANCE.invalid;
+		return INSTANCE != null && INSTANCE.isValid();
 	}
 
 	public static ServerQuestFile getInstance() {
@@ -77,6 +80,7 @@ public class ServerQuestFile extends BaseQuestFile {
 		server = s;
 		shouldSave = false;
 		isLoading = false;
+		historyStack = new HistoryStack();
 
 		folder = Platform.get().paths().configPath().resolve("ftbquests/quests");
 
@@ -100,8 +104,13 @@ public class ServerQuestFile extends BaseQuestFile {
 			if (Files.exists(folder)) {
 				FTBQuests.LOGGER.info("Loading quests from {}", folder);
 				isLoading = true;
-				readDataFull(folder, server.registryAccess());
-				isLoading = false;
+				try {
+					readDataFull(folder, server.registryAccess());
+				} catch (Exception ex) {
+					FTBQuests.LOGGER.error("failed to load quest data from {}: {}", folder, ex.getMessage(), ex);
+				} finally {
+					isLoading = false;
+				}
 			}
 		}
 
@@ -149,30 +158,36 @@ public class ServerQuestFile extends BaseQuestFile {
 	}
 
 	@Override
-	public void deleteObject(long id) {
-		QuestObjectBase object = getBase(id);
-
-		if (object != null) {
-			object.getPath().ifPresent(path -> {
-				try {
-					Files.delete(getFolder().resolve(path));
-				} catch (IOException e) {
-					FTBQuests.LOGGER.error("can't delete {}: {}", getFolder().resolve(path), e.getMessage());
-				}
-			});
-			getTranslationManager().removeAllTranslations(object);
-			object.deleteChildren();
-			object.deleteSelf();
-			refreshIDMap();
-			markDirty();
+	public void deleteObjects(List<Long> ids) {
+		List<Long> deletedIds = new ArrayList<>();
+		for (long id : ids) {
+			QuestObjectBase object = getBase(id);
+			if (object != null) {
+				getTranslationManager().removeAllTranslations(object);
+				object.deleteSelf();
+				object.getPath().ifPresent(path -> {
+                    try {
+                        FileUtils.delete(getFolder().resolve(path).toFile());
+                    } catch (IOException e) {
+						FTBQuests.LOGGER.error("can't delete {}: {}", path, e.getMessage());
+                    }
+                });
+				deletedIds.add(id);
+			}
 		}
 
-		Server2PlayNetworking.sendToAllPlayers(server, new DeleteObjectResponseMessage(id));
+		if (!deletedIds.isEmpty()) {
+			markDirty();
+		}
 	}
 
 	@Override
 	public void markDirty() {
 		shouldSave = true;
+	}
+
+	public HistoryStack getHistoryStack() {
+		return historyStack;
 	}
 
 	public void saveNow() {
@@ -188,10 +203,10 @@ public class ServerQuestFile extends BaseQuestFile {
 
 	public void unload() {
 		saveNow();
-		deleteChildren();
 		deleteSelf();
 	}
 
+	@Nullable
 	public ServerPlayer getCurrentPlayer() {
 		return playerContextStack.peek();
 	}
@@ -216,6 +231,8 @@ public class ServerQuestFile extends BaseQuestFile {
 		Server2PlayNetworking.send(player, new SyncEditorPermissionMessage(PermissionsHelper.hasEditorPermission(player, false)));
 
 		getTranslationManager().sendTranslationsToPlayer(player);
+
+		Server2PlayNetworking.send(player, historyStack.createInitialDescPacket(this));
 
 		player.inventoryMenu.addSlotListener(new FTBQuestsInventoryListener(player));
 
@@ -266,7 +283,7 @@ public class ServerQuestFile extends BaseQuestFile {
 	public void teamCreated(TeamCreatedEvent.Data event) {
 		UUID id = event.team().getId();
 
-		TeamData data = teamDataMap.computeIfAbsent(id, k -> {
+		TeamData data = teamDataMap.computeIfAbsent(id, _ -> {
 			TeamData newTeamData = new TeamData(id, true);
 			newTeamData.markDirty();
 			return newTeamData;
@@ -324,7 +341,6 @@ public class ServerQuestFile extends BaseQuestFile {
 		if (super.moveChapterGroup(id, movingUp)) {
 			markDirty();
 			clearCachedData();
-			Server2PlayNetworking.sendToAllPlayers(server, new MoveChapterGroupResponseMessage(id, movingUp));
 			return true;
 		}
 		return false;

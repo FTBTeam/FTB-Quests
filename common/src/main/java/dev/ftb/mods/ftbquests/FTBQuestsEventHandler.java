@@ -104,9 +104,11 @@ public class FTBQuestsEventHandler {
 		if (source.getEntity() instanceof ServerPlayer player && !Platform.get().misc().isFakePlayer(player)) {
 			if (!killTasks.get().isEmpty()) {
 				ServerQuestFile.getInstance().getTeamData(player).ifPresent(data -> {
-					for (KillTask task : killTasks.get()) {
-						if (data.getProgress(task) < task.getMaxProgress() && data.canStartTasks(task.getQuest())) {
-							task.kill(data, entity);
+					if (!data.isProgressionPaused(player)) {
+						for (KillTask task : killTasks.get()) {
+							if (data.getProgress(task) < task.getMaxProgress() && data.canStartTasks(task.getQuest())) {
+								task.kill(data, entity);
+							}
 						}
 					}
 				});

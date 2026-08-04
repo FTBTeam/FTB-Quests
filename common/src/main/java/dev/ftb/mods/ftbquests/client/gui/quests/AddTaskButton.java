@@ -41,8 +41,8 @@ public class AddTaskButton extends Button {
 		for (TaskType type : TaskTypes.TYPES.values()) {
 			contextMenu.add(new ContextMenuItem(type.getDisplayName(), type.getIconSupplier(), b -> {
 				playClickSound();
-				type.getGuiProvider().openCreationGui(this.parent, quest, (task, extra) ->
-						Play2ServerNetworking.send(CreateObjectMessage.create(task, extra)));
+				type.getGuiProvider().openCreationGui(this.parent, quest, task ->
+						Play2ServerNetworking.send(CreateObjectMessage.requestCreation(task)));
 			}));
 		}
 
@@ -62,7 +62,7 @@ public class AddTaskButton extends Button {
 	private void copyAndCreateTask(Task task) {
 		Task newTask = QuestObjectBase.copy(task,
 				() -> TaskType.createTask(0L, quest, task.getType().getTypeId().toString()));
-        Play2ServerNetworking.send(CreateObjectMessage.create(newTask, newTask.getType().makeExtraJson()));
+        Play2ServerNetworking.send(CreateObjectMessage.requestCreation(newTask));
     }
 
 	@Override

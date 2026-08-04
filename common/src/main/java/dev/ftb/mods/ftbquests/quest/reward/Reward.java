@@ -22,6 +22,7 @@ import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.util.RandomSource;
+import net.minecraft.util.Util;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import org.jspecify.annotations.Nullable;
@@ -182,15 +183,6 @@ public abstract class Reward extends QuestObjectBase {
 	}
 
 	@Override
-	public final void deleteChildren() {
-		for (TeamData data : getQuestFile().getAllTeamData()) {
-			data.deleteReward(this);
-		}
-
-		super.deleteChildren();
-	}
-
-	@Override
 	public void editedFromGUI() {
 		QuestScreen gui = ClientUtils.getCurrentGuiAs(QuestScreen.class);
 		if (gui != null) {
@@ -201,6 +193,8 @@ public abstract class Reward extends QuestObjectBase {
 
 	@Override
 	public void onCreated() {
+		super.onCreated();
+
 		quest.addReward(this);
 	}
 
@@ -209,6 +203,10 @@ public abstract class Reward extends QuestObjectBase {
 	}
 
 	public final RewardAutoClaim getAutoClaimType() {
+		if (quest.getQuestFile().shouldSuppressAllAutoclaiming()) {
+			return RewardAutoClaim.DISABLED;
+		}
+
 		if (quest.getChapter().isAlwaysInvisible() && (autoclaim == RewardAutoClaim.DEFAULT || autoclaim == RewardAutoClaim.DISABLED)) {
 			return RewardAutoClaim.ENABLED;
 		}
@@ -298,6 +296,11 @@ public abstract class Reward extends QuestObjectBase {
 
 	protected boolean isIgnoreRewardBlockingHardcoded() {
 		return false;
+	}
+
+	@Override
+	public Json5Object makeCreationMetadata() {
+		return Util.make(super.makeCreationMetadata(), t -> t.addProperty("type", getType().getTypeForSerialization()));
 	}
 
 	public void addAnyProtoTranslations(Json5Object tag) {

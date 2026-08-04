@@ -23,6 +23,7 @@ import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.util.Mth;
 import net.minecraft.util.Util;
 import net.minecraft.world.entity.player.Player;
@@ -129,14 +130,16 @@ public class RewardSelectorScreen extends AbstractGroupedButtonListScreen<Chapte
     }
 
     private void doClaimAll(boolean xpOnly) {
+        if (!ClientQuestFile.getInstance().shouldSuppressAllAutoclaiming()) {
             Play2ServerNetworking.send(new ClaimAllRewardsMessage(xpOnly));
-        message = xpOnly ?
-                Component.translatable("ftbquests.gui.xp_rewards_claimed") :
-                (excludedRewards > 0 ?
-                        Component.translatable("ftbquests.gui.claim_all_exclusion", excludedRewards) :
-                        Component.translatable("ftbquests.gui.all_rewards_claimed")
-                );
-        msgTimeout = REFRESH_TIME;
+            message = xpOnly ?
+                    Component.translatable("ftbquests.gui.xp_rewards_claimed") :
+                    (excludedRewards > 0 ?
+                            Component.translatable("ftbquests.gui.claim_all_exclusion", excludedRewards) :
+                            Component.translatable("ftbquests.gui.all_rewards_claimed")
+                    );
+            msgTimeout = REFRESH_TIME;
+        }
     }
 
     @Override
@@ -247,11 +250,16 @@ public class RewardSelectorScreen extends AbstractGroupedButtonListScreen<Chapte
 
         @Override
         public void addWidgets() {
-            Component[] tooltip = excludedRewards > 0 ?
-                    new Component[] { Component.translatable("ftbquests.gui.claim_all_exclusion", excludedRewards) } :
-                    new Component[0];
-            buttonClaimAll = SimpleTextButton.create(this, Component.translatable("ftbquests.reward.claim_all"),
-                    Icons.MONEY_BAG, mb -> doClaimAll(false), tooltip);
+            MutableComponent claimAllTitle = Component.translatable("ftbquests.reward.claim_all");
+            List<Component> tooltip = new ArrayList<>();
+            if (ClientQuestFile.getInstance().shouldSuppressAllAutoclaiming()) {
+                tooltip.add(Component.literal("Suppressed by quest book configuration"));
+                claimAllTitle.withStyle(ChatFormatting.STRIKETHROUGH);
+            } else if (excludedRewards > 0) {
+                tooltip.add(Component.translatable("ftbquests.gui.claim_all_exclusion", excludedRewards));
+            }
+            buttonClaimAll = SimpleTextButton.create(this, claimAllTitle,
+                    Icons.MONEY_BAG, mb -> doClaimAll(false), tooltip.toArray(new Component[0]));
             buttonClaimXP = SimpleTextButton.create(this, Component.translatable("ftbquests.reward.claim_xp"),
                     ItemIcon.ofItem(Items.EXPERIENCE_BOTTLE), _ -> doClaimAll(true));
 

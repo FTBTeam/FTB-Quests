@@ -62,7 +62,6 @@ public final class TeamMergeTests {
 			Quest quest = QuestTestSupport.newQuest(chapter);
 			QuestTestSupport.newCheckmarkTask(quest);
 			Reward reward = QuestTestSupport.newXpReward(quest);
-			QuestTestSupport.file().refreshIDMap();
 
 			UUID leavingPlayer = UUID.randomUUID();
 			UUID otherPlayer = UUID.randomUUID();

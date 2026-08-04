@@ -80,7 +80,6 @@ public final class ProgressionTests {
 			Quest questB = QuestTestSupport.newQuest(chapter);
 			QuestTestSupport.newCheckmarkTask(questB);
 			questB.addDependency(questA);
-			QuestTestSupport.file().refreshIDMap();
 
 			TeamData data = QuestTestSupport.newTeam();
 

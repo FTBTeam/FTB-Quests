@@ -2,9 +2,12 @@ package dev.ftb.mods.ftbquests.net;
 
 import dev.ftb.mods.ftblibrary.platform.network.PacketContext;
 import dev.ftb.mods.ftblibrary.platform.network.Server2PlayNetworking;
+import dev.ftb.mods.ftblibrary.util.NetworkHelper;
 import dev.ftb.mods.ftbquests.api.FTBQuestsAPI;
 import dev.ftb.mods.ftbquests.quest.QuestObjectBase;
+import dev.ftb.mods.ftbquests.quest.QuestObjectType;
 import dev.ftb.mods.ftbquests.quest.ServerQuestFile;
+import dev.ftb.mods.ftbquests.quest.history.events.MoveItemWithinQuest;
 import dev.ftb.mods.ftbquests.quest.reward.Reward;
 import dev.ftb.mods.ftbquests.quest.task.Task;
 import dev.ftb.mods.ftbquests.util.NetUtils;
@@ -15,36 +18,24 @@ import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.server.level.ServerLevel;
 
 /**
- * Sent by client to move a task or reward left/right from the quest view panel
- * @param id ID of the task or reward
+ * Sent by client to move a task or reward within its quest. Task/reward ordering is shown in the quest view panel.
+ * @param taskOrRewardId ID of the task or reward
+ * @param questObjectType the object type (must be TASK or REWARD)
  * @param moveRight true to move right, false to move left
  */
-public record ReorderItemMessage(long id, boolean moveRight) implements CustomPacketPayload {
+public record ReorderItemMessage(long taskOrRewardId, QuestObjectType questObjectType, boolean moveRight) implements CustomPacketPayload {
     public static final Type<ReorderItemMessage> TYPE = new Type<>(FTBQuestsAPI.id("reorder_item"));
     public static final StreamCodec<FriendlyByteBuf, ReorderItemMessage> STREAM_CODEC = StreamCodec.composite(
-            ByteBufCodecs.VAR_LONG, ReorderItemMessage::id,
+            ByteBufCodecs.VAR_LONG, ReorderItemMessage::taskOrRewardId,
+            NetworkHelper.enumStreamCodec(QuestObjectType.class), ReorderItemMessage::questObjectType,
             ByteBufCodecs.BOOL, ReorderItemMessage::moveRight,
             ReorderItemMessage::new
     );
 
     public static void handle(ReorderItemMessage message, PacketContext context) {
-        if (NetUtils.canEdit(context) && context.player().level() instanceof ServerLevel serverLevel) {
-            QuestObjectBase object = ServerQuestFile.getInstance().getBase(message.id);
-            if (object instanceof Task task) {
-                if (message.moveRight) {
-                    task.getQuest().moveTaskRight(task);
-                } else {
-                    task.getQuest().moveTaskLeft(task);
-                }
-                Server2PlayNetworking.sendToAllPlayers(serverLevel.getServer(), ReorderItemResponseMessage.tasks(task.getQuest()));
-            } else if (object instanceof Reward reward) {
-                if (message.moveRight) {
-                    reward.getQuest().moveRewardRight(reward);
-                } else {
-                    reward.getQuest().moveRewardLeft(reward);
-                }
-                Server2PlayNetworking.sendToAllPlayers(serverLevel.getServer(), ReorderItemResponseMessage.rewards(reward.getQuest()));
-            }
+        if (NetUtils.canEdit(context)) {
+            ServerQuestFile sqf = ServerQuestFile.getInstance();
+            sqf.getHistoryStack().addAndApply(sqf, new MoveItemWithinQuest(message.taskOrRewardId, message.questObjectType, message.moveRight));
         }
     }
 

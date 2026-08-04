@@ -8,7 +8,7 @@ import de.marhali.json5.Json5Object;
 import dev.ftb.mods.ftblibrary.json5.Json5Util;
 import dev.ftb.mods.ftbquests.FTBQuests;
 import dev.ftb.mods.ftbquests.quest.BaseQuestFile;
-import dev.ftb.mods.ftbquests.quest.QuestObject;
+import dev.ftb.mods.ftbquests.quest.QuestObjectBase;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
@@ -69,7 +69,7 @@ public class TranslationTable {
 
         map.forEach((key, val) -> {
             String[] parts = key.split("\\.");
-            QuestObject qo = file.get(BaseQuestFile.parseCodeString(parts[1]));
+            QuestObjectBase qo = file.getBase(BaseQuestFile.parseCodeString(parts[1]));
             if (qo != null) {
                 Path path = getPathForQuestObject(qo);
                 if (path != null) {
@@ -100,7 +100,7 @@ public class TranslationTable {
         return new TranslationTable(map);
     }
 
-    private static @Nullable Path getPathForQuestObject(QuestObject qo) {
+    private static @Nullable Path getPathForQuestObject(QuestObjectBase qo) {
         return switch (qo.getObjectType()) {
             case QUEST, TASK, QUEST_LINK -> qo.getQuestChapter() != null ?
                     Path.of("chapters").resolve(qo.getQuestChapter().getFilename() + BaseQuestFile.FILE_SUFFIX) :
@@ -151,5 +151,9 @@ public class TranslationTable {
 
     public boolean contains(String key) {
         return map.containsKey(key);
+    }
+
+    public Either<String, List<String>> getEntry(String key, Either<String, List<String>> def) {
+        return map.getOrDefault(key, def);
     }
 }

@@ -6,6 +6,7 @@ import dev.ftb.mods.ftblibrary.platform.network.Play2ServerNetworking;
 import dev.ftb.mods.ftblibrary.util.TooltipList;
 import dev.ftb.mods.ftbquests.FTBQuests;
 import dev.ftb.mods.ftbquests.client.gui.EmergencyItemsScreen;
+import dev.ftb.mods.ftbquests.client.gui.QuestFileChangelog;
 import dev.ftb.mods.ftbquests.client.gui.quests.QuestScreen;
 import dev.ftb.mods.ftbquests.net.DeleteObjectMessage;
 import dev.ftb.mods.ftbquests.quest.*;
@@ -43,8 +44,10 @@ public class ClientQuestFile extends BaseQuestFile {
 	private QuestScreen.@Nullable PersistedData persistedData;
 	private boolean editorPermission;
 
+	private final QuestFileChangelog changelog = new QuestFileChangelog();
+
 	public static boolean exists() {
-		return INSTANCE != null && !INSTANCE.invalid;
+		return INSTANCE != null && INSTANCE.isValid();
 	}
 
 	public static ClientQuestFile getInstance() {
@@ -58,7 +61,6 @@ public class ClientQuestFile extends BaseQuestFile {
 
 		if (INSTANCE != null) {
 			// clean up the previous instance
-			INSTANCE.deleteChildren();
 			INSTANCE.deleteSelf();
 		}
 
@@ -148,8 +150,13 @@ public class ClientQuestFile extends BaseQuestFile {
 	}
 
 	@Override
-	public void deleteObject(long id) {
-		Play2ServerNetworking.send(new DeleteObjectMessage(id));
+	public void deleteObjects(List<Long> ids) {
+		// Don't actually delete the object(s) yet, but just send a deletion request to the server
+		// See FTBQuestNetClient#deleteObject for actual client-side deletion, done on receipt of
+		//   the server deletion response
+		if (!ids.isEmpty()) {
+			Play2ServerNetworking.send(new DeleteObjectMessage(ids));
+		}
 	}
 
 	@Override
@@ -251,4 +258,8 @@ public class ClientQuestFile extends BaseQuestFile {
 	public boolean isChapterSelected(Chapter chapter) {
 		return getQuestScreen().map(screen -> screen.isChapterSelected(chapter)).orElse(false);
 	}
+
+    public QuestFileChangelog getChangelog() {
+        return changelog;
+    }
 }

@@ -14,20 +14,18 @@ public enum ItemTaskClient implements TaskClient {
 
     @Override
     public void onButtonClicked(Task task, Button button, boolean canClick) {
-        if (!(task instanceof ItemTask itemTask)) {
-            return;
-        }
+        ensureTaskType(task, ItemTask.class).ifPresent(itemTask -> {
+            button.playClickSound();
 
-        button.playClickSound();
+            List<ItemStack> validItems = itemTask.getValidDisplayItems();
 
-        List<ItemStack> validItems = itemTask.getValidDisplayItems();
-
-        if (!itemTask.consumesResources() && validItems.size() == 1 && FTBQuests.getRecipeModHelper().isRecipeModAvailable()) {
-            FTBQuests.getRecipeModHelper().showRecipes(validItems.getFirst());
-        } else if (validItems.isEmpty()) {
-            FTBQuestsClient.showErrorToast(Component.literal("No valid items!"), Component.literal("Report this bug to modpack author!"));
-        } else {
-            new ValidItemsScreen(itemTask, validItems, canClick).openGui();
-        }
+            if (!task.consumesResources() && validItems.size() == 1 && FTBQuests.getRecipeModHelper().isRecipeModAvailable()) {
+                FTBQuests.getRecipeModHelper().showRecipes(validItems.getFirst());
+            } else if (validItems.isEmpty()) {
+                FTBQuestsClient.showErrorToast(Component.literal("No valid items!"), Component.literal("Report this bug to modpack author!"));
+            } else {
+                new ValidItemsScreen(itemTask, validItems, canClick).openGui();
+            }
+        });
     }
 }

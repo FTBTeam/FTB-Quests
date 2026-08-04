@@ -126,13 +126,12 @@ public class GenerateChapterCommand {
             quest.setY(row);
             quest.setRawSubtitle(ItemStack.CODEC.encodeStart(source.registryAccess().createSerializationContext(NbtOps.INSTANCE), stack).getOrThrow().toString());
 
-            Server2PlayNetworking.sendToAllPlayers(source.getServer(), CreateObjectResponseMessage.create(quest, null));
-
             ItemTask task = new ItemTask(chapter.file.newID(), quest);
             task.onCreated();
             task.setStackAndCount(stack, 1);//.setConsumeItems(Tristate.TRUE);
 
-            Server2PlayNetworking.sendToAllPlayers(source.getServer(), CreateObjectResponseMessage.create(task, task.getType().makeExtraJson()));
+            // FIXME not creating properly on the server
+            Server2PlayNetworking.sendToAllPlayers(source.getServer(), CreateObjectResponseMessage.create(List.of(quest, task), null));
 
             col++;
         }

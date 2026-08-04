@@ -1,7 +1,7 @@
 package dev.ftb.mods.ftbquests.client.gui.quests;
 
 import com.mojang.blaze3d.platform.InputConstants;
-import de.marhali.json5.Json5Object;
+import com.mojang.datafixers.util.Pair;
 import dev.ftb.mods.ftblibrary.client.config.editable.EditableDouble;
 import dev.ftb.mods.ftblibrary.client.config.gui.EditStringConfigOverlay;
 import dev.ftb.mods.ftblibrary.client.gui.input.MouseButton;
@@ -18,7 +18,9 @@ import dev.ftb.mods.ftblibrary.icon.Icon;
 import dev.ftb.mods.ftblibrary.icon.Icons;
 import dev.ftb.mods.ftblibrary.math.PixelBuffer;
 import dev.ftb.mods.ftblibrary.platform.network.Play2ServerNetworking;
+import dev.ftb.mods.ftblibrary.util.Lazy;
 import dev.ftb.mods.ftblibrary.util.TooltipList;
+import dev.ftb.mods.ftblibrary.util.Vec2d;
 import dev.ftb.mods.ftbquests.client.FTBQuestsClient;
 import dev.ftb.mods.ftbquests.client.FTBQuestsClientConfig;
 import dev.ftb.mods.ftbquests.client.gui.ContextMenuBuilder;
@@ -31,6 +33,8 @@ import dev.ftb.mods.ftbquests.quest.reward.RewardType;
 import dev.ftb.mods.ftbquests.quest.reward.RewardTypes;
 import dev.ftb.mods.ftbquests.quest.theme.property.ThemeProperties;
 import dev.ftb.mods.ftbquests.util.TextUtils;
+import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
+import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.network.chat.Component;
@@ -47,13 +51,20 @@ import java.util.Optional;
 public class QuestButton extends Button implements QuestPositionableButton {
 	protected final QuestScreen questScreen;
 	final Quest quest;
-	@Nullable private Collection<QuestButton> dependencies = null;
+
+	// bezier control points, mapped to screen coords
+	private final Long2ObjectMap<Pair<Vec2d, Vec2d>> controlPoints = new Long2ObjectOpenHashMap<>();
+	private final Long2ObjectMap<List<Vec2d>> bezierCache; // caches points for connection lines/curves
+
+	private final Lazy<Long2ObjectMap<QuestButton>> dependencies = Lazy.of(this::buildDependencies);
+	private final Lazy<QuestShape> shape = Lazy.of(() -> QuestShape.get(getShape()));
 
 	public QuestButton(Panel panel, Quest quest) {
 		super(panel, quest.getTitle(), quest.getIcon());
 		questScreen = (QuestScreen) panel.getGui();
 		setSize(20, 20);
 		this.quest = quest;
+		this.bezierCache = new Long2ObjectOpenHashMap<>();
 	}
 
 	@Override
@@ -113,26 +124,30 @@ public class QuestButton extends Button implements QuestPositionableButton {
 		}
 	}
 
-	public Collection<QuestButton> getDependencies() {
-		if (dependencies == null) {
-			List<QuestButton> list = new ArrayList<>();
-			quest.streamDependencies().forEach(dependency -> {
-				if (dependency.isValid() && dependency instanceof Quest) {
-					for (Widget widget : questScreen.questPanel.getWidgets()) {
-						if (widget instanceof QuestButton qb && dependency == qb.quest) {
-							list.add(qb);
-						}
+	private Long2ObjectMap<QuestButton> buildDependencies() {
+		Long2ObjectMap<QuestButton> deps = new Long2ObjectOpenHashMap<>();
+		quest.streamDependencies().forEach(dependency -> {
+			if (dependency.isValid() && dependency instanceof Quest) {
+				for (Widget widget : questScreen.questPanel.getWidgets()) {
+					if (widget instanceof QuestButton qb && dependency == qb.quest) {
+						deps.put(dependency.getId(), qb);
 					}
 				}
-			});
-			dependencies = List.copyOf(list);
-		}
+			}
+		});
+		return deps;
+	}
 
-		return dependencies;
+	public Long2ObjectMap<QuestButton> getDependencies() {
+		return dependencies.get();
 	}
 
 	@Override
 	public void onClicked(MouseButton button) {
+		if (questScreen.questPanel.bezierController.isActive()) {
+			return;
+		}
+
 		playClickSound();
 
 		boolean canEdit = questScreen.file.canEdit();
@@ -144,7 +159,7 @@ public class QuestButton extends Button implements QuestPositionableButton {
 				addMultiselectionContextMenuItems(contextMenu, selected);
 				getGui().openContextMenu(contextMenu);
 			} else {
-				ContextMenuBuilder.create(theQuestObject(), questScreen)
+				ContextMenuBuilder.create(theQuestObject(), questScreen, this)
 						.withDeletionFocus(moveAndDeleteFocus())
 						.openContextMenu(getGui());
 			}
@@ -185,36 +200,38 @@ public class QuestButton extends Button implements QuestPositionableButton {
 		if (!selected.contains(quest)) {
 			contextMenu.add(new ContextMenuItem(Component.translatable("ftbquests.gui.add_dependencies"),
 					ThemeProperties.ADD_ICON.get(),
-					b -> selected.forEach(q -> editDependency(quest, q, true)))
+					_ -> selected.forEach(q -> editDependency(quest, q, true)))
 			);
 			contextMenu.add(new ContextMenuItem(Component.translatable("ftbquests.gui.remove_dependencies"),
 					ThemeProperties.DELETE_ICON.get(),
-					b -> selected.forEach(q -> editDependency(quest, q, false)))
+					_ -> selected.forEach(q -> editDependency(quest, q, false)))
 			);
 			contextMenu.add(new ContextMenuItem(Component.translatable("ftbquests.gui.add_dependencies_self"),
 					ThemeProperties.ADD_ICON.get(),
-					b -> selected.forEach(q -> editDependency(q, quest, true)))
+					_ -> selected.forEach(q -> editDependency(q, quest, true)))
 			);
 			contextMenu.add(new ContextMenuItem(Component.translatable("ftbquests.gui.remove_dependencies_self"),
 					ThemeProperties.DELETE_ICON.get(),
-					b -> selected.forEach(q -> editDependency(q, quest, false)))
+					_ -> selected.forEach(q -> editDependency(q, quest, false)))
 			);
 		} else {
 			contextMenu.add(new ContextMenuItem(Component.translatable("gui.move"),
 					ThemeProperties.MOVE_UP_ICON.get(quest),
-					b -> questScreen.movingObjects = true));
+					_ -> questScreen.movingObjects = true));
 			contextMenu.add(new ContextMenuItem(Component.translatable("ftbquests.gui.add_reward_all"),
 					ThemeProperties.ADD_ICON.get(quest),
-					b -> openAddRewardContextMenu()));
+					_ -> openAddRewardContextMenu()));
 			contextMenu.add(new ContextMenuItem(Component.translatable("ftbquests.gui.clear_reward_all"),
 					ThemeProperties.CLOSE_ICON.get(quest),
-					b -> selected.forEach(q -> q.getRewards().forEach(r -> Play2ServerNetworking.send(new DeleteObjectMessage(r.id))))));
+					_ -> selected.forEach(q -> Play2ServerNetworking.send(
+							new DeleteObjectMessage(q.getRewards().stream().map(QuestObjectBase::getId).toList())
+					))));
 			contextMenu.add(new ContextMenuItem(Component.translatable("ftbquests.gui.bulk_change_size"),
 					Icons.SETTINGS,
-					b -> bulkChangeSize()));
+					_ -> bulkChangeSize()));
 			contextMenu.add(new ContextMenuItem(Component.translatable("selectServer.delete"),
 					ThemeProperties.DELETE_ICON.get(quest),
-					b -> questScreen.deleteSelectedObjects())
+					_ -> questScreen.deleteSelectedObjects())
 					.setYesNoText(Component.translatable("delete_item", Component.translatable("ftbquests.quests").append(" [" + questScreen.selectedObjects.size() + "]"))));
 		}
 
@@ -239,12 +256,8 @@ public class QuestButton extends Button implements QuestPositionableButton {
 
 		EditStringConfigOverlay<Double> overlay = new EditStringConfigOverlay<>(getGui(), editable, accepted -> {
 			if (accepted) {
-				quests.forEach(q -> {
-					if (editable.getValue() != null) {
-						q.setSize(editable.getValue());
-						Play2ServerNetworking.send(EditObjectMessage.forQuestObject(q));
-					}
-				});
+				quests.forEach(q -> q.setSize(editable.getValue()));
+				Play2ServerNetworking.send(EditObjectMessage.forQuestObjects(quests));
 			}
 			run();
 		}, Component.translatable("ftbquests.quest.appearance.size")).atMousePosition();
@@ -257,14 +270,12 @@ public class QuestButton extends Button implements QuestPositionableButton {
 
 		for (RewardType type : RewardTypes.TYPES.values()) {
 			if (type.getGuiProvider() != null) {
-				contextMenu2.add(new ContextMenuItem(type.getDisplayName(), type.getIconSupplier(), b -> {
+				contextMenu2.add(new ContextMenuItem(type.getDisplayName(), type.getIconSupplier(), _ -> {
 					playClickSound();
 					type.getGuiProvider().openCreationGui(parent, quest, reward -> questScreen.getSelectedQuests().forEach(quest -> {
 						Reward newReward = QuestObjectBase.copy(reward, () -> type.createReward(0L, quest));
-                        Json5Object extra = new Json5Object();
-                        extra.addProperty("type", type.getTypeForSerialization());
-                        Play2ServerNetworking.send(CreateObjectMessage.create(newReward, extra));
-                    }));
+						Play2ServerNetworking.send(CreateObjectMessage.requestCreation(newReward));
+					}));
 				}));
 			}
 		}
@@ -308,9 +319,9 @@ public class QuestButton extends Button implements QuestPositionableButton {
 
 		TeamData teamData = questScreen.file.selfTeamData;
 
-        if (teamData.isStarted(quest) && !teamData.isCompleted(quest)) {
-            title = title.copy().append(Component.literal(" " + teamData.getRelativeProgress(quest) + "%").withStyle(ChatFormatting.DARK_GRAY));
-        }
+		if (teamData.isStarted(quest) && !teamData.isCompleted(quest)) {
+			title = title.copy().append(Component.literal(" " + teamData.getRelativeProgress(quest) + "%").withStyle(ChatFormatting.DARK_GRAY));
+		}
 
 		TextUtils.processComponentWithPossibleNewlines(title, list::add);
 
@@ -324,12 +335,12 @@ public class QuestButton extends Button implements QuestPositionableButton {
 		}
 		if (quest.canBeRepeated()) {
 			list.add(ComponentUtils.wrapInSquareBrackets(Component.translatable("ftbquests.quest.misc.can_repeat")).withStyle(ChatFormatting.GRAY));
-            int completionCount = teamData.getCompletionCount(quest);
-            if (completionCount > 0) {
-                String key = completionCount > 1 ? "ftbquests.quest.misc.completion_count.plural" : "ftbquests.quest.misc.completion_count";
-                list.add(Component.translatable(key, completionCount).withStyle(ChatFormatting.GRAY));
-            }
-        }
+			int completionCount = teamData.getCompletionCount(quest);
+			if (completionCount > 0) {
+				String key = completionCount > 1 ? "ftbquests.quest.misc.completion_count.plural" : "ftbquests.quest.misc.completion_count";
+				list.add(Component.translatable(key, completionCount).withStyle(ChatFormatting.GRAY));
+			}
+		}
 		if (!teamData.canStartTasks(quest)) {
 			Component reason = teamData.getCannotStartReason(this.quest);
 			list.add(ComponentUtils.wrapInSquareBrackets(reason).withStyle(ChatFormatting.DARK_GRAY));
@@ -383,13 +394,13 @@ public class QuestButton extends Button implements QuestPositionableButton {
 			hiddenIcon = ThemeProperties.HIDDEN_ICON.get();
 		}
 
-		QuestShape shape = QuestShape.get(getShape());
+		QuestShape questShape = shape.get();
 
-		if (shape.shouldDraw()) {
-			IconHelper.renderIcon(shape.getShape().withColor(Color4I.DARK_GRAY), graphics, x, y, w, h);
+		if (questShape.shouldDraw()) {
+			IconHelper.renderIcon(questShape.getShape().withColor(Color4I.DARK_GRAY), graphics, x, y, w, h);
 			graphics.nextStratum();
-			IconHelper.renderIcon(shape.getBackground().withColor(Color4I.WHITE.withAlpha(150)), graphics, x, y, w, h);
-			IconHelper.renderIcon(shape.getOutline().withColor(outlineColor), graphics, x, y, w, h);
+			IconHelper.renderIcon(questShape.getBackground().withColor(Color4I.WHITE.withAlpha(150)), graphics, x, y, w, h);
+			IconHelper.renderIcon(questShape.getOutline().withColor(outlineColor), graphics, x, y, w, h);
 		}
 
 		Matrix3x2fStack poseStack = graphics.pose();
@@ -404,13 +415,13 @@ public class QuestButton extends Button implements QuestPositionableButton {
 
 		if (questScreen.getViewedQuest() == quest || questScreen.selectedObjects.contains(moveAndDeleteFocus())) {
 			Color4I col = Color4I.WHITE.withAlpha((int) (190D + Math.sin(System.currentTimeMillis() * 0.003D) * 50D));
-			IconHelper.renderIcon(shape.getOutline().withColor(col), graphics, x, y, w, h);
-			IconHelper.renderIcon(shape.getBackground().withColor(col), graphics, x, y, w, h);
+			IconHelper.renderIcon(questShape.getOutline().withColor(col), graphics, x, y, w, h);
+			IconHelper.renderIcon(questShape.getBackground().withColor(col), graphics, x, y, w, h);
 		}
 
 		if (!canStart || !teamData.areDependenciesComplete(quest)) {
-			if (shape.shouldDraw()) {
-				IconHelper.renderIcon(shape.getShape().withColor(Color4I.BLACK.withAlpha(100)), graphics, x, y, w, h);
+			if (questShape.shouldDraw()) {
+				IconHelper.renderIcon(questShape.getShape().withColor(Color4I.BLACK.withAlpha(100)), graphics, x, y, w, h);
 			}
 			if (quest.getQuestFile().showLockIcons() && FTBQuestsClientConfig.SHOW_LOCK_ICON.get()) {
 				lockIcon = ThemeProperties.LOCK_ICON.get();
@@ -420,7 +431,7 @@ public class QuestButton extends Button implements QuestPositionableButton {
 		graphics.nextStratum();
 
 		if (isMouseOver()) {
-			IconHelper.renderIcon(shape.getShape().withColor(Color4I.WHITE.withAlpha(100)), graphics, x, y, w, h);
+			IconHelper.renderIcon(questShape.getShape().withColor(Color4I.WHITE.withAlpha(100)), graphics, x, y, w, h);
 		}
 
 		if (!questIcon.isEmpty()) {
@@ -467,5 +478,70 @@ public class QuestButton extends Button implements QuestPositionableButton {
 	@Override
 	public Movable moveAndDeleteFocus() {
 		return (Movable) theQuestObject();
+	}
+
+	public List<Vec2d> getConnectionPoints(QuestButton other, double dist) {
+		Vec2d ourPos = new Vec2d((float) (getX() + getWidth() / 2), (float) (getY() + getHeight() / 2));
+		Vec2d otherPos = new Vec2d((float) (other.getX() + other.getWidth() / 2), (float) (other.getY() + other.getHeight() / 2));
+
+		List<Vec2d> list = bezierCache.get(other.quest.getId());
+		if (list == null) {
+			var controlPts = controlPoints.get(other.quest.getId());
+			if (controlPts == null) {
+				// simple case - no control points, just a straight line from them to us
+				list = List.of(Vec2d.ZERO, otherPos.sub(ourPos));
+			} else {
+				// do a bezier calculation
+				int nPoints = Math.max(20, (int) (2.0 + dist / 20.0));
+				float incr = 1f / nPoints;
+				Vec2d panelOff = new Vec2d(questScreen.questPanel.getX(), questScreen.questPanel.getY());
+				Vec2d ctrl1 = controlPts.getFirst().add(panelOff);
+				Vec2d ctrl2 = controlPts.getSecond().add(panelOff);
+				list = new ArrayList<>();
+				for (float t = 0f; t <= 1f; t += incr) {
+					Vec2d point = ourPos.scale((1f - t) * (1f - t) * (1f - t))
+							.add(ctrl2.scale(3 * (1f - t) * (1f - t) * t))
+							.add(ctrl1.scale(3 * (1f - t) * t * t))
+							.add(otherPos.scale(t * t * t));
+					list.add((point.sub(ourPos)));
+				}
+				list.add(otherPos.sub(ourPos));  // ensure connection doesn't stop short
+			}
+			bezierCache.put(other.quest.getId(), list);
+		}
+		return list;
+	}
+
+	@Nullable
+	public Pair<Vec2d, Vec2d> getControlPoints(QuestObject qo) {
+		return controlPoints.get(qo.getId());
+	}
+
+	public void positionControlPoints() {
+		// convert control point data in the quest to coordinates in the widget's screen space
+		controlPoints.clear();
+		bezierCache.clear();
+
+		var questControlPoints = quest.getBezierControlPoints();
+		if (questControlPoints.isEmpty()) {
+			return;
+		}
+		double questMinX = questScreen.questPanel.questMinX;
+		double questMinY = questScreen.questPanel.questMinY;
+		double bs = questScreen.getQuestButtonSize();
+		double bp = questScreen.getQuestButtonSpacing();
+		double qw = getPosition().w();
+		double qh = getPosition().h();
+		questControlPoints.forEach((id, points) -> {
+			Vec2d p0 = points.getFirst();
+			float x0 = (float) ((p0.x() - questMinX - qw / 2D) * (bs + bp) + bp / 2D + bp * (qw - 1D) / 2D);
+			float y0 = (float) ((p0.y() - questMinY - qh / 2D) * (bs + bp) + bp / 2D + bp * (qh - 1D) / 2D);
+
+			Vec2d p1 = points.getSecond();
+			float x1 = (float) ((p1.x() - questMinX - qw / 2D) * (bs + bp) + bp / 2D + bp * (qw - 1D) / 2D);
+			float y1 = (float) ((p1.y() - questMinY - qh / 2D) * (bs + bp) + bp / 2D + bp * (qh - 1D) / 2D);
+
+			controlPoints.put(id.longValue(), Pair.of(new Vec2d(x0, y0), new Vec2d(x1, y1)));
+		});
 	}
 }

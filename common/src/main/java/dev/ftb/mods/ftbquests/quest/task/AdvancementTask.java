@@ -86,9 +86,10 @@ public class AdvancementTask extends AbstractBooleanTask {
 
 	@Override
 	public Component getAltTitle() {
-		KnownServerRegistries.AdvancementInfo info = KnownServerRegistries.client == null ?
+		KnownServerRegistries reg = getQuestFile().isServerSide() ? KnownServerRegistries.server : KnownServerRegistries.client;
+		KnownServerRegistries.AdvancementInfo info = reg == null ?
 				null :
-				KnownServerRegistries.client.advancements().get(advancement);
+				reg.advancements().get(advancement);
 
 		if (info != null && !TextUtils.isComponentEmpty(info.name())) {
 			return Component.translatable("ftbquests.task.ftbquests.advancement").append(": ").append(Component.literal("").append(info.name()).withStyle(ChatFormatting.YELLOW));

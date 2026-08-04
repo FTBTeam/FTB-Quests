@@ -808,15 +808,30 @@ public class TeamData {
 				.ifPresent(map::putAll);
 	}
 
+    public boolean isProgressionPaused(Player player) {
+		return getOrCreatePlayerData(player).map(d -> d.progressionPaused).orElse(false);
+    }
+
+    public void setProgressionPaused(ServerPlayer player, boolean pauseProgression) {
+		getOrCreatePlayerData(player).ifPresent(d -> {
+			if (d.progressionPaused != pauseProgression) {
+				d.progressionPaused = pauseProgression;
+				markDirty();
+			}
+        });
+    }
+
 	private static class PerPlayerData {
 		public static final Codec<PerPlayerData> CODEC = RecordCodecBuilder.create(builder -> builder.group(
 				Codec.BOOL.optionalFieldOf("can_edit", false).forGetter(p -> p.canEdit),
 				Codec.BOOL.optionalFieldOf("auto_pin", false).forGetter(p -> p.autoPin),
+				Codec.BOOL.optionalFieldOf("progression_paused", false).forGetter(p -> p.progressionPaused),
 				FTBQCodecs.LONG_SET_CODEC.optionalFieldOf("pinned_quests", new LongArraySet()).forGetter(p -> p.pinnedQuests)
 		).apply(builder, PerPlayerData::new));
 		public static final StreamCodec<FriendlyByteBuf, PerPlayerData> STREAM_CODEC = StreamCodec.composite(
 				ByteBufCodecs.BOOL, p -> p.canEdit,
 				ByteBufCodecs.BOOL, p -> p.autoPin,
+				ByteBufCodecs.BOOL, p -> p.progressionPaused,
 				FTBQCodecs.LONG_SET_STREAM_CODEC, p -> p.pinnedQuests,
 				PerPlayerData::new
 		);
@@ -827,16 +842,18 @@ public class TeamData {
 
 		private boolean canEdit;
 		private boolean autoPin;
+		private boolean progressionPaused;
 		private final LongSet pinnedQuests;
 
 		PerPlayerData() {
-			canEdit = autoPin = false;
+			canEdit = autoPin = progressionPaused = false;
 			pinnedQuests = new LongOpenHashSet();
 		}
 
-		PerPlayerData(boolean canEdit, boolean autoPin, LongSet pinnedQuests) {
+		PerPlayerData(boolean canEdit, boolean autoPin, boolean progressionPaused, LongSet pinnedQuests) {
 			this.canEdit = canEdit;
 			this.autoPin = autoPin;
+			this.progressionPaused = progressionPaused;
 			this.pinnedQuests = pinnedQuests;
 		}
 	}

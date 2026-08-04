@@ -56,6 +56,11 @@ public class FluidTask extends Task {
 	}
 
 	@Override
+	public TaskClient client() {
+		return FluidTaskClient.INSTANCE;
+	}
+
+	@Override
 	public TaskType getType() {
 		return TaskTypes.FLUID;
 	}

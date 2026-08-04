@@ -11,17 +11,17 @@ import dev.ftb.mods.ftblibrary.json5.Json5Ops;
 import dev.ftb.mods.ftblibrary.json5.Json5Util;
 import dev.ftb.mods.ftblibrary.math.Bits;
 import dev.ftb.mods.ftblibrary.platform.network.Play2ServerNetworking;
+import dev.ftb.mods.ftbquests.FTBQuests;
 import dev.ftb.mods.ftbquests.api.FTBQuestsAPI;
 import dev.ftb.mods.ftbquests.client.ClientQuestFile;
 import dev.ftb.mods.ftbquests.client.config.EditableIconItemStack;
 import dev.ftb.mods.ftbquests.integration.RecipeModHelper;
 import dev.ftb.mods.ftbquests.item.CustomIconItem;
+import dev.ftb.mods.ftbquests.item.MissingItem;
 import dev.ftb.mods.ftbquests.net.EditObjectMessage;
 import dev.ftb.mods.ftbquests.net.SyncTranslationMessageToServer;
 import dev.ftb.mods.ftbquests.quest.theme.property.ThemeProperties;
 import dev.ftb.mods.ftbquests.quest.translation.TranslationKey;
-import dev.ftb.mods.ftbquests.registry.ModDataComponents;
-import dev.ftb.mods.ftbquests.registry.ModItems;
 import dev.ftb.mods.ftbquests.util.NetUtils;
 import dev.ftb.mods.ftbquests.util.ProgressChange;
 import dev.ftb.mods.ftbquests.util.TextUtils;
@@ -30,7 +30,6 @@ import net.minecraft.core.HolderLookup;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
-import net.minecraft.util.Util;
 import net.minecraft.world.item.ItemStack;
 import org.jspecify.annotations.Nullable;
 
@@ -45,7 +44,7 @@ public abstract class QuestObjectBase implements Comparable<QuestObjectBase> {
 
 	public final long id;
 
-	protected boolean invalid = false;
+	private boolean invalid = false;
 	private ItemStack rawIcon = ItemStack.EMPTY;
 	private List<String> tags = new ArrayList<>(0);
 
@@ -88,19 +87,16 @@ public abstract class QuestObjectBase implements Comparable<QuestObjectBase> {
 	}
 
 	public static ItemStack itemOrMissingFromJson(Json5Object json, HolderLookup.Provider provider) {
-		return json.isEmpty() ?
-				ItemStack.EMPTY :
-				ItemStack.CODEC.parse(provider.createSerializationContext(Json5Ops.INSTANCE), json).result()
-								.orElse(createMissing(json));
-	}
+		if (json.isEmpty()) {
+			return ItemStack.EMPTY;
+		}
 
-	private static ItemStack createMissing(Json5Object json) {
-		String id = Json5Util.getString(json, "id").orElse("unknown");
-		int count = Math.max(1, Json5Util.getInt(json, "count").orElse(1));
-		String text = count == 1 ? id : count + "x " + id;
-
-		return Util.make(new ItemStack(ModItems.MISSING_ITEM.get()),
-				stack -> stack.set(ModDataComponents.MISSING_ITEM_DESC.get(), text));
+		var res = ItemStack.CODEC.parse(provider.createSerializationContext(Json5Ops.INSTANCE), json);
+		if (res.isSuccess()) {
+			return MissingItem.maybeRestoreItem(res.getOrThrow(), provider);
+		} else {
+			return MissingItem.createFromJson(json);
+		}
 	}
 
 	public final boolean isValid() {
@@ -335,7 +331,9 @@ public abstract class QuestObjectBase implements Comparable<QuestObjectBase> {
 		}
 
 		if (!getRawTitle().isEmpty()) {
-			cachedTitle = TextUtils.parseRawText(getRawTitle(), holderLookup());
+			cachedTitle = getQuestFile().isServerSide() ?
+					Component.literal(getRawTitle()) :
+					TextUtils.parseRawText(getRawTitle(), holderLookup());
 		} else {
 			cachedTitle = getAltTitle();
 		}
@@ -344,7 +342,8 @@ public abstract class QuestObjectBase implements Comparable<QuestObjectBase> {
 	}
 
 	public final MutableComponent getMutableTitle() {
-		return getTitle().copy();
+		Component t = getTitle();
+		return t instanceof MutableComponent m ? m : t.copy();
 	}
 
 	public final Icon<?> getIcon() {
@@ -363,12 +362,21 @@ public abstract class QuestObjectBase implements Comparable<QuestObjectBase> {
 
 	}
 
+	/**
+	 * Called on object deletion. Responsible for cleaning up any self data and also any child objects
+	 * (chapter -> quests, quest -> tasks etc.)
+	 */
 	public void deleteSelf() {
-		getQuestFile().remove(id);
+		invalidate();
+
+		if (getQuestFile().removeFromMap(id) == null) {
+			FTBQuests.LOGGER.warn("tried to remove quest object {} from ID map, but it wasn't present!", this);
+		}
 	}
 
-	public void deleteChildren() {
-	}
+    public void invalidate() {
+        invalid = true;
+    }
 
 	public void editedFromGUI() {
 		ClientQuestFile.getInstance().refreshGui();
@@ -378,6 +386,9 @@ public abstract class QuestObjectBase implements Comparable<QuestObjectBase> {
 	}
 
 	public void onCreated() {
+		if (getQuestFile().addToMap(this) != null) {
+			FTBQuests.LOGGER.warn("quest object {} already in ID map, overwriting!", this);
+		}
 	}
 
 	public Optional<String> getPath() {
@@ -394,7 +405,7 @@ public abstract class QuestObjectBase implements Comparable<QuestObjectBase> {
 		return group.getOrCreateSubgroup(getObjectType().getId());
 	}
 
-	public void onEditButtonClicked(Runnable gui) {
+	public void onEditButtonClicked(Runnable gui, Component title) {
 		EditableConfigGroup group = new EditableConfigGroup(FTBQuestsAPI.MOD_ID, accepted -> {
 			gui.run();
 			if (accepted && validateEditedConfig()) {
@@ -404,7 +415,7 @@ public abstract class QuestObjectBase implements Comparable<QuestObjectBase> {
 			@Override
 			public Component getName() {
 				MutableComponent type = Component.literal(" [").append(Component.translatable("ftbquests." + getObjectType().getId())).append("]").withStyle(getObjectType().getColor());
-				return Component.empty().append(getTitle().copy().withStyle(ChatFormatting.UNDERLINE)).append(type);
+				return Component.empty().append(title.copy().withStyle(ChatFormatting.UNDERLINE)).append(type);
 			}
 		};
 
@@ -416,6 +427,10 @@ public abstract class QuestObjectBase implements Comparable<QuestObjectBase> {
 				return group.getName();
 			}
 		}.openGui();
+	}
+
+	public final void onEditButtonClicked(Runnable gui) {
+		onEditButtonClicked(gui, getTitle());
 	}
 
 	protected boolean validateEditedConfig() {
@@ -431,6 +446,7 @@ public abstract class QuestObjectBase implements Comparable<QuestObjectBase> {
 		Json5Object tag = new Json5Object();
 		orig.writeData(tag, orig.holderLookup());
 		copied.readData(tag, orig.holderLookup());
+		copied.setRawTitle(orig.getRawTitle());
 		return copied;
 	}
 
@@ -446,11 +462,18 @@ public abstract class QuestObjectBase implements Comparable<QuestObjectBase> {
 		return getQuestFile().holderLookup();
 	}
 
-//	protected CompoundTag saveItemSingleLine(ItemStack stack) {
-//		if (stack.isEmpty()) {
-//			return new SNBTCompoundTag();
-//		}
-//
-//		return Util.make(SNBTCompoundTag.of(ItemStack.CODEC.encodeStart(holderLookup().createSerializationContext(NbtOps.INSTANCE), stack).getOrThrow()), SNBTCompoundTag::singleLine);
-//	}
+	/**
+	 * Build the extra NBT data sent along with a quest object creation request to the server. Default is to include
+	 * the initial raw title text for insertion into the translation manager. Override to augment this with any other
+	 * extra data that needs to be handled in {@link BaseQuestFile#create(long, QuestObjectType, long, Json5Object)}.
+	 *
+	 * @return some nbt data
+	 */
+	public Json5Object makeCreationMetadata() {
+		Json5Object json = new Json5Object();
+		if (!getRawTitle().isEmpty()) {
+			getQuestFile().getTranslationManager().addInitialTranslation(json, getQuestFile().getLocale(), TranslationKey.TITLE, getRawTitle());
+		}
+		return json;
+	}
 }

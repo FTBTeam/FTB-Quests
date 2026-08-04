@@ -149,21 +149,13 @@ public class RewardTablesScreen extends AbstractButtonListScreen {
 		}
 		editedIndexes.removeAll(pendingDeleteIndexes);
 
-		int nAdded = sendToServer(toCreate, RewardTablesScreen::makeCreationPacket, true);
+		int nAdded = sendToServer(toCreate, table -> CreateObjectMessage.requestCreation(table, false), true);
 		int nEdited = sendToServer(editedIndexes, EditObjectMessage::forQuestObject, false);
 		int nDeleted = sendToServer(pendingDeleteIndexes, DeleteObjectMessage::forQuestObject, false);
 
 		FTBQuests.LOGGER.debug("Sent {} new, {} edited, {} deleted reward tables to server", nAdded, nEdited, nDeleted);
 
 		questScreen.run();
-	}
-
-	private static CreateObjectMessage makeCreationPacket(RewardTable table) {
-		ClientQuestFile file = ClientQuestFile.getInstance();
-		Json5Object extra = Util.make(new Json5Object(), tag -> file.getTranslationManager().addInitialTranslation(
-				tag, file.getLocale(), TranslationKey.TITLE, table.getRawTitle())
-		);
-		return CreateObjectMessage.create(table, extra);
 	}
 
 	private <T extends CustomPacketPayload> int sendToServer(IntSet indexes, Function<RewardTable, T> func, boolean addNew) {

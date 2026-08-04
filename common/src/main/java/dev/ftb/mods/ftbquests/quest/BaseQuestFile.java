@@ -22,11 +22,13 @@ import dev.ftb.mods.ftbquests.api.event.progress.ProgressEventData;
 import dev.ftb.mods.ftbquests.api.event.progress.ProgressType;
 import dev.ftb.mods.ftbquests.client.FTBQuestsClient;
 import dev.ftb.mods.ftbquests.client.config.EditableLocaleConfig;
+import dev.ftb.mods.ftbquests.client.config.EditableVisualPresets;
 import dev.ftb.mods.ftbquests.integration.RecipeModHelper;
 import dev.ftb.mods.ftbquests.net.DeleteObjectResponseMessage;
 import dev.ftb.mods.ftbquests.quest.loot.EntityWeight;
 import dev.ftb.mods.ftbquests.quest.loot.LootCrate;
 import dev.ftb.mods.ftbquests.quest.loot.RewardTable;
+import dev.ftb.mods.ftbquests.quest.preset.VisualPresets;
 import dev.ftb.mods.ftbquests.quest.reward.Reward;
 import dev.ftb.mods.ftbquests.quest.reward.RewardAutoClaim;
 import dev.ftb.mods.ftbquests.quest.reward.RewardType;
@@ -52,6 +54,7 @@ import net.minecraft.util.Util;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.mutable.MutableInt;
 import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
@@ -108,6 +111,9 @@ public abstract class BaseQuestFile extends QuestObject implements QuestFile {
 	private boolean dropBookOnDeath;
 	private String fallbackLocale;
 	private boolean verifyOnLoad;
+	private boolean suppressAllAutoclaiming;
+	protected VisualPresets allPresets;
+	private String presetName;
 
 	@Nullable
 	private List<Task> allTasks;
@@ -149,6 +155,8 @@ public abstract class BaseQuestFile extends QuestObject implements QuestFile {
 		dropBookOnDeath = false;
 		hideExcludedQuests = false;
 		verifyOnLoad = false;
+		allPresets = VisualPresets.EMPTY;
+		presetName = "";
 
 		allTasks = null;
 
@@ -222,26 +230,17 @@ public abstract class BaseQuestFile extends QuestObject implements QuestFile {
 
 	@Override
 	public void deleteSelf() {
-		invalid = true;
-	}
+		invalidate();
 
-	@Override
-	public void deleteChildren() {
-		forAllChapters(chapter -> {
-			chapter.deleteChildren();
-			chapter.invalid = true;
-		});
+		List<Chapter> allChapters = new ArrayList<>();
+		forAllChapters(allChapters::add);
+		allChapters.forEach(Chapter::deleteSelf);
 
 		defaultChapterGroup.clearChapters();
 		chapterGroups.clear();
 		chapterGroups.add(defaultChapterGroup);
 
-		for (RewardTable table : rewardTables) {
-			table.deleteChildren();
-			table.invalid = true;
-		}
-
-		rewardTables.clear();
+		List.copyOf(rewardTables).forEach(RewardTable::deleteSelf);
 	}
 
 	@Nullable
@@ -254,28 +253,19 @@ public abstract class BaseQuestFile extends QuestObject implements QuestFile {
 
 		QuestObjectBase object = questObjectMap.get(id);
 		//noinspection ConstantValue
-		return object == null || object.invalid ? null : object;
+		return object == null || !object.isValid() ? null : object;
 	}
 
 	@Nullable
 	public QuestObject get(long id) {
-		return getBase(id) instanceof QuestObject qo ? qo : null;
-	}
-
-	@Nullable
-	public QuestObjectBase remove(long id) {
-		QuestObjectBase object = questObjectMap.remove(id);
-
-		//noinspection ConstantValue
-		if (object != null) {
-			if (object instanceof QuestObject qo) {
-				forAllQuests(quest -> quest.removeDependency(qo));
+		QuestObjectBase base = getBase(id);
+		if (base != null) {
+			if (base instanceof QuestObject qo) {
+				return qo;
+			} else {
+				FTBQuests.LOGGER.error("object id {} exists but is not a QuestObject! ({})", getCodeString(id), base.getClass().getName());
 			}
-			object.invalid = true;
-			refreshIDMap();
-			return object;
 		}
-
 		return null;
 	}
 
@@ -344,7 +334,11 @@ public abstract class BaseQuestFile extends QuestObject implements QuestFile {
 		return object instanceof ChapterGroup ? (ChapterGroup) object : defaultChapterGroup;
 	}
 
-	public void refreshIDMap() {
+	/**
+	 * Rebuild the id -> quest object map after some object has been added or removed. Also clears all cached data for
+	 * all known objects, forcing a re-cache on the next access.
+	 */
+	protected void refreshIDMap() {
 		clearCachedData();
 		questObjectMap.clear();
 
@@ -371,44 +365,41 @@ public abstract class BaseQuestFile extends QuestObject implements QuestFile {
 		rewardTables.forEach(table -> table.getWeightedRewards().forEach(wr -> questObjectMap.put(wr.getReward().id, wr.getReward())));
 	}
 
-	public QuestObjectBase create(long id, QuestObjectType type, long parent, Json5Object extraData) {
-		switch (type) {
-			case CHAPTER -> {
-				return new Chapter(id, this, getChapterGroup(Json5Util.getLong(extraData, "group").orElse(0L)));
-			}
-			case QUEST -> {
-				return new Quest(id, getChapterOrThrow(parent));
-			}
-			case QUEST_LINK -> {
-				return new QuestLink(id, getChapterOrThrow(parent), 0L);
-			}
+	private interface QuestObjectGetter<T extends QuestObjectBase> {
+		@Nullable T getBase(long id);
+	}
+
+	private <T extends QuestObjectBase> T requireQuestObject(long id, QuestObjectGetter<T> getter) {
+		T res = getter.getBase(id);
+		if (res == null) {
+			throw new IllegalArgumentException("Quest object " + id + " not found!");
+		}
+		return res;
+	}
+
+	public QuestObjectBase create(long id, QuestObjectType type, long parent, Json5Object metaData) {
+		return switch (type) {
+			case CHAPTER -> new Chapter(id, this, getChapterGroup(Json5Util.getLong(metaData, "group").orElse(0L)));
+			case QUEST -> new Quest(id, requireQuestObject(parent, this::getChapter));
+			case QUEST_LINK -> new QuestLink(id, requireQuestObject(parent, this::getChapter), 0L);
 			case TASK -> {
-				Quest quest = getQuest(parent);
-				if (quest != null) {
-					return TaskType.createTask(id, quest, Json5Util.getString(extraData, "type").orElse(""));
-				}
-				throw new IllegalArgumentException("Parent quest not found!");
+				Quest quest = requireQuestObject(parent, this::getQuest);
+				yield TaskType.requireCreateTask(id, quest, Json5Util.getString(metaData, "type").orElse(""));
 			}
 			case REWARD -> {
-				String rewardType = Json5Util.getString(extraData, "type").orElse("");
+				String rewardType = Json5Util.getString(metaData,"type").orElse("");
 				if (RewardTable.isFakeQuestId(parent)) {
-					return RewardTable.createRewardForTable(id, rewardType, this);
+					yield RewardTable.createRewardForTable(id, rewardType, this);
 				} else {
-					Quest quest = getQuestObjectOrThrow(parent, Quest.class);
-					return RewardType.createReward(id, quest, rewardType);
+					Quest quest = requireQuestObject(parent, this::getQuest);
+                    yield RewardType.requireCreateReward(id, quest, rewardType);
 				}
 			}
-			case REWARD_TABLE -> {
-				return new RewardTable(id, this);
-			}
-			case CHAPTER_GROUP -> {
-				return new ChapterGroup(id, this);
-			}
-			case IMAGE -> {
-				return new ChapterImage(id, getChapterOrThrow(parent));
-			}
-			default -> throw new IllegalArgumentException("Unknown type: " + type);
-		}
+			case REWARD_TABLE -> new RewardTable(id, this);
+			case CHAPTER_GROUP -> new ChapterGroup(id, this);
+			case IMAGE -> new ChapterImage(id, requireQuestObject(parent, this::getChapter));
+			default -> throw new IllegalArgumentException("Unknown/unsupported type: '" + type + "'");
+		};
 	}
 
 	@Override
@@ -436,6 +427,11 @@ public abstract class BaseQuestFile extends QuestObject implements QuestFile {
 		json.addProperty("hide_excluded_quests", hideExcludedQuests);
 		json.addProperty("fallback_locale", fallbackLocale);
 		json.addProperty("verify_on_load", verifyOnLoad);
+		if (suppressAllAutoclaiming) json.addProperty("suppress_all_autoclaiming", true);
+		if (!allPresets.allPresets().isEmpty()) {
+			json.add("presets", allPresets.serialize());
+		}
+		if (!presetName.isEmpty()) json.addProperty("preset", presetName);
 	}
 
 	@Override
@@ -468,16 +464,18 @@ public abstract class BaseQuestFile extends QuestObject implements QuestFile {
 		hideExcludedQuests = Json5Util.getBoolean(json, "hide_excluded_quests").orElse(false);
 		fallbackLocale = Json5Util.getString(json, "fallback_locale").orElse(TranslationManager.DEFAULT_FALLBACK_LOCALE);
 		verifyOnLoad = Json5Util.getBoolean(json, "verify_on_load").orElse(false);
+		suppressAllAutoclaiming = Json5Util.getBoolean(json,"suppress_all_autoclaiming").orElse(false);
+		presetName = Json5Util.getString(json, "preset").orElse("");
+		allPresets = isServerSide() && !json.has("presets") ?
+				VisualPresets.makeDefaults() :
+				Json5Util.getJson5Object(json, "presets").map(VisualPresets::deserialize).orElse(VisualPresets.EMPTY);
 	}
 
 	public final void writeDataFull(Path folder, HolderLookup.Provider provider) {
-		boolean prev = false;
 		try {
 			// Sorting keys ensure consistent sort order in the saved quest file
 			// Since questbook data is commonly stored under version control, this minimizes extraneous
 			//  version control changes stemming from unpredictable hashmap key ordering
-//			prev = SNBT.setShouldSortKeysOnWrite(true);
-
 			Json5Util.save(folder.resolve("data" + FILE_SUFFIX), Util.make(new Json5Object(), j -> {
 				j.addProperty("version", VERSION);
 				writeData(j, provider);
@@ -488,8 +486,6 @@ public abstract class BaseQuestFile extends QuestObject implements QuestFile {
 			writeChapterGroupsFile(folder, provider);
 		} catch (IOException e) {
 			LOGGER.error("Failed to save quest file.", e);
-		} finally {
-//			SNBT.setShouldSortKeysOnWrite(prev);
 		}
 	}
 
@@ -641,7 +637,11 @@ public abstract class BaseQuestFile extends QuestObject implements QuestFile {
 			var data = dataCache.get(object.id);
 			//noinspection ConstantValue
 			if (data != null) {
-				object.readData(data, provider);
+				try {
+					object.readData(data, provider);
+				} catch (Exception ex) {
+					FTBQuests.LOGGER.error("failed to read data for {} {}: {}", object.getClass().getSimpleName(), object.id, ex.getMessage());
+				}
 			}
 		}
 
@@ -706,9 +706,11 @@ public abstract class BaseQuestFile extends QuestObject implements QuestFile {
 						if (taskEl instanceof Json5Object taskJson) {
 							long taskId = readID(taskJson.get("id"));
 							Task task = TaskType.createTask(taskId, quest, Json5Util.getString(taskJson, "type").orElseThrow());
-							questObjectMap.put(task.id, task);
-							dataCache.put(task.id, taskJson);
-							quest.addTask(task);
+							if (task != null) {
+								questObjectMap.put(task.id, task);
+								dataCache.put(task.id, taskJson);
+								quest.addTask(task);
+							}
 						}
 					}
 				});
@@ -718,9 +720,11 @@ public abstract class BaseQuestFile extends QuestObject implements QuestFile {
 						if (rewardEl instanceof Json5Object rewardJson) {
 							long rewardId = readID(rewardJson.get("id"));
 							Reward reward = RewardType.createReward(rewardId, quest, Json5Util.getString(rewardJson, "type").orElseThrow());
-							questObjectMap.put(reward.id, reward);
-							dataCache.put(reward.id, rewardJson);
-							quest.addReward(reward);
+							if (reward != null) {
+								questObjectMap.put(reward.id, reward);
+								dataCache.put(reward.id, rewardJson);
+								quest.addReward(reward);
+							}
 						}
 					}
 				});
@@ -816,6 +820,8 @@ public abstract class BaseQuestFile extends QuestObject implements QuestFile {
 		buffer.writeBoolean(dropBookOnDeath);
 		buffer.writeBoolean(hideExcludedQuests);
 		buffer.writeUtf(fallbackLocale);
+		buffer.writeBoolean(suppressAllAutoclaiming);
+		VisualPresets.STREAM_CODEC.encode(buffer, allPresets);
 	}
 
 	@Override
@@ -842,6 +848,8 @@ public abstract class BaseQuestFile extends QuestObject implements QuestFile {
 		dropBookOnDeath = buffer.readBoolean();
 		hideExcludedQuests = buffer.readBoolean();
 		fallbackLocale = buffer.readUtf();
+		suppressAllAutoclaiming = buffer.readBoolean();
+		allPresets = VisualPresets.STREAM_CODEC.decode(buffer);
 	}
 
 	public final void writeNetDataFull(RegistryFriendlyByteBuf buffer) {
@@ -1004,14 +1012,26 @@ public abstract class BaseQuestFile extends QuestObject implements QuestFile {
 
 					int taskCount = buffer.readVarInt();
 					for (int k = 0; k < taskCount; k++) {
-						TaskType type = taskTypeIds.get(buffer.readVarInt());
-						quest.addTask(type.createTask(buffer.readLong(), quest));
+						int typeId = buffer.readVarInt();
+						TaskType type = taskTypeIds.get(typeId);
+						long id = buffer.readLong();
+						if (type == null) {
+							throw new IllegalStateException("Received quest sync data for an unrecognized task type (internal id "
+									+ typeId + ") - client and server likely have a mismatched set of mods that register quest task/reward types");
+						}
+						quest.addTask(type.createTask(id, quest));
 					}
 
 					int rewardCount = buffer.readVarInt();
 					for (int k = 0; k < rewardCount; k++) {
-						RewardType type = rewardTypeIds.get(buffer.readVarInt());
-						quest.addReward(type.createReward(buffer.readLong(), quest));
+						int typeId = buffer.readVarInt();
+						RewardType type = rewardTypeIds.get(typeId);
+						long id = buffer.readLong();
+						if (type == null) {
+							throw new IllegalStateException("Received quest sync data for an unrecognized reward type (internal id "
+									+ typeId + ") - client and server likely have a mismatched set of mods that register quest task/reward types");
+						}
+						quest.addReward(type.createReward(id, quest));
 					}
 				}
 
@@ -1105,7 +1125,7 @@ public abstract class BaseQuestFile extends QuestObject implements QuestFile {
 		return Collections.unmodifiableCollection(teamDataMap.values());
 	}
 
-	public abstract void deleteObject(long id);
+	public abstract void deleteObjects(List<Long> ids);
 
 	@Override
 	public MutableComponent getAltTitle() {
@@ -1133,6 +1153,8 @@ public abstract class BaseQuestFile extends QuestObject implements QuestFile {
 		config.addBool("drop_book_on_death", dropBookOnDeath, v -> dropBookOnDeath = v, true);
 		config.addBool("hide_excluded_quests", hideExcludedQuests, v -> hideExcludedQuests = v, false);
 		config.add("fallback_locale", new EditableLocaleConfig(), fallbackLocale, v -> fallbackLocale = v, "");
+		config.addBool("suppress_all_autoclaiming", suppressAllAutoclaiming, v -> suppressAllAutoclaiming = v, false);
+		config.add("presets", new EditableVisualPresets(), allPresets, v -> allPresets = v, VisualPresets.EMPTY);
 
 		EditableConfigGroup defaultsGroup = config.getOrCreateSubgroup("defaults");
 		defaultsGroup.addBool("reward_team", defaultPerTeamReward, v -> defaultPerTeamReward = v, false);
@@ -1140,6 +1162,7 @@ public abstract class BaseQuestFile extends QuestObject implements QuestFile {
 		defaultsGroup.addEnum("autoclaim_rewards", defaultRewardAutoClaim, v -> defaultRewardAutoClaim = v, RewardAutoClaim.NAME_MAP_NO_DEFAULT);
 		defaultsGroup.addEnum("quest_shape", defaultQuestShape, v -> defaultQuestShape = v, QuestShape.idMap);
 		defaultsGroup.addBool("quest_disable_jei", defaultQuestDisableJEI, v -> defaultQuestDisableJEI = v, false);
+		defaultsGroup.addEnum("default_preset", presetName, v -> presetName = v, getQuestFile().getPresets().nameMap());
 
 		EditableConfigGroup d = config.getOrCreateSubgroup("loot_crate_no_drop");
 		d.addInt("passive", lootCrateNoDrop.passive, v -> lootCrateNoDrop.passive = v, 0, 0, Integer.MAX_VALUE).setNameKey("ftbquests.loot.entitytype.passive");
@@ -1442,6 +1465,7 @@ public abstract class BaseQuestFile extends QuestObject implements QuestFile {
 
 	public abstract boolean isPlayerOnTeam(Player player, TeamData teamData);
 
+	@Nullable
 	public TaskType getTaskType(int typeId) {
 		return taskTypeIds.get(typeId);
 	}
@@ -1467,28 +1491,25 @@ public abstract class BaseQuestFile extends QuestObject implements QuestFile {
 	}
 
 	public int removeEmptyRewardTables(CommandSourceStack source) {
-		MutableInt del = new MutableInt(0);
-
-		for (RewardTable table : rewardTables) {
-			if (table.getWeightedRewards().isEmpty()) {
-				Path path = ServerQuestFile.getInstance().getFolder().resolve(table.getPath().orElseThrow());
-				try {
-					Files.delete(path);
-					del.increment();
-					table.invalid = true;
-					Server2PlayNetworking.sendToAllPlayers(source.getServer(), new DeleteObjectResponseMessage(table.id));
-				} catch (IOException e) {
-					FTBQuests.LOGGER.error("can't delete file {}: {}", path, e.getMessage());
-				}
+		List<RewardTable> toRemove = rewardTables.stream().filter(table -> table.getWeightedRewards().isEmpty()).toList();
+		List<Long> idsToRemove = new ArrayList<>();
+		toRemove.forEach(table -> {
+			Path path = ServerQuestFile.getInstance().getFolder().resolve(table.getPath().orElseThrow());
+			try {
+	            FileUtils.delete(path.toFile());
+				table.deleteSelf();
+				idsToRemove.add(table.id);
+			} catch (IOException e) {
+				FTBQuests.LOGGER.error("can't delete {}: {}", path, e.getMessage());
 			}
-		}
+		});
 
-		if (rewardTables.removeIf(rewardTable -> rewardTable.invalid)) {
-			refreshIDMap();
+		if (!idsToRemove.isEmpty()) {
+			Server2PlayNetworking.sendToAllPlayers(source.getServer(), new DeleteObjectResponseMessage(idsToRemove));
 			markDirty();
 		}
 
-		return del.intValue();
+		return toRemove.size();
 	}
 
 	public List<ChapterGroup> getChapterGroups() {
@@ -1522,6 +1543,7 @@ public abstract class BaseQuestFile extends QuestObject implements QuestFile {
 			if (index != -1 && movingUp ? (index > 1) : (index < chapterGroups.size() - 1)) {
 				chapterGroups.remove(index);
 				chapterGroups.add(movingUp ? index - 1 : index + 1, group);
+				group.clearCachedData();
 				return true;
 			}
 		}
@@ -1540,5 +1562,48 @@ public abstract class BaseQuestFile extends QuestObject implements QuestFile {
 
 	public boolean dropBookOnDeath() {
 		return dropBookOnDeath;
+	}
+
+	/**
+	 * Remove the quest object from the ID map. Only to be called from {@link QuestObjectBase#deleteSelf()} !
+	 *
+	 * @param id the quest id
+	 * @return the removed quest, or null if the quest isn't in the map
+	 */
+	@Nullable
+    QuestObjectBase removeFromMap(long id) {
+		QuestObjectBase object = questObjectMap.remove(id);
+
+		if (object != null) {
+			if (object instanceof QuestObject qo) {
+				forAllQuests(quest -> quest.removeDependency(qo));
+			}
+			object.invalidate();
+			return object;
+		}
+
+		return null;
+    }
+
+	/**
+	 * Add the quest to the map. Only to be called from {@link BaseQuestFile#onCreated()} !
+	 * @param qo the quest object to add
+	 * @return the quest object already in the map (hopefully null)
+	 */
+	@Nullable
+	QuestObjectBase addToMap(QuestObjectBase qo) {
+		return questObjectMap.put(qo.id, qo);
+	}
+
+	public boolean shouldSuppressAllAutoclaiming() {
+		return suppressAllAutoclaiming;
+	}
+
+	public String getPresetName() {
+		return presetName;
+	}
+
+	public VisualPresets getPresets() {
+		return allPresets;
 	}
 }

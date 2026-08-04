@@ -2,6 +2,7 @@ package dev.ftb.mods.ftbquests.client.gui.quests;
 
 import dev.ftb.mods.ftblibrary.client.gui.GuiHelper;
 import dev.ftb.mods.ftblibrary.client.gui.WidgetType;
+import dev.ftb.mods.ftblibrary.client.gui.input.Key;
 import dev.ftb.mods.ftblibrary.client.gui.input.MouseButton;
 import dev.ftb.mods.ftblibrary.client.gui.theme.Theme;
 import dev.ftb.mods.ftblibrary.client.gui.widget.Button;
@@ -14,9 +15,11 @@ import dev.ftb.mods.ftblibrary.icon.Color4I;
 import dev.ftb.mods.ftblibrary.icon.Icons;
 import dev.ftb.mods.ftblibrary.platform.network.Play2ServerNetworking;
 import dev.ftb.mods.ftblibrary.util.TooltipList;
+import dev.ftb.mods.ftbquests.FTBQuests;
 import dev.ftb.mods.ftbquests.client.ClientQuestFile;
 import dev.ftb.mods.ftbquests.client.gui.ContextMenuBuilder;
 import dev.ftb.mods.ftbquests.net.ReorderItemMessage;
+import dev.ftb.mods.ftbquests.quest.QuestObjectType;
 import dev.ftb.mods.ftbquests.quest.reward.ItemReward;
 import dev.ftb.mods.ftbquests.quest.reward.Reward;
 import dev.ftb.mods.ftbquests.quest.theme.property.ThemeProperties;
@@ -89,6 +92,12 @@ public class RewardButton extends Button {
 	}
 
 	@Override
+	public boolean keyPressed(Key key) {
+		return FTBQuests.getRecipeModHelper().tryToggleBookmark(this, key, reward.getIcon().getIngredient())
+				|| super.keyPressed(key);
+	}
+
+	@Override
 	public boolean mousePressed(MouseButton button) {
 		if (isMouseOver()) {
 			if (button.isRight() || getWidgetType() != WidgetType.DISABLED) {
@@ -113,13 +122,13 @@ public class RewardButton extends Button {
 		} else if (button.isRight() && ClientQuestFile.exists() && ClientQuestFile.getInstance().canEdit()) {
 			playClickSound();
 
-			ContextMenuBuilder builder = ContextMenuBuilder.create(reward, questScreen);
+			ContextMenuBuilder builder = ContextMenuBuilder.create(reward, questScreen, this);
 
 			builder.insertAtTop(List.of(new ContextMenuItem(Component.translatable("ftbquests.gui.move_left"), Icons.LEFT,
-					b -> Play2ServerNetworking.send(new ReorderItemMessage(reward.getId(), false))
+                    _ -> Play2ServerNetworking.send(new ReorderItemMessage(reward.getId(), QuestObjectType.REWARD, false))
 			)));
 			builder.insertAtTop(List.of(new ContextMenuItem(Component.translatable("ftbquests.gui.move_right"), Icons.RIGHT,
-					b -> Play2ServerNetworking.send(new ReorderItemMessage(reward.getId(), true))
+                    _ -> Play2ServerNetworking.send(new ReorderItemMessage(reward.getId(), QuestObjectType.REWARD, true))
 			)));
 
 			builder.openContextMenu(getGui());

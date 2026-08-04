@@ -1,6 +1,7 @@
 package dev.ftb.mods.ftbquests.quest;
 
 import com.mojang.datafixers.util.Pair;
+import com.mojang.serialization.Codec;
 import de.marhali.json5.Json5Array;
 import de.marhali.json5.Json5Object;
 import dev.ftb.mods.ftblibrary.client.config.ConfigCallback;
@@ -16,6 +17,7 @@ import dev.ftb.mods.ftblibrary.icon.Icon;
 import dev.ftb.mods.ftblibrary.json5.Json5Util;
 import dev.ftb.mods.ftblibrary.math.Bits;
 import dev.ftb.mods.ftblibrary.platform.event.NativeEventPosting;
+import dev.ftb.mods.ftblibrary.util.Vec2d;
 import dev.ftb.mods.ftbquests.FTBQuests;
 import dev.ftb.mods.ftbquests.api.event.progress.ProgressEventData;
 import dev.ftb.mods.ftbquests.api.event.progress.ProgressType;
@@ -24,16 +26,22 @@ import dev.ftb.mods.ftbquests.client.config.EditableQuestObject;
 import dev.ftb.mods.ftbquests.client.gui.MultilineTextEditorScreen;
 import dev.ftb.mods.ftbquests.client.gui.quests.QuestScreen;
 import dev.ftb.mods.ftbquests.integration.RecipeModHelper;
+import dev.ftb.mods.ftbquests.quest.preset.VisualPreset;
 import dev.ftb.mods.ftbquests.quest.reward.Reward;
 import dev.ftb.mods.ftbquests.quest.task.Task;
 import dev.ftb.mods.ftbquests.quest.translation.TranslationKey;
+import dev.ftb.mods.ftbquests.util.FTBQCodecs;
 import dev.ftb.mods.ftbquests.util.ProgressChange;
 import dev.ftb.mods.ftbquests.util.TextUtils;
+import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.longs.LongOpenHashSet;
 import it.unimi.dsi.fastutil.longs.LongSet;
 import net.minecraft.core.HolderLookup;
+import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.codec.ByteBufCodecs;
+import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.util.Util;
 import org.jspecify.annotations.Nullable;
 
@@ -44,12 +52,18 @@ import java.util.stream.Stream;
 public final class Quest extends QuestObject implements Movable, Excludable {
 	public static final String PAGEBREAK_CODE = "{@pagebreak}";
 
+	public static final Codec<Map<Long, Pair<Vec2d, Vec2d>>> CONTROL_POINTS_CODEC
+			= Codec.unboundedMap(FTBQCodecs.QUEST_ID_CODEC, Vec2d.PAIR_CODEC);
+	public static final StreamCodec<FriendlyByteBuf, Map<Long, Pair<Vec2d, Vec2d>>> CONTROL_POINTS_STREAM_CODEC
+			= ByteBufCodecs.map(HashMap::new, ByteBufCodecs.VAR_LONG, FTBQCodecs.pair(Vec2d.STREAM_CODEC, Vec2d.STREAM_CODEC));
+
 	private Chapter chapter;
 	private double x, y;
 	private Tristate hideUntilDepsVisible;
 	private Tristate hideUntilDepsComplete;
 	private String shape;
 	private final List<QuestObject> dependencies;
+	private final Map<Long, Pair<Vec2d, Vec2d>> depControlPoints;  // for bezier curved depenendency lines
 	private final List<Task> tasks;
 	private final List<Reward> rewards;
 	private DependencyRequirement dependencyRequirement;
@@ -71,6 +85,9 @@ public final class Quest extends QuestObject implements Movable, Excludable {
 	private boolean hideLockIcon;
 	private int maxCompletableDeps;
 	private int repeatCooldown; // seconds
+	private String presetName;
+	@Nullable
+	private VisualPreset cachedPreset;
 
 	@Nullable
 	private Component cachedSubtitle = null;
@@ -89,6 +106,7 @@ public final class Quest extends QuestObject implements Movable, Excludable {
 		y = 0;
 		shape = "";
 		dependencies = new ArrayList<>(0);
+		depControlPoints = new Long2ObjectOpenHashMap<>();
 		tasks = new ArrayList<>(1);
 		rewards = new ArrayList<>(1);
 		guidePage = "";
@@ -115,6 +133,7 @@ public final class Quest extends QuestObject implements Movable, Excludable {
 		hideLockIcon = false;
 		maxCompletableDeps = 0;
 		repeatCooldown = 0;
+		presetName = "";
 	}
 
 	@Override
@@ -167,7 +186,7 @@ public final class Quest extends QuestObject implements Movable, Excludable {
 
 	// used by FTB XMod Compat
 	@SuppressWarnings("unused")
-    public boolean showInRecipeMod() {
+	public boolean showInRecipeMod() {
 		return !disableJEI.get(getQuestFile().isDefaultQuestDisableJEI());
 	}
 
@@ -181,13 +200,6 @@ public final class Quest extends QuestObject implements Movable, Excludable {
 		cachedSubtitle = null;
 	}
 
-	@Override
-	public Quest setPosition(double x, double y) {
-		this.x = x;
-		this.y = y;
-		return this;
-	}
-
 	public void setX(double x) {
 		this.x = x;
 	}
@@ -197,6 +209,7 @@ public final class Quest extends QuestObject implements Movable, Excludable {
 	}
 
 	public double getSize() {
+		double size = getVisualPreset().size();
 		return size == 0D ? chapter.getDefaultQuestSize() : size;
 	}
 
@@ -214,6 +227,18 @@ public final class Quest extends QuestObject implements Movable, Excludable {
 
 	public boolean canBeRepeated() {
 		return canRepeat.get(chapter.isDefaultRepeatable());
+	}
+
+	private VisualPreset getVisualPreset() {
+		if (cachedPreset == null) {
+			String name = presetName.isEmpty() ? chapter.getPresetName() : presetName;
+			if (name.isEmpty()) {
+				cachedPreset = new FallbackVisualPreset();
+			} else {
+				cachedPreset = getQuestFile().getPresets().get(name).orElseGet(FallbackVisualPreset::new);
+			}
+		}
+		return cachedPreset;
 	}
 
 	public List<String> getRawDescription() {
@@ -253,9 +278,10 @@ public final class Quest extends QuestObject implements Movable, Excludable {
 		if (hideDependentLines) json.addProperty("hide_dependent_lines", true);
 		if (minRequiredDependencies > 0) json.addProperty("min_required_dependencies", minRequiredDependencies);
 		if (hasDependencies()) {
-			json.add("dependencies", Util.make(new Json5Array(), a -> {
-				dependencies.forEach(dep -> a.add(dep.getCodeString()));
-			}));
+			Json5Util.store(json, "dependencies", FTBQCodecs.QUEST_ID_CODEC.listOf(), dependencies.stream().map(QuestObject::getId).toList());
+			if (!depControlPoints.isEmpty()) {
+				Json5Util.store(json, "dep_control_pts", CONTROL_POINTS_CODEC, depControlPoints);
+			}
 		}
 		disableJEI.write(json, "disable_recipe_mod");
 		hideUntilDepsVisible.write(json, "hide_until_deps_visible");
@@ -278,6 +304,7 @@ public final class Quest extends QuestObject implements Movable, Excludable {
 		if (hideLockIcon) json.addProperty("hide_lock_icon", true);
 		if (maxCompletableDeps > 0) json.addProperty("max_completable_dependents", maxCompletableDeps);
 		if (repeatCooldown > 0) json.addProperty("repeat_cooldown", repeatCooldown);
+		if (!presetName.isEmpty()) json.addProperty("preset", presetName);
 	}
 
 	@Override
@@ -297,11 +324,8 @@ public final class Quest extends QuestObject implements Movable, Excludable {
 		minRequiredDependencies = Json5Util.getInt(json, "min_required_dependencies").orElse(0);
 
 		clearDependencies();
-		Json5Util.getJson5Array(json, "dependencies").ifPresent(a -> a.forEach(el -> {
-            if (chapter.file.get(chapter.file.getID(el.getAsString())) instanceof QuestObject qo) {
-                addDependency(qo);
-            }
-        }));
+		Json5Util.fetch(json, "dependencies", FTBQCodecs.QUEST_ID_CODEC.listOf()).ifPresent(ids -> ids.forEach(this::addDependency));
+		Json5Util.fetch(json, "dep_control_pts", CONTROL_POINTS_CODEC).ifPresent(depControlPoints::putAll);
 
 		hideUntilDepsVisible = Tristate.read(json, "hide_until_deps_visible");
 		hideUntilDepsComplete = Tristate.read(json, "hide_until_deps_complete");
@@ -326,6 +350,7 @@ public final class Quest extends QuestObject implements Movable, Excludable {
 		hideLockIcon = Json5Util.getBoolean(json, "hide_lock_icon").orElse(false);
 		maxCompletableDeps = Json5Util.getInt(json, "max_completable_dependents").orElse(0);
 		repeatCooldown = Json5Util.getInt(json, "repeat_cooldown").orElse(0);
+		presetName = Json5Util.getString(json, "preset").orElse("");
 	}
 
 	@Override
@@ -369,11 +394,9 @@ public final class Quest extends QuestObject implements Movable, Excludable {
 
 		buffer.writeVarInt(minRequiredDependencies);
 		DependencyRequirement.NAME_MAP.write(buffer, dependencyRequirement);
-		buffer.writeVarInt(dependencies.size());
 
-		for (QuestObject d : dependencies) {
-			buffer.writeLong(d.invalid ? 0L : d.id);
-		}
+		FTBQCodecs.LONG_LIST_STREAM_CODEC.encode(buffer, dependencies.stream().filter(QuestObjectBase::isValid).map(QuestObject::getId).toList());
+		CONTROL_POINTS_STREAM_CODEC.encode(buffer, depControlPoints);
 
 		if (size != 0D) {
 			buffer.writeDouble(size);
@@ -397,6 +420,8 @@ public final class Quest extends QuestObject implements Movable, Excludable {
 		if (canRepeat.isTrue()) {
 			buffer.writeInt(repeatCooldown);
 		}
+
+		buffer.writeUtf(presetName);
 	}
 
 	@Override
@@ -416,16 +441,10 @@ public final class Quest extends QuestObject implements Movable, Excludable {
 
 		minRequiredDependencies = buffer.readVarInt();
 		dependencyRequirement = DependencyRequirement.NAME_MAP.read(buffer);
+
 		clearDependencies();
-		int d = buffer.readVarInt();
-
-		for (int i = 0; i < d; i++) {
-			QuestObject object = chapter.file.get(buffer.readLong());
-
-			if (object != null) {
-				addDependency(object);
-			}
-		}
+		FTBQCodecs.LONG_LIST_STREAM_CODEC.decode(buffer).forEach(this::addDependency);
+		depControlPoints.putAll(CONTROL_POINTS_STREAM_CODEC.decode(buffer));
 
 		size = Bits.getFlag(flags, 0x04) ? buffer.readDouble() : 0D;
 		iconScale = Bits.getFlag(flags, 0x20000) ? buffer.readDouble() : 1D;
@@ -443,6 +462,7 @@ public final class Quest extends QuestObject implements Movable, Excludable {
 		progressionMode = ProgressionMode.NAME_MAP.read(buffer);
 		maxCompletableDeps = buffer.readVarInt();
 		repeatCooldown = canRepeat.isTrue() ? buffer.readInt() : 0;
+		presetName = buffer.readUtf();
 	}
 
 	@Override
@@ -502,13 +522,13 @@ public final class Quest extends QuestObject implements Movable, Excludable {
 	private void checkForDependantCompletion(TeamData data) {
 		getDependants().forEach(questObject -> {
 			if (questObject instanceof Quest quest) {
-                if (quest.getProgressionMode() == ProgressionMode.FLEXIBLE && quest.checkDependencies(data::isCompleted)) {
-                    quest.tasks.forEach(task -> {
-                        if (data.getProgress(task) >= task.getMaxProgress()) {
-                            data.markTaskCompleted(task);
-                        }
-                    });
-                }
+				if (quest.getProgressionMode() == ProgressionMode.FLEXIBLE && quest.checkDependencies(data::isCompleted)) {
+					quest.tasks.forEach(task -> {
+						if (data.getProgress(task) >= task.getMaxProgress()) {
+							data.markTaskCompleted(task);
+						}
+					});
+				}
 
 				data.checkAutoCompletion(quest);
 			}
@@ -551,35 +571,33 @@ public final class Quest extends QuestObject implements Movable, Excludable {
 	@Override
 	public void deleteSelf() {
 		super.deleteSelf();
+
 		chapter.removeQuest(this);
 
+		// clean up any tasks & rewards
+		for (Task task : List.copyOf(tasks)) {
+			task.deleteSelf();
+		}
+		tasks.clear();
+		for (Reward reward : List.copyOf(rewards)) {
+			reward.deleteSelf();
+		}
+		rewards.clear();
+
+		// clean up any quest links which point to this quest
 		List<QuestLink> linksToDel = new ArrayList<>();
-		getQuestFile().forAllQuestLinks(l -> {
-			if (l.linksTo(this)) {
-				linksToDel.add(l);
+		getQuestFile().forAllQuestLinks(link -> {
+			if (link.linksTo(this)) {
+				linksToDel.add(link);
 			}
 		});
-		linksToDel.forEach(l -> getQuestFile().deleteObject(l.id));
-	}
-
-	@Override
-	public void deleteChildren() {
-		for (Task task : tasks) {
-			task.deleteChildren();
-			task.invalid = true;
-		}
-
-		for (Reward reward : rewards) {
-			reward.deleteChildren();
-			reward.invalid = true;
-		}
-
-		tasks.clear();
-		rewards.clear();
+		linksToDel.forEach(QuestLink::deleteSelf);
 	}
 
 	@Override
 	public void onCreated() {
+		super.onCreated();
+
 		chapter.addQuest(this);
 
 		if (!tasks.isEmpty()) {
@@ -611,12 +629,13 @@ public final class Quest extends QuestObject implements Movable, Excludable {
 		appearance.addDouble("y", y, v -> y = v, 0, Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY);
 		appearance.addInt("min_width", minWidth, v -> minWidth = v, 0, 0, 3000);
 		appearance.addDouble("icon_scale", iconScale, v -> iconScale = v, 1f, 0.1, 2.0);
+		appearance.addEnum("preset", presetName, v -> presetName = v, getQuestFile().getPresets().nameMap());
 
 		EditableConfigGroup visibility = config.getOrCreateSubgroup("visibility");
 		visibility.addTristate("hide_until_deps_complete", hideUntilDepsComplete, v -> hideUntilDepsComplete = v);
 		visibility.addTristate("hide_until_deps_visible", hideUntilDepsVisible, v -> hideUntilDepsVisible = v);
-		visibility.addBool("invisible", invisibleUntilCompleted, v -> invisibleUntilCompleted = v, false);
-		visibility.addInt("invisible_until_tasks", invisibleUntilTasks, v -> invisibleUntilTasks = v, 0, 0, Integer.MAX_VALUE).setCanEdit(invisibleUntilCompleted);
+		var editableIUC =visibility.addBool("invisible", invisibleUntilCompleted, v -> invisibleUntilCompleted = v, false);
+		visibility.addInt("invisible_until_tasks", invisibleUntilTasks, v -> invisibleUntilTasks = v, 0, 0, Integer.MAX_VALUE).setCanEdit(editableIUC.getValue());
 		visibility.addTristate("hide_details_until_startable", hideDetailsUntilStartable, v -> hideDetailsUntilStartable = v);
 		visibility.addTristate("hide_text_until_complete", hideTextUntilComplete, v -> hideTextUntilComplete = v);
 		visibility.addBool("hide_lock_icon", hideLockIcon, v -> hideLockIcon = v, false);
@@ -662,7 +681,19 @@ public final class Quest extends QuestObject implements Movable, Excludable {
 
 	@Override
 	public void setChapter(Chapter newChapter) {
-		this.chapter = newChapter;
+		if (!Objects.equals(getChapter(), newChapter)) {
+			getChapter().removeQuest(this);
+			newChapter.addQuest(this);
+			this.chapter = newChapter;
+		}
+	}
+
+	@Override
+	public Quest setPosition(double x, double y) {
+		this.x = x;
+		this.y = y;
+		getQuestFile().markDirty();
+		return this;
 	}
 
 	@Override
@@ -687,6 +718,7 @@ public final class Quest extends QuestObject implements Movable, Excludable {
 
 	@Override
 	public String getShape() {
+		String shape = getVisualPreset().shapeName();
 		return shape.isEmpty() ? chapter.getDefaultQuestShape() : shape;
 	}
 
@@ -725,6 +757,7 @@ public final class Quest extends QuestObject implements Movable, Excludable {
 		super.clearCachedData();
 		cachedSubtitle = null;
 		cachedDescription = null;
+		cachedPreset = null;
 
 		for (Task task : tasks) {
 			task.clearCachedData();
@@ -750,18 +783,8 @@ public final class Quest extends QuestObject implements Movable, Excludable {
 	}
 
 	public boolean hasDependency(QuestObject object) {
-		if (object.invalid) {
-			return false;
-		}
-
-		for (QuestObject dependency : dependencies) {
-			if (dependency == object) {
-				return true;
-			}
-		}
-
-		return false;
-	}
+        return object.isValid() && dependencies.stream().anyMatch(dependency -> dependency == object);
+    }
 
 	@Override
 	protected boolean validateEditedConfig() {
@@ -851,7 +874,7 @@ public final class Quest extends QuestObject implements Movable, Excludable {
 	public Collection<QuestObject> getDependants() {
 		return dependantIDs.stream()
 				.map(id -> getQuestFile().get(id))
-				.filter(q -> q != null && !q.invalid)
+				.filter(q -> q != null && q.isValid())
 				.toList();
 	}
 
@@ -935,6 +958,12 @@ public final class Quest extends QuestObject implements Movable, Excludable {
 		return dependencies.stream();
 	}
 
+	private void addDependency(long id) {
+		if (getQuestFile().get(id) instanceof QuestObject q) {
+			addDependency(q);
+		}
+	}
+
 	public void addDependency(QuestObject object) {
 		dependencies.add(object);
 		if (object instanceof Quest q) {
@@ -946,6 +975,7 @@ public final class Quest extends QuestObject implements Movable, Excludable {
 		dependencies.remove(object);
 		if (object instanceof Quest q) {
 			q.removeDependant(id);
+			depControlPoints.remove(id);
 		}
 	}
 
@@ -953,7 +983,7 @@ public final class Quest extends QuestObject implements Movable, Excludable {
 		Iterator<@Nullable QuestObject> iter = dependencies.iterator();
 		while (iter.hasNext()) {
 			QuestObject qo = iter.next();
-			if (qo == null || qo.invalid || qo == this) {
+			if (qo == null || !qo.isValid() || qo == this) {
 				iter.remove();
 				if (qo instanceof Quest q) {
 					q.removeDependant(id);
@@ -969,6 +999,7 @@ public final class Quest extends QuestObject implements Movable, Excludable {
 			}
 		});
 		dependencies.clear();
+		depControlPoints.clear();
 	}
 
 	private void addDependant(long id) {
@@ -984,7 +1015,7 @@ public final class Quest extends QuestObject implements Movable, Excludable {
 	}
 
 	@SuppressWarnings("BooleanMethodIsAlwaysInverted")
-    public boolean hideDetailsUntilStartable() {
+	public boolean hideDetailsUntilStartable() {
 		return hideDetailsUntilStartable.get(chapter.hideQuestDetailsUntilStartable());
 	}
 
@@ -1024,8 +1055,9 @@ public final class Quest extends QuestObject implements Movable, Excludable {
 	@FunctionalInterface
 	private interface DependencyChecker {
 		default boolean check(QuestObject questObject) {
-			return !questObject.invalid && check0(questObject);
+			return questObject.isValid() && check0(questObject);
 		}
+
 		boolean check0(QuestObject questObject);
 	}
 
@@ -1067,6 +1099,34 @@ public final class Quest extends QuestObject implements Movable, Excludable {
 		}
 
 		return index;
+	}
+
+	public Optional<Pair<Vec2d, Vec2d>> getBezierControlPoints(Quest other) {
+		return Optional.ofNullable(depControlPoints.get(other.getId()));
+	}
+
+	public Map<Long, Pair<Vec2d, Vec2d>> getBezierControlPoints() {
+		return depControlPoints;
+	}
+
+	public void setBezierControlPoint(Quest other, int index, double newX, double newY) {
+		var current= depControlPoints.getOrDefault(other.getId(),
+				Pair.of(new Vec2d(other.getX(), other.getY()), new Vec2d(getX(), getY()))
+		);
+		depControlPoints.put(other.getId(), Pair.of(
+				index == 0 ? new Vec2d(newX, newY) : current.getFirst(),
+				index == 1 ? new Vec2d(newX, newY) : current.getSecond()
+		));
+		getQuestFile().markDirty();
+	}
+
+	public void setBezierControlPoints(Quest other, @Nullable Pair<Vec2d, Vec2d> controlPoints) {
+		if (controlPoints == null) {
+			depControlPoints.remove(other.getId());
+		} else {
+			depControlPoints.put(other.id, controlPoints);
+		}
+		getQuestFile().markDirty();
 	}
 
 	@Override
@@ -1145,19 +1205,23 @@ public final class Quest extends QuestObject implements Movable, Excludable {
 		getQuestFile().markDirty();
 	}
 
-	public void moveTaskLeft(Task task) {
-		moveItem(tasks, task, -1);
+	public void moveTask(Task task, boolean moveRight) {
+		moveItem(tasks, task, moveRight ? 1 : -1);
 	}
 
-	public void moveTaskRight(Task task) {
-		moveItem(tasks, task, 1);
+	public void moveReward(Reward reward, boolean moveRight) {
+		moveItem(rewards, reward, moveRight ? 1 : -1);
 	}
 
-	public void moveRewardLeft(Reward reward) {
-		moveItem(rewards, reward, -1);
-	}
+	private class FallbackVisualPreset implements VisualPreset {
+		@Override
+		public String shapeName() {
+			return shape;
+		}
 
-	public void moveRewardRight(Reward reward) {
-		moveItem(rewards, reward, 1);
+		@Override
+		public double size() {
+			return size;
+		}
 	}
 }

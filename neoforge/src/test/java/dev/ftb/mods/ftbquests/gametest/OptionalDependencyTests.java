@@ -66,7 +66,6 @@ public final class OptionalDependencyTests {
 			QuestTestSupport.newCheckmarkTask(target);
 			target.addDependency(questA);
 			target.addDependency(questB);
-			QuestTestSupport.file().refreshIDMap();
 
 			TeamData data = QuestTestSupport.newTeam();
 			assertFalse(helper, data.areDependenciesComplete(target), "ONE_COMPLETED unsatisfied before any dependency completes");
@@ -93,7 +92,6 @@ public final class OptionalDependencyTests {
 			target.addDependency(questA);
 			target.addDependency(questB);
 			target.addDependency(questC);
-			QuestTestSupport.file().refreshIDMap();
 
 			TeamData data = QuestTestSupport.newTeam();
 
@@ -113,7 +111,6 @@ public final class OptionalDependencyTests {
 			Quest target = QuestTestSupport.newQuest(chapter, dependencyRequirement("all_started"));
 			QuestTestSupport.newCheckmarkTask(target);
 			target.addDependency(questA);
-			QuestTestSupport.file().refreshIDMap();
 
 			TeamData data = QuestTestSupport.newTeam();
 			assertFalse(helper, data.areDependenciesComplete(target), "ALL_STARTED unsatisfied before the dependency is started");
@@ -140,7 +137,6 @@ public final class OptionalDependencyTests {
 			Quest branchC = QuestTestSupport.newQuest(chapter);
 			QuestTestSupport.newCheckmarkTask(branchC);
 			branchC.addDependency(hub);
-			QuestTestSupport.file().refreshIDMap();
 
 			TeamData data = QuestTestSupport.newTeam();
 

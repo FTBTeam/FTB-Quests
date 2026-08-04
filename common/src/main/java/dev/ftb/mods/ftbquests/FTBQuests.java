@@ -22,7 +22,6 @@ import net.minecraft.server.packs.resources.ResourceManagerReloadListener;
 import net.minecraft.world.item.ItemStack;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.jspecify.annotations.Nullable;
 
 import java.util.Collection;
 import java.util.List;
@@ -33,18 +32,12 @@ import java.util.function.Supplier;
 public class FTBQuests {
 	public static final Logger LOGGER = LogManager.getLogger(FTBQuestsAPI.MOD_NAME);
 
-//	@Nullable
-//	private static IQuestProxy PROXY;
-	@Nullable
-	private static RecipeModHelper recipeModHelper;
-	private static final RecipeModHelper NO_OP_HELPER = new RecipeModHelper.NoOp();
+	private static RecipeModHelper recipeModHelper = RecipeModHelper.NONE;
 
 	public final FTBQuestsEventHandler eventHandler;
 
 	public FTBQuests() {
 		FTBQuestsAPI._init(FTBQuestsAPIImpl.INSTANCE);
-
-//		PROXY = EnvExecutor.getEnvSpecific(() -> FTBQClientProxy::new, () -> FTBQServerProxy::new);
 
 		eventHandler = new FTBQuestsEventHandler();
 
@@ -67,15 +60,12 @@ public class FTBQuests {
 	}
 
 	public static RecipeModHelper getRecipeModHelper() {
-		return Objects.requireNonNullElse(recipeModHelper, NO_OP_HELPER);
+		return recipeModHelper;
 	}
 
-//	public static IQuestProxy proxy() {
-//		return Objects.requireNonNull(PROXY);
-//	}
-
 	public static void setRecipeModHelper(RecipeModHelper recipeModHelper) {
-		if (FTBQuests.recipeModHelper != null) {
+		// called from FTB XMod Compat
+		if (FTBQuests.recipeModHelper != RecipeModHelper.NONE) {
 			throw new IllegalStateException("recipe mod helper has already been initialised!");
 		}
 		FTBQuests.recipeModHelper = recipeModHelper;

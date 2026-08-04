@@ -17,5 +17,6 @@ public final class FTBQuestsGameTests {
 		ChapterProgressionTests.register(registrar);
 		TeamMergeTests.register(registrar);
 		CapabilityTests.register(registrar);
+		UndoRedoTests.register(registrar);
 	}
 }

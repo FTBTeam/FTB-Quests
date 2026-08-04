@@ -1,29 +1,39 @@
 package dev.ftb.mods.ftbquests.net;
 
-import de.marhali.json5.Json5Element;
-import de.marhali.json5.Json5Object;
-import dev.ftb.mods.ftblibrary.json5.Json5NetPacker;
 import dev.ftb.mods.ftblibrary.platform.network.PacketContext;
 import dev.ftb.mods.ftbquests.api.FTBQuestsAPI;
 import dev.ftb.mods.ftbquests.client.FTBQuestsNetClient;
 import dev.ftb.mods.ftbquests.quest.QuestObjectBase;
-import net.minecraft.network.FriendlyByteBuf;
+import dev.ftb.mods.ftbquests.quest.history.EditRecord;
+import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
-import net.minecraft.util.Util;
 
-public record EditObjectResponseMessage(long id, Json5Element json) implements CustomPacketPayload {
+import java.util.Collection;
+import java.util.List;
+
+/**
+ * Received on: CLIENT
+ * <br>
+ * Sent by server in response to a {@link EditObjectMessage} packet.
+ *
+ * @param editRecords one or more of (questobject id, serialized questobject data)
+ */
+public record EditObjectResponseMessage(List<EditRecord> editRecords) implements CustomPacketPayload {
 	public static final Type<EditObjectResponseMessage> TYPE = new Type<>(FTBQuestsAPI.id("edit_object_response_message"));
 
-	public static final StreamCodec<FriendlyByteBuf, EditObjectResponseMessage> STREAM_CODEC = StreamCodec.composite(
-			ByteBufCodecs.VAR_LONG, EditObjectResponseMessage::id,
-			Json5NetPacker.CODEC, EditObjectResponseMessage::json,
+	public static final StreamCodec<RegistryFriendlyByteBuf, EditObjectResponseMessage> STREAM_CODEC = StreamCodec.composite(
+			EditRecord.STREAM_CODEC.apply(ByteBufCodecs.list()), EditObjectResponseMessage::editRecords,
 			EditObjectResponseMessage::new
 	);
 
-	public EditObjectResponseMessage(QuestObjectBase questObjectBase) {
-		this(questObjectBase.id, Util.make(new Json5Object(), o -> questObjectBase.writeData(o, questObjectBase.getQuestFile().holderLookup())));
+	public EditObjectResponseMessage(QuestObjectBase qo) {
+		this(List.of(qo));
+	}
+
+	public EditObjectResponseMessage(Collection<? extends QuestObjectBase> list) {
+		this(list.stream().map(EditRecord::ofQuestObject).toList());
 	}
 
 	@Override
@@ -32,8 +42,6 @@ public record EditObjectResponseMessage(long id, Json5Element json) implements C
 	}
 
 	public static void handle(EditObjectResponseMessage message, PacketContext ignoredContext) {
-		if (message.json instanceof Json5Object o) {
-			FTBQuestsNetClient.editObject(message.id, o);
-		}
+		message.editRecords.forEach(editRecord -> FTBQuestsNetClient.editObject(editRecord.id(), editRecord.data()));
 	}
 }

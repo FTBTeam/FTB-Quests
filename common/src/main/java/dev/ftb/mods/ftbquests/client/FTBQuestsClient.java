@@ -29,6 +29,7 @@ import dev.ftb.mods.ftbquests.quest.QuestObjectBase;
 import dev.ftb.mods.ftbquests.quest.TeamData;
 import dev.ftb.mods.ftbquests.quest.theme.ThemeLoader;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.screens.ConfirmLinkScreen;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.core.BlockPos;
@@ -37,6 +38,7 @@ import net.minecraft.core.HolderLookup;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
+import net.minecraft.util.Util;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.player.Player;
@@ -45,6 +47,7 @@ import net.minecraft.world.item.CreativeModeTabs;
 import net.minecraft.world.level.block.state.BlockState;
 import org.jspecify.annotations.Nullable;
 
+import java.net.URI;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
@@ -192,10 +195,29 @@ public class FTBQuestsClient {
 	}
 
 	public static void showErrorToast(Component text, Component desc) {
-		Minecraft.getInstance().getToastManager().addToast(new CustomToast(text, Icons.BARRIER, desc));
+		showInfoToast(text, Icons.BARRIER, desc);
 	}
 
 	public static void showInfoToast(Component text, Component desc) {
-		Minecraft.getInstance().getToastManager().addToast(new CustomToast(text, Icons.INFO, desc));
+		showInfoToast(text, Icons.INFO, desc);
+	}
+
+	public static void showInfoToast(Component text, Icon<?> icon, Component desc) {
+		Minecraft.getInstance().getToastManager().addToast(new CustomToast(text, icon, desc));
+	}
+
+	public static void openUri(String uriStr) {
+		URI uri = URI.create(uriStr);
+		if (Minecraft.getInstance().options.chatLinksPrompt().get()) {
+			final var currentScreen = Minecraft.getInstance().screen;
+			Minecraft.getInstance().setScreen(new ConfirmLinkScreen(accepted -> {
+				if (accepted) {
+					Util.getPlatform().openUri(uri);
+				}
+				Minecraft.getInstance().setScreen(currentScreen);
+			}, uriStr, false));
+		} else {
+			Util.getPlatform().openUri(uri);
+		}
 	}
 }

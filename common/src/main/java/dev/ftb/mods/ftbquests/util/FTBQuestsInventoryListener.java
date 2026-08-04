@@ -25,7 +25,7 @@ public record FTBQuestsInventoryListener(ServerPlayer player) implements Contain
 			if (!tasksToCheck.isEmpty()) {
 				FTBTeamsAPI.api().getManager().getTeamForPlayer(player).ifPresent(team -> {
 					TeamData data = file.getNullableTeamData(team.getId());
-					if (data != null && !data.isLocked()) {
+					if (data != null && !data.isLocked() && !data.isProgressionPaused(player)) {
 						file.withPlayerContext(player, () -> {
 							PlayerInventorySummary.build(player);
 							for (Task task : tasksToCheck) {

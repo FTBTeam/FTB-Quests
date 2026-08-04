@@ -9,7 +9,6 @@ import dev.ftb.mods.ftbquests.quest.Quest;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
 import net.minecraft.util.Util;
-import org.apache.commons.lang3.Validate;
 import org.jspecify.annotations.Nullable;
 
 import java.util.function.Consumer;
@@ -38,6 +37,7 @@ public final class RewardType {
 		this(typeId, provider, iconSupplier, true);
 	}
 
+	@Nullable
 	public static Reward createReward(long id, Quest quest, String typeId) {
 		if (typeId.isEmpty()) {
 			typeId = FTBQuestsAPI.MOD_ID + ":item";
@@ -46,9 +46,17 @@ public final class RewardType {
 		}
 
 		RewardType type = RewardTypes.TYPES.get(Identifier.tryParse(typeId));
-		Validate.isTrue(type != null, "Unknown reward type: " + type);
-        return type.provider.create(id, quest);
-    }
+
+		return type == null ? null : type.provider.create(id, quest);
+	}
+
+	public static Reward requireCreateReward(long id, Quest quest, String typeId) {
+		Reward reward = createReward(id, quest, typeId);
+		if (reward == null) {
+			throw new IllegalArgumentException("Unknown reward type: '" + typeId + "'");
+		}
+		return reward;
+	}
 
 	public Identifier getTypeId() {
 		return typeId;

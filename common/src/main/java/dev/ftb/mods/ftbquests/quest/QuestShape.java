@@ -36,7 +36,7 @@ public final class QuestShape extends Icon<QuestShape> {
 		shouldDraw = !id.equals("none");
 	}
 
-	public static void reload(List<String> list) {
+	public static synchronized void reload(List<String> list) {
 		MAP.clear();
 
 		list.forEach(s -> MAP.put(s, new QuestShape(s)));
@@ -47,7 +47,7 @@ public final class QuestShape extends Icon<QuestShape> {
 		idMapWithDefault = NameMap.of(list.getFirst(), list).baseNameKey("ftbquests.quest.shape").create();
 	}
 
-	public static QuestShape get(String id) {
+	public static synchronized QuestShape get(String id) {
 		return MAP.getOrDefault(id, defaultShape);
 	}
 

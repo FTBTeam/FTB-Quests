@@ -6,6 +6,7 @@ import dev.ftb.mods.ftbquests.api.FTBQuestsAPI;
 import dev.ftb.mods.ftbquests.quest.Chapter;
 import dev.ftb.mods.ftbquests.quest.ChapterGroup;
 import dev.ftb.mods.ftbquests.quest.ServerQuestFile;
+import dev.ftb.mods.ftbquests.quest.history.events.MoveChapterAcrossGroup;
 import dev.ftb.mods.ftbquests.util.NetUtils;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
@@ -28,21 +29,10 @@ public record ChangeChapterGroupMessage(long chapterId, long groupId) implements
 
 	public static void handle(ChangeChapterGroupMessage message, PacketContext context) {
 		if (NetUtils.canEdit(context)) {
-			ServerQuestFile.ifExists(file -> {
-				Chapter chapter = file.getChapter(message.chapterId);
-
-				if (chapter != null) {
-					ChapterGroup group = file.getChapterGroup(message.groupId);
-					if (chapter.getGroup() != group) {
-						chapter.getGroup().removeChapter(chapter);
-						group.addChapter(chapter);
-						chapter.file.clearCachedData();
-						chapter.file.markDirty();
-						Server2PlayNetworking.sendToAllPlayers(file.server,
-								new ChangeChapterGroupResponseMessage(message.chapterId, message.groupId));
-					}
-				}
-			});
+			ServerQuestFile sqf = ServerQuestFile.getInstance();
+			if (NetUtils.canEdit(context) && sqf.getChapter(message.chapterId) instanceof Chapter chapter) {
+				sqf.getHistoryStack().addAndApply(sqf, new MoveChapterAcrossGroup(message.chapterId, chapter.getGroup().getId(), message.groupId()));
+			}
 		}
 	}
 }

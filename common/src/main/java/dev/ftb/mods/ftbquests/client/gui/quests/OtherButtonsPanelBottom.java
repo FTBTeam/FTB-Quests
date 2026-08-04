@@ -11,10 +11,13 @@ import dev.ftb.mods.ftblibrary.util.TooltipList;
 import dev.ftb.mods.ftbquests.client.ClientQuestFile;
 import dev.ftb.mods.ftbquests.client.FTBQuestsClient;
 import dev.ftb.mods.ftbquests.client.FTBQuestsClientConfig;
+import dev.ftb.mods.ftbquests.client.gui.QuestFileChangelog;
 import dev.ftb.mods.ftbquests.client.gui.RewardTablesScreen;
 import dev.ftb.mods.ftbquests.net.ChangeProgressMessage;
 import dev.ftb.mods.ftbquests.net.ForceSaveMessage;
 import dev.ftb.mods.ftbquests.net.ToggleEditingModeMessage;
+import dev.ftb.mods.ftbquests.net.UndoRedoRequestMessage;
+import dev.ftb.mods.ftbquests.quest.history.ChangeType;
 import dev.ftb.mods.ftbquests.quest.task.StructureTask;
 import dev.ftb.mods.ftbquests.quest.theme.property.ThemeProperties;
 import net.minecraft.ChatFormatting;
@@ -39,6 +42,8 @@ public class OtherButtonsPanelBottom extends OtherButtonsPanel {
 	@Override
 	public void addWidgets() {
 		if (questScreen.file.canEdit()) {
+			add(new UndoRedoButton(this, ChangeType.REDO));
+			add(new UndoRedoButton(this, ChangeType.UNDO));
 			add(new EditSettingsButton(this));
 		}
 
@@ -55,6 +60,37 @@ public class OtherButtonsPanelBottom extends OtherButtonsPanel {
 	public void alignWidgets() {
 		setHeight(align(WidgetLayout.VERTICAL));
 		setPos(questScreen.width - width, questScreen.height - height - 1);
+	}
+
+	public static class UndoRedoButton extends TabButton {
+		private final ChangeType type;
+
+		public UndoRedoButton(Panel panel, ChangeType type) {
+			super(panel, type.description(), type.icon());
+
+			this.type = type;
+		}
+
+		@Override
+		public void addMouseOverText(TooltipList list) {
+			QuestFileChangelog changelog = ClientQuestFile.getInstance().getChangelog();
+			List<Component> desc = type == ChangeType.UNDO ? changelog.getUndoDesc() : changelog.getRedoDesc();
+
+			list.add(type.simpleDescription());
+			desc.forEach(component -> list.add(Component.literal("• ").append(component.copy().withStyle(ChatFormatting.GRAY))));
+			list.add(Component.literal(type == ChangeType.UNDO ? "[Ctrl + Z]" : "[Ctrl + Y]").withStyle(ChatFormatting.DARK_GRAY));
+		}
+
+		@Override
+		public void onClicked(MouseButton button) {
+			Play2ServerNetworking.send(new UndoRedoRequestMessage(type == ChangeType.UNDO));
+		}
+
+		@Override
+		public boolean isEnabled() {
+			QuestFileChangelog changelog = ClientQuestFile.getInstance().getChangelog();
+			return type == ChangeType.UNDO ? !changelog.getUndoDesc().isEmpty() : !changelog.getRedoDesc().isEmpty();
+		}
 	}
 
 	/**
