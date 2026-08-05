@@ -297,8 +297,7 @@ public final class ChapterImage extends QuestObjectBase implements Movable {
 
 	@Override
 	public Component getAltTitle() {
-		var p = image.toString().split("/");
-		return Component.literal(p[p.length - 1]).withStyle(ChatFormatting.GRAY);
+		return Component.empty();
 	}
 
 	@Override

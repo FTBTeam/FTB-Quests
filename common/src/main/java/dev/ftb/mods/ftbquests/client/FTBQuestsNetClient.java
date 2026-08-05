@@ -180,6 +180,7 @@ public class FTBQuestsNetClient {
 	public static void syncEditingMode(UUID teamId, boolean editingMode) {
 		if (ClientQuestFile.getInstance().getOrCreateTeamData(teamId).setCanEdit(ClientUtils.getClientPlayer(), editingMode)) {
 			setEditorPermission(editingMode);
+			ClientQuestFile.getInstance().clearCachedData();
 			ClientQuestFile.getInstance().refreshGui();
 		}
 	}

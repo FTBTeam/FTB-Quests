@@ -188,8 +188,14 @@ public class ChapterImageButton extends Button implements QuestPositionableButto
 
 	@Override
 	public void addMouseOverText(TooltipList list) {
-		if (!chapterImage.shouldDrawTextOnImage()) {
+		if (!chapterImage.shouldDrawTextOnImage() && !TextUtils.isComponentEmpty(getTitle())) {
 			TextUtils.processComponentWithPossibleNewlines(getTitle(), list::add);
+		}
+		if (chapterImage.getQuestFile().canEdit()) {
+			var p = chapterImage.getImage().toString().split("/");
+			Component c = Component.translatable("ftbquests.image").append(": ")
+					.append(Component.literal(p[p.length - 1])).withStyle(ChatFormatting.GRAY, ChatFormatting.ITALIC);
+			list.add(c);
 		}
 	}
 
