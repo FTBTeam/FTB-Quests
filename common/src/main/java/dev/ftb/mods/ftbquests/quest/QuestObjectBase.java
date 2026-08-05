@@ -394,8 +394,7 @@ public abstract class QuestObjectBase implements Comparable<QuestObjectBase> {
 	}
 
 	public final MutableComponent getMutableTitle() {
-		Component t = getTitle();
-		return t instanceof MutableComponent m ? m : t.copy();
+		return getTitle().copy();
 	}
 
 	@Environment(EnvType.CLIENT)
