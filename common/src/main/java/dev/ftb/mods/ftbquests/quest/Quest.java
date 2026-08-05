@@ -417,7 +417,7 @@ public final class Quest extends QuestObject implements Movable, Excludable {
 		ProgressionMode.NAME_MAP.write(buffer, progressionMode);
 
 		buffer.writeVarInt(maxCompletableDeps);
-		if (canRepeat.isTrue()) {
+		if (canBeRepeated()) {
 			buffer.writeInt(repeatCooldown);
 		}
 
@@ -461,7 +461,7 @@ public final class Quest extends QuestObject implements Movable, Excludable {
 		hideLockIcon = Bits.getFlag(flags, 0x40000);
 		progressionMode = ProgressionMode.NAME_MAP.read(buffer);
 		maxCompletableDeps = buffer.readVarInt();
-		repeatCooldown = canRepeat.isTrue() ? buffer.readInt() : 0;
+		repeatCooldown = canBeRepeated() ? buffer.readInt() : 0;
 		presetName = buffer.readUtf();
 	}
 
