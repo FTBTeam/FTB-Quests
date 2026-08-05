@@ -462,6 +462,9 @@ public final class Chapter extends QuestObject {
 		for (Quest quest : quests) {
 			quest.clearCachedData();
 		}
+		for (ChapterImage image : images) {
+			image.clearCachedData();
+		}
 	}
 
 	@Override

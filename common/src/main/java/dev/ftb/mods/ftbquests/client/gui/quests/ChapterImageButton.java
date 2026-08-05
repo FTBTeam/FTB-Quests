@@ -60,13 +60,13 @@ public class ChapterImageButton extends Button implements QuestPositionableButto
 
 	@Override
 	public boolean checkMouseOver(int mouseX, int mouseY) {
-        if (questScreen.questPanel.mouseOverQuest != null
+		if (questScreen.questPanel.mouseOverQuest != null
 				|| questScreen.movingObjects
 				|| questScreen.viewQuestPanel.isMouseOver()
 				|| questScreen.chapterPanel.isMouseOver()
 				|| chapterImage.getClickAction().isNone() && !questScreen.file.canEdit()) {
-            return false;
-        }
+			return false;
+		}
 
 		if (chapterImage.getRotation() != 0) {
 			// need a bit of trig here, and we'll memoize it for performance
@@ -79,12 +79,12 @@ public class ChapterImageButton extends Button implements QuestPositionableButto
 			mouseY = (int) (cy + rotated.y);
 		}
 
-        return super.checkMouseOver(mouseX, mouseY);
+		return super.checkMouseOver(mouseX, mouseY);
 	}
 
 	@Override
 	public boolean mousePressed(MouseButton button) {
-        if (isMouseOver() && getWidgetType() != WidgetType.DISABLED) {
+		if (isMouseOver() && getWidgetType() != WidgetType.DISABLED) {
 			onClicked(button);
 			// returning false on left button click allows click-through for panning behaviour
 			//  (also, images with a click action defined should swallow the mouse click)
@@ -168,16 +168,24 @@ public class ChapterImageButton extends Button implements QuestPositionableButto
 	}
 
 	@Override
-    public boolean collidesWith(int x, int y, int w, int h) {
-        // small kludge: always try to render rotated images, even if they're off-screen
-        // while it's possible to do extra calculations to determine the effective bounding area of a rotated image,
-        //   it adds a lot of complexity for a relatively small benefit
-        return chapterImage.getRotation() != 0 || super.collidesWith(x, y, w, h);
-    }
+	public boolean collidesWith(int x, int y, int w, int h) {
+		// small kludge: always try to render rotated images, even if they're off-screen
+		// while it's possible to do extra calculations to determine the effective bounding area of a rotated image,
+		//   it adds a lot of complexity for a relatively small benefit
+		return chapterImage.getRotation() != 0 || super.collidesWith(x, y, w, h);
+	}
 
 	@Override
 	public void addMouseOverText(TooltipList list) {
-		TextUtils.processComponentWithPossibleNewlines(getTitle(), list::add);
+		if (!chapterImage.shouldDrawTextOnImage() && !TextUtils.isComponentEmpty(getTitle())) {
+			TextUtils.processComponentWithPossibleNewlines(getTitle(), list::add);
+		}
+		if (chapterImage.getQuestFile().canEdit()) {
+			var p = chapterImage.getImage().toString().split("/");
+			Component c = Component.translatable("ftbquests.image").append(": ")
+					.append(Component.literal(p[p.length - 1])).withStyle(ChatFormatting.GRAY, ChatFormatting.ITALIC);
+			list.add(c);
+		}
 	}
 
 	@Override
