@@ -4,6 +4,7 @@ import dev.ftb.mods.ftblibrary.ui.Theme;
 import dev.ftb.mods.ftblibrary.ui.misc.KeyReferenceScreen;
 import dev.ftb.mods.ftblibrary.util.client.ClientUtils;
 import dev.ftb.mods.ftbquests.client.FTBQuestsKeyMappings;
+import dev.ftb.mods.ftbquests.mixin.KeyMappingMixin;
 import dev.ftb.mods.ftbquests.quest.theme.property.ThemeProperties;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.KeyMapping;
@@ -93,7 +94,7 @@ public class QuestKeyReferenceScreen extends KeyReferenceScreen {
         int e = input.indexOf('}');
         if (s >= 0 && e >= 0 && e > s + 1) {
             String key = input.substring(s + 1, e);
-            var keyMapping = KeyMapping.ALL.get(key);
+            var keyMapping = KeyMappingMixin.getAll().get(key);
             if (keyMapping != null) {
                 return Component.literal(input.substring(0, s))
                         .append(ClientUtils.input().getKeyMappingDisplayName(keyMapping))

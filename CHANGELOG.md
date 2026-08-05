@@ -4,6 +4,16 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2101.1.30]
+
+### Fixed
+* Fixed repeatable quest cooldowns not sync'ing to client when quest is repeatable due to chapter defaults
+* Fixed possible accesswidener issues with keymap querying
+  * Could not reproduce this, but replaced an accesswidener (for `KeyMapping.ALL`) with an accessor mixin
+* Chapter side panel now always attempts to keep the selected chapter in view when there are more chapters than fit vertically on screen
+* Image tooltips (showing the image name) now only appear in edit mode (as "Image: <name>" in gray italics)
+  * If the image has a non-empty "Title" property, that is _always_ shown in the tooltip (unless "Draw Title Text on Image" is true)
+
 ## [2101.1.29]
 
 ### Fixed

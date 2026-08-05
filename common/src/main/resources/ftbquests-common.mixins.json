@@ -6,6 +6,7 @@
     "ServerGamePacketListenerImplMixin"
   ],
   "client": [
+    "KeyMappingMixin"
   ],
   "injectors": {
     "defaultRequire": 1

@@ -165,6 +165,7 @@ public class QuestScreen extends BaseScreen {
 			questPanel.refreshWidgets();
 			questPanel.resetScroll();
 			questPanel.bezierController.deactivate(false);
+			chapterPanel.keepChapterInView(selectedChapter);
 		}
 	}
 

@@ -379,7 +379,7 @@ public abstract class QuestObjectBase implements Comparable<QuestObjectBase> {
 
 	public final Component getTitle() {
 		if (cachedTitle != null) {
-			return cachedTitle.copy();
+			return cachedTitle;
 		}
 
 		if (!getRawTitle().isEmpty()) {
@@ -390,12 +390,11 @@ public abstract class QuestObjectBase implements Comparable<QuestObjectBase> {
 			cachedTitle = getAltTitle();
 		}
 
-		return cachedTitle.copy();
+		return cachedTitle;
 	}
 
 	public final MutableComponent getMutableTitle() {
-		Component t = getTitle();
-		return t instanceof MutableComponent m ? m : t.copy();
+		return getTitle().copy();
 	}
 
 	@Environment(EnvType.CLIENT)

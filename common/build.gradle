@@ -1,6 +1,3 @@
-loom {
-	accessWidenerPath = file("src/main/resources/ftbquests.accesswidener")
-}
 
 dependencies {
 	modImplementation "net.fabricmc:fabric-loader:${rootProject.fabric_loader_version}"
