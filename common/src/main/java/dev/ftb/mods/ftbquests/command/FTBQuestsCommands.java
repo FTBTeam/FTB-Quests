@@ -204,16 +204,24 @@ public class FTBQuestsCommands {
         return 0;
     }
 
-	private static boolean isSSPOrEditor(CommandSourceStack s) {
-		// s.getServer() *can* be null here, whatever the IDE thinks!
+	static boolean isSSPOrEditor(CommandSourceStack source) {
+		// source.getServer() *can* return null: https://github.com/FTBTeam/FTB-Mods-Issues/issues/766
 		//noinspection ConstantValue
-		return s.getServer() != null && s.getServer().isSingleplayer() || hasEditorPermission(s);
+		if (source.getServer() == null) {
+			return false;
+		}
+
+		// from console, or owner of SSP world (incl open to LAN), or see hasEditorPermission() below
+		return source.getPlayer() == null
+				|| source.getServer().isSingleplayerOwner(source.getPlayer().getGameProfile())
+				|| hasEditorPermission(source);
 	}
 
-	private static boolean hasEditorPermission(CommandSourceStack stack) {
+	static boolean hasEditorPermission(CommandSourceStack source) {
+		// has GM perm level or better, or has "ftbquests.editor" FTB Ranks node
+
 		//noinspection DataFlowIssue
-		return stack.hasPermission(2)
-				|| stack.isPlayer() && PermissionsHelper.hasEditorPermission(stack.getPlayer(), false);
+		return source.isPlayer() && PermissionsHelper.hasEditorPermission(source.getPlayer(), false);
 	}
 
 	private static QuestObjectBase getQuestObjectForString(String idStr) throws CommandSyntaxException {
