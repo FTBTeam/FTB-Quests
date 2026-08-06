@@ -45,6 +45,7 @@ import org.apache.commons.lang3.Validate;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.nio.file.Path;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -68,7 +69,7 @@ public class RewardTable extends QuestObjectBase {
 		super(id);
 
 		this.file = file;
-		this.filename = filename;
+		this.filename = sanitizeFilename(filename).orElse("");
 
 		weightedRewards = new ArrayList<>();
 		fakeQuest = makeFakeQuest(file);
@@ -304,7 +305,7 @@ public class RewardTable extends QuestObjectBase {
 	@Override
 	public void readNetData(RegistryFriendlyByteBuf buffer) {
 		super.readNetData(buffer);
-		filename = buffer.readUtf(Short.MAX_VALUE);
+		filename = sanitizeFilename(buffer.readUtf(Short.MAX_VALUE)).orElse("");
 		emptyWeight = buffer.readFloat();
 		lootSize = buffer.readVarInt();
 		int flags = buffer.readVarInt();
@@ -399,7 +400,7 @@ public class RewardTable extends QuestObjectBase {
 		file.addRewardTable(this);
 	}
 
-	public String getFilename() {
+	private String getFilename() {
 		if (filename.isEmpty()) {
 			filename = getCodeString(this);
 		}
@@ -408,8 +409,8 @@ public class RewardTable extends QuestObjectBase {
 	}
 
 	@Override
-	public Optional<String> getPath() {
-		return Optional.of("reward_tables/" + getFilename() + ".snbt");
+	public Optional<Path> getPath() {
+		return Optional.of(Path.of("reward_tables").resolve(getFilename() + ".snbt"));
 	}
 
 	@Override

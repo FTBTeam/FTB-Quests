@@ -20,6 +20,7 @@ import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 
+import java.nio.file.Path;
 import java.util.*;
 import java.util.regex.Pattern;
 
@@ -58,7 +59,7 @@ public final class Chapter extends QuestObject {
 
 		this.file = file;
 		this.group = group;
-		this.filename = filename;
+		this.filename = sanitizeFilename(filename).orElse("");
 		quests = new ArrayList<>();
 		questLinks = new ArrayList<>();
 		alwaysInvisible = false;
@@ -204,9 +205,9 @@ public final class Chapter extends QuestObject {
 
 	@Override
 	public void readData(CompoundTag nbt, HolderLookup.Provider provider) {
-		filename = nbt.getString("filename");
 		super.readData(nbt, provider);
 
+		filename = sanitizeFilename(nbt.getString("filename")).orElse("");
 		alwaysInvisible = nbt.getBoolean("always_invisible");
 		defaultQuestShape = nbt.getString("default_quest_shape");
 
@@ -268,7 +269,7 @@ public final class Chapter extends QuestObject {
 	@Override
 	public void readNetData(RegistryFriendlyByteBuf buffer) {
 		super.readNetData(buffer);
-		filename = buffer.readUtf(Short.MAX_VALUE);
+		filename = sanitizeFilename(buffer.readUtf(Short.MAX_VALUE)).orElse("");
 		defaultQuestShape = buffer.readUtf(Short.MAX_VALUE);
 		defaultQuestSize = buffer.readDouble();
 //		NetUtils.read(buffer, images, buf -> ChapterImage.fromNet(this, buf));
@@ -405,7 +406,7 @@ public final class Chapter extends QuestObject {
 		}
 	}
 
-	public String getFilename() {
+	private String getFilename() {
 		if (filename.isEmpty()) {
 			filename = getCodeString(this);
 		}
@@ -414,8 +415,8 @@ public final class Chapter extends QuestObject {
 	}
 
 	@Override
-	public Optional<String> getPath() {
-		return Optional.of("chapters/" + getFilename() + ".snbt");
+	public Optional<Path> getPath() {
+		return Optional.of(Path.of("chapters").resolve(getFilename() + ".snbt"));
 	}
 
 	@Override

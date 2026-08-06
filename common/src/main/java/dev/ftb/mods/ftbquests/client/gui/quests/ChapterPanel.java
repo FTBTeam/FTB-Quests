@@ -252,7 +252,7 @@ public class ChapterPanel extends Panel {
 					chapterPanel.questScreen.openGui();
 
 					if (accepted && !c.getValue().isEmpty()) {
-						Chapter chapter = new Chapter(0L, file, file.getDefaultChapterGroup(), Chapter.titleToID(c.getValue()).orElse(""));
+						Chapter chapter = new Chapter(0L, file, file.getDefaultChapterGroup(), c.getValue());
 						chapter.setRawTitle(c.getValue());
 						NetworkManager.sendToServer(CreateObjectMessage.requestCreation(chapter));
 					}
@@ -379,7 +379,7 @@ public class ChapterPanel extends Panel {
 				chapterPanel.questScreen.openGui();
 
 				if (accepted && !c.getValue().isEmpty()) {
-					Chapter chapter = new Chapter(0L, file, group, Chapter.titleToID( c.getValue()).orElse(""));
+					Chapter chapter = new Chapter(0L, file, group, c.getValue());
 					chapter.setRawTitle(c.getValue());
 					NetworkManager.sendToServer(CreateObjectMessage.requestCreation(chapter));
 				}

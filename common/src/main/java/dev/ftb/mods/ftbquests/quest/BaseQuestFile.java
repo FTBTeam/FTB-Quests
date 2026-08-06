@@ -576,7 +576,7 @@ public abstract class BaseQuestFile extends QuestObject implements QuestFile {
 					}
 				}));
 
-				SNBT.write(folder.resolve("chapters/" + chapter.getFilename() + ".snbt"), chapterNBT);
+				SNBT.write(folder.resolve(chapter.getPath().orElseThrow()), chapterNBT);
 			}
 		}
 	}
@@ -588,7 +588,7 @@ public abstract class BaseQuestFile extends QuestObject implements QuestFile {
 			tableNBT.putString("id", table.getCodeString());
 			tableNBT.putInt("order_index", ri);
 			table.writeData(tableNBT, provider);
-			SNBT.write(folder.resolve("reward_tables/" + table.getFilename() + ".snbt"), tableNBT);
+			SNBT.write(folder.resolve(table.getPath().orElseThrow()), tableNBT);
 		}
 	}
 
