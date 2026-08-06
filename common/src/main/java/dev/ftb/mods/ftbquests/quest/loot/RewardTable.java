@@ -65,7 +65,7 @@ public class RewardTable extends QuestObjectBase {
 		super(id);
 
 		this.file = file;
-		this.filename = filename;
+		this.filename = sanitizeFilename(filename).orElse("");
 
 		weightedRewards = new ArrayList<>();
 		fakeQuest = makeFakeQuest(file);
@@ -282,7 +282,7 @@ public class RewardTable extends QuestObjectBase {
 	@Override
 	public void readNetData(RegistryFriendlyByteBuf buffer) {
 		super.readNetData(buffer);
-		filename = buffer.readUtf(Short.MAX_VALUE);
+		filename = sanitizeFilename(buffer.readUtf(Short.MAX_VALUE)).orElse("");
 		emptyWeight = buffer.readFloat();
 		lootSize = buffer.readVarInt();
 		int flags = buffer.readVarInt();
