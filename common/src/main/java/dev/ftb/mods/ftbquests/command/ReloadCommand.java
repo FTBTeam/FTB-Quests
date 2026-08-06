@@ -3,6 +3,7 @@ package dev.ftb.mods.ftbquests.command;
 import com.mojang.brigadier.Command;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import dev.ftb.mods.ftblibrary.platform.network.Server2PlayNetworking;
+import dev.ftb.mods.ftbquests.integration.PermissionsHelper;
 import dev.ftb.mods.ftbquests.net.SyncEditorPermissionMessage;
 import dev.ftb.mods.ftbquests.net.SyncQuestsMessage;
 import dev.ftb.mods.ftbquests.quest.ServerQuestFile;
@@ -24,7 +25,7 @@ public class ReloadCommand {
 
     public static LiteralArgumentBuilder<CommandSourceStack> register() {
         return Commands.literal("reload")
-                .requires(FTBQuestsCommands::hasEditorPermission)
+                .requires(PermissionsHelper::hasEditorPermission)
                 .executes(context -> doReload(context.getSource(), true, true))
                 .then(literal("quests")
                         .executes(context -> doReload(context.getSource(), true, false))

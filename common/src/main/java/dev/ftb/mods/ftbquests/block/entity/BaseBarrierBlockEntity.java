@@ -10,6 +10,7 @@ import dev.ftb.mods.ftblibrary.platform.network.Play2ServerNetworking;
 import dev.ftb.mods.ftbquests.api.FTBQuestsAPI;
 import dev.ftb.mods.ftbquests.block.QuestBarrierBlock;
 import dev.ftb.mods.ftbquests.client.FTBQuestsClient;
+import dev.ftb.mods.ftbquests.integration.PermissionsHelper;
 import dev.ftb.mods.ftbquests.net.BlockConfigResponseMessage;
 import dev.ftb.mods.ftbquests.registry.ModBlocks;
 import dev.ftb.mods.ftbquests.registry.ModDataComponents;
@@ -215,9 +216,7 @@ public abstract class BaseBarrierBlockEntity extends EditableBlockEntity {
 
 	@Override
 	public boolean hasPermissionToEdit(Player player) {
-		return FTBQuestsAPI.api().getQuestFile(player.level().isClientSide()).getTeamData(player)
-				.map(team -> team.getCanEdit(player))
-				.orElse(false);
+		return PermissionsHelper.canPlayerEdit(player);
 	}
 
 	public Optional<TeleportData> optionalTeleportData() {

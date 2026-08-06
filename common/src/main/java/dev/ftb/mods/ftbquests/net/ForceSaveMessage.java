@@ -24,7 +24,7 @@ public class ForceSaveMessage implements CustomPacketPayload {
 
 	public static void handle(ForceSaveMessage ignoredMessage, PacketContext context) {
 		ServerPlayer player = (ServerPlayer) context.player();
-		if (PermissionsHelper.hasEditorPermission(player, false)) {
+		if (PermissionsHelper.hasEditorPermission(player)) {
 			ServerQuestFile.getInstance().markDirty();
 			ServerQuestFile.getInstance().saveNow();
 			player.sendSystemMessage(Component.translatable("ftbquests.gui.saved_on_server"));

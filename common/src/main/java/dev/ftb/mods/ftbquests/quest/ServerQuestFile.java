@@ -228,7 +228,7 @@ public class ServerQuestFile extends BaseQuestFile {
 		// - server will only then send a SyncTeamData message to the client
 		Server2PlayNetworking.send(player, new SyncQuestsMessage(this));
 
-		Server2PlayNetworking.send(player, new SyncEditorPermissionMessage(PermissionsHelper.hasEditorPermission(player, false)));
+		Server2PlayNetworking.send(player, new SyncEditorPermissionMessage(PermissionsHelper.hasEditorPermission(player)));
 
 		getTranslationManager().sendTranslationsToPlayer(player);
 
@@ -241,6 +241,11 @@ public class ServerQuestFile extends BaseQuestFile {
 		if (data.getName().isEmpty()) {
 			data.setName(player.getPlainTextName());
 			Server2PlayNetworking.send(player, new UpdateTeamDataMessage(data.getTeamId(), data.getName()));
+		}
+
+		if (data.isPlayerInEditMode(player) && !PermissionsHelper.canPlayerEdit(player)) {
+			// could happen if player was deop'd or lost the "ftbquests.editor" permission node
+			data.setPlayerEditMode(player, false);
 		}
 
 		checkQuestBookOnLogin(data, player);

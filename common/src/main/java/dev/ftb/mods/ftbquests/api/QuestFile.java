@@ -20,8 +20,12 @@ public interface QuestFile {
     boolean isServerSide();
 
     /**
-     * Check if this quest file is editable. This will always return false on the server;
-     * use {@link TeamData#getCanEdit(Player)} there.
+     * Check if this quest file is editable. This will always return false on the server; use
+     * {@link TeamData#isPlayerInEditMode(Player)} there.
+     * <p>
+     * On the client this returns true if the client believes the player is in edit mode based on information
+     * the server has sent it (the server will of course validate any messages sent).
+     *
      * @return true if the file can be edited (clientside), false otherwise
      */
     boolean canEdit();

@@ -110,7 +110,7 @@ public class OtherButtonsPanelBottom extends OtherButtonsPanel {
 		public void onClicked(MouseButton button) {
 			playClickSound();
 
-			if (!FTBQuestsClient.getClientPlayerData().getCanEdit(ClientUtils.getClientPlayer())) {
+			if (!FTBQuestsClient.getClientPlayerData().isPlayerInEditMode(ClientUtils.getClientPlayer())) {
 				StructureTask.maybeRequestStructureSync();
 			}
 

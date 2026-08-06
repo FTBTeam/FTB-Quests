@@ -5,12 +5,10 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.DynamicCommandExceptionType;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import dev.ftb.mods.ftbquests.api.FTBQuestsAPI;
-import dev.ftb.mods.ftbquests.integration.PermissionsHelper;
 import dev.ftb.mods.ftbquests.quest.QuestObjectBase;
 import dev.ftb.mods.ftbquests.quest.ServerQuestFile;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.network.chat.Component;
-import net.minecraft.server.permissions.Permissions;
 
 import static net.minecraft.commands.Commands.literal;
 
@@ -37,18 +35,6 @@ public class FTBQuestsCommands {
 				.then(ClearItemDisplayCacheCommand.register())
 				.then(PauseProgressionCommand.register())
 		);
-	}
-
-	static boolean isSSPOrEditor(CommandSourceStack s) {
-		// s.getServer() *can* be null here, whatever the IDE thinks!
-		//noinspection ConstantValue
-		return s.getServer() != null && s.getServer().isSingleplayer() || hasEditorPermission(s);
-	}
-
-	static boolean hasEditorPermission(CommandSourceStack stack) {
-		//noinspection DataFlowIssue
-		return stack.permissions().hasPermission(Permissions.COMMANDS_GAMEMASTER)
-				|| stack.isPlayer() && PermissionsHelper.hasEditorPermission(stack.getPlayer(), false);
 	}
 
 	static QuestObjectBase getQuestObjectForString(String idStr) throws CommandSyntaxException {

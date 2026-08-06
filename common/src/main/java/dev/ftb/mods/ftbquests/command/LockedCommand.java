@@ -3,6 +3,7 @@ package dev.ftb.mods.ftbquests.command;
 import com.mojang.brigadier.Command;
 import com.mojang.brigadier.arguments.BoolArgumentType;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
+import dev.ftb.mods.ftbquests.integration.PermissionsHelper;
 import dev.ftb.mods.ftbquests.quest.ServerQuestFile;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.arguments.EntityArgument;
@@ -18,7 +19,7 @@ import static net.minecraft.commands.Commands.literal;
 public class LockedCommand {
     public static LiteralArgumentBuilder<CommandSourceStack> register() {
         return literal("locked")
-                .requires(FTBQuestsCommands::hasEditorPermission)
+                .requires(PermissionsHelper::hasEditorPermission)
                 .executes(c -> locked(c.getSource(), c.getSource().getPlayerOrException(), null))
                 .then(argument("enabled", BoolArgumentType.bool())
                         .executes(c -> locked(c.getSource(), c.getSource().getPlayerOrException(), BoolArgumentType.getBool(c, "enabled")))

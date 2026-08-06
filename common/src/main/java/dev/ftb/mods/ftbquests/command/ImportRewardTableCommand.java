@@ -6,6 +6,7 @@ import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import dev.ftb.mods.ftblibrary.platform.Platform;
 import dev.ftb.mods.ftblibrary.platform.network.Server2PlayNetworking;
+import dev.ftb.mods.ftbquests.integration.PermissionsHelper;
 import dev.ftb.mods.ftbquests.net.CreateObjectResponseMessage;
 import dev.ftb.mods.ftbquests.net.SyncTranslationMessageToClient;
 import dev.ftb.mods.ftbquests.quest.ServerQuestFile;
@@ -28,7 +29,7 @@ import static net.minecraft.commands.Commands.argument;
 public class ImportRewardTableCommand {
     public static LiteralArgumentBuilder<CommandSourceStack> register() {
         return Commands.literal("import_reward_table_from_chest")
-                .requires(FTBQuestsCommands::hasEditorPermission)
+                .requires(PermissionsHelper::hasEditorPermission)
                 .then(argument("name", StringArgumentType.string())
                         .executes(ctx -> {
                             String name = StringArgumentType.getString(ctx, "name");
