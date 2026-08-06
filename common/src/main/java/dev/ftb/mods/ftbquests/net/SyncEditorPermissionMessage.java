@@ -19,7 +19,7 @@ public record SyncEditorPermissionMessage(boolean hasPermission) implements Cust
     );
 
     public static SyncEditorPermissionMessage forPlayer(ServerPlayer p) {
-        return new SyncEditorPermissionMessage(PermissionsHelper.hasEditorPermission(p, false));
+        return new SyncEditorPermissionMessage(PermissionsHelper.hasEditorPermission(p));
     }
 
     @Override

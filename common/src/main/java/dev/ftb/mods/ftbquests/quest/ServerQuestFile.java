@@ -200,20 +200,25 @@ public class ServerQuestFile extends BaseQuestFile {
 
 	public void playerLoggedIn(PlayerLoggedInAfterTeamEvent event) {
 		ServerPlayer player = event.getPlayer();
-		TeamData data = getOrCreateTeamData(event.getTeam());
 
 		// Sync the quest book data
 		// - client will respond to this with a RequestTeamData message
 		// - server will only then send a SyncTeamData message to the client
 		NetworkHelper.sendTo(player, new SyncQuestsMessage(this));
 
-		NetworkHelper.sendTo(player, new SyncEditorPermissionMessage(PermissionsHelper.hasEditorPermission(player, false)));
+		NetworkHelper.sendTo(player, new SyncEditorPermissionMessage(PermissionsHelper.hasEditorPermission(player)));
 
 		getTranslationManager().sendTranslationsToPlayer(player);
 
 		NetworkHelper.sendTo(player, historyStack.createInitialDescPacket(this));
 
 		player.inventoryMenu.addSlotListener(new FTBQuestsInventoryListener(player));
+
+		TeamData data = getOrCreateTeamData(event.getTeam());
+		if (data.isPlayerInEditMode(player) && !PermissionsHelper.canPlayerEdit(player)) {
+			// could happen if player was deop'd or lost the "ftbquests.editor" permission node
+			data.setPlayerEditMode(player, false);
+		}
 
 		checkQuestBookOnLogin(data, player);
 	}

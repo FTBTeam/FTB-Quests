@@ -22,7 +22,7 @@ public interface QuestFile {
 
     /**
      * Check if this quest file is editable. This will always return false on the server;
-     * use {@link TeamData#getCanEdit(Player)} there.
+     * use {@link TeamData#isPlayerInEditMode(Player)} there.
      * @return true if the file can be edited (clientside), false otherwise
      */
     boolean canEdit();

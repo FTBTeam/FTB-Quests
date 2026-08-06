@@ -85,7 +85,7 @@ public class ClientQuestFile extends BaseQuestFile {
 
 	@Override
 	public boolean canEdit() {
-		return Minecraft.getInstance().player != null && hasEditorPermission() && selfTeamData.getCanEdit(Minecraft.getInstance().player);
+		return Minecraft.getInstance().player != null && hasEditorPermission() && selfTeamData.isPlayerInEditMode(Minecraft.getInstance().player);
 	}
 
 	@Override
@@ -186,7 +186,7 @@ public class ClientQuestFile extends BaseQuestFile {
 	}
 
 	public static boolean canClientPlayerEdit() {
-		return exists() && INSTANCE.selfTeamData.getCanEdit(FTBQuestsClient.getClientPlayer());
+		return exists() && INSTANCE.selfTeamData.isPlayerInEditMode(FTBQuestsClient.getClientPlayer());
 	}
 
 	public static boolean isQuestPinned(long id) {

@@ -57,7 +57,7 @@ public class FTBQuestsCommands {
 	public static void register(CommandDispatcher<CommandSourceStack> dispatcher) {
 		dispatcher.register(literal("ftbquests")
 				.then(literal("editing_mode")
-						.requires(FTBQuestsCommands::isSSPOrEditor)
+						.requires(PermissionsHelper::hasEditorPermission)
 						.executes(c -> editingMode(c.getSource(), c.getSource().getPlayerOrException(), null))
 						.then(argument("enabled", BoolArgumentType.bool())
 								.executes(c -> editingMode(c.getSource(), c.getSource().getPlayerOrException(), BoolArgumentType.getBool(c, "enabled")))
@@ -67,7 +67,7 @@ public class FTBQuestsCommands {
 						)
 				)
 				.then(literal("locked")
-						.requires(FTBQuestsCommands::hasEditorPermission)
+						.requires(PermissionsHelper::hasEditorPermission)
 						.executes(c -> locked(c.getSource(), c.getSource().getPlayerOrException(), null))
 						.then(argument("enabled", BoolArgumentType.bool())
 								.executes(c -> locked(c.getSource(), c.getSource().getPlayerOrException(), BoolArgumentType.getBool(c, "enabled")))
@@ -77,11 +77,11 @@ public class FTBQuestsCommands {
 						)
 				)
 				.then(literal("delete_empty_reward_tables")
-						.requires(FTBQuestsCommands::hasEditorPermission)
+						.requires(PermissionsHelper::hasEditorPermission)
 						.executes(context -> deleteEmptyRewardTables(context.getSource()))
 				)
 				.then(literal("change_progress")
-						.requires(FTBQuestsCommands::hasEditorPermission)
+						.requires(PermissionsHelper::hasEditorPermission)
 						.then(argument("players", EntityArgument.players())
 								.then(literal("reset")
 										.then(argument("quest_object", StringArgumentType.string())
@@ -114,7 +114,7 @@ public class FTBQuestsCommands {
 						)
 				)
 				.then(literal("export_reward_table_to_chest")
-						.requires(FTBQuestsCommands::hasEditorPermission)
+						.requires(PermissionsHelper::hasEditorPermission)
 						.then(argument("reward_table", StringArgumentType.string())
 								.executes(ctx ->
 										exportRewards(ctx.getSource(), StringArgumentType.getString(ctx, "reward_table"), null)
@@ -128,7 +128,7 @@ public class FTBQuestsCommands {
 						)
 				)
 				.then(literal("import_reward_table_from_chest")
-						.requires(FTBQuestsCommands::hasEditorPermission)
+						.requires(PermissionsHelper::hasEditorPermission)
 						.then(argument("name", StringArgumentType.string())
 								.executes(ctx -> {
 									String name = StringArgumentType.getString(ctx, "name");
@@ -144,7 +144,7 @@ public class FTBQuestsCommands {
 						)
 				)
 				.then(literal("generate_chapter")
-						.requires(FTBQuestsCommands::hasEditorPermission)
+						.requires(PermissionsHelper::hasEditorPermission)
 						.then(literal("from_entire_creative_list")
 								.executes(context -> generateAllItemChapter(context.getSource()))
 						)
@@ -158,7 +158,7 @@ public class FTBQuestsCommands {
 						)
 				)
 				.then(literal("reload")
-						.requires(FTBQuestsCommands::hasEditorPermission)
+						.requires(PermissionsHelper::hasEditorPermission)
 						.executes(context -> doReload(context.getSource(), true, true))
 						.then(literal("quests")
 								.executes(context -> doReload(context.getSource(), true, false))
@@ -168,12 +168,12 @@ public class FTBQuestsCommands {
 						)
 				)
 				.then(literal("block_rewards")
-						.requires(FTBQuestsCommands::hasEditorPermission)
+						.requires(PermissionsHelper::hasEditorPermission)
 						.executes(c -> toggleRewardBlocking(c.getSource(), c.getSource().getPlayerOrException(), null))
 						.then(argument("enabled", BoolArgumentType.bool())
 								.executes(c -> toggleRewardBlocking(c.getSource(), c.getSource().getPlayerOrException(), BoolArgumentType.getBool(c, "enabled")))
 								.then(argument("player", EntityArgument.player())
-										.requires(FTBQuestsCommands::hasEditorPermission)
+										.requires(PermissionsHelper::hasEditorPermission)
 										.executes(c -> toggleRewardBlocking(c.getSource(), EntityArgument.getPlayer(c, "player"), BoolArgumentType.getBool(c, "enabled")))
 								)
 						)
@@ -184,11 +184,11 @@ public class FTBQuestsCommands {
 								.executes(c -> openQuest(c.getSource().getPlayerOrException(), StringArgumentType.getString(c, "quest_object"))))
 				)
 				.then(literal("clear_item_display_cache")
-						.requires(FTBQuestsCommands::hasEditorPermission)
+						.requires(PermissionsHelper::hasEditorPermission)
 						.executes(c -> clearDisplayCache(c.getSource()))
 				)
 				.then(literal("cleanup_stale_translations")
-						.requires(FTBQuestsCommands::hasEditorPermission)
+						.requires(PermissionsHelper::hasEditorPermission)
 						.then(literal("show")
 								.executes(c -> cleanupTranslations(c.getSource(), true))
 						)
@@ -203,26 +203,6 @@ public class FTBQuestsCommands {
 		ServerQuestFile.INSTANCE.getTranslationManager().cleanupTranslations(source, dryRun);
         return 0;
     }
-
-	static boolean isSSPOrEditor(CommandSourceStack source) {
-		// source.getServer() *can* return null: https://github.com/FTBTeam/FTB-Mods-Issues/issues/766
-		//noinspection ConstantValue
-		if (source.getServer() == null) {
-			return false;
-		}
-
-		// from console, or owner of SSP world (incl open to LAN), or see hasEditorPermission() below
-		return source.getPlayer() == null
-				|| source.getServer().isSingleplayerOwner(source.getPlayer().getGameProfile())
-				|| hasEditorPermission(source);
-	}
-
-	static boolean hasEditorPermission(CommandSourceStack source) {
-		// has GM perm level or better, or has "ftbquests.editor" FTB Ranks node
-
-		//noinspection DataFlowIssue
-		return source.isPlayer() && PermissionsHelper.hasEditorPermission(source.getPlayer(), false);
-	}
 
 	private static QuestObjectBase getQuestObjectForString(String idStr) throws CommandSyntaxException {
 		ServerQuestFile file = ServerQuestFile.INSTANCE;
@@ -254,7 +234,7 @@ public class FTBQuestsCommands {
 		}
 		return ServerQuestFile.INSTANCE.getTeamData(player).map(data -> {
 			Quest quest = qo.getRelatedQuest();
-			return quest != null && (data.getCanEdit(player) || !quest.hideDetailsUntilStartable() || data.canStartTasks(quest));
+			return quest != null && (data.isPlayerInEditMode(player) || !quest.hideDetailsUntilStartable() || data.canStartTasks(quest));
 		}).orElse(false);
 	}
 
@@ -335,9 +315,9 @@ public class FTBQuestsCommands {
 
 	private static int editingMode(CommandSourceStack source, ServerPlayer player, @Nullable Boolean canEdit) {
 		return ServerQuestFile.INSTANCE.getTeamData(player).map(data -> {
-			boolean newCanEdit = Objects.requireNonNullElse(canEdit, !data.getCanEdit(player));
+			boolean newCanEdit = Objects.requireNonNullElse(canEdit, !data.isPlayerInEditMode(player));
 
-			data.setCanEdit(player, newCanEdit);
+			data.setPlayerEditMode(player, newCanEdit);
 
 			if (newCanEdit) {
 				source.sendSuccess(() -> Component.translatable("commands.ftbquests.editing_mode.enabled", player.getDisplayName()), true);

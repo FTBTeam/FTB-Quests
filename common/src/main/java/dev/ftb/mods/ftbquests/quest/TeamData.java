@@ -805,11 +805,11 @@ public class TeamData {
 		return Optional.ofNullable(perPlayerData.get(player.getUUID()));
 	}
 
-	public boolean getCanEdit(Player player) {
+	public boolean isPlayerInEditMode(Player player) {
 		return getOrCreatePlayerData(player).map(d -> d.canEdit).orElse(false);
 	}
 
-	public boolean setCanEdit(Player player, boolean newCanEdit) {
+	public boolean setPlayerEditMode(Player player, boolean newCanEdit) {
 		return getOrCreatePlayerData(player).map(playerData -> {
 			if (playerData.canEdit != newCanEdit) {
 				playerData.canEdit = newCanEdit;

@@ -27,7 +27,7 @@ public record GiveItemToPlayerMessage(ItemStack stack) implements CustomPacketPa
 	public static void handle(GiveItemToPlayerMessage message, NetworkManager.PacketContext context) {
 		context.queue(() -> {
 			ServerPlayer player = (ServerPlayer) context.getPlayer();
-			if (PermissionsHelper.hasEditorPermission(player, false)) {
+			if (PermissionsHelper.hasEditorPermission(player)) {
 				ItemStackHooks.giveItem(player, message.stack);
 				player.displayClientMessage(Component.translatable("ftbquests.task.gave_item", message.stack.toString()), false);
 			}

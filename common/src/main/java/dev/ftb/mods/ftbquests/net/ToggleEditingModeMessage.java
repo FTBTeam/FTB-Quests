@@ -24,12 +24,10 @@ public record ToggleEditingModeMessage() implements CustomPacketPayload {
     public static void handle(ToggleEditingModeMessage message, NetworkManager.PacketContext context) {
         context.queue(() -> {
             ServerPlayer player = (ServerPlayer) context.getPlayer();
-            if (PermissionsHelper.hasEditorPermission(player, false)
-                    || player.getServer() != null && player.getServer().isSingleplayerOwner(player.getGameProfile()))
-            {
+            if (PermissionsHelper.hasEditorPermission(player)) {
                 // will send a response to the client, causing GUI refresh
                 ServerQuestFile.INSTANCE.getTeamData(player)
-                        .ifPresent(data -> data.setCanEdit(player, !data.getCanEdit(player)));
+                        .ifPresent(data -> data.setPlayerEditMode(player, !data.isPlayerInEditMode(player)));
             }
         });
     }

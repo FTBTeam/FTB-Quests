@@ -3,10 +3,10 @@ package dev.ftb.mods.ftbquests.net;
 import dev.architectury.networking.NetworkManager;
 import dev.ftb.mods.ftblibrary.util.NetworkHelper;
 import dev.ftb.mods.ftbquests.api.FTBQuestsAPI;
+import dev.ftb.mods.ftbquests.integration.PermissionsHelper;
 import dev.ftb.mods.ftbquests.quest.QuestObjectType;
 import dev.ftb.mods.ftbquests.quest.ServerQuestFile;
 import dev.ftb.mods.ftbquests.quest.history.events.MoveItemWithinQuest;
-import dev.ftb.mods.ftbquests.util.NetUtils;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
@@ -29,7 +29,7 @@ public record ReorderItemMessage(long taskOrRewardId, QuestObjectType questObjec
 
     public static void handle(ReorderItemMessage message, NetworkManager.PacketContext context) {
         context.queue(() -> ServerQuestFile.getInstance().ifPresent(sqf -> {
-            if (NetUtils.canEdit(context)) {
+            if (PermissionsHelper.canPlayerEdit(context)) {
                 sqf.getHistoryStack().addAndApply(sqf, new MoveItemWithinQuest(message.taskOrRewardId, message.questObjectType, message.moveRight));
             }
         }));

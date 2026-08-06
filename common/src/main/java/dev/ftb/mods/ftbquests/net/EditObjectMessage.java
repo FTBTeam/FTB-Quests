@@ -2,11 +2,11 @@ package dev.ftb.mods.ftbquests.net;
 
 import dev.architectury.networking.NetworkManager;
 import dev.ftb.mods.ftbquests.api.FTBQuestsAPI;
+import dev.ftb.mods.ftbquests.integration.PermissionsHelper;
 import dev.ftb.mods.ftbquests.quest.QuestObjectBase;
 import dev.ftb.mods.ftbquests.quest.ServerQuestFile;
 import dev.ftb.mods.ftbquests.quest.history.EditRecord;
 import dev.ftb.mods.ftbquests.quest.history.events.ModifyQuestObjects;
-import dev.ftb.mods.ftbquests.util.NetUtils;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
@@ -49,7 +49,7 @@ public record EditObjectMessage(List<EditRecord> editRecords) implements CustomP
 
 	public static void handle(EditObjectMessage message, NetworkManager.PacketContext context) {
 		context.queue(() -> ServerQuestFile.getInstance().ifPresent(sqf -> {
-			if (NetUtils.canEdit(context)) {
+			if (PermissionsHelper.canPlayerEdit(context)) {
 				ModifyQuestObjects.fromEditRecords(sqf, message.editRecords)
 						.ifPresent(modification -> sqf.getHistoryStack().addAndApply(sqf, modification));
 			}
