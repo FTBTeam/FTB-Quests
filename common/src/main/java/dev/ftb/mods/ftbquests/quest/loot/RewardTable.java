@@ -39,6 +39,7 @@ import net.minecraft.util.Util;
 import net.minecraft.world.item.ItemStack;
 import org.jspecify.annotations.Nullable;
 
+import java.nio.file.Path;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -372,7 +373,7 @@ public class RewardTable extends QuestObjectBase {
 		file.addRewardTable(this);
 	}
 
-	public String getFilename() {
+	private String getFilename() {
 		if (filename.isEmpty()) {
 			filename = getCodeString(this);
 		}
@@ -381,8 +382,8 @@ public class RewardTable extends QuestObjectBase {
 	}
 
 	@Override
-	public Optional<String> getPath() {
-		return Optional.of("reward_tables/" + getFilename() + Json5Util.FILE_EXT);
+	public Optional<Path> getPath() {
+		return Optional.of(Path.of("reward_tables").resolve(getFilename() + Json5Util.FILE_EXT));
 	}
 
 	@Override

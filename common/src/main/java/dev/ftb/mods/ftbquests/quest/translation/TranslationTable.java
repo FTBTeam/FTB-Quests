@@ -103,7 +103,7 @@ public class TranslationTable {
     private static @Nullable Path getPathForQuestObject(QuestObjectBase qo) {
         return switch (qo.getObjectType()) {
             case QUEST, TASK, QUEST_LINK -> qo.getQuestChapter() != null ?
-                    Path.of("chapters").resolve(qo.getQuestChapter().getFilename() + BaseQuestFile.FILE_SUFFIX) :
+                    qo.getQuestChapter().getPath().orElseThrow() :
                     null;
             default -> Path.of(qo.getObjectType().getId() + BaseQuestFile.FILE_SUFFIX);
         };

@@ -19,6 +19,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.util.Util;
 
+import java.nio.file.Path;
 import java.util.*;
 import java.util.regex.Pattern;
 
@@ -57,7 +58,7 @@ public final class Chapter extends QuestObject {
 
 		this.file = file;
 		this.group = group;
-		this.filename = filename;
+		this.filename = sanitizeFilename(filename).orElse("");
 		quests = new ArrayList<>();
 		questLinks = new ArrayList<>();
 		alwaysInvisible = false;
@@ -187,7 +188,7 @@ public final class Chapter extends QuestObject {
 	public void readData(Json5Object json, HolderLookup.Provider provider) {
 		super.readData(json, provider);
 
-		filename = Json5Util.getString(json, "filename").orElseThrow();
+		filename = sanitizeFilename(Json5Util.getString(json, "filename").orElseThrow()).orElse(getCodeString());
 		alwaysInvisible = Json5Util.getBoolean(json, "always_invisible").orElse(false);
 		defaultQuestShape = Json5Util.getString(json, "default_quest_shape").orElse("");
 		defaultQuestSize = Json5Util.getDouble(json, "default_quest_size").orElse(1D);
@@ -243,7 +244,7 @@ public final class Chapter extends QuestObject {
 	@Override
 	public void readNetData(RegistryFriendlyByteBuf buffer) {
 		super.readNetData(buffer);
-		filename = buffer.readUtf(Short.MAX_VALUE);
+		filename = sanitizeFilename(buffer.readUtf(Short.MAX_VALUE)).orElse(getCodeString());
 		defaultQuestShape = buffer.readUtf(Short.MAX_VALUE);
 		defaultQuestSize = buffer.readDouble();
 		defaultMinWidth = buffer.readInt();
@@ -379,7 +380,7 @@ public final class Chapter extends QuestObject {
 		}
 	}
 
-	public String getFilename() {
+	private String getFilename() {
 		if (filename.isEmpty()) {
 			filename = getCodeString(this);
 		}
@@ -388,8 +389,8 @@ public final class Chapter extends QuestObject {
 	}
 
 	@Override
-	public Optional<String> getPath() {
-		return Optional.of("chapters/" + getFilename() + Json5Util.FILE_EXT);
+	public Optional<Path> getPath() {
+		return Optional.of(Path.of("chapters").resolve(getFilename() + Json5Util.FILE_EXT));
 	}
 
 	@Override

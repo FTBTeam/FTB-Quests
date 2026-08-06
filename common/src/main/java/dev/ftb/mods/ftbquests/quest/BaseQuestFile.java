@@ -68,7 +68,7 @@ import java.util.function.Predicate;
 import java.util.stream.Stream;
 
 public abstract class BaseQuestFile extends QuestObject implements QuestFile {
-	public static final String FILE_SUFFIX = ".json5";
+	public static final String FILE_SUFFIX = Json5Util.FILE_EXT;
 	public static int VERSION = 13;
 	private static final Logger LOGGER = LogUtils.getLogger();
 
@@ -527,7 +527,7 @@ public abstract class BaseQuestFile extends QuestObject implements QuestFile {
 					}
 				}));
 
-				Json5Util.save(folder.resolve("chapters").resolve(chapter.getFilename() + FILE_SUFFIX), chapterJson);
+				Json5Util.save(folder.resolve(chapter.getPath().orElseThrow()), chapterJson);
 			}
 		}
 	}
@@ -539,7 +539,7 @@ public abstract class BaseQuestFile extends QuestObject implements QuestFile {
 			tableNBT.addProperty("id", table.getCodeString());
 			tableNBT.addProperty("order_index", ri);
 			table.writeData(tableNBT, provider);
-			Json5Util.save(folder.resolve("reward_tables").resolve(table.getFilename() + FILE_SUFFIX), tableNBT);
+			Json5Util.save(folder.resolve(table.getPath().orElseThrow()), tableNBT);
 		}
 	}
 
