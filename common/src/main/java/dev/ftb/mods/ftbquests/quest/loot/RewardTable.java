@@ -220,14 +220,16 @@ public class RewardTable extends QuestObjectBase {
 				}
 
 				Reward reward = RewardType.createReward(rewardId, fakeQuest, Json5Util.getString(rewardTag, "type").orElse(""));
-				getQuestFile().getTranslationManager().processInitialTranslation(rewardTag, reward);
-				reward.readData(rewardTag, provider);
-				float weight = rewardTag.has("weight") ? Json5Util.getFloat(rewardTag, "weight").orElse(0f) : 1;
-				weightedRewards.add(new WeightedReward(reward, weight));
-				prevRewards.remove(rewardId);
-				if (newReward && getFile() instanceof ServerQuestFile sqf) {
-					Server2PlayNetworking.sendToAllPlayers(sqf.server, CreateObjectResponseMessage.create(reward));
-				}
+                if (reward != null) {
+                    getQuestFile().getTranslationManager().processInitialTranslation(rewardTag, reward);
+					reward.readData(rewardTag, provider);
+					float weight = rewardTag.has("weight") ? Json5Util.getFloat(rewardTag, "weight").orElse(0f) : 1;
+					weightedRewards.add(new WeightedReward(reward, weight));
+					prevRewards.remove(rewardId);
+					if (newReward && getFile() instanceof ServerQuestFile sqf) {
+						Server2PlayNetworking.sendToAllPlayers(sqf.server, CreateObjectResponseMessage.create(reward));
+					}
+                }
 			}
 		}
 
