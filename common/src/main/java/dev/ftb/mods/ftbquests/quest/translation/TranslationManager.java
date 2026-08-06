@@ -66,30 +66,37 @@ public class TranslationManager {
 
     public void saveToFile(BaseQuestFile file, Path langFolder, boolean force) {
         map.forEach((locale, table) -> {
-            Path localeDir = langFolder.resolve(locale);
-            try {
-                Files.createDirectories(localeDir);
-                if (force || table.isSaveNeeded()) {
-                    table.splitAndSerialize(file).forEach((path, json) -> {
-                        Path fullPath = localeDir.resolve(path);
-                        try {
-                            Files.createDirectories(fullPath.getParent());
-                            Json5Util.save(fullPath, json);
-                        } catch (IOException e) {
-                            FTBQuests.LOGGER.error("can't write lang file {}", fullPath);
-                        }
-                    });
-                    table.setSaveNeeded(false);
+            if (isValidLocale(locale)) {
+                Path localeDir = langFolder.resolve(locale);
+                try {
+                    Files.createDirectories(localeDir);
+                    if (force || table.isSaveNeeded()) {
+                        table.splitAndSerialize(file).forEach((path, json) -> {
+                            Path fullPath = localeDir.resolve(path);
+                            try {
+                                Files.createDirectories(fullPath.getParent());
+                                Json5Util.save(fullPath, json);
+                            } catch (IOException e) {
+                                FTBQuests.LOGGER.error("can't write lang file {}", fullPath);
+                            }
+                        });
+                        table.setSaveNeeded(false);
+                    }
+                } catch (IOException e) {
+                    FTBQuests.LOGGER.error("can't create lang directory structure {}", langFolder);
                 }
-            } catch (IOException e) {
-                FTBQuests.LOGGER.error("can't create lang directory structure {}", langFolder);
             }
         });
     }
 
 
     private static boolean isValidLangDirectory(Path p) {
-        return Files.isDirectory(p) && LANG_FILE_PAT.matcher(p.getFileName().toString()).matches();
+        return Files.isDirectory(p) && isValidLocale(p.getFileName().toString());
+    }
+
+    private static boolean isValidLocale(String localeName) {
+        // this is a very loose test but we're primarily concerned about safety here
+        return LANG_FILE_PAT.matcher(localeName).matches();
     }
 
     public Optional<String> getStringTranslation(QuestObjectBase object, String locale, TranslationKey subKey) {
@@ -138,18 +145,24 @@ public class TranslationManager {
     }
 
     public void addTranslation(QuestObjectBase object, String locale, TranslationKey subKey, String message) {
-        addTranslation(locale, makeKey(object, subKey), message);
-        object.getQuestFile().markDirty();
+        if (isValidLocale(locale)) {
+            addTranslation(locale, makeKey(object, subKey), message);
+            object.getQuestFile().markDirty();
+        }
     }
 
     public void addTranslation(QuestObjectBase object, String locale, TranslationKey subKey, List<String> message) {
-        addTranslation(locale, makeKey(object, subKey), message);
-        object.getQuestFile().markDirty();
+        if (isValidLocale(locale)) {
+            addTranslation(locale, makeKey(object, subKey), message);
+            object.getQuestFile().markDirty();
+        }
     }
 
     public void removeTranslation(QuestObjectBase object, String locale, TranslationKey subKey) {
-        map.computeIfAbsent(locale, _ -> new TranslationTable()).remove(makeKey(object, subKey));
-        object.getQuestFile().markDirty();
+        if (isValidLocale(locale)) {
+            map.computeIfAbsent(locale, _ -> new TranslationTable()).remove(makeKey(object, subKey));
+            object.getQuestFile().markDirty();
+        }
     }
 
     private void addTranslation(String locale, String key, List<String> message) {
@@ -199,24 +212,27 @@ public class TranslationManager {
     }
 
     public void addInitialTranslation(Json5Object extra, String locale, TranslationKey translationKey, String value) {
-        extra.addProperty("locale", locale);
-        extra.add("translate", Util.make(new Json5Object(),
-                o -> o.addProperty(TranslationKey.NAME_MAP.getName(translationKey), value))
-        );
+        if (isValidLocale(locale)) {
+            extra.addProperty("locale", locale);
+            extra.add("translate", Util.make(new Json5Object(),
+                    o -> o.addProperty(TranslationKey.NAME_MAP.getName(translationKey), value))
+            );
+        }
     }
 
     public void processInitialTranslation(Json5Object extra, QuestObjectBase object) {
         if (extra.has("locale") && extra.has("translate")) {
             String locale = Json5Util.getString(extra,"locale").orElse("en_us");
-            TranslationTable table = map.computeIfAbsent(locale, k -> new TranslationTable());
-            Json5Util.getJson5Object(extra, "translate").ifPresent(translations -> {
-                translations.asMap().forEach((keyStr, val) -> {
-                    TranslationKey key = TranslationKey.NAME_MAP.getNullable(keyStr);
-                    if (key != null) {
-                        table.put(makeKey(object, key), val.getAsString());
-                    }
-                });
-            });
+            if (isValidLocale(locale)) {
+                TranslationTable table = map.computeIfAbsent(locale, _ -> new TranslationTable());
+                Json5Util.getJson5Object(extra, "translate").ifPresent(translations ->
+                        translations.asMap().forEach((keyStr, val) -> {
+                            TranslationKey key = TranslationKey.NAME_MAP.getNullable(keyStr);
+                            if (key != null) {
+                                table.put(makeKey(object, key), val.getAsString());
+                            }
+                        }));
+            }
         }
     }
 }
