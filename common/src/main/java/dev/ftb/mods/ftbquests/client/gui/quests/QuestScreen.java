@@ -351,7 +351,7 @@ public class QuestScreen extends BaseScreen {
 
 	private void addBezierControlEntries(List<ContextMenuItem> contextMenu, QuestButton qb) {
 		var depQuests = qb.quest.streamDependencies()
-				.filter(qo -> qo instanceof Quest)
+				.filter(qo -> qo instanceof Quest && qo.getQuestChapter().id == qb.quest.getChapter().id)
 				.map(qo -> (Quest) qo).toList();
 
 		if (depQuests.size() == 1) {
