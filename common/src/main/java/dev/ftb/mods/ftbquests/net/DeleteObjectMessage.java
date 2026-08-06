@@ -2,6 +2,7 @@ package dev.ftb.mods.ftbquests.net;
 
 import dev.architectury.networking.NetworkManager;
 import dev.ftb.mods.ftbquests.api.FTBQuestsAPI;
+import dev.ftb.mods.ftbquests.quest.BaseQuestFile;
 import dev.ftb.mods.ftbquests.quest.QuestObject;
 import dev.ftb.mods.ftbquests.quest.QuestObjectBase;
 import dev.ftb.mods.ftbquests.quest.ServerQuestFile;
@@ -56,7 +57,7 @@ public record DeleteObjectMessage(List<Long> ids) implements CustomPacketPayload
 
 		for (var rec : in) {
 			QuestObjectBase qob = file.getBase(rec.id());
-			if (qob instanceof QuestObject qo) {
+			if (qob instanceof QuestObject qo && !(qob instanceof BaseQuestFile)) {
 				List<CreateOrDeleteRecord> l = qo.getChildren().stream()
 						.flatMap(child -> expandChildren(file, List.of(CreateOrDeleteRecord.ofQuestObject(child))).stream())
 						.toList();
