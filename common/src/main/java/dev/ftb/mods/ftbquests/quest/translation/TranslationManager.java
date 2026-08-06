@@ -26,6 +26,7 @@ import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
 public class TranslationManager {
+    private static final Pattern LANG_PAT = Pattern.compile("^\\w+$");
     private static final Pattern LANG_FILE_PAT = Pattern.compile("^\\w+\\.snbt$");
 
     private final Map<String, TranslationTable> map = new HashMap<>();
@@ -80,7 +81,7 @@ public class TranslationManager {
 
     public void saveToNBT(Path langFolder, boolean force) {
         map.forEach((locale, table) -> {
-            if (force || table.isSaveNeeded()) {
+            if (isValidLocale(locale) && (force || table.isSaveNeeded())) {
                 boolean prevSort = SNBT.setShouldSortKeysOnWrite(true);
                 Path savePath = langFolder.resolve(locale + ".snbt");
                 if (!SNBT.write(savePath, table.saveToNBT())) {
@@ -94,6 +95,10 @@ public class TranslationManager {
 
     private static boolean isValidLangFile(Path p) {
         return LANG_FILE_PAT.matcher(p.getFileName().toString()).matches();
+    }
+
+    private static boolean isValidLocale(String locale) {
+        return LANG_PAT.matcher(locale).matches();
     }
 
     public Optional<String> getStringTranslation(QuestObjectBase object, String locale, TranslationKey subKey) {
@@ -142,18 +147,24 @@ public class TranslationManager {
     }
 
     public void addTranslation(QuestObjectBase object, String locale, TranslationKey subKey, String message) {
-        addTranslation(locale, makeKey(object, subKey), message);
-        object.getQuestFile().markDirty();
+        if (isValidLocale(locale)) {
+            addTranslation(locale, makeKey(object, subKey), message);
+            object.getQuestFile().markDirty();
+        }
     }
 
     public void addTranslation(QuestObjectBase object, String locale, TranslationKey subKey, List<String> message) {
-        addTranslation(locale, makeKey(object, subKey), message);
-        object.getQuestFile().markDirty();
+        if (isValidLocale(locale)) {
+            addTranslation(locale, makeKey(object, subKey), message);
+            object.getQuestFile().markDirty();
+        }
     }
 
     public void removeTranslation(QuestObjectBase object, String locale, TranslationKey subKey) {
-        map.computeIfAbsent(locale, k -> new TranslationTable()).remove(makeKey(object, subKey));
-        object.getQuestFile().markDirty();
+        if (isValidLocale(locale)) {
+            map.computeIfAbsent(locale, k -> new TranslationTable()).remove(makeKey(object, subKey));
+            object.getQuestFile().markDirty();
+        }
     }
 
     private void addTranslation(String locale, String key, List<String> message) {
@@ -207,19 +218,23 @@ public class TranslationManager {
     }
 
     public void addInitialTranslation(CompoundTag extra, String locale, TranslationKey translationKey, String value) {
-        extra.putString("locale", locale);
-        extra.put("translate", Util.make(new CompoundTag(), t -> t.putString(TranslationKey.NAME_MAP.getName(translationKey), value)));
+        if (isValidLocale(locale)) {
+            extra.putString("locale", locale);
+            extra.put("translate", Util.make(new CompoundTag(), t -> t.putString(TranslationKey.NAME_MAP.getName(translationKey), value)));
+        }
     }
 
     public void processInitialTranslation(CompoundTag extra, QuestObjectBase object) {
         if (extra.contains("locale") && extra.contains("translate")) {
             String locale = extra.getString("locale");
-            TranslationTable table = map.computeIfAbsent(locale, k -> new TranslationTable());
-            CompoundTag tag = extra.getCompound("translate");
-            for (String keyStr : tag.getAllKeys()) {
-                TranslationKey key = TranslationKey.NAME_MAP.getNullable(keyStr);
-                if (key != null) {
-                    table.put(makeKey(object, key), tag.getString(keyStr));
+            if (isValidLocale(locale)) {
+                TranslationTable table = map.computeIfAbsent(locale, k -> new TranslationTable());
+                CompoundTag tag = extra.getCompound("translate");
+                for (String keyStr : tag.getAllKeys()) {
+                    TranslationKey key = TranslationKey.NAME_MAP.getNullable(keyStr);
+                    if (key != null) {
+                        table.put(makeKey(object, key), tag.getString(keyStr));
+                    }
                 }
             }
         }
