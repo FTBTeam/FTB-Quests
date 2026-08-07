@@ -28,10 +28,15 @@ public record ReorderItemMessage(long taskOrRewardId, QuestObjectType questObjec
     );
 
     public static void handle(ReorderItemMessage message, PacketContext context) {
-        if (PermissionsHelper.canPlayerEdit(context)) {
-            ServerQuestFile sqf = ServerQuestFile.getInstance();
-            sqf.getHistoryStack().addAndApply(sqf, new MoveItemWithinQuest(message.taskOrRewardId, message.questObjectType, message.moveRight));
+        if (PermissionsHelper.canPlayerEdit(context) && isValidObjectType(message)) {
+            ServerQuestFile.ifExists(sqf ->
+                    sqf.getHistoryStack().addAndApply(sqf, new MoveItemWithinQuest(message.taskOrRewardId, message.questObjectType, message.moveRight))
+            );
         }
+    }
+
+    private static boolean isValidObjectType(ReorderItemMessage message) {
+        return message.questObjectType == QuestObjectType.TASK || message.questObjectType == QuestObjectType.REWARD;
     }
 
     @Override

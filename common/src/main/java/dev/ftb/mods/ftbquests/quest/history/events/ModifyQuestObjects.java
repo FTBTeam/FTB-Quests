@@ -34,13 +34,13 @@ public record ModifyQuestObjects(List<EditRecord> oldRecords, List<EditRecord> n
     }
 
     @Override
-    public void apply(ServerQuestFile file) {
-        editObjects(file, newRecords);
+    public boolean apply(ServerQuestFile file) {
+        return editObjects(file, newRecords);
     }
 
     @Override
-    public void applyUndo(ServerQuestFile file) {
-        editObjects(file, oldRecords);
+    public boolean applyUndo(ServerQuestFile file) {
+        return editObjects(file, oldRecords);
     }
 
     @Override

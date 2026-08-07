@@ -36,17 +36,19 @@ public record UpdateTranslation(
     }
 
     @Override
-    public void apply(ServerQuestFile file) {
+    public boolean apply(ServerQuestFile file) {
         if (file.getBase(questObjectId) instanceof QuestObjectBase qo) {
             newVal.ifLeft(string -> file.getTranslationManager().addTranslation(qo, locale, subKey, string))
                     .ifRight(list -> file.getTranslationManager().addTranslation(qo, locale, subKey, list));
 
             Server2PlayNetworking.sendToAllPlayers(file.server, new SyncTranslationMessageToClient(questObjectId, locale, subKey, newVal));
+            return true;
         }
+        return false;
     }
 
     @Override
-    public void applyUndo(ServerQuestFile file) {
+    public boolean applyUndo(ServerQuestFile file) {
         if (file.getBase(questObjectId) instanceof QuestObjectBase qo) {
             if (oldVal.map(String::isEmpty, List::isEmpty)) {
                 file.getTranslationManager().removeTranslation(qo, locale, subKey);
@@ -57,7 +59,9 @@ public record UpdateTranslation(
 
                 Server2PlayNetworking.sendToAllPlayers(file.server, new SyncTranslationMessageToClient(questObjectId, locale, subKey, oldVal));
             }
+            return true;
         }
+        return false;
     }
 
     @Override

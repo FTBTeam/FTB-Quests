@@ -28,8 +28,9 @@ public interface QuestBookEditEvent {
      * an undo of the edit needs to be redone (undo an undo...)
      *
      * @param file the quest file
+     * @return true if the event was successfully applied, false otherwise
      */
-    void apply(ServerQuestFile file);
+    boolean apply(ServerQuestFile file);
 
     /**
      * Reverse the application of this history event. Should be processed in the opposite order of
@@ -38,44 +39,57 @@ public interface QuestBookEditEvent {
      * this should remove the task first, then the quest).
      *
      * @param file the quest file
+     * @return true if the undo was successfully applied, false otherwise
      */
-    void applyUndo(ServerQuestFile file);
+    boolean applyUndo(ServerQuestFile file);
 
     /**
      * {@return a brief description of the changes, 1 per change, for message console purposes}
      */
     List<Component> description(BaseQuestFile file, ChangeType changeType);
 
-    default void createObjects(ServerQuestFile file, List<CreateOrDeleteRecord> records, @Nullable UUID creatorId) {
-        for (var creationRec : records) {
-            QuestObjectBase qo = file.create(creationRec.id(), creationRec.questObjectType(), creationRec.parent(), creationRec.metadata());
-            qo.readData(creationRec.data(), file.server.registryAccess());
-            file.getTranslationManager().processInitialTranslation(creationRec.metadata(), qo);
-            qo.onCreated();
+    default boolean createObjects(ServerQuestFile file, List<CreateOrDeleteRecord> records, @Nullable UUID creatorId) {
+        try {
+            for (var creationRec : records) {
+                QuestObjectBase qo = file.create(creationRec.id(), creationRec.questObjectType(), creationRec.parent(), creationRec.metadata());
+                qo.readData(creationRec.data(), file.server.registryAccess());
+                file.getTranslationManager().processInitialTranslation(creationRec.metadata(), qo);
+                qo.onCreated();
+            }
+            Server2PlayNetworking.sendToAllPlayers(file.server, new CreateObjectResponseMessage(records, Optional.ofNullable(creatorId)));
+            file.markDirty();
+            return true;
+        } catch (Exception ignored) {
+            return false;
         }
-        Server2PlayNetworking.sendToAllPlayers(file.server, new CreateObjectResponseMessage(records, Optional.ofNullable(creatorId)));
-        file.markDirty();
     }
 
-    default void deleteObjects(ServerQuestFile file, List<CreateOrDeleteRecord> records) {
+    default boolean deleteObjects(ServerQuestFile file, List<CreateOrDeleteRecord> records) {
         List<Long> ids = records.stream().map(CreateOrDeleteRecord::id).toList();
         file.deleteObjects(ids);
 
         Server2PlayNetworking.sendToAllPlayers(file.server, new DeleteObjectResponseMessage(ids));
+
+        return true;
     }
 
-    default void editObjects(ServerQuestFile file, List<EditRecord> records) {
-        records.forEach(editRecord -> {
-            QuestObjectBase object = file.getBase(editRecord.id());
-            if (object != null) {
-                object.readData(editRecord.data(), file.server.registryAccess());
-                object.editedFromGUIOnServer();
-                object.clearCachedData();
+    default boolean editObjects(ServerQuestFile file, List<EditRecord> records) {
+        try {
+            records.forEach(editRecord -> {
+                QuestObjectBase object = file.getBase(editRecord.id());
+                if (object != null) {
+                    object.readData(editRecord.data(), file.server.registryAccess());
+                    object.editedFromGUIOnServer();
+                    object.clearCachedData();
 
-                Server2PlayNetworking.sendToAllPlayers(file.server, new EditObjectResponseMessage(records));
-            }
-        });
-        file.markDirty();
+                    Server2PlayNetworking.sendToAllPlayers(file.server, new EditObjectResponseMessage(records));
+                }
+            });
+            file.markDirty();
+            return true;
+        } catch (Exception ignored) {
+            return false;
+        }
     }
 
     default Component getTitle(BaseQuestFile file, long id) {

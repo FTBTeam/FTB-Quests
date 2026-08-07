@@ -4,6 +4,7 @@ import dev.ftb.mods.ftblibrary.platform.network.PacketContext;
 import dev.ftb.mods.ftbquests.api.FTBQuestsAPI;
 import dev.ftb.mods.ftbquests.integration.PermissionsHelper;
 import dev.ftb.mods.ftbquests.quest.QuestObjectBase;
+import dev.ftb.mods.ftbquests.quest.QuestObjectType;
 import dev.ftb.mods.ftbquests.quest.ServerQuestFile;
 import dev.ftb.mods.ftbquests.quest.history.CreateOrDeleteRecord;
 import dev.ftb.mods.ftbquests.quest.history.events.CreateQuestObjects;
@@ -51,12 +52,11 @@ public record CreateObjectMessage(List<CreateOrDeleteRecord> creationRecords, bo
 
 	public static void handle(CreateObjectMessage message, PacketContext context) {
 		if (PermissionsHelper.canPlayerEdit(context) && context.player() instanceof ServerPlayer sp) {
-			message.creationRecords.forEach(creationRecord -> {
-				ServerQuestFile sqf = ServerQuestFile.getInstance();
-
-				// records will have arrived from client with an id of 0, so allocate some real id's now
-				List<CreateOrDeleteRecord> creationRecs = message.creationRecords.stream().map(r -> r.withNewID(sqf)).toList();
-
+			ServerQuestFile.ifExists(sqf -> {
+				List<CreateOrDeleteRecord> creationRecs = message.creationRecords.stream()
+						.filter(rec -> rec.questObjectType() != QuestObjectType.NULL)
+						.map(r -> r.withNewID(sqf))
+						.toList();
 				UUID creatorId = message.openScreen ? sp.getUUID() : null;
 				sqf.getHistoryStack().addAndApply(sqf, new CreateQuestObjects(creationRecs, creatorId));
 			});

@@ -19,22 +19,24 @@ public class HistoryStack {
     public void addAndApply(ServerQuestFile file, QuestBookEditEvent event) {
         pushWithSizeLimit(event, undoStack);
 
-        event.apply(file);
-
-        Server2PlayNetworking.sendToAllPlayers(file.server, createDescPacket(file, event, ChangeType.INITIAL));
+        if (event.apply(file)) {
+            Server2PlayNetworking.sendToAllPlayers(file.server, createDescPacket(file, event, ChangeType.INITIAL));
+        }
     }
 
     public boolean tryUndo(ServerQuestFile file) {
         return applyOperation(undoStack, redoStack, event -> {
-            event.applyUndo(file);
-            Server2PlayNetworking.sendToAllPlayers(file.server, createDescPacket(file, event, ChangeType.UNDO));
+            if (event.applyUndo(file)) {
+                Server2PlayNetworking.sendToAllPlayers(file.server, createDescPacket(file, event, ChangeType.UNDO));
+            }
         });
     }
 
     public boolean tryRedo(ServerQuestFile file) {
         return applyOperation(redoStack, undoStack, event -> {
-            event.apply(file);
-            Server2PlayNetworking.sendToAllPlayers(file.server, createDescPacket(file, event, ChangeType.REDO));
+            if (event.apply(file)) {
+                Server2PlayNetworking.sendToAllPlayers(file.server, createDescPacket(file, event, ChangeType.REDO));
+            }
         });
     }
 
