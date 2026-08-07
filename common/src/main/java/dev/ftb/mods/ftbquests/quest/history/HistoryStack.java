@@ -1,14 +1,16 @@
 package dev.ftb.mods.ftbquests.quest.history;
 
 import dev.ftb.mods.ftblibrary.platform.network.Server2PlayNetworking;
+import dev.ftb.mods.ftbquests.integration.PermissionsHelper;
 import dev.ftb.mods.ftbquests.net.SendChangeDescPacket;
 import dev.ftb.mods.ftbquests.quest.ServerQuestFile;
 import dev.ftb.mods.ftbquests.quest.history.events.NoAction;
+import net.minecraft.server.MinecraftServer;
 
 import java.util.ArrayDeque;
 import java.util.Deque;
 import java.util.List;
-import java.util.function.Consumer;
+import java.util.function.Function;
 
 public class HistoryStack {
     private static final int MAX_UNDO_SIZE = 100;
@@ -17,26 +19,29 @@ public class HistoryStack {
     private final Deque<QuestBookEditEvent> redoStack = new ArrayDeque<>();
 
     public void addAndApply(ServerQuestFile file, QuestBookEditEvent event) {
-        pushWithSizeLimit(event, undoStack);
-
         if (event.apply(file)) {
-            Server2PlayNetworking.sendToAllPlayers(file.server, createDescPacket(file, event, ChangeType.INITIAL));
+            pushWithSizeLimit(event, undoStack);
+            sendToQuestBookEditors(file.server, createDescPacket(file, event, ChangeType.INITIAL));
         }
     }
 
     public boolean tryUndo(ServerQuestFile file) {
         return applyOperation(undoStack, redoStack, event -> {
             if (event.applyUndo(file)) {
-                Server2PlayNetworking.sendToAllPlayers(file.server, createDescPacket(file, event, ChangeType.UNDO));
+                sendToQuestBookEditors(file.server, createDescPacket(file, event, ChangeType.UNDO));
+                return true;
             }
+            return false;
         });
     }
 
     public boolean tryRedo(ServerQuestFile file) {
         return applyOperation(redoStack, undoStack, event -> {
             if (event.apply(file)) {
-                Server2PlayNetworking.sendToAllPlayers(file.server, createDescPacket(file, event, ChangeType.REDO));
+                sendToQuestBookEditors(file.server, createDescPacket(file, event, ChangeType.REDO));
+                return true;
             }
+            return false;
         });
     }
 
@@ -51,6 +56,13 @@ public class HistoryStack {
         return createDescPacket(file, NoAction.INSTANCE, ChangeType.INITIAL);
     }
 
+    private void sendToQuestBookEditors(MinecraftServer server, SendChangeDescPacket packet) {
+        var editors = server.getPlayerList().getPlayers().stream()
+                .filter(PermissionsHelper::canPlayerEdit)
+                .toList();
+        Server2PlayNetworking.send(editors, packet);
+    }
+
     private SendChangeDescPacket createDescPacket(ServerQuestFile file, QuestBookEditEvent event, ChangeType type) {
         return new SendChangeDescPacket(type, event.description(file, type),
                 undoStack.isEmpty() ? List.of() : undoStack.peek().description(file, ChangeType.UNDO),
@@ -58,15 +70,14 @@ public class HistoryStack {
         );
     }
 
-    private boolean applyOperation(Deque<QuestBookEditEvent> from, Deque<QuestBookEditEvent> to, Consumer<QuestBookEditEvent> consumer) {
+    private boolean applyOperation(Deque<QuestBookEditEvent> from, Deque<QuestBookEditEvent> to, Function<QuestBookEditEvent,Boolean> func) {
         if (!from.isEmpty()) {
-            var event = from.pop();
-
-            pushWithSizeLimit(event, to);
-
-            consumer.accept(event);
-
-            return true;
+            var event = from.peek();
+            var result = func.apply(event);
+            if (result) {
+                pushWithSizeLimit(from.pop(), to);
+            }
+            return result;
         }
         return false;
     }
