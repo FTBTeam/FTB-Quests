@@ -93,7 +93,11 @@ public class TranslationTable {
             if (v.isJson5Primitive()) {
                 map.put(k, Either.left(v.getAsString()));
             } else if (v.isJson5Array()) {
-                map.put(k, Either.right(v.getAsJson5Array().asList().stream().map(Json5Element::getAsString).toList()));
+                List<String> list = v.getAsJson5Array().asList().stream()
+                        .filter(Json5Element::isJson5Primitive)
+                        .map(Json5Element::getAsString)
+                        .toList();
+                map.put(k, Either.right(list));
             }
         });
 

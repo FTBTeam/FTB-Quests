@@ -275,10 +275,6 @@ public abstract class QuestObjectBase implements Comparable<QuestObjectBase> {
 		Json5Util.getJson5Object(json, "icon").ifPresent(icon -> rawIcon = itemOrMissingFromJson(icon, provider));
 
 		tags = Json5Util.fetch(json, "tags", Codec.STRING.listOf()).orElseGet(ArrayList::new);
-
-		if (json.has("custom_id")) {
-			tags.add(json.get("custom_id").getAsString());
-		}
 	}
 
 	public void writeNetData(RegistryFriendlyByteBuf buffer) {

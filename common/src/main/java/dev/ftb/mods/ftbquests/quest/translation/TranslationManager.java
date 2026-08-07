@@ -228,7 +228,7 @@ public class TranslationManager {
                 Json5Util.getJson5Object(extra, "translate").ifPresent(translations ->
                         translations.asMap().forEach((keyStr, val) -> {
                             TranslationKey key = TranslationKey.NAME_MAP.getNullable(keyStr);
-                            if (key != null) {
+                            if (key != null && val.isJson5Primitive()) {
                                 table.put(makeKey(object, key), val.getAsString());
                             }
                         }));
