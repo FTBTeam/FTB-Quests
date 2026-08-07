@@ -9,6 +9,7 @@ import net.minecraft.core.UUIDUtil;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.util.Util;
 import org.jspecify.annotations.Nullable;
 
 import java.util.Date;
@@ -22,6 +23,8 @@ public class ProgressChange {
 			ByteBufCodecs.BOOL, ProgressChange::shouldNotify,
 			ProgressChange::createServerSide
 	);
+
+	private static final ProgressChange INVALID = new ProgressChange(null, Util.NIL_UUID);
 
 	private final Date date;
 	@Nullable
@@ -40,10 +43,18 @@ public class ProgressChange {
 	}
 
 	public static ProgressChange createServerSide(long origin, boolean reset, UUID playerId, boolean notifications) {
+		if (!ServerQuestFile.exists() || !ServerQuestFile.getInstance().isValid()) {
+			// shouldn't normally happen, but a badly-behaved client could send a ChangeProgressMessage at the wrong time...
+			return ProgressChange.INVALID;
+		}
 		ProgressChange pc = new ProgressChange(ServerQuestFile.getInstance().getBase(origin), playerId);
 		pc.reset = reset;
 		pc.notifications = notifications;
 		return pc;
+	}
+
+	public boolean isValid() {
+		return this != INVALID;
 	}
 
 	public void maybeForceProgress(UUID teamId) {

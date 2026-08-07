@@ -55,16 +55,18 @@ public abstract class QuestObject extends QuestObjectBase {
 
 	@Override
 	public void forceProgress(TeamData teamData, ProgressChange progressChange) {
-		if (progressChange.shouldReset()) {
-			teamData.setStarted(id, null);
-			teamData.setCompleted(id, null);
-		} else {
-			teamData.setStarted(id, progressChange.getDate());
-			teamData.setCompleted(id, progressChange.getDate());
-		}
+		if (progressChange.isValid()) {
+			if (progressChange.shouldReset()) {
+				teamData.setStarted(id, null);
+				teamData.setCompleted(id, null);
+			} else {
+				teamData.setStarted(id, progressChange.getDate());
+				teamData.setCompleted(id, progressChange.getDate());
+			}
 
-		for (QuestObject child : getChildren()) {
-			child.forceProgress(teamData, progressChange);
+			for (QuestObject child : getChildren()) {
+				child.forceProgress(teamData, progressChange);
+			}
 		}
 	}
 
