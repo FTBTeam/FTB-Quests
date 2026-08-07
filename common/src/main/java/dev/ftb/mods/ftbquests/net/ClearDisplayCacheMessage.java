@@ -28,8 +28,6 @@ public class ClearDisplayCacheMessage implements CustomPacketPayload {
     }
 
     public static void clearForAll() {
-        if (ServerQuestFile.exists()) {
-            Server2PlayNetworking.sendToAllPlayers(ServerQuestFile.getInstance().server, ClearDisplayCacheMessage.INSTANCE);
-        }
+        ServerQuestFile.ifExists(sqf -> Server2PlayNetworking.sendToAllPlayers(sqf.server, ClearDisplayCacheMessage.INSTANCE));
     }
 }

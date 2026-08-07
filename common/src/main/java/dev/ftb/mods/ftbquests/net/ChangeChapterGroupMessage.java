@@ -27,10 +27,11 @@ public record ChangeChapterGroupMessage(long chapterId, long groupId) implements
 
 	public static void handle(ChangeChapterGroupMessage message, PacketContext context) {
 		if (PermissionsHelper.canPlayerEdit(context)) {
-			ServerQuestFile sqf = ServerQuestFile.getInstance();
-			if (PermissionsHelper.canPlayerEdit(context) && sqf.getChapter(message.chapterId) instanceof Chapter chapter) {
-				sqf.getHistoryStack().addAndApply(sqf, new MoveChapterAcrossGroup(message.chapterId, chapter.getGroup().getId(), message.groupId()));
-			}
+			ServerQuestFile.ifExists(sqf -> {
+				if (PermissionsHelper.canPlayerEdit(context) && sqf.getChapter(message.chapterId) instanceof Chapter chapter) {
+					sqf.getHistoryStack().addAndApply(sqf, new MoveChapterAcrossGroup(message.chapterId, chapter.getGroup().getId(), message.groupId()));
+				}
+			});
 		}
 	}
 }

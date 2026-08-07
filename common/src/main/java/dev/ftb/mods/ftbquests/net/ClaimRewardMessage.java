@@ -25,14 +25,16 @@ public record ClaimRewardMessage(long id, boolean shouldNotify) implements Custo
 	}
 
 	public static void handle(ClaimRewardMessage message, PacketContext context) {
-		Reward reward = ServerQuestFile.getInstance().getReward(message.id);
+		ServerQuestFile.ifExists(sqf -> {
+			Reward reward = sqf.getReward(message.id);
 
-		if (reward != null && context.player() instanceof ServerPlayer player) {
-			ServerQuestFile.getInstance().getTeamData(player).ifPresent(teamData -> {
-				if (teamData.isCompleted(reward.getQuest())) {
-					teamData.claimReward(player, reward, message.shouldNotify);
-				}
-			});
-		}
+			if (reward != null && context.player() instanceof ServerPlayer player) {
+				sqf.getTeamData(player).ifPresent(teamData -> {
+					if (teamData.isCompleted(reward.getQuest())) {
+						teamData.claimReward(player, reward, message.shouldNotify);
+					}
+				});
+			}
+		});
 	}
 }

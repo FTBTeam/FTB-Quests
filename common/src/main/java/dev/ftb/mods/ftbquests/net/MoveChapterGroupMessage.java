@@ -26,8 +26,9 @@ public record MoveChapterGroupMessage(long id, boolean movingUp) implements Cust
 
 	public static void handle(MoveChapterGroupMessage message, PacketContext context) {
 		if (PermissionsHelper.canPlayerEdit(context)) {
-			ServerQuestFile sqf = ServerQuestFile.getInstance();
-			sqf.getHistoryStack().addAndApply(sqf, new MoveChapterGroup(message.id, message.movingUp));
+			ServerQuestFile.ifExists(sqf ->
+					sqf.getHistoryStack().addAndApply(sqf, new MoveChapterGroup(message.id, message.movingUp))
+			);
 		}
 	}
 }

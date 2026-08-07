@@ -37,12 +37,13 @@ public record UndoRedoRequestMessage(boolean isUndo) implements CustomPacketPayl
 
     public static void handle(UndoRedoRequestMessage message, PacketContext packetContext) {
         if (PermissionsHelper.canPlayerEdit(packetContext)) {
-            ServerQuestFile sqf = ServerQuestFile.getInstance();
-            if (message.isUndo) {
-                sqf.getHistoryStack().tryUndo(sqf);
-            } else {
-                sqf.getHistoryStack().tryRedo(sqf);
-            }
+            ServerQuestFile.ifExists(sqf -> {
+                if (message.isUndo) {
+                    sqf.getHistoryStack().tryUndo(sqf);
+                } else {
+                    sqf.getHistoryStack().tryRedo(sqf);
+                }
+            });
         }
     }
 }

@@ -25,14 +25,14 @@ public record SubmitTaskMessage(long taskId) implements CustomPacketPayload {
 
 	public static void handle(SubmitTaskMessage message, PacketContext context) {
 		if (context.player() instanceof ServerPlayer player) {
-			ServerQuestFile.getInstance().getTeamData(player).ifPresent(data -> {
+			ServerQuestFile.ifExists(sqf -> sqf.getTeamData(player).ifPresent(data -> {
 				if (!data.isLocked()) {
 					Task task = data.getFile().getTask(message.taskId);
-					if (task != null && data.getFile() instanceof ServerQuestFile sqf && data.canStartTasks(task.getQuest())) {
+					if (task != null && data.canStartTasks(task.getQuest())) {
 						sqf.withPlayerContext(player, () -> task.submitTask(data, player));
 					}
 				}
-			});
+			}));
 		}
 	}
 }

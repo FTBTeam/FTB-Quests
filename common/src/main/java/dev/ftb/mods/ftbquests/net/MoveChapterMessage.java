@@ -25,10 +25,10 @@ public record MoveChapterMessage(long id, boolean movingUp) implements CustomPac
 	}
 
 	public static void handle(MoveChapterMessage message, PacketContext context) {
-		ServerQuestFile.ifExists(sqf -> {
-			if (PermissionsHelper.canPlayerEdit(context)) {
-				sqf.getHistoryStack().addAndApply(sqf, new MoveChapterWithinGroup(message.id, message.movingUp));
-			}
-		});
+		if (PermissionsHelper.canPlayerEdit(context)) {
+			ServerQuestFile.ifExists(sqf ->
+					sqf.getHistoryStack().addAndApply(sqf, new MoveChapterWithinGroup(message.id, message.movingUp))
+			);
+		}
 	}
 }

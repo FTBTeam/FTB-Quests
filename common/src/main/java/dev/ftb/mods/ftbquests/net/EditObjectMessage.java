@@ -50,9 +50,9 @@ public record EditObjectMessage(List<EditRecord> editRecords) implements CustomP
 
 	public static void handle(EditObjectMessage message, PacketContext context) {
 		if (PermissionsHelper.canPlayerEdit(context)) {
-			ServerQuestFile sqf = ServerQuestFile.getInstance();
-			ModifyQuestObjects.fromEditRecords(sqf, message.editRecords)
-					.ifPresent(modification -> sqf.getHistoryStack().addAndApply(sqf, modification));
+			ServerQuestFile.ifExists(sqf ->
+					ModifyQuestObjects.fromEditRecords(sqf, message.editRecords)
+							.ifPresent(modification -> sqf.getHistoryStack().addAndApply(sqf, modification)));
 		}
 	}
 }

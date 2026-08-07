@@ -34,12 +34,13 @@ public record CopyChapterImageMessage(long id, long chapterId, double qx, double
 
     public static void handle(CopyChapterImageMessage message, PacketContext context) {
         if (PermissionsHelper.canPlayerEdit(context)) {
-            ServerQuestFile sqf = ServerQuestFile.getInstance();
-            if (sqf.getBase(message.id) instanceof ChapterImage img && sqf.get(message.chapterId) instanceof Chapter chapter) {
-                ChapterImage newImage = Objects.requireNonNull(QuestObjectBase.copy(img, () -> new ChapterImage(sqf.newID(), chapter)));
-                newImage.setPosition(message.qx, message.qy);
-                sqf.getHistoryStack().addAndApply(sqf, new CreateQuestObjects(CreateOrDeleteRecord.ofQuestObject(newImage), null));
-            }
+            ServerQuestFile.ifExists(sqf -> {
+                if (sqf.getBase(message.id) instanceof ChapterImage img && sqf.get(message.chapterId) instanceof Chapter chapter) {
+                    ChapterImage newImage = Objects.requireNonNull(QuestObjectBase.copy(img, () -> new ChapterImage(sqf.newID(), chapter)));
+                    newImage.setPosition(message.qx, message.qy);
+                    sqf.getHistoryStack().addAndApply(sqf, new CreateQuestObjects(CreateOrDeleteRecord.ofQuestObject(newImage), null));
+                }
+            });
         }
     }
 }
