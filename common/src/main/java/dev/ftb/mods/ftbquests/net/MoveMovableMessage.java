@@ -29,13 +29,14 @@ public record MoveMovableMessage(long objectId, long newChapterID, double x, dou
 	}
 
 	public static void handle(MoveMovableMessage message, PacketContext context) {
-		ServerQuestFile sqf = ServerQuestFile.getInstance();
-		if (PermissionsHelper.canPlayerEdit(context) && sqf.getBase(message.objectId) instanceof Movable movable) {
-			Chapter toChapter = sqf.getChapter(message.newChapterID);
-			if (toChapter != null) {
-				MoveMovableObject.create(movable, toChapter, message.x(), message.y())
-						.ifPresent(event -> sqf.getHistoryStack().addAndApply(sqf, event));
+		ServerQuestFile.ifExists(sqf -> {
+			if (PermissionsHelper.canPlayerEdit(context) && sqf.getBase(message.objectId) instanceof Movable movable) {
+				Chapter toChapter = sqf.getChapter(message.newChapterID);
+				if (toChapter != null) {
+					MoveMovableObject.create(movable, toChapter, message.x(), message.y())
+							.ifPresent(event -> sqf.getHistoryStack().addAndApply(sqf, event));
+				}
 			}
-		}
+		});
 	}
 }

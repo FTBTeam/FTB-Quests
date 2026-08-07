@@ -35,13 +35,14 @@ public record DeleteObjectMessage(List<Long> ids) implements CustomPacketPayload
 	}
 
 	public static void handle(DeleteObjectMessage message, PacketContext context) {
-		ServerQuestFile sqf = ServerQuestFile.getInstance();
-		if (PermissionsHelper.canPlayerEdit(context)) {
-			List<CreateOrDeleteRecord> records = expandChildren(sqf, CreateOrDeleteRecord.fromIds(sqf, message.ids));
-			if (!records.isEmpty()) {
-				sqf.getHistoryStack().addAndApply(sqf, new DeleteQuestObjects(records));
+		ServerQuestFile.ifExists(sqf -> {
+			if (PermissionsHelper.canPlayerEdit(context)) {
+				List<CreateOrDeleteRecord> records = expandChildren(sqf, CreateOrDeleteRecord.fromIds(sqf, message.ids));
+				if (!records.isEmpty()) {
+					sqf.getHistoryStack().addAndApply(sqf, new DeleteQuestObjects(records));
+				}
 			}
-		}
+		});
 	}
 
 	/**

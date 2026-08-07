@@ -59,22 +59,23 @@ public record CreateQuestAndTaskMessage(long chapterId, double x, double y, int 
 	}
 
 	public static void handle(CreateQuestAndTaskMessage message, PacketContext context) {
-		ServerQuestFile sqf = ServerQuestFile.getInstance();
-		if (PermissionsHelper.canPlayerEdit(context) && context.player() instanceof ServerPlayer sp) {
-			Chapter chapter = sqf.getChapter(message.chapterId);
-			TaskType taskType = sqf.getTaskType(message.taskTypeId);
+		ServerQuestFile.ifExists(sqf -> {
+			if (PermissionsHelper.canPlayerEdit(context) && context.player() instanceof ServerPlayer sp) {
+				Chapter chapter = sqf.getChapter(message.chapterId);
+				TaskType taskType = sqf.getTaskType(message.taskTypeId);
 
-			if (chapter != null && taskType != null) {
-				Quest quest = new Quest(sqf.newID(), chapter).setPosition(message.x, message.y);
+				if (chapter != null && taskType != null) {
+					Quest quest = new Quest(sqf.newID(), chapter).setPosition(message.x, message.y);
 
-				Task task = taskType.createTask(sqf.newID(), quest);
-				task.readData(message.data, sp.registryAccess());
-				Json5Object metadata = message.metadata.orElse(new Json5Object());
-				sqf.getTranslationManager().processInitialTranslation(metadata, task);
+					Task task = taskType.createTask(sqf.newID(), quest);
+					task.readData(message.data, sp.registryAccess());
+					Json5Object metadata = message.metadata.orElse(new Json5Object());
+					sqf.getTranslationManager().processInitialTranslation(metadata, task);
 
-				List<CreateOrDeleteRecord> recs = CreateOrDeleteRecord.ofQuestObjects(quest, task);
-				sqf.getHistoryStack().addAndApply(sqf, new CreateQuestObjects(recs, sp.getUUID()));
+					List<CreateOrDeleteRecord> recs = CreateOrDeleteRecord.ofQuestObjects(quest, task);
+					sqf.getHistoryStack().addAndApply(sqf, new CreateQuestObjects(recs, sp.getUUID()));
+				}
 			}
-		}
+		});
 	}
 }

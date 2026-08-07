@@ -23,11 +23,12 @@ public class ForceSaveMessage implements CustomPacketPayload {
 	}
 
 	public static void handle(ForceSaveMessage ignoredMessage, PacketContext context) {
-		ServerPlayer player = (ServerPlayer) context.player();
-		if (PermissionsHelper.hasEditorPermission(player)) {
-			ServerQuestFile.getInstance().markDirty();
-			ServerQuestFile.getInstance().saveNow();
-			player.sendSystemMessage(Component.translatable("ftbquests.gui.saved_on_server"));
-		}
+        if (context.player() instanceof ServerPlayer player && PermissionsHelper.hasEditorPermission(player)) {
+            ServerQuestFile.ifExists(sqf -> {
+                sqf.markDirty();
+                sqf.saveNow();
+                player.sendSystemMessage(Component.translatable("ftbquests.gui.saved_on_server"));
+            });
+        }
 	}
 }
