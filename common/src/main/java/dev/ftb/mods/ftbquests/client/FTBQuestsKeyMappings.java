@@ -24,6 +24,11 @@ public class FTBQuestsKeyMappings {
             null,
             KeyConflict.IN_GAME
     ));
+    public static final KeyMapping KEY_CYCLE_PINNED_TRACKER = input().createKeyMapping(
+            KeyMappingConfig.builder("cycle_pinned_tracker", FTBQuestsAPI.MOD_ID)
+                    .conflictContext(KeyConflict.IN_GAME)
+                    .build()
+    );
 
     private static final String FTB_QUESTS_KEY_CATEGORY_GUI
             = category("gui");
@@ -117,6 +122,7 @@ public class FTBQuestsKeyMappings {
     public static void init() {
         // in-game category
         input().registerKeyMapping(FTBQuestsAPI.MOD_ID, KEY_QUESTS);
+        input().registerKeyMapping(FTBQuestsAPI.MOD_ID, KEY_CYCLE_PINNED_TRACKER);
 
         // gui category
         // We do this to remove the player prefs from the Key reference as it's ordered differently.

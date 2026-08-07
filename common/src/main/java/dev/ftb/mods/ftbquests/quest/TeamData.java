@@ -605,7 +605,11 @@ public class TeamData {
 	}
 
 	public boolean canStartTasks(Quest quest) {
-		return (quest.getProgressionMode() == ProgressionMode.FLEXIBLE || areDependenciesComplete(quest))
+		return canStartTasks(quest, true);
+	}
+
+	public boolean canStartTasks(Quest quest, boolean flex) {
+		return (flex && quest.getProgressionMode() == ProgressionMode.FLEXIBLE || areDependenciesComplete(quest))
 				&& !isExcludedByOtherQuestline(quest)
 				&& getMilliSecondsUntilRepeatable(quest) == 0L;
 	}
