@@ -65,13 +65,17 @@ public class MissingItem extends Item {
 		if (stack.getItem() instanceof MissingItem && stack.has(ModDataComponents.MISSING_ITEM_ID.get())) {
 			// we've read a missing item, but it's possible the item has become valid since last run
 			// e.g. if a mod is now installed which wasn't before
-			String id = stack.get(ModDataComponents.MISSING_ITEM_ID.get());
-			assert id != null;
-			if (id.contains(" ")) {
+			String idStr = stack.get(ModDataComponents.MISSING_ITEM_ID.get());
+			assert idStr != null;
+			if (idStr.contains(" ")) {
 				// could be a legacy string, e.g. "10x minecraft:oak_planks"
-				return tryParseLegacy(stack, id);
+				return tryParseLegacy(stack, idStr);
 			}
-			return BuiltInRegistries.ITEM.get(Identifier.parse(id)).map(itemRef -> {
+			Identifier id = Identifier.tryParse(idStr);
+			if (id == null) {
+				return stack;
+			}
+			return BuiltInRegistries.ITEM.get(id).map(itemRef -> {
 				int count = stack.getOrDefault(ModDataComponents.MISSING_ITEM_COUNT.get(), 1);
 				Json5Element components = stack.getOrDefault(ModDataComponents.MISSING_ITEM_DATA.get(), new Json5Object());
 				RegistryOps<Json5Element> ops = provider.createSerializationContext(Json5Ops.INSTANCE);

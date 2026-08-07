@@ -13,6 +13,7 @@ import dev.ftb.mods.ftbquests.FTBQuests;
 import dev.ftb.mods.ftbquests.client.ClientQuestFile;
 import dev.ftb.mods.ftbquests.client.FTBQuestsClient;
 import dev.ftb.mods.ftbquests.client.gui.quests.QuestScreen;
+import net.minecraft.IdentifierException;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
@@ -94,7 +95,10 @@ public record ImageClickAction(ActionType actionType, String actionData) {
     }
 
     private static void postCustomEvent(String eventData) {
-        CustomClickEvent.TYPE.post(new CustomClickEvent.Data(Identifier.parse(eventData)));
+        try {
+            CustomClickEvent.TYPE.post(new CustomClickEvent.Data(Identifier.parse(eventData)));
+        } catch (IdentifierException ignored) {
+        }
     }
 
     private static void runCommand(String command) {
@@ -102,9 +106,12 @@ public record ImageClickAction(ActionType actionType, String actionData) {
     }
 
     private static void showRecipes(String itemIdStr) {
-        Identifier id = Identifier.parse(itemIdStr);
-        Item item = BuiltInRegistries.ITEM.get(id).orElseThrow().value();
-        FTBQuests.getRecipeModHelper().showRecipes(new ItemStack(item));
+        try {
+            Identifier id = Identifier.parse(itemIdStr);
+            Item item = BuiltInRegistries.ITEM.get(id).orElseThrow().value();
+            FTBQuests.getRecipeModHelper().showRecipes(new ItemStack(item));
+        } catch (IdentifierException ignored) {
+        }
     }
 
     private static void showDocs(String docsPath) {
