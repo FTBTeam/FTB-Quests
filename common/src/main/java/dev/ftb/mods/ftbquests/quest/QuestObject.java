@@ -64,7 +64,7 @@ public abstract class QuestObject extends QuestObjectBase {
 				teamData.setCompleted(id, progressChange.getDate());
 			}
 
-			for (QuestObject child : getChildren()) {
+			for (QuestObjectBase child : getChildren()) {
 				child.forceProgress(teamData, progressChange);
 			}
 		}
@@ -118,23 +118,25 @@ public abstract class QuestObject extends QuestObjectBase {
 		return dim ? c.addBrightness(-0.35F) : c;
 	}
 
-	public Collection<? extends QuestObject> getChildren() {
+	public Collection<? extends QuestObjectBase> getChildren() {
 		return List.of();
 	}
 
 	public boolean isCompletedRaw(TeamData data) {
 		int nOptional = 0;
 		int nCompleted = 0;
-        for (QuestObject child : getChildren()) {
-			boolean uncompleted = !data.isCompleted(child) && !data.isExcludedByOtherQuestline(child);
-			if (uncompleted) {
-				if (child.isOptionalForProgression(data)) {
-					nOptional++;
+        for (QuestObjectBase child : getChildren()) {
+			if (child instanceof QuestObject qob) {
+				boolean uncompleted = !data.isCompleted(qob) && !data.isExcludedByOtherQuestline(qob);
+				if (uncompleted) {
+					if (qob.isOptionalForProgression(data)) {
+						nOptional++;
+					} else {
+						return false;
+					}
 				} else {
-					return false;
+					nCompleted++;
 				}
-			} else {
-				nCompleted++;
 			}
         }
 		// if there are no children at all, it's auto-completed (degenerate case)

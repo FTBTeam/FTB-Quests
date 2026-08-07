@@ -96,6 +96,8 @@ public final class Quest extends QuestObject implements Movable, Excludable {
 	private boolean ignoreRewardBlocking;
 	private ProgressionMode progressionMode;
 	private final Set<Long> dependantIDs;
+	@Nullable
+	private List<QuestObjectBase> allChildren = null;
 
 	public Quest(long id, Chapter chapter) {
 		super(id);
@@ -759,12 +761,9 @@ public final class Quest extends QuestObject implements Movable, Excludable {
 		cachedDescription = null;
 		cachedPreset = null;
 
-		for (Task task : tasks) {
-			task.clearCachedData();
-		}
-
-		for (Reward reward : rewards) {
-			reward.clearCachedData();
+		if (allChildren != null) {
+			allChildren.forEach(QuestObjectBase::clearCachedData);
+			allChildren = null;
 		}
 	}
 
@@ -887,8 +886,13 @@ public final class Quest extends QuestObject implements Movable, Excludable {
 	}
 
 	@Override
-	public Collection<? extends QuestObject> getChildren() {
-		return tasks;
+	public Collection<? extends QuestObjectBase> getChildren() {
+		if (allChildren == null) {
+			allChildren = new ArrayList<>();
+			allChildren.addAll(tasks);
+			allChildren.addAll(rewards);
+		}
+		return Collections.unmodifiableList(allChildren);
 	}
 
 	@Override
