@@ -32,7 +32,7 @@ public record MoveMovableMessage(long objectId, long newChapterID, double x, dou
 		ServerQuestFile.ifExists(sqf -> {
 			if (PermissionsHelper.canPlayerEdit(context) && sqf.getBase(message.objectId) instanceof Movable movable) {
 				Chapter toChapter = sqf.getChapter(message.newChapterID);
-				if (toChapter != null) {
+				if (toChapter != null && !movable.isPositionLocked()) {
 					MoveMovableObject.create(movable, toChapter, message.x(), message.y())
 							.ifPresent(event -> sqf.getHistoryStack().addAndApply(sqf, event));
 				}
