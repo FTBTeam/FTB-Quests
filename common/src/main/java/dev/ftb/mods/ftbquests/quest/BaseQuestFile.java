@@ -91,9 +91,6 @@ public abstract class BaseQuestFile extends QuestObject implements QuestFile {
 
 	private final Long2ObjectOpenHashMap<QuestObjectBase> questObjectMap;
 
-	protected final Int2ObjectOpenHashMap<TaskType> taskTypeIds;
-	protected final Int2ObjectOpenHashMap<RewardType> rewardTypeIds;
-
 	private final TranslationManager translationManager;
 
 	private final List<ItemStack> emergencyItems;
@@ -140,8 +137,6 @@ public abstract class BaseQuestFile extends QuestObject implements QuestFile {
 		teamDataMap = new HashMap<>();
 
 		questObjectMap = new Long2ObjectOpenHashMap<>();
-		taskTypeIds = new Int2ObjectOpenHashMap<>();
-		rewardTypeIds = new Int2ObjectOpenHashMap<>();
 
 		emergencyItems = new ArrayList<>();
 		emergencyItemsCooldown = DEF_EMERGENCY_ITEMS_COOLDOWN;
@@ -396,7 +391,7 @@ public abstract class BaseQuestFile extends QuestObject implements QuestFile {
 			case REWARD -> {
 				String rewardType = Json5Util.getString(metaData,"type").orElse("");
 				if (RewardTable.isFakeQuestId(parent)) {
-					yield RewardTable.createRewardForTable(id, rewardType, this);
+					yield RewardTable.requireCreateRewardForTable(id, rewardType, this);
 				} else {
 					Quest quest = requireQuestObject(parent, this::getQuest);
                     yield RewardType.requireCreateReward(id, quest, rewardType);
@@ -865,13 +860,13 @@ public abstract class BaseQuestFile extends QuestObject implements QuestFile {
 		buffer.writeVarInt(TaskTypes.TYPES.size());
 		for (TaskType type : TaskTypes.TYPES.values()) {
 			buffer.writeIdentifier(type.getTypeId());
-			buffer.writeVarInt(type.internalId);
+			buffer.writeVarInt(type.getInternalId());
 		}
 
 		buffer.writeVarInt(RewardTypes.TYPES.size());
 		for (RewardType type : RewardTypes.TYPES.values()) {
 			buffer.writeIdentifier(type.getTypeId());
-			buffer.writeVarInt(type.internalId);
+			buffer.writeVarInt(type.getInternalId());
 		}
 
 		writeNetData(buffer);
@@ -900,13 +895,13 @@ public abstract class BaseQuestFile extends QuestObject implements QuestFile {
 
 					buffer.writeVarInt(quest.getTasks().size());
 					quest.getTasks().forEach(task -> {
-						buffer.writeVarInt(task.getType().internalId);
+						buffer.writeVarInt(task.getType().getInternalId());
 						buffer.writeLong(task.id);
 					});
 
 					buffer.writeVarInt(quest.getRewards().size());
 					quest.getRewards().forEach(reward -> {
-						buffer.writeVarInt(reward.getType().internalId);
+						buffer.writeVarInt(reward.getType().getInternalId());
 						buffer.writeLong(reward.id);
 					});
 				}
@@ -954,43 +949,29 @@ public abstract class BaseQuestFile extends QuestObject implements QuestFile {
 	public final void readNetDataFull(RegistryFriendlyByteBuf buffer) {
 		int pos = buffer.readerIndex();
 
-		taskTypeIds.clear();
-		rewardTypeIds.clear();
-
-		for (TaskType type : TaskTypes.TYPES.values()) {
-			type.internalId = 0;
-		}
-
-		for (RewardType type : RewardTypes.TYPES.values()) {
-			type.internalId = 0;
-		}
-
+		Int2ObjectOpenHashMap<TaskType> taskTypeIds = new Int2ObjectOpenHashMap<>();
 		int taskTypesSize = buffer.readVarInt();
 		for (int i = 0; i < taskTypesSize; i++) {
 			TaskType type = TaskTypes.TYPES.get(buffer.readIdentifier());
 			int id = buffer.readVarInt();
-
 			if (type != null) {
-				type.internalId = id;
-				taskTypeIds.put(type.internalId, type);
+				taskTypeIds.put(id, type);
 			}
 		}
 
+		Int2ObjectOpenHashMap<RewardType> rewardTypeIds = new Int2ObjectOpenHashMap<>();
 		int rewardTypesSize = buffer.readVarInt();
 		for (int i = 0; i < rewardTypesSize; i++) {
 			RewardType type = RewardTypes.TYPES.get(buffer.readIdentifier());
 			int id = buffer.readVarInt();
-
 			if (type != null) {
-				type.internalId = id;
-				rewardTypeIds.put(type.internalId, type);
+				rewardTypeIds.put(id, type);
 			}
 		}
 
 		readNetData(buffer);
 
 		rewardTables.clear();
-
 		int rewardTableSize = buffer.readVarInt();
 		for (int i = 0; i < rewardTableSize; i++) {
 			RewardTable table = new RewardTable(buffer.readLong(), this);
@@ -999,7 +980,6 @@ public abstract class BaseQuestFile extends QuestObject implements QuestFile {
 
 		chapterGroups.clear();
 		chapterGroups.add(defaultChapterGroup);
-
 		int chapterGroupsSize = buffer.readVarInt();
 		for (int i = 0; i < chapterGroupsSize; i++) {
 			ChapterGroup group = new ChapterGroup(buffer.readLong(), this);
@@ -1478,15 +1458,6 @@ public abstract class BaseQuestFile extends QuestObject implements QuestFile {
 	}
 
 	public abstract boolean isPlayerOnTeam(Player player, TeamData teamData);
-
-	@Nullable
-	public TaskType getTaskType(int typeId) {
-		return taskTypeIds.get(typeId);
-	}
-
-	public RewardType getRewardType(int typeId) {
-		return rewardTypeIds.get(typeId);
-	}
 
 	public DefaultChapterGroup getDefaultChapterGroup() {
 		return defaultChapterGroup;

@@ -10,11 +10,7 @@ import dev.ftb.mods.ftbquests.api.event.progress.ProgressEventData;
 import dev.ftb.mods.ftbquests.integration.PermissionsHelper;
 import dev.ftb.mods.ftbquests.net.*;
 import dev.ftb.mods.ftbquests.quest.history.HistoryStack;
-import dev.ftb.mods.ftbquests.quest.reward.RewardType;
-import dev.ftb.mods.ftbquests.quest.reward.RewardTypes;
 import dev.ftb.mods.ftbquests.quest.task.Task;
-import dev.ftb.mods.ftbquests.quest.task.TaskType;
-import dev.ftb.mods.ftbquests.quest.task.TaskTypes;
 import dev.ftb.mods.ftbquests.util.FTBQuestsInventoryListener;
 import dev.ftb.mods.ftbquests.util.PlayerInventorySummary;
 import dev.ftb.mods.ftbteams.api.FTBTeamsAPI;
@@ -83,20 +79,6 @@ public class ServerQuestFile extends BaseQuestFile {
 		historyStack = new HistoryStack();
 
 		folder = Platform.get().paths().configPath().resolve("ftbquests/quests");
-
-		int taskTypeId = 0;
-
-		for (TaskType type : TaskTypes.TYPES.values()) {
-			type.internalId = ++taskTypeId;
-			taskTypeIds.put(type.internalId, type);
-		}
-
-		int rewardTypeId = 0;
-
-		for (RewardType type : RewardTypes.TYPES.values()) {
-			type.internalId = ++rewardTypeId;
-			rewardTypeIds.put(type.internalId, type);
-		}
 	}
 
 	public void load(boolean quests, boolean progression) {

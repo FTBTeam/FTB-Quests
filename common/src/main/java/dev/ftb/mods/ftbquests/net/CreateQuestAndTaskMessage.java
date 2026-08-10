@@ -12,11 +12,13 @@ import dev.ftb.mods.ftbquests.quest.history.CreateOrDeleteRecord;
 import dev.ftb.mods.ftbquests.quest.history.events.CreateQuestObjects;
 import dev.ftb.mods.ftbquests.quest.task.Task;
 import dev.ftb.mods.ftbquests.quest.task.TaskType;
+import dev.ftb.mods.ftbquests.quest.task.TaskTypes;
 import dev.ftb.mods.ftbquests.util.FTBQCodecs;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.util.Util;
 
@@ -30,25 +32,25 @@ import java.util.Optional;
  * @param chapterId chapter in which the new quest belongs
  * @param x X-position of the new quest
  * @param y Y-position of the new quest
- * @param taskTypeId internal ID for the task type
+ * @param taskTypeId registered ID for the task type
  * @param data the task data NBT
  * @param metadata extra initial task data
  */
-public record CreateQuestAndTaskMessage(long chapterId, double x, double y, int taskTypeId, Json5Object data, Optional<Json5Object> metadata) implements CustomPacketPayload {
+public record CreateQuestAndTaskMessage(long chapterId, double x, double y, Identifier taskTypeId, Json5Object data, Optional<Json5Object> metadata) implements CustomPacketPayload {
 	public static final Type<CreateQuestAndTaskMessage> TYPE = new Type<>(FTBQuestsAPI.id("create_task_at_message"));
 
 	public static final StreamCodec<FriendlyByteBuf, CreateQuestAndTaskMessage> STREAM_CODEC = StreamCodec.composite(
 			ByteBufCodecs.VAR_LONG, CreateQuestAndTaskMessage::chapterId,
 			ByteBufCodecs.DOUBLE, CreateQuestAndTaskMessage::x,
 			ByteBufCodecs.DOUBLE, CreateQuestAndTaskMessage::y,
-			ByteBufCodecs.VAR_INT, CreateQuestAndTaskMessage::taskTypeId,
+			Identifier.STREAM_CODEC, CreateQuestAndTaskMessage::taskTypeId,
 			FTBQCodecs.JSON5_OBJECT_STREAM_CODEC, CreateQuestAndTaskMessage::data,
 			ByteBufCodecs.optional(FTBQCodecs.JSON5_OBJECT_STREAM_CODEC), CreateQuestAndTaskMessage::metadata,
 			CreateQuestAndTaskMessage::new
 	);
 
 	public static CreateQuestAndTaskMessage requestCreation(Chapter chapter, double x, double y, Task task) {
-		return new CreateQuestAndTaskMessage(chapter.id, x, y, task.getType().internalId,
+		return new CreateQuestAndTaskMessage(chapter.id, x, y, task.getType().getTypeId(),
 				Util.make(new Json5Object(), json -> task.writeData(json, chapter.getQuestFile().holderLookup())),
 				Optional.of(task.makeCreationMetadata())
 		);
@@ -63,7 +65,7 @@ public record CreateQuestAndTaskMessage(long chapterId, double x, double y, int 
 		ServerQuestFile.ifExists(sqf -> {
 			if (PermissionsHelper.canPlayerEdit(context) && context.player() instanceof ServerPlayer sp) {
 				Chapter chapter = sqf.getChapter(message.chapterId);
-				TaskType taskType = sqf.getTaskType(message.taskTypeId);
+				TaskType taskType = TaskTypes.TYPES.get(message.taskTypeId);
 
 				if (chapter != null && taskType != null) {
 					var allocator = new BaseQuestFile.UniqueIdAllocator(sqf);

@@ -85,8 +85,8 @@ public class RewardTable extends QuestObjectBase {
 		return id == -1L;
 	}
 
-	public static QuestObjectBase createRewardForTable(long id, String type, BaseQuestFile file) {
-		return RewardType.createReward(id, makeFakeQuest(file), type);
+	public static QuestObjectBase requireCreateRewardForTable(long id, String type, BaseQuestFile file) {
+		return Objects.requireNonNull(RewardType.createReward(id, makeFakeQuest(file), type));
 	}
 
 	public Component getTitleOrElse(Component def) {
@@ -252,6 +252,7 @@ public class RewardTable extends QuestObjectBase {
 	@Override
 	public void writeNetData(RegistryFriendlyByteBuf buffer) {
 		super.writeNetData(buffer);
+
 		buffer.writeUtf(filename, Short.MAX_VALUE);
 		buffer.writeFloat(emptyWeight);
 		buffer.writeVarInt(lootSize);
@@ -261,11 +262,11 @@ public class RewardTable extends QuestObjectBase {
 		flags = Bits.setFlag(flags, 4, lootCrate != null);
 		flags = Bits.setFlag(flags, 8, lootTableId != null);
 		buffer.writeVarInt(flags);
-		buffer.writeVarInt(weightedRewards.size());
 
+		buffer.writeVarInt(weightedRewards.size());
 		for (WeightedReward wr : weightedRewards) {
 			buffer.writeLong(wr.getReward().getId());
-			buffer.writeVarInt(wr.getReward().getType().internalId);
+			buffer.writeIdentifier(wr.getReward().getType().getTypeId());
 			wr.getReward().writeNetData(buffer);
 			buffer.writeFloat(wr.getWeight());
 		}
@@ -295,11 +296,13 @@ public class RewardTable extends QuestObjectBase {
 
 		for (int i = 0; i < s; i++) {
 			long id = buffer.readLong();
-			RewardType type = file.getRewardType(buffer.readVarInt());
-			Reward reward = type.createReward(id, fakeQuest);
-			reward.readNetData(buffer);
-			float weight = buffer.readFloat();
-			weightedRewards.add(new WeightedReward(reward, weight));
+			RewardType type = RewardTypes.TYPES.get(buffer.readIdentifier());
+			if (type != null) {
+				Reward reward = type.createReward(id, fakeQuest);
+				reward.readNetData(buffer);
+				float weight = buffer.readFloat();
+				weightedRewards.add(new WeightedReward(reward, weight));
+			}
 		}
 
 		lootCrate = null;

@@ -18,12 +18,13 @@ public final class TaskType {
 	private final Supplier<Icon<?>> iconSupplier;
 	private final Component displayName;
 	private GuiProvider guiProvider;
-	public int internalId;
+	private final int internalId;
 
-	TaskType(Identifier typeId, Provider provider, Supplier<Icon<?>> iconSupplier) {
+	TaskType(Identifier typeId, Provider provider, Supplier<Icon<?>> iconSupplier, int internalId) {
 		this.typeId = typeId;
 		this.provider = provider;
 		this.iconSupplier = iconSupplier;
+		this.internalId = internalId;
 
 		displayName = Component.translatable(typeId.toLanguageKey("ftbquests.task"));
 		guiProvider = GuiProviders.defaultTaskGuiProvider(provider);
@@ -31,6 +32,10 @@ public final class TaskType {
 
 	public Identifier getTypeId() {
 		return typeId;
+	}
+
+	public int getInternalId() {
+		return internalId;
 	}
 
 	@Nullable

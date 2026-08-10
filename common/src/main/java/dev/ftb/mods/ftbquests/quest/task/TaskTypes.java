@@ -11,13 +11,15 @@ import net.minecraft.world.level.material.Fluids;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Supplier;
 
 public interface TaskTypes {
 	Map<Identifier, TaskType> TYPES = new LinkedHashMap<>();
+	AtomicInteger INTERNAL_ID = new AtomicInteger(1);
 
 	static TaskType register(Identifier name, TaskType.Provider provider, Supplier<Icon<?>> iconSupplier) {
-		return TYPES.computeIfAbsent(name, id -> new TaskType(id, provider, iconSupplier));
+		return TYPES.computeIfAbsent(name, id -> new TaskType(id, provider, iconSupplier, INTERNAL_ID.getAndIncrement()));
 	}
 
 	TaskType ITEM = register(FTBQuestsAPI.id("item"), ItemTask::new,

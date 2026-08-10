@@ -22,19 +22,24 @@ public final class RewardType {
 	@Nullable
 	private GuiProvider guiProvider;
 	private boolean excludeFromListRewards = false;
-	public int internalId;
+	private final int internalId;
 
-	public RewardType(Identifier typeId, Provider provider, Supplier<Icon<?>> iconSupplier, boolean availableByDefault) {
+	public RewardType(Identifier typeId, Provider provider, Supplier<Icon<?>> iconSupplier, boolean availableByDefault, int internalId) {
 		this.typeId = typeId;
 		this.provider = provider;
 		this.iconSupplier = iconSupplier;
+		this.internalId = internalId;
 
 		displayName = Component.translatable(typeId.toLanguageKey("ftbquests.reward"));
 		guiProvider = availableByDefault ? GuiProviders.defaultRewardGuiProvider(provider) : null;
 	}
 
-	public RewardType(Identifier typeId, Provider provider, Supplier<Icon<?>> iconSupplier) {
-		this(typeId, provider, iconSupplier, true);
+	public RewardType(Identifier typeId, Provider provider, Supplier<Icon<?>> iconSupplier, int internalId) {
+		this(typeId, provider, iconSupplier, true, internalId);
+	}
+
+	public int getInternalId() {
+		return internalId;
 	}
 
 	@Nullable
