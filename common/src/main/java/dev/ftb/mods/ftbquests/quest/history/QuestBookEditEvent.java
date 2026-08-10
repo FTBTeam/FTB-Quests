@@ -111,4 +111,9 @@ public interface QuestBookEditEvent {
     static <T> List<T> takeLimitedElements(List<T> list) {
         return list.subList(0, Math.min(list.size(), MAX_LIST_SIZE));
     }
+
+    static Component sanitizeComponent(Component in) {
+        String s = in.getString();
+        return Component.literal(s.substring(0, Math.min(80, s.length())));
+    }
 }

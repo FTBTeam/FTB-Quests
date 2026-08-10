@@ -29,7 +29,7 @@ public record ModifyQuestObjects(List<EditRecord> oldRecords, List<EditRecord> n
                 .map(EditRecord::ofQuestObject)
                 .toList();
         return oldRecs.size() == newRecs.size() && !oldRecs.equals(newRecs) ?
-                Optional.of(new ModifyQuestObjects(oldRecs, newRecs)) :
+                Optional.of(new ModifyQuestObjects(oldRecs, newRecs.stream().map(EditRecord::sanitizeTitle).toList())) :
                 Optional.empty();
     }
 

@@ -60,6 +60,7 @@ public record CreateObjectMessage(List<CreateOrDeleteRecord> creationRecords, bo
 				List<CreateOrDeleteRecord> creationRecs = message.creationRecords.stream()
 						.limit(QuestBookEditEvent.MAX_LIST_SIZE)
 						.filter(rec -> rec.questObjectType() != QuestObjectType.NULL)
+						.map(r -> r.sanitizeTitle())
 						.map(r -> r.withNewID(sqf))
 						.toList();
 				UUID creatorId = message.openScreen ? sp.getUUID() : null;

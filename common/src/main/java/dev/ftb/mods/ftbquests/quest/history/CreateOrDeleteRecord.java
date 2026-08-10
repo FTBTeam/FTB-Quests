@@ -54,4 +54,8 @@ public record CreateOrDeleteRecord(long id, long parent, QuestObjectType questOb
     public CreateOrDeleteRecord withNewID(ServerQuestFile file) {
         return new CreateOrDeleteRecord(file.newID(), parent, questObjectType, title, data, metadata);
     }
+
+    public CreateOrDeleteRecord sanitizeTitle() {
+        return new CreateOrDeleteRecord(id, parent, questObjectType, QuestBookEditEvent.sanitizeComponent(title), data, metadata);
+    }
 }

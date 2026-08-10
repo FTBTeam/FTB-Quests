@@ -40,4 +40,8 @@ public record EditRecord(long id, QuestObjectType questObjectType, Component tit
     public int hashCode() {
         return Objects.hash(id, questObjectType, data);
     }
+
+    public EditRecord sanitizeTitle() {
+        return new EditRecord(id, questObjectType, QuestBookEditEvent.sanitizeComponent(title), data);
+    }
 }
