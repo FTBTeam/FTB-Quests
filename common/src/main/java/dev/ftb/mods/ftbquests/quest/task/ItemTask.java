@@ -130,7 +130,7 @@ public class ItemTask extends Task implements Predicate<ItemStack> {
 		int flags = buffer.readVarInt();
 
 		itemStack = ItemStack.OPTIONAL_STREAM_CODEC.decode(buffer);
-		count = Bits.getFlag(flags, 0x01) ? buffer.readVarLong() : 1L;
+		count = Bits.getFlag(flags, 0x01) ? Math.max(buffer.readVarLong(), 1L) : 1L;
 		consumeItems = Bits.getFlag(flags, 0x02) ? Bits.getFlag(flags, 0x04) ? Tristate.TRUE : Tristate.FALSE : Tristate.DEFAULT;
 		onlyFromCrafting = Bits.getFlag(flags, 0x08) ? Bits.getFlag(flags, 0x10) ? Tristate.TRUE : Tristate.FALSE : Tristate.DEFAULT;
 		matchComponents = Bits.getFlag(flags, 0x20) ? Bits.getFlag(flags, 0x40) ? ComponentMatchType.STRICT : ComponentMatchType.FUZZY : ComponentMatchType.NONE;

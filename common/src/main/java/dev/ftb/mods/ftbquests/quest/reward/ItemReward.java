@@ -18,6 +18,7 @@ import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
@@ -29,6 +30,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 public class ItemReward extends Reward {
+	public static final int MAX_COUNT = 8192;
 	private ItemStack item;
 	private int count;
 	private int randomBonus;
@@ -78,12 +80,12 @@ public class ItemReward extends Reward {
 		super.readData(json, provider);
 
 		item = itemOrMissingFromJson(Json5Util.getJson5Object(json, "item").orElse(new Json5Object()), provider);
-		count = Json5Util.getInt(json,"count").orElse(1);
+		count = Mth.clamp(Json5Util.getInt(json,"count").orElse(1), 1, MAX_COUNT);
 		if (count == 0) {
 			count = item.getCount();
 			item.setCount(1);
 		}
-		randomBonus = Json5Util.getInt(json, "random_bonus").orElse(0);
+		randomBonus = Mth.clamp(Json5Util.getInt(json, "random_bonus").orElse(0), 0, MAX_COUNT);
 		onlyOne = Json5Util.getBoolean(json, "only_one").orElse(false);
 	}
 
@@ -111,8 +113,8 @@ public class ItemReward extends Reward {
 		super.readNetData(buffer);
 
 		item = ItemStack.OPTIONAL_STREAM_CODEC.decode(buffer);
-		count = buffer.readVarInt();
-		randomBonus = buffer.readVarInt();
+		count = Mth.clamp(buffer.readVarInt(), 1, MAX_COUNT);
+		randomBonus = Mth.clamp(buffer.readVarInt(), 0, MAX_COUNT);
 		onlyOne = buffer.readBoolean();
 	}
 
@@ -121,8 +123,8 @@ public class ItemReward extends Reward {
 		super.fillConfigGroup(config);
 
 		config.addItemStack("item", item, v -> item = v, ItemStack.EMPTY, true, false).setNameKey("ftbquests.reward.ftbquests.item");
-		config.addInt("count", count, v -> count = v, 1, 1, 8192);
-		config.addInt("random_bonus", randomBonus, v -> randomBonus = v, 0, 0, 8192).setNameKey("ftbquests.reward.random_bonus");
+		config.addInt("count", count, v -> count = v, 1, 1, MAX_COUNT);
+		config.addInt("random_bonus", randomBonus, v -> randomBonus = v, 0, 0, MAX_COUNT).setNameKey("ftbquests.reward.random_bonus");
 		config.addBool("only_one", onlyOne, v -> onlyOne = v, false);
 	}
 

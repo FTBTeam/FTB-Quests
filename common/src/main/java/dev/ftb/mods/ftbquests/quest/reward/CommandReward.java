@@ -18,6 +18,7 @@ import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.permissions.LevelBasedPermissionSet;
 import net.minecraft.server.permissions.PermissionSet;
+import net.minecraft.util.Mth;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -61,7 +62,7 @@ public class CommandReward extends Reward {
 	public void readData(Json5Object json, HolderLookup.Provider provider) {
 		super.readData(json, provider);
 		command = Json5Util.getString(json, "command").orElse(DEFAULT_COMMAND);
-		permissionLevel = Json5Util.getInt(json, "permission_level").orElse(0);
+		permissionLevel = Mth.clamp(Json5Util.getInt(json, "permission_level").orElse(0), 0, 4);
 		silent = Json5Util.getBoolean(json, "silent").orElse(false);
 		feedbackMessage = Json5Util.getString(json, "feedback_message").orElse("");
 	}
@@ -79,7 +80,7 @@ public class CommandReward extends Reward {
 	public void readNetData(RegistryFriendlyByteBuf buffer) {
 		super.readNetData(buffer);
 		command = buffer.readUtf(Short.MAX_VALUE);
-		permissionLevel = buffer.readVarInt();
+		permissionLevel = Mth.clamp(buffer.readVarInt(), 0, 4);
 		silent = buffer.readBoolean();
 		feedbackMessage = buffer.readUtf(Short.MAX_VALUE);
 	}

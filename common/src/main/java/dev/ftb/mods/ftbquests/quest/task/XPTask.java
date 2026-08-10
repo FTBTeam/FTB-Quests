@@ -52,7 +52,7 @@ public class XPTask extends Task implements ISingleLongValueTask {
 	@Override
 	public void readData(Json5Object json, HolderLookup.Provider provider) {
 		super.readData(json, provider);
-		value = Json5Util.getLong(json, "value").orElseThrow();
+		value = Math.max(Json5Util.getLong(json, "value").orElseThrow(), 1L);
 		points = Json5Util.getBoolean(json, "points").orElseThrow();
 	}
 
@@ -66,7 +66,7 @@ public class XPTask extends Task implements ISingleLongValueTask {
 	@Override
 	public void readNetData(RegistryFriendlyByteBuf buffer) {
 		super.readNetData(buffer);
-		value = buffer.readVarLong();
+		value = Math.max(buffer.readVarLong(), 1L);
 		points = buffer.readBoolean();
 	}
 

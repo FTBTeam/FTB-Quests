@@ -22,6 +22,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.tags.TagKey;
+import net.minecraft.util.Mth;
 import net.minecraft.util.ProblemReporter;
 import net.minecraft.util.Util;
 import net.minecraft.world.entity.Entity;
@@ -39,6 +40,7 @@ import org.jspecify.annotations.Nullable;
 import java.util.Optional;
 
 public class ObservationTask extends AbstractBooleanTask {
+	public static final long MAX_TIMER = 1200L;
 	private long timer;
 	private ObserveType observeType;
 	private String toObserve;
@@ -75,7 +77,7 @@ public class ObservationTask extends AbstractBooleanTask {
 	@Override
 	public void readData(Json5Object json, HolderLookup.Provider provider) {
 		super.readData(json, provider);
-		timer = Json5Util.getLong(json, "timer").orElseThrow();
+		timer = Mth.clamp(Json5Util.getLong(json, "timer").orElse(0L), 0L, MAX_TIMER);
 		observeType = ObserveType.NAME_MAP.get(Json5Util.getString(json, "observation_type").orElseThrow());
 		toObserve = Json5Util.getString(json, "to_observe").orElseThrow();
 	}
@@ -91,7 +93,7 @@ public class ObservationTask extends AbstractBooleanTask {
 	@Override
 	public void readNetData(RegistryFriendlyByteBuf buffer) {
 		super.readNetData(buffer);
-		timer = buffer.readVarLong();
+		timer = Mth.clamp(buffer.readVarLong(), 0L, MAX_TIMER);
 		observeType = buffer.readEnum(ObserveType.class);
 		toObserve = buffer.readUtf(Short.MAX_VALUE);
 	}
@@ -99,7 +101,7 @@ public class ObservationTask extends AbstractBooleanTask {
 	@Override
 	public void fillConfigGroup(EditableConfigGroup config) {
 		super.fillConfigGroup(config);
-		config.addLong("timer", timer, v -> timer = v, 0L, 0L, 1200L);
+		config.addLong("timer", timer, v -> timer = v, 0L, 0L, MAX_TIMER);
 		config.addEnum("observe_type", observeType, v -> observeType = v, ObserveType.NAME_MAP);
 		config.addString("to_observe", toObserve, v -> toObserve = v, "minecraft:dirt");
 	}

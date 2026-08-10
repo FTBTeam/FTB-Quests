@@ -17,6 +17,7 @@ import net.minecraft.core.HolderLookup;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.util.Mth;
 import net.minecraft.util.Util;
 import org.jspecify.annotations.Nullable;
 
@@ -26,6 +27,7 @@ import java.util.regex.Pattern;
 
 public final class Chapter extends QuestObject {
 	private static final Pattern HEX_STRING = Pattern.compile("^([a-fA-F0-9]+)?$");
+	public static final double MIN_QUEST_SIZE = 1D / 16D;
 
 	public final BaseQuestFile file;
 
@@ -194,7 +196,7 @@ public final class Chapter extends QuestObject {
 		filename = sanitizeFilename(Json5Util.getString(json, "filename").orElseThrow()).orElse(getCodeString());
 		alwaysInvisible = Json5Util.getBoolean(json, "always_invisible").orElse(false);
 		defaultQuestShape = Json5Util.getString(json, "default_quest_shape").orElse("");
-		defaultQuestSize = Json5Util.getDouble(json, "default_quest_size").orElse(1D);
+		defaultQuestSize = Mth.clamp(Json5Util.getDouble(json, "default_quest_size").orElse(1D), MIN_QUEST_SIZE, Quest.MAX_QUEST_SIZE);
 		defaultHideDependencyLines = Json5Util.getBoolean(json, "default_hide_dependency_lines").orElse(false);
 		defaultMinWidth = Json5Util.getInt(json, "default_min_width").orElse(0);
 		progressionMode = Json5Util.getString(json, "progression_mode").map(ProgressionMode.NAME_MAP::get).orElse(ProgressionMode.DEFAULT);
@@ -206,7 +208,7 @@ public final class Chapter extends QuestObject {
 		defaultRepeatable = Json5Util.getBoolean(json, "default_repeatable_quest").orElse(false);
 		requireSequentialTasks = Json5Util.getBoolean(json, "require_sequential_tasks").orElse(false);
 		presetName = Json5Util.getString(json, "preset").orElse("");
-		autoFocusId = Json5Util.getString(json, "autofocus_id").orElse("");
+		autoFocusId = Json5Util.getString(json, "autofocus_id").filter(id -> BaseQuestFile.parseHexId(id).isPresent()).orElse("");
 
 		if (defaultQuestShape.equals("default")) {
 			defaultQuestShape = "";
@@ -249,7 +251,7 @@ public final class Chapter extends QuestObject {
 		super.readNetData(buffer);
 		filename = sanitizeFilename(buffer.readUtf(Short.MAX_VALUE)).orElse(getCodeString());
 		defaultQuestShape = buffer.readUtf(Short.MAX_VALUE);
-		defaultQuestSize = buffer.readDouble();
+		defaultQuestSize = Mth.clamp(buffer.readDouble(), MIN_QUEST_SIZE, Quest.MAX_QUEST_SIZE);
 		defaultMinWidth = buffer.readInt();
 		progressionMode = ProgressionMode.NAME_MAP.read(buffer);
 
@@ -404,8 +406,8 @@ public final class Chapter extends QuestObject {
 
 		EditableConfigGroup appearance = config.getOrCreateSubgroup("appearance").setNameKey("ftbquests.quest.appearance");
 		appearance.addEnum("default_quest_shape", defaultQuestShape.isEmpty() ? "default" : defaultQuestShape, v -> defaultQuestShape = v.equals("default") ? "" : v, QuestShape.idMapWithDefault);
-		appearance.addDouble("default_quest_size", defaultQuestSize, v -> defaultQuestSize = v, 1, 0.0625D, 8D);
-		appearance.addInt("default_min_width", defaultMinWidth, v -> defaultMinWidth = v, 0, 0, 3000);
+		appearance.addDouble("default_quest_size", defaultQuestSize, v -> defaultQuestSize = v, 1, MIN_QUEST_SIZE, Quest.MAX_QUEST_SIZE);
+		appearance.addInt("default_min_width", defaultMinWidth, v -> defaultMinWidth = v, 0, 0, Quest.MAX_MIN_WIDTH);
 		appearance.addEnum("default_preset", presetName, v -> presetName = v, getQuestFile().getPresets().nameMap());
 
 		EditableConfigGroup visibility = config.getOrCreateSubgroup("visibility").setNameKey("ftbquests.quest.visibility");

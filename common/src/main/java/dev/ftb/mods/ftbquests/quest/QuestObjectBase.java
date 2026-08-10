@@ -274,7 +274,9 @@ public abstract class QuestObjectBase implements Comparable<QuestObjectBase> {
 	public void readData(Json5Object json, HolderLookup.Provider provider) {
 		Json5Util.getJson5Object(json, "icon").ifPresent(icon -> rawIcon = itemOrMissingFromJson(icon, provider));
 
-		tags = Json5Util.fetch(json, "tags", Codec.STRING.listOf()).orElseGet(ArrayList::new);
+		tags = Json5Util.fetch(json, "tags", Codec.STRING.listOf())
+				.map(list -> list.stream().filter(tag -> TAG_PATTERN.matcher(tag).matches()).toList())
+				.orElseGet(ArrayList::new);
 	}
 
 	public void writeNetData(RegistryFriendlyByteBuf buffer) {
@@ -300,6 +302,7 @@ public abstract class QuestObjectBase implements Comparable<QuestObjectBase> {
 
 		if (Bits.getFlag(flags, 4)) {
 			NetUtils.readStrings(buffer, tags);
+			tags.removeIf(tag -> !TAG_PATTERN.matcher(tag).matches());
 		}
 	}
 

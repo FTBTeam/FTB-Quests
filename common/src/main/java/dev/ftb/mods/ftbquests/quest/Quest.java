@@ -42,6 +42,7 @@ import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.util.Mth;
 import net.minecraft.util.Util;
 import org.jspecify.annotations.Nullable;
 
@@ -56,6 +57,11 @@ public final class Quest extends QuestObject implements Movable, Excludable {
 			= Codec.unboundedMap(FTBQCodecs.QUEST_ID_CODEC, Vec2d.PAIR_CODEC);
 	public static final StreamCodec<FriendlyByteBuf, Map<Long, Pair<Vec2d, Vec2d>>> CONTROL_POINTS_STREAM_CODEC
 			= ByteBufCodecs.map(HashMap::new, ByteBufCodecs.VAR_LONG, FTBQCodecs.pair(Vec2d.STREAM_CODEC, Vec2d.STREAM_CODEC));
+
+	public static final int MAX_MIN_WIDTH = 3000;
+	public static final double MAX_QUEST_SIZE = 8D;
+	public static final double MIN_ICON_SCALE = 0.1D;
+	public static final double MAX_ICON_SCALE = 2.0D;
 
 	private Chapter chapter;
 	private double x, y;
@@ -336,10 +342,10 @@ public final class Quest extends QuestObject implements Movable, Excludable {
 				.map(DependencyRequirement.NAME_MAP::get)
 				.orElse(DependencyRequirement.ALL_COMPLETED);
 		hideTextUntilComplete = Tristate.read(json, "hide_text_until_complete");
-		size = Json5Util.getDouble(json, "size").orElse(0D);
-		iconScale = Json5Util.getDouble(json, "icon_scale").orElse(1.0);
+		size = Mth.clamp(Json5Util.getDouble(json, "size").orElse(1D), 0D, MAX_QUEST_SIZE);
+		iconScale = Mth.clamp(Json5Util.getDouble(json, "icon_scale").orElse(1.0), MIN_ICON_SCALE, MAX_ICON_SCALE);
 		optional = Json5Util.getBoolean(json, "optional").orElse(false);
-		minWidth = Json5Util.getInt(json, "min_width").orElse(0);
+		minWidth = Mth.clamp(Json5Util.getInt(json, "min_width").orElse(0), 0, MAX_MIN_WIDTH);
 		canRepeat = Tristate.read(json, "can_repeat");
 		invisibleUntilCompleted = Json5Util.getBoolean(json, "invisible").orElse(false);
 		invisibleUntilTasks = Json5Util.getInt(json, "invisible_until_tasks").orElse(0);
@@ -448,9 +454,9 @@ public final class Quest extends QuestObject implements Movable, Excludable {
 		FTBQCodecs.LONG_LIST_STREAM_CODEC.decode(buffer).forEach(this::addDependency);
 		depControlPoints.putAll(CONTROL_POINTS_STREAM_CODEC.decode(buffer));
 
-		size = Bits.getFlag(flags, 0x04) ? buffer.readDouble() : 0D;
-		iconScale = Bits.getFlag(flags, 0x20000) ? buffer.readDouble() : 1D;
-		minWidth = Bits.getFlag(flags, 0x200) ? buffer.readVarInt() : 0;
+		size = Bits.getFlag(flags, 0x04) ? Mth.clamp(buffer.readDouble(), 0, MAX_QUEST_SIZE) : 0D;
+		iconScale = Bits.getFlag(flags, 0x20000) ? Mth.clamp(buffer.readDouble(), MIN_ICON_SCALE, MAX_ICON_SCALE) : 1D;
+		minWidth = Bits.getFlag(flags, 0x200) ? Mth.clamp(buffer.readVarInt(), 0, MAX_MIN_WIDTH) : 0;
 		ignoreRewardBlocking = Bits.getFlag(flags, 0x10);
 		hideDependentLines = Bits.getFlag(flags, 0x20);
 		canRepeat = Bits.getFlag(flags, 0x2000) ? Bits.getFlag(flags, 0x4000) ? Tristate.TRUE : Tristate.FALSE : Tristate.DEFAULT;
@@ -626,11 +632,11 @@ public final class Quest extends QuestObject implements Movable, Excludable {
 
 		EditableConfigGroup appearance = config.getOrCreateSubgroup("appearance");
 		appearance.addEnum("shape", shape.isEmpty() ? "default" : shape, v -> shape = v.equals("default") ? "" : v, QuestShape.idMapWithDefault);
-		appearance.addDouble("size", size, v -> size = v, 0, 0, 8D);
+		appearance.addDouble("size", size, v -> size = v, 0, 0, MAX_QUEST_SIZE);
 		appearance.addDouble("x", x, v -> x = v, 0, Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY);
 		appearance.addDouble("y", y, v -> y = v, 0, Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY);
-		appearance.addInt("min_width", minWidth, v -> minWidth = v, 0, 0, 3000);
-		appearance.addDouble("icon_scale", iconScale, v -> iconScale = v, 1f, 0.1, 2.0);
+		appearance.addInt("min_width", minWidth, v -> minWidth = v, 0, 0, MAX_MIN_WIDTH);
+		appearance.addDouble("icon_scale", iconScale, v -> iconScale = v, 1D, MIN_ICON_SCALE, MAX_ICON_SCALE);
 		appearance.addEnum("preset", presetName, v -> presetName = v, getQuestFile().getPresets().nameMap());
 
 		EditableConfigGroup visibility = config.getOrCreateSubgroup("visibility");

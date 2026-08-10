@@ -49,6 +49,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
 import net.minecraft.util.Util;
 import net.minecraft.world.entity.Entity;
@@ -69,6 +70,10 @@ import java.util.stream.Stream;
 
 public abstract class BaseQuestFile extends QuestObject implements QuestFile {
 	public static final String FILE_SUFFIX = Json5Util.FILE_EXT;
+	public static final double MIN_GRID_SCALE = 1D / 32D;
+	public static final double MAX_GRID_SCALE = 8D;
+	public static final int MAX_DETECTION_DELAY = 200;
+	public static final int DEF_EMERGENCY_ITEMS_COOLDOWN = 300;
 	public static int VERSION = 13;
 	private static final Logger LOGGER = LogUtils.getLogger();
 
@@ -137,7 +142,7 @@ public abstract class BaseQuestFile extends QuestObject implements QuestFile {
 		rewardTypeIds = new Int2ObjectOpenHashMap<>();
 
 		emergencyItems = new ArrayList<>();
-		emergencyItemsCooldown = 300;
+		emergencyItemsCooldown = DEF_EMERGENCY_ITEMS_COOLDOWN;
 
 		defaultPerTeamReward = false;
 		defaultTeamConsumeItems = false;
@@ -450,15 +455,15 @@ public abstract class BaseQuestFile extends QuestObject implements QuestFile {
 		emergencyItems.clear();
 		Json5Util.fetch(json, "emergency_items", ItemStack.CODEC.listOf()).ifPresent(emergencyItems::addAll);
 
-		emergencyItemsCooldown = Json5Util.getInt(json, "emergency_items_cooldown").orElseThrow();
+		emergencyItemsCooldown = Math.max(Json5Util.getInt(json, "emergency_items_cooldown").orElse(DEF_EMERGENCY_ITEMS_COOLDOWN), 0);
 		dropLootCrates = Json5Util.getBoolean(json, "drop_loot_crates").orElseThrow();
 		lootCrateNoDrop = Json5Util.fetch(json, "loot_crate_no_drop", EntityWeight.CODEC).orElseGet(EntityWeight::zero);
 		disableGui = Json5Util.getBoolean(json, "disable_gui").orElse(false);
-		gridScale = Json5Util.getDouble(json, "grid_scale").orElse(0.5D);
+		gridScale = Mth.clamp(Json5Util.getDouble(json, "grid_scale").orElse(0.5D), MIN_GRID_SCALE, MAX_GRID_SCALE);
 		pauseGame = Json5Util.getBoolean(json, "pause_game").orElse(false);
 		lockMessage = Json5Util.getString(json, "lock_message").orElse("");
 		progressionMode = Json5Util.getString(json, "progression_mode").map(ProgressionMode.NAME_MAP_NO_DEFAULT::get).orElse(ProgressionMode.LINEAR);
-		detectionDelay = Json5Util.getInt(json, "detection_delay").orElse(20);
+		detectionDelay = Mth.clamp(Json5Util.getInt(json, "detection_delay").orElse(20), 0, MAX_DETECTION_DELAY);
 		showLockIcons = Json5Util.getBoolean(json, "show_lock_icons").orElse(false);
 		dropBookOnDeath = Json5Util.getBoolean(json, "drop_book_on_death").orElse(false);
 		hideExcludedQuests = Json5Util.getBoolean(json, "hide_excluded_quests").orElse(false);
@@ -830,7 +835,7 @@ public abstract class BaseQuestFile extends QuestObject implements QuestFile {
 
 		emergencyItems.clear();
 		emergencyItems.addAll(ItemStack.OPTIONAL_STREAM_CODEC.apply(ByteBufCodecs.list()).decode(buffer));
-		emergencyItemsCooldown = buffer.readVarInt();
+		emergencyItemsCooldown = Math.max(buffer.readVarInt(), 0);
 		defaultPerTeamReward = buffer.readBoolean();
 		defaultTeamConsumeItems = buffer.readBoolean();
 		defaultRewardAutoClaim = RewardAutoClaim.NAME_MAP_NO_DEFAULT.read(buffer);
@@ -839,11 +844,11 @@ public abstract class BaseQuestFile extends QuestObject implements QuestFile {
 		dropLootCrates = buffer.readBoolean();
 		lootCrateNoDrop = EntityWeight.STREAM_CODEC.decode(buffer);
 		disableGui = buffer.readBoolean();
-		gridScale = buffer.readDouble();
+		gridScale = Mth.clamp(buffer.readDouble(), MIN_GRID_SCALE, MAX_GRID_SCALE);
 		pauseGame = buffer.readBoolean();
 		lockMessage = buffer.readUtf(Short.MAX_VALUE);
 		progressionMode = ProgressionMode.NAME_MAP_NO_DEFAULT.read(buffer);
-		detectionDelay = buffer.readVarInt();
+		detectionDelay = Mth.clamp(buffer.readVarInt(), 0, MAX_DETECTION_DELAY);
 		showLockIcons = buffer.readBoolean();
 		dropBookOnDeath = buffer.readBoolean();
 		hideExcludedQuests = buffer.readBoolean();
@@ -1141,13 +1146,13 @@ public abstract class BaseQuestFile extends QuestObject implements QuestFile {
 	public void fillConfigGroup(EditableConfigGroup config) {
 		super.fillConfigGroup(config);
 		config.addList("emergency_items", emergencyItems, new EditableItemStack(false, false), ItemStack.EMPTY);
-		config.addInt("emergency_items_cooldown", emergencyItemsCooldown, v -> emergencyItemsCooldown = v, 300, 0, Integer.MAX_VALUE);
+		config.addInt("emergency_items_cooldown", emergencyItemsCooldown, v -> emergencyItemsCooldown = v, DEF_EMERGENCY_ITEMS_COOLDOWN, 0, Integer.MAX_VALUE);
 		config.addBool("drop_loot_crates", dropLootCrates, v -> dropLootCrates = v, false);
 		config.addBool("disable_gui", disableGui, v -> disableGui = v, false);
-		config.addDouble("grid_scale", gridScale, v -> gridScale = v, 0.5D, 1D / 32D, 8D);
+		config.addDouble("grid_scale", gridScale, v -> gridScale = v, 0.5D, MIN_GRID_SCALE, MAX_GRID_SCALE);
 		config.addString("lock_message", lockMessage, v -> lockMessage = v, "");
 		config.addEnum("progression_mode", progressionMode, v -> progressionMode = v, ProgressionMode.NAME_MAP_NO_DEFAULT);
-		config.addInt("detection_delay", detectionDelay, v -> detectionDelay = v, 20, 0, 200);
+		config.addInt("detection_delay", detectionDelay, v -> detectionDelay = v, 20, 0, MAX_DETECTION_DELAY);
 		config.addBool("pause_game", pauseGame, v -> pauseGame = v, false);
 		config.addBool("show_lock_icons", showLockIcons, v -> showLockIcons = v, true).setNameKey("ftbquests.ui.show_lock_icon");
 		config.addBool("drop_book_on_death", dropBookOnDeath, v -> dropBookOnDeath = v, true);
