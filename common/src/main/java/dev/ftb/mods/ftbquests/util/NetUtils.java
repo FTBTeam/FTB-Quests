@@ -2,7 +2,11 @@ package dev.ftb.mods.ftbquests.util;
 
 import de.marhali.json5.Json5Element;
 import de.marhali.json5.Json5Object;
+import dev.ftb.mods.ftblibrary.platform.network.Server2PlayNetworking;
+import dev.ftb.mods.ftbquests.integration.PermissionsHelper;
 import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import net.minecraft.server.MinecraftServer;
 
 import java.util.Collection;
 import java.util.Optional;
@@ -33,4 +37,11 @@ public class NetUtils {
 				.map(Json5Element::getAsJson5Object)
 				.orElseGet(Json5Object::new);
 	}
+
+    public static void sendToQuestBookEditors(MinecraftServer server, CustomPacketPayload packet) {
+        var editors = server.getPlayerList().getPlayers().stream()
+                .filter(PermissionsHelper::canPlayerEdit)
+                .toList();
+        Server2PlayNetworking.send(editors, packet);
+    }
 }

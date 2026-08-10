@@ -1,11 +1,9 @@
 package dev.ftb.mods.ftbquests.quest.history;
 
-import dev.ftb.mods.ftblibrary.platform.network.Server2PlayNetworking;
-import dev.ftb.mods.ftbquests.integration.PermissionsHelper;
 import dev.ftb.mods.ftbquests.net.SendChangeDescPacket;
 import dev.ftb.mods.ftbquests.quest.ServerQuestFile;
 import dev.ftb.mods.ftbquests.quest.history.events.NoAction;
-import net.minecraft.server.MinecraftServer;
+import dev.ftb.mods.ftbquests.util.NetUtils;
 
 import java.util.ArrayDeque;
 import java.util.Deque;
@@ -21,14 +19,14 @@ public class HistoryStack {
     public void addAndApply(ServerQuestFile file, QuestBookEditEvent event) {
         if (event.apply(file)) {
             pushWithSizeLimit(event, undoStack);
-            sendToQuestBookEditors(file.server, createDescPacket(file, event, ChangeType.INITIAL));
+            NetUtils.sendToQuestBookEditors(file.server, createDescPacket(file, event, ChangeType.INITIAL));
         }
     }
 
     public boolean tryUndo(ServerQuestFile file) {
         return applyOperation(undoStack, redoStack, event -> {
             if (event.applyUndo(file)) {
-                sendToQuestBookEditors(file.server, createDescPacket(file, event, ChangeType.UNDO));
+                NetUtils.sendToQuestBookEditors(file.server, createDescPacket(file, event, ChangeType.UNDO));
                 return true;
             }
             return false;
@@ -38,7 +36,7 @@ public class HistoryStack {
     public boolean tryRedo(ServerQuestFile file) {
         return applyOperation(redoStack, undoStack, event -> {
             if (event.apply(file)) {
-                sendToQuestBookEditors(file.server, createDescPacket(file, event, ChangeType.REDO));
+                NetUtils.sendToQuestBookEditors(file.server, createDescPacket(file, event, ChangeType.REDO));
                 return true;
             }
             return false;
@@ -54,13 +52,6 @@ public class HistoryStack {
     public SendChangeDescPacket createInitialDescPacket(ServerQuestFile file) {
         // sent to players on login to get their gui undo/redo buttons set up correctly
         return createDescPacket(file, NoAction.INSTANCE, ChangeType.INITIAL);
-    }
-
-    private void sendToQuestBookEditors(MinecraftServer server, SendChangeDescPacket packet) {
-        var editors = server.getPlayerList().getPlayers().stream()
-                .filter(PermissionsHelper::canPlayerEdit)
-                .toList();
-        Server2PlayNetworking.send(editors, packet);
     }
 
     private SendChangeDescPacket createDescPacket(ServerQuestFile file, QuestBookEditEvent event, ChangeType type) {

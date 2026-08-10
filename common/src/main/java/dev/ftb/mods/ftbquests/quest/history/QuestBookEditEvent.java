@@ -1,16 +1,17 @@
 package dev.ftb.mods.ftbquests.quest.history;
 
-import dev.ftb.mods.ftblibrary.platform.network.Server2PlayNetworking;
 import dev.ftb.mods.ftbquests.net.CreateObjectResponseMessage;
 import dev.ftb.mods.ftbquests.net.DeleteObjectResponseMessage;
 import dev.ftb.mods.ftbquests.net.EditObjectResponseMessage;
 import dev.ftb.mods.ftbquests.quest.BaseQuestFile;
 import dev.ftb.mods.ftbquests.quest.QuestObjectBase;
 import dev.ftb.mods.ftbquests.quest.ServerQuestFile;
+import dev.ftb.mods.ftbquests.util.NetUtils;
 import net.minecraft.network.chat.Component;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -56,7 +57,7 @@ public interface QuestBookEditEvent {
                 file.getTranslationManager().processInitialTranslation(creationRec.metadata(), qo);
                 qo.onCreated();
             }
-            Server2PlayNetworking.sendToAllPlayers(file.server, new CreateObjectResponseMessage(records, Optional.ofNullable(creatorId)));
+            NetUtils.sendToQuestBookEditors(file.server, new CreateObjectResponseMessage(records, Optional.ofNullable(creatorId)));
             file.markDirty();
             return true;
         } catch (Exception ignored) {
@@ -68,7 +69,7 @@ public interface QuestBookEditEvent {
         List<Long> ids = records.stream().map(CreateOrDeleteRecord::id).toList();
         boolean deleted = file.deleteObjects(ids);
         if (deleted) {
-            Server2PlayNetworking.sendToAllPlayers(file.server, new DeleteObjectResponseMessage(ids));
+            NetUtils.sendToQuestBookEditors(file.server, new DeleteObjectResponseMessage(ids));
         }
 
         return deleted;
@@ -76,16 +77,21 @@ public interface QuestBookEditEvent {
 
     default boolean editObjects(ServerQuestFile file, List<EditRecord> records) {
         try {
-            records.forEach(editRecord -> {
-                QuestObjectBase object = file.getBase(editRecord.id());
-                if (object != null) {
-                    object.readData(editRecord.data(), file.server.registryAccess());
-                    object.editedFromGUIOnServer();
-                    object.clearCachedData();
-
-                    Server2PlayNetworking.sendToAllPlayers(file.server, new EditObjectResponseMessage(records));
+            // all ids must be valid, or no change is made
+            for (var rec : records) {
+                if (file.getBase(rec.id()) == null) {
+                    return false;
                 }
-            });
+            }
+
+            for (var editRecord : records) {
+                QuestObjectBase object = Objects.requireNonNull(file.getBase(editRecord.id())); // already validated non-null
+                object.readData(editRecord.data(), file.server.registryAccess());
+                object.editedFromGUIOnServer();
+                object.clearCachedData();
+            }
+
+            NetUtils.sendToQuestBookEditors(file.server, new EditObjectResponseMessage(records));
             file.markDirty();
             return true;
         } catch (Exception ignored) {
