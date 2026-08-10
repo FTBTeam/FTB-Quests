@@ -59,11 +59,13 @@ public class ProgressChange {
 
 	public void maybeForceProgress(UUID teamId) {
 		if (origin != null) {
-			TeamData data = ServerQuestFile.getInstance().getOrCreateTeamData(teamId);
-			origin.forceProgressRaw(data, this);
-			if (origin instanceof Quest quest && reset) {
-				data.clearRepeatCooldown(quest);
-				ClearRepeatCooldownMessage.sendToTeam(quest, data.getTeamId());
+			TeamData data = ServerQuestFile.getInstance().getNullableTeamData(teamId);
+			if (data != null) {
+				origin.forceProgressRaw(data, this);
+				if (origin instanceof Quest quest && reset) {
+					data.clearRepeatCooldown(quest);
+					ClearRepeatCooldownMessage.sendToTeam(quest, data.getTeamId());
+				}
 			}
 		}
 	}
