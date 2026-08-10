@@ -248,9 +248,12 @@ public abstract class QuestObjectBase implements Comparable<QuestObjectBase> {
 			return;
 		}
 
-		sendNotifications = progressChange.shouldNotify() ? Tristate.TRUE : Tristate.FALSE;
-		forceProgress(teamData, progressChange);
-		sendNotifications = Tristate.DEFAULT;
+		try {
+			sendNotifications = progressChange.shouldNotify() ? Tristate.TRUE : Tristate.FALSE;
+			forceProgress(teamData, progressChange);
+		} finally {
+			sendNotifications = Tristate.DEFAULT;
+		}
 	}
 
 	@Nullable

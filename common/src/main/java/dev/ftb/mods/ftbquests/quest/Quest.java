@@ -548,15 +548,6 @@ public final class Quest extends QuestObject implements Movable, Excludable {
 	}
 
 	@Override
-	public void forceProgress(TeamData teamData, ProgressChange progressChange) {
-		super.forceProgress(teamData, progressChange);
-
-		for (Reward r : rewards) {
-			r.forceProgress(teamData, progressChange);
-		}
-	}
-
-	@Override
 	public Component getAltTitle() {
 		if (!tasks.isEmpty()) {
 			return tasks.getFirst().getTitle();
