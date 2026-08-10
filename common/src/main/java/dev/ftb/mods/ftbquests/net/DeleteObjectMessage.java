@@ -9,13 +9,17 @@ import dev.ftb.mods.ftbquests.quest.QuestObjectBase;
 import dev.ftb.mods.ftbquests.quest.ServerQuestFile;
 import dev.ftb.mods.ftbquests.quest.history.CreateOrDeleteRecord;
 import dev.ftb.mods.ftbquests.quest.history.events.DeleteQuestObjects;
+import it.unimi.dsi.fastutil.longs.LongOpenHashSet;
+import it.unimi.dsi.fastutil.longs.LongSet;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 
 import java.util.ArrayList;
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Set;
 
 public record DeleteObjectMessage(List<Long> ids) implements CustomPacketPayload {
 	public static final Type<DeleteObjectMessage> TYPE = new Type<>(FTBQuestsAPI.id("delete_object_message"));
@@ -37,7 +41,8 @@ public record DeleteObjectMessage(List<Long> ids) implements CustomPacketPayload
 	public static void handle(DeleteObjectMessage message, PacketContext context) {
 		ServerQuestFile.ifExists(sqf -> {
 			if (PermissionsHelper.canPlayerEdit(context)) {
-				List<CreateOrDeleteRecord> records = expandChildren(sqf, CreateOrDeleteRecord.fromIds(sqf, message.ids));
+				// LinkedHashSet deduplicates input ids while preserving order, which may be significant
+				List<CreateOrDeleteRecord> records = expandChildren(sqf, CreateOrDeleteRecord.fromIds(sqf, new LinkedHashSet<>(message.ids)));
 				if (!records.isEmpty()) {
 					sqf.getHistoryStack().addAndApply(sqf, new DeleteQuestObjects(records));
 				}

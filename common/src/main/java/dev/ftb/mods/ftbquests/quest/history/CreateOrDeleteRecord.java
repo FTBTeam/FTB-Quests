@@ -13,6 +13,7 @@ import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.util.Util;
 
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
 
@@ -38,7 +39,7 @@ public record CreateOrDeleteRecord(long id, long parent, QuestObjectType questOb
         );
     }
 
-    public static List<CreateOrDeleteRecord> fromIds(ServerQuestFile sqf, List<Long> ids) {
+    public static List<CreateOrDeleteRecord> fromIds(ServerQuestFile sqf, Collection<Long> ids) {
         return ids.stream()
                 .map(sqf::getBase)
                 .filter(Objects::nonNull)

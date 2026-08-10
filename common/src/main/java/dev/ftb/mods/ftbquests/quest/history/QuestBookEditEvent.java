@@ -66,11 +66,12 @@ public interface QuestBookEditEvent {
 
     default boolean deleteObjects(ServerQuestFile file, List<CreateOrDeleteRecord> records) {
         List<Long> ids = records.stream().map(CreateOrDeleteRecord::id).toList();
-        file.deleteObjects(ids);
+        boolean deleted = file.deleteObjects(ids);
+        if (deleted) {
+            Server2PlayNetworking.sendToAllPlayers(file.server, new DeleteObjectResponseMessage(ids));
+        }
 
-        Server2PlayNetworking.sendToAllPlayers(file.server, new DeleteObjectResponseMessage(ids));
-
-        return true;
+        return deleted;
     }
 
     default boolean editObjects(ServerQuestFile file, List<EditRecord> records) {

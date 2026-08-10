@@ -158,27 +158,37 @@ public class ServerQuestFile extends BaseQuestFile {
 	}
 
 	@Override
-	public void deleteObjects(List<Long> ids) {
+	public boolean deleteObjects(List<Long> ids) {
 		List<Long> deletedIds = new ArrayList<>();
+
+		List<QuestObjectBase> toDelete = new ArrayList<>();
 		for (long id : ids) {
-			QuestObjectBase object = getBase(id);
-			if (object != null) {
-				getTranslationManager().removeAllTranslations(object);
-				object.deleteSelf();
-				object.getPath().ifPresent(path -> {
-                    try {
-                        FileUtils.delete(getFolder().resolve(path).toFile());
-                    } catch (IOException e) {
-						FTBQuests.LOGGER.error("can't delete {}: {}", path, e.getMessage());
-                    }
-                });
-				deletedIds.add(id);
+			var qob = getBase(id);
+			if (qob == null || qob instanceof BaseQuestFile) {
+				return false;
 			}
+			toDelete.add(qob);
 		}
 
-		if (!deletedIds.isEmpty()) {
-			markDirty();
+		for (var qob : toDelete) {
+			getTranslationManager().removeAllTranslations(qob);
+			qob.deleteSelf();
+			qob.getPath().ifPresent(path -> {
+				try {
+					FileUtils.delete(getFolder().resolve(path).toFile());
+				} catch (IOException e) {
+					FTBQuests.LOGGER.error("can't delete {}: {}", path, e.getMessage());
+				}
+			});
+			deletedIds.add(id);
 		}
+
+		if (deletedIds.size() == toDelete.size()) {
+			markDirty();
+			return true;
+		}
+
+		return false;
 	}
 
 	@Override

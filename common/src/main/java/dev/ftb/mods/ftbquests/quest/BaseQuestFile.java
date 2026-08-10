@@ -1130,7 +1130,15 @@ public abstract class BaseQuestFile extends QuestObject implements QuestFile {
 		return Collections.unmodifiableCollection(teamDataMap.values());
 	}
 
-	public abstract void deleteObjects(List<Long> ids);
+	/**
+	 * Delete one or more quest objects. On the client, this sends a deletion request to the server with the given ids.
+	 * On the server, it attempts to actually delete the quest objects; if <em>any</em> of the ids is invalid, then no
+	 * deletion will be done.
+	 *
+	 * @param ids list of quest object ids to delete
+	 * @return on the client, true if the id list is non-empty; on the server, true if all the ids are valid quest objects, and not the quest file itself
+	 */
+	public abstract boolean deleteObjects(List<Long> ids);
 
 	@Override
 	public MutableComponent getAltTitle() {

@@ -150,13 +150,15 @@ public class ClientQuestFile extends BaseQuestFile {
 	}
 
 	@Override
-	public void deleteObjects(List<Long> ids) {
+	public boolean deleteObjects(List<Long> ids) {
 		// Don't actually delete the object(s) yet, but just send a deletion request to the server
 		// See FTBQuestNetClient#deleteObject for actual client-side deletion, done on receipt of
 		//   the server deletion response
 		if (!ids.isEmpty()) {
 			Play2ServerNetworking.send(new DeleteObjectMessage(ids));
+			return true;
 		}
+		return false;
 	}
 
 	@Override
