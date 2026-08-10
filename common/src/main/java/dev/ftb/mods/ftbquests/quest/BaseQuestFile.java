@@ -42,6 +42,8 @@ import dev.ftb.mods.ftbteams.api.client.ClientTeamManager;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.longs.Long2IntOpenHashMap;
 import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
+import it.unimi.dsi.fastutil.longs.LongOpenHashSet;
+import it.unimi.dsi.fastutil.longs.LongSet;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.network.RegistryFriendlyByteBuf;
@@ -1209,9 +1211,8 @@ public abstract class BaseQuestFile extends QuestObject implements QuestFile {
 	}
 
 	public long readID(long id) {
-		//noinspection ConstantValue
-		while (id == 0L || id == 1L || questObjectMap.get(id) != null) {
-			id = Math.abs(MathUtils.RAND.nextLong());
+		while (id == 0L || id == 1L || questObjectMap.containsKey(id)) {
+			id = MathUtils.RAND.nextLong(Long.MAX_VALUE);
 			markDirty();
 		}
 
@@ -1619,4 +1620,28 @@ public abstract class BaseQuestFile extends QuestObject implements QuestFile {
 	public VisualPresets getPresets() {
 		return allPresets;
 	}
+
+
+	/**
+	 * Allows allocating multiple new quest object ids with no risk of collision. Intended to be a short-lived object,
+	 * do not persist across multiple ticks!
+	 */
+	public static class UniqueIdAllocator {
+		private final BaseQuestFile file;
+		private final LongSet allocated = new LongOpenHashSet();
+
+        public UniqueIdAllocator(BaseQuestFile file) {
+            this.file = file;
+        }
+
+		public long newId() {
+			long newId;
+			do {
+				newId = file.newID();
+			} while (allocated.contains(newId));
+			allocated.add(newId);
+
+			return newId;
+		}
+    }
 }

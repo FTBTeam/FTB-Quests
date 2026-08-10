@@ -3,10 +3,7 @@ package dev.ftb.mods.ftbquests.net;
 import dev.ftb.mods.ftblibrary.platform.network.PacketContext;
 import dev.ftb.mods.ftbquests.api.FTBQuestsAPI;
 import dev.ftb.mods.ftbquests.integration.PermissionsHelper;
-import dev.ftb.mods.ftbquests.quest.Chapter;
-import dev.ftb.mods.ftbquests.quest.Quest;
-import dev.ftb.mods.ftbquests.quest.QuestObjectBase;
-import dev.ftb.mods.ftbquests.quest.ServerQuestFile;
+import dev.ftb.mods.ftbquests.quest.*;
 import dev.ftb.mods.ftbquests.quest.history.CreateOrDeleteRecord;
 import dev.ftb.mods.ftbquests.quest.history.events.CreateQuestObjects;
 import dev.ftb.mods.ftbquests.quest.reward.Reward;
@@ -42,8 +39,10 @@ public record CopyQuestMessage(long id, long chapterId, double qx, double qy, bo
     public static void handle(CopyQuestMessage message, PacketContext context) {
         ServerQuestFile.ifExists(sqf -> {
             if (PermissionsHelper.canPlayerEdit(context) && sqf.get(message.id) instanceof Quest toCopy && sqf.get(message.chapterId) instanceof Chapter chapter) {
+                var allocator = new BaseQuestFile.UniqueIdAllocator(sqf);
+
                 // deep copy of the quest
-                Quest newQuest = QuestObjectBase.copy(toCopy, () -> new Quest(sqf.newID(), chapter));
+                Quest newQuest = QuestObjectBase.copy(toCopy, () -> new Quest(allocator.newId(), chapter));
                 if (!message.copyDeps) {
                     newQuest.clearDependencies();
                 }
@@ -54,12 +53,12 @@ public record CopyQuestMessage(long id, long chapterId, double qx, double qy, bo
                 // deep copy of all tasks and rewards
                 List<CreateOrDeleteRecord> newTasks = new ArrayList<>();
                 toCopy.getTasks().forEach(task -> {
-                    Task newTask = QuestObjectBase.copy(task, () -> Objects.requireNonNull(TaskType.createTask(sqf.newID(), newQuest, task.getType().getTypeForSerialization())));
+                    Task newTask = QuestObjectBase.copy(task, () -> Objects.requireNonNull(TaskType.createTask(allocator.newId(), newQuest, task.getType().getTypeForSerialization())));
                     newTasks.add(CreateOrDeleteRecord.ofQuestObject(newTask));
                 });
                 List<CreateOrDeleteRecord> newRewards = new ArrayList<>();
                 for (Reward reward : toCopy.getRewards()) {
-                    Reward newReward = QuestObjectBase.copy(reward, () -> Objects.requireNonNull(RewardType.createReward(sqf.newID(), newQuest, reward.getType().getTypeForSerialization())));
+                    Reward newReward = QuestObjectBase.copy(reward, () -> Objects.requireNonNull(RewardType.createReward(allocator.newId(), newQuest, reward.getType().getTypeForSerialization())));
                     newRewards.add(CreateOrDeleteRecord.ofQuestObject(newReward));
                 }
 

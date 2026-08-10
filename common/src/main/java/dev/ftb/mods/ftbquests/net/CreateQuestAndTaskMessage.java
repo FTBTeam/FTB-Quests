@@ -4,6 +4,7 @@ import de.marhali.json5.Json5Object;
 import dev.ftb.mods.ftblibrary.platform.network.PacketContext;
 import dev.ftb.mods.ftbquests.api.FTBQuestsAPI;
 import dev.ftb.mods.ftbquests.integration.PermissionsHelper;
+import dev.ftb.mods.ftbquests.quest.BaseQuestFile;
 import dev.ftb.mods.ftbquests.quest.Chapter;
 import dev.ftb.mods.ftbquests.quest.Quest;
 import dev.ftb.mods.ftbquests.quest.ServerQuestFile;
@@ -65,9 +66,11 @@ public record CreateQuestAndTaskMessage(long chapterId, double x, double y, int 
 				TaskType taskType = sqf.getTaskType(message.taskTypeId);
 
 				if (chapter != null && taskType != null) {
-					Quest quest = new Quest(sqf.newID(), chapter).setPosition(message.x, message.y);
+					var allocator = new BaseQuestFile.UniqueIdAllocator(sqf);
 
-					Task task = taskType.createTask(sqf.newID(), quest);
+					Quest quest = new Quest(allocator.newId(), chapter).setPosition(message.x, message.y);
+
+					Task task = taskType.createTask(allocator.newId(), quest);
 					task.readData(message.data, sp.registryAccess());
 					Json5Object metadata = message.metadata.orElse(new Json5Object());
 					sqf.getTranslationManager().processInitialTranslation(metadata, task);

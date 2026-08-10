@@ -3,6 +3,7 @@ package dev.ftb.mods.ftbquests.net;
 import dev.ftb.mods.ftblibrary.platform.network.PacketContext;
 import dev.ftb.mods.ftbquests.api.FTBQuestsAPI;
 import dev.ftb.mods.ftbquests.integration.PermissionsHelper;
+import dev.ftb.mods.ftbquests.quest.BaseQuestFile;
 import dev.ftb.mods.ftbquests.quest.QuestObjectBase;
 import dev.ftb.mods.ftbquests.quest.QuestObjectType;
 import dev.ftb.mods.ftbquests.quest.ServerQuestFile;
@@ -15,6 +16,7 @@ import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.server.level.ServerPlayer;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.UUID;
@@ -57,15 +59,24 @@ public record CreateObjectMessage(List<CreateOrDeleteRecord> creationRecords, bo
 	public static void handle(CreateObjectMessage message, PacketContext context) {
 		if (PermissionsHelper.canPlayerEdit(context) && context.player() instanceof ServerPlayer sp) {
 			ServerQuestFile.ifExists(sqf -> {
-				List<CreateOrDeleteRecord> creationRecs = message.creationRecords.stream()
-						.limit(QuestBookEditEvent.MAX_LIST_SIZE)
-						.filter(rec -> rec.questObjectType() != QuestObjectType.NULL)
-						.map(r -> r.sanitizeTitle())
-						.map(r -> r.withNewID(sqf))
-						.toList();
-				UUID creatorId = message.openScreen ? sp.getUUID() : null;
-				sqf.getHistoryStack().addAndApply(sqf, new CreateQuestObjects(creationRecs, creatorId));
+				List<CreateOrDeleteRecord> recs = sanitize(sqf, message.creationRecords);
+				if (!recs.isEmpty()) {
+					UUID creatorId = message.openScreen ? sp.getUUID() : null;
+					sqf.getHistoryStack().addAndApply(sqf, new CreateQuestObjects(recs, creatorId));
+				}
 			});
 		}
+	}
+
+	private static List<CreateOrDeleteRecord> sanitize(ServerQuestFile sqf, List<CreateOrDeleteRecord> recsIn) {
+		var allocator = new BaseQuestFile.UniqueIdAllocator(sqf);
+		List<CreateOrDeleteRecord> recsOut = new ArrayList<>();
+		for (int i = 0; i < recsIn.size() && i < QuestBookEditEvent.MAX_LIST_SIZE; i++) {
+			var rec = recsIn.get(i);
+			if (rec.questObjectType() != QuestObjectType.NULL) {
+				recsOut.add(rec.sanitizeTitle().withNewID(allocator.newId()));
+			}
+		}
+		return recsOut;
 	}
 }
