@@ -7,6 +7,7 @@ import dev.ftb.mods.ftbquests.quest.QuestObjectBase;
 import dev.ftb.mods.ftbquests.quest.QuestObjectType;
 import dev.ftb.mods.ftbquests.quest.ServerQuestFile;
 import dev.ftb.mods.ftbquests.quest.history.CreateOrDeleteRecord;
+import dev.ftb.mods.ftbquests.quest.history.QuestBookEditEvent;
 import dev.ftb.mods.ftbquests.quest.history.events.CreateQuestObjects;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
@@ -41,7 +42,10 @@ public record CreateObjectMessage(List<CreateOrDeleteRecord> creationRecords, bo
 	}
 
 	public static CreateObjectMessage requestCreation(Collection<? extends QuestObjectBase> questObjects, boolean openScreen) {
-		List<CreateOrDeleteRecord> records = questObjects.stream().map(CreateOrDeleteRecord::ofQuestObject).toList();
+		List<CreateOrDeleteRecord> records = questObjects.stream()
+				.limit(QuestBookEditEvent.MAX_LIST_SIZE)
+				.map(CreateOrDeleteRecord::ofQuestObject)
+				.toList();
 		return new CreateObjectMessage(records, openScreen);
 	}
 
@@ -54,6 +58,7 @@ public record CreateObjectMessage(List<CreateOrDeleteRecord> creationRecords, bo
 		if (PermissionsHelper.canPlayerEdit(context) && context.player() instanceof ServerPlayer sp) {
 			ServerQuestFile.ifExists(sqf -> {
 				List<CreateOrDeleteRecord> creationRecs = message.creationRecords.stream()
+						.limit(QuestBookEditEvent.MAX_LIST_SIZE)
 						.filter(rec -> rec.questObjectType() != QuestObjectType.NULL)
 						.map(r -> r.withNewID(sqf))
 						.toList();

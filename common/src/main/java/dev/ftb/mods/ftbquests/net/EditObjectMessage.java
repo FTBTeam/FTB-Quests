@@ -7,6 +7,7 @@ import dev.ftb.mods.ftbquests.integration.PermissionsHelper;
 import dev.ftb.mods.ftbquests.quest.QuestObjectBase;
 import dev.ftb.mods.ftbquests.quest.ServerQuestFile;
 import dev.ftb.mods.ftbquests.quest.history.EditRecord;
+import dev.ftb.mods.ftbquests.quest.history.QuestBookEditEvent;
 import dev.ftb.mods.ftbquests.quest.history.events.ModifyQuestObjects;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
@@ -36,7 +37,7 @@ public record EditObjectMessage(List<EditRecord> editRecords) implements CustomP
 	}
 
 	public static EditObjectMessage forQuestObjects(Collection<? extends QuestObjectBase> list) {
-		return new EditObjectMessage(list.stream().map(EditRecord::ofQuestObject).toList());
+		return new EditObjectMessage(list.stream().limit(QuestBookEditEvent.MAX_LIST_SIZE).map(EditRecord::ofQuestObject).toList());
 	}
 
 	public static void sendToServer(QuestObjectBase qo) {
@@ -51,7 +52,7 @@ public record EditObjectMessage(List<EditRecord> editRecords) implements CustomP
 	public static void handle(EditObjectMessage message, PacketContext context) {
 		if (PermissionsHelper.canPlayerEdit(context)) {
 			ServerQuestFile.ifExists(sqf ->
-					ModifyQuestObjects.fromEditRecords(sqf, message.editRecords)
+					ModifyQuestObjects.fromEditRecords(sqf, QuestBookEditEvent.takeLimitedElements(message.editRecords))
 							.ifPresent(modification -> sqf.getHistoryStack().addAndApply(sqf, modification)));
 		}
 	}

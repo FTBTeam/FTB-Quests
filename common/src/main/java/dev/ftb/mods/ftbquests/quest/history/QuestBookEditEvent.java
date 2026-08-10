@@ -25,6 +25,11 @@ import java.util.UUID;
  */
 public interface QuestBookEditEvent {
     /**
+     * The maximum number of quest objects which can be handled in one create/edit/delete request
+     */
+    int MAX_LIST_SIZE = 32;
+
+    /**
      * Apply this history event to the quest file. Called both to carry out an edit to the file, and later on if
      * an undo of the edit needs to be redone (undo an undo...)
      *
@@ -101,5 +106,9 @@ public interface QuestBookEditEvent {
 
     default Component getTitle(BaseQuestFile file, long id) {
         return file.getBase(id) instanceof QuestObjectBase c ? c.getTitle() : Component.literal("<?>");
+    }
+
+    static <T> List<T> takeLimitedElements(List<T> list) {
+        return list.subList(0, Math.min(list.size(), MAX_LIST_SIZE));
     }
 }

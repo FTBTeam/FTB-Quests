@@ -8,6 +8,7 @@ import dev.ftb.mods.ftbquests.quest.QuestObject;
 import dev.ftb.mods.ftbquests.quest.QuestObjectBase;
 import dev.ftb.mods.ftbquests.quest.ServerQuestFile;
 import dev.ftb.mods.ftbquests.quest.history.CreateOrDeleteRecord;
+import dev.ftb.mods.ftbquests.quest.history.QuestBookEditEvent;
 import dev.ftb.mods.ftbquests.quest.history.events.DeleteQuestObjects;
 import it.unimi.dsi.fastutil.longs.LongOpenHashSet;
 import it.unimi.dsi.fastutil.longs.LongSet;
@@ -41,8 +42,9 @@ public record DeleteObjectMessage(List<Long> ids) implements CustomPacketPayload
 	public static void handle(DeleteObjectMessage message, PacketContext context) {
 		ServerQuestFile.ifExists(sqf -> {
 			if (PermissionsHelper.canPlayerEdit(context)) {
+				List<Long> idSublist = QuestBookEditEvent.takeLimitedElements(message.ids);
 				// LinkedHashSet deduplicates input ids while preserving order, which may be significant
-				List<CreateOrDeleteRecord> records = expandChildren(sqf, CreateOrDeleteRecord.fromIds(sqf, new LinkedHashSet<>(message.ids)));
+				List<CreateOrDeleteRecord> records = expandChildren(sqf, CreateOrDeleteRecord.fromIds(sqf, new LinkedHashSet<>(idSublist)));
 				if (!records.isEmpty()) {
 					sqf.getHistoryStack().addAndApply(sqf, new DeleteQuestObjects(records));
 				}
