@@ -193,7 +193,7 @@ public class ChapterGroup extends QuestObject {
 	public boolean moveChapterWithinGroup(Chapter chapter, boolean movingUp) {
 		int index = chapters.indexOf(chapter);
 
-		if (index != -1 && movingUp ? (index > 0) : (index < chapters.size() - 1)) {
+		if (index != -1 && (movingUp ? (index > 0) : (index < chapters.size() - 1))) {
 			chapters.remove(index);
 			chapters.add(movingUp ? index - 1 : index + 1, chapter);
 			clearCachedData();
