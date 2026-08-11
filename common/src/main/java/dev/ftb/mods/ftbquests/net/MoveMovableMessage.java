@@ -31,9 +31,8 @@ public record MoveMovableMessage(long objectId, long newChapterID, double x, dou
 	public static void handle(MoveMovableMessage message, NetworkManager.PacketContext context) {
 		context.queue(() -> ServerQuestFile.getInstance().ifPresent(sqf -> {
 			if (PermissionsHelper.canPlayerEdit(context) && sqf.getBase(message.objectId) instanceof Movable movable) {
-                Chapter fromChapter = movable.getChapter();
 				Chapter toChapter = sqf.getChapter(message.newChapterID);
-                if (fromChapter != null && toChapter != null) {
+                if (toChapter != null && !movable.isPositionLocked()) {
 					MoveMovableObject.create(movable, toChapter, message.x(), message.y())
 							.ifPresent(event -> sqf.getHistoryStack().addAndApply(sqf, event));
 				}
