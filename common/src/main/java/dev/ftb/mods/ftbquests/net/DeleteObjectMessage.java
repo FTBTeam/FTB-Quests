@@ -8,6 +8,7 @@ import dev.ftb.mods.ftbquests.quest.QuestObject;
 import dev.ftb.mods.ftbquests.quest.QuestObjectBase;
 import dev.ftb.mods.ftbquests.quest.ServerQuestFile;
 import dev.ftb.mods.ftbquests.quest.history.CreateOrDeleteRecord;
+import dev.ftb.mods.ftbquests.quest.history.QuestBookEditEvent;
 import dev.ftb.mods.ftbquests.quest.history.events.DeleteQuestObjects;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
@@ -15,6 +16,7 @@ import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 
 import java.util.ArrayList;
+import java.util.LinkedHashSet;
 import java.util.List;
 
 public record DeleteObjectMessage(List<Long> ids) implements CustomPacketPayload {
@@ -37,7 +39,9 @@ public record DeleteObjectMessage(List<Long> ids) implements CustomPacketPayload
 	public static void handle(DeleteObjectMessage message, NetworkManager.PacketContext context) {
 		context.queue(() -> ServerQuestFile.getInstance().ifPresent(sqf -> {
 			if (PermissionsHelper.canPlayerEdit(context)) {
-				List<CreateOrDeleteRecord> records = expandChildren(sqf, CreateOrDeleteRecord.fromIds(sqf, message.ids));
+				List<Long> idSublist = QuestBookEditEvent.takeLimitedElements(message.ids);
+				// LinkedHashSet deduplicates input ids while preserving order, which may be significant
+				List<CreateOrDeleteRecord> records = expandChildren(sqf, CreateOrDeleteRecord.fromIds(sqf, new LinkedHashSet<>(idSublist)));
 				if (!records.isEmpty()) {
 					sqf.getHistoryStack().addAndApply(sqf, new DeleteQuestObjects(records));
 				}

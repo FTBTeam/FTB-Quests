@@ -16,13 +16,13 @@ public record DeleteQuestObjects(List<CreateOrDeleteRecord> deletionRecords) imp
     }
 
     @Override
-    public void apply(ServerQuestFile file) {
-        deleteObjects(file, deletionRecords);
+    public boolean apply(ServerQuestFile file) {
+        return deleteObjects(file, deletionRecords);
     }
 
     @Override
-    public void applyUndo(ServerQuestFile file) {
-        createObjects(file, deletionRecords.reversed(), null);
+    public boolean applyUndo(ServerQuestFile file) {
+        return createObjects(file, deletionRecords.reversed(), null);
     }
 
     @Override

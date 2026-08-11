@@ -1,16 +1,17 @@
 package dev.ftb.mods.ftbquests.quest.history;
 
-import dev.ftb.mods.ftblibrary.util.NetworkHelper;
 import dev.ftb.mods.ftbquests.net.CreateObjectResponseMessage;
 import dev.ftb.mods.ftbquests.net.DeleteObjectResponseMessage;
 import dev.ftb.mods.ftbquests.net.EditObjectResponseMessage;
 import dev.ftb.mods.ftbquests.quest.BaseQuestFile;
 import dev.ftb.mods.ftbquests.quest.QuestObjectBase;
 import dev.ftb.mods.ftbquests.quest.ServerQuestFile;
+import dev.ftb.mods.ftbquests.util.NetUtils;
 import net.minecraft.network.chat.Component;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -23,13 +24,16 @@ import java.util.UUID;
  * These are typically (but not necessarily) invoked from the handlers of network packets received from the client.
  */
 public interface QuestBookEditEvent {
+    int MAX_LIST_SIZE = 32;
+
     /**
      * Apply this history event to the quest file. Called both to carry out an edit to the file, and later on if
      * an undo of the edit needs to be redone (undo an undo...)
      *
      * @param file the quest file
+     * @return true if the event was successfully applied, false otherwise
      */
-    void apply(ServerQuestFile file);
+    boolean apply(ServerQuestFile file);
 
     /**
      * Reverse the application of this history event. Should be processed in the opposite order of
@@ -38,47 +42,75 @@ public interface QuestBookEditEvent {
      * this should remove the task first, then the quest).
      *
      * @param file the quest file
+     * @return true if the undo was successfully applied, false otherwise
      */
-    void applyUndo(ServerQuestFile file);
+    boolean applyUndo(ServerQuestFile file);
 
     /**
      * {@return a brief description of the changes, 1 per change, for message console purposes}
      */
     List<Component> description(BaseQuestFile file, ChangeType changeType);
 
-    default void createObjects(ServerQuestFile file, List<CreateOrDeleteRecord> records, @Nullable UUID creatorId) {
-        for (var creationRec : records) {
-            QuestObjectBase qo = file.create(creationRec.id(), creationRec.questObjectType(), creationRec.parent(), creationRec.extra());
-            qo.readData(creationRec.nbt(), file.server.registryAccess());
-            file.getTranslationManager().processInitialTranslation(creationRec.extra(), qo);
-            qo.onCreated();
+    default boolean createObjects(ServerQuestFile file, List<CreateOrDeleteRecord> records, @Nullable UUID creatorId) {
+        try {
+            for (var creationRec : records) {
+                QuestObjectBase qo = file.create(creationRec.id(), creationRec.questObjectType(), creationRec.parent(), creationRec.extra());
+                qo.readData(creationRec.nbt(), file.server.registryAccess());
+                file.getTranslationManager().processInitialTranslation(creationRec.extra(), qo);
+                qo.onCreated();
+            }
+            NetUtils.sendToQuestBookEditors(file.server, new CreateObjectResponseMessage(records, Optional.ofNullable(creatorId)));
+            file.markDirty();
+            return true;
+        } catch (Exception ignored) {
+            return false;
         }
-        NetworkHelper.sendToAll(file.server, new CreateObjectResponseMessage(records, Optional.ofNullable(creatorId)));
-        file.markDirty();
     }
 
-    default void deleteObjects(ServerQuestFile file, List<CreateOrDeleteRecord> records) {
+    default boolean deleteObjects(ServerQuestFile file, List<CreateOrDeleteRecord> records) {
         List<Long> ids = records.stream().map(CreateOrDeleteRecord::id).toList();
-        file.deleteObjects(ids);
+        boolean deleted = file.deleteObjects(ids);
+        if (deleted) {
+            NetUtils.sendToQuestBookEditors(file.server, new DeleteObjectResponseMessage(ids));
+        }
 
-        NetworkHelper.sendToAll(file.server, new DeleteObjectResponseMessage(ids));
+        return deleted;
     }
 
-    default void editObjects(ServerQuestFile file, List<EditRecord> records) {
-        records.forEach(editRecord -> {
-            QuestObjectBase object = ServerQuestFile.INSTANCE.getBase(editRecord.id());
-            if (object != null) {
+    default boolean editObjects(ServerQuestFile file, List<EditRecord> records) {
+        try {
+            // all ids must be valid, or no change is made
+            for (var rec : records) {
+                if (file.getBase(rec.id()) == null) {
+                    return false;
+                }
+            }
+
+            for (var editRecord : records) {
+                QuestObjectBase object = Objects.requireNonNull(file.getBase(editRecord.id())); // already validated non-null
                 object.readData(editRecord.nbt(), file.server.registryAccess());
                 object.editedFromGUIOnServer();
                 object.clearCachedData();
-
-                NetworkHelper.sendToAll(file.server, new EditObjectResponseMessage(records));
             }
-        });
-        file.markDirty();
+
+            NetUtils.sendToQuestBookEditors(file.server, new EditObjectResponseMessage(records));
+            file.markDirty();
+            return true;
+        } catch (Exception ignored) {
+            return false;
+        }
     }
 
     default Component getTitle(BaseQuestFile file, long id) {
         return file.getBase(id) instanceof QuestObjectBase c ? c.getTitle() : Component.literal("<?>");
+    }
+
+    static <T> List<T> takeLimitedElements(List<T> list) {
+        return list.subList(0, Math.min(list.size(), MAX_LIST_SIZE));
+    }
+
+    static Component sanitizeComponent(Component in) {
+        String s = in.getString();
+        return Component.literal(s.substring(0, Math.min(80, s.length())));
     }
 }

@@ -6,6 +6,7 @@ import dev.ftb.mods.ftbquests.integration.PermissionsHelper;
 import dev.ftb.mods.ftbquests.quest.QuestObjectBase;
 import dev.ftb.mods.ftbquests.quest.ServerQuestFile;
 import dev.ftb.mods.ftbquests.quest.history.EditRecord;
+import dev.ftb.mods.ftbquests.quest.history.QuestBookEditEvent;
 import dev.ftb.mods.ftbquests.quest.history.events.ModifyQuestObjects;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
@@ -50,7 +51,7 @@ public record EditObjectMessage(List<EditRecord> editRecords) implements CustomP
 	public static void handle(EditObjectMessage message, NetworkManager.PacketContext context) {
 		context.queue(() -> ServerQuestFile.getInstance().ifPresent(sqf -> {
 			if (PermissionsHelper.canPlayerEdit(context)) {
-				ModifyQuestObjects.fromEditRecords(sqf, message.editRecords)
+				ModifyQuestObjects.fromEditRecords(sqf, QuestBookEditEvent.takeLimitedElements(message.editRecords))
 						.ifPresent(modification -> sqf.getHistoryStack().addAndApply(sqf, modification));
 			}
 		}));

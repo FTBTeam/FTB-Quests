@@ -1,7 +1,11 @@
 package dev.ftb.mods.ftbquests.util;
 
 import dev.ftb.mods.ftblibrary.icon.Icon;
+import dev.ftb.mods.ftblibrary.util.NetworkHelper;
+import dev.ftb.mods.ftbquests.integration.PermissionsHelper;
 import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import net.minecraft.server.MinecraftServer;
 
 import java.util.Collection;
 import java.util.function.BiConsumer;
@@ -31,5 +35,12 @@ public class NetUtils {
 
 	public static Icon readIcon(FriendlyByteBuf buffer) {
 		return Icon.getIcon(buffer.readUtf());
+	}
+
+	public static void sendToQuestBookEditors(MinecraftServer server, CustomPacketPayload packet) {
+		var editors = server.getPlayerList().getPlayers().stream()
+				.filter(PermissionsHelper::canPlayerEdit)
+				.toList();
+		editors.forEach(e -> NetworkHelper.sendTo(e, packet));
 	}
 }

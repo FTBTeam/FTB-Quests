@@ -17,13 +17,13 @@ import java.util.List;
 
 public record MoveItemWithinQuest(long taskOrRewardId, QuestObjectType questObjectType, boolean moveRight) implements QuestBookEditEvent {
     @Override
-    public void apply(ServerQuestFile file) {
-        applyChange(file, moveRight);
+    public boolean apply(ServerQuestFile file) {
+        return applyChange(file, moveRight);
     }
 
     @Override
-    public void applyUndo(ServerQuestFile file) {
-        applyChange(file, !moveRight);
+    public boolean applyUndo(ServerQuestFile file) {
+        return applyChange(file, !moveRight);
     }
 
     @Override
@@ -35,14 +35,17 @@ public record MoveItemWithinQuest(long taskOrRewardId, QuestObjectType questObje
         );
     }
 
-    private void applyChange(ServerQuestFile file, boolean dir) {
+    private boolean applyChange(ServerQuestFile file, boolean dir) {
         QuestObjectBase object = file.getBase(taskOrRewardId);
         if (object instanceof Task task) {
             task.getQuest().moveTask(task, dir);
             NetworkHelper.sendToAll(file.server, ReorderItemResponseMessage.tasks(task.getQuest()));
+            return true;
         } else if (object instanceof Reward reward) {
             reward.getQuest().moveReward(reward, dir);
             NetworkHelper.sendToAll(file.server, ReorderItemResponseMessage.rewards(reward.getQuest()));
+            return true;
         }
+        return false;
     }
 }

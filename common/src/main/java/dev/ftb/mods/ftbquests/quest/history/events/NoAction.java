@@ -12,11 +12,13 @@ public enum NoAction implements QuestBookEditEvent {
     INSTANCE;
 
     @Override
-    public void apply(ServerQuestFile file) {
+    public boolean apply(ServerQuestFile file) {
+        return false;
     }
 
     @Override
-    public void applyUndo(ServerQuestFile file) {
+    public boolean applyUndo(ServerQuestFile file) {
+        return false;
     }
 
     @Override

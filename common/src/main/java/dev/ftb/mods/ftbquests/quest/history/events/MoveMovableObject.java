@@ -33,13 +33,13 @@ public record MoveMovableObject(
     }
 
     @Override
-    public void apply(ServerQuestFile file) {
-        applyChange(file, newX, newY, newChapterId);
+    public boolean apply(ServerQuestFile file) {
+        return applyChange(file, newX, newY, newChapterId);
     }
 
     @Override
-    public void applyUndo(ServerQuestFile file) {
-        applyChange(file, oldX, oldY, oldChapterId);
+    public boolean applyUndo(ServerQuestFile file) {
+        return applyChange(file, oldX, oldY, oldChapterId);
     }
 
     @Override
@@ -59,12 +59,14 @@ public record MoveMovableObject(
 
     }
 
-    private void applyChange(ServerQuestFile file, double x, double y, long chapterId) {
+    private boolean applyChange(ServerQuestFile file, double x, double y, long chapterId) {
         if (file.getBase(movableId) instanceof Movable movable && file.getChapter(chapterId) instanceof Chapter chapter) {
             movable.setPosition(x, y);
             movable.setChapter(chapter);
 
             NetworkHelper.sendToAll(file.server, MoveMovableResponseMessage.create(movable));
+            return true;
         }
+        return false;
     }
 }
