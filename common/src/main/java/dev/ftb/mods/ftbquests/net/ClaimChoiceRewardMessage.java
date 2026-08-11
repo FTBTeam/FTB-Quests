@@ -34,12 +34,13 @@ public record ClaimChoiceRewardMessage(long id, int index) implements CustomPack
 				ServerQuestFile.INSTANCE.getTeamData(serverPlayer).ifPresent(data -> {
 					RewardTable table = choiceReward.getTable();
 
-					if (table != null && data.isCompleted(reward.getQuest())) {
-						if (message.index >= 0 && message.index < table.getWeightedRewards().size()) {
-							table.getWeightedRewards().get(message.index).getReward().claim(serverPlayer, true);
-							data.claimReward(serverPlayer, reward, true);
-						}
-					}
+                    if (table != null
+							&& data.isCompleted(reward.getQuest())
+							&& message.index >= 0 && message.index < table.getWeightedRewards().size()
+							&& data.markRewardAsClaimed(serverPlayer.getUUID(), reward, System.currentTimeMillis()))
+					{
+                        table.getWeightedRewards().get(message.index).getReward().claim(serverPlayer, true);
+                    }
 				});
 			}
 		});
