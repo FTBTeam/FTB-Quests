@@ -44,7 +44,10 @@ public record CreateObjectMessage(List<CreateOrDeleteRecord> creationRecords, bo
 	}
 
 	public static CreateObjectMessage requestCreation(Collection<? extends QuestObjectBase> questObjects, boolean openScreen) {
-		List<CreateOrDeleteRecord> records = questObjects.stream().map(CreateOrDeleteRecord::ofQuestObject).toList();
+		List<CreateOrDeleteRecord> records = questObjects.stream()
+				.limit(QuestBookEditEvent.MAX_LIST_SIZE)
+				.map(CreateOrDeleteRecord::ofQuestObject)
+				.toList();
 		return new CreateObjectMessage(records, openScreen);
 	}
 

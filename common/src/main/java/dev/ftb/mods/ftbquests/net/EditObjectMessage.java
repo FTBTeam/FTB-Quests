@@ -36,7 +36,7 @@ public record EditObjectMessage(List<EditRecord> editRecords) implements CustomP
 	}
 
 	public static EditObjectMessage forQuestObjects(Collection<? extends QuestObjectBase> list) {
-		return new EditObjectMessage(list.stream().map(EditRecord::ofQuestObject).toList());
+		return new EditObjectMessage(list.stream().limit(QuestBookEditEvent.MAX_LIST_SIZE).map(EditRecord::ofQuestObject).toList());
 	}
 
 	public static void sendToServer(QuestObjectBase qo) {
