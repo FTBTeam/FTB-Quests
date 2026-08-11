@@ -7,7 +7,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [26.1.2.4]
 
 ### Changed
-* A large of internal code cleanup
 * SSP worlds created with "Allow Commands" = OFF can no longer do quest book editing, which is considered an admin operation
   * Where emergency edits need to be in such a world, there are two workarounds:
     * Workaround 1: open the world to LAN with "All Commands" = ON
