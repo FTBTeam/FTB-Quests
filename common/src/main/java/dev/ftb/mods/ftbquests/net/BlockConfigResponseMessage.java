@@ -29,6 +29,7 @@ public record BlockConfigResponseMessage(BlockPos pos, CompoundTag payload) impl
     public static void handle(BlockConfigResponseMessage message, NetworkManager.PacketContext context) {
         context.queue(() -> {
             if (context.getPlayer() instanceof ServerPlayer serverPlayer
+                    && serverPlayer.level().isLoaded(message.pos)
                     && serverPlayer.level().getBlockEntity(message.pos) instanceof EditableBlockEntity editable
                     && editable.hasPermissionToEdit(serverPlayer)) {
                 editable.readPayload(message.payload, serverPlayer.registryAccess());
