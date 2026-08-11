@@ -737,6 +737,11 @@ public class TeamData {
 		return Optional.of(perPlayerData.get(player.getUUID()));
 	}
 
+	@Deprecated(forRemoval = true)
+	public boolean getCanEdit(Player player) {
+		return isPlayerInEditMode(player);
+	}
+
 	public boolean isPlayerInEditMode(Player player) {
 		return getOrCreatePlayerData(player).map(ppd -> ppd.isEditMode).orElse(false);
 	}
