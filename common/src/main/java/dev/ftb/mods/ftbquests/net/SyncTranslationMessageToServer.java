@@ -59,8 +59,11 @@ public record SyncTranslationMessageToServer(long id, String locale, Translation
             if (PermissionsHelper.canPlayerEdit(context)) {
                 QuestObjectBase object = sqf.getBase(message.id);
                 if (object != null) {
-                    UpdateTranslation.create(sqf, object, message.locale, message.subKey, message.val)
-                            .ifPresent(event -> sqf.getHistoryStack().addAndApply(sqf, event));
+                    try {
+                        UpdateTranslation.create(sqf, object, message.locale, message.subKey, message.val)
+                                .ifPresent(event -> sqf.getHistoryStack().addAndApply(sqf, event));
+                    } catch (IllegalArgumentException ignored) {
+                    }
                 }
             }
         }));
