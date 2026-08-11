@@ -574,14 +574,7 @@ public final class Quest extends QuestObject implements Movable, Excludable {
 		chapter.removeQuest(this);
 
 		// clean up any tasks & rewards
-		for (Task task : List.copyOf(tasks)) {
-			task.deleteSelf();
-		}
-		tasks.clear();
-		for (Reward reward : List.copyOf(rewards)) {
-			reward.deleteSelf();
-		}
-		rewards.clear();
+		List.copyOf(getChildren()).forEach(QuestObjectBase::deleteSelf);  // copy to avoid CME
 
 		// clean up any quest links which point to this quest
 		List<QuestLink> linksToDel = new ArrayList<>();
