@@ -4,6 +4,21 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2101.1.31]
+
+### Changed
+* SSP worlds created with "Allow Commands" = OFF can no longer do quest book editing, which is considered an admin operation
+  * Where emergency edits need to be in such a world, there are two workarounds:
+    * Workaround 1: open the world to LAN with "All Commands" = ON
+    * Workaround 2: use FTB Ranks and get the `ftbquests.editor` permission node
+* Deleting a chapter group no longer reparents the group's chapters to the default group, but now deletes the chapters
+  * Reparenting chapters could lead to quest book consistency bugs
+  * Deleted group and chapters can be restored with the undo function (which is not an alternative to making backups!)
+
+### Fixed
+* Fixed Choice Reward status not being correctly updated after being claimed by a player
+* Fixed editing a quest title or subtitle from the quest view panel with the 'T' and 'S' hotkeys not immediately updating the quest view panel
+
 ## [2101.1.30]
 
 ### Fixed
