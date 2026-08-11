@@ -100,10 +100,7 @@ public class ChapterGroup extends QuestObject {
 
 		file.chapterGroups.remove(this);
 
-		// rather than delete any chapters in this group, instead move them to the "default" chapter group
-		for (Chapter chapter : chapters) {
-			file.getDefaultChapterGroup().addChapter(chapter);
-		}
+		List.copyOf(chapters).forEach(Chapter::deleteSelf);  // copy to avoid CME
 	}
 
 	@Override
@@ -189,7 +186,7 @@ public class ChapterGroup extends QuestObject {
 	}
 
 	@Override
-	public Collection<? extends QuestObject> getChildren() {
+	public Collection<? extends QuestObjectBase> getChildren() {
 		return chapters;
 	}
 

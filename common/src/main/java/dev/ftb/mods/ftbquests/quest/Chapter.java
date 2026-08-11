@@ -19,6 +19,7 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
+import org.jetbrains.annotations.Nullable;
 
 import java.nio.file.Path;
 import java.util.*;
@@ -49,6 +50,8 @@ public final class Chapter extends QuestObject {
 	private boolean requireSequentialTasks;
 	private String autoFocusId;
 	private String presetName;
+	@Nullable
+	private List<QuestObjectBase> allChildren = null;
 
 	public Chapter(long id, BaseQuestFile file, ChapterGroup group) {
 		this(id, file, group, "");
@@ -373,7 +376,7 @@ public final class Chapter extends QuestObject {
 	public void deleteSelf() {
 		super.deleteSelf();
 
-        List.copyOf(quests).forEach(Quest::deleteSelf);
+        List.copyOf(getChildren()).forEach(QuestObjectBase::deleteSelf);  // copy to avoid CME
 
 		group.removeChapter(this);
 	}
@@ -460,11 +463,9 @@ public final class Chapter extends QuestObject {
 	public void clearCachedData() {
 		super.clearCachedData();
 
-		for (Quest quest : quests) {
-			quest.clearCachedData();
-		}
-		for (ChapterImage image : images) {
-			image.clearCachedData();
+		if (allChildren != null) {
+			allChildren.forEach(QuestObjectBase::clearCachedData);
+			allChildren = null;
 		}
 	}
 
@@ -492,8 +493,14 @@ public final class Chapter extends QuestObject {
 	}
 
 	@Override
-	public Collection<? extends QuestObject> getChildren() {
-		return quests;
+	public Collection<? extends QuestObjectBase> getChildren() {
+		if (allChildren == null) {
+			allChildren = new ArrayList<>();
+			allChildren.addAll(quests);
+			allChildren.addAll(questLinks);
+			allChildren.addAll(images);
+		}
+		return Collections.unmodifiableList(allChildren);
 	}
 
 	@Override
