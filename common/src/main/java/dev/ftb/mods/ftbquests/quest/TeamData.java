@@ -809,6 +809,11 @@ public class TeamData {
 		return Optional.ofNullable(perPlayerData.get(player.getUUID()));
 	}
 
+	@Deprecated(forRemoval = true)
+	public boolean getCanEdit(Player player) {
+		return isPlayerInEditMode(player);
+	}
+
 	public boolean isPlayerInEditMode(Player player) {
 		return getOrCreatePlayerData(player).map(d -> d.canEdit).orElse(false);
 	}
