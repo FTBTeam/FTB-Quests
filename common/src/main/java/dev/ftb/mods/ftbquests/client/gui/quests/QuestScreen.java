@@ -538,6 +538,10 @@ public class QuestScreen extends BaseScreen {
 
 	@Override
 	public boolean keyPressed(Key key) {
+		if (super.keyPressed(key)) {
+			return true;
+		}
+
 		if (key.matches(FTBQuestsKeyMappings.KEY_GUI_RELOAD_THEME)) {
 			reloadTheme(!isShiftKeyDown());
 			return true;
@@ -652,7 +656,7 @@ public class QuestScreen extends BaseScreen {
 			}
 		}
 
-		return super.keyPressed(key);
+		return false;
 	}
 
 	@Override
