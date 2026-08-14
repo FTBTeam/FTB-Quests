@@ -6,6 +6,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [2101.1.31]
 
+### Added
+* Pinned quest tracker improvements
+  * Quests which are startable but not yet completable (due to flexible mode) are no longer shown
+    * Added "Exclude Flexible-Mode Quests" client config setting (default true) to control this
+  * Added "Pinned Tracker Visibility" client config setting to control what is shown (quest and tasks - default / quests only / hidden)
+  * Added a "Pinned Quest Tracker Visibility" keybinding (default unbound) for easy cycling of the tracker visibility
+
 ### Changed
 * SSP worlds created with "Allow Commands" = OFF can no longer do quest book editing, which is considered an admin operation
   * Where emergency edits need to be in such a world, there are two workarounds:
