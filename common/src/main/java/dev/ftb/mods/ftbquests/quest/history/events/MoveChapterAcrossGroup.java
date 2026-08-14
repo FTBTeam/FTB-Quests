@@ -11,13 +11,13 @@ import java.util.List;
 
 public record MoveChapterAcrossGroup(long chapterId, long oldGroupId, long newGroupId) implements QuestBookEditEvent {
     @Override
-    public void apply(ServerQuestFile file) {
-        applyChange(file, newGroupId);
+    public boolean apply(ServerQuestFile file) {
+        return applyChange(file, newGroupId);
     }
 
     @Override
-    public void applyUndo(ServerQuestFile file) {
-        applyChange(file, oldGroupId);
+    public boolean applyUndo(ServerQuestFile file) {
+        return applyChange(file, oldGroupId);
     }
 
     @Override
@@ -30,14 +30,18 @@ public record MoveChapterAcrossGroup(long chapterId, long oldGroupId, long newGr
         );
     }
 
-    private void applyChange(ServerQuestFile file, long groupId) {
-        if (file.getChapter(chapterId) instanceof Chapter chapter && file.getChapterGroup(groupId) instanceof ChapterGroup group) {
-            if (group != chapter.getGroup()) {
-                chapter.getGroup().removeChapter(chapter);
-                group.addChapter(chapter);
+    private boolean applyChange(ServerQuestFile file, long groupId) {
+        if (file.getChapter(chapterId) instanceof Chapter chapter
+                && file.getChapterGroup(groupId) instanceof ChapterGroup group
+                && group != chapter.getGroup())
+        {
+            chapter.getGroup().removeChapter(chapter);
+            group.addChapter(chapter);
 
-                NetworkHelper.sendToAll(file.server, new ChangeChapterGroupResponseMessage(chapterId, groupId));
-            }
+            NetworkHelper.sendToAll(file.server, new ChangeChapterGroupResponseMessage(chapterId, groupId));
+
+            return true;
         }
+        return false;
     }
 }

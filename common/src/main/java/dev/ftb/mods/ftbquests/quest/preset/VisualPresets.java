@@ -40,7 +40,7 @@ public class VisualPresets {
     }
 
     private Component getDisplayName(String name) {
-        return name.isEmpty() ?
+        return (name == null || name.isEmpty()) ?
                 Component.translatable("ftbquests.null").withStyle(ChatFormatting.ITALIC) :
                 Component.literal(name);
     }

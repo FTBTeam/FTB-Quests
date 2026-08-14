@@ -2,17 +2,21 @@ package dev.ftb.mods.ftbquests.net;
 
 import dev.architectury.networking.NetworkManager;
 import dev.ftb.mods.ftbquests.api.FTBQuestsAPI;
+import dev.ftb.mods.ftbquests.integration.PermissionsHelper;
+import dev.ftb.mods.ftbquests.quest.BaseQuestFile;
 import dev.ftb.mods.ftbquests.quest.QuestObjectBase;
+import dev.ftb.mods.ftbquests.quest.QuestObjectType;
 import dev.ftb.mods.ftbquests.quest.ServerQuestFile;
 import dev.ftb.mods.ftbquests.quest.history.CreateOrDeleteRecord;
+import dev.ftb.mods.ftbquests.quest.history.QuestBookEditEvent;
 import dev.ftb.mods.ftbquests.quest.history.events.CreateQuestObjects;
-import dev.ftb.mods.ftbquests.util.NetUtils;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.server.level.ServerPlayer;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.UUID;
@@ -40,7 +44,10 @@ public record CreateObjectMessage(List<CreateOrDeleteRecord> creationRecords, bo
 	}
 
 	public static CreateObjectMessage requestCreation(Collection<? extends QuestObjectBase> questObjects, boolean openScreen) {
-		List<CreateOrDeleteRecord> records = questObjects.stream().map(CreateOrDeleteRecord::ofQuestObject).toList();
+		List<CreateOrDeleteRecord> records = questObjects.stream()
+				.limit(QuestBookEditEvent.MAX_LIST_SIZE)
+				.map(CreateOrDeleteRecord::ofQuestObject)
+				.toList();
 		return new CreateObjectMessage(records, openScreen);
 	}
 
@@ -51,17 +58,27 @@ public record CreateObjectMessage(List<CreateOrDeleteRecord> creationRecords, bo
 
 	public static void handle(CreateObjectMessage message, NetworkManager.PacketContext context) {
 		context.queue(() -> {
-			if (NetUtils.canEdit(context) && context.getPlayer() instanceof ServerPlayer sp) {
-				message.creationRecords.forEach(creationRecord -> {
-					ServerQuestFile sqf = ServerQuestFile.INSTANCE;
-
-					// records will have arrived from client with an id of 0, so allocate some real id's now
-					List<CreateOrDeleteRecord> creationRecs = message.creationRecords.stream().map(r -> r.withNewID(sqf)).toList();
-
-					UUID creatorId = message.openScreen ? sp.getUUID() : null;
-					sqf.getHistoryStack().addAndApply(sqf, new CreateQuestObjects(creationRecs, creatorId));
+			if (PermissionsHelper.canPlayerEdit(context) && context.getPlayer() instanceof ServerPlayer sp) {
+				ServerQuestFile.getInstance().ifPresent(sqf -> {
+					List<CreateOrDeleteRecord> recs = sanitize(sqf, message.creationRecords);
+					if (!recs.isEmpty()) {
+						UUID creatorId = message.openScreen ? sp.getUUID() : null;
+						sqf.getHistoryStack().addAndApply(sqf, new CreateQuestObjects(recs, creatorId));
+					}
 				});
 			}
 		});
+	}
+
+	private static List<CreateOrDeleteRecord> sanitize(ServerQuestFile sqf, List<CreateOrDeleteRecord> recsIn) {
+		var allocator = new BaseQuestFile.UniqueIdAllocator(sqf);
+		List<CreateOrDeleteRecord> recsOut = new ArrayList<>();
+		for (int i = 0; i < recsIn.size() && i < QuestBookEditEvent.MAX_LIST_SIZE; i++) {
+			var rec = recsIn.get(i);
+			if (rec.questObjectType() != QuestObjectType.NULL) {
+				recsOut.add(rec.sanitizeTitle().withNewID(allocator.newId()));
+			}
+		}
+		return recsOut;
 	}
 }

@@ -244,7 +244,7 @@ public class TaskScreenBlockEntity extends EditableBlockEntity implements ITaskS
     }
 
     private boolean isSuitableTask(TeamData data, QuestObjectBase o) {
-        return o instanceof Task t && (data.getCanEdit(FTBQuestsClient.getClientPlayer()) || data.canStartTasks(t.getQuest())) && t.consumesResources();
+        return o instanceof Task t && (data.isPlayerInEditMode(FTBQuestsClient.getClientPlayer()) || data.canStartTasks(t.getQuest())) && t.consumesResources();
     }
 
     public float[] getFakeTextureUV() {

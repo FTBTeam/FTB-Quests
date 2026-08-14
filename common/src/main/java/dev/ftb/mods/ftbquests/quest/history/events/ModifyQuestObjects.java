@@ -29,18 +29,18 @@ public record ModifyQuestObjects(List<EditRecord> oldRecords, List<EditRecord> n
                 .map(EditRecord::ofQuestObject)
                 .toList();
         return oldRecs.size() == newRecs.size() && !oldRecs.equals(newRecs) ?
-                Optional.of(new ModifyQuestObjects(oldRecs, newRecs)) :
+                Optional.of(new ModifyQuestObjects(oldRecs, newRecs.stream().map(EditRecord::sanitizeTitle).toList())) :
                 Optional.empty();
     }
 
     @Override
-    public void apply(ServerQuestFile file) {
-        editObjects(file, newRecords);
+    public boolean apply(ServerQuestFile file) {
+        return editObjects(file, newRecords);
     }
 
     @Override
-    public void applyUndo(ServerQuestFile file) {
-        editObjects(file, oldRecords);
+    public boolean applyUndo(ServerQuestFile file) {
+        return editObjects(file, oldRecords);
     }
 
     @Override

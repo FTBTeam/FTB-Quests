@@ -2,11 +2,11 @@ package dev.ftb.mods.ftbquests.net;
 
 import dev.architectury.networking.NetworkManager;
 import dev.ftb.mods.ftbquests.api.FTBQuestsAPI;
+import dev.ftb.mods.ftbquests.integration.PermissionsHelper;
 import dev.ftb.mods.ftbquests.quest.Chapter;
 import dev.ftb.mods.ftbquests.quest.Movable;
 import dev.ftb.mods.ftbquests.quest.ServerQuestFile;
 import dev.ftb.mods.ftbquests.quest.history.events.MoveMovableObject;
-import dev.ftb.mods.ftbquests.util.NetUtils;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
@@ -30,10 +30,9 @@ public record MoveMovableMessage(long objectId, long newChapterID, double x, dou
 
 	public static void handle(MoveMovableMessage message, NetworkManager.PacketContext context) {
 		context.queue(() -> ServerQuestFile.getInstance().ifPresent(sqf -> {
-			if (NetUtils.canEdit(context) && sqf.getBase(message.objectId) instanceof Movable movable) {
-                Chapter fromChapter = movable.getChapter();
+			if (PermissionsHelper.canPlayerEdit(context) && sqf.getBase(message.objectId) instanceof Movable movable) {
 				Chapter toChapter = sqf.getChapter(message.newChapterID);
-                if (fromChapter != null && toChapter != null) {
+                if (toChapter != null && !movable.isPositionLocked()) {
 					MoveMovableObject.create(movable, toChapter, message.x(), message.y())
 							.ifPresent(event -> sqf.getHistoryStack().addAndApply(sqf, event));
 				}

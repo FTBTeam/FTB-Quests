@@ -36,6 +36,7 @@ import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.nio.file.Path;
 import java.util.*;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
@@ -222,18 +223,26 @@ public abstract class QuestObjectBase implements Comparable<QuestObjectBase> {
 		}
 	}
 
-	public static Optional<String> titleToID(String s) {
-		s = s.replace(' ', '_').replaceAll("\\W", "").toLowerCase().trim();
+	/**
+	 * Strip out all non alphanumeric-characters, replace whitespace with '_', and trim any leading or trailing '_'
+	 * characters to create a sanitized filename for this chapter. Called both clientside when a chapter is being
+	 * created, and server-side whenever the filename is deserialized from Json5 or the network.
+	 *
+	 * @param name the unsanitized chapter name
+	 * @return the sanitized chapter name
+	 */
+	public static Optional<String> sanitizeFilename(String name) {
+		name = name.replace(' ', '_').replaceAll("\\W", "").toLowerCase().trim();
 
-		while (s.startsWith("_")) {
-			s = s.substring(1);
+		while (name.startsWith("_")) {
+			name = name.substring(1);
 		}
 
-		while (s.endsWith("_")) {
-			s = s.substring(0, s.length() - 1);
+		while (name.endsWith("_")) {
+			name = name.substring(0, name.length() - 1);
 		}
 
-		return s.isEmpty() ? Optional.empty() : Optional.of(s);
+		return name.isEmpty() ? Optional.empty() : Optional.of(name);
 	}
 
 	public final String getCodeString() {
@@ -278,12 +287,12 @@ public abstract class QuestObjectBase implements Comparable<QuestObjectBase> {
 			return;
 		}
 
-		teamData.clearCachedProgress();
-		sendNotifications = progressChange.shouldNotify() ? Tristate.TRUE : Tristate.FALSE;
-		forceProgress(teamData, progressChange);
-		sendNotifications = Tristate.DEFAULT;
-		teamData.clearCachedProgress();
-		teamData.markDirty();
+		try {
+			sendNotifications = progressChange.shouldNotify() ? Tristate.TRUE : Tristate.FALSE;
+			forceProgress(teamData, progressChange);
+		} finally {
+			sendNotifications = Tristate.DEFAULT;
+		}
 	}
 
 	@Nullable
@@ -440,7 +449,7 @@ public abstract class QuestObjectBase implements Comparable<QuestObjectBase> {
 		}
 	}
 
-	public Optional<String> getPath() {
+	public Optional<Path> getPath() {
 		return Optional.empty();
 	}
 

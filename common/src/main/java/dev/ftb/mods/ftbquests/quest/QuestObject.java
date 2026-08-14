@@ -58,16 +58,18 @@ public abstract class QuestObject extends QuestObjectBase {
 
 	@Override
 	public void forceProgress(TeamData teamData, ProgressChange progressChange) {
-		if (progressChange.shouldReset()) {
-			teamData.setStarted(id, null);
-			teamData.setCompleted(id, null);
-		} else {
-			teamData.setStarted(id, progressChange.getDate());
-			teamData.setCompleted(id, progressChange.getDate());
-		}
+		if (progressChange.isValid()) {
+			if (progressChange.shouldReset()) {
+				teamData.setStarted(id, null);
+				teamData.setCompleted(id, null);
+			} else {
+				teamData.setStarted(id, progressChange.getDate());
+				teamData.setCompleted(id, progressChange.getDate());
+			}
 
-		for (QuestObject child : getChildren()) {
-			child.forceProgress(teamData, progressChange);
+			for (QuestObjectBase child : getChildren()) {
+				child.forceProgress(teamData, progressChange);
+			}
 		}
 	}
 
@@ -121,23 +123,25 @@ public abstract class QuestObject extends QuestObjectBase {
 		return dim ? c.addBrightness(-0.35F) : c;
 	}
 
-	public Collection<? extends QuestObject> getChildren() {
+	public Collection<? extends QuestObjectBase> getChildren() {
 		return List.of();
 	}
 
 	public boolean isCompletedRaw(TeamData data) {
 		int nOptional = 0;
 		int nCompleted = 0;
-        for (QuestObject child : getChildren()) {
-			boolean uncompleted = !data.isCompleted(child) && !data.isExcludedByOtherQuestline(child);
-			if (uncompleted) {
-				if (child.isOptionalForProgression(data)) {
-					nOptional++;
+        for (QuestObjectBase child : getChildren()) {
+			if (child instanceof QuestObject qo) {
+				boolean uncompleted = !data.isCompleted(qo) && !data.isExcludedByOtherQuestline(qo);
+				if (uncompleted) {
+					if (qo.isOptionalForProgression(data)) {
+						nOptional++;
+					} else {
+						return false;
+					}
 				} else {
-					return false;
+					nCompleted++;
 				}
-			} else {
-				nCompleted++;
 			}
         }
 		// if there are no children at all, it's auto-completed (degenerate case)

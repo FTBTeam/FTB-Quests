@@ -85,7 +85,7 @@ public class ClientQuestFile extends BaseQuestFile {
 
 	@Override
 	public boolean canEdit() {
-		return Minecraft.getInstance().player != null && hasEditorPermission() && selfTeamData.getCanEdit(Minecraft.getInstance().player);
+		return Minecraft.getInstance().player != null && hasEditorPermission() && selfTeamData.isPlayerInEditMode(Minecraft.getInstance().player);
 	}
 
 	@Override
@@ -158,13 +158,16 @@ public class ClientQuestFile extends BaseQuestFile {
 	}
 
 	@Override
-	public void deleteObjects(List<Long> ids) {
+	public boolean deleteObjects(List<Long> ids) {
 		// Don't actually delete the object(s) yet, but just send a deletion request to the server
 		// See FTBQuestNetClient#deleteObject for actual client-side deletion, done on receipt of
 		//   the server deletion response
 		if (!ids.isEmpty()) {
 			NetworkManager.sendToServer(new DeleteObjectMessage(ids));
+			return true;
 		}
+
+		return false;
 	}
 
 	@Override
@@ -186,7 +189,7 @@ public class ClientQuestFile extends BaseQuestFile {
 	}
 
 	public static boolean canClientPlayerEdit() {
-		return exists() && INSTANCE.selfTeamData.getCanEdit(FTBQuestsClient.getClientPlayer());
+		return exists() && INSTANCE.selfTeamData.isPlayerInEditMode(FTBQuestsClient.getClientPlayer());
 	}
 
 	public static boolean isQuestPinned(long id) {

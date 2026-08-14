@@ -605,7 +605,11 @@ public class TeamData {
 	}
 
 	public boolean canStartTasks(Quest quest) {
-		return (quest.getProgressionMode() == ProgressionMode.FLEXIBLE || areDependenciesComplete(quest))
+		return canStartTasks(quest, true);
+	}
+
+	public boolean canStartTasks(Quest quest, boolean flex) {
+		return (flex && quest.getProgressionMode() == ProgressionMode.FLEXIBLE || areDependenciesComplete(quest))
 				&& !isExcludedByOtherQuestline(quest)
 				&& getMilliSecondsUntilRepeatable(quest) == 0L;
 	}
@@ -805,11 +809,16 @@ public class TeamData {
 		return Optional.ofNullable(perPlayerData.get(player.getUUID()));
 	}
 
+	@Deprecated(forRemoval = true)
 	public boolean getCanEdit(Player player) {
+		return isPlayerInEditMode(player);
+	}
+
+	public boolean isPlayerInEditMode(Player player) {
 		return getOrCreatePlayerData(player).map(d -> d.canEdit).orElse(false);
 	}
 
-	public boolean setCanEdit(Player player, boolean newCanEdit) {
+	public boolean setPlayerEditMode(Player player, boolean newCanEdit) {
 		return getOrCreatePlayerData(player).map(playerData -> {
 			if (playerData.canEdit != newCanEdit) {
 				playerData.canEdit = newCanEdit;

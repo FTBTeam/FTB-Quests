@@ -2,10 +2,10 @@ package dev.ftb.mods.ftbquests.net;
 
 import dev.architectury.networking.NetworkManager;
 import dev.ftb.mods.ftbquests.api.FTBQuestsAPI;
+import dev.ftb.mods.ftbquests.integration.PermissionsHelper;
 import dev.ftb.mods.ftbquests.quest.Chapter;
 import dev.ftb.mods.ftbquests.quest.ServerQuestFile;
 import dev.ftb.mods.ftbquests.quest.history.events.MoveChapterAcrossGroup;
-import dev.ftb.mods.ftbquests.util.NetUtils;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
@@ -27,7 +27,7 @@ public record ChangeChapterGroupMessage(long chapterId, long groupId) implements
 
 	public static void handle(ChangeChapterGroupMessage message, NetworkManager.PacketContext context) {
 		context.queue(() -> ServerQuestFile.getInstance().ifPresent(sqf -> {
-            if (NetUtils.canEdit(context) && sqf.getChapter(message.chapterId) instanceof Chapter chapter) {
+            if (PermissionsHelper.canPlayerEdit(context) && sqf.getChapter(message.chapterId) instanceof Chapter chapter) {
                 sqf.getHistoryStack().addAndApply(sqf, new MoveChapterAcrossGroup(message.chapterId, chapter.getGroup().getId(), message.groupId()));
             }
 		}));

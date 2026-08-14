@@ -33,6 +33,8 @@ import dev.ftb.mods.ftbteams.api.client.ClientTeamManager;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.longs.Long2IntOpenHashMap;
 import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
+import it.unimi.dsi.fastutil.longs.LongOpenHashSet;
+import it.unimi.dsi.fastutil.longs.LongSet;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.Util;
@@ -576,7 +578,7 @@ public abstract class BaseQuestFile extends QuestObject implements QuestFile {
 					}
 				}));
 
-				SNBT.write(folder.resolve("chapters/" + chapter.getFilename() + ".snbt"), chapterNBT);
+				SNBT.write(folder.resolve(chapter.getPath().orElseThrow()), chapterNBT);
 			}
 		}
 	}
@@ -588,7 +590,7 @@ public abstract class BaseQuestFile extends QuestObject implements QuestFile {
 			tableNBT.putString("id", table.getCodeString());
 			tableNBT.putInt("order_index", ri);
 			table.writeData(tableNBT, provider);
-			SNBT.write(folder.resolve("reward_tables/" + table.getFilename() + ".snbt"), tableNBT);
+			SNBT.write(folder.resolve(table.getPath().orElseThrow()), tableNBT);
 		}
 	}
 
@@ -1235,7 +1237,7 @@ public abstract class BaseQuestFile extends QuestObject implements QuestFile {
 		return Collections.unmodifiableCollection(teamDataMap.values());
 	}
 
-	public abstract void deleteObjects(List<Long> ids);
+	public abstract boolean deleteObjects(List<Long> ids);
 
 	@Override
 	public MutableComponent getAltTitle() {
@@ -1502,7 +1504,7 @@ public abstract class BaseQuestFile extends QuestObject implements QuestFile {
 	}
 
 	@Override
-	public Collection<? extends QuestObject> getChildren() {
+	public Collection<? extends QuestObjectBase> getChildren() {
 		return chapterGroups;
 	}
 
@@ -1644,7 +1646,7 @@ public abstract class BaseQuestFile extends QuestObject implements QuestFile {
 
 		if (!group.isDefaultGroup()) {
 			int index = chapterGroups.indexOf(group);
-			if (index != -1 && movingUp ? (index > 1) : (index < chapterGroups.size() - 1)) {
+			if (index != -1 && (movingUp ? (index > 1) : (index < chapterGroups.size() - 1))) {
 				chapterGroups.remove(index);
 				chapterGroups.add(movingUp ? index - 1 : index + 1, group);
 				group.clearCachedData();
@@ -1679,4 +1681,27 @@ public abstract class BaseQuestFile extends QuestObject implements QuestFile {
     public VisualPresets getPresets() {
         return allPresets;
     }
+
+	/**
+	 * Allows allocating multiple new quest object ids with no risk of collision. Intended to be a short-lived object,
+	 * do not persist across multiple ticks!
+	 */
+	public static class UniqueIdAllocator {
+		private final BaseQuestFile file;
+		private final LongSet allocated = new LongOpenHashSet();
+
+		public UniqueIdAllocator(BaseQuestFile file) {
+			this.file = file;
+		}
+
+		public long newId() {
+			long newId;
+			do {
+				newId = file.newID();
+			} while (allocated.contains(newId));
+			allocated.add(newId);
+
+			return newId;
+		}
+	}
 }

@@ -6,6 +6,7 @@ import dev.ftb.mods.ftblibrary.util.PanelPositioning;
 import dev.ftb.mods.ftbquests.api.FTBQuestsAPI;
 import dev.ftb.mods.ftbquests.client.config.LocaleValue;
 import dev.ftb.mods.ftbquests.client.gui.QuestsClientConfigScreen;
+import net.minecraft.network.chat.Component;
 
 public interface FTBQuestsClientConfig {
     String KEY = FTBQuestsAPI.MOD_ID + "-client";
@@ -28,6 +29,8 @@ public interface FTBQuestsClientConfig {
     IntValue PINNED_QUESTS_INSET_X = PINNED.addInt("pinned_quests_inset_x", 2);
     IntValue PINNED_QUESTS_INSET_Y = PINNED.addInt("pinned_quests_inset_y", 2);
     DoubleValue PINNED_QUESTS_SCALE = PINNED.addDouble("pinned_quests_scale", 0.75, 0.25, 2.0);
+    BooleanValue PINNED_EXCLUDE_FLEXIBLE = PINNED.addBoolean("pinned_exclude_flexible", true);
+    EnumValue<PinnedTrackerVisibility> PINNED_VISIBILITY = PINNED.addEnum("pinned_visibility", PinnedTrackerVisibility.NAME_MAP);
 
     SNBTConfig XLATE = CONFIG.addGroup("xlate", 3);
     StringValue EDITING_LOCALE = XLATE.add(new LocaleValue(XLATE,"editing_locale", ""));
@@ -63,5 +66,17 @@ public interface FTBQuestsClientConfig {
             CHANGELOG_ALWAYS_SHOW.set(show);
             ConfigManager.getInstance().save(KEY);
         }
+    }
+
+    static void cyclePinnedTrackerVisibility() {
+        PINNED_VISIBILITY.set(PINNED_VISIBILITY.get().next());
+        ConfigManager.getInstance().save(KEY);
+        PinnedQuestsTracker.INSTANCE.refresh();
+        FTBQuestsClient.getClientPlayer().displayClientMessage(
+                Component.translatable("key.ftbquests.cycle_pinned_tracker")
+                        .append(": ")
+                        .append(PinnedTrackerVisibility.NAME_MAP.getDisplayName(PINNED_VISIBILITY.get())),
+                true
+        );
     }
 }

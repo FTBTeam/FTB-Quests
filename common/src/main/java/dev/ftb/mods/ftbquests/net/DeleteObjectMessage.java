@@ -2,18 +2,21 @@ package dev.ftb.mods.ftbquests.net;
 
 import dev.architectury.networking.NetworkManager;
 import dev.ftb.mods.ftbquests.api.FTBQuestsAPI;
+import dev.ftb.mods.ftbquests.integration.PermissionsHelper;
+import dev.ftb.mods.ftbquests.quest.BaseQuestFile;
 import dev.ftb.mods.ftbquests.quest.QuestObject;
 import dev.ftb.mods.ftbquests.quest.QuestObjectBase;
 import dev.ftb.mods.ftbquests.quest.ServerQuestFile;
 import dev.ftb.mods.ftbquests.quest.history.CreateOrDeleteRecord;
+import dev.ftb.mods.ftbquests.quest.history.QuestBookEditEvent;
 import dev.ftb.mods.ftbquests.quest.history.events.DeleteQuestObjects;
-import dev.ftb.mods.ftbquests.util.NetUtils;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 
 import java.util.ArrayList;
+import java.util.LinkedHashSet;
 import java.util.List;
 
 public record DeleteObjectMessage(List<Long> ids) implements CustomPacketPayload {
@@ -35,8 +38,10 @@ public record DeleteObjectMessage(List<Long> ids) implements CustomPacketPayload
 
 	public static void handle(DeleteObjectMessage message, NetworkManager.PacketContext context) {
 		context.queue(() -> ServerQuestFile.getInstance().ifPresent(sqf -> {
-			if (NetUtils.canEdit(context)) {
-				List<CreateOrDeleteRecord> records = expandChildren(sqf, CreateOrDeleteRecord.fromIds(sqf, message.ids));
+			if (PermissionsHelper.canPlayerEdit(context)) {
+				List<Long> idSublist = QuestBookEditEvent.takeLimitedElements(message.ids);
+				// LinkedHashSet deduplicates input ids while preserving order, which may be significant
+				List<CreateOrDeleteRecord> records = expandChildren(sqf, CreateOrDeleteRecord.fromIds(sqf, new LinkedHashSet<>(idSublist)));
 				if (!records.isEmpty()) {
 					sqf.getHistoryStack().addAndApply(sqf, new DeleteQuestObjects(records));
 				}
@@ -56,7 +61,7 @@ public record DeleteObjectMessage(List<Long> ids) implements CustomPacketPayload
 
 		for (var rec : in) {
 			QuestObjectBase qob = file.getBase(rec.id());
-			if (qob instanceof QuestObject qo) {
+			if (qob instanceof QuestObject qo && !(qob instanceof BaseQuestFile)) {
 				List<CreateOrDeleteRecord> l = qo.getChildren().stream()
 						.flatMap(child -> expandChildren(file, List.of(CreateOrDeleteRecord.ofQuestObject(child))).stream())
 						.toList();

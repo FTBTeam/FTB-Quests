@@ -2,6 +2,8 @@ package dev.ftb.mods.ftbquests.net;
 
 import dev.architectury.networking.NetworkManager;
 import dev.ftb.mods.ftbquests.api.FTBQuestsAPI;
+import dev.ftb.mods.ftbquests.integration.PermissionsHelper;
+import dev.ftb.mods.ftbquests.quest.BaseQuestFile;
 import dev.ftb.mods.ftbquests.quest.Chapter;
 import dev.ftb.mods.ftbquests.quest.Quest;
 import dev.ftb.mods.ftbquests.quest.ServerQuestFile;
@@ -9,7 +11,6 @@ import dev.ftb.mods.ftbquests.quest.history.CreateOrDeleteRecord;
 import dev.ftb.mods.ftbquests.quest.history.events.CreateQuestObjects;
 import dev.ftb.mods.ftbquests.quest.task.Task;
 import dev.ftb.mods.ftbquests.quest.task.TaskType;
-import dev.ftb.mods.ftbquests.util.NetUtils;
 import net.minecraft.Util;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.FriendlyByteBuf;
@@ -59,14 +60,16 @@ public record CreateQuestAndTaskMessage(long chapterId, double x, double y, int 
 
 	public static void handle(CreateQuestAndTaskMessage message, NetworkManager.PacketContext context) {
 		context.queue(() -> ServerQuestFile.getInstance().ifPresent(sqf -> {
-			if (NetUtils.canEdit(context) && context.getPlayer() instanceof ServerPlayer sp) {
+			if (PermissionsHelper.canPlayerEdit(context) && context.getPlayer() instanceof ServerPlayer sp) {
 				Chapter chapter = sqf.getChapter(message.chapterId);
 				TaskType taskType = ServerQuestFile.INSTANCE.getTaskType(message.taskTypeId);
 
 				if (chapter != null && taskType != null) {
-					Quest quest = new Quest(sqf.newID(), chapter).setPosition(message.x, message.y);
+					var allocator = new BaseQuestFile.UniqueIdAllocator(sqf);
 
-					Task task = taskType.createTask(sqf.newID(), quest);
+					Quest quest = new Quest(allocator.newId(), chapter).setPosition(message.x, message.y);
+
+					Task task = taskType.createTask(allocator.newId(), quest);
 					task.readData(message.nbt, context.registryAccess());
 					CompoundTag extra = message.extra.orElse(new CompoundTag());
 					sqf.getTranslationManager().processInitialTranslation(extra, task);

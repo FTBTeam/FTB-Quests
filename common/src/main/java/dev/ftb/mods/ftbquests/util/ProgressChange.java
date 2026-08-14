@@ -5,6 +5,7 @@ import dev.ftb.mods.ftbquests.quest.Quest;
 import dev.ftb.mods.ftbquests.quest.QuestObjectBase;
 import dev.ftb.mods.ftbquests.quest.ServerQuestFile;
 import dev.ftb.mods.ftbquests.quest.TeamData;
+import net.minecraft.Util;
 import net.minecraft.core.UUIDUtil;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
@@ -22,6 +23,8 @@ public class ProgressChange {
 			ProgressChange::createServerSide
 	);
 
+	private static final ProgressChange INVALID = new ProgressChange(null, Util.NIL_UUID);
+
 	private final Date date;
 	private final QuestObjectBase origin;
 	private final UUID playerId;
@@ -38,19 +41,28 @@ public class ProgressChange {
 	}
 
 	public static ProgressChange createServerSide(long origin, boolean reset, UUID playerId, boolean notifications) {
-		ProgressChange pc = new ProgressChange(ServerQuestFile.INSTANCE.getBase(origin), playerId);
-		pc.reset = reset;
-		pc.notifications = notifications;
-		return pc;
+		// file should always exist, but a badly-behaved client could send a ChangeProgressMessage at the wrong time...
+		return ServerQuestFile.getInstance().map(sqf -> {
+			ProgressChange pc = new ProgressChange(sqf.getBase(origin), playerId);
+			pc.reset = reset;
+			pc.notifications = notifications;
+			return pc;
+		}).orElse(ProgressChange.INVALID);
+	}
+
+	public boolean isValid() {
+		return this != INVALID;
 	}
 
 	public void maybeForceProgress(UUID teamId) {
 		if (origin != null) {
-			TeamData data = ServerQuestFile.INSTANCE.getOrCreateTeamData(teamId);
-			origin.forceProgressRaw(data, this);
-			if (origin instanceof Quest quest && reset) {
-				data.clearRepeatCooldown(quest);
-				ClearRepeatCooldownMessage.sendToTeam(quest, data.getTeamId());
+			TeamData data = ServerQuestFile.INSTANCE.getNullableTeamData(teamId);
+			if (data != null) {
+				origin.forceProgressRaw(data, this);
+				if (origin instanceof Quest quest && reset) {
+					data.clearRepeatCooldown(quest);
+					ClearRepeatCooldownMessage.sendToTeam(quest, data.getTeamId());
+				}
 			}
 		}
 	}

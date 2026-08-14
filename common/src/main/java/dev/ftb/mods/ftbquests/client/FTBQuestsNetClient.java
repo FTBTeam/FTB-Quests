@@ -176,7 +176,7 @@ public class FTBQuestsNetClient {
 	}
 
 	public static void syncEditingMode(UUID teamId, boolean editingMode) {
-		if (ClientQuestFile.INSTANCE.getOrCreateTeamData(teamId).setCanEdit(Minecraft.getInstance().player, editingMode)) {
+		if (ClientQuestFile.INSTANCE.getOrCreateTeamData(teamId).setPlayerEditMode(Minecraft.getInstance().player, editingMode)) {
 			setEditorPermission(editingMode);
 			ClientQuestFile.INSTANCE.clearCachedData();
 			ClientQuestFile.INSTANCE.refreshGui();

@@ -88,6 +88,8 @@ public final class Quest extends QuestObject implements Movable, Excludable {
 	private boolean ignoreRewardBlocking;
 	private ProgressionMode progressionMode;
 	private final Set<Long> dependantIDs;
+	@Nullable
+	private List<QuestObjectBase> allChildren = null;
 
 	public Quest(long id, Chapter chapter) {
 		super(id);
@@ -641,15 +643,6 @@ public final class Quest extends QuestObject implements Movable, Excludable {
 	}
 
 	@Override
-	public void forceProgress(TeamData teamData, ProgressChange progressChange) {
-		super.forceProgress(teamData, progressChange);
-
-		for (Reward r : rewards) {
-			r.forceProgress(teamData, progressChange);
-		}
-	}
-
-	@Override
 	public Component getAltTitle() {
 		if (!tasks.isEmpty()) {
 			return tasks.getFirst().getTitle();
@@ -677,14 +670,7 @@ public final class Quest extends QuestObject implements Movable, Excludable {
 		chapter.removeQuest(this);
 
 		// clean up any tasks & rewards
-		for (Task task : List.copyOf(tasks)) {
-			task.deleteSelf();
-		}
-		tasks.clear();
-		for (Reward reward : List.copyOf(rewards)) {
-			reward.deleteSelf();
-		}
-		rewards.clear();
+		List.copyOf(getChildren()).forEach(QuestObjectBase::deleteSelf);  // copy to avoid CME
 
 		// clean up any quest links which point to this quest
 		List<QuestLink> linksToDel = new ArrayList<>();
@@ -858,16 +844,14 @@ public final class Quest extends QuestObject implements Movable, Excludable {
 	@Override
 	public void clearCachedData() {
 		super.clearCachedData();
+
 		cachedSubtitle = null;
 		cachedDescription = null;
 		cachedPreset = null;
 
-		for (Task task : tasks) {
-			task.clearCachedData();
-		}
-
-		for (Reward reward : rewards) {
-			reward.clearCachedData();
+		if (allChildren != null) {
+			allChildren.forEach(QuestObjectBase::clearCachedData);
+			allChildren = null;
 		}
 	}
 
@@ -1000,8 +984,13 @@ public final class Quest extends QuestObject implements Movable, Excludable {
 	}
 
 	@Override
-	public Collection<? extends QuestObject> getChildren() {
-		return tasks;
+	public Collection<? extends QuestObjectBase> getChildren() {
+		if (allChildren == null) {
+			allChildren = new ArrayList<>();
+			allChildren.addAll(tasks);
+			allChildren.addAll(rewards);
+		}
+		return Collections.unmodifiableList(allChildren);
 	}
 
 	@Override

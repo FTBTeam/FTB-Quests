@@ -42,6 +42,11 @@ public enum PinnedQuestsTracker {
     }
 
     private void collectPinnedQuests(ClientQuestFile file) {
+        if (FTBQuestsClientConfig.PINNED_VISIBILITY.get() == PinnedTrackerVisibility.HIDDEN) {
+            pinnedQuestText.clear();
+            return;
+        }
+
         TeamData data = file.selfTeamData;
 
         showChapterTitle = false;
@@ -52,7 +57,11 @@ public enum PinnedQuestsTracker {
                 // special auto-pin value: collect all quests which can be done now
                 boolean wholeBook = FTBQuestsClientConfig.AUTO_PIN_FOLLOWS.get() == AutoPinTarget.QUEST_BOOK;
                 file.forAllQuests(quest -> {
-                    if (!data.isCompleted(quest) && quest.isVisible(data) && data.canStartTasks(quest) && (wholeBook || file.isChapterSelected(quest.getChapter()))) {
+                    if (!data.isCompleted(quest)
+                            && quest.isVisible(data)
+                            && data.canStartTasks(quest, !FTBQuestsClientConfig.PINNED_EXCLUDE_FLEXIBLE.get())
+                            && (wholeBook || file.isChapterSelected(quest.getChapter())))
+                    {
                         pinnedQuests.add(quest);
                     }
                 });
@@ -71,6 +80,10 @@ public enum PinnedQuestsTracker {
     private void rebuildPinnedText(List<Quest> pinnedQuests, Minecraft mc, TeamData data) {
         pinnedQuestText.clear();
 
+        if (FTBQuestsClientConfig.PINNED_VISIBILITY.get() == PinnedTrackerVisibility.HIDDEN) {
+            return;
+        }
+
         for (int i = 0; i < pinnedQuests.size(); i++) {
             Quest quest = pinnedQuests.get(i);
 
@@ -83,17 +96,19 @@ public enum PinnedQuestsTracker {
                             .append(data.getRelativeProgress(quest) + "%")
             ), 500));
 
-            for (Task task : quest.getTasks()) {
-                if (!data.isCompleted(task)) {
-                    pinnedQuestText.addAll(mc.font.split(FormattedText.composite(
-                            Component.literal("└").withStyle(ChatFormatting.GRAY),
-                            mc.font.getSplitter().headByWidth(task.getMutableTitle().withStyle(ChatFormatting.GRAY), 160, Style.EMPTY.applyFormat(ChatFormatting.GRAY)),
-                            Component.literal(" ")
-                                    .withStyle(ChatFormatting.GREEN)
-                                    .append(task.formatProgress(data, data.getProgress(task)))
-                                    .append("/")
-                                    .append(task.formatMaxProgress())
-                    ), 500));
+            if (FTBQuestsClientConfig.PINNED_VISIBILITY.get() == PinnedTrackerVisibility.ALL) {
+                for (Task task : quest.getTasks()) {
+                    if (!data.isCompleted(task)) {
+                        pinnedQuestText.addAll(mc.font.split(FormattedText.composite(
+                                Component.literal("└").withStyle(ChatFormatting.GRAY),
+                                mc.font.getSplitter().headByWidth(task.getMutableTitle().withStyle(ChatFormatting.GRAY), 160, Style.EMPTY.applyFormat(ChatFormatting.GRAY)),
+                                Component.literal(" ")
+                                        .withStyle(ChatFormatting.GREEN)
+                                        .append(task.formatProgress(data, data.getProgress(task)))
+                                        .append("/")
+                                        .append(task.formatMaxProgress())
+                        ), 500));
+                    }
                 }
             }
         }

@@ -7,10 +7,10 @@ import dev.architectury.networking.NetworkManager;
 import dev.ftb.mods.ftbquests.block.entity.BaseBarrierBlockEntity;
 import dev.ftb.mods.ftbquests.block.entity.QuestBarrierBlockEntity;
 import dev.ftb.mods.ftbquests.client.ClientQuestFile;
+import dev.ftb.mods.ftbquests.integration.PermissionsHelper;
 import dev.ftb.mods.ftbquests.net.BlockConfigRequestMessage;
 import dev.ftb.mods.ftbquests.net.BlockConfigRequestMessage.BlockType;
 import dev.ftb.mods.ftbquests.registry.ModDataComponents;
-import dev.ftb.mods.ftbquests.util.NetUtils;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.core.BlockPos;
@@ -95,7 +95,7 @@ public class QuestBarrierBlock extends BaseEntityBlock {
 
 	@Override
 	protected VoxelShape getShape(BlockState blockState, BlockGetter bg, BlockPos pos, CollisionContext ctx) {
-		if (EntityHooks.fromCollision(ctx) instanceof Player player && isBarrierOpen(player, blockState, bg, pos) && !NetUtils.canEdit(player)) {
+		if (EntityHooks.fromCollision(ctx) instanceof Player player && isBarrierOpen(player, blockState, bg, pos) && !PermissionsHelper.canPlayerEdit(player)) {
 			return Shapes.empty();
 		}
 

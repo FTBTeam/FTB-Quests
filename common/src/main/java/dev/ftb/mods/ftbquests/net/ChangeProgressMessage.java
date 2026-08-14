@@ -3,9 +3,9 @@ package dev.ftb.mods.ftbquests.net;
 import dev.architectury.networking.NetworkManager;
 import dev.ftb.mods.ftbquests.api.FTBQuestsAPI;
 import dev.ftb.mods.ftbquests.client.FTBQuestsClient;
+import dev.ftb.mods.ftbquests.integration.PermissionsHelper;
 import dev.ftb.mods.ftbquests.quest.QuestObjectBase;
 import dev.ftb.mods.ftbquests.quest.TeamData;
-import dev.ftb.mods.ftbquests.util.NetUtils;
 import dev.ftb.mods.ftbquests.util.ProgressChange;
 import net.minecraft.core.UUIDUtil;
 import net.minecraft.network.FriendlyByteBuf;
@@ -39,7 +39,7 @@ public record ChangeProgressMessage(UUID teamId, ProgressChange progressChange) 
 
 	public static void handle(ChangeProgressMessage message, NetworkManager.PacketContext context) {
 		context.queue(() -> {
-			if (NetUtils.canEdit(context)) {
+			if (PermissionsHelper.canPlayerEdit(context)) {
 				message.progressChange.maybeForceProgress(message.teamId);
 			}
 		});

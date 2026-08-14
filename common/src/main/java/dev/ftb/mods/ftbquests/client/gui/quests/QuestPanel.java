@@ -61,6 +61,13 @@ public class QuestPanel extends Panel {
 		bezierController = new BezierController();
 	}
 
+	@Override
+	public void refreshWidgets() {
+		super.refreshWidgets();
+
+		questScreen.viewQuestPanel.refreshWidgets();
+	}
+
 	public void updateMinMax() {
 		questMinX = Double.POSITIVE_INFINITY;
 		questMinY = Double.POSITIVE_INFINITY;

@@ -2,17 +2,14 @@ package dev.ftb.mods.ftbquests.net;
 
 import dev.architectury.networking.NetworkManager;
 import dev.ftb.mods.ftbquests.api.FTBQuestsAPI;
-import dev.ftb.mods.ftbquests.quest.Chapter;
-import dev.ftb.mods.ftbquests.quest.Quest;
-import dev.ftb.mods.ftbquests.quest.QuestObjectBase;
-import dev.ftb.mods.ftbquests.quest.ServerQuestFile;
+import dev.ftb.mods.ftbquests.integration.PermissionsHelper;
+import dev.ftb.mods.ftbquests.quest.*;
 import dev.ftb.mods.ftbquests.quest.history.CreateOrDeleteRecord;
 import dev.ftb.mods.ftbquests.quest.history.events.CreateQuestObjects;
 import dev.ftb.mods.ftbquests.quest.reward.Reward;
 import dev.ftb.mods.ftbquests.quest.reward.RewardType;
 import dev.ftb.mods.ftbquests.quest.task.Task;
 import dev.ftb.mods.ftbquests.quest.task.TaskType;
-import dev.ftb.mods.ftbquests.util.NetUtils;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
@@ -40,9 +37,11 @@ public record CopyQuestMessage(long id, long chapterId, double qx, double qy, bo
 
     public static void handle(CopyQuestMessage message, NetworkManager.PacketContext context) {
         context.queue(() -> ServerQuestFile.getInstance().ifPresent(sqf -> {
-            if (NetUtils.canEdit(context) && sqf.get(message.id) instanceof Quest toCopy && sqf.get(message.chapterId) instanceof Chapter chapter) {
+            if (PermissionsHelper.canPlayerEdit(context) && sqf.get(message.id) instanceof Quest toCopy && sqf.get(message.chapterId) instanceof Chapter chapter) {
+                var allocator = new BaseQuestFile.UniqueIdAllocator(sqf);
+
                 // deep copy of the quest
-                Quest newQuest = QuestObjectBase.copy(toCopy, () -> new Quest(sqf.newID(), chapter));
+                Quest newQuest = QuestObjectBase.copy(toCopy, () -> new Quest(allocator.newId(), chapter));
                 if (newQuest == null) {
                     return;
                 }
@@ -56,14 +55,14 @@ public record CopyQuestMessage(long id, long chapterId, double qx, double qy, bo
                 // deep copy of all tasks and rewards
                 List<CreateOrDeleteRecord> newTasks = new ArrayList<>();
                 toCopy.getTasks().forEach(task -> {
-                    Task newTask = QuestObjectBase.copy(task, () -> TaskType.createTask(sqf.newID(), newQuest, task.getType().getTypeForNBT()));
+                    Task newTask = QuestObjectBase.copy(task, () -> TaskType.createTask(allocator.newId(), newQuest, task.getType().getTypeForNBT()));
                     if (newTask != null) {
                         newTasks.add(CreateOrDeleteRecord.ofQuestObject(newTask));
                     }
                 });
                 List<CreateOrDeleteRecord> newRewards = new ArrayList<>();
                 for (Reward reward : toCopy.getRewards()) {
-                    Reward newReward = QuestObjectBase.copy(reward, () -> RewardType.createReward(sqf.newID(), newQuest, reward.getType().getTypeForNBT()));
+                    Reward newReward = QuestObjectBase.copy(reward, () -> RewardType.createReward(allocator.newId(), newQuest, reward.getType().getTypeForNBT()));
                     if (newReward != null) {
                         newRewards.add(CreateOrDeleteRecord.ofQuestObject(newReward));
                     }

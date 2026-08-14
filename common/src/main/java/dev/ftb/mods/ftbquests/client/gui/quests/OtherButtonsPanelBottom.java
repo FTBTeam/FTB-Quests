@@ -108,7 +108,7 @@ public class OtherButtonsPanelBottom extends OtherButtonsPanel {
 		public void onClicked(MouseButton button) {
 			playClickSound();
 
-			if (!questScreen.file.selfTeamData.getCanEdit(Minecraft.getInstance().player)) {
+			if (!questScreen.file.selfTeamData.isPlayerInEditMode(Minecraft.getInstance().player)) {
 				StructureTask.maybeRequestStructureSync();
 			}
 

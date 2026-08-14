@@ -19,7 +19,9 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
+import org.jetbrains.annotations.Nullable;
 
+import java.nio.file.Path;
 import java.util.*;
 import java.util.regex.Pattern;
 
@@ -48,6 +50,8 @@ public final class Chapter extends QuestObject {
 	private boolean requireSequentialTasks;
 	private String autoFocusId;
 	private String presetName;
+	@Nullable
+	private List<QuestObjectBase> allChildren = null;
 
 	public Chapter(long id, BaseQuestFile file, ChapterGroup group) {
 		this(id, file, group, "");
@@ -58,7 +62,7 @@ public final class Chapter extends QuestObject {
 
 		this.file = file;
 		this.group = group;
-		this.filename = filename;
+		this.filename = sanitizeFilename(filename).orElse("");
 		quests = new ArrayList<>();
 		questLinks = new ArrayList<>();
 		alwaysInvisible = false;
@@ -204,9 +208,9 @@ public final class Chapter extends QuestObject {
 
 	@Override
 	public void readData(CompoundTag nbt, HolderLookup.Provider provider) {
-		filename = nbt.getString("filename");
 		super.readData(nbt, provider);
 
+		filename = sanitizeFilename(nbt.getString("filename")).orElse("");
 		alwaysInvisible = nbt.getBoolean("always_invisible");
 		defaultQuestShape = nbt.getString("default_quest_shape");
 
@@ -268,7 +272,7 @@ public final class Chapter extends QuestObject {
 	@Override
 	public void readNetData(RegistryFriendlyByteBuf buffer) {
 		super.readNetData(buffer);
-		filename = buffer.readUtf(Short.MAX_VALUE);
+		filename = sanitizeFilename(buffer.readUtf(Short.MAX_VALUE)).orElse("");
 		defaultQuestShape = buffer.readUtf(Short.MAX_VALUE);
 		defaultQuestSize = buffer.readDouble();
 //		NetUtils.read(buffer, images, buf -> ChapterImage.fromNet(this, buf));
@@ -372,7 +376,7 @@ public final class Chapter extends QuestObject {
 	public void deleteSelf() {
 		super.deleteSelf();
 
-        List.copyOf(quests).forEach(Quest::deleteSelf);
+        List.copyOf(getChildren()).forEach(QuestObjectBase::deleteSelf);  // copy to avoid CME
 
 		group.removeChapter(this);
 	}
@@ -405,7 +409,7 @@ public final class Chapter extends QuestObject {
 		}
 	}
 
-	public String getFilename() {
+	private String getFilename() {
 		if (filename.isEmpty()) {
 			filename = getCodeString(this);
 		}
@@ -414,8 +418,8 @@ public final class Chapter extends QuestObject {
 	}
 
 	@Override
-	public Optional<String> getPath() {
-		return Optional.of("chapters/" + getFilename() + ".snbt");
+	public Optional<Path> getPath() {
+		return Optional.of(Path.of("chapters").resolve(getFilename() + ".snbt"));
 	}
 
 	@Override
@@ -459,11 +463,9 @@ public final class Chapter extends QuestObject {
 	public void clearCachedData() {
 		super.clearCachedData();
 
-		for (Quest quest : quests) {
-			quest.clearCachedData();
-		}
-		for (ChapterImage image : images) {
-			image.clearCachedData();
+		if (allChildren != null) {
+			allChildren.forEach(QuestObjectBase::clearCachedData);
+			allChildren = null;
 		}
 	}
 
@@ -491,8 +493,14 @@ public final class Chapter extends QuestObject {
 	}
 
 	@Override
-	public Collection<? extends QuestObject> getChildren() {
-		return quests;
+	public Collection<? extends QuestObjectBase> getChildren() {
+		if (allChildren == null) {
+			allChildren = new ArrayList<>();
+			allChildren.addAll(quests);
+			allChildren.addAll(questLinks);
+			allChildren.addAll(images);
+		}
+		return Collections.unmodifiableList(allChildren);
 	}
 
 	@Override

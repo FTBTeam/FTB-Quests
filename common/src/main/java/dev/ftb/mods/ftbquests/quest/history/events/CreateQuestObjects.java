@@ -18,13 +18,13 @@ public record CreateQuestObjects(List<CreateOrDeleteRecord> creationRecords, @Nu
     }
 
     @Override
-    public void apply(ServerQuestFile file) {
-        createObjects(file, creationRecords, creator);
+    public boolean apply(ServerQuestFile file) {
+        return createObjects(file, creationRecords, creator);
     }
 
     @Override
-    public void applyUndo(ServerQuestFile file) {
-        deleteObjects(file, creationRecords.reversed());
+    public boolean applyUndo(ServerQuestFile file) {
+        return deleteObjects(file, creationRecords.reversed());
     }
 
     @Override

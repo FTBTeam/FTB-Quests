@@ -12,6 +12,7 @@ import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
 
@@ -37,7 +38,7 @@ public record CreateOrDeleteRecord(long id, long parent, QuestObjectType questOb
         );
     }
 
-    public static List<CreateOrDeleteRecord> fromIds(ServerQuestFile sqf, List<Long> ids) {
+    public static List<CreateOrDeleteRecord> fromIds(ServerQuestFile sqf, Collection<Long> ids) {
         return ids.stream()
                 .map(sqf::getBase)
                 .filter(Objects::nonNull)
@@ -49,7 +50,11 @@ public record CreateOrDeleteRecord(long id, long parent, QuestObjectType questOb
         return Arrays.stream(qo).map(CreateOrDeleteRecord::ofQuestObject).toList();
     }
 
-    public CreateOrDeleteRecord withNewID(ServerQuestFile file) {
-        return new CreateOrDeleteRecord(file.newID(), parent, questObjectType, title, nbt, extra);
+    public CreateOrDeleteRecord withNewID(long newId) {
+        return new CreateOrDeleteRecord(newId, parent, questObjectType, title, nbt, extra);
+    }
+
+    public CreateOrDeleteRecord sanitizeTitle() {
+        return new CreateOrDeleteRecord(id, parent, questObjectType, QuestBookEditEvent.sanitizeComponent(title), nbt, extra);
     }
 }
