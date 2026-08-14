@@ -18,6 +18,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 * Fixed Choice Reward status not being correctly updated after being claimed by a player
 * Fixed editing a quest title or subtitle from the quest view panel with the 'T' and 'S' hotkeys not immediately updating the quest view panel
+* Fixed client-side NPE related to new visual presets system (thanks @MatrixU5er)
+* Fixed quest GUI keymappings wrongly taking precedence over widget text entry
 
 ## [2101.1.30]
 
