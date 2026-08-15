@@ -11,6 +11,7 @@ import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.UUID;
@@ -130,23 +131,30 @@ public abstract class QuestObject extends QuestObjectBase {
 	public boolean isCompletedRaw(TeamData data) {
 		int nOptional = 0;
 		int nCompleted = 0;
-        for (QuestObjectBase child : getChildren()) {
-			if (child instanceof QuestObject qo) {
-				boolean uncompleted = !data.isCompleted(qo) && !data.isExcludedByOtherQuestline(qo);
-				if (uncompleted) {
-					if (qo.isOptionalForProgression(data)) {
-						nOptional++;
-					} else {
-						return false;
-					}
-				} else {
-					nCompleted++;
-				}
+
+		List<QuestObject> children = new ArrayList<>();
+		getChildren().forEach(qob -> {
+			// only consider QuestObject children, i.e. ones that can be progressed
+			if (qob instanceof QuestObject qo) {
+				children.add(qo);
 			}
-        }
+		});
+
+		for (QuestObject qo : children) {
+			boolean uncompleted = !data.isCompleted(qo) && !data.isExcludedByOtherQuestline(qo);
+			if (uncompleted) {
+				if (qo.isOptionalForProgression(data)) {
+					nOptional++;
+				} else {
+					return false;
+				}
+			} else {
+				nCompleted++;
+			}
+		}
 		// if there are no children at all, it's auto-completed (degenerate case)
 		// if ALL children are optional, require at least one to be completed (e.g. quests with either/or tasks)
-        return getChildren().isEmpty() || nOptional < getChildren().size() || nCompleted > 0;
+		return children.isEmpty() || nOptional < children.size() || nCompleted > 0;
 	}
 
 	public boolean isOptionalForProgression(TeamData teamData) {
