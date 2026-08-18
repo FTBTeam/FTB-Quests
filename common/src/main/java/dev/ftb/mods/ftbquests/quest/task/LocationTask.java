@@ -81,9 +81,9 @@ public class LocationTask extends AbstractBooleanTask {
 
 		List<Integer> size = Json5Util.fetch(json, "size", THREE_INT_LIST_CODEC).orElseThrow();
 		if (size.size() == 3) {
-			w = Math.max(pos.get(0), 1);
-			h = Math.max(pos.get(1), 1);
-			d = Math.max(pos.get(2), 1);
+			w = Math.max(size.get(0), 1);
+			h = Math.max(size.get(1), 1);
+			d = Math.max(size.get(2), 1);
 		}
 	}
 
