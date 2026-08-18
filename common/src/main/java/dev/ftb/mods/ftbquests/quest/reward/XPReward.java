@@ -40,7 +40,7 @@ public class XPReward extends Reward {
 	@Override
 	public void readData(Json5Object json, HolderLookup.Provider provider) {
 		super.readData(json, provider);
-		xp = Json5Util.getInt(json, "xp").orElseThrow();
+		xp = Math.max(Json5Util.getInt(json, "xp").orElseThrow(), 1);
 	}
 
 	@Override
@@ -52,7 +52,7 @@ public class XPReward extends Reward {
 	@Override
 	public void readNetData(RegistryFriendlyByteBuf buffer) {
 		super.readNetData(buffer);
-		xp = buffer.readVarInt();
+		xp = Math.max(buffer.readVarInt(), 1);
 	}
 
 	@Override

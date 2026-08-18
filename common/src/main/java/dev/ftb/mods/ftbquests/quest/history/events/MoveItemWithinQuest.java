@@ -1,7 +1,6 @@
 package dev.ftb.mods.ftbquests.quest.history.events;
 
 import dev.ftb.mods.ftblibrary.platform.network.Server2PlayNetworking;
-import dev.ftb.mods.ftblibrary.util.NetworkHelper;
 import dev.ftb.mods.ftbquests.net.ReorderItemResponseMessage;
 import dev.ftb.mods.ftbquests.quest.BaseQuestFile;
 import dev.ftb.mods.ftbquests.quest.QuestObjectBase;
@@ -18,13 +17,13 @@ import java.util.List;
 
 public record MoveItemWithinQuest(long taskOrRewardId, QuestObjectType questObjectType, boolean moveRight) implements QuestBookEditEvent {
     @Override
-    public void apply(ServerQuestFile file) {
-        applyChange(file, moveRight);
+    public boolean apply(ServerQuestFile file) {
+        return applyChange(file, moveRight);
     }
 
     @Override
-    public void applyUndo(ServerQuestFile file) {
-        applyChange(file, !moveRight);
+    public boolean applyUndo(ServerQuestFile file) {
+        return applyChange(file, !moveRight);
     }
 
     @Override
@@ -36,14 +35,17 @@ public record MoveItemWithinQuest(long taskOrRewardId, QuestObjectType questObje
         );
     }
 
-    private void applyChange(ServerQuestFile file, boolean dir) {
+    private boolean applyChange(ServerQuestFile file, boolean dir) {
         QuestObjectBase object = file.getBase(taskOrRewardId);
         if (object instanceof Task task) {
             task.getQuest().moveTask(task, dir);
             Server2PlayNetworking.sendToAllPlayers(file.server, ReorderItemResponseMessage.tasks(task.getQuest()));
+            return true;
         } else if (object instanceof Reward reward) {
             reward.getQuest().moveReward(reward, dir);
             Server2PlayNetworking.sendToAllPlayers(file.server, ReorderItemResponseMessage.rewards(reward.getQuest()));
+            return true;
         }
+        return false;
     }
 }

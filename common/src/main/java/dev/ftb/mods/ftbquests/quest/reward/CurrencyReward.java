@@ -46,7 +46,7 @@ public class CurrencyReward extends Reward {
     @Override
     public void readData(Json5Object json, HolderLookup.Provider provider) {
         super.readData(json, provider);
-        coinAmount = Json5Util.getInt(json,"amount").orElse(0);
+        coinAmount = Math.max(Json5Util.getInt(json,"amount").orElse(0), 1);
     }
 
     @Override
@@ -58,7 +58,7 @@ public class CurrencyReward extends Reward {
     @Override
     public void readNetData(RegistryFriendlyByteBuf buffer) {
         super.readNetData(buffer);
-        coinAmount = buffer.readVarInt();
+        coinAmount = Math.max(buffer.readVarInt(), 1);
     }
 
     @Override

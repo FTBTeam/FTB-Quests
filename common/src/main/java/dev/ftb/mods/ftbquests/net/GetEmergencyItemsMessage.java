@@ -28,14 +28,16 @@ public record GetEmergencyItemsMessage() implements CustomPacketPayload {
 	}
 
 	public static void handle(GetEmergencyItemsMessage ignoredMessage, PacketContext context) {
+		ServerQuestFile.ifExists(sqf -> {
 			ServerPlayer player = (ServerPlayer) context.player();
 			long now = Util.getEpochMillis();
 			long delta = now - lastItemsGot.getOrDefault(player.getUUID(), 0L);
 
-			if (delta >= ServerQuestFile.getInstance().getEmergencyItemsCooldown() * 1000L) {
+			if (delta >= sqf.getEmergencyItemsCooldown() * 1000L) {
 				ServerQuestFile.getInstance().getEmergencyItems()
 						.forEach(stack -> player.getInventory().placeItemBackInInventory(stack.copy()));
 				lastItemsGot.put(player.getUUID(), now);
 			}
+		});
 	}
 }

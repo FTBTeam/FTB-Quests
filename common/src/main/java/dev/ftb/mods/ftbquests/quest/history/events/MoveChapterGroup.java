@@ -13,13 +13,13 @@ import java.util.List;
 
 public record MoveChapterGroup(long groupId, boolean movingUp) implements QuestBookEditEvent {
     @Override
-    public void apply(ServerQuestFile file) {
-        applyChange(file, movingUp);
+    public boolean apply(ServerQuestFile file) {
+        return applyChange(file, movingUp);
     }
 
     @Override
-    public void applyUndo(ServerQuestFile file) {
-        applyChange(file, !movingUp);
+    public boolean applyUndo(ServerQuestFile file) {
+        return applyChange(file, !movingUp);
     }
 
     @Override
@@ -31,9 +31,11 @@ public record MoveChapterGroup(long groupId, boolean movingUp) implements QuestB
         );
     }
 
-    private void applyChange(ServerQuestFile file, boolean dir) {
+    private boolean applyChange(ServerQuestFile file, boolean dir) {
         if (file.getChapterGroup(groupId) != file.getDefaultChapterGroup() && file.moveChapterGroup(groupId, dir)) {
             Server2PlayNetworking.sendToAllPlayers(file.server, new MoveChapterGroupResponseMessage(groupId, dir));
+            return true;
         }
+        return false;
     }
 }

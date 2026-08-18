@@ -1,21 +1,16 @@
 package dev.ftb.mods.ftbquests.net;
 
 import dev.ftb.mods.ftblibrary.platform.network.PacketContext;
-import dev.ftb.mods.ftblibrary.platform.network.Server2PlayNetworking;
 import dev.ftb.mods.ftblibrary.util.NetworkHelper;
 import dev.ftb.mods.ftbquests.api.FTBQuestsAPI;
-import dev.ftb.mods.ftbquests.quest.QuestObjectBase;
+import dev.ftb.mods.ftbquests.integration.PermissionsHelper;
 import dev.ftb.mods.ftbquests.quest.QuestObjectType;
 import dev.ftb.mods.ftbquests.quest.ServerQuestFile;
 import dev.ftb.mods.ftbquests.quest.history.events.MoveItemWithinQuest;
-import dev.ftb.mods.ftbquests.quest.reward.Reward;
-import dev.ftb.mods.ftbquests.quest.task.Task;
-import dev.ftb.mods.ftbquests.util.NetUtils;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
-import net.minecraft.server.level.ServerLevel;
 
 /**
  * Sent by client to move a task or reward within its quest. Task/reward ordering is shown in the quest view panel.
@@ -33,10 +28,15 @@ public record ReorderItemMessage(long taskOrRewardId, QuestObjectType questObjec
     );
 
     public static void handle(ReorderItemMessage message, PacketContext context) {
-        if (NetUtils.canEdit(context)) {
-            ServerQuestFile sqf = ServerQuestFile.getInstance();
-            sqf.getHistoryStack().addAndApply(sqf, new MoveItemWithinQuest(message.taskOrRewardId, message.questObjectType, message.moveRight));
+        if (PermissionsHelper.canPlayerEdit(context) && isValidObjectType(message)) {
+            ServerQuestFile.ifExists(sqf ->
+                    sqf.getHistoryStack().addAndApply(sqf, new MoveItemWithinQuest(message.taskOrRewardId, message.questObjectType, message.moveRight))
+            );
         }
+    }
+
+    private static boolean isValidObjectType(ReorderItemMessage message) {
+        return message.questObjectType == QuestObjectType.TASK || message.questObjectType == QuestObjectType.REWARD;
     }
 
     @Override

@@ -4,6 +4,7 @@ import dev.ftb.mods.ftblibrary.fabric.FTBLibraryFabricEvents;
 import dev.ftb.mods.ftbquests.api.fabric.FTBQuestsEvents;
 import dev.ftb.mods.ftbquests.client.FTBQuestsClient;
 import dev.ftb.mods.ftbquests.client.FTBQuestsClientEventHandler;
+import dev.ftb.mods.ftbquests.client.LootCrateTintSource;
 import dev.ftb.mods.ftbquests.client.TaskScreenRenderer;
 import dev.ftb.mods.ftbquests.registry.ModBlockEntityTypes;
 import net.fabricmc.api.ClientModInitializer;
@@ -12,7 +13,9 @@ import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
 import net.fabricmc.fabric.api.client.rendering.v1.hud.HudElementRegistry;
 import net.fabricmc.fabric.api.client.rendering.v1.hud.VanillaHudElements;
+import net.minecraft.client.color.item.ItemTintSources;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderers;
+import net.minecraft.resources.Identifier;
 
 public class FTBQuestsFabricClient implements ClientModInitializer {
     @Override
@@ -36,5 +39,7 @@ public class FTBQuestsFabricClient implements ClientModInitializer {
         // See TextureAtlasMixin for other "event" handlers
 
         HudElementRegistry.attachElementAfter(VanillaHudElements.SUBTITLES, FTBQuestsClient.GUI_OVERLAY_ID, eventHandler::renderGuiOverlay);
+
+        ItemTintSources.ID_MAPPER.put(LootCrateTintSource.ID, LootCrateTintSource.CODEC);
     }
 }

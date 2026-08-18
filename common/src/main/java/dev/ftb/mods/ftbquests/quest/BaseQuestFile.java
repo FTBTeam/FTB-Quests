@@ -42,6 +42,8 @@ import dev.ftb.mods.ftbteams.api.client.ClientTeamManager;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.longs.Long2IntOpenHashMap;
 import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
+import it.unimi.dsi.fastutil.longs.LongOpenHashSet;
+import it.unimi.dsi.fastutil.longs.LongSet;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.network.RegistryFriendlyByteBuf;
@@ -49,6 +51,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
 import net.minecraft.util.Util;
 import net.minecraft.world.entity.Entity;
@@ -68,7 +71,11 @@ import java.util.function.Predicate;
 import java.util.stream.Stream;
 
 public abstract class BaseQuestFile extends QuestObject implements QuestFile {
-	public static final String FILE_SUFFIX = ".json5";
+	public static final String FILE_SUFFIX = Json5Util.FILE_EXT;
+	public static final double MIN_GRID_SCALE = 1D / 32D;
+	public static final double MAX_GRID_SCALE = 8D;
+	public static final int MAX_DETECTION_DELAY = 200;
+	public static final int DEF_EMERGENCY_ITEMS_COOLDOWN = 300;
 	public static int VERSION = 13;
 	private static final Logger LOGGER = LogUtils.getLogger();
 
@@ -83,9 +90,6 @@ public abstract class BaseQuestFile extends QuestObject implements QuestFile {
 	protected final Map<UUID, TeamData> teamDataMap;
 
 	private final Long2ObjectOpenHashMap<QuestObjectBase> questObjectMap;
-
-	protected final Int2ObjectOpenHashMap<TaskType> taskTypeIds;
-	protected final Int2ObjectOpenHashMap<RewardType> rewardTypeIds;
 
 	private final TranslationManager translationManager;
 
@@ -133,11 +137,9 @@ public abstract class BaseQuestFile extends QuestObject implements QuestFile {
 		teamDataMap = new HashMap<>();
 
 		questObjectMap = new Long2ObjectOpenHashMap<>();
-		taskTypeIds = new Int2ObjectOpenHashMap<>();
-		rewardTypeIds = new Int2ObjectOpenHashMap<>();
 
 		emergencyItems = new ArrayList<>();
-		emergencyItemsCooldown = 300;
+		emergencyItemsCooldown = DEF_EMERGENCY_ITEMS_COOLDOWN;
 
 		defaultPerTeamReward = false;
 		defaultTeamConsumeItems = false;
@@ -389,7 +391,7 @@ public abstract class BaseQuestFile extends QuestObject implements QuestFile {
 			case REWARD -> {
 				String rewardType = Json5Util.getString(metaData,"type").orElse("");
 				if (RewardTable.isFakeQuestId(parent)) {
-					yield RewardTable.createRewardForTable(id, rewardType, this);
+					yield RewardTable.requireCreateRewardForTable(id, rewardType, this);
 				} else {
 					Quest quest = requireQuestObject(parent, this::getQuest);
                     yield RewardType.requireCreateReward(id, quest, rewardType);
@@ -450,15 +452,15 @@ public abstract class BaseQuestFile extends QuestObject implements QuestFile {
 		emergencyItems.clear();
 		Json5Util.fetch(json, "emergency_items", ItemStack.CODEC.listOf()).ifPresent(emergencyItems::addAll);
 
-		emergencyItemsCooldown = Json5Util.getInt(json, "emergency_items_cooldown").orElseThrow();
+		emergencyItemsCooldown = Math.max(Json5Util.getInt(json, "emergency_items_cooldown").orElse(DEF_EMERGENCY_ITEMS_COOLDOWN), 0);
 		dropLootCrates = Json5Util.getBoolean(json, "drop_loot_crates").orElseThrow();
 		lootCrateNoDrop = Json5Util.fetch(json, "loot_crate_no_drop", EntityWeight.CODEC).orElseGet(EntityWeight::zero);
 		disableGui = Json5Util.getBoolean(json, "disable_gui").orElse(false);
-		gridScale = Json5Util.getDouble(json, "grid_scale").orElse(0.5D);
+		gridScale = Mth.clamp(Json5Util.getDouble(json, "grid_scale").orElse(0.5D), MIN_GRID_SCALE, MAX_GRID_SCALE);
 		pauseGame = Json5Util.getBoolean(json, "pause_game").orElse(false);
 		lockMessage = Json5Util.getString(json, "lock_message").orElse("");
 		progressionMode = Json5Util.getString(json, "progression_mode").map(ProgressionMode.NAME_MAP_NO_DEFAULT::get).orElse(ProgressionMode.LINEAR);
-		detectionDelay = Json5Util.getInt(json, "detection_delay").orElse(20);
+		detectionDelay = Mth.clamp(Json5Util.getInt(json, "detection_delay").orElse(20), 0, MAX_DETECTION_DELAY);
 		showLockIcons = Json5Util.getBoolean(json, "show_lock_icons").orElse(false);
 		dropBookOnDeath = Json5Util.getBoolean(json, "drop_book_on_death").orElse(false);
 		hideExcludedQuests = Json5Util.getBoolean(json, "hide_excluded_quests").orElse(false);
@@ -527,7 +529,7 @@ public abstract class BaseQuestFile extends QuestObject implements QuestFile {
 					}
 				}));
 
-				Json5Util.save(folder.resolve("chapters").resolve(chapter.getFilename() + FILE_SUFFIX), chapterJson);
+				Json5Util.save(folder.resolve(chapter.getPath().orElseThrow()), chapterJson);
 			}
 		}
 	}
@@ -539,7 +541,7 @@ public abstract class BaseQuestFile extends QuestObject implements QuestFile {
 			tableNBT.addProperty("id", table.getCodeString());
 			tableNBT.addProperty("order_index", ri);
 			table.writeData(tableNBT, provider);
-			Json5Util.save(folder.resolve("reward_tables").resolve(table.getFilename() + FILE_SUFFIX), tableNBT);
+			Json5Util.save(folder.resolve(table.getPath().orElseThrow()), tableNBT);
 		}
 	}
 
@@ -830,7 +832,7 @@ public abstract class BaseQuestFile extends QuestObject implements QuestFile {
 
 		emergencyItems.clear();
 		emergencyItems.addAll(ItemStack.OPTIONAL_STREAM_CODEC.apply(ByteBufCodecs.list()).decode(buffer));
-		emergencyItemsCooldown = buffer.readVarInt();
+		emergencyItemsCooldown = Math.max(buffer.readVarInt(), 0);
 		defaultPerTeamReward = buffer.readBoolean();
 		defaultTeamConsumeItems = buffer.readBoolean();
 		defaultRewardAutoClaim = RewardAutoClaim.NAME_MAP_NO_DEFAULT.read(buffer);
@@ -839,11 +841,11 @@ public abstract class BaseQuestFile extends QuestObject implements QuestFile {
 		dropLootCrates = buffer.readBoolean();
 		lootCrateNoDrop = EntityWeight.STREAM_CODEC.decode(buffer);
 		disableGui = buffer.readBoolean();
-		gridScale = buffer.readDouble();
+		gridScale = Mth.clamp(buffer.readDouble(), MIN_GRID_SCALE, MAX_GRID_SCALE);
 		pauseGame = buffer.readBoolean();
 		lockMessage = buffer.readUtf(Short.MAX_VALUE);
 		progressionMode = ProgressionMode.NAME_MAP_NO_DEFAULT.read(buffer);
-		detectionDelay = buffer.readVarInt();
+		detectionDelay = Mth.clamp(buffer.readVarInt(), 0, MAX_DETECTION_DELAY);
 		showLockIcons = buffer.readBoolean();
 		dropBookOnDeath = buffer.readBoolean();
 		hideExcludedQuests = buffer.readBoolean();
@@ -858,13 +860,13 @@ public abstract class BaseQuestFile extends QuestObject implements QuestFile {
 		buffer.writeVarInt(TaskTypes.TYPES.size());
 		for (TaskType type : TaskTypes.TYPES.values()) {
 			buffer.writeIdentifier(type.getTypeId());
-			buffer.writeVarInt(type.internalId);
+			buffer.writeVarInt(type.getInternalId());
 		}
 
 		buffer.writeVarInt(RewardTypes.TYPES.size());
 		for (RewardType type : RewardTypes.TYPES.values()) {
 			buffer.writeIdentifier(type.getTypeId());
-			buffer.writeVarInt(type.internalId);
+			buffer.writeVarInt(type.getInternalId());
 		}
 
 		writeNetData(buffer);
@@ -893,13 +895,13 @@ public abstract class BaseQuestFile extends QuestObject implements QuestFile {
 
 					buffer.writeVarInt(quest.getTasks().size());
 					quest.getTasks().forEach(task -> {
-						buffer.writeVarInt(task.getType().internalId);
+						buffer.writeVarInt(task.getType().getInternalId());
 						buffer.writeLong(task.id);
 					});
 
 					buffer.writeVarInt(quest.getRewards().size());
 					quest.getRewards().forEach(reward -> {
-						buffer.writeVarInt(reward.getType().internalId);
+						buffer.writeVarInt(reward.getType().getInternalId());
 						buffer.writeLong(reward.id);
 					});
 				}
@@ -947,43 +949,29 @@ public abstract class BaseQuestFile extends QuestObject implements QuestFile {
 	public final void readNetDataFull(RegistryFriendlyByteBuf buffer) {
 		int pos = buffer.readerIndex();
 
-		taskTypeIds.clear();
-		rewardTypeIds.clear();
-
-		for (TaskType type : TaskTypes.TYPES.values()) {
-			type.internalId = 0;
-		}
-
-		for (RewardType type : RewardTypes.TYPES.values()) {
-			type.internalId = 0;
-		}
-
+		Int2ObjectOpenHashMap<TaskType> taskTypeIds = new Int2ObjectOpenHashMap<>();
 		int taskTypesSize = buffer.readVarInt();
 		for (int i = 0; i < taskTypesSize; i++) {
 			TaskType type = TaskTypes.TYPES.get(buffer.readIdentifier());
 			int id = buffer.readVarInt();
-
 			if (type != null) {
-				type.internalId = id;
-				taskTypeIds.put(type.internalId, type);
+				taskTypeIds.put(id, type);
 			}
 		}
 
+		Int2ObjectOpenHashMap<RewardType> rewardTypeIds = new Int2ObjectOpenHashMap<>();
 		int rewardTypesSize = buffer.readVarInt();
 		for (int i = 0; i < rewardTypesSize; i++) {
 			RewardType type = RewardTypes.TYPES.get(buffer.readIdentifier());
 			int id = buffer.readVarInt();
-
 			if (type != null) {
-				type.internalId = id;
-				rewardTypeIds.put(type.internalId, type);
+				rewardTypeIds.put(id, type);
 			}
 		}
 
 		readNetData(buffer);
 
 		rewardTables.clear();
-
 		int rewardTableSize = buffer.readVarInt();
 		for (int i = 0; i < rewardTableSize; i++) {
 			RewardTable table = new RewardTable(buffer.readLong(), this);
@@ -992,7 +980,6 @@ public abstract class BaseQuestFile extends QuestObject implements QuestFile {
 
 		chapterGroups.clear();
 		chapterGroups.add(defaultChapterGroup);
-
 		int chapterGroupsSize = buffer.readVarInt();
 		for (int i = 0; i < chapterGroupsSize; i++) {
 			ChapterGroup group = new ChapterGroup(buffer.readLong(), this);
@@ -1125,7 +1112,15 @@ public abstract class BaseQuestFile extends QuestObject implements QuestFile {
 		return Collections.unmodifiableCollection(teamDataMap.values());
 	}
 
-	public abstract void deleteObjects(List<Long> ids);
+	/**
+	 * Delete one or more quest objects. On the client, this sends a deletion request to the server with the given ids.
+	 * On the server, it attempts to actually delete the quest objects; if <em>any</em> of the ids is invalid, then no
+	 * deletion will be done.
+	 *
+	 * @param ids list of quest object ids to delete
+	 * @return on the client, true if the id list is non-empty; on the server, true if all the ids are valid quest objects, and not the quest file itself
+	 */
+	public abstract boolean deleteObjects(List<Long> ids);
 
 	@Override
 	public MutableComponent getAltTitle() {
@@ -1141,13 +1136,13 @@ public abstract class BaseQuestFile extends QuestObject implements QuestFile {
 	public void fillConfigGroup(EditableConfigGroup config) {
 		super.fillConfigGroup(config);
 		config.addList("emergency_items", emergencyItems, new EditableItemStack(false, false), ItemStack.EMPTY);
-		config.addInt("emergency_items_cooldown", emergencyItemsCooldown, v -> emergencyItemsCooldown = v, 300, 0, Integer.MAX_VALUE);
+		config.addInt("emergency_items_cooldown", emergencyItemsCooldown, v -> emergencyItemsCooldown = v, DEF_EMERGENCY_ITEMS_COOLDOWN, 0, Integer.MAX_VALUE);
 		config.addBool("drop_loot_crates", dropLootCrates, v -> dropLootCrates = v, false);
 		config.addBool("disable_gui", disableGui, v -> disableGui = v, false);
-		config.addDouble("grid_scale", gridScale, v -> gridScale = v, 0.5D, 1D / 32D, 8D);
+		config.addDouble("grid_scale", gridScale, v -> gridScale = v, 0.5D, MIN_GRID_SCALE, MAX_GRID_SCALE);
 		config.addString("lock_message", lockMessage, v -> lockMessage = v, "");
 		config.addEnum("progression_mode", progressionMode, v -> progressionMode = v, ProgressionMode.NAME_MAP_NO_DEFAULT);
-		config.addInt("detection_delay", detectionDelay, v -> detectionDelay = v, 20, 0, 200);
+		config.addInt("detection_delay", detectionDelay, v -> detectionDelay = v, 20, 0, MAX_DETECTION_DELAY);
 		config.addBool("pause_game", pauseGame, v -> pauseGame = v, false);
 		config.addBool("show_lock_icons", showLockIcons, v -> showLockIcons = v, true).setNameKey("ftbquests.ui.show_lock_icon");
 		config.addBool("drop_book_on_death", dropBookOnDeath, v -> dropBookOnDeath = v, true);
@@ -1196,9 +1191,8 @@ public abstract class BaseQuestFile extends QuestObject implements QuestFile {
 	}
 
 	public long readID(long id) {
-		//noinspection ConstantValue
-		while (id == 0L || id == 1L || questObjectMap.get(id) != null) {
-			id = Math.abs(MathUtils.RAND.nextLong());
+		while (id == 0L || id == 1L || questObjectMap.containsKey(id)) {
+			id = MathUtils.RAND.nextLong(Long.MAX_VALUE);
 			markDirty();
 		}
 
@@ -1392,7 +1386,7 @@ public abstract class BaseQuestFile extends QuestObject implements QuestFile {
 	}
 
 	@Override
-	public Collection<? extends QuestObject> getChildren() {
+	public Collection<? extends QuestObjectBase> getChildren() {
 		return chapterGroups;
 	}
 
@@ -1465,15 +1459,6 @@ public abstract class BaseQuestFile extends QuestObject implements QuestFile {
 
 	public abstract boolean isPlayerOnTeam(Player player, TeamData teamData);
 
-	@Nullable
-	public TaskType getTaskType(int typeId) {
-		return taskTypeIds.get(typeId);
-	}
-
-	public RewardType getRewardType(int typeId) {
-		return rewardTypeIds.get(typeId);
-	}
-
 	public DefaultChapterGroup getDefaultChapterGroup() {
 		return defaultChapterGroup;
 	}
@@ -1540,7 +1525,7 @@ public abstract class BaseQuestFile extends QuestObject implements QuestFile {
 
 		if (!group.isDefaultGroup()) {
 			int index = chapterGroups.indexOf(group);
-			if (index != -1 && movingUp ? (index > 1) : (index < chapterGroups.size() - 1)) {
+			if (index != -1 && (movingUp ? (index > 1) : (index < chapterGroups.size() - 1))) {
 				chapterGroups.remove(index);
 				chapterGroups.add(movingUp ? index - 1 : index + 1, group);
 				group.clearCachedData();
@@ -1606,4 +1591,28 @@ public abstract class BaseQuestFile extends QuestObject implements QuestFile {
 	public VisualPresets getPresets() {
 		return allPresets;
 	}
+
+
+	/**
+	 * Allows allocating multiple new quest object ids with no risk of collision. Intended to be a short-lived object,
+	 * do not persist across multiple ticks!
+	 */
+	public static class UniqueIdAllocator {
+		private final BaseQuestFile file;
+		private final LongSet allocated = new LongOpenHashSet();
+
+        public UniqueIdAllocator(BaseQuestFile file) {
+            this.file = file;
+        }
+
+		public long newId() {
+			long newId;
+			do {
+				newId = file.newID();
+			} while (allocated.contains(newId));
+			allocated.add(newId);
+
+			return newId;
+		}
+    }
 }

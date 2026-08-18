@@ -7,13 +7,15 @@ import net.minecraft.resources.Identifier;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Supplier;
 
 public interface RewardTypes {
 	Map<Identifier, RewardType> TYPES = new LinkedHashMap<>();
+	AtomicInteger INTERNAL_ID = new AtomicInteger(1);
 
 	static RewardType register(Identifier name, RewardType.Provider typeProvider, Supplier<Icon<?>> iconSupplier, boolean availableByDefault) {
-		return TYPES.computeIfAbsent(name, id -> new RewardType(id, typeProvider, iconSupplier, availableByDefault));
+		return TYPES.computeIfAbsent(name, id -> new RewardType(id, typeProvider, iconSupplier, availableByDefault, INTERNAL_ID.getAndIncrement()));
 	}
 
 	static RewardType register(Identifier name, RewardType.Provider typeProvider, Supplier<Icon<?>> iconSupplier) {

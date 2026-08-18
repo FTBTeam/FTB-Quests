@@ -2,8 +2,8 @@ package dev.ftb.mods.ftbquests.net;
 
 import dev.ftb.mods.ftblibrary.platform.network.PacketContext;
 import dev.ftb.mods.ftbquests.api.FTBQuestsAPI;
+import dev.ftb.mods.ftbquests.integration.PermissionsHelper;
 import dev.ftb.mods.ftbquests.quest.ServerQuestFile;
-import dev.ftb.mods.ftbquests.util.NetUtils;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
@@ -36,13 +36,14 @@ public record UndoRedoRequestMessage(boolean isUndo) implements CustomPacketPayl
     }
 
     public static void handle(UndoRedoRequestMessage message, PacketContext packetContext) {
-        if (NetUtils.canEdit(packetContext)) {
-            ServerQuestFile sqf = ServerQuestFile.getInstance();
-            if (message.isUndo) {
-                sqf.getHistoryStack().tryUndo(sqf);
-            } else {
-                sqf.getHistoryStack().tryRedo(sqf);
-            }
+        if (PermissionsHelper.canPlayerEdit(packetContext)) {
+            ServerQuestFile.ifExists(sqf -> {
+                if (message.isUndo) {
+                    sqf.getHistoryStack().tryUndo(sqf);
+                } else {
+                    sqf.getHistoryStack().tryRedo(sqf);
+                }
+            });
         }
     }
 }

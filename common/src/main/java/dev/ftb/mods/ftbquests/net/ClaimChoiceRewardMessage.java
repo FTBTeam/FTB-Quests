@@ -27,19 +27,22 @@ public record ClaimChoiceRewardMessage(long id, int index) implements CustomPack
 	}
 
 	public static void handle(ClaimChoiceRewardMessage message, PacketContext context) {
-		Reward reward = ServerQuestFile.getInstance().getReward(message.id);
+		ServerQuestFile.ifExists(sqf -> {
+			Reward reward = sqf.getReward(message.id);
 
-		if (reward instanceof ChoiceReward choiceReward && context.player() instanceof ServerPlayer serverPlayer) {
-			ServerQuestFile.getInstance().getTeamData(serverPlayer).ifPresent(data -> {
-				RewardTable table = choiceReward.getTable();
+			if (reward instanceof ChoiceReward choiceReward && context.player() instanceof ServerPlayer serverPlayer) {
+				sqf.getTeamData(serverPlayer).ifPresent(data -> {
+					RewardTable table = choiceReward.getTable();
 
-				if (table != null && data.isCompleted(reward.getQuest())) {
-					if (message.index >= 0 && message.index < table.getWeightedRewards().size()) {
-						table.getWeightedRewards().get(message.index).getReward().claim(serverPlayer, true);
-						data.claimReward(serverPlayer, reward, true);
-					}
-				}
-			});
-		}
+                    if (table != null
+							&& data.isCompleted(reward.getQuest())
+							&& message.index >= 0 && message.index < table.getWeightedRewards().size()
+							&& data.markRewardAsClaimed(serverPlayer.getUUID(), reward, System.currentTimeMillis()))
+					{
+                        table.getWeightedRewards().get(message.index).getReward().claim(serverPlayer, true);
+                    }
+				});
+			}
+		});
 	}
 }

@@ -6,6 +6,7 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import dev.ftb.mods.ftblibrary.platform.Platform;
 import dev.ftb.mods.ftblibrary.platform.network.Server2PlayNetworking;
 import dev.ftb.mods.ftbquests.FTBQuests;
+import dev.ftb.mods.ftbquests.integration.PermissionsHelper;
 import dev.ftb.mods.ftbquests.net.CreateObjectResponseMessage;
 import dev.ftb.mods.ftbquests.net.SyncTranslationMessageToClient;
 import dev.ftb.mods.ftbquests.quest.Chapter;
@@ -36,7 +37,7 @@ import static net.minecraft.commands.Commands.literal;
 public class GenerateChapterCommand {
     public static LiteralArgumentBuilder<CommandSourceStack> register() {
         return Commands.literal("generate_chapter")
-                .requires(FTBQuestsCommands::hasEditorPermission)
+                .requires(PermissionsHelper::hasEditorPermission)
                 .then(literal("from_entire_creative_list")
                         .executes(context -> generateAllItemChapter(context.getSource()))
                 )

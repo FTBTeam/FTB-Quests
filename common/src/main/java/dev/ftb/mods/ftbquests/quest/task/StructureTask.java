@@ -78,7 +78,7 @@ public class StructureTask extends AbstractBooleanTask {
 		super.fillConfigGroup(config);
 		if (KNOWN_STRUCTURES.isEmpty()) {
 			// should not normally be the case, but as a defensive fallback...
-			config.addString("structure", getStructure(), this::setStructure, "minecraft:mineshaft");
+			config.addString("structure", getStructure(), this::setStructure, DEFAULT_STRUCTURE.toString());
 		} else {
 			config.addEnum("structure", getStructure(), this::setStructure, NameMap.of(DEFAULT_STRUCTURE.toString(), KNOWN_STRUCTURES).create());
 		}

@@ -42,11 +42,12 @@ public class KillTask extends Task {
 	private static final Lazy<NameMap<Identifier>> entityNameMap = Lazy.of(KillTask::scanEntityTypes);
 	private static final Lazy<NameMap<String>> entityTagMap = Lazy.of(KillTask::scanEntityTags);
 	private static final Map<Identifier,Icon<?>> entityIcons = new HashMap<>();
+	public static final long DEF_KILL_COUNT = 100L;
 
 	private Identifier entityTypeId = ZOMBIE;
 	@Nullable
 	private TagKey<EntityType<?>> entityTypeTag = null;
-	private long value = 100L;
+	private long value = DEF_KILL_COUNT;
 	private String customName = "";
 	private String nbtFilter = "";
 
@@ -79,7 +80,7 @@ public class KillTask extends Task {
 		super.readData(json, provider);
 		entityTypeId = parseTypeId(Json5Util.getString(json, "entity").orElse(""));
 		entityTypeTag = parseTypeTag(Json5Util.getString(json,"entityTypeTag").orElse(""));
-		value = Json5Util.getLong(json, "value").orElse(0L);
+		value = Math.max(Json5Util.getLong(json, "value").orElse(DEF_KILL_COUNT), 1L);
 		customName = Json5Util.getString(json, "custom_name").orElse("");
 		nbtFilter = Json5Util.getString(json, "nbt_filter").orElse("");
 	}
@@ -99,7 +100,7 @@ public class KillTask extends Task {
 		super.readNetData(buffer);
 		entityTypeId = parseTypeId(buffer.readUtf());
 		entityTypeTag = parseTypeTag(buffer.readUtf());
-		value = buffer.readVarInt();
+		value = Math.max(buffer.readVarInt(), 1L);
 		customName = buffer.readUtf();
 		nbtFilter = buffer.readUtf();
 	}
@@ -125,7 +126,7 @@ public class KillTask extends Task {
 
 		config.addEnum("entity", entityTypeId, v -> entityTypeId = v, entityNameMap.get(), ZOMBIE);
 		config.addEnum("entity_type_tag", getTypeTagStr(), v -> entityTypeTag = parseTypeTag(v), entityTagMap.get());
-		config.addLong("value", value, v -> value = v, 100L, 1L, Long.MAX_VALUE);
+		config.addLong("value", value, v -> value = v, DEF_KILL_COUNT, 1L, Long.MAX_VALUE);
 		config.addString("custom_name", customName, v -> customName = v, "");
 		config.addString("nbt_filter", nbtFilter, v -> nbtFilter = v, "");
 	}

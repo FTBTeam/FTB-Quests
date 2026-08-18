@@ -2,9 +2,9 @@ package dev.ftb.mods.ftbquests.net;
 
 import dev.ftb.mods.ftblibrary.platform.network.PacketContext;
 import dev.ftb.mods.ftbquests.api.FTBQuestsAPI;
+import dev.ftb.mods.ftbquests.integration.PermissionsHelper;
 import dev.ftb.mods.ftbquests.quest.ServerQuestFile;
 import dev.ftb.mods.ftbquests.quest.history.events.MoveChapterGroup;
-import dev.ftb.mods.ftbquests.util.NetUtils;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
@@ -25,9 +25,10 @@ public record MoveChapterGroupMessage(long id, boolean movingUp) implements Cust
 	}
 
 	public static void handle(MoveChapterGroupMessage message, PacketContext context) {
-		if (NetUtils.canEdit(context)) {
-			ServerQuestFile sqf = ServerQuestFile.getInstance();
-			sqf.getHistoryStack().addAndApply(sqf, new MoveChapterGroup(message.id, message.movingUp));
+		if (PermissionsHelper.canPlayerEdit(context)) {
+			ServerQuestFile.ifExists(sqf ->
+					sqf.getHistoryStack().addAndApply(sqf, new MoveChapterGroup(message.id, message.movingUp))
+			);
 		}
 	}
 }

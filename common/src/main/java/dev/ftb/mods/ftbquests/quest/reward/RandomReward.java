@@ -90,11 +90,7 @@ public class RandomReward extends Reward {
 		super.writeNetData(buffer);
 
 		RewardTable table = getTable();
-		buffer.writeLong(table == null ? 0L : table.id);
-
-		if (table != null && table.id == -1L) {
-			table.writeNetData(buffer);
-		}
+		buffer.writeLong(table == null ? 0L : table.getId());
 	}
 
 	@Override
@@ -102,15 +98,8 @@ public class RandomReward extends Reward {
 		super.readNetData(buffer);
 		BaseQuestFile file = getQuestFile();
 
-		long t = buffer.readLong();
-
-		if (t == -1L) {
-			table = new RewardTable(-1L, file);
-			table.readNetData(buffer);
-			table.setRawTitle("Internal");
-		} else {
-			table = file.getRewardTable(t);
-		}
+		long tableId = buffer.readLong();
+		table = tableId == 0L ? null : file.getRewardTable(tableId);
 	}
 
 	@Override
@@ -128,7 +117,6 @@ public class RandomReward extends Reward {
 				wr.getReward().claim(player, notify);
 			}
 		}
-
 	}
 
 	@Override

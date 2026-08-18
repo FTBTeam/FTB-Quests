@@ -137,7 +137,9 @@ public abstract class Task extends QuestObject {
 
 	@Override
 	public final void forceProgress(TeamData teamData, ProgressChange progressChange) {
-		teamData.setProgress(this, progressChange.shouldReset() ? 0L : getMaxProgress());
+		if (progressChange.isValid()) {
+			teamData.setProgress(this, progressChange.shouldReset() ? 0L : getMaxProgress());
+		}
 	}
 
 	@Override

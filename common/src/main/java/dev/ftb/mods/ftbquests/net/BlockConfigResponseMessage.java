@@ -4,6 +4,7 @@ import dev.ftb.mods.ftblibrary.platform.network.PacketContext;
 import dev.ftb.mods.ftbquests.FTBQuests;
 import dev.ftb.mods.ftbquests.api.FTBQuestsAPI;
 import dev.ftb.mods.ftbquests.block.entity.EditableBlockEntity;
+import dev.ftb.mods.ftbquests.integration.PermissionsHelper;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.FriendlyByteBuf;
@@ -29,15 +30,17 @@ public record BlockConfigResponseMessage(BlockPos pos, CompoundTag payload) impl
 
     public static void handle(BlockConfigResponseMessage message, PacketContext context) {
         if (context.player() instanceof ServerPlayer serverPlayer
+                && serverPlayer.level().isLoaded(message.pos)
                 && serverPlayer.level().getBlockEntity(message.pos) instanceof EditableBlockEntity editable
-                && editable.hasPermissionToEdit(serverPlayer)) {
+                && editable.hasPermissionToEdit(serverPlayer))
+        {
             try {
                 editable.readPayload(message.payload, serverPlayer.registryAccess());
+                serverPlayer.level().sendBlockUpdated(editable.getBlockPos(), editable.getBlockState(), editable.getBlockState(), Block.UPDATE_ALL);
+                editable.setChanged();
             } catch (Exception ex) {
                 FTBQuests.LOGGER.error("Failed to read block entity payload", ex);
             }
-            serverPlayer.level().sendBlockUpdated(editable.getBlockPos(), editable.getBlockState(), editable.getBlockState(), Block.UPDATE_ALL);
-            editable.setChanged();
         }
     }
 }

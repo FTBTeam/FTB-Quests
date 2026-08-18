@@ -4,8 +4,32 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [26.1.2.4]
+
+### Added
+* Pinned quest tracker improvements
+  * Quests which are startable but not yet completable (due to flexible mode) are no longer shown
+    * Added "Exclude Flexible-Mode Quests" client config setting (default true) to control this
+  * Added "Pinned Tracker Visibility" client config setting to control what is shown (quest and tasks - default / quests only / hidden)
+  * Added a "Pinned Quest Tracker Visibility" keybinding (default unbound) for easy cycling of the tracker visibility
+
+### Changed
+* SSP worlds created with "Allow Commands" = OFF can no longer do quest book editing, which is considered an admin operation
+  * Where emergency edits need to be in such a world, there are two workarounds:
+    * Workaround 1: open the world to LAN with "All Commands" = ON
+    * Workaround 2: use FTB Ranks and get the `ftbquests.editor` permission node
+* Deleting a chapter group no longer reparents the group's chapters to the default group, but now deletes the chapters
+  * Reparenting chapters could lead to quest book consistency bugs 
+  * Deleted group and chapters can be restored with the undo function (which is not an alternative to making backups!)
+
+### Fixed
+* Loot crate items now render correctly (previously showed the missing texture checkerboard)
+* Fixed Choice Reward status not being correctly updated after being claimed by a player
+* Fixed editing a quest title or subtitle from the quest view panel with the 'T' and 'S' hotkeys not immediately updating the quest view panel
+
 ## [26.1.2.3]
 
+### Added
 * JEI bookmarking support for Task & Reward buttons and valid items screen in FTB Quests
   * Press 'A' (or whatever your keybinding for JEI bookmarking is) to toggle bookmarking for items for within FTB Quests
   * FTB XMod Compat 26.1.2.3+ is also required

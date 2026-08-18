@@ -5,6 +5,8 @@ import com.mojang.serialization.DataResult;
 import de.marhali.json5.Json5Object;
 import dev.ftb.mods.ftblibrary.client.config.EditableConfigGroup;
 import dev.ftb.mods.ftblibrary.json5.Json5Util;
+import dev.ftb.mods.ftblibrary.util.KnownServerRegistries;
+import dev.ftb.mods.ftblibrary.util.NameMap;
 import dev.ftb.mods.ftbquests.quest.Quest;
 import dev.ftb.mods.ftbquests.quest.TeamData;
 import net.minecraft.core.HolderLookup;
@@ -66,7 +68,8 @@ public class LocationTask extends AbstractBooleanTask {
 	@Override
 	public void readData(Json5Object json, HolderLookup.Provider provider) {
 		super.readData(json, provider);
-		dimension = ResourceKey.create(Registries.DIMENSION, Json5Util.fetch(json, "dimension", Identifier.CODEC).orElseThrow());
+
+		dimension = ResourceKey.create(Registries.DIMENSION, Json5Util.fetch(json, "dimension", Identifier.CODEC).orElse(Level.OVERWORLD.identifier()));
 		ignoreDimension = Json5Util.getBoolean(json, "ignore_dimension").orElseThrow();
 
 		List<Integer> pos = Json5Util.fetch(json, "position", THREE_INT_LIST_CODEC).orElseThrow();
@@ -78,9 +81,9 @@ public class LocationTask extends AbstractBooleanTask {
 
 		List<Integer> size = Json5Util.fetch(json, "size", THREE_INT_LIST_CODEC).orElseThrow();
 		if (size.size() == 3) {
-			w = pos.get(0);
-			h = pos.get(1);
-			d = pos.get(2);
+			w = Math.max(pos.get(0), 1);
+			h = Math.max(pos.get(1), 1);
+			d = Math.max(pos.get(2), 1);
 		}
 	}
 
@@ -105,15 +108,24 @@ public class LocationTask extends AbstractBooleanTask {
 		x = buffer.readVarInt();
 		y = buffer.readVarInt();
 		z = buffer.readVarInt();
-		w = buffer.readVarInt();
-		h = buffer.readVarInt();
-		d = buffer.readVarInt();
+		w = Math.max(buffer.readVarInt(), 1);
+		h = Math.max(buffer.readVarInt(), 1);
+		d = Math.max(buffer.readVarInt(), 1);
 	}
 
 	@Override
 	public void fillConfigGroup(EditableConfigGroup config) {
 		super.fillConfigGroup(config);
-		config.addString("dim", dimension.identifier().toString(), v -> dimension = ResourceKey.create(Registries.DIMENSION, Identifier.tryParse(v)), "minecraft:overworld");
+
+		if (KnownServerRegistries.client != null && !KnownServerRegistries.client.dimension().isEmpty()) {
+			List<Identifier> dimensions = KnownServerRegistries.client.dimension();
+			config.addEnum("dim", dimension.identifier(),
+					v -> dimension = ResourceKey.create(Registries.DIMENSION, v),
+					NameMap.of(dimensions.getFirst(), dimensions.toArray(new Identifier[0])).create());
+		} else {
+			config.addString("dim", dimension.identifier().toString(),
+					v -> Identifier.read(v).ifSuccess(id -> dimension = ResourceKey.create(Registries.DIMENSION, id)), "minecraft:overworld");
+		}
 		config.addBool("ignore_dim", ignoreDimension, v -> ignoreDimension = v, false);
 		config.addInt("x", x, v -> x = v, 0, Integer.MIN_VALUE, Integer.MAX_VALUE);
 		config.addInt("y", y, v -> y = v, 0, Integer.MIN_VALUE, Integer.MAX_VALUE);

@@ -4,11 +4,11 @@ import com.mojang.datafixers.util.Either;
 import dev.ftb.mods.ftblibrary.platform.network.PacketContext;
 import dev.ftb.mods.ftblibrary.util.NetworkHelper;
 import dev.ftb.mods.ftbquests.api.FTBQuestsAPI;
+import dev.ftb.mods.ftbquests.integration.PermissionsHelper;
 import dev.ftb.mods.ftbquests.quest.QuestObjectBase;
 import dev.ftb.mods.ftbquests.quest.ServerQuestFile;
 import dev.ftb.mods.ftbquests.quest.history.events.UpdateTranslation;
 import dev.ftb.mods.ftbquests.quest.translation.TranslationKey;
-import dev.ftb.mods.ftbquests.util.NetUtils;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
@@ -51,13 +51,17 @@ public record SyncTranslationMessageToServer(long id, String locale, Translation
     }
 
     public static void handle(SyncTranslationMessageToServer message, PacketContext context) {
-        if (NetUtils.canEdit(context)) {
-            ServerQuestFile sqf = ServerQuestFile.getInstance();
-            QuestObjectBase object = sqf.getBase(message.id);
-            if (object != null) {
-                UpdateTranslation.create(sqf, object, message.locale, message.subKey, message.val)
-                        .ifPresent(event -> sqf.getHistoryStack().addAndApply(sqf, event));
-            }
+        if (PermissionsHelper.canPlayerEdit(context)) {
+            ServerQuestFile.ifExists(sqf -> {
+                QuestObjectBase object = sqf.getBase(message.id);
+                if (object != null) {
+                    try {
+                        UpdateTranslation.create(sqf, object, message.locale, message.subKey, message.subKey.validate(message.val))
+                                .ifPresent(event -> sqf.getHistoryStack().addAndApply(sqf, event));
+                    } catch (IllegalArgumentException ignored) {
+                    }
+                }
+            });
         }
     }
 }

@@ -93,7 +93,11 @@ public class TranslationTable {
             if (v.isJson5Primitive()) {
                 map.put(k, Either.left(v.getAsString()));
             } else if (v.isJson5Array()) {
-                map.put(k, Either.right(v.getAsJson5Array().asList().stream().map(Json5Element::getAsString).toList()));
+                List<String> list = v.getAsJson5Array().asList().stream()
+                        .filter(Json5Element::isJson5Primitive)
+                        .map(Json5Element::getAsString)
+                        .toList();
+                map.put(k, Either.right(list));
             }
         });
 
@@ -103,7 +107,7 @@ public class TranslationTable {
     private static @Nullable Path getPathForQuestObject(QuestObjectBase qo) {
         return switch (qo.getObjectType()) {
             case QUEST, TASK, QUEST_LINK -> qo.getQuestChapter() != null ?
-                    Path.of("chapters").resolve(qo.getQuestChapter().getFilename() + BaseQuestFile.FILE_SUFFIX) :
+                    qo.getQuestChapter().getPath().orElseThrow() :
                     null;
             default -> Path.of(qo.getObjectType().getId() + BaseQuestFile.FILE_SUFFIX);
         };

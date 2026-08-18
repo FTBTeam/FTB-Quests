@@ -79,7 +79,7 @@ public class ClientQuestFile extends BaseQuestFile {
 	@Override
 	public boolean canEdit() {
         return hasEditorPermission() && ClientUtils.getOptionalClientPlayer()
-				.map(player -> selfTeamData.isValid() && selfTeamData.getCanEdit(player))
+				.map(player -> selfTeamData.isValid() && selfTeamData.isPlayerInEditMode(player))
 				.orElse(false);
 	}
 
@@ -150,13 +150,15 @@ public class ClientQuestFile extends BaseQuestFile {
 	}
 
 	@Override
-	public void deleteObjects(List<Long> ids) {
+	public boolean deleteObjects(List<Long> ids) {
 		// Don't actually delete the object(s) yet, but just send a deletion request to the server
 		// See FTBQuestNetClient#deleteObject for actual client-side deletion, done on receipt of
 		//   the server deletion response
 		if (!ids.isEmpty()) {
 			Play2ServerNetworking.send(new DeleteObjectMessage(ids));
+			return true;
 		}
+		return false;
 	}
 
 	@Override
@@ -179,11 +181,11 @@ public class ClientQuestFile extends BaseQuestFile {
 	}
 
 	public static boolean canClientPlayerEdit() {
-		return exists() && INSTANCE.selfTeamData.getCanEdit(ClientUtils.getClientPlayer());
+		return exists() && getInstance().selfTeamData.isPlayerInEditMode(ClientUtils.getClientPlayer());
 	}
 
 	public static boolean isQuestPinned(long id) {
-		return exists() && INSTANCE.selfTeamData.isQuestPinned(ClientUtils.getClientPlayer(), id);
+		return exists() && getInstance().selfTeamData.isQuestPinned(ClientUtils.getClientPlayer(), id);
 	}
 
 	@Override
@@ -222,6 +224,12 @@ public class ClientQuestFile extends BaseQuestFile {
 		editorPermission = hasPermission;
 	}
 
+	/**
+	 * Non-authoritative check! This is what the client thinks it has, but this will be validated server-side when
+	 * any packets are received there.
+	 *
+	 * @return true if the client think this player has editor permission
+	 */
 	public boolean hasEditorPermission() {
 		return editorPermission;
 	}

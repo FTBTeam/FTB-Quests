@@ -39,6 +39,7 @@ import net.minecraft.util.Util;
 import net.minecraft.world.item.ItemStack;
 import org.jspecify.annotations.Nullable;
 
+import java.nio.file.Path;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -64,7 +65,7 @@ public class RewardTable extends QuestObjectBase {
 		super(id);
 
 		this.file = file;
-		this.filename = filename;
+		this.filename = sanitizeFilename(filename).orElse("");
 
 		weightedRewards = new ArrayList<>();
 		fakeQuest = makeFakeQuest(file);
@@ -84,8 +85,8 @@ public class RewardTable extends QuestObjectBase {
 		return id == -1L;
 	}
 
-	public static QuestObjectBase createRewardForTable(long id, String type, BaseQuestFile file) {
-		return RewardType.createReward(id, makeFakeQuest(file), type);
+	public static QuestObjectBase requireCreateRewardForTable(long id, String type, BaseQuestFile file) {
+		return Objects.requireNonNull(RewardType.createReward(id, makeFakeQuest(file), type));
 	}
 
 	public Component getTitleOrElse(Component def) {
@@ -219,14 +220,16 @@ public class RewardTable extends QuestObjectBase {
 				}
 
 				Reward reward = RewardType.createReward(rewardId, fakeQuest, Json5Util.getString(rewardTag, "type").orElse(""));
-				getQuestFile().getTranslationManager().processInitialTranslation(rewardTag, reward);
-				reward.readData(rewardTag, provider);
-				float weight = rewardTag.has("weight") ? Json5Util.getFloat(rewardTag, "weight").orElse(0f) : 1;
-				weightedRewards.add(new WeightedReward(reward, weight));
-				prevRewards.remove(rewardId);
-				if (newReward && getFile() instanceof ServerQuestFile sqf) {
-					Server2PlayNetworking.sendToAllPlayers(sqf.server, CreateObjectResponseMessage.create(reward));
-				}
+                if (reward != null) {
+                    getQuestFile().getTranslationManager().processInitialTranslation(rewardTag, reward);
+					reward.readData(rewardTag, provider);
+					float weight = rewardTag.has("weight") ? Json5Util.getFloat(rewardTag, "weight").orElse(0f) : 1;
+					weightedRewards.add(new WeightedReward(reward, weight));
+					prevRewards.remove(rewardId);
+					if (newReward && getFile() instanceof ServerQuestFile sqf) {
+						Server2PlayNetworking.sendToAllPlayers(sqf.server, CreateObjectResponseMessage.create(reward));
+					}
+                }
 			}
 		}
 
@@ -249,6 +252,7 @@ public class RewardTable extends QuestObjectBase {
 	@Override
 	public void writeNetData(RegistryFriendlyByteBuf buffer) {
 		super.writeNetData(buffer);
+
 		buffer.writeUtf(filename, Short.MAX_VALUE);
 		buffer.writeFloat(emptyWeight);
 		buffer.writeVarInt(lootSize);
@@ -258,11 +262,11 @@ public class RewardTable extends QuestObjectBase {
 		flags = Bits.setFlag(flags, 4, lootCrate != null);
 		flags = Bits.setFlag(flags, 8, lootTableId != null);
 		buffer.writeVarInt(flags);
-		buffer.writeVarInt(weightedRewards.size());
 
+		buffer.writeVarInt(weightedRewards.size());
 		for (WeightedReward wr : weightedRewards) {
 			buffer.writeLong(wr.getReward().getId());
-			buffer.writeVarInt(wr.getReward().getType().internalId);
+			buffer.writeIdentifier(wr.getReward().getType().getTypeId());
 			wr.getReward().writeNetData(buffer);
 			buffer.writeFloat(wr.getWeight());
 		}
@@ -279,7 +283,7 @@ public class RewardTable extends QuestObjectBase {
 	@Override
 	public void readNetData(RegistryFriendlyByteBuf buffer) {
 		super.readNetData(buffer);
-		filename = buffer.readUtf(Short.MAX_VALUE);
+		filename = sanitizeFilename(buffer.readUtf(Short.MAX_VALUE)).orElse("");
 		emptyWeight = buffer.readFloat();
 		lootSize = buffer.readVarInt();
 		int flags = buffer.readVarInt();
@@ -292,11 +296,13 @@ public class RewardTable extends QuestObjectBase {
 
 		for (int i = 0; i < s; i++) {
 			long id = buffer.readLong();
-			RewardType type = file.getRewardType(buffer.readVarInt());
-			Reward reward = type.createReward(id, fakeQuest);
-			reward.readNetData(buffer);
-			float weight = buffer.readFloat();
-			weightedRewards.add(new WeightedReward(reward, weight));
+			RewardType type = RewardTypes.TYPES.get(buffer.readIdentifier());
+			if (type != null) {
+				Reward reward = type.createReward(id, fakeQuest);
+				reward.readNetData(buffer);
+				float weight = buffer.readFloat();
+				weightedRewards.add(new WeightedReward(reward, weight));
+			}
 		}
 
 		lootCrate = null;
@@ -372,7 +378,7 @@ public class RewardTable extends QuestObjectBase {
 		file.addRewardTable(this);
 	}
 
-	public String getFilename() {
+	private String getFilename() {
 		if (filename.isEmpty()) {
 			filename = getCodeString(this);
 		}
@@ -381,8 +387,8 @@ public class RewardTable extends QuestObjectBase {
 	}
 
 	@Override
-	public Optional<String> getPath() {
-		return Optional.of("reward_tables/" + getFilename() + Json5Util.FILE_EXT);
+	public Optional<Path> getPath() {
+		return Optional.of(Path.of("reward_tables").resolve(getFilename() + Json5Util.FILE_EXT));
 	}
 
 	@Override

@@ -4,6 +4,7 @@ import com.mojang.brigadier.Command;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import dev.ftb.mods.ftbquests.integration.PermissionsHelper;
 import dev.ftb.mods.ftbquests.net.ClearRepeatCooldownMessage;
 import dev.ftb.mods.ftbquests.quest.Quest;
 import dev.ftb.mods.ftbquests.quest.QuestObjectBase;
@@ -23,7 +24,7 @@ import static net.minecraft.commands.Commands.literal;
 public class ChangeProgressCommand {
     public static LiteralArgumentBuilder<CommandSourceStack> register() {
         return Commands.literal("change_progress")
-                .requires(FTBQuestsCommands::hasEditorPermission)
+                .requires(PermissionsHelper::hasEditorPermission)
                 .then(argument("players", EntityArgument.players())
                         .then(literal("reset")
                                 .then(argument("quest_object", StringArgumentType.string())

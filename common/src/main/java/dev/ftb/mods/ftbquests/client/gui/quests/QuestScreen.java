@@ -351,7 +351,7 @@ public class QuestScreen extends BaseScreen {
 
 	private void addBezierControlEntries(List<ContextMenuItem> contextMenu, QuestButton qb) {
 		var depQuests = qb.quest.streamDependencies()
-				.filter(qo -> qo instanceof Quest)
+				.filter(qo -> qo instanceof Quest && qo.getQuestChapter().id == qb.quest.getChapter().id)
 				.map(qo -> (Quest) qo).toList();
 
 		if (depQuests.size() == 1) {
@@ -538,6 +538,10 @@ public class QuestScreen extends BaseScreen {
 
 	@Override
 	public boolean keyPressed(Key key) {
+		if (super.keyPressed(key)) {
+			return true;
+		}
+
 		if (key.matches(FTBQuestsKeyMappings.KEY_GUI_RELOAD_THEME)) {
 			reloadTheme(!isShiftKeyDown());
 			return true;
@@ -652,7 +656,7 @@ public class QuestScreen extends BaseScreen {
 			}
 		}
 
-		return super.keyPressed(key);
+		return false;
 	}
 
 	@Override

@@ -5,6 +5,7 @@ import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import dev.ftb.mods.ftblibrary.platform.Platform;
+import dev.ftb.mods.ftbquests.integration.PermissionsHelper;
 import dev.ftb.mods.ftbquests.quest.loot.RewardTable;
 import dev.ftb.mods.ftbquests.quest.loot.WeightedReward;
 import dev.ftb.mods.ftbquests.quest.reward.ItemReward;
@@ -28,7 +29,7 @@ import static net.minecraft.commands.Commands.argument;
 public class ExportRewardTableCommand {
     public static LiteralArgumentBuilder<CommandSourceStack> register() {
         return Commands.literal("export_reward_table_to_chest")
-                .requires(FTBQuestsCommands::hasEditorPermission)
+                .requires(PermissionsHelper::hasEditorPermission)
                 .then(argument("reward_table", StringArgumentType.string())
                         .executes(ctx ->
                                 exportRewards(ctx.getSource(), StringArgumentType.getString(ctx, "reward_table"), null)

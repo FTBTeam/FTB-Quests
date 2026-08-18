@@ -12,8 +12,11 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 
 public abstract class EnergyTask extends Task implements ISingleLongValueTask {
-	private long value = 1000L;
-	private long maxInput = 1000L;
+	public static final long DEFAULT_VALUE = 1000L;
+	public static final long DEFAULT_MAX_INPUT = 1000L;
+
+	private long value = DEFAULT_VALUE;
+	private long maxInput = DEFAULT_MAX_INPUT;
 
 	public EnergyTask(long id, Quest quest) {
 		super(id, quest);
@@ -28,16 +31,16 @@ public abstract class EnergyTask extends Task implements ISingleLongValueTask {
 	public void writeData(Json5Object json, HolderLookup.Provider provider) {
 		super.writeData(json, provider);
 
-		json.addProperty("value", value);
-		if (maxInput > 0L) json.addProperty("max_input", maxInput);
+		if (value != DEFAULT_VALUE) json.addProperty("value", value);
+		if (maxInput != DEFAULT_MAX_INPUT) json.addProperty("max_input", maxInput);
 	}
 
 	@Override
 	public void readData(Json5Object json, HolderLookup.Provider provider) {
 		super.readData(json, provider);
 
-		value = Math.max(1L, Json5Util.getLong(json, "value").orElseThrow());
-		maxInput = Json5Util.getLong(json, "max_input").orElse(1000L);
+		value = Math.max(Json5Util.getLong(json, "value").orElse(DEFAULT_VALUE), 1L);
+		maxInput = Math.max(Json5Util.getLong(json, "max_input").orElse(DEFAULT_MAX_INPUT), 0L);
 	}
 
 	@Override
@@ -50,8 +53,8 @@ public abstract class EnergyTask extends Task implements ISingleLongValueTask {
 	@Override
 	public void readNetData(RegistryFriendlyByteBuf buffer) {
 		super.readNetData(buffer);
-		value = buffer.readVarLong();
-		maxInput = buffer.readVarLong();
+		value = Math.max(buffer.readVarLong(), 1L);
+		maxInput = Math.max(buffer.readVarLong(), 0L);
 	}
 
 	public long getValue() {
@@ -76,8 +79,9 @@ public abstract class EnergyTask extends Task implements ISingleLongValueTask {
 	@Override
 	public void fillConfigGroup(EditableConfigGroup config) {
 		super.fillConfigGroup(config);
-		config.addLong("value", value, v -> value = v, 1000L, 1L, Long.MAX_VALUE);
-		config.addLong("max_input", maxInput, v -> maxInput = v, 1000L, 0L, Integer.MAX_VALUE).setNameKey("ftbquests.task.max_input");
+		config.addLong("value", value, v -> value = v, DEFAULT_VALUE, 1L, Long.MAX_VALUE);
+		config.addLong("max_input", maxInput, v -> maxInput = v, DEFAULT_MAX_INPUT, 0L, Integer.MAX_VALUE)
+				.setNameKey("ftbquests.task.max_input");
 	}
 
 	public abstract EnergyTaskClientData getClientData();

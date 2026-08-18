@@ -2,19 +2,25 @@ package dev.ftb.mods.ftbquests.net;
 
 import dev.ftb.mods.ftblibrary.platform.network.PacketContext;
 import dev.ftb.mods.ftbquests.api.FTBQuestsAPI;
+import dev.ftb.mods.ftbquests.integration.PermissionsHelper;
+import dev.ftb.mods.ftbquests.quest.BaseQuestFile;
 import dev.ftb.mods.ftbquests.quest.QuestObject;
 import dev.ftb.mods.ftbquests.quest.QuestObjectBase;
 import dev.ftb.mods.ftbquests.quest.ServerQuestFile;
 import dev.ftb.mods.ftbquests.quest.history.CreateOrDeleteRecord;
+import dev.ftb.mods.ftbquests.quest.history.QuestBookEditEvent;
 import dev.ftb.mods.ftbquests.quest.history.events.DeleteQuestObjects;
-import dev.ftb.mods.ftbquests.util.NetUtils;
+import it.unimi.dsi.fastutil.longs.LongOpenHashSet;
+import it.unimi.dsi.fastutil.longs.LongSet;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 
 import java.util.ArrayList;
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Set;
 
 public record DeleteObjectMessage(List<Long> ids) implements CustomPacketPayload {
 	public static final Type<DeleteObjectMessage> TYPE = new Type<>(FTBQuestsAPI.id("delete_object_message"));
@@ -34,18 +40,22 @@ public record DeleteObjectMessage(List<Long> ids) implements CustomPacketPayload
 	}
 
 	public static void handle(DeleteObjectMessage message, PacketContext context) {
-		ServerQuestFile sqf = ServerQuestFile.getInstance();
-		if (NetUtils.canEdit(context)) {
-			List<CreateOrDeleteRecord> records = expandChildren(sqf, CreateOrDeleteRecord.fromIds(sqf, message.ids));
-			if (!records.isEmpty()) {
-				sqf.getHistoryStack().addAndApply(sqf, new DeleteQuestObjects(records));
+		ServerQuestFile.ifExists(sqf -> {
+			if (PermissionsHelper.canPlayerEdit(context)) {
+				List<Long> idSublist = QuestBookEditEvent.takeLimitedElements(message.ids);
+				// LinkedHashSet deduplicates input ids while preserving order, which may be significant
+				List<CreateOrDeleteRecord> records = expandChildren(sqf, CreateOrDeleteRecord.fromIds(sqf, new LinkedHashSet<>(idSublist)));
+				if (!records.isEmpty()) {
+					sqf.getHistoryStack().addAndApply(sqf, new DeleteQuestObjects(records));
+				}
 			}
-		}
+		});
 	}
 
 	/**
 	 * Given a list of deletion records, expand the list to include all child objects too, e.g. if there's a quest
-	 * in the list, also add its tasks/rewards, *before* the quest itself. Operates recursively where needed.
+	 * in the list, also add its tasks/rewards, *before* the quest itself. Operates recursively where needed. Does not
+	 * allow deletion of the entire quest file.
 	 *
 	 * @param in the input list
 	 * @return the (possibly) expanded, list
@@ -55,7 +65,7 @@ public record DeleteObjectMessage(List<Long> ids) implements CustomPacketPayload
 
 		for (var rec : in) {
 			QuestObjectBase qob = file.getBase(rec.id());
-			if (qob instanceof QuestObject qo) {
+			if (qob instanceof QuestObject qo && (!(qob instanceof BaseQuestFile))) {
 				List<CreateOrDeleteRecord> l = qo.getChildren().stream()
 						.flatMap(child -> expandChildren(file, List.of(CreateOrDeleteRecord.ofQuestObject(child))).stream())
 						.toList();

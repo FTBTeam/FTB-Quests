@@ -737,18 +737,23 @@ public class TeamData {
 		return Optional.of(perPlayerData.get(player.getUUID()));
 	}
 
+	@Deprecated(forRemoval = true)
 	public boolean getCanEdit(Player player) {
-		return getOrCreatePlayerData(player).map(d -> d.canEdit).orElse(false);
+		return isPlayerInEditMode(player);
 	}
 
-	public boolean setCanEdit(Player player, boolean newCanEdit) {
+	public boolean isPlayerInEditMode(Player player) {
+		return getOrCreatePlayerData(player).map(ppd -> ppd.isEditMode).orElse(false);
+	}
+
+	public boolean setPlayerEditMode(Player player, boolean newEditMode) {
 		return getOrCreatePlayerData(player).map(playerData -> {
-			if (playerData.canEdit != newCanEdit) {
-				playerData.canEdit = newCanEdit;
+			if (playerData.isEditMode != newEditMode) {
+				playerData.isEditMode = newEditMode;
 				clearCachedProgress();
 				markDirty();
 				if (serverSide && player instanceof ServerPlayer sp) {
-					Server2PlayNetworking.send(sp, new SyncEditingModeMessage(teamId, newCanEdit));
+					Server2PlayNetworking.send(sp, new SyncEditingModeMessage(teamId, newEditMode));
 				}
 				return true;
 			}
@@ -823,13 +828,13 @@ public class TeamData {
 
 	private static class PerPlayerData {
 		public static final Codec<PerPlayerData> CODEC = RecordCodecBuilder.create(builder -> builder.group(
-				Codec.BOOL.optionalFieldOf("can_edit", false).forGetter(p -> p.canEdit),
+				Codec.BOOL.optionalFieldOf("can_edit", false).forGetter(p -> p.isEditMode),
 				Codec.BOOL.optionalFieldOf("auto_pin", false).forGetter(p -> p.autoPin),
 				Codec.BOOL.optionalFieldOf("progression_paused", false).forGetter(p -> p.progressionPaused),
 				FTBQCodecs.LONG_SET_CODEC.optionalFieldOf("pinned_quests", new LongArraySet()).forGetter(p -> p.pinnedQuests)
 		).apply(builder, PerPlayerData::new));
 		public static final StreamCodec<FriendlyByteBuf, PerPlayerData> STREAM_CODEC = StreamCodec.composite(
-				ByteBufCodecs.BOOL, p -> p.canEdit,
+				ByteBufCodecs.BOOL, p -> p.isEditMode,
 				ByteBufCodecs.BOOL, p -> p.autoPin,
 				ByteBufCodecs.BOOL, p -> p.progressionPaused,
 				FTBQCodecs.LONG_SET_STREAM_CODEC, p -> p.pinnedQuests,
@@ -840,18 +845,18 @@ public class TeamData {
 		public static final StreamCodec<FriendlyByteBuf, Map<UUID,PerPlayerData>> MAP_STREAM_CODEC
 				= ByteBufCodecs.map(HashMap::new, UUIDUtil.STREAM_CODEC, STREAM_CODEC);
 
-		private boolean canEdit;
+		private boolean isEditMode;
 		private boolean autoPin;
 		private boolean progressionPaused;
 		private final LongSet pinnedQuests;
 
 		PerPlayerData() {
-			canEdit = autoPin = progressionPaused = false;
+			isEditMode = autoPin = progressionPaused = false;
 			pinnedQuests = new LongOpenHashSet();
 		}
 
-		PerPlayerData(boolean canEdit, boolean autoPin, boolean progressionPaused, LongSet pinnedQuests) {
-			this.canEdit = canEdit;
+		PerPlayerData(boolean isEditMode, boolean autoPin, boolean progressionPaused, LongSet pinnedQuests) {
+			this.isEditMode = isEditMode;
 			this.autoPin = autoPin;
 			this.progressionPaused = progressionPaused;
 			this.pinnedQuests = pinnedQuests;

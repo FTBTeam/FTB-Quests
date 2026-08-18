@@ -25,10 +25,10 @@ public record TogglePinnedMessage(long id) implements CustomPacketPayload {
 
 	public static void handle(TogglePinnedMessage message, PacketContext context) {
 		ServerPlayer player = (ServerPlayer) context.player();
-		ServerQuestFile.getInstance().getTeamData(player).ifPresent(data -> {
-			boolean newPinned = !data.isQuestPinned(player, message.id);
-			data.setQuestPinned(player, message.id, newPinned);
-			Server2PlayNetworking.send(player, new TogglePinnedResponseMessage(message.id, newPinned));
-		});
+		ServerQuestFile.ifExists(sqf -> sqf.getTeamData(player).ifPresent(data -> {
+            boolean newPinned = !data.isQuestPinned(player, message.id);
+            data.setQuestPinned(player, message.id, newPinned);
+            Server2PlayNetworking.send(player, new TogglePinnedResponseMessage(message.id, newPinned));
+        }));
 	}
 }

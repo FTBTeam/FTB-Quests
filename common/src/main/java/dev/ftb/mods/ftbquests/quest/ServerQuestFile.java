@@ -10,11 +10,7 @@ import dev.ftb.mods.ftbquests.api.event.progress.ProgressEventData;
 import dev.ftb.mods.ftbquests.integration.PermissionsHelper;
 import dev.ftb.mods.ftbquests.net.*;
 import dev.ftb.mods.ftbquests.quest.history.HistoryStack;
-import dev.ftb.mods.ftbquests.quest.reward.RewardType;
-import dev.ftb.mods.ftbquests.quest.reward.RewardTypes;
 import dev.ftb.mods.ftbquests.quest.task.Task;
-import dev.ftb.mods.ftbquests.quest.task.TaskType;
-import dev.ftb.mods.ftbquests.quest.task.TaskTypes;
 import dev.ftb.mods.ftbquests.util.FTBQuestsInventoryListener;
 import dev.ftb.mods.ftbquests.util.PlayerInventorySummary;
 import dev.ftb.mods.ftbteams.api.FTBTeamsAPI;
@@ -83,20 +79,6 @@ public class ServerQuestFile extends BaseQuestFile {
 		historyStack = new HistoryStack();
 
 		folder = Platform.get().paths().configPath().resolve("ftbquests/quests");
-
-		int taskTypeId = 0;
-
-		for (TaskType type : TaskTypes.TYPES.values()) {
-			type.internalId = ++taskTypeId;
-			taskTypeIds.put(type.internalId, type);
-		}
-
-		int rewardTypeId = 0;
-
-		for (RewardType type : RewardTypes.TYPES.values()) {
-			type.internalId = ++rewardTypeId;
-			rewardTypeIds.put(type.internalId, type);
-		}
 	}
 
 	public void load(boolean quests, boolean progression) {
@@ -158,27 +140,37 @@ public class ServerQuestFile extends BaseQuestFile {
 	}
 
 	@Override
-	public void deleteObjects(List<Long> ids) {
+	public boolean deleteObjects(List<Long> ids) {
 		List<Long> deletedIds = new ArrayList<>();
+
+		List<QuestObjectBase> toDelete = new ArrayList<>();
 		for (long id : ids) {
-			QuestObjectBase object = getBase(id);
-			if (object != null) {
-				getTranslationManager().removeAllTranslations(object);
-				object.deleteSelf();
-				object.getPath().ifPresent(path -> {
-                    try {
-                        FileUtils.delete(getFolder().resolve(path).toFile());
-                    } catch (IOException e) {
-						FTBQuests.LOGGER.error("can't delete {}: {}", path, e.getMessage());
-                    }
-                });
-				deletedIds.add(id);
+			var qob = getBase(id);
+			if (qob == null || qob instanceof BaseQuestFile) {
+				return false;
 			}
+			toDelete.add(qob);
 		}
 
-		if (!deletedIds.isEmpty()) {
-			markDirty();
+		for (var qob : toDelete) {
+			getTranslationManager().removeAllTranslations(qob);
+			qob.deleteSelf();
+			qob.getPath().ifPresent(path -> {
+				try {
+					FileUtils.delete(getFolder().resolve(path).toFile());
+				} catch (IOException e) {
+					FTBQuests.LOGGER.error("can't delete {}: {}", path, e.getMessage());
+				}
+			});
+			deletedIds.add(id);
 		}
+
+		if (deletedIds.size() == toDelete.size()) {
+			markDirty();
+			return true;
+		}
+
+		return false;
 	}
 
 	@Override
@@ -228,7 +220,7 @@ public class ServerQuestFile extends BaseQuestFile {
 		// - server will only then send a SyncTeamData message to the client
 		Server2PlayNetworking.send(player, new SyncQuestsMessage(this));
 
-		Server2PlayNetworking.send(player, new SyncEditorPermissionMessage(PermissionsHelper.hasEditorPermission(player, false)));
+		Server2PlayNetworking.send(player, new SyncEditorPermissionMessage(PermissionsHelper.hasEditorPermission(player)));
 
 		getTranslationManager().sendTranslationsToPlayer(player);
 
@@ -241,6 +233,11 @@ public class ServerQuestFile extends BaseQuestFile {
 		if (data.getName().isEmpty()) {
 			data.setName(player.getPlainTextName());
 			Server2PlayNetworking.send(player, new UpdateTeamDataMessage(data.getTeamId(), data.getName()));
+		}
+
+		if (data.isPlayerInEditMode(player) && !PermissionsHelper.canPlayerEdit(player)) {
+			// could happen if player was deop'd or lost the "ftbquests.editor" permission node
+			data.setPlayerEditMode(player, false);
 		}
 
 		checkQuestBookOnLogin(data, player);

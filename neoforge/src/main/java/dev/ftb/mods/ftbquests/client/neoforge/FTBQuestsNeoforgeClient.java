@@ -1,10 +1,12 @@
 package dev.ftb.mods.ftbquests.client.neoforge;
 
 import dev.ftb.mods.ftblibrary.api.neoforge.FTBLibraryEvent;
+import dev.ftb.mods.ftbquests.FTBQuests;
 import dev.ftb.mods.ftbquests.api.FTBQuestsAPI;
 import dev.ftb.mods.ftbquests.api.neoforge.FTBQuestsEvent;
 import dev.ftb.mods.ftbquests.client.FTBQuestsClient;
 import dev.ftb.mods.ftbquests.client.FTBQuestsClientEventHandler;
+import dev.ftb.mods.ftbquests.client.LootCrateTintSource;
 import dev.ftb.mods.ftbquests.registry.ModBlockEntityTypes;
 import net.minecraft.client.Minecraft;
 import net.neoforged.api.distmarker.Dist;
@@ -44,6 +46,8 @@ public class FTBQuestsNeoforgeClient {
         modBus.addListener(TextureAtlasStitchedEvent.class, event ->
                 FTBQuestsClientEventHandler.onTextureStitchPost(event.getAtlas()));
         modBus.addListener(ModelBakeEventHandler::onModelBake);
+        modBus.addListener(RegisterColorHandlersEvent.ItemTintSources.class, event ->
+                event.register(LootCrateTintSource.ID, LootCrateTintSource.CODEC));
 
         bus.addListener(FTBQuestsEvent.ClearFileCache.class, event ->
                 eventHandler.onFileCacheClear(event.getEventData()));

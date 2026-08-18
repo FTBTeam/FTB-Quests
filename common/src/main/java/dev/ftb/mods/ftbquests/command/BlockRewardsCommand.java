@@ -3,6 +3,7 @@ package dev.ftb.mods.ftbquests.command;
 import com.mojang.brigadier.Command;
 import com.mojang.brigadier.arguments.BoolArgumentType;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
+import dev.ftb.mods.ftbquests.integration.PermissionsHelper;
 import dev.ftb.mods.ftbquests.quest.ServerQuestFile;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
@@ -18,12 +19,12 @@ import static net.minecraft.commands.Commands.argument;
 public class BlockRewardsCommand {
     public static LiteralArgumentBuilder<CommandSourceStack> register() {
         return Commands.literal("block_rewards")
-                .requires(FTBQuestsCommands::hasEditorPermission)
+                .requires(PermissionsHelper::hasEditorPermission)
                 .executes(c -> toggleRewardBlocking(c.getSource(), c.getSource().getPlayerOrException(), null))
                 .then(argument("enabled", BoolArgumentType.bool())
                         .executes(c -> toggleRewardBlocking(c.getSource(), c.getSource().getPlayerOrException(), BoolArgumentType.getBool(c, "enabled")))
                         .then(argument("player", EntityArgument.player())
-                                .requires(FTBQuestsCommands::hasEditorPermission)
+                                .requires(PermissionsHelper::hasEditorPermission)
                                 .executes(c -> toggleRewardBlocking(c.getSource(), EntityArgument.getPlayer(c, "player"), BoolArgumentType.getBool(c, "enabled")))
                         )
                 );

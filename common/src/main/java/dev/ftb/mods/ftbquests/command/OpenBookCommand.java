@@ -5,6 +5,7 @@ import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import dev.ftb.mods.ftblibrary.platform.network.Server2PlayNetworking;
+import dev.ftb.mods.ftbquests.integration.PermissionsHelper;
 import dev.ftb.mods.ftbquests.net.OpenQuestBookMessage;
 import dev.ftb.mods.ftbquests.quest.Chapter;
 import dev.ftb.mods.ftbquests.quest.Quest;
@@ -45,7 +46,7 @@ public class OpenBookCommand {
         }
         return ServerQuestFile.getInstance().getTeamData(player).map(data -> {
             Quest quest = qo.getRelatedQuest();
-            return quest != null && (data.getCanEdit(player) || !quest.hideDetailsUntilStartable() || data.canStartTasks(quest));
+            return quest != null && (PermissionsHelper.canPlayerEdit(player) || !quest.hideDetailsUntilStartable() || data.canStartTasks(quest));
         }).orElse(false);
     }
 }
