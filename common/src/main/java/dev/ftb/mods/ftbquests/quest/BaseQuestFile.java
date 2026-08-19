@@ -36,6 +36,7 @@ import dev.ftb.mods.ftbquests.quest.reward.RewardTypes;
 import dev.ftb.mods.ftbquests.quest.task.*;
 import dev.ftb.mods.ftbquests.quest.theme.property.ThemeProperties;
 import dev.ftb.mods.ftbquests.quest.translation.TranslationManager;
+import dev.ftb.mods.ftbquests.util.FTBQFileUtils;
 import dev.ftb.mods.ftbteams.api.FTBTeamsAPI;
 import dev.ftb.mods.ftbteams.api.Team;
 import dev.ftb.mods.ftbteams.api.client.ClientTeamManager;
@@ -694,19 +695,24 @@ public abstract class BaseQuestFile extends QuestObject implements QuestFile {
 					// multiple files means a case-clash
 					// keep the most recent file, move the others to a .OLD extension
 
-					dev.ftb.mods.ftbquests.util.FileUtils.sortPathsByModificationTime(key, paths);
+					FTBQFileUtils.sortPathsByModificationTime(key, paths);
 
 					// most recent file is now last, move the others out of the way
 					for (int i = 0; i < paths.size() - 1; i++) {
 						Path oldPath = paths.get(i);
 						Path newPath = oldPath.resolveSibling(oldPath.getFileName() + ".OLD");
-						dev.ftb.mods.ftbquests.util.FileUtils.tryRename(oldPath, newPath);
+						FTBQFileUtils.tryRename(oldPath, newPath);
 					}
 
 					// and make sure the most recent filename is in canonical lowercased form
 					Path latest = paths.getLast();
 					Path newPath = latest.resolveSibling(latest.getFileName().toString().toLowerCase(Locale.ROOT));
-					dev.ftb.mods.ftbquests.util.FileUtils.tryRename(latest, newPath);
+					FTBQFileUtils.tryRename(latest, newPath);
+				} else if (paths.size() == 1) {
+					// just one path so no clash
+					// but let's still check in case filename needs to be lowercased
+					Path newPath = paths.getFirst().resolveSibling(paths.getFirst().getFileName().toString().toLowerCase(Locale.ROOT));
+					FTBQFileUtils.tryRename(paths.getFirst(), newPath);
 				}
 			});
 		} catch (Exception ex) {

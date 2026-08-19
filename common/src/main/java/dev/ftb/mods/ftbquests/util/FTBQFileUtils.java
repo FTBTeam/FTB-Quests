@@ -7,7 +7,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
 
-public class FileUtils {
+public class FTBQFileUtils {
     public static void tryRename(Path oldPath, Path newPath) {
         if (!oldPath.equals(newPath)) {
             try {
