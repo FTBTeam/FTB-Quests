@@ -32,6 +32,7 @@ import dev.architectury.platform.Platform;
 import dev.architectury.registry.ReloadListenerRegistry;
 import dev.architectury.registry.client.rendering.RenderTypeRegistry;
 import dev.architectury.registry.registries.RegistrarManager;
+import dev.ftb.mods.ftbquests.util.FileUtils;
 import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.ConfirmLinkScreen;
@@ -90,12 +91,7 @@ public class FTBQuestsClient {
 		Path newConfig = Platform.getConfigFolder().resolve("ftbquests-client.snbt");
 
 		if (Files.exists(oldConfig) && !Files.exists(newConfig)) {
-			try {
-				Files.move(oldConfig, newConfig);
-				FTBQuests.LOGGER.info("migrated {} to {}", oldConfig, newConfig);
-			} catch (IOException e) {
-				FTBQuests.LOGGER.error("can't migrate {} to {}: {}", oldConfig, newConfig, e.getMessage());
-			}
+			FileUtils.tryRename(oldConfig, newConfig);
 		}
 	}
 
