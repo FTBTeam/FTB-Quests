@@ -380,7 +380,7 @@ public class RewardTable extends QuestObjectBase {
 
 	private String getFilename() {
 		if (filename.isEmpty()) {
-			filename = getCodeString(this);
+			filename = getCodeStringForFilename();
 		}
 
 		return filename;
