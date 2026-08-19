@@ -36,6 +36,7 @@ import dev.ftb.mods.ftbquests.quest.reward.RewardTypes;
 import dev.ftb.mods.ftbquests.quest.task.*;
 import dev.ftb.mods.ftbquests.quest.theme.property.ThemeProperties;
 import dev.ftb.mods.ftbquests.quest.translation.TranslationManager;
+import dev.ftb.mods.ftbquests.util.FTBQFileUtils;
 import dev.ftb.mods.ftbteams.api.FTBTeamsAPI;
 import dev.ftb.mods.ftbteams.api.Team;
 import dev.ftb.mods.ftbteams.api.client.ClientTeamManager;
@@ -592,6 +593,7 @@ public abstract class BaseQuestFile extends QuestObject implements QuestFile {
 		objectOrderMap.defaultReturnValue(-1);
 
 		if (Files.exists(chaptersFolder)) {
+			checkAndFixFileCase(chaptersFolder);
 			try (Stream<Path> s = Files.list(chaptersFolder)) {
 				s.filter(path -> path.toString().endsWith(FILE_SUFFIX)).forEach(path -> {
 					try {
@@ -627,6 +629,7 @@ public abstract class BaseQuestFile extends QuestObject implements QuestFile {
 
 		Path rewardTableFolder = folder.resolve("reward_tables");
 		if (Files.exists(rewardTableFolder)) {
+			checkAndFixFileCase(rewardTableFolder);
 			try (Stream<Path> s = Files.list(rewardTableFolder)) {
 				s.filter(path -> path.toString().endsWith(FILE_SUFFIX))
 						.forEach(path -> loadRewardTableFile(path, objectOrderMap, dataCache));
@@ -677,6 +680,44 @@ public abstract class BaseQuestFile extends QuestObject implements QuestFile {
 		}
 
 		FTBQuests.LOGGER.info("Loaded {} chapter groups, {} chapters, {} quests, {} reward tables", chapterGroups.size(), chapterCounter, questCounter, rewardTables.size());
+	}
+
+	private void checkAndFixFileCase(Path folder) {
+		try (Stream<Path> s = Files.list(folder)) {
+			Map<String, List<Path>> fileMap = new HashMap<>();
+			s.filter(path -> path.toString().endsWith(Json5Util.FILE_EXT))
+					.forEach(path -> {
+						String key = path.getFileName().toString().toLowerCase();
+						fileMap.computeIfAbsent(key, _ -> new ArrayList<>()).add(path);
+					});
+			fileMap.forEach((key, paths) -> {
+				if (paths.size() > 1) {
+					// multiple files means a case-clash
+					// keep the most recent file, move the others to a .OLD extension
+
+					FTBQFileUtils.sortPathsByModificationTime(key, paths);
+
+					// most recent file is now last, move the others out of the way
+					for (int i = 0; i < paths.size() - 1; i++) {
+						Path oldPath = paths.get(i);
+						Path newPath = oldPath.resolveSibling(oldPath.getFileName() + ".OLD");
+						FTBQFileUtils.tryRename(oldPath, newPath);
+					}
+
+					// and make sure the most recent filename is in canonical lowercased form
+					Path latest = paths.getLast();
+					Path newPath = latest.resolveSibling(latest.getFileName().toString().toLowerCase(Locale.ROOT));
+					FTBQFileUtils.tryRename(latest, newPath);
+				} else if (paths.size() == 1) {
+					// just one path so no clash
+					// but let's still check in case filename needs to be lowercased
+					Path newPath = paths.getFirst().resolveSibling(paths.getFirst().getFileName().toString().toLowerCase(Locale.ROOT));
+					FTBQFileUtils.tryRename(paths.getFirst(), newPath);
+				}
+			});
+		} catch (Exception ex) {
+			FTBQuests.LOGGER.error("failed to read folder {}: {}", folder, ex.getMessage());
+		}
 	}
 
 	private void loadRewardTableFile(Path path, Long2IntOpenHashMap objectOrderMap, Long2ObjectOpenHashMap<Json5Object> dataCache) {

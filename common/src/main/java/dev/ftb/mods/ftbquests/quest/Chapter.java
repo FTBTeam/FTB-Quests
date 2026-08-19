@@ -364,14 +364,14 @@ public final class Chapter extends QuestObject {
 		// filename should have been suggested by the client and available here
 		// but in case not, fall back to the chapter's hex object id
 		if (filename.isEmpty()) {
-			filename = getCodeString();
+			filename = getCodeStringForFilename();
 		}
 
 		// ensure the filename is actually unique (same chapter name could appear in multiple groups...)
 		Set<String> existingNames = new HashSet<>();
 		getQuestFile().forAllChapters(ch -> existingNames.add(ch.filename));
 		if (existingNames.contains(filename)) {
-			filename = filename + "_" + getCodeString();
+			filename = filename + "_" + getCodeStringForFilename();
 		}
 
 		group.addChapter(this);
@@ -387,7 +387,7 @@ public final class Chapter extends QuestObject {
 
 	private String getFilename() {
 		if (filename.isEmpty()) {
-			filename = getCodeString(this);
+			filename = getCodeStringForFilename();
 		}
 
 		return filename;
