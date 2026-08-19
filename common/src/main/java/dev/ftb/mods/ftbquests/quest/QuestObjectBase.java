@@ -249,6 +249,10 @@ public abstract class QuestObjectBase implements Comparable<QuestObjectBase> {
 		return getCodeString(id);
 	}
 
+	public final String getCodeStringForFilename() {
+		return getCodeString(id).toLowerCase(Locale.ROOT);  // filenames always lower-cased
+ 	}
+
 	public final String toString() {
 		return getCodeString();
 	}
