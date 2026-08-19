@@ -757,6 +757,11 @@ public abstract class BaseQuestFile extends QuestObject implements QuestFile {
 					Path latest = paths.getLast();
 					Path newPath = latest.resolveSibling(latest.getFileName().toString().toLowerCase(Locale.ROOT));
 					FileUtils.tryRename(latest, newPath);
+				} else if (paths.size() == 1) {
+					// just one path so no clash
+					// but let's still check in case filename needs to be lowercased
+					Path newPath = paths.getFirst().resolveSibling(paths.getFirst().getFileName().toString().toLowerCase(Locale.ROOT));
+					FileUtils.tryRename(paths.getFirst(), newPath);
 				}
 			});
 		} catch (Exception ex) {
