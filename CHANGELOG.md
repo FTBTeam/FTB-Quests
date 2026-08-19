@@ -4,6 +4,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [26.1.2.6]
+
+### Fixed
+* Fixed filename case-sensitivity issues with chapter and/or reward table .snbt files
+  * This could lead to the same chapter or reward table being read twice
+  * The `chapters/` and `reward_tables/` folders are now scanned for case clashes before any .snbt files are read
+  * In the case of a clash, older file(s) are renamed to a ".OLD" extension, and the latest file is renamed to a lower-cased filename
+
 ## [26.1.2.5]
 
 ### Fixed
