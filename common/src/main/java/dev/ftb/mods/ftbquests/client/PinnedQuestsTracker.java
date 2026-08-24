@@ -18,27 +18,32 @@ import net.minecraft.util.FormattedCharSequence;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 
 public enum PinnedQuestsTracker {
     INSTANCE;
 
-    private static final int INTERVAL = 30;
+    private static final int INTERVAL = 20;
     public static final int VERTICAL_SPACING = 3;
 
     private final List<FormattedCharSequence> pinnedQuestText = new ArrayList<>();
     private int ticker = 0;
     private boolean showChapterTitle;
+    private boolean refreshNeeded = true;
 
     public void tick(ClientQuestFile file) {
-        if (++ticker >= INTERVAL) {
+        if (ticker < INTERVAL) {
+            ticker++;
+        }
+
+        if (refreshNeeded && ticker >= INTERVAL) {
             collectPinnedQuests(file);
+            refreshNeeded = false;
             ticker = 0;
         }
     }
 
     public void refresh() {
-        ticker = INTERVAL;
+        refreshNeeded = true;
     }
 
     private void collectPinnedQuests(ClientQuestFile file) {
@@ -67,10 +72,12 @@ public enum PinnedQuestsTracker {
                 });
                 showChapterTitle = !wholeBook;
             } else {
-                pinnedIds.longStream()
-                        .mapToObj(file::getQuest)
-                        .filter(Objects::nonNull)
-                        .forEach(pinnedQuests::add);
+                for (long id : pinnedIds) {
+                    var quest = file.getQuest(id);
+                    if (quest != null) {
+                        pinnedQuests.add(quest);
+                    }
+                }
             }
         }
 

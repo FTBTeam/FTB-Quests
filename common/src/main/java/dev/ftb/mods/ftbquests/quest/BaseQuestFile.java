@@ -117,6 +117,7 @@ public abstract class BaseQuestFile extends QuestObject implements QuestFile {
 	protected VisualPresets allPresets;
 	private String presetName;
 
+	private List<Quest> allQuests;
 	private List<Task> allTasks;
 	private List<Task> submitTasks;
 	private List<Task> craftingTasks;
@@ -162,6 +163,7 @@ public abstract class BaseQuestFile extends QuestObject implements QuestFile {
 		presetName = "";
 
 		allTasks = null;
+		allQuests = null;
 
 		translationManager = new TranslationManager();
 		fallbackLocale = TranslationManager.DEFAULT_FALLBACK_LOCALE;
@@ -1328,6 +1330,7 @@ public abstract class BaseQuestFile extends QuestObject implements QuestFile {
 	public void clearCachedData() {
 		super.clearCachedData();
 
+		allQuests = null;
 		allTasks = null;
 		submitTasks = null;
 		craftingTasks = null;
@@ -1673,7 +1676,11 @@ public abstract class BaseQuestFile extends QuestObject implements QuestFile {
 
 	@Override
 	public void forAllQuests(Consumer<Quest> consumer) {
-		forAllChapters(c -> c.getQuests().forEach(consumer));
+		if (allQuests == null) {
+			allQuests = new ArrayList<>();
+			forAllChapters(c -> allQuests.addAll(c.getQuests()));
+		}
+		allQuests.forEach(consumer);
 	}
 
 	@Override
