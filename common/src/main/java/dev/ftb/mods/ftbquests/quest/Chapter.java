@@ -438,10 +438,8 @@ public final class Chapter extends QuestObject {
 	public void clearCachedData() {
 		super.clearCachedData();
 
-		if (allChildren != null) {
-			allChildren.forEach(QuestObjectBase::clearCachedData);
-			allChildren = null;
-		}
+		getChildren().forEach(QuestObjectBase::clearCachedData);
+		allChildren = null;
 	}
 
 	@Override

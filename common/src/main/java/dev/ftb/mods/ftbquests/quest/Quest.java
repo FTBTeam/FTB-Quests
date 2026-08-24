@@ -751,10 +751,8 @@ public final class Quest extends QuestObject implements Movable, Excludable {
 		cachedDescription = null;
 		cachedPreset = null;
 
-		if (allChildren != null) {
-			allChildren.forEach(QuestObjectBase::clearCachedData);
-			allChildren = null;
-		}
+		getChildren().forEach(QuestObjectBase::clearCachedData);
+		allChildren = null;
 	}
 
 	public Component getSubtitle() {
@@ -1015,28 +1013,34 @@ public final class Quest extends QuestObject implements Movable, Excludable {
 
 	public void addTask(Task task) {
 		tasks.add(task);
+		clearCachedData();
 	}
 
 	public void removeTask(Task task) {
 		tasks.remove(task);
+		clearCachedData();
 	}
 
 	public void addReward(Reward reward) {
 		rewards.add(reward);
+		clearCachedData();
 	}
 
 	public void removeReward(Reward reward) {
 		rewards.remove(reward);
+		clearCachedData();
 	}
 
 	public void setTaskList(List<Task> tasks) {
 		this.tasks.clear();
 		this.tasks.addAll(tasks);
+		clearCachedData();
 	}
 
 	public void setRewardList(List<Reward> rewards) {
 		this.rewards.clear();
 		this.rewards.addAll(rewards);
+		clearCachedData();
 	}
 
 	/**
