@@ -4,6 +4,19 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [26.1.2.7]
+
+### Added
+* Pinned quest tracker improvements
+  * Quests which are startable but not yet completable (due to flexible mode) are no longer shown
+    * Added "Exclude Flexible-Mode Quests" client config setting (default true) to control this
+  * Added "Pinned Tracker Visibility" client config setting to control what is shown (quest and tasks - default / quests only / hidden)
+  * Added a "Pinned Quest Tracker Visibility" keybinding (default unbound) for easy cycling of the tracker visibility
+
+### Fixed
+* Pinned quest tracker should now be more performant on the client, especially for very large quest books
+* Fixed a caching issue causing task/quest icons to not always get changed after a task was edited
+
 ## [26.1.2.6]
 
 ### Fixed
