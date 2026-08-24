@@ -1,5 +1,6 @@
 package dev.ftb.mods.ftbquests.client;
 
+import com.google.common.collect.ImmutableList;
 import dev.ftb.mods.ftblibrary.icon.Color4I;
 import dev.ftb.mods.ftblibrary.ui.GuiHelper;
 import dev.ftb.mods.ftbquests.client.gui.quests.QuestScreen;
@@ -9,12 +10,14 @@ import dev.ftb.mods.ftbquests.quest.task.Task;
 import it.unimi.dsi.fastutil.longs.LongSet;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.FormattedText;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.Style;
 import net.minecraft.util.FormattedCharSequence;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -25,10 +28,11 @@ public enum PinnedQuestsTracker {
     private static final int INTERVAL = 20;
     public static final int VERTICAL_SPACING = 3;
 
-    private final List<FormattedCharSequence> pinnedQuestText = new ArrayList<>();
     private int ticker = 0;
     private boolean showChapterTitle;
     private boolean refreshNeeded = true;
+    @Nullable
+    private PinnedQuestsTracker.RenderData renderData;
 
     public void tick(ClientQuestFile file) {
         if (ticker < INTERVAL) {
@@ -48,7 +52,7 @@ public enum PinnedQuestsTracker {
 
     private void collectPinnedQuests(ClientQuestFile file) {
         if (FTBQuestsClientConfig.PINNED_VISIBILITY.get() == PinnedTrackerVisibility.HIDDEN) {
-            pinnedQuestText.clear();
+            renderData = null;
             return;
         }
 
@@ -85,18 +89,17 @@ public enum PinnedQuestsTracker {
     }
 
     private void rebuildPinnedText(List<Quest> pinnedQuests, Minecraft mc, TeamData data) {
-        pinnedQuestText.clear();
-
         if (FTBQuestsClientConfig.PINNED_VISIBILITY.get() == PinnedTrackerVisibility.HIDDEN) {
             return;
         }
 
+        ImmutableList.Builder<FormattedCharSequence> linesBuilder = ImmutableList.builder();
         for (int i = 0; i < pinnedQuests.size(); i++) {
             Quest quest = pinnedQuests.get(i);
 
-            if (i > 0) pinnedQuestText.add(FormattedCharSequence.EMPTY);  // separator line between quests
+            if (i > 0) linesBuilder.add(FormattedCharSequence.EMPTY);  // separator line between quests
 
-            pinnedQuestText.addAll(mc.font.split(FormattedText.composite(
+            linesBuilder.addAll(mc.font.split(FormattedText.composite(
                     mc.font.getSplitter().headByWidth(quest.getTitle(), 160, Style.EMPTY.withBold(true)),
                     Component.literal(" ")
                             .withStyle(ChatFormatting.DARK_AQUA)
@@ -106,7 +109,7 @@ public enum PinnedQuestsTracker {
             if (FTBQuestsClientConfig.PINNED_VISIBILITY.get() == PinnedTrackerVisibility.ALL) {
                 for (Task task : quest.getTasks()) {
                     if (!data.isCompleted(task)) {
-                        pinnedQuestText.addAll(mc.font.split(FormattedText.composite(
+                        linesBuilder.addAll(mc.font.split(FormattedText.composite(
                                 Component.literal("└").withStyle(ChatFormatting.GRAY),
                                 mc.font.getSplitter().headByWidth(task.getMutableTitle().withStyle(ChatFormatting.GRAY), 160, Style.EMPTY.applyFormat(ChatFormatting.GRAY)),
                                 Component.literal(" ")
@@ -119,27 +122,17 @@ public enum PinnedQuestsTracker {
                 }
             }
         }
+
+        renderData = RenderData.create(linesBuilder.build(), showChapterTitle, mc.font);
     }
 
     void render(Minecraft mc, GuiGraphics graphics) {
-        if (pinnedQuestText.isEmpty()) {
+        if (renderData == null || renderData.pinnedQuestText().isEmpty()) {
             return;
         }
 
-        MutableComponent title = Component.translatable("ftbquests.pinned");
-        if (showChapterTitle) {
-            ClientQuestFile.INSTANCE.getQuestScreen().flatMap(QuestScreen::getSelectedChapter)
-                    .ifPresent(chapter -> title.append(": ").append(chapter.getTitle()));
-        }
-
-        int titleWidth = mc.font.width(title);
-        int width = titleWidth + 5;
-        int height = mc.font.lineHeight + 10;
-        for (FormattedCharSequence s : pinnedQuestText) {
-            width = Math.max(width, (int) mc.font.getSplitter().stringWidth(s));
-            height += s == FormattedCharSequence.EMPTY ? VERTICAL_SPACING : mc.font.lineHeight;
-        }
-        width += 8;
+        int width = renderData.width;
+        int height = renderData.height;
 
         float scale = FTBQuestsClientConfig.PINNED_QUESTS_SCALE.get().floatValue();
         int insetX = FTBQuestsClientConfig.PINNED_QUESTS_INSET_X.get();
@@ -159,9 +152,9 @@ public enum PinnedQuestsTracker {
         Color4I.GRAY.withAlpha(50).draw(graphics, 1, 1, width - 2, mc.font.lineHeight + 4);
         Color4I.BLACK.draw(graphics, 0, mc.font.lineHeight + 4, width, 1);
 
-        graphics.drawString(mc.font, title, (width - titleWidth) / 2, 4, 0xFFFFFF00);
+        graphics.drawString(mc.font, renderData.title, (width - renderData.titleWidth) / 2, 4, 0xFFFFFF00);
         int yPos = mc.font.lineHeight + 8;
-        for (FormattedCharSequence fcs : pinnedQuestText) {
+        for (FormattedCharSequence fcs : renderData.pinnedQuestText) {
             if (fcs == FormattedCharSequence.EMPTY) {
                 yPos += VERTICAL_SPACING;
             } else {
@@ -171,5 +164,32 @@ public enum PinnedQuestsTracker {
         }
 
         graphics.pose().popPose();
+    }
+
+    private record RenderData(
+            Component title,
+            List<FormattedCharSequence> pinnedQuestText,
+            int titleWidth,
+            int width,
+            int height
+    )
+    {
+        static RenderData create(List<FormattedCharSequence> lines, boolean showChapterTitle, Font font) {
+            MutableComponent title = Component.translatable("ftbquests.pinned");
+            if (showChapterTitle) {
+                ClientQuestFile.getInstance().getQuestScreen().flatMap(QuestScreen::getSelectedChapter)
+                        .ifPresent(chapter -> title.append(": ").append(chapter.getTitle()));
+            }
+            int titleWidth = font.width(title);
+            int width = titleWidth + 5;
+            int height = font.lineHeight + 10;
+            for (FormattedCharSequence s : lines) {
+                width = Math.max(width, (int) font.getSplitter().stringWidth(s));
+                height += s == FormattedCharSequence.EMPTY ? VERTICAL_SPACING : font.lineHeight;
+            }
+            width += 8;
+
+            return new RenderData(title, lines, titleWidth, width, height);
+        }
     }
 }
