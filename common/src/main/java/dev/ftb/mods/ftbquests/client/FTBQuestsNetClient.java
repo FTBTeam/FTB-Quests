@@ -34,6 +34,7 @@ public class FTBQuestsNetClient {
 	public static void syncTeamData(TeamData data) {
 		ClientQuestFile.getInstance().addData(data, true);
 		ClientQuestFile.getInstance().selfTeamData = data;
+		PinnedQuestsTracker.INSTANCE.refresh();
 	}
 
 	public static void claimReward(UUID teamId, UUID player, long rewardId) {

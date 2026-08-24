@@ -16,6 +16,11 @@ public class FTBQuestsKeyMappings {
             = input().createKeyMapping(KeyMappingConfig.builder("quests", FTB_QUESTS_KEY_CATEGORY)
             .conflictContext(KeyConflict.IN_GAME)
             .build());
+    public static final KeyMapping KEY_CYCLE_PINNED_TRACKER = input().createKeyMapping(
+            KeyMappingConfig.builder("cycle_pinned_tracker", FTB_QUESTS_KEY_CATEGORY)
+                    .conflictContext(KeyConflict.IN_GAME)
+                    .build()
+    );
 
     private static final KeyMapping.Category FTB_QUESTS_KEY_CATEGORY_GUI
             = new KeyMapping.Category(FTBQuestsAPI.id("gui"));
@@ -71,7 +76,7 @@ public class FTBQuestsKeyMappings {
 
     public static void init() {
         // in-game category
-        input().registerKeyMapping(FTBQuestsAPI.MOD_ID, KEY_QUESTS);
+        input().registerKeyMapping(FTBQuestsAPI.MOD_ID, KEY_QUESTS, KEY_CYCLE_PINNED_TRACKER);
 
         // gui category
         input().registerKeyMapping(FTBQuestsAPI.MOD_ID,
