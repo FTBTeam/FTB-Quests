@@ -709,7 +709,7 @@
 	"ftbquests.pinned.pinned_quests_scale": "Pinned Quests Panel Scaling",
 	"ftbquests.pinned.pinned_exclude_flexible": "Exclude Flexible-Mode Quests",
 	"ftbquests.pinned.pinned_exclude_flexible.tooltip": "If true, quests which are only startable due to flexible mode (so not completable yet) are not shown in the tracker\nIf false, all startable quests are shown",
-	"ftbquests.pinned.visibility": "Pinned Tracker Visibility",
+	"ftbquests.pinned.pinned_visibility": "Pinned Tracker Visibility",
 	"ftbquests.pinned.visibility.all": "Quests and Tasks",
 	"ftbquests.pinned.visibility.quests_only": "Quests Only",
 	"ftbquests.pinned.visibility.hidden": "Hidden",

@@ -59,6 +59,7 @@ public interface FTBQuestsClientConfig {
 
     static void onEdited(boolean ignoredClientSide) {
         ClientQuestFile.INSTANCE.clearCachedData();
+        PinnedQuestsTracker.INSTANCE.refresh();
     }
 
     static void setAlwaysShowChangelog(boolean show) {

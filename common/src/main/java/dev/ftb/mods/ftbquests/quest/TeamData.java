@@ -7,6 +7,7 @@ import dev.ftb.mods.ftblibrary.snbt.SNBTCompoundTag;
 import dev.ftb.mods.ftbquests.FTBQuests;
 import dev.ftb.mods.ftbquests.api.FTBQuestsAPI;
 import dev.ftb.mods.ftbquests.client.ClientQuestFile;
+import dev.ftb.mods.ftbquests.client.PinnedQuestsTracker;
 import dev.ftb.mods.ftbquests.events.QuestProgressEventData;
 import dev.ftb.mods.ftbquests.net.*;
 import dev.ftb.mods.ftbquests.quest.reward.Reward;
@@ -27,6 +28,7 @@ import net.minecraft.nbt.Tag;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
@@ -37,6 +39,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.nio.file.Path;
 import java.util.*;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 public class TeamData {
@@ -166,71 +169,53 @@ public class TeamData {
 		return when == 0L ? Optional.empty() : Optional.of(new Date(when));
 	}
 
-	public boolean setStarted(long questId, @Nullable Date time) {
-		if (!locked) {
-			if (time == null) {
-				if (started.remove(questId) >= 0L) {
-					clearCachedProgress();
-					markDirty();
-
-					if (file.isServerSide()) {
-						NetworkManager.sendToPlayers(getOnlineMembers(), new ObjectStartedResetMessage(teamId, questId));
-					}
-
-					return true;
-				}
-			} else {
-				if (started.put(questId, time.getTime()) == 0L) {
-					clearCachedProgress();
-					markDirty();
-
-					if (file.isServerSide()) {
-						NetworkManager.sendToPlayers(getOnlineMembers(), new ObjectStartedMessage(teamId, questId));
-					}
-
-					return true;
-				}
-			}
-
-		}
-		return false;
-	}
-
 	public Optional<Date> getCompletedTime(long questId) {
 		long when = completed.get(questId);
 		return when == 0L ? Optional.empty() : Optional.of(new Date(when));
 	}
 
-	public boolean setCompleted(long id, @Nullable Date time) {
-		if (locked) {
-			return false;
-		}
-
-		if (time == null) {
-			if (completed.remove(id) >= 0L) {
-				clearCachedProgress();
-				markDirty();
-
-				if (file.isServerSide()) {
-					NetworkManager.sendToPlayers(getOnlineMembers(), new ObjectCompletedResetMessage(teamId, id));
+	public boolean setStarted(long questId, @Nullable Date time) {
+		if (!locked) {
+			if (time == null) {
+				if (started.remove(questId) >= 0L) {
+					onStartedOrCompleted(() -> new ObjectStartedResetMessage(teamId, questId));
+					return true;
 				}
-
-				return true;
-			}
-		} else {
-			if (completed.put(id, time.getTime()) == 0L) {
-				clearCachedProgress();
-				markDirty();
-
-				if (file.isServerSide()) {
-					NetworkManager.sendToPlayers(getOnlineMembers(), new ObjectCompletedMessage(teamId, id));
+			} else {
+				if (started.put(questId, time.getTime()) == 0L) {
+					onStartedOrCompleted(() -> new ObjectStartedMessage(teamId, questId));
+					return true;
 				}
-
-				return true;
 			}
 		}
-
 		return false;
+	}
+
+	public boolean setCompleted(long questId, @Nullable Date time) {
+        if (!locked) {
+            if (time == null) {
+                if (completed.remove(questId) >= 0L) {
+                    onStartedOrCompleted(() -> new ObjectCompletedResetMessage(teamId, questId));
+                    return true;
+                }
+            } else {
+                if (completed.put(questId, time.getTime()) == 0L) {
+                    onStartedOrCompleted(() -> new ObjectCompletedMessage(teamId, questId));
+                    return true;
+                }
+            }
+        }
+		return false;
+    }
+
+	private void onStartedOrCompleted(Supplier<CustomPacketPayload> packet) {
+		clearCachedProgress();
+		markDirty();
+		if (file.isServerSide()) {
+			NetworkManager.sendToPlayers(getOnlineMembers(), packet.get());
+		} else {
+			PinnedQuestsTracker.INSTANCE.refresh();
+		}
 	}
 
 	public Optional<Date> getRewardClaimTime(UUID player, Reward reward) {
@@ -684,7 +669,7 @@ public class TeamData {
 		}
 
 		long maxProgress = task.getMaxProgress();
-		progress = Math.max(0L, Math.min(progress, maxProgress));
+		progress = Math.clamp(progress, 0L, maxProgress);
 		long prevProgress = getProgress(task);
 
 		if (prevProgress != progress || progress == 0L && isStarted(task)) {
@@ -712,6 +697,8 @@ public class TeamData {
 				if (progress >= maxProgress && areDependenciesComplete(task.getQuest())) {
 					markTaskCompleted(task);
 				}
+			} else {
+				PinnedQuestsTracker.INSTANCE.refresh();
 			}
 
 			markDirty();
@@ -841,6 +828,9 @@ public class TeamData {
 		getOrCreatePlayerData(player).ifPresent(playerData -> {
 			if (pinned ? playerData.pinnedQuests.add(id) : playerData.pinnedQuests.remove(id)) {
 				markDirty();
+				if (!file.isServerSide()) {
+					PinnedQuestsTracker.INSTANCE.refresh();
+				}
 			}
 		});
 	}
