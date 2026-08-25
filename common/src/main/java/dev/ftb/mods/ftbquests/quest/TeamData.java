@@ -11,6 +11,7 @@ import dev.ftb.mods.ftblibrary.platform.network.Server2PlayNetworking;
 import dev.ftb.mods.ftbquests.FTBQuests;
 import dev.ftb.mods.ftbquests.api.FTBQuestsAPI;
 import dev.ftb.mods.ftbquests.api.event.progress.ProgressEventData;
+import dev.ftb.mods.ftbquests.client.PinnedQuestsTracker;
 import dev.ftb.mods.ftbquests.net.*;
 import dev.ftb.mods.ftbquests.quest.reward.Reward;
 import dev.ftb.mods.ftbquests.quest.reward.RewardAutoClaim;
@@ -28,6 +29,7 @@ import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.util.Util;
 import net.minecraft.world.entity.player.Player;
@@ -40,6 +42,7 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.util.*;
 import java.util.function.Function;
+import java.util.function.Supplier;
 
 public class TeamData {
 	public static final int VERSION = 1;
@@ -50,11 +53,6 @@ public class TeamData {
 	private static final byte BOOL_UNKNOWN = -1;
 	private static final byte BOOL_FALSE = 0;
 	private static final byte BOOL_TRUE = 1;
-
-	private static final Comparator<Long2LongMap.Entry> LONG2LONG_COMPARATOR
-			= (e1, e2) -> Long.compareUnsigned(e1.getLongValue(), e2.getLongValue());
-	private static final Comparator<Object2LongMap.Entry<QuestKey>> OBJECT2LONG_COMPARATOR
-			= (e1, e2) -> Long.compareUnsigned(e1.getLongValue(), e2.getLongValue());
 
 	public static final StreamCodec<FriendlyByteBuf,TeamData> STREAM_CODEC = StreamCodec.of(
 			(buf, data) -> {
@@ -171,71 +169,53 @@ public class TeamData {
 		return when == 0L ? Optional.empty() : Optional.of(new Date(when));
 	}
 
-	public boolean setStarted(long questId, @Nullable Date time) {
-		if (!locked) {
-			if (time == null) {
-				if (started.remove(questId) >= 0L) {
-					clearCachedProgress();
-					markDirty();
-
-					if (serverSide) {
-						Server2PlayNetworking.send(getOnlineMembers(), new ObjectStartedResetMessage(teamId, questId));
-					}
-
-					return true;
-				}
-			} else {
-				if (started.put(questId, time.getTime()) == 0L) {
-					clearCachedProgress();
-					markDirty();
-
-					if (serverSide) {
-						Server2PlayNetworking.send(getOnlineMembers(), new ObjectStartedMessage(teamId, questId));
-					}
-
-					return true;
-				}
-			}
-
-		}
-		return false;
-	}
-
 	public Optional<Date> getCompletedTime(long questId) {
 		long when = completed.getOrDefault(questId, 0L);
 		return when == 0L ? Optional.empty() : Optional.of(new Date(when));
 	}
 
-	public boolean setCompleted(long id, @Nullable Date time) {
-		if (locked) {
-			return false;
-		}
-
-		if (time == null) {
-			if (completed.remove(id) >= 0L) {
-				clearCachedProgress();
-				markDirty();
-
-				if (serverSide) {
-					Server2PlayNetworking.send(getOnlineMembers(), new ObjectCompletedResetMessage(teamId, id));
+	public boolean setStarted(long questId, @Nullable Date time) {
+		if (!locked) {
+			if (time == null) {
+				if (started.remove(questId) >= 0L) {
+					onStartedOrCompleted(() -> new ObjectStartedResetMessage(teamId, questId));
+					return true;
 				}
-
-				return true;
-			}
-		} else {
-			if (completed.put(id, time.getTime()) == 0L) {
-				clearCachedProgress();
-				markDirty();
-
-				if (serverSide) {
-					Server2PlayNetworking.send(getOnlineMembers(), new ObjectCompletedMessage(teamId, id));
+			} else {
+				if (started.put(questId, time.getTime()) == 0L) {
+					onStartedOrCompleted(() -> new ObjectStartedMessage(teamId, questId));
+					return true;
 				}
-
-				return true;
 			}
 		}
-
 		return false;
+	}
+
+	public boolean setCompleted(long questId, @Nullable Date time) {
+		if (!locked) {
+			if (time == null) {
+				if (completed.remove(questId) >= 0L) {
+					onStartedOrCompleted(() -> new ObjectCompletedResetMessage(teamId, questId));
+					return true;
+				}
+			} else {
+				if (completed.put(questId, time.getTime()) == 0L) {
+					onStartedOrCompleted(() -> new ObjectCompletedMessage(teamId, questId));
+					return true;
+				}
+			}
+		}
+		return false;
+	}
+
+	private void onStartedOrCompleted(Supplier<CustomPacketPayload> packet) {
+		clearCachedProgress();
+		markDirty();
+		if (serverSide) {
+			Server2PlayNetworking.send(getOnlineMembers(), packet.get());
+		} else {
+			PinnedQuestsTracker.INSTANCE.refresh();
+		}
 	}
 
 	public Optional<Date> getRewardClaimTime(UUID player, Reward reward) {
@@ -536,7 +516,11 @@ public class TeamData {
 	}
 
 	public boolean canStartTasks(Quest quest) {
-		return (quest.getProgressionMode() == ProgressionMode.FLEXIBLE || areDependenciesComplete(quest))
+		return canStartTasks(quest, true);
+	}
+
+	public boolean canStartTasks(Quest quest, boolean flex) {
+		return (flex && quest.getProgressionMode() == ProgressionMode.FLEXIBLE || areDependenciesComplete(quest))
 				&& !isExcludedByOtherQuestline(quest)
 				&& getMilliSecondsUntilRepeatable(quest) == 0L;
 	}
@@ -600,6 +584,9 @@ public class TeamData {
 	public void resetProgress(Task task) {
 		if (taskProgress.remove(task.id) > 0L) {
 			markDirty();
+			if (!serverSide) {
+				PinnedQuestsTracker.INSTANCE.refresh();
+			}
 		}
 	}
 
@@ -609,7 +596,7 @@ public class TeamData {
 		}
 
 		long maxProgress = task.getMaxProgress();
-		progress = Math.max(0L, Math.min(progress, maxProgress));
+		progress = Math.clamp(progress, 0L, maxProgress);
 		long prevProgress = getProgress(task);
 
 		if (prevProgress != progress || progress == 0L && isStarted(task)) {
@@ -637,6 +624,8 @@ public class TeamData {
 				if (progress >= maxProgress && areDependenciesComplete(task.getQuest())) {
 					markTaskCompleted(task);
 				}
+			} else {
+				PinnedQuestsTracker.INSTANCE.refresh();
 			}
 
 			markDirty();
@@ -769,6 +758,9 @@ public class TeamData {
 		getOrCreatePlayerData(player).ifPresent(playerData -> {
 			if (pinned ? playerData.pinnedQuests.add(id) : playerData.pinnedQuests.remove(id)) {
 				markDirty();
+				if (!serverSide) {
+					PinnedQuestsTracker.INSTANCE.refresh();
+				}
 			}
 		});
 	}
@@ -829,13 +821,11 @@ public class TeamData {
 	private static class PerPlayerData {
 		public static final Codec<PerPlayerData> CODEC = RecordCodecBuilder.create(builder -> builder.group(
 				Codec.BOOL.optionalFieldOf("can_edit", false).forGetter(p -> p.isEditMode),
-				Codec.BOOL.optionalFieldOf("auto_pin", false).forGetter(p -> p.autoPin),
 				Codec.BOOL.optionalFieldOf("progression_paused", false).forGetter(p -> p.progressionPaused),
-				FTBQCodecs.LONG_SET_CODEC.optionalFieldOf("pinned_quests", new LongArraySet()).forGetter(p -> p.pinnedQuests)
+				FTBQCodecs.LONG_SET_CODEC.fieldOf("pinned_quests").forGetter(p -> p.pinnedQuests)
 		).apply(builder, PerPlayerData::new));
 		public static final StreamCodec<FriendlyByteBuf, PerPlayerData> STREAM_CODEC = StreamCodec.composite(
 				ByteBufCodecs.BOOL, p -> p.isEditMode,
-				ByteBufCodecs.BOOL, p -> p.autoPin,
 				ByteBufCodecs.BOOL, p -> p.progressionPaused,
 				FTBQCodecs.LONG_SET_STREAM_CODEC, p -> p.pinnedQuests,
 				PerPlayerData::new
@@ -846,18 +836,17 @@ public class TeamData {
 				= ByteBufCodecs.map(HashMap::new, UUIDUtil.STREAM_CODEC, STREAM_CODEC);
 
 		private boolean isEditMode;
-		private boolean autoPin;
 		private boolean progressionPaused;
 		private final LongSet pinnedQuests;
 
 		PerPlayerData() {
-			isEditMode = autoPin = progressionPaused = false;
+			isEditMode = false;
+			progressionPaused = false;
 			pinnedQuests = new LongOpenHashSet();
 		}
 
-		PerPlayerData(boolean isEditMode, boolean autoPin, boolean progressionPaused, LongSet pinnedQuests) {
+		PerPlayerData(boolean isEditMode, boolean progressionPaused, LongSet pinnedQuests) {
 			this.isEditMode = isEditMode;
-			this.autoPin = autoPin;
 			this.progressionPaused = progressionPaused;
 			this.pinnedQuests = pinnedQuests;
 		}

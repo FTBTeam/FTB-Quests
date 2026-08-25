@@ -105,6 +105,8 @@ public class FTBQuestsClientEventHandler {
                 && (!ClientQuestFile.getInstance().isDisableGui() || ClientQuestFile.getInstance().canEdit())
                 && FTBQuestsKeyMappings.KEY_QUESTS.consumeClick()) {
             ClientQuestFile.openGui();
+        } else if (FTBQuestsKeyMappings.KEY_CYCLE_PINNED_TRACKER.consumeClick()) {
+            FTBQuestsClientConfig.cyclePinnedTrackerVisibility();
         }
     }
 
