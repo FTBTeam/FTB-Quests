@@ -10,6 +10,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 * Added an "Insert Hovered Text" toolbar button to the multiline text editor screen
   * Allows easier insertion of tooltips on quest description text
 
+### Fixed
+* Fixed clientside NPE when pasting an image while one or more images are currently selected
+
 ## [26.1.2.7]
 
 ### Added
