@@ -559,6 +559,22 @@ public class QuestScreen extends BaseScreen {
 				}
 			}
 
+			if (selectedObjects.isEmpty() && !isViewingQuest()) {
+				if (key.matches(FTBQuestsKeyMappings.KEY_GUI_DOWN)) {
+					questPanel.setScrollY(questPanel.getScrollY() + questPanel.getScrollStep() * moveStep());
+					return true;
+				} else if (key.matches(FTBQuestsKeyMappings.KEY_GUI_UP)) {
+					questPanel.setScrollY(questPanel.getScrollY() - questPanel.getScrollStep() * moveStep());
+					return true;
+				} else if (key.matches(FTBQuestsKeyMappings.KEY_GUI_LEFT)) {
+					questPanel.setScrollX(questPanel.getScrollX() - questPanel.getScrollStep() * moveStep());
+					return true;
+				} else if (key.matches(FTBQuestsKeyMappings.KEY_GUI_RIGHT)) {
+					questPanel.setScrollX(questPanel.getScrollX() + questPanel.getScrollStep() * moveStep());
+					return true;
+				}
+			}
+
 			if (key.matches(FTBQuestsKeyMappings.KEY_GUI_RELOAD_THEME)) {
 				reloadTheme(!isShiftKeyDown());
 				return true;
@@ -639,22 +655,6 @@ public class QuestScreen extends BaseScreen {
 		} else if (key.matches(FTBQuestsKeyMappings.KEY_GUI_EXT_INFO)) {
 			showExtendedInfo = true;
 			return true;
-		}
-
-		if (selectedObjects.isEmpty()) {
-			if (key.matches(FTBQuestsKeyMappings.KEY_GUI_DOWN)) {
-				questPanel.setScrollY(questPanel.getScrollY() + questPanel.getScrollStep() * moveStep());
-				return true;
-			} else if (key.matches(FTBQuestsKeyMappings.KEY_GUI_UP)) {
-				questPanel.setScrollY(questPanel.getScrollY() - questPanel.getScrollStep() * moveStep());
-				return true;
-			} else if (key.matches(FTBQuestsKeyMappings.KEY_GUI_LEFT)) {
-				questPanel.setScrollX(questPanel.getScrollX() - questPanel.getScrollStep() * moveStep());
-				return true;
-			} else if (key.matches(FTBQuestsKeyMappings.KEY_GUI_RIGHT)) {
-				questPanel.setScrollX(questPanel.getScrollX() + questPanel.getScrollStep() * moveStep());
-				return true;
-			}
 		}
 
 		return false;
