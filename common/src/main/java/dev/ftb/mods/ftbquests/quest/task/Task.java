@@ -183,7 +183,7 @@ public abstract class Task extends QuestObject {
 
 	@Override
 	public Icon<?> getAltIcon() {
-		return getType().getIconSupplier();
+		return getType().getIcon();
 	}
 
 	@Override

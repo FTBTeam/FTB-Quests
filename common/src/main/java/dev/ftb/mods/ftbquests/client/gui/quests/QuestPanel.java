@@ -504,9 +504,9 @@ public class QuestPanel extends Panel {
 			double qy = questY;
 
 			for (TaskType type : TaskTypes.TYPES.values()) {
-				contextMenu.add(new ContextMenuItem(type.getDisplayName(), type.getIconSupplier(), b -> {
+				contextMenu.add(new ContextMenuItem(type.getDisplayName(), type.getIcon(), b -> {
 					playClickSound();
-					type.getGuiProvider().openCreationGui(this, new Quest(0L, questScreen.selectedChapter),
+					type.getGuiProviderOrThrow().openCreationGui(this, new Quest(0L, questScreen.selectedChapter),
 							task -> Play2ServerNetworking.send(CreateQuestAndTaskMessage.requestCreation(questScreen.selectedChapter, qx, qy, task))
 					);
 				}));
@@ -578,8 +578,7 @@ public class QuestPanel extends Panel {
 		if (questScreen.selectedChapter == null) {
 			return;
 		}
-		Task newTask = QuestObjectBase.copy(task,
-				() -> TaskType.createTask(0L, new Quest(0L, questScreen.selectedChapter), task.getType().getTypeId().toString()));
+		Task newTask = QuestObjectBase.copy(task, () -> task.getType().create(0L, new Quest(0L, questScreen.selectedChapter)));
 		Play2ServerNetworking.send(CreateQuestAndTaskMessage.requestCreation(questScreen.selectedChapter, qx, qy, newTask));
 	}
 

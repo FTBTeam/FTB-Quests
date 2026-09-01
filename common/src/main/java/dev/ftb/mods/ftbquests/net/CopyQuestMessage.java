@@ -53,12 +53,12 @@ public record CopyQuestMessage(long id, long chapterId, double qx, double qy, bo
                 // deep copy of all tasks and rewards
                 List<CreateOrDeleteRecord> newTasks = new ArrayList<>();
                 toCopy.getTasks().forEach(task -> {
-                    Task newTask = QuestObjectBase.copy(task, () -> Objects.requireNonNull(TaskType.createTask(allocator.newId(), newQuest, task.getType().getTypeForSerialization())));
+                    Task newTask = QuestObjectBase.copy(task, () -> task.getType().create(allocator.newId(), newQuest));
                     newTasks.add(CreateOrDeleteRecord.ofQuestObject(newTask));
                 });
                 List<CreateOrDeleteRecord> newRewards = new ArrayList<>();
                 for (Reward reward : toCopy.getRewards()) {
-                    Reward newReward = QuestObjectBase.copy(reward, () -> Objects.requireNonNull(RewardType.createReward(allocator.newId(), newQuest, reward.getType().getTypeForSerialization())));
+                    Reward newReward = QuestObjectBase.copy(reward, () -> reward.getType().create(allocator.newId(), newQuest));
                     newRewards.add(CreateOrDeleteRecord.ofQuestObject(newReward));
                 }
 
