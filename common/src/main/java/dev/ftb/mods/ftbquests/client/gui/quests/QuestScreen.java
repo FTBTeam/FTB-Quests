@@ -800,8 +800,14 @@ public class QuestScreen extends BaseScreen {
 		if (grabbed != null) {
 			int mx = getMouseX();
 			int my = getMouseY();
-			if (grabbed.isLeft()) {
-
+			if (questPanel.isDraggingSelectionBox()) {
+				int boxX = Math.min(prevMouseX, mx);
+				int boxY = Math.min(prevMouseY, my);
+				int boxW = Math.abs(mx - prevMouseX);
+				int boxH = Math.abs(my - prevMouseY);
+				GuiHelper.drawHollowRect(graphics, boxX, boxY, boxW, boxH, Color4I.DARK_GRAY, false);
+				IconHelper.renderIcon(Color4I.DARK_GRAY.withAlpha(40), graphics, boxX, boxY, boxW, boxH);
+			} else if (grabbed.isLeft()) {
 				if (scrollWidth > questPanel.width) {
 					questPanel.setScrollX(Math.clamp(questPanel.getScrollX() + (prevMouseX - mx), 0, scrollWidth - questPanel.width));
 				} else {
@@ -816,13 +822,6 @@ public class QuestScreen extends BaseScreen {
 
 				prevMouseX = mx;
 				prevMouseY = my;
-			} else if (grabbed.isMiddle()) {
-				int boxX = Math.min(prevMouseX, mx);
-				int boxY = Math.min(prevMouseY, my);
-				int boxW = Math.abs(mx - prevMouseX);
-				int boxH = Math.abs(my - prevMouseY);
-				GuiHelper.drawHollowRect(graphics, boxX, boxY, boxW, boxH, Color4I.DARK_GRAY, false);
-				IconHelper.renderIcon(Color4I.DARK_GRAY.withAlpha(40), graphics, boxX, boxY, boxW, boxH);
 			}
 		}
 	}

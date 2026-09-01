@@ -587,12 +587,17 @@ public class QuestPanel extends Panel {
 	public void mouseReleased(MouseButton button) {
 		super.mouseReleased(button);
 
-		if (questScreen.grabbed != null && questScreen.grabbed.isMiddle() && questScreen.file.canEdit()) {
+		if (isDraggingSelectionBox()) {
 			// select any quests in the box
 			questScreen.selectAllQuestsInBox(getMouseX(), getMouseY(), getScrollX(), getScrollY());
 		}
 
 		questScreen.grabbed = null;
+	}
+
+	boolean isDraggingSelectionBox() {
+        return questScreen.file.canEdit() && questScreen.grabbed != null
+                && (questScreen.grabbed.isMiddle() || questScreen.grabbed.isLeft() && Minecraft.getInstance().hasAltDown());
 	}
 
 	@Override
