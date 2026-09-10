@@ -28,6 +28,7 @@ import dev.ftb.mods.ftbquests.quest.QuestObject;
 import dev.ftb.mods.ftbquests.quest.QuestObjectBase;
 import dev.ftb.mods.ftbquests.quest.TeamData;
 import dev.ftb.mods.ftbquests.quest.theme.ThemeLoader;
+import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.ConfirmLinkScreen;
 import net.minecraft.client.gui.screens.Screen;
@@ -36,7 +37,9 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.network.chat.ClickEvent;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.Style;
 import net.minecraft.resources.Identifier;
 import net.minecraft.util.Util;
 import net.minecraft.world.InteractionHand;
@@ -48,6 +51,8 @@ import net.minecraft.world.level.block.state.BlockState;
 import org.jspecify.annotations.Nullable;
 
 import java.net.URI;
+import java.nio.file.Path;
+import java.util.Calendar;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
@@ -218,6 +223,45 @@ public class FTBQuestsClient {
 			}, uriStr, false));
 		} else {
 			Util.getPlatform().openUri(uri);
+		}
+	}
+
+	public static void saveLocally() {
+		try {
+			Calendar time = Calendar.getInstance();
+			ClientQuestFile questFile = ClientQuestFile.getInstance();
+			Minecraft mc = Minecraft.getInstance();
+
+			StringBuilder fileName = new StringBuilder();
+			appendNum(fileName, time.get(Calendar.YEAR), '-');
+			appendNum(fileName, time.get(Calendar.MONTH) + 1, '-');
+			appendNum(fileName, time.get(Calendar.DAY_OF_MONTH), '-');
+			appendNum(fileName, time.get(Calendar.HOUR_OF_DAY), '-');
+			appendNum(fileName, time.get(Calendar.MINUTE), '-');
+			appendNum(fileName, time.get(Calendar.SECOND), '\0');
+
+			Path subPath = Path.of("local", "ftbquests", "saved", fileName.toString());
+			Path path = mc.gameDirectory.toPath().resolve(subPath);
+
+			questFile.writeDataFull(path, questFile.holderLookup());
+			questFile.getTranslationManager().saveToFile(questFile, path.resolve("lang"), true);
+
+			Component c = Component.literal(subPath.toString()).withStyle(ChatFormatting.YELLOW);
+			Component component = Component.translatable("ftbquests.gui.saved_as_file", c)
+					.withStyle(Style.EMPTY.withClickEvent(new ClickEvent.OpenFile(subPath)));
+			ClientUtils.getClientPlayer().sendSystemMessage(component);
+		} catch (Exception ex) {
+			FTBQuests.LOGGER.error("can't save quest file locally: {}", ex.getMessage());
+		}
+	}
+
+	private static void appendNum(StringBuilder sb, int num, char c) {
+		if (num < 10) {
+			sb.append('0');
+		}
+		sb.append(num);
+		if (c != '\0') {
+			sb.append(c);
 		}
 	}
 }

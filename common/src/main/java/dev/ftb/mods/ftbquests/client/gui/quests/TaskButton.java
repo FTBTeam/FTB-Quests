@@ -38,6 +38,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
 import org.joml.Matrix3x2fStack;
 
 import java.util.Comparator;
@@ -134,13 +135,17 @@ public class TaskButton extends Button {
 	}
 
 	private void setTagFilterAndSave(ItemTask itemTask, ItemFilterAdapter adapter, TagKey<Item> tag) {
-		itemTask.setStackAndCount(adapter.makeTagFilterStack(tag), itemTask.getItemStack().getCount());
+		ItemStack filter = adapter.makeTagFilterStack(tag);
 
-		if (itemTask.getRawTitle().isEmpty()) {
-			itemTask.setRawTitle("Any #" + tag.location());
+		if (!filter.isEmpty()) {
+			itemTask.setStackAndCount(filter, itemTask.getItemStack().getCount());
+
+			if (itemTask.getRawTitle().isEmpty()) {
+				itemTask.setRawTitle("Any #" + tag.location());
+			}
+
+			EditObjectMessage.sendToServer(itemTask);
 		}
-
-		EditObjectMessage.sendToServer(itemTask);
 	}
 
 	@Override

@@ -58,6 +58,9 @@ public class FTBQuestsKeyMappings {
             .noModifierFallbackKey(InputConstants.UNKNOWN)
             .conflictContext(KeyConflict.ANY_GUI)
             .build());
+    public static final KeyMapping KEY_GUI_COMPLETE_OBJ = guiEditorKey("complete_object", InputConstants.KEY_C, KeyModifier.ALT);
+    public static final KeyMapping KEY_GUI_RESET_OBJ = guiEditorKey("reset_object", InputConstants.KEY_R, KeyModifier.ALT);
+    public static final KeyMapping KEY_GUI_SAVE = guiEditorKey("save", InputConstants.KEY_S, KeyModifier.CONTROL);
 
     public static final KeyMapping KEY_GUI_REWARD_TABLES = guiEditorKey("reward_tables", InputConstants.KEY_T, KeyModifier.CONTROL);
     public static final KeyMapping KEY_GUI_UNDO = guiEditorKey("undo", InputConstants.KEY_Z, KeyModifier.CONTROL);
