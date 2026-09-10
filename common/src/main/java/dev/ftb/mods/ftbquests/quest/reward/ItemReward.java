@@ -69,7 +69,7 @@ public class ItemReward extends Reward {
 	public void writeData(Json5Object json, HolderLookup.Provider provider) {
 		super.writeData(json, provider);
 
-		if (!item.isEmpty()) Json5Util.store(json, "item", ItemStack.CODEC, item);
+		if (!item.isEmpty()) Json5Util.store(json, holderLookup(), "item", ItemStack.CODEC, item);
 		if (count > 1) json.addProperty("count", count);
 		if (randomBonus > 0) json.addProperty("random_bonus", randomBonus);
 		if (onlyOne) json.addProperty("only_one", true);
