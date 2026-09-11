@@ -107,7 +107,10 @@ public class FTBQuestsKeyMappings {
                 KEY_GUI_RELOAD_THEME,
                 KEY_GUI_DELETE,
                 KEY_GUI_FORCE_DELETE,
-                KEY_GUI_REWARD_TABLES
+                KEY_GUI_REWARD_TABLES,
+                KEY_GUI_COMPLETE_OBJ,
+                KEY_GUI_RESET_OBJ,
+                KEY_GUI_SAVE
         );
 
         // gui editor mode (quest panel) category
