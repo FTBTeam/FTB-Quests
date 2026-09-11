@@ -4,13 +4,13 @@ import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import dev.ftb.mods.ftblibrary.platform.Env;
 import dev.ftb.mods.ftblibrary.platform.Platform;
-import dev.ftb.mods.ftbquests.FTBQuests;
 import dev.ftb.mods.ftbquests.client.ClientQuestFile;
 import dev.ftb.mods.ftbquests.client.gui.RewardNotificationsScreen;
 import dev.ftb.mods.ftbquests.quest.loot.LootCrate;
 import dev.ftb.mods.ftbquests.quest.loot.WeightedReward;
 import dev.ftb.mods.ftbquests.registry.ModDataComponents;
 import dev.ftb.mods.ftbquests.registry.ModItems;
+import dev.ftb.mods.ftbquests.util.FTBQUtils;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.color.item.ItemTintSource;
 import net.minecraft.client.multiplayer.ClientLevel;
@@ -53,7 +53,7 @@ public class LootCrateItem extends Item {
 
 	@Nullable
 	public static LootCrate getCrate(ItemStack stack, boolean isClientSide) {
-		return FTBQuests.getComponent(stack, ModDataComponents.LOOT_CRATE)
+		return FTBQUtils.getComponent(stack, ModDataComponents.LOOT_CRATE)
 				.map(type -> LootCrate.getLootCrates(isClientSide).get(type))
 				.orElse(null);
 	}

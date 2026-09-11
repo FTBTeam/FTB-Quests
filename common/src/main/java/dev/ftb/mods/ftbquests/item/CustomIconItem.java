@@ -6,10 +6,10 @@ import dev.ftb.mods.ftblibrary.client.config.editable.EditableImageResource;
 import dev.ftb.mods.ftblibrary.icon.EntityIconLoader;
 import dev.ftb.mods.ftblibrary.icon.Icon;
 import dev.ftb.mods.ftblibrary.icon.ItemIcon;
-import dev.ftb.mods.ftbquests.FTBQuests;
 import dev.ftb.mods.ftbquests.client.FTBQuestsClient;
 import dev.ftb.mods.ftbquests.registry.ModDataComponents;
 import dev.ftb.mods.ftbquests.registry.ModItems;
+import dev.ftb.mods.ftbquests.util.FTBQUtils;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
@@ -62,7 +62,7 @@ public class CustomIconItem extends Item {
     public void appendHoverText(ItemStack stack, TooltipContext context, TooltipDisplay tooltipDisplay, Consumer<Component> consumer, TooltipFlag tooltipFlag) {
         consumer.accept(Component.translatable("item.ftbquests.custom_icon.tooltip").withStyle(ChatFormatting.GRAY));
 
-        String icon = FTBQuests.getComponent(stack, ModDataComponents.CUSTOM_ICON)
+        String icon = FTBQUtils.getComponent(stack, ModDataComponents.CUSTOM_ICON)
                 .map(Identifier::toString)
                 .orElse("-");
         consumer.accept(Component.literal(icon).withStyle(ChatFormatting.DARK_GRAY));

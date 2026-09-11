@@ -23,10 +23,10 @@ public interface RewardTypes {
 	}
 
 	RewardType ITEM = register(FTBQuestsAPI.id("item"), ItemReward::new, () -> Icon.getIcon("minecraft:item/diamond"));
-	RewardType CHOICE = register(FTBQuestsAPI.id("choice"), ChoiceReward::new, () -> Icons.COLOR_RGB).setExcludeFromListRewards(true);
-	RewardType ALL_TABLE = register(FTBQuestsAPI.id("all_table"), AllTableReward::new, () -> Icons.COLOR_HSB).setExcludeFromListRewards(true);
-	RewardType RANDOM = register(FTBQuestsAPI.id("random"), RandomReward::new, () -> Icons.DICE).setExcludeFromListRewards(true);
-	RewardType LOOT = register(FTBQuestsAPI.id("loot"), LootReward::new, () -> Icons.MONEY_BAG).setExcludeFromListRewards(true);
+	RewardType CHOICE = register(FTBQuestsAPI.id("choice"), ChoiceReward::new, () -> Icons.COLOR_RGB).setExcludedFromClaimAll(true);
+	RewardType ALL_TABLE = register(FTBQuestsAPI.id("all_table"), AllTableReward::new, () -> Icons.COLOR_HSB).setExcludedFromClaimAll(true);
+	RewardType RANDOM = register(FTBQuestsAPI.id("random"), RandomReward::new, () -> Icons.DICE).setExcludedFromClaimAll(true);
+	RewardType LOOT = register(FTBQuestsAPI.id("loot"), LootReward::new, () -> Icons.MONEY_BAG).setExcludedFromClaimAll(true);
 	RewardType COMMAND = register(FTBQuestsAPI.id("command"), CommandReward::new, () -> Icon.getIcon("minecraft:block/command_block_back"));
 	RewardType CUSTOM = register(FTBQuestsAPI.id("custom"), CustomReward::new, () -> Icons.COLOR_HSB);
 	RewardType XP = register(FTBQuestsAPI.id("xp"), XPReward::new, () -> Icon.getIcon("minecraft:item/experience_bottle"));

@@ -11,6 +11,7 @@ import dev.ftb.mods.ftblibrary.util.TooltipList;
 import dev.ftb.mods.ftbquests.client.ClientQuestFile;
 import dev.ftb.mods.ftbquests.client.FTBQuestsClient;
 import dev.ftb.mods.ftbquests.client.FTBQuestsClientConfig;
+import dev.ftb.mods.ftbquests.client.FTBQuestsKeyMappings;
 import dev.ftb.mods.ftbquests.client.gui.QuestFileChangelog;
 import dev.ftb.mods.ftbquests.client.gui.RewardTablesScreen;
 import dev.ftb.mods.ftbquests.net.ChangeProgressMessage;
@@ -21,15 +22,10 @@ import dev.ftb.mods.ftbquests.quest.history.ChangeType;
 import dev.ftb.mods.ftbquests.quest.task.StructureTask;
 import dev.ftb.mods.ftbquests.quest.theme.property.ThemeProperties;
 import net.minecraft.ChatFormatting;
-import net.minecraft.client.Minecraft;
-import net.minecraft.network.chat.ClickEvent;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.Style;
 import net.minecraft.server.permissions.Permissions;
 
-import java.io.File;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.List;
 
 public class OtherButtonsPanelBottom extends OtherButtonsPanel {
@@ -156,65 +152,30 @@ public class OtherButtonsPanelBottom extends OtherButtonsPanel {
 
 			List<ContextMenuItem> contextMenu = new ArrayList<>();
 			contextMenu.add(new ContextMenuItem(Component.translatable("ftbquests.gui.edit_file"), ThemeProperties.SETTINGS_ICON.get(),
-					b -> questScreen.file.onEditButtonClicked(this)));
+					_ -> questScreen.file.onEditButtonClicked(this)));
 
-			contextMenu.add(new ContextMenuItem(Component.translatable("ftbquests.gui.reset_progress"), ThemeProperties.RELOAD_ICON.get(),
-					b -> ChangeProgressMessage.sendToServer(FTBQuestsClient.getClientPlayerData(), questScreen.file, progressChange -> progressChange.setReset(true)))
+			contextMenu.add(new ContextMenuItem(Component.translatable("ftbquests.gui.reset_progress"), ThemeProperties.UNDO_ICON.get(),
+					_ -> ChangeProgressMessage.sendToServer(FTBQuestsClient.getClientPlayerData(), questScreen.file, progressChange -> progressChange.setReset(true)))
 					.setYesNoText(Component.translatable("ftbquests.gui.reset_progress_q")));
 			contextMenu.add(new ContextMenuItem(Component.translatable("ftbquests.gui.complete_instantly"), ThemeProperties.CHECK_ICON.get(),
-					b -> ChangeProgressMessage.sendToServer(FTBQuestsClient.getClientPlayerData(), questScreen.file, progressChange -> progressChange.setReset(false)))
+					_ -> ChangeProgressMessage.sendToServer(FTBQuestsClient.getClientPlayerData(), questScreen.file, progressChange -> progressChange.setReset(false)))
 					.setYesNoText(Component.translatable("ftbquests.gui.complete_instantly_q")));
 
 			contextMenu.add(new TooltipContextMenuItem(Component.translatable("ftbquests.reward_tables"), ThemeProperties.REWARD_TABLE_ICON.get(),
-					b -> new RewardTablesScreen(questScreen).openGui(), Component.literal("[Ctrl + T]").withStyle(ChatFormatting.DARK_GRAY)));
-			contextMenu.add(new ContextMenuItem(Component.translatable("ftbquests.gui.save_on_server"), ThemeProperties.SAVE_ICON.get(),
-					b -> Play2ServerNetworking.send(ForceSaveMessage.INSTANCE)));
-			contextMenu.add(new ContextMenuItem(Component.translatable("ftbquests.gui.save_as_file"), ThemeProperties.DOWNLOAD_ICON.get(),
-					b -> saveLocally()));
+					_ -> new RewardTablesScreen(questScreen).openGui(), FTBQuestsKeyMappings.KEY_GUI_REWARD_TABLES));
+			contextMenu.add(new TooltipContextMenuItem(Component.translatable("ftbquests.gui.save_on_server"), ThemeProperties.SAVE_ICON.get(),
+					_ -> Play2ServerNetworking.send(ForceSaveMessage.INSTANCE), FTBQuestsKeyMappings.KEY_GUI_SAVE));
+			contextMenu.add(new TooltipContextMenuItem(Component.translatable("ftbquests.gui.save_as_file"), ThemeProperties.DOWNLOAD_ICON.get(),
+					_ -> FTBQuestsClient.saveLocally(),
+					Component.literal("[").append("SHIFT + ").append(FTBQuestsKeyMappings.KEY_GUI_SAVE.getTranslatedKeyMessage()).append("]").withStyle(ChatFormatting.DARK_GRAY)
+			));
 
-			contextMenu.add(new ContextMenuItem(Component.translatable("ftbquests.gui.reload_theme"), ThemeProperties.RELOAD_ICON.get(),
-					b -> QuestScreen.reloadTheme()));
+			contextMenu.add(new TooltipContextMenuItem(Component.translatable("ftbquests.gui.reload_theme"), ThemeProperties.RELOAD_ICON.get(),
+					_ -> QuestScreen.reloadTheme(), FTBQuestsKeyMappings.KEY_GUI_RELOAD_THEME));
 			contextMenu.add(new ContextMenuItem(Component.translatable("ftbquests.gui.wiki"), Icons.INFO,
-					b -> handleClick(WIKI_URL)));
+					_ -> handleClick(WIKI_URL)));
 
 			questScreen.openContextMenu(contextMenu);
 		}
-
-		private void saveLocally() {
-			try {
-				Calendar time = Calendar.getInstance();
-				ClientQuestFile questFile = ClientQuestFile.getInstance();
-				Minecraft mc = Minecraft.getInstance();
-
-				StringBuilder fileName = new StringBuilder("local/ftbquests/saved/");
-				appendNum(fileName, time.get(Calendar.YEAR), '-');
-				appendNum(fileName, time.get(Calendar.MONTH) + 1, '-');
-				appendNum(fileName, time.get(Calendar.DAY_OF_MONTH), '-');
-				appendNum(fileName, time.get(Calendar.HOUR_OF_DAY), '-');
-				appendNum(fileName, time.get(Calendar.MINUTE), '-');
-				appendNum(fileName, time.get(Calendar.SECOND), '\0');
-				File file = new File(mc.gameDirectory, fileName.toString()).getCanonicalFile();
-				questFile.writeDataFull(file.toPath(), questFile.holderLookup());
-				questFile.getTranslationManager().saveToFile(questFile, file.toPath().resolve("lang"), true);
-
-                String p = "." + file.getPath().replace(mc.gameDirectory.getCanonicalFile().getAbsolutePath(), "");
-				Component component = Component.translatable("ftbquests.gui.saved_as_file", p)
-						.withStyle(Style.EMPTY.withClickEvent(new ClickEvent.OpenFile(p)));
-				mc.player.sendSystemMessage(component);
-			} catch (Exception ex) {
-				ex.printStackTrace();
-			}
-		}
-
-		private void appendNum(StringBuilder sb, int num, char c) {
-			if (num < 10) {
-				sb.append('0');
-			}
-			sb.append(num);
-			if (c != '\0') {
-				sb.append(c);
-			}
-		}
 	}
-
 }

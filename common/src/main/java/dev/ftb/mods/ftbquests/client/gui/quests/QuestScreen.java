@@ -293,31 +293,39 @@ public class QuestScreen extends BaseScreen {
 		if (object instanceof RandomReward rr && !QuestObjectBase.isNull(rr.getTable())) {
 			contextMenu.add(new ContextMenuItem(Component.translatable("ftbquests.reward_table.edit"),
 					ThemeProperties.EDIT_ICON.get(),
-                    _ -> rr.getTable().onEditButtonClicked(gui))
+					_ -> rr.getTable().onEditButtonClicked(gui))
 			);
 		}
 
 		long delId = deletionFocus == null ? object.id : deletionFocus.getMovableID();
 		QuestObjectBase delObject = file.getBase(delId);
 		if (delObject != null) {
-			ContextMenuItem delete = new ContextMenuItem(Component.translatable("selectServer.delete"),
+			var delete = new TooltipContextMenuItem(Component.translatable("selectServer.delete"),
 					ThemeProperties.DELETE_ICON.get(),
-                    _ -> file.deleteObjects(List.of(delId)));
+					_ -> file.deleteObjects(List.of(delId)),
+					FTBQuestsKeyMappings.KEY_GUI_DELETE);
 			if (!isShiftKeyDown()) {
 				delete.setYesNoText(Component.translatable("delete_item", delObject.getTitle()));
 			}
 			contextMenu.add(delete);
 		}
 
-		contextMenu.add(new ContextMenuItem(Component.translatable("ftbquests.gui.reset_progress"),
-				ThemeProperties.RELOAD_ICON.get(),
-				_ -> ChangeProgressMessage.sendToServer(FTBQuestsClient.getClientPlayerData(), object, progressChange -> progressChange.setReset(true))
-		).setYesNoText(Component.translatable("ftbquests.gui.reset_progress_q")));
-
-		contextMenu.add(new ContextMenuItem(Component.translatable("ftbquests.gui.complete_instantly"),
-				ThemeProperties.CHECK_ICON.get(),
-				_ -> ChangeProgressMessage.sendToServer(FTBQuestsClient.getClientPlayerData(), object, progressChange -> progressChange.setReset(false))
-		).setYesNoText(Component.translatable("ftbquests.gui.complete_instantly_q")));
+        if (object instanceof QuestObject qo) {
+            if (file.selfTeamData.isStarted(qo)) {
+                contextMenu.add(new TooltipContextMenuItem(Component.translatable("ftbquests.gui.reset_progress"),
+                        ThemeProperties.UNDO_ICON.get(),
+                        _ -> handleProgressChange(object, true),
+						FTBQuestsKeyMappings.KEY_GUI_RESET_OBJ
+                ));
+            }
+			if (!file.selfTeamData.isCompleted(qo)) {
+				contextMenu.add(new TooltipContextMenuItem(Component.translatable("ftbquests.gui.complete_instantly"),
+						ThemeProperties.CHECK_ICON.get(),
+						_ -> handleProgressChange(object, false),
+						FTBQuestsKeyMappings.KEY_GUI_COMPLETE_OBJ
+				));
+			}
+        }
 
 		if (selectedChapter != null) {
 			if (selectedChapter.isAutofocus(object.id)) {
@@ -559,6 +567,22 @@ public class QuestScreen extends BaseScreen {
 				}
 			}
 
+			if (selectedObjects.isEmpty() && !isViewingQuest()) {
+				if (key.matches(FTBQuestsKeyMappings.KEY_GUI_DOWN)) {
+					questPanel.setScrollY(questPanel.getScrollY() + questPanel.getScrollStep() * moveStep());
+					return true;
+				} else if (key.matches(FTBQuestsKeyMappings.KEY_GUI_UP)) {
+					questPanel.setScrollY(questPanel.getScrollY() - questPanel.getScrollStep() * moveStep());
+					return true;
+				} else if (key.matches(FTBQuestsKeyMappings.KEY_GUI_LEFT)) {
+					questPanel.setScrollX(questPanel.getScrollX() - questPanel.getScrollStep() * moveStep());
+					return true;
+				} else if (key.matches(FTBQuestsKeyMappings.KEY_GUI_RIGHT)) {
+					questPanel.setScrollX(questPanel.getScrollX() + questPanel.getScrollStep() * moveStep());
+					return true;
+				}
+			}
+
 			if (key.matches(FTBQuestsKeyMappings.KEY_GUI_RELOAD_THEME)) {
 				reloadTheme(!isShiftKeyDown());
 				return true;
@@ -603,6 +627,19 @@ public class QuestScreen extends BaseScreen {
 			} else if (key.matches(FTBQuestsKeyMappings.KEY_GUI_REDO)) {
 				Play2ServerNetworking.send(UndoRedoRequestMessage.redo());
 				return true;
+			} else if (key.matches(FTBQuestsKeyMappings.KEY_GUI_COMPLETE_OBJ)) {
+				getHoveredObject().ifPresent(m -> handleProgressChange(m, false));
+				return true;
+			} else if (key.matches(FTBQuestsKeyMappings.KEY_GUI_RESET_OBJ)) {
+				getHoveredObject().ifPresent(m -> handleProgressChange(m, true));
+				return true;
+			} else if (key.matches(FTBQuestsKeyMappings.KEY_GUI_SAVE)) {
+				if (BaseScreen.isShiftKeyDown()) {
+					FTBQuestsClient.saveLocally();
+				} else {
+					Play2ServerNetworking.send(ForceSaveMessage.INSTANCE);
+				}
+				return true;
 			}
 		}
 
@@ -641,22 +678,6 @@ public class QuestScreen extends BaseScreen {
 			return true;
 		}
 
-		if (selectedObjects.isEmpty()) {
-			if (key.matches(FTBQuestsKeyMappings.KEY_GUI_DOWN)) {
-				questPanel.setScrollY(questPanel.getScrollY() + questPanel.getScrollStep() * moveStep());
-				return true;
-			} else if (key.matches(FTBQuestsKeyMappings.KEY_GUI_UP)) {
-				questPanel.setScrollY(questPanel.getScrollY() - questPanel.getScrollStep() * moveStep());
-				return true;
-			} else if (key.matches(FTBQuestsKeyMappings.KEY_GUI_LEFT)) {
-				questPanel.setScrollX(questPanel.getScrollX() - questPanel.getScrollStep() * moveStep());
-				return true;
-			} else if (key.matches(FTBQuestsKeyMappings.KEY_GUI_RIGHT)) {
-				questPanel.setScrollX(questPanel.getScrollX() + questPanel.getScrollStep() * moveStep());
-				return true;
-			}
-		}
-
 		return false;
 	}
 
@@ -671,6 +692,20 @@ public class QuestScreen extends BaseScreen {
 		}
 
 		return super.keyReleased(key);
+	}
+
+	private void handleProgressChange(Movable movable, boolean resetting) {
+		QuestObject qob = file.get(movable.getMovableID());
+		if (qob != null) {
+			handleProgressChange(qob, resetting);
+		}
+	}
+
+	private void handleProgressChange(QuestObjectBase qob, boolean resetting) {
+		getGui().openYesNo(Component.translatable(resetting ? "ftbquests.gui.reset_progress_q" : "ftbquests.gui.complete_instantly_q"),
+				qob.getTitle(),
+				() -> ChangeProgressMessage.sendToServer(FTBQuestsClient.getClientPlayerData(), qob,
+						progressChange -> progressChange.setReset(resetting)));
 	}
 
 	private boolean handleDeletion(boolean force) {
@@ -800,8 +835,14 @@ public class QuestScreen extends BaseScreen {
 		if (grabbed != null) {
 			int mx = getMouseX();
 			int my = getMouseY();
-			if (grabbed.isLeft()) {
-
+			if (questPanel.isDraggingSelectionBox()) {
+				int boxX = Math.min(prevMouseX, mx);
+				int boxY = Math.min(prevMouseY, my);
+				int boxW = Math.abs(mx - prevMouseX);
+				int boxH = Math.abs(my - prevMouseY);
+				GuiHelper.drawHollowRect(graphics, boxX, boxY, boxW, boxH, Color4I.DARK_GRAY, false);
+				IconHelper.renderIcon(Color4I.DARK_GRAY.withAlpha(40), graphics, boxX, boxY, boxW, boxH);
+			} else if (grabbed.isLeft()) {
 				if (scrollWidth > questPanel.width) {
 					questPanel.setScrollX(Math.clamp(questPanel.getScrollX() + (prevMouseX - mx), 0, scrollWidth - questPanel.width));
 				} else {
@@ -816,13 +857,6 @@ public class QuestScreen extends BaseScreen {
 
 				prevMouseX = mx;
 				prevMouseY = my;
-			} else if (grabbed.isMiddle()) {
-				int boxX = Math.min(prevMouseX, mx);
-				int boxY = Math.min(prevMouseY, my);
-				int boxW = Math.abs(mx - prevMouseX);
-				int boxH = Math.abs(my - prevMouseY);
-				GuiHelper.drawHollowRect(graphics, boxX, boxY, boxW, boxH, Color4I.DARK_GRAY, false);
-				IconHelper.renderIcon(Color4I.DARK_GRAY.withAlpha(40), graphics, boxX, boxY, boxW, boxH);
 			}
 		}
 	}
@@ -956,12 +990,11 @@ public class QuestScreen extends BaseScreen {
 		selectChapter(file.getChapter(persistedData.selectedChapter));
 
 		selectedObjects.clear();
-		selectedObjects.addAll(persistedData.selectedQuests.stream()
-				.mapToLong(id -> id)
-				.filter(id -> file.getBase(id) instanceof Movable)
-				.mapToObj(id -> (Movable) file.get(id))
-				.toList()
-		);
+		for (long id : persistedData.selectedQuests) {
+			if (file.getBase(id) instanceof Movable movable) {
+				selectedObjects.add(movable);
+			}
+		}
 
 		questPanel.scrollTo(persistedData.scrollX, persistedData.scrollY);
 		questPanel.centerQuestX = persistedData.scrollX;

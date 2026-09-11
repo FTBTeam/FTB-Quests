@@ -14,10 +14,10 @@ import dev.ftb.mods.ftblibrary.client.gui.widget.Widget;
 import dev.ftb.mods.ftblibrary.icon.EntityIconLoader;
 import dev.ftb.mods.ftblibrary.icon.Icons;
 import dev.ftb.mods.ftblibrary.icon.ItemIcon;
-import dev.ftb.mods.ftbquests.FTBQuests;
 import dev.ftb.mods.ftbquests.item.CustomIconItem;
 import dev.ftb.mods.ftbquests.registry.ModDataComponents;
 import dev.ftb.mods.ftbquests.registry.ModItems;
+import dev.ftb.mods.ftbquests.util.FTBQUtils;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
@@ -50,7 +50,7 @@ public class EditableIconItemStack extends EditableItemStack {
 
 	private void openImageSelector(ConfigCallback callback) {
 		EditableImageResource imageConfig = new EditableImageResource();
-		FTBQuests.getComponent(getValue(), ModDataComponents.CUSTOM_ICON)
+		FTBQUtils.getComponent(getValue(), ModDataComponents.CUSTOM_ICON)
 				.ifPresent(imageConfig::setValue);
 
 		new SelectImageResourceScreen(imageConfig, accepted -> {
@@ -68,7 +68,7 @@ public class EditableIconItemStack extends EditableItemStack {
 
 	private void openEntitySelector(ConfigCallback callback) {
 		EditableEntityFace faceConfig = new EditableEntityFace();
-		FTBQuests.getComponent(getValue(), ModDataComponents.ENTITY_FACE_ICON)
+		FTBQUtils.getComponent(getValue(), ModDataComponents.ENTITY_FACE_ICON)
 				.flatMap(BuiltInRegistries.ENTITY_TYPE::get)
 				.ifPresent(value -> faceConfig.setValue(value.value()));
 
