@@ -3,6 +3,7 @@ package dev.ftb.mods.ftbquests.client.gui.quests;
 import com.mojang.datafixers.util.Pair;
 import dev.ftb.mods.ftblibrary.client.config.editable.EditableImageResource;
 import dev.ftb.mods.ftblibrary.client.config.gui.resource.SelectImageResourceScreen;
+import dev.ftb.mods.ftblibrary.client.gui.CursorType;
 import dev.ftb.mods.ftblibrary.client.gui.GuiHelper;
 import dev.ftb.mods.ftblibrary.client.gui.input.Key;
 import dev.ftb.mods.ftblibrary.client.gui.input.MouseButton;
@@ -71,6 +72,11 @@ public class QuestPanel extends Panel {
 		super.refreshWidgets();
 
 		questScreen.viewQuestPanel.refreshWidgets();
+	}
+
+	@Override
+	public @Nullable CursorType getCursor() {
+		return questScreen.movingObjects ? CursorType.MOVE : super.getCursor();
 	}
 
 	public void updateMinMax() {
