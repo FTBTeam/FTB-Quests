@@ -85,8 +85,8 @@ public class RewardTable extends QuestObjectBase {
 		return id == -1L;
 	}
 
-	public static QuestObjectBase requireCreateRewardForTable(long id, String type, BaseQuestFile file) {
-		return Objects.requireNonNull(RewardType.createReward(id, makeFakeQuest(file), type));
+	public static QuestObjectBase requireCreateRewardForTable(long id, RewardType type, BaseQuestFile file) {
+		return type.create(id, makeFakeQuest(file));
 	}
 
 	public Component getTitleOrElse(Component def) {
@@ -219,9 +219,10 @@ public class RewardTable extends QuestObjectBase {
 					newReward = refreshIds = true;
 				}
 
-				Reward reward = RewardType.createReward(rewardId, fakeQuest, Json5Util.getString(rewardTag, "type").orElse(""));
-                if (reward != null) {
-                    getQuestFile().getTranslationManager().processInitialTranslation(rewardTag, reward);
+				RewardType rewardType = RewardType.get(Json5Util.getString(rewardTag, "type").orElse(""));
+				if (rewardType != null) {
+					Reward reward = rewardType.create(rewardId, fakeQuest);
+					getQuestFile().getTranslationManager().processInitialTranslation(rewardTag, reward);
 					reward.readData(rewardTag, provider);
 					float weight = rewardTag.has("weight") ? Json5Util.getFloat(rewardTag, "weight").orElse(0f) : 1;
 					weightedRewards.add(new WeightedReward(reward, weight));
@@ -229,7 +230,7 @@ public class RewardTable extends QuestObjectBase {
 					if (newReward && getFile() instanceof ServerQuestFile sqf) {
 						Server2PlayNetworking.sendToAllPlayers(sqf.server, CreateObjectResponseMessage.create(reward));
 					}
-                }
+				}
 			}
 		}
 
@@ -298,7 +299,7 @@ public class RewardTable extends QuestObjectBase {
 			long id = buffer.readLong();
 			RewardType type = RewardTypes.TYPES.get(buffer.readIdentifier());
 			if (type != null) {
-				Reward reward = type.createReward(id, fakeQuest);
+				Reward reward = type.create(id, fakeQuest);
 				reward.readNetData(buffer);
 				float weight = buffer.readFloat();
 				weightedRewards.add(new WeightedReward(reward, weight));

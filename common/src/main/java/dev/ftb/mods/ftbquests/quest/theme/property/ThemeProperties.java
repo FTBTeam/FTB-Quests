@@ -5,7 +5,6 @@ public interface ThemeProperties {
 	IconProperty BACKGROUND = new IconProperty("background");
 	IconProperty CHAPTER_PANEL_BACKGROUND = new IconProperty("chapter_panel_background");
 	IconProperty KEY_REFERENCE_BACKGROUND = new IconProperty("key_reference_background");
-	StringProperty EXTRA_QUEST_SHAPES = new StringProperty("extra_quest_shapes");
 	ColorProperty SELECTED_HILITE_1 = new ColorProperty("selected_chapter_highlight_1");
 	ColorProperty SELECTED_HILITE_2 = new ColorProperty("selected_chapter_highlight_2");
 
@@ -59,6 +58,8 @@ public interface ThemeProperties {
 	IconProperty MOVE_UP_ICON = new IconProperty("move_up_icon");
 	IconProperty MOVE_DOWN_ICON = new IconProperty("move_down_icon");
 	IconProperty LOCK_ICON = new IconProperty("lock_icon");
+	IconProperty UNDO_ICON = new IconProperty("undo_icon");
+	IconProperty REDO_ICON = new IconProperty("redo_icon");
 
 	// Quest window //
 	IconProperty ICON = new IconProperty("icon");

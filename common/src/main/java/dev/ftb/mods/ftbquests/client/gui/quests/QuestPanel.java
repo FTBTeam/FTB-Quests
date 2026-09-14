@@ -3,6 +3,7 @@ package dev.ftb.mods.ftbquests.client.gui.quests;
 import com.mojang.datafixers.util.Pair;
 import dev.ftb.mods.ftblibrary.client.config.editable.EditableImageResource;
 import dev.ftb.mods.ftblibrary.client.config.gui.resource.SelectImageResourceScreen;
+import dev.ftb.mods.ftblibrary.client.gui.CursorType;
 import dev.ftb.mods.ftblibrary.client.gui.GuiHelper;
 import dev.ftb.mods.ftblibrary.client.gui.input.Key;
 import dev.ftb.mods.ftblibrary.client.gui.input.MouseButton;
@@ -71,6 +72,11 @@ public class QuestPanel extends Panel {
 		super.refreshWidgets();
 
 		questScreen.viewQuestPanel.refreshWidgets();
+	}
+
+	@Override
+	public @Nullable CursorType getCursor() {
+		return questScreen.movingObjects ? CursorType.MOVE : super.getCursor();
 	}
 
 	public void updateMinMax() {
@@ -504,9 +510,9 @@ public class QuestPanel extends Panel {
 			double qy = questY;
 
 			for (TaskType type : TaskTypes.TYPES.values()) {
-				contextMenu.add(new ContextMenuItem(type.getDisplayName(), type.getIconSupplier(), b -> {
+				contextMenu.add(new ContextMenuItem(type.getDisplayName(), type.getIcon(), b -> {
 					playClickSound();
-					type.getGuiProvider().openCreationGui(this, new Quest(0L, questScreen.selectedChapter),
+					type.getGuiProviderOrThrow().openCreationGui(this, new Quest(0L, questScreen.selectedChapter),
 							task -> Play2ServerNetworking.send(CreateQuestAndTaskMessage.requestCreation(questScreen.selectedChapter, qx, qy, task))
 					);
 				}));
@@ -578,8 +584,7 @@ public class QuestPanel extends Panel {
 		if (questScreen.selectedChapter == null) {
 			return;
 		}
-		Task newTask = QuestObjectBase.copy(task,
-				() -> TaskType.createTask(0L, new Quest(0L, questScreen.selectedChapter), task.getType().getTypeId().toString()));
+		Task newTask = QuestObjectBase.copy(task, () -> task.getType().create(0L, new Quest(0L, questScreen.selectedChapter)));
 		Play2ServerNetworking.send(CreateQuestAndTaskMessage.requestCreation(questScreen.selectedChapter, qx, qy, newTask));
 	}
 
@@ -587,12 +592,17 @@ public class QuestPanel extends Panel {
 	public void mouseReleased(MouseButton button) {
 		super.mouseReleased(button);
 
-		if (questScreen.grabbed != null && questScreen.grabbed.isMiddle() && questScreen.file.canEdit()) {
+		if (isDraggingSelectionBox()) {
 			// select any quests in the box
 			questScreen.selectAllQuestsInBox(getMouseX(), getMouseY(), getScrollX(), getScrollY());
 		}
 
 		questScreen.grabbed = null;
+	}
+
+	boolean isDraggingSelectionBox() {
+        return questScreen.file.canEdit() && questScreen.grabbed != null
+                && (questScreen.grabbed.isMiddle() || questScreen.grabbed.isLeft() && Minecraft.getInstance().hasAltDown());
 	}
 
 	@Override

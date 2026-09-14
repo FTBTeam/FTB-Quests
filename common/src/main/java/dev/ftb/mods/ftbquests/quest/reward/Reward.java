@@ -44,7 +44,7 @@ public abstract class Reward extends QuestObjectBase {
 		quest = q;
 		team = Tristate.DEFAULT;
 		autoclaim = RewardAutoClaim.DEFAULT;
-		excludeFromClaimAll = getType().getExcludeFromListRewards();
+		excludeFromClaimAll = getType().isExcludedFromClaimAll();
 		ignoreRewardBlocking = false;
 		disableRewardScreenBlur = false;
 	}
@@ -96,7 +96,7 @@ public abstract class Reward extends QuestObjectBase {
 				.map(RewardAutoClaim.NAME_MAP::get)
 				.orElse(RewardAutoClaim.DEFAULT);
 
-		excludeFromClaimAll = Json5Util.getBoolean(json, "exclude_from_claim_all").orElse(getType().getExcludeFromListRewards());
+		excludeFromClaimAll = Json5Util.getBoolean(json, "exclude_from_claim_all").orElse(getType().isExcludedFromClaimAll());
 		ignoreRewardBlocking = Json5Util.getBoolean(json, "ignore_reward_blocking").orElse(false);
 		disableRewardScreenBlur	= Json5Util.getBoolean(json, "disable_reward_screen_blur").orElse(false);
 	}
@@ -240,7 +240,7 @@ public abstract class Reward extends QuestObjectBase {
 
 	@Override
 	public Icon<?> getAltIcon() {
-		return getType().getIconSupplier();
+		return getType().getIcon();
 	}
 
 	@Override

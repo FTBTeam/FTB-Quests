@@ -32,14 +32,13 @@ public class AddRewardButton extends Button {
 		List<ContextMenuItem> contextMenu = new ArrayList<>();
 
 		for (RewardType type : RewardTypes.TYPES.values()) {
-			if (type.getGuiProvider() != null) {
-				contextMenu.add(new ContextMenuItem(type.getDisplayName(), type.getIconSupplier(), b -> {
-					playClickSound();
-					type.getGuiProvider().openCreationGui(parent, quest, reward ->
-							Play2ServerNetworking.send(CreateObjectMessage.requestCreation(reward))
-					);
-				}));
-			}
+			type.ifGuiProvider(rewardGuiProvider ->
+					contextMenu.add(new ContextMenuItem(type.getDisplayName(), type.getIcon(), _ -> {
+						playClickSound();
+						rewardGuiProvider.openCreationGui(parent, quest, reward ->
+								Play2ServerNetworking.send(CreateObjectMessage.requestCreation(reward))
+						);
+					})));
 		}
 
 		getGui().openContextMenu(contextMenu);

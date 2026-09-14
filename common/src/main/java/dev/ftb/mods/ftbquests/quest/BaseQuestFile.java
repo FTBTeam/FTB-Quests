@@ -386,16 +386,15 @@ public abstract class BaseQuestFile extends QuestObject implements QuestFile {
 			case QUEST -> new Quest(id, requireQuestObject(parent, this::getChapter));
 			case QUEST_LINK -> new QuestLink(id, requireQuestObject(parent, this::getChapter), 0L);
 			case TASK -> {
-				Quest quest = requireQuestObject(parent, this::getQuest);
-				yield TaskType.requireCreateTask(id, quest, Json5Util.getString(metaData, "type").orElse(""));
+				TaskType taskType = TaskType.getOrThrow(Json5Util.getString(metaData, "type").orElse(""));
+				yield taskType.create(id, requireQuestObject(parent, this::getQuest));
 			}
 			case REWARD -> {
-				String rewardType = Json5Util.getString(metaData,"type").orElse("");
+				RewardType rewardType = RewardType.getOrThrow(Json5Util.getString(metaData,"type").orElse(""));
 				if (RewardTable.isFakeQuestId(parent)) {
 					yield RewardTable.requireCreateRewardForTable(id, rewardType, this);
 				} else {
-					Quest quest = requireQuestObject(parent, this::getQuest);
-                    yield RewardType.requireCreateReward(id, quest, rewardType);
+					yield rewardType.create(id, requireQuestObject(parent, this::getQuest));
 				}
 			}
 			case REWARD_TABLE -> new RewardTable(id, this);
@@ -748,12 +747,11 @@ public abstract class BaseQuestFile extends QuestObject implements QuestFile {
 					for (var taskEl : taskList) {
 						if (taskEl instanceof Json5Object taskJson) {
 							long taskId = readID(taskJson.get("id"));
-							Task task = TaskType.createTask(taskId, quest, Json5Util.getString(taskJson, "type").orElseThrow());
-							if (task != null) {
-								questObjectMap.put(task.id, task);
-								dataCache.put(task.id, taskJson);
-								quest.addTask(task);
-							}
+							String typeStr = Json5Util.getString(taskJson, "type").orElseThrow();
+							Task task = TaskType.getOrThrow(typeStr).create(taskId, quest);
+							questObjectMap.put(task.id, task);
+							dataCache.put(task.id, taskJson);
+							quest.addTask(task);
 						}
 					}
 				});
@@ -762,12 +760,11 @@ public abstract class BaseQuestFile extends QuestObject implements QuestFile {
 					for (var rewardEl : rewardList) {
 						if (rewardEl instanceof Json5Object rewardJson) {
 							long rewardId = readID(rewardJson.get("id"));
-							Reward reward = RewardType.createReward(rewardId, quest, Json5Util.getString(rewardJson, "type").orElseThrow());
-							if (reward != null) {
-								questObjectMap.put(reward.id, reward);
-								dataCache.put(reward.id, rewardJson);
-								quest.addReward(reward);
-							}
+							var rewardType = RewardType.getOrThrow(Json5Util.getString(rewardJson, "type").orElseThrow());
+							Reward reward = rewardType.create(rewardId, quest);
+							questObjectMap.put(reward.id, reward);
+							dataCache.put(reward.id, rewardJson);
+							quest.addReward(reward);
 						}
 					}
 				});
@@ -1047,7 +1044,7 @@ public abstract class BaseQuestFile extends QuestObject implements QuestFile {
 							throw new IllegalStateException("Received quest sync data for an unrecognized task type (internal id "
 									+ typeId + ") - client and server likely have a mismatched set of mods that register quest task/reward types");
 						}
-						quest.addTask(type.createTask(id, quest));
+						quest.addTask(type.create(id, quest));
 					}
 
 					int rewardCount = buffer.readVarInt();
@@ -1059,7 +1056,7 @@ public abstract class BaseQuestFile extends QuestObject implements QuestFile {
 							throw new IllegalStateException("Received quest sync data for an unrecognized reward type (internal id "
 									+ typeId + ") - client and server likely have a mismatched set of mods that register quest task/reward types");
 						}
-						quest.addReward(type.createReward(id, quest));
+						quest.addReward(type.create(id, quest));
 					}
 				}
 
@@ -1522,7 +1519,7 @@ public abstract class BaseQuestFile extends QuestObject implements QuestFile {
 		toRemove.forEach(table -> {
 			Path path = ServerQuestFile.getInstance().getFolder().resolve(table.getPath().orElseThrow());
 			try {
-	            FileUtils.delete(path.toFile());
+				FileUtils.delete(path.toFile());
 				table.deleteSelf();
 				idsToRemove.add(table.id);
 			} catch (IOException e) {
@@ -1597,7 +1594,7 @@ public abstract class BaseQuestFile extends QuestObject implements QuestFile {
 	 * @return the removed quest, or null if the quest isn't in the map
 	 */
 	@Nullable
-    QuestObjectBase removeFromMap(long id) {
+	QuestObjectBase removeFromMap(long id) {
 		QuestObjectBase object = questObjectMap.remove(id);
 
 		if (object != null) {
@@ -1609,7 +1606,7 @@ public abstract class BaseQuestFile extends QuestObject implements QuestFile {
 		}
 
 		return null;
-    }
+	}
 
 	/**
 	 * Add the quest to the map. Only to be called from {@link BaseQuestFile#onCreated()} !
@@ -1642,9 +1639,9 @@ public abstract class BaseQuestFile extends QuestObject implements QuestFile {
 		private final BaseQuestFile file;
 		private final LongSet allocated = new LongOpenHashSet();
 
-        public UniqueIdAllocator(BaseQuestFile file) {
-            this.file = file;
-        }
+		public UniqueIdAllocator(BaseQuestFile file) {
+			this.file = file;
+		}
 
 		public long newId() {
 			long newId;
@@ -1655,5 +1652,5 @@ public abstract class BaseQuestFile extends QuestObject implements QuestFile {
 
 			return newId;
 		}
-    }
+	}
 }

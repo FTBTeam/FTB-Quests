@@ -4,6 +4,25 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [26.1.2.8]
+
+### Added
+* Added an "Insert Hovered Text" toolbar button to the multiline text editor screen
+  * Allows easier insertion of tooltips on quest description text
+* Added a few more edit-mode GUI hotkeys (all rebindable via vanilla options screen)
+  * Force-complete hovered quest (Alt-C)
+  * Force-reset hovered quest (Alt-R)
+  * Force-save quest book data on server (Ctrl+S)
+  * Download quest book data to client (Shift+Ctrl+S)
+* Alt + Left mouse button now works to drag a quest selection box (in addition to the existing middle-button functionality)
+  * Many people find the middle button awkward to use, especially if it's also the mouse wheel
+  * Ctrl + Alt + Left button toggles selection, same as Ctrl + middle button already does
+
+### Fixed
+* Fixed clientside NPE when pasting an image while one or more images are currently selected
+* Fixed item rewards with enchanted items (serialization was missing the registry context)
+* Arrow keys weren't working as intended to the scroll the quest screen
+
 ## [26.1.2.7]
 
 ### Added

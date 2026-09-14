@@ -1,11 +1,11 @@
 package dev.ftb.mods.ftbquests.item;
 
 import dev.ftb.mods.ftblibrary.platform.network.Server2PlayNetworking;
-import dev.ftb.mods.ftbquests.FTBQuests;
 import dev.ftb.mods.ftbquests.block.entity.ITaskScreen;
 import dev.ftb.mods.ftbquests.net.BlockConfigRequestMessage;
 import dev.ftb.mods.ftbquests.registry.ModDataComponents;
 import dev.ftb.mods.ftbquests.registry.ModItems;
+import dev.ftb.mods.ftbquests.util.FTBQUtils;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.GlobalPos;
@@ -95,7 +95,7 @@ public class TaskScreenConfiguratorItem extends Item {
     }
 
     public static Optional<GlobalPos> readBlockPos(ItemStack stack) {
-        return FTBQuests.getComponent(stack, ModDataComponents.SCREEN_POS);
+        return FTBQUtils.getComponent(stack, ModDataComponents.SCREEN_POS);
     }
 
     private static String posToString(BlockPos pos) {

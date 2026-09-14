@@ -72,7 +72,7 @@ public record CreateQuestAndTaskMessage(long chapterId, double x, double y, Iden
 
 					Quest quest = new Quest(allocator.newId(), chapter).setPosition(message.x, message.y);
 
-					Task task = taskType.createTask(allocator.newId(), quest);
+					Task task = taskType.create(allocator.newId(), quest);
 					task.readData(message.data, sp.registryAccess());
 					Json5Object metadata = message.metadata.orElse(new Json5Object());
 					sqf.getTranslationManager().processInitialTranslation(metadata, task);

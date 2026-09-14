@@ -16,18 +16,14 @@ import dev.ftb.mods.ftbquests.registry.ModBlockEntityTypes;
 import dev.ftb.mods.ftbquests.registry.ModBlocks;
 import dev.ftb.mods.ftbquests.registry.ModDataComponents;
 import dev.ftb.mods.ftbquests.registry.ModItems;
-import net.minecraft.core.component.DataComponentType;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.server.packs.resources.ResourceManagerReloadListener;
-import net.minecraft.world.item.ItemStack;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
-import java.util.Optional;
-import java.util.function.Supplier;
 
 public class FTBQuests {
 	public static final Logger LOGGER = LogManager.getLogger(FTBQuestsAPI.MOD_NAME);
@@ -93,11 +89,4 @@ public class FTBQuests {
 		}
 	}
 
-	public static <T> Optional<T> getComponent(ItemStack stack, Supplier<DataComponentType<T>> componentType) {
-		return Optional.ofNullable(stack.get(componentType.get()));
-	}
-
-	public static <T> Optional<T> getComponent(ItemStack stack, DataComponentType<T> componentType) {
-		return Optional.ofNullable(stack.get(componentType));
-	}
 }

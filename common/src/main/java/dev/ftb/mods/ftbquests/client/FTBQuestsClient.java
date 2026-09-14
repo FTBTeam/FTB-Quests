@@ -36,7 +36,9 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.network.chat.ClickEvent;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.Style;
 import net.minecraft.resources.Identifier;
 import net.minecraft.util.Util;
 import net.minecraft.world.InteractionHand;
@@ -48,6 +50,9 @@ import net.minecraft.world.level.block.state.BlockState;
 import org.jspecify.annotations.Nullable;
 
 import java.net.URI;
+import java.nio.file.Path;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
@@ -218,6 +223,23 @@ public class FTBQuestsClient {
 			}, uriStr, false));
 		} else {
 			Util.getPlatform().openUri(uri);
+		}
+	}
+
+	public static void saveLocally() {
+		try {
+			DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd-HH-mm-ss");
+			Path path = Path.of("local", FTBQuestsAPI.MOD_ID, "saved").resolve(LocalDateTime.now().format(formatter));
+
+			ClientQuestFile cqf = ClientQuestFile.getInstance();
+			cqf.writeDataFull(path, cqf.holderLookup());
+			cqf.getTranslationManager().saveToFile(cqf, path.resolve("lang"), true);
+
+			Component component = Component.translatable("ftbquests.gui.saved_as_file", path.toString())
+					.withStyle(Style.EMPTY.withClickEvent(new ClickEvent.OpenFile(path.toString())));
+			Minecraft.getInstance().player.sendSystemMessage(component);
+		} catch (Exception ex) {
+			ex.printStackTrace();
 		}
 	}
 }

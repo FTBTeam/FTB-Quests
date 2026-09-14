@@ -54,6 +54,8 @@ move_up_icon:         ftblibrary:icons/up
 move_down_icon:       ftblibrary:icons/down
 left_arrow:           ftblibrary:icons/left
 right_arrow:          ftblibrary:icons/right
+undo_icon:            ftblibrary:icons/undo
+redo_icon:            ftblibrary:icons/redo
 
 full_screen_quest:                  0
 tasks_text_color:                   #5555FF

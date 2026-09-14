@@ -54,7 +54,7 @@ public class WeightedReward implements Comparable<WeightedReward> {
 	}
 
 	public WeightedReward copy() {
-		Reward r = QuestObjectBase.copy(reward, () -> RewardType.createReward(reward.id, reward.getQuest(), reward.getType().getTypeId().toString()));
+		Reward r = QuestObjectBase.copy(reward, () -> reward.getType().create(reward.id, reward.getQuest()));
 		return new WeightedReward(r, weight);
 	}
 }
