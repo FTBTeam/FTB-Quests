@@ -21,13 +21,9 @@ import dev.ftb.mods.ftbquests.quest.task.StructureTask;
 import dev.ftb.mods.ftbquests.quest.theme.property.ThemeProperties;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
-import net.minecraft.network.chat.ClickEvent;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.Style;
 
-import java.io.File;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.List;
 
 public class OtherButtonsPanelBottom extends OtherButtonsPanel {
@@ -168,7 +164,7 @@ public class OtherButtonsPanelBottom extends OtherButtonsPanel {
 			contextMenu.add(new ContextMenuItem(Component.translatable("ftbquests.gui.save_on_server"), ThemeProperties.SAVE_ICON.get(),
 					b -> NetworkManager.sendToServer(ForceSaveMessage.INSTANCE)));
 			contextMenu.add(new ContextMenuItem(Component.translatable("ftbquests.gui.save_as_file"), ThemeProperties.DOWNLOAD_ICON.get(),
-					b -> saveLocally()));
+					b -> FTBQuestsClient.saveLocally()));
 
 			contextMenu.add(new ContextMenuItem(Component.translatable("ftbquests.gui.reload_theme"), ThemeProperties.RELOAD_ICON.get(),
 					b -> QuestScreen.reloadTheme()));
@@ -177,39 +173,5 @@ public class OtherButtonsPanelBottom extends OtherButtonsPanel {
 
 			questScreen.openContextMenu(contextMenu);
 		}
-
-		private void saveLocally() {
-			try {
-				Calendar time = Calendar.getInstance();
-				StringBuilder fileName = new StringBuilder("local/ftbquests/saved/");
-				appendNum(fileName, time.get(Calendar.YEAR), '-');
-				appendNum(fileName, time.get(Calendar.MONTH) + 1, '-');
-				appendNum(fileName, time.get(Calendar.DAY_OF_MONTH), '-');
-				appendNum(fileName, time.get(Calendar.HOUR_OF_DAY), '-');
-				appendNum(fileName, time.get(Calendar.MINUTE), '-');
-				appendNum(fileName, time.get(Calendar.SECOND), '\0');
-				File file = new File(Minecraft.getInstance().gameDirectory, fileName.toString()).getCanonicalFile();
-				ClientQuestFile.INSTANCE.writeDataFull(file.toPath(), ClientQuestFile.INSTANCE.holderLookup());
-				ClientQuestFile.INSTANCE.getTranslationManager().saveToNBT(file.toPath().resolve("lang"), true);
-
-                String p = "." + file.getPath().replace(Minecraft.getInstance().gameDirectory.getCanonicalFile().getAbsolutePath(), "");
-				Component component = Component.translatable("ftbquests.gui.saved_as_file", p)
-						.withStyle(Style.EMPTY.withClickEvent(new ClickEvent(ClickEvent.Action.OPEN_FILE, p)));
-				Minecraft.getInstance().player.displayClientMessage(component, false);
-			} catch (Exception ex) {
-				ex.printStackTrace();
-			}
-		}
-
-		private void appendNum(StringBuilder sb, int num, char c) {
-			if (num < 10) {
-				sb.append('0');
-			}
-			sb.append(num);
-			if (c != '\0') {
-				sb.append(c);
-			}
-		}
 	}
-
 }
