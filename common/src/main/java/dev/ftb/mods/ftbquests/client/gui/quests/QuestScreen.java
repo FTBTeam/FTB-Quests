@@ -965,11 +965,11 @@ public class QuestScreen extends BaseScreen {
 		selectChapter(file.getChapter(persistedData.selectedChapter));
 
 		selectedObjects.clear();
-		persistedData.selectedQuests.stream()
-				.mapToLong(id -> id)
-				.filter(id -> file.getBase(id) instanceof Movable)
-				.mapToObj(id -> (Movable) file.get(id))
-				.forEach(selectedObjects::add);
+		for (long id : persistedData.selectedQuests) {
+			if (file.getBase(id) instanceof Movable movable) {
+				selectedObjects.add(movable);
+			}
+		}
 
 		questPanel.scrollTo(persistedData.scrollX, persistedData.scrollY);
 		questPanel.centerQuestX = persistedData.scrollX;
