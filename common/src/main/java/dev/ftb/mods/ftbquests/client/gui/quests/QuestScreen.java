@@ -567,22 +567,6 @@ public class QuestScreen extends BaseScreen {
 				}
 			}
 
-			if (selectedObjects.isEmpty() && !isViewingQuest()) {
-				if (key.matches(FTBQuestsKeyMappings.KEY_GUI_DOWN)) {
-					questPanel.setScrollY(questPanel.getScrollY() + questPanel.getScrollStep() * moveStep());
-					return true;
-				} else if (key.matches(FTBQuestsKeyMappings.KEY_GUI_UP)) {
-					questPanel.setScrollY(questPanel.getScrollY() - questPanel.getScrollStep() * moveStep());
-					return true;
-				} else if (key.matches(FTBQuestsKeyMappings.KEY_GUI_LEFT)) {
-					questPanel.setScrollX(questPanel.getScrollX() - questPanel.getScrollStep() * moveStep());
-					return true;
-				} else if (key.matches(FTBQuestsKeyMappings.KEY_GUI_RIGHT)) {
-					questPanel.setScrollX(questPanel.getScrollX() + questPanel.getScrollStep() * moveStep());
-					return true;
-				}
-			}
-
 			if (key.matches(FTBQuestsKeyMappings.KEY_GUI_RELOAD_THEME)) {
 				reloadTheme(!isShiftKeyDown());
 				return true;
@@ -600,14 +584,16 @@ public class QuestScreen extends BaseScreen {
 			} else if (key.matches(FTBQuestsKeyMappings.KEY_GUI_SELECT_NONE)) {
 				selectedObjects.clear();
 				return true;
-			} else if (key.matches(FTBQuestsKeyMappings.KEY_GUI_DOWN)) {
-				return moveSelectedQuests(0D, moveStep());
-			} else if (key.matches(FTBQuestsKeyMappings.KEY_GUI_UP)) {
-				return moveSelectedQuests(0D, -moveStep());
-			} else if (key.matches(FTBQuestsKeyMappings.KEY_GUI_LEFT)) {
-				return moveSelectedQuests(-moveStep(), 0D);
-			} else if (key.matches(FTBQuestsKeyMappings.KEY_GUI_RIGHT)) {
-				return moveSelectedQuests(moveStep(), 0D);
+			} else if (movingObjects) {
+				if (key.matches(FTBQuestsKeyMappings.KEY_GUI_DOWN)) {
+					return moveSelectedQuests(0D, moveStep());
+				} else if (key.matches(FTBQuestsKeyMappings.KEY_GUI_UP)) {
+					return moveSelectedQuests(0D, -moveStep());
+				} else if (key.matches(FTBQuestsKeyMappings.KEY_GUI_LEFT)) {
+					return moveSelectedQuests(-moveStep(), 0D);
+				} else if (key.matches(FTBQuestsKeyMappings.KEY_GUI_RIGHT)) {
+					return moveSelectedQuests(moveStep(), 0D);
+				}
 			} else if (key.matches(FTBQuestsKeyMappings.KEY_GUI_COPY)) {
 				return copyObjectsToClipboard();
 			} else if (key.matches(FTBQuestsKeyMappings.KEY_GUI_PASTE)) {
@@ -675,6 +661,18 @@ public class QuestScreen extends BaseScreen {
 			return true;
 		} else if (key.matches(FTBQuestsKeyMappings.KEY_GUI_EXT_INFO)) {
 			showExtendedInfo = true;
+			return true;
+		} else if (key.matches(FTBQuestsKeyMappings.KEY_GUI_DOWN)) {
+			questPanel.setScrollY(questPanel.getScrollY() + questPanel.getScrollStep() * moveStep());
+			return true;
+		} else if (key.matches(FTBQuestsKeyMappings.KEY_GUI_UP)) {
+			questPanel.setScrollY(questPanel.getScrollY() - questPanel.getScrollStep() * moveStep());
+			return true;
+		} else if (key.matches(FTBQuestsKeyMappings.KEY_GUI_LEFT)) {
+			questPanel.setScrollX(questPanel.getScrollX() - questPanel.getScrollStep() * moveStep());
+			return true;
+		} else if (key.matches(FTBQuestsKeyMappings.KEY_GUI_RIGHT)) {
+			questPanel.setScrollX(questPanel.getScrollX() + questPanel.getScrollStep() * moveStep());
 			return true;
 		}
 
