@@ -6,8 +6,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [2101.1.35]
 
+### Added
+* Added a few more edit-mode GUI hotkeys (all rebindable via vanilla options screen)
+  * Force-complete hovered quest (Alt-C)
+  * Force-reset hovered quest (Alt-R)
+  * Force-save quest book data on server (Ctrl+S)
+  * Download quest book data to client (Shift+Ctrl+S)
+* Alt + Left mouse button now works to drag a quest selection box (in addition to the existing middle-button functionality)
+  * Many people find the middle button awkward to use, especially if it's also the mouse wheel
+  * Ctrl + Alt + Left button toggles selection, same as Ctrl + middle button already does
+
 ### Fixed
 * Fixed player permission checking bug which could cause problems with other mods running `/ftbquests ...` commands
+* Fixed clientside NPE when pasting an image while one or more images are currently selected
+* Arrow keys weren't working as intended to the scroll the quest screen
 
 ## [2101.1.34]
 

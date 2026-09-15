@@ -151,58 +151,11 @@ public class QuestButton extends Button implements QuestPositionableButton {
 
 			Collection<Quest> selected = questScreen.getSelectedQuests();
 			if (!selected.isEmpty()) {
-				if (!selected.contains(quest)) {
-					contextMenu.add(new ContextMenuItem(Component.translatable("ftbquests.gui.add_dependencies"),
-							ThemeProperties.ADD_ICON.get(),
-							b -> selected.forEach(q -> editDependency(quest, q, true)))
-					);
-					contextMenu.add(new ContextMenuItem(Component.translatable("ftbquests.gui.remove_dependencies"),
-							ThemeProperties.DELETE_ICON.get(),
-							b -> selected.forEach(q -> editDependency(quest, q, false)))
-					);
-					contextMenu.add(new ContextMenuItem(Component.translatable("ftbquests.gui.add_dependencies_self"),
-							ThemeProperties.ADD_ICON.get(),
-							b -> selected.forEach(q -> editDependency(q, quest, true)))
-					);
-					contextMenu.add(new ContextMenuItem(Component.translatable("ftbquests.gui.remove_dependencies_self"),
-							ThemeProperties.DELETE_ICON.get(),
-							b -> selected.forEach(q -> editDependency(q, quest, false)))
-					);
-				} else {
-					contextMenu.add(new ContextMenuItem(Component.translatable("gui.move"),
-							ThemeProperties.MOVE_UP_ICON.get(quest),
-							b -> questScreen.movingObjects = true));
-					contextMenu.add(new ContextMenuItem(Component.translatable("ftbquests.gui.add_reward_all"),
-							ThemeProperties.ADD_ICON.get(quest),
-							b -> openAddRewardContextMenu()));
-					contextMenu.add(new ContextMenuItem(Component.translatable("ftbquests.gui.clear_reward_all"),
-							ThemeProperties.CLOSE_ICON.get(quest),
-							b -> selected.forEach(q -> NetworkManager.sendToServer(
-									new DeleteObjectMessage(q.getRewards().stream().map(QuestObjectBase::getId).toList())
-							))));
-					contextMenu.add(new ContextMenuItem(Component.translatable("ftbquests.gui.bulk_change_size"),
-							Icons.SETTINGS,
-							b -> bulkChangeSize()));
-					contextMenu.add(new ContextMenuItem(Component.translatable("selectServer.delete"),
-							ThemeProperties.DELETE_ICON.get(quest),
-							b -> questScreen.deleteSelectedObjects())
-							.setYesNoText(Component.translatable("delete_item", Component.translatable("ftbquests.quests").append(" [" + questScreen.selectedObjects.size() + "]"))));
-				}
-
-				contextMenu.add(ContextMenuItem.SEPARATOR);
-				contextMenu.add(new ContextMenuItem(Component.literal("Ctrl+A to select all quests").withStyle(ChatFormatting.GRAY), Icons.INFO, null).setCloseMenu(false));
-				contextMenu.add(new ContextMenuItem(Component.literal("Ctrl+D to deselect all quests").withStyle(ChatFormatting.GRAY), Icons.INFO, null).setCloseMenu(false));
-				contextMenu.add(new ContextMenuItem(Component.literal("Ctrl+Arrow Key to move selected quests").withStyle(ChatFormatting.GRAY), Icons.INFO, null).setCloseMenu(false));
-
+				addMultiSelectionContextMenuItems(selected, contextMenu);
 				getGui().openContextMenu(contextMenu);
 			} else {
 				ContextMenuBuilder.create(theQuestObject(), questScreen, this)
 						.withDeletionFocus(moveAndDeleteFocus())
-						.insertAtTop(List.of(new TooltipContextMenuItem(Component.translatable("gui.move"),
-								ThemeProperties.MOVE_UP_ICON.get(quest),
-								b -> questScreen.initiateMoving(moveAndDeleteFocus()),
-								Component.translatable("ftbquests.gui.move_tooltip").withStyle(ChatFormatting.DARK_GRAY))
-						))
 						.openContextMenu(getGui());
 			}
 		} else if (button.isLeft()) {
@@ -237,6 +190,51 @@ public class QuestButton extends Button implements QuestPositionableButton {
 				questScreen.closeQuest();
 			}
 		}
+	}
+
+	private void addMultiSelectionContextMenuItems(Collection<Quest> selected, List<ContextMenuItem> contextMenu) {
+		if (!selected.contains(quest)) {
+			contextMenu.add(new ContextMenuItem(Component.translatable("ftbquests.gui.add_dependencies"),
+					ThemeProperties.ADD_ICON.get(),
+					b -> selected.forEach(q -> editDependency(quest, q, true)))
+			);
+			contextMenu.add(new ContextMenuItem(Component.translatable("ftbquests.gui.remove_dependencies"),
+					ThemeProperties.DELETE_ICON.get(),
+					b -> selected.forEach(q -> editDependency(quest, q, false)))
+			);
+			contextMenu.add(new ContextMenuItem(Component.translatable("ftbquests.gui.add_dependencies_self"),
+					ThemeProperties.ADD_ICON.get(),
+					b -> selected.forEach(q -> editDependency(q, quest, true)))
+			);
+			contextMenu.add(new ContextMenuItem(Component.translatable("ftbquests.gui.remove_dependencies_self"),
+					ThemeProperties.DELETE_ICON.get(),
+					b -> selected.forEach(q -> editDependency(q, quest, false)))
+			);
+		} else {
+			contextMenu.add(new ContextMenuItem(Component.translatable("gui.move"),
+					ThemeProperties.MOVE_UP_ICON.get(quest),
+					b -> questScreen.movingObjects = true));
+			contextMenu.add(new ContextMenuItem(Component.translatable("ftbquests.gui.add_reward_all"),
+					ThemeProperties.ADD_ICON.get(quest),
+					b -> openAddRewardContextMenu()));
+			contextMenu.add(new ContextMenuItem(Component.translatable("ftbquests.gui.clear_reward_all"),
+					ThemeProperties.CLOSE_ICON.get(quest),
+					b -> selected.forEach(q -> NetworkManager.sendToServer(
+							new DeleteObjectMessage(q.getRewards().stream().map(QuestObjectBase::getId).toList())
+					))));
+			contextMenu.add(new ContextMenuItem(Component.translatable("ftbquests.gui.bulk_change_size"),
+					Icons.SETTINGS,
+					b -> bulkChangeSize()));
+			contextMenu.add(new ContextMenuItem(Component.translatable("selectServer.delete"),
+					ThemeProperties.DELETE_ICON.get(quest),
+					b -> questScreen.deleteSelectedObjects())
+					.setYesNoText(Component.translatable("delete_item", Component.translatable("ftbquests.quests").append(" [" + questScreen.selectedObjects.size() + "]"))));
+		}
+
+		contextMenu.add(ContextMenuItem.SEPARATOR);
+		contextMenu.add(new ContextMenuItem(Component.literal("Ctrl+A to select all quests").withStyle(ChatFormatting.GRAY), Icons.INFO, null).setCloseMenu(false));
+		contextMenu.add(new ContextMenuItem(Component.literal("Ctrl+D to deselect all quests").withStyle(ChatFormatting.GRAY), Icons.INFO, null).setCloseMenu(false));
+		contextMenu.add(new ContextMenuItem(Component.literal("Ctrl+Arrow Key to move selected quests").withStyle(ChatFormatting.GRAY), Icons.INFO, null).setCloseMenu(false));
 	}
 
 	private void bulkChangeSize() {

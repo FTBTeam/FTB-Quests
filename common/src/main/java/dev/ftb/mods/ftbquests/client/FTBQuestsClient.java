@@ -1,5 +1,11 @@
 package dev.ftb.mods.ftbquests.client;
 
+import dev.architectury.event.events.client.ClientLifecycleEvent;
+import dev.architectury.networking.NetworkManager;
+import dev.architectury.platform.Platform;
+import dev.architectury.registry.ReloadListenerRegistry;
+import dev.architectury.registry.client.rendering.RenderTypeRegistry;
+import dev.architectury.registry.registries.RegistrarManager;
 import dev.ftb.mods.ftblibrary.FTBLibrary;
 import dev.ftb.mods.ftblibrary.config.EntityFaceConfig;
 import dev.ftb.mods.ftblibrary.config.ImageResourceConfig;
@@ -26,12 +32,6 @@ import dev.ftb.mods.ftbquests.quest.QuestObjectBase;
 import dev.ftb.mods.ftbquests.quest.TeamData;
 import dev.ftb.mods.ftbquests.quest.theme.ThemeLoader;
 import dev.ftb.mods.ftbquests.registry.ModBlocks;
-import dev.architectury.event.events.client.ClientLifecycleEvent;
-import dev.architectury.networking.NetworkManager;
-import dev.architectury.platform.Platform;
-import dev.architectury.registry.ReloadListenerRegistry;
-import dev.architectury.registry.client.rendering.RenderTypeRegistry;
-import dev.architectury.registry.registries.RegistrarManager;
 import dev.ftb.mods.ftbquests.util.FileUtils;
 import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
@@ -46,7 +46,9 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.registries.Registries;
+import net.minecraft.network.chat.ClickEvent;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.Style;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.PackType;
 import net.minecraft.util.RandomSource;
@@ -59,10 +61,11 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
 import org.jetbrains.annotations.Nullable;
 
-import java.io.IOException;
 import java.net.URI;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Optional;
 
@@ -251,4 +254,20 @@ public class FTBQuestsClient {
 			Util.getPlatform().openUri(uri);
 		}
 	}
+
+    public static void saveLocally() {
+        try {
+			DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd-HH-mm-ss");
+			Path path = Path.of("local", FTBQuestsAPI.MOD_ID, "saved").resolve(LocalDateTime.now().format(formatter));
+
+            ClientQuestFile.INSTANCE.writeDataFull(path, ClientQuestFile.INSTANCE.holderLookup());
+            ClientQuestFile.INSTANCE.getTranslationManager().saveToNBT(path.resolve("lang"), true);
+
+            Component component = Component.translatable("ftbquests.gui.saved_as_file", path)
+                    .withStyle(Style.EMPTY.withClickEvent(new ClickEvent(ClickEvent.Action.OPEN_FILE, path.toString())));
+            Minecraft.getInstance().player.displayClientMessage(component, false);
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
+    }
 }

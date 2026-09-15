@@ -1,5 +1,10 @@
 package dev.ftb.mods.ftbquests.client.gui.quests;
 
+import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.blaze3d.vertex.*;
+import com.mojang.datafixers.util.Pair;
+import com.mojang.math.Axis;
+import dev.architectury.networking.NetworkManager;
 import dev.ftb.mods.ftblibrary.config.ImageResourceConfig;
 import dev.ftb.mods.ftblibrary.config.ui.resource.SelectImageResourceScreen;
 import dev.ftb.mods.ftblibrary.icon.Color4I;
@@ -19,11 +24,6 @@ import dev.ftb.mods.ftbquests.quest.task.Task;
 import dev.ftb.mods.ftbquests.quest.task.TaskType;
 import dev.ftb.mods.ftbquests.quest.task.TaskTypes;
 import dev.ftb.mods.ftbquests.quest.theme.property.ThemeProperties;
-import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.*;
-import com.mojang.datafixers.util.Pair;
-import com.mojang.math.Axis;
-import dev.architectury.networking.NetworkManager;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.renderer.GameRenderer;
@@ -66,6 +66,11 @@ public class QuestPanel extends Panel {
 		super.refreshWidgets();
 
 		questScreen.viewQuestPanel.refreshWidgets();
+	}
+
+	@Override
+	public @Nullable CursorType getCursor() {
+		return questScreen.movingObjects ? CursorType.MOVE : super.getCursor();
 	}
 
 	public void updateMinMax() {
@@ -594,12 +599,17 @@ public class QuestPanel extends Panel {
 	public void mouseReleased(MouseButton button) {
 		super.mouseReleased(button);
 
-		if (questScreen.grabbed != null && questScreen.grabbed.isMiddle() && questScreen.file.canEdit()) {
+		if (isDraggingSelectionBox()) {
 			// select any quests in the box
 			questScreen.selectAllQuestsInBox(getMouseX(), getMouseY(), getScrollX(), getScrollY());
 		}
 
 		questScreen.grabbed = null;
+	}
+
+	boolean isDraggingSelectionBox() {
+		return questScreen.file.canEdit() && questScreen.grabbed != null
+				&& (questScreen.grabbed.isMiddle() || questScreen.grabbed.isLeft() && ScreenWrapper.hasAltDown());
 	}
 
 	@Override
