@@ -4,7 +4,7 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [2101.1.35]
+## [2101.1.36]
 
 ### Added
 * Added a few more edit-mode GUI hotkeys (all rebindable via vanilla options screen)
@@ -17,9 +17,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   * Ctrl + Alt + Left button toggles selection, same as Ctrl + middle button already does
 
 ### Fixed
-* Fixed player permission checking bug which could cause problems with other mods running `/ftbquests ...` commands
 * Fixed clientside NPE when pasting an image while one or more images are currently selected
 * Arrow keys weren't working as intended to the scroll the quest screen
+
+## [2101.1.35]
+
+### Fixed
+* Fixed player permission checking bug which could cause problems with other mods running `/ftbquests ...` commands
 
 ## [2101.1.34]
 
