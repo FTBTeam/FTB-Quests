@@ -564,7 +564,7 @@ public final class Chapter extends QuestObject {
 	}
 
 	public boolean isAutofocus(long id) {
-		return id == getAutofocus().map(Movable::getMovableID).orElse(0L);
+		return autoFocusId != null && !autoFocusId.isEmpty() && id == getAutofocus().map(Movable::getMovableID).orElse(0L);
 	}
 
 	@Override

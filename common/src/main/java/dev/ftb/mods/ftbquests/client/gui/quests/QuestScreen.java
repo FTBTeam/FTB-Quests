@@ -1,5 +1,7 @@
 package dev.ftb.mods.ftbquests.client.gui.quests;
 
+import com.mojang.datafixers.util.Pair;
+import dev.architectury.networking.NetworkManager;
 import dev.ftb.mods.ftblibrary.config.ConfigGroup;
 import dev.ftb.mods.ftblibrary.config.ConfigValue;
 import dev.ftb.mods.ftblibrary.config.ConfigWithVariants;
@@ -26,8 +28,9 @@ import dev.ftb.mods.ftbquests.quest.theme.QuestTheme;
 import dev.ftb.mods.ftbquests.quest.theme.ThemeLoader;
 import dev.ftb.mods.ftbquests.quest.theme.property.ThemeProperties;
 import dev.ftb.mods.ftbquests.util.ConfigQuestObject;
-import com.mojang.datafixers.util.Pair;
-import dev.architectury.networking.NetworkManager;
+import it.unimi.dsi.fastutil.doubles.DoubleDoublePair;
+import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
+import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
@@ -64,6 +67,7 @@ public class QuestScreen extends BaseScreen {
 	private boolean showExtendedInfo = false;
 
 	private final Set<Panel> refreshPending = Collections.newSetFromMap(new IdentityHashMap<>());
+	private final Long2ObjectMap<DoubleDoublePair> lastScrollPos = new Long2ObjectOpenHashMap<>();
 
 	public final QuestPanel questPanel;
 	public final OtherButtonsPanelBottom otherButtonsBottomPanel;
@@ -154,16 +158,31 @@ public class QuestScreen extends BaseScreen {
 		file.setPersistedScreenInfo(getPersistedScreenData());
 		PinnedQuestsTracker.INSTANCE.refresh();
 		QuestTheme.setFallbackQuestObject(null);
+		storeScrollPos();
 
 		super.onClosed();
+	}
+
+	private void storeScrollPos() {
+		if (selectedChapter != null) {
+			lastScrollPos.put(selectedChapter.getId(), DoubleDoublePair.of(questPanel.centerQuestX, questPanel.centerQuestY));
+		}
 	}
 
 	public void selectChapter(@Nullable Chapter chapter) {
 		if (selectedChapter != chapter) {
 			closeQuest();
+			storeScrollPos();
 			selectedChapter = chapter;
 			questPanel.refreshWidgets();
-			questPanel.resetScroll();
+			if (selectedChapter != null && lastScrollPos.containsKey(selectedChapter.id)) {
+				var savedPos = lastScrollPos.get(selectedChapter.id);
+				questPanel.scrollTo(savedPos.firstDouble(), savedPos.secondDouble());
+			} else if (selectedChapter != null && selectedChapter.getAutofocus().isPresent()) {
+				scrollTo(selectedChapter.getAutofocus().get());
+			} else {
+				questPanel.resetScroll();
+			}
 			questPanel.bezierController.deactivate(false);
 			chapterPanel.keepChapterInView(selectedChapter);
 			PinnedQuestsTracker.INSTANCE.refresh();
@@ -221,7 +240,7 @@ public class QuestScreen extends BaseScreen {
 	}
 
 	public void toggleSelected(Movable movable) {
-		viewQuest(null);
+		closeQuest();
 
 		if (selectedObjects.contains(movable)) {
 			selectedObjects.remove(movable);
@@ -712,7 +731,7 @@ public class QuestScreen extends BaseScreen {
 		int index = visibleChapters.indexOf(selectedChapter) + offset;
 		if (selectedChapter != null && visibleChapters.size() > 1) {
 			selectChapter(visibleChapters.get(MathUtils.mod(index, visibleChapters.size())));
-			selectedChapter.getAutofocus().ifPresent(this::scrollTo);
+//			selectedChapter.getAutofocus().ifPresent(this::scrollTo);
 		}
 		return true;
 	}
@@ -727,12 +746,14 @@ public class QuestScreen extends BaseScreen {
 					zoom = 20;
 					selectChapter(quest.getChapter());
 					questPanel.scrollTo(quest.getX(), quest.getY());
-					viewQuest(quest);
+					open(quest, true);
+//					viewQuest(quest);
 				} else if (c.getValue() instanceof QuestLink link) {
 					zoom = 20;
 					selectChapter(link.getChapter());
 					questPanel.scrollTo(link.getX(), link.getY());
-					link.getQuest().ifPresent(this::viewQuest);
+					open(link, true);
+//					link.getQuest().ifPresent(this::viewQuest);
 				}
 			}
 			QuestScreen.this.openGui();
@@ -757,9 +778,6 @@ public class QuestScreen extends BaseScreen {
 
 		if (selectedChapter == null) {
 			selectChapter(file.getFirstVisibleChapter(file.selfTeamData));
-			if (selectedChapter != null) {
-				selectedChapter.getAutofocus().ifPresent(this::scrollTo);
-			}
 		}
 
 		super.tick();
@@ -889,7 +907,7 @@ public class QuestScreen extends BaseScreen {
 			viewQuest(task.getQuest());
 		}
 
-		// in case we've just opened the gui; we don't want switch away from the view object on the next tick
+		// in case we've just opened the gui; we don't want to switch away from the view object on the next tick
 		pendingPersistedData = null;
 
 		if (ClientUtils.getCurrentGuiAs(QuestScreen.class) != this) {

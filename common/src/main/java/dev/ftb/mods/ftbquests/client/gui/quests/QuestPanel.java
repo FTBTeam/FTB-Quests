@@ -50,9 +50,9 @@ public class QuestPanel extends Panel {
 	double centerQuestY = 0;
 	QuestButton mouseOverQuest = null;
 	double questMinX;
-    double questMinY;
-    private double questMaxX;
-    private double questMaxY;
+	double questMinY;
+	private double questMaxX;
+	private double questMaxY;
 	final BezierController bezierController;
 
 	public QuestPanel(Panel panel) {
@@ -321,33 +321,33 @@ public class QuestPanel extends Panel {
 			questScreen.file.getChangelog().draw(graphics, questScreen);
 		}
 
+		double dx = (questMaxX - questMinX);
+		double dy = (questMaxY - questMinY);
+
+		double px = getX() - getScrollX();
+		double py = getY() - getScrollY();
+
+		questXunsnapped = (questScreen.getMouseX() - px) / questScreen.scrollWidth * dx + questMinX;
+		questYunsnapped = (questScreen.getMouseY() - py) / questScreen.scrollHeight * dy + questMinY;
+		centerQuestX = (questScreen.width / 2D - px) / questScreen.scrollWidth * dx + questMinX;
+		centerQuestY = (questScreen.height / 2D - py) / questScreen.scrollHeight * dy + questMinY;
+
+		if (isShiftKeyDown()) {
+			questX = questXunsnapped;
+			questY = questYunsnapped;
+		} else {
+			// grid-snapping size is based on the smallest selected item
+			//   although images always act as if they were size 1
+			double minSize = questScreen.selectedObjects.stream()
+					.map(m -> m instanceof ChapterImage ? 1d : m.getWidth())
+					.min(Double::compare)
+					.orElse(1d);
+			double snap = 1D / (questScreen.file.getGridScale() * minSize);
+			questX = Mth.floor(questXunsnapped * snap + 0.5D) / snap;
+			questY = Mth.floor(questYunsnapped * snap + 0.5D) / snap;
+		}
+
 		if (questScreen.selectedChapter != null && isMouseOver()) {
-			double dx = (questMaxX - questMinX);
-			double dy = (questMaxY - questMinY);
-
-			double px = getX() - getScrollX();
-			double py = getY() - getScrollY();
-
-			questXunsnapped = (questScreen.getMouseX() - px) / questScreen.scrollWidth * dx + questMinX;
-			questYunsnapped = (questScreen.getMouseY() - py) / questScreen.scrollHeight * dy + questMinY;
-			centerQuestX = (questScreen.width / 2D - px) / questScreen.scrollWidth * dx + questMinX;
-			centerQuestY = (questScreen.height / 2D - py) / questScreen.scrollHeight * dy + questMinY;
-
-			if (isShiftKeyDown()) {
-				questX = questXunsnapped;
-				questY = questYunsnapped;
-			} else {
-				// grid-snapping size is based on the smallest selected item
-				//   although images always act as if they were size 1
-				double minSize = questScreen.selectedObjects.stream()
-						.map(m -> m instanceof ChapterImage ? 1d : m.getWidth())
-						.min(Double::compare)
-						.orElse(1d);
-				double snap = 1D / (questScreen.file.getGridScale() * minSize);
-				questX = Mth.floor(questXunsnapped * snap + 0.5D) / snap;
-				questY = Mth.floor(questYunsnapped * snap + 0.5D) / snap;
-			}
-
 			if (questScreen.file.canEdit()) {
 
 				if (bezierController.isActive()) {
@@ -418,7 +418,7 @@ public class QuestPanel extends Panel {
 
 					if (QuestScreen.grid && !questScreen.isViewingQuest()) {
 						poseStack.pushPose();
-						poseStack.translate(0, 0, 1000);
+						poseStack.translate(0, 0, 200);
 						Color4I.WHITE.draw(graphics, (int) Math.round(sx), (int) Math.round(sy), 1, 1);
 						Color4I.WHITE.withAlpha(30).draw(graphics, getX(), (int) sy, width, 1);
 						Color4I.WHITE.withAlpha(30).draw(graphics, (int) Math.round(sx), getY(), 1, height);
@@ -680,9 +680,9 @@ public class QuestPanel extends Panel {
 		bezierController.deactivate(accepted);
 	}
 
-    public void clearBezierControlPoints(QuestButton qb, Quest dep) {
-        bezierController.clear(qb, dep);
-    }
+	public void clearBezierControlPoints(QuestButton qb, Quest dep) {
+		bezierController.clear(qb, dep);
+	}
 
 	private static class PasteQuestMenuItem extends TooltipContextMenuItem {
 		public PasteQuestMenuItem(Quest quest, Component title, Icon icon, @Nullable Consumer<Button> callback) {
@@ -703,9 +703,9 @@ public class QuestPanel extends Panel {
 		private BezierController() {
 			control0 = new ControlPointButton(QuestPanel.this, this, () -> Objects.requireNonNull(data).depButton, 0);
 			control1 = new ControlPointButton(QuestPanel.this, this, () -> Objects.requireNonNull(data).questButton, 1);
-        }
+		}
 
-        public void activate(QuestButton questButton, Quest depQuest) {
+		public void activate(QuestButton questButton, Quest depQuest) {
 			if (data == null) {
 				data = new Data(
 						questButton,
@@ -749,18 +749,18 @@ public class QuestPanel extends Panel {
 			}
 		}
 
-        public boolean isActive() {
-            return data != null;
-        }
+		public boolean isActive() {
+			return data != null;
+		}
 
-        public void clear(QuestButton qb, Quest dep) {
+		public void clear(QuestButton qb, Quest dep) {
 			qb.quest.setBezierControlPoints(dep, null);
 			qb.positionControlPoints();
 
 			NetworkManager.sendToServer(EditObjectMessage.forQuestObject(qb.quest));
 		}
 
-        public void repositionControlButtons(QuestButton qb) {
+		public void repositionControlButtons(QuestButton qb) {
 			if (data != null && data.questButton == qb) {
 				Pair<Vec2d, Vec2d> controlPoints = qb.getControlPoints(data.depButton.quest);
 				if (controlPoints != null) {
@@ -768,31 +768,31 @@ public class QuestPanel extends Panel {
 					control1.setPos((int) controlPoints.getSecond().x(), (int) controlPoints.getSecond().y());
 				}
 			}
-        }
+		}
 
 		private record Data(QuestButton questButton, QuestButton depButton, @Nullable Pair<Vec2d, Vec2d> savedControlPoints) {
 		}
 	}
 
 	private class ControlPointButton extends Button {
-        private final BezierController controller;
+		private final BezierController controller;
 		private final int index; // 0 or 1
-        private final Supplier<QuestButton> questButtonSupplier;
+		private final Supplier<QuestButton> questButtonSupplier;
 
-        private boolean active = false;
+		private boolean active = false;
 		private Vec2d startPosition = Vec2d.ZERO;  // screen coords
 		private boolean dragging = false;
 		private int dragOffsetX, dragOffsetY;
 
-        public ControlPointButton(Panel panel, BezierController controller, Supplier<QuestButton> questButtonSupplier, int index) {
+		public ControlPointButton(Panel panel, BezierController controller, Supplier<QuestButton> questButtonSupplier, int index) {
 			super(panel, Component.empty(), Icons.MARKER);
 
-            this.controller = controller;
-            this.questButtonSupplier = questButtonSupplier;
-            this.index = index;
+			this.controller = controller;
+			this.questButtonSupplier = questButtonSupplier;
+			this.index = index;
 
-            setSize(12, 12);
-        }
+			setSize(12, 12);
+		}
 
 		@Override
 		public boolean checkMouseOver(int mouseX, int mouseY) {
@@ -883,12 +883,12 @@ public class QuestPanel extends Panel {
 			activate(new Vec2d(x, y));
 		}
 
-        public void deactivate(boolean accepted) {
+		public void deactivate(boolean accepted) {
 			if (!accepted) {
 				// reset button position to what it was when we activated it
 				setPos((int) Math.round(startPosition.x()), (int) Math.round(startPosition.y()));
 			}
 			active = false;
-        }
+		}
 	}
 }

@@ -10,6 +10,7 @@ import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.chat.Component;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.Objects;
 import java.util.Optional;
@@ -66,6 +67,11 @@ public class QuestLink extends QuestObject implements Movable, Excludable {
     @Override
     public boolean isVisible(TeamData data) {
         return getQuest().map(q -> q.isVisible(data)).orElse(false);
+    }
+
+    @Override
+    public @Nullable Chapter getQuestChapter() {
+        return chapter;
     }
 
     @Override

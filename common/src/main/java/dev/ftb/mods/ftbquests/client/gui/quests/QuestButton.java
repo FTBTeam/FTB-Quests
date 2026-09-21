@@ -185,7 +185,7 @@ public class QuestButton extends Button implements QuestPositionableButton {
 			questScreen.movingObjects = false;
 
 			if (questScreen.getViewedQuest() != quest) {
-				questScreen.viewQuest(quest);
+				questScreen.open(theQuestObject(), false);
 			} else {
 				questScreen.closeQuest();
 			}
