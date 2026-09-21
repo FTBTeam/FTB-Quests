@@ -7,6 +7,8 @@ import dev.ftb.mods.ftblibrary.icon.Icons;
 import dev.ftb.mods.ftblibrary.platform.fluid.FluidStack;
 import dev.ftb.mods.ftbquests.api.FTBQuestsAPI;
 import net.minecraft.resources.Identifier;
+import dev.ftb.mods.ftblibrary.icon.ItemIcon;
+import net.minecraft.world.item.Items;
 import net.minecraft.world.level.material.Fluids;
 
 import java.util.LinkedHashMap;
@@ -50,8 +52,9 @@ public interface TaskTypes {
 			() -> Icons.CONTROLLER);
 	TaskType FLUID = TaskTypes.register(FTBQuestsAPI.id("fluid"), FluidTask::new,
 			() -> new TextureAtlasSpriteRef(ClientUtils.getStillTexture(new FluidStack(Fluids.WATER, 1000L))).createIcon()
-					.combineWith(Icon.getIcon(FluidTask.TANK_TEXTURE.toString()))
-	);
+					.combineWith(Icon.getIcon(FluidTask.TANK_TEXTURE.toString())));
+	TaskType INTERACTION = TaskTypes.register(FTBQuestsAPI.id("interaction"), InteractionTask::new,
+			() -> ItemIcon.ofItem(Items.DIAMOND_PICKAXE));
 
 	static void init() {
 	}

@@ -8,6 +8,8 @@ import net.fabricmc.fabric.api.entity.event.v1.ServerEntityCombatEvents;
 import net.fabricmc.fabric.api.entity.event.v1.ServerPlayerEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
+import net.fabricmc.fabric.api.event.player.UseBlockCallback;
+import net.fabricmc.fabric.api.event.player.UseEntityCallback;
 
 public class FabricEventHandler {
     public static void init(FTBQuestsEventHandler handler) {
@@ -30,6 +32,11 @@ public class FabricEventHandler {
             handler.onServerTickPost(server);
         });
         ServerPlayerEvents.AFTER_RESPAWN.register(handler::onPlayerRespawn);
+
+        UseBlockCallback.EVENT.register((player, _, _, hitResult)
+                -> handler.onPlayerInteractBlock(player, hitResult.getBlockPos()));
+        UseEntityCallback.EVENT.register((player, _, _, entity, _)
+                -> handler.onPlayerInteractEntity(player, entity));
 
         // See ResultSlotMixin, FurnaceResultSlotMixin, ServerLevelMixin, ServerPlayerMixin for other "event" handlers
 

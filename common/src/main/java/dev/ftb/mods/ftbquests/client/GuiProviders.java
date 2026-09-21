@@ -20,9 +20,11 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.Util;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.StructureBlockEntity;
 import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.world.phys.EntityHitResult;
 
 import java.util.function.Consumer;
 
@@ -126,6 +128,18 @@ public class GuiProviders {
             if (Minecraft.getInstance().hitResult instanceof BlockHitResult bhr) {
                 Block block = ClientUtils.getClientLevel().getBlockState(bhr.getBlockPos()).getBlock();
                 task.setToObserve(BuiltInRegistries.BLOCK.getKey(block).toString());
+            }
+            openSetupGui(gui, callback, task);
+        });
+
+        TaskTypes.INTERACTION.setGuiProvider((gui, quest, callback) -> {
+            InteractionTask task = new InteractionTask(0L, quest);
+            if (Minecraft.getInstance().hitResult instanceof BlockHitResult bhr) {
+                Block block = Minecraft.getInstance().level.getBlockState(bhr.getBlockPos()).getBlock();
+                task.setToInteract(InteractionTask.InteractionType.BLOCK, BuiltInRegistries.BLOCK.getKey(block).toString());
+            } else if (Minecraft.getInstance().hitResult instanceof EntityHitResult ehr) {
+                Entity entity = ehr.getEntity();
+                task.setToInteract(InteractionTask.InteractionType.ENTITY_TYPE, BuiltInRegistries.ENTITY_TYPE.getKey(entity.getType()).toString());
             }
             openSetupGui(gui, callback, task);
         });
