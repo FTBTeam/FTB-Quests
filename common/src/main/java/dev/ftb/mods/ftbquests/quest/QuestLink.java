@@ -106,6 +106,7 @@ public class QuestLink extends QuestObject implements Movable, Excludable {
     public void deleteSelf() {
         super.deleteSelf();
 
+        getQuest().ifPresent(Quest::clearCachedData);
         chapter.removeQuestLink(this);
     }
 
