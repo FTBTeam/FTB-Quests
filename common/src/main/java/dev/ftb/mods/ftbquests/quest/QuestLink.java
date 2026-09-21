@@ -34,6 +34,11 @@ public class QuestLink extends QuestObject implements Movable, Excludable {
     }
 
     @Override
+    public long getEffectiveId() {
+        return getQuest().map(QuestObjectBase::getId).orElse(super.getEffectiveId());
+    }
+
+    @Override
     public Quest getRelatedQuest() {
         return getQuest().orElse(null);
     }
@@ -66,6 +71,16 @@ public class QuestLink extends QuestObject implements Movable, Excludable {
     @Override
     public int getRelativeProgressFromChildren(TeamData data) {
         return 0;
+    }
+
+    @Override
+    public boolean isOptionalForProgression(TeamData teamData) {
+        return getQuest().map(q -> q.isOptionalForProgression(teamData)).orElse(false);
+    }
+
+    @Override
+    public boolean isCompletedRaw(TeamData data) {
+        return getQuest().map(q -> q.isCompletedRaw(data)).orElse(false);
     }
 
     public Optional<Quest> getQuest() {
