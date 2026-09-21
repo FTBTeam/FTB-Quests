@@ -4,9 +4,11 @@ import dev.architectury.fluid.FluidStack;
 import dev.ftb.mods.ftblibrary.icon.Color4I;
 import dev.ftb.mods.ftblibrary.icon.Icon;
 import dev.ftb.mods.ftblibrary.icon.Icons;
+import dev.ftb.mods.ftblibrary.icon.ItemIcon;
 import dev.ftb.mods.ftblibrary.util.client.ClientUtils;
 import dev.ftb.mods.ftbquests.api.FTBQuestsAPI;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.item.Items;
 import net.minecraft.world.level.material.Fluids;
 
 import java.util.LinkedHashMap;
@@ -47,6 +49,8 @@ public interface TaskTypes {
 			() -> Icon.getIcon("minecraft:item/filled_map"));
 	TaskType STAGE = TaskTypes.register(FTBQuestsAPI.rl("gamestage"), StageTask::new,
 			() -> Icons.CONTROLLER);
+	TaskType INTERACTION = TaskTypes.register(FTBQuestsAPI.rl("interaction"), InteractionTask::new,
+			() -> ItemIcon.getItemIcon(Items.DIAMOND_PICKAXE));
 	TaskType FLUID = TaskTypes.register(FTBQuestsAPI.rl("fluid"), FluidTask::new,
 			() -> Icon.getIcon(Optional.ofNullable(ClientUtils.getStillTexture(FluidStack.create(Fluids.WATER, 1000L)))
 							.map(ResourceLocation::toString)

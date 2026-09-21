@@ -174,7 +174,7 @@ public class ObservationTask extends AbstractBooleanTask {
 			}
 		} else if (result instanceof EntityHitResult entityResult) {
 			if (observeType == ObserveType.ENTITY_TYPE) {
-				return tryMatchEntity(entityResult.getEntity());
+				return tryMatchEntity(toObserve, entityResult.getEntity());
 			} else if (observeType == ObserveType.ENTITY_TYPE_TAG) {
 				return asTagRL(toObserve)
 						.map(rl -> entityResult.getEntity().getType().is(TagKey.create(Registries.ENTITY_TYPE, rl)))
@@ -185,15 +185,15 @@ public class ObservationTask extends AbstractBooleanTask {
 		return false;
 	}
 
-    private boolean tryMatchEntity(Entity entity) {
+    static boolean tryMatchEntity(String matchAgainst, Entity entity) {
 		ResourceLocation entityType = RegistrarManager.getId(entity.getType(), Registries.ENTITY_TYPE);
 		if (entityType == null) return false;
 
-		int nbtStart = toObserve.indexOf('{');
-		int nbtEnd = nbtStart > 0 ? toObserve.indexOf('}', nbtStart) : -1;
+		int nbtStart = matchAgainst.indexOf('{');
+		int nbtEnd = nbtStart > 0 ? matchAgainst.indexOf('}', nbtStart) : -1;
 
-		String entityId = nbtStart < 0 ? toObserve : toObserve.substring(0, nbtStart);
-		String nbtFilter = nbtStart > 0 && nbtEnd > nbtStart ? toObserve.substring(nbtStart, nbtEnd + 1) : "";
+		String entityId = nbtStart < 0 ? matchAgainst : matchAgainst.substring(0, nbtStart);
+		String nbtFilter = nbtStart > 0 && nbtEnd > nbtStart ? matchAgainst.substring(nbtStart, nbtEnd + 1) : "";
 
 		return entityType.toString().equals(entityId) && matchEntityNBT(entity, nbtFilter);
     }
@@ -213,7 +213,7 @@ public class ObservationTask extends AbstractBooleanTask {
 		}
     }
 
-	private Optional<ResourceLocation> asTagRL(String str) {
+	static Optional<ResourceLocation> asTagRL(String str) {
 		try {
 			return Optional.ofNullable(ResourceLocation.tryParse(str.startsWith("#") ? str.substring(1) : str));
 		} catch (ResourceLocationException e) {
@@ -221,9 +221,9 @@ public class ObservationTask extends AbstractBooleanTask {
 		}
 	}
 
-	private BlockInput tryMatchBlock(String string, boolean parseNbt) {
+	static BlockInput tryMatchBlock(String matchAgainst, boolean parseNbt) {
 		try {
-			BlockStateParser.BlockResult blockStateParser = BlockStateParser.parseForBlock(BuiltInRegistries.BLOCK.asLookup(), new StringReader(string), parseNbt);
+			BlockStateParser.BlockResult blockStateParser = BlockStateParser.parseForBlock(BuiltInRegistries.BLOCK.asLookup(), new StringReader(matchAgainst), parseNbt);
 			return new BlockInput(blockStateParser.blockState(), blockStateParser.properties().keySet(), parseNbt ? blockStateParser.nbt() : null);
 		} catch (Exception ex) {
 			return null;

@@ -1,6 +1,7 @@
 package dev.ftb.mods.ftbquests;
 
 import com.mojang.brigadier.CommandDispatcher;
+import com.mojang.datafixers.util.Either;
 import dev.architectury.event.EventResult;
 import dev.architectury.event.events.common.*;
 import dev.architectury.hooks.level.entity.PlayerHooks;
@@ -9,10 +10,7 @@ import dev.ftb.mods.ftbquests.command.FTBQuestsCommands;
 import dev.ftb.mods.ftbquests.events.ClearFileCacheEvent;
 import dev.ftb.mods.ftbquests.quest.BaseQuestFile;
 import dev.ftb.mods.ftbquests.quest.ServerQuestFile;
-import dev.ftb.mods.ftbquests.quest.task.CustomTask;
-import dev.ftb.mods.ftbquests.quest.task.DimensionTask;
-import dev.ftb.mods.ftbquests.quest.task.KillTask;
-import dev.ftb.mods.ftbquests.quest.task.Task;
+import dev.ftb.mods.ftbquests.quest.task.*;
 import dev.ftb.mods.ftbquests.registry.ModBlockEntityTypes;
 import dev.ftb.mods.ftbquests.registry.ModBlocks;
 import dev.ftb.mods.ftbquests.registry.ModDataComponents;
@@ -26,12 +24,16 @@ import dev.ftb.mods.ftbteams.api.event.TeamEvent;
 import net.minecraft.commands.CommandBuildContext;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.Container;
+import net.minecraft.world.InteractionHand;
 import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
@@ -46,6 +48,7 @@ public enum FTBQuestsEventHandler {
 	INSTANCE;
 
 	private List<KillTask> killTasks = null;
+	private List<InteractionTask> interactionTasks = null;
 	private List<Task> autoSubmitTasks = null;
 
 	void init() {
@@ -69,6 +72,8 @@ public enum FTBQuestsEventHandler {
 		PlayerEvent.PLAYER_CLONE.register(this::cloned);
 		PlayerEvent.CHANGE_DIMENSION.register(this::changedDimension);
 		PlayerEvent.OPEN_MENU.register(this::containerOpened);
+		InteractionEvent.RIGHT_CLICK_BLOCK.register(this::playerInteractBlock);
+		InteractionEvent.INTERACT_ENTITY.register(this::playerInteractEntity);
 		TickEvent.SERVER_POST.register(DeferredInventoryDetection::tick);
 		TickEvent.SERVER_POST.register(QuestBarrierBlock.TeleportTicker::tick);
 		TickEvent.SERVER_POST.register(CustomTask.TaskSync::tick);
@@ -108,6 +113,7 @@ public enum FTBQuestsEventHandler {
 
 	private void clearCachedData() {
 		killTasks = null;
+		interactionTasks = null;
 		autoSubmitTasks = null;
 	}
 
@@ -142,6 +148,36 @@ public enum FTBQuestsEventHandler {
 				for (KillTask task : killTasks) {
 					if (data.getProgress(task) < task.getMaxProgress() && data.canStartTasks(task.getQuest())) {
 						task.kill(data, entity);
+					}
+				}
+			});
+		}
+
+		return EventResult.pass();
+	}
+
+	private EventResult playerInteractBlock(Player player, InteractionHand interactionHand, BlockPos blockPos, Direction direction) {
+		return playerInteract(player, Either.left(blockPos));
+	}
+
+	private EventResult playerInteractEntity(Player player, Entity entity, InteractionHand interactionHand) {
+		return playerInteract(player, Either.right(entity));
+	}
+
+	private EventResult playerInteract(Player player, Either<BlockPos, Entity> either) {
+		if (!PlayerHooks.isFake(player)) {
+			if (interactionTasks == null) {
+				interactionTasks = ServerQuestFile.INSTANCE.collect(InteractionTask.class);
+			}
+			if (interactionTasks.isEmpty()) {
+				return EventResult.pass();
+			}
+			ServerQuestFile.INSTANCE.getTeamData(player).ifPresent(data -> {
+				for (var task : interactionTasks) {
+					if (data.getProgress(task) < task.getMaxProgress() && data.canStartTasks(task.getQuest())) {
+						either.ifLeft(pos -> task.interacted(data, player.level(), pos))
+								.ifRight(entity -> task.interacted(data, entity)
+						);
 					}
 				}
 			});
