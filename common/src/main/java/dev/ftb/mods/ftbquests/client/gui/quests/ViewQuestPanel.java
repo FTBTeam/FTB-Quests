@@ -254,11 +254,9 @@ public class ViewQuestPanel extends ModalPanel {
 			b.setPosAndSize(iconSize + 4, 0, iconSize, iconSize);
 		}
 
-		List<QuestLink> links = new ArrayList<>();
-		questScreen.file.forAllChapters(chapter -> chapter.getQuestLinks().stream()
-				.filter(link -> chapter != questScreen.selectedChapter && link.linksTo(quest))
-				.forEach(links::add)
-		);
+		List<QuestLink> links = quest.getQuestLinks().stream()
+				.filter(link -> quest.getQuestChapter() == questScreen.selectedChapter)
+				.toList();
 		var linksButton = new ViewQuestLinksButton(links);
 		add(linksButton);
 		linksButton.setPosAndSize(w - iconSize * 3 - 4, 0, iconSize, iconSize);
