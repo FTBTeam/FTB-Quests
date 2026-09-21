@@ -478,11 +478,11 @@ public class TeamData {
 	}
 
 	public boolean isStarted(QuestObject object) {
-		return started.containsKey(object.id);
+		return started.containsKey(object.getEffectiveId());
 	}
 
 	public boolean isCompleted(QuestObject object) {
-		return completed.containsKey(object.id);
+		return completed.containsKey(object.getEffectiveId());
 	}
 
 	public int getCompletionCount(Quest quest) {
