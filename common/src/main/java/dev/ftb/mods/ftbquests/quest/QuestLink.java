@@ -72,6 +72,11 @@ public class QuestLink extends QuestObject implements Movable, Excludable {
     }
 
     @Override
+    public @Nullable Chapter getQuestChapter() {
+        return chapter;
+    }
+
+    @Override
     public int getRelativeProgressFromChildren(TeamData data) {
         return 0;
     }
