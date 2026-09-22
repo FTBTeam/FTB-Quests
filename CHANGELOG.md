@@ -4,6 +4,17 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [26.1.2.9]
+
+### Added
+* New task type: Interaction task
+  * Completes when player right-clicks a block or entity
+  * Matches can be specficed as block/block tag/blockstate (with properties)/entity/entity tag
+* Quest book gui now notes the scroll position per-chapter and returns to that position when the chapter is revisited
+
+### Fixed
+* Fixed a bug preventing chapters being marked complete if they contain a Quest Link
+
 ## [26.1.2.8]
 
 ### Added
