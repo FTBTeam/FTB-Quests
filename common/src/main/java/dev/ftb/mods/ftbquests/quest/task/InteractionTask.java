@@ -28,6 +28,9 @@ public class InteractionTask extends Task {
 
     public InteractionTask(long id, Quest quest) {
         super(id, quest);
+
+        interactionType = InteractionType.BLOCK;
+        toInteract = "minecraft:dirt";
     }
 
     public void setToInteract(InteractionType interactionType, String toInteract) {
