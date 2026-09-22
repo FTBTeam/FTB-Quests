@@ -165,7 +165,7 @@ public enum FTBQuestsEventHandler {
 	}
 
 	private EventResult playerInteract(Player player, Either<BlockPos, Entity> either) {
-		if (!PlayerHooks.isFake(player)) {
+		if (!player.level().isClientSide() && !PlayerHooks.isFake(player)) {
 			if (interactionTasks == null) {
 				interactionTasks = ServerQuestFile.INSTANCE.collect(InteractionTask.class);
 			}
