@@ -14,6 +14,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 * Fixed a bug preventing chapters being marked complete if they contain a Quest Link
+* Fixed Biome Tasks crashing when a biome tag is being used
 
 ## [26.1.2.8]
 
