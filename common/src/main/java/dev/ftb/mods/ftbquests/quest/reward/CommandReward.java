@@ -103,7 +103,7 @@ public class CommandReward extends Reward {
 	}
 
 	@Override
-	public void claim(ServerPlayer player, boolean notify) {
+	public boolean claim(ServerPlayer player, boolean notify) {
 		Map<String, Object> overrides = new HashMap<>();
 		overrides.put("p", player.getGameProfile().getName());
 
@@ -137,6 +137,8 @@ public class CommandReward extends Reward {
 			String key = feedbackMessage.isEmpty() ? "ftbquests.reward.ftbquests.command.success" : feedbackMessage;
 			NetworkManager.sendToPlayer(player, new NotifyRewardMessage(id, Component.translatable(key), REWARD_ICON, disableRewardScreenBlur));
 		}
+
+		return true;
 	}
 
 	@Override

@@ -8,6 +8,7 @@ import dev.ftb.mods.ftblibrary.icon.ItemIcon;
 import dev.ftb.mods.ftblibrary.ui.Widget;
 import dev.ftb.mods.ftblibrary.util.client.PositionedIngredient;
 import dev.ftb.mods.ftbquests.FTBQuests;
+import dev.ftb.mods.ftbquests.events.ClaimRewardEvent;
 import dev.ftb.mods.ftbquests.net.NotifyItemRewardMessage;
 import dev.ftb.mods.ftbquests.quest.Quest;
 import dev.ftb.mods.ftbquests.registry.ModItems;
@@ -29,6 +30,7 @@ import org.jetbrains.annotations.Nullable;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.function.Consumer;
 
 public class ItemReward extends Reward {
 	private ItemStack item;
@@ -141,34 +143,46 @@ public class ItemReward extends Reward {
 	}
 
 	@Override
-	public void claim(ServerPlayer player, boolean notify) {
+	public boolean claim(ServerPlayer player, boolean notify) {
 		if (onlyOne && player.getInventory().contains(item)) {
-			return;
+			return false;
 		}
 
-		int size = count + player.level().random.nextInt(randomBonus + 1);
-		while (size > 0) {
-			int s = Math.min(size, item.getMaxStackSize());
-			ItemStackHooks.giveItem(player, ItemStackHooks.copyWithCount(item, s));
-			size -= s;
+		int size = count + player.level().getRandom().nextInt(randomBonus + 1);
+		var eventResult = ClaimRewardEvent.GrantItem.EVENT.invoker().onClaimItem(player, player.getUUID(), item.copyWithCount(size));
+		if (eventResult.isFalse()) {
+			return false;
 		}
+
+		processItems(size, stack -> ItemStackHooks.giveItem(player, stack));
 
 		if (notify) {
 			NetworkManager.sendToPlayer(player, new NotifyItemRewardMessage(item, size, disableRewardScreenBlur));
 		}
+
+		return true;
 	}
 
 	@Override
 	public boolean automatedClaimPre(BlockEntity blockEntity, List<ItemStack> items, RandomSource random, UUID playerId, @Nullable ServerPlayer player) {
 		int size = count + random.nextInt(randomBonus + 1);
 
-		while (size > 0) {
-			int s = Math.min(size, item.getMaxStackSize());
-			items.add(ItemStackHooks.copyWithCount(item, s));
-			size -= s;
+		var eventResult = ClaimRewardEvent.GrantItem.EVENT.invoker().onClaimItem(player, playerId, item.copyWithCount(size));
+		if (eventResult.isFalse()) {
+			return false;
 		}
 
+		processItems(size, items::add);
+
 		return true;
+	}
+
+	private void processItems(int size, Consumer<ItemStack> consumer) {
+		while (size > 0) {
+			int s = Math.min(size, item.getMaxStackSize());
+			consumer.accept(ItemStackHooks.copyWithCount(item, s));
+			size -= s;
+		}
 	}
 
 	@Override

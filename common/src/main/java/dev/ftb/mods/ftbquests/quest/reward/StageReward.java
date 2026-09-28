@@ -74,7 +74,7 @@ public class StageReward extends Reward {
 	}
 
 	@Override
-	public void claim(ServerPlayer player, boolean notify) {
+	public boolean claim(ServerPlayer player, boolean notify) {
 		if (remove) {
 			if (isTeamReward()) {
 				FTBTeamsAPI.api().getManager().getTeamForPlayer(player)
@@ -95,6 +95,8 @@ public class StageReward extends Reward {
 			String key = (remove ? "removed" : "added") + (isTeamReward() ? "_team" : "");
 			player.sendSystemMessage(Component.translatable("ftbquests.reward.ftbquests.gamestage." + key, stage), true);
 		}
+
+		return true;
 	}
 
 	@Override

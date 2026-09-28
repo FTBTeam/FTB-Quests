@@ -278,6 +278,10 @@ public class TeamData {
 		return b == BOOL_TRUE;
 	}
 
+	public boolean isRewardReadyToClaim(UUID player, Reward reward) {
+		return !locked && !isRewardBlocked(reward) && !claimedRewards.containsKey(QuestKey.forReward(player, reward));
+	}
+
 	public boolean markRewardAsClaimed(UUID player, Reward reward, long date) {
 		if (locked || isRewardBlocked(reward)) {
 			return false;
@@ -600,9 +604,10 @@ public class TeamData {
 	}
 
 	public void claimReward(ServerPlayer player, Reward reward, boolean notify, long when) {
-		if (markRewardAsClaimed(player.getUUID(), reward, when)) {
-			reward.claim(player, notify);
-		}
+//		if (markRewardAsClaimed(player.getUUID(), reward, when)) {
+        if (isRewardReadyToClaim(player.getUUID(), reward) && reward.tryClaim(player, notify)) {
+            markRewardAsClaimed(player.getUUID(), reward, when);
+        }
 	}
 
 	public void claimReward(ServerPlayer player, Reward reward, boolean notify) {

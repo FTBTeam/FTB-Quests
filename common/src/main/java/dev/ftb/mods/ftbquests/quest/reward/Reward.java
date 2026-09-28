@@ -10,6 +10,7 @@ import dev.ftb.mods.ftblibrary.util.TooltipList;
 import dev.ftb.mods.ftblibrary.util.client.ClientUtils;
 import dev.ftb.mods.ftblibrary.util.client.PositionedIngredient;
 import dev.ftb.mods.ftbquests.client.gui.quests.QuestScreen;
+import dev.ftb.mods.ftbquests.events.ClaimRewardEvent;
 import dev.ftb.mods.ftbquests.integration.RecipeModHelper;
 import dev.ftb.mods.ftbquests.net.ClaimRewardMessage;
 import dev.ftb.mods.ftbquests.quest.*;
@@ -142,7 +143,12 @@ public abstract class Reward extends QuestObjectBase {
 				.setNameKey("ftbquests.reward.disable_reward_screen_blur");
 	}
 
-	public abstract void claim(ServerPlayer player, boolean notify);
+	public final boolean tryClaim(ServerPlayer player, boolean notify) {
+		var result = ClaimRewardEvent.Pre.EVENT.invoker().onClaim(this, player, null);
+        return !result.isFalse() && claim(player, notify);
+    }
+
+	public abstract boolean claim(ServerPlayer player, boolean notify);
 
 	/**
 	 * Called by the Loot Crate Opener when it's about to open a crate. Can be overridden to add any itemstacks the

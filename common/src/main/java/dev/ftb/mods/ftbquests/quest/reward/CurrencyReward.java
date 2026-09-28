@@ -73,16 +73,20 @@ public class CurrencyReward extends Reward {
     }
 
     @Override
-    public void claim(ServerPlayer player, boolean notify) {
+    public boolean claim(ServerPlayer player, boolean notify) {
         CurrencyProvider provider = CurrencyHelper.getInstance().getProvider();
-
-        if (provider.isValidProvider()) {
-            provider.giveCurrency(player, coinAmount);
-
-            if (notify) {
-                Component msg = Component.literal(Integer.toString(coinAmount)).append(" ").append(provider.coinName(coinAmount > 1));
-                NetworkManager.sendToPlayer(player, new NotifyRewardMessage(id, msg, Icons.MONEY, disableRewardScreenBlur));
-            }
+        if (!provider.isValidProvider()) {
+            return false;
         }
+
+        provider.giveCurrency(player, coinAmount);
+
+        if (notify) {
+            Component msg = Component.literal(Integer.toString(coinAmount)).append(" ").append(provider.coinName(coinAmount > 1));
+            NetworkManager.sendToPlayer(player, new NotifyRewardMessage(id, msg, Icons.MONEY, disableRewardScreenBlur));
+        }
+
+        return true;
+
     }
 }
