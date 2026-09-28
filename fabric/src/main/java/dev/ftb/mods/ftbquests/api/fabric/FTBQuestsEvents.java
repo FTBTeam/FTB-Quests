@@ -1,8 +1,7 @@
 package dev.ftb.mods.ftbquests.api.fabric;
 
-import dev.ftb.mods.ftbquests.api.event.ClearFileCacheEvent;
-import dev.ftb.mods.ftbquests.api.event.CustomRewardEvent;
-import dev.ftb.mods.ftbquests.api.event.CustomTaskEvent;
+import dev.ftb.mods.ftblibrary.util.result.DataOutcome;
+import dev.ftb.mods.ftbquests.api.event.*;
 import dev.ftb.mods.ftbquests.api.event.progress.ChapterProgressEvent;
 import dev.ftb.mods.ftbquests.api.event.progress.FileProgressEvent;
 import dev.ftb.mods.ftbquests.api.event.progress.QuestProgressEvent;
@@ -71,6 +70,42 @@ public class FTBQuestsEvents {
                 for (var c : callbacks) {
                     c.accept(data);
                 }
+            }
+    );
+
+    public static Event<ClaimRewardEvent.Pre> CLAIM_REWARD_PRE
+            = EventFactory.createArrayBacked(ClaimRewardEvent.Pre.class,
+            callbacks -> data -> {
+                for (var c : callbacks) {
+                    if (!c.test(data)) {
+                        return false;
+                    }
+                }
+                return true;
+            }
+    );
+
+    public static Event<ClaimRewardEvent.GrantItem> CLAIM_REWARD_GRANT_ITEM
+            = EventFactory.createArrayBacked(ClaimRewardEvent.GrantItem.class,
+            callbacks -> data -> {
+                for (var c : callbacks) {
+                    if (!c.test(data)) {
+                        return false;
+                    }
+                }
+                return true;
+            }
+    );
+
+    public static Event<OpenLootCrateEvent> OPEN_LOOT_CRATE = EventFactory.createArrayBacked(OpenLootCrateEvent.class,
+            callbacks -> data -> {
+                for (var event : callbacks) {
+                    var outcome = event.apply(data);
+                    if (outcome.isFail()) {
+                        return outcome;
+                    }
+                }
+                return DataOutcome.pass();
             }
     );
 }

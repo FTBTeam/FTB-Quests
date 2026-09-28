@@ -109,15 +109,17 @@ public class RandomReward extends Reward {
 	}
 
 	@Override
-	public void claim(ServerPlayer player, boolean notify) {
+	public boolean claim(ServerPlayer player, boolean notify) {
 		RewardTable table = getTable();
+        if (table == null) {
+            return false;
+        }
 
-		if (table != null) {
-			for (WeightedReward wr : table.generateWeightedRandomRewards(player.getRandom(), 1, false)) {
-				wr.getReward().claim(player, notify);
-			}
-		}
-	}
+        for (WeightedReward wr : table.generateWeightedRandomRewards(player.getRandom(), 1, false)) {
+            wr.getReward().claim(player, notify);
+        }
+        return true;
+    }
 
 	@Override
 	public Component getAltTitle() {

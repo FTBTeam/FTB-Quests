@@ -6,6 +6,11 @@ import dev.ftb.mods.ftbquests.api.event.progress.ChapterProgressEvent;
 import dev.ftb.mods.ftbquests.api.event.progress.FileProgressEvent;
 import dev.ftb.mods.ftbquests.api.event.progress.QuestProgressEvent;
 import dev.ftb.mods.ftbquests.api.event.progress.TaskProgressEvent;
+import net.minecraft.network.chat.Component;
+import net.neoforged.bus.api.ICancellableEvent;
+import org.jspecify.annotations.Nullable;
+
+import java.util.Optional;
 
 public class FTBQuestsEvent {
     public static class ClearFileCache extends BaseEventWithData<ClearFileCacheEvent.Data> {
@@ -47,6 +52,37 @@ public class FTBQuestsEvent {
     public static class TaskProgress extends BaseEventWithData<TaskProgressEvent.Data> {
         public TaskProgress(TaskProgressEvent.Data data) {
             super(data);
+        }
+    }
+
+    public static class ClaimReward {
+        public static class Pre extends BaseEventWithData<ClaimRewardEvent.Pre.Data> implements ICancellableEvent {
+            public Pre(ClaimRewardEvent.Pre.Data data) {
+                super(data);
+            }
+        }
+
+        public static class GrantItem extends BaseEventWithData<ClaimRewardEvent.GrantItem.Data> implements ICancellableEvent {
+            public GrantItem(ClaimRewardEvent.GrantItem.Data data) {
+                super(data);
+            }
+        }
+    }
+
+    public static class OpenLootCrate extends BaseEventWithData<OpenLootCrateEvent.Data> implements ICancellableEvent {
+        private Component reason = Component.empty();
+
+        public OpenLootCrate(OpenLootCrateEvent.Data data) {
+            super(data);
+        }
+
+        public void fail(Component reason) {
+            this.reason = reason;
+            setCanceled(true);
+        }
+
+        public Component getReason() {
+            return reason;
         }
     }
 }

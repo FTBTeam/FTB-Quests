@@ -16,7 +16,8 @@ public class CustomReward extends Reward {
 	}
 
 	@Override
-	public void claim(ServerPlayer player, boolean notify) {
+	public boolean claim(ServerPlayer player, boolean notify) {
 		NativeEventPosting.get().postEvent(new CustomRewardEvent.Data(this, player, notify));
+		return true;
 	}
 }

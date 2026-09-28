@@ -2,6 +2,7 @@ package dev.ftb.mods.ftbquests.block.entity;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
+import dev.ftb.mods.ftbquests.api.event.OpenLootCrateEvent;
 import dev.ftb.mods.ftbquests.item.LootCrateItem;
 import dev.ftb.mods.ftbquests.quest.loot.LootCrate;
 import dev.ftb.mods.ftbquests.quest.loot.WeightedReward;
@@ -12,13 +13,13 @@ import net.minecraft.core.UUIDUtil;
 import net.minecraft.core.component.DataComponentGetter;
 import net.minecraft.core.component.DataComponentMap;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.util.Util;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.component.ItemContainerContents;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.storage.ValueInput;
 import net.minecraft.world.level.storage.ValueOutput;
-import org.jspecify.annotations.Nullable;
 
 import java.util.*;
 
@@ -26,8 +27,7 @@ public class LootCrateOpenerBlockEntity extends BlockEntity {
     private static final ItemEntry EMPTY_ENTRY = new ItemEntry(ItemStack.EMPTY);
     private static final int MAX_ITEM_TYPES = 64;
 
-    @Nullable
-    private UUID owner = null;
+    private UUID owner = Util.NIL_UUID;
     private final Map<ItemEntry, Integer> outputs = new LinkedHashMap<>();
 
     public LootCrateOpenerBlockEntity(BlockPos blockPos, BlockState blockState) {
@@ -50,7 +50,7 @@ public class LootCrateOpenerBlockEntity extends BlockEntity {
             outputs.put(new ItemEntry(stack.stack()), stack.amount());
         });
 
-        owner = valueInput.read("Owner", UUIDUtil.CODEC).orElse(null);
+        owner = valueInput.read("Owner", UUIDUtil.CODEC).orElse(Util.NIL_UUID);
     }
 
     @Override
@@ -67,7 +67,7 @@ public class LootCrateOpenerBlockEntity extends BlockEntity {
             valueOutput.store("Items", StackWithAmount.CODEC.listOf(), stacks);
         }
 
-        if (owner != null) valueOutput.store("Owner", UUIDUtil.CODEC, owner);
+        valueOutput.store("Owner", UUIDUtil.CODEC, owner);
     }
 
     @Override
@@ -87,7 +87,6 @@ public class LootCrateOpenerBlockEntity extends BlockEntity {
                 ItemContainerContents.fromItems(outputs.keySet().stream().map(ItemEntry::stack).toList()));
     }
 
-    @Nullable
     public UUID getOwner() {
         return owner;
     }
@@ -139,7 +138,12 @@ public class LootCrateOpenerBlockEntity extends BlockEntity {
             return stack;
         }
 
-        ServerPlayer player = owner == null ? null : level.getServer().getPlayerList().getPlayer(owner);
+        ServerPlayer player = level.getServer().getPlayerList().getPlayer(owner);
+
+        if (OpenLootCrateEvent.TYPE.post(new OpenLootCrateEvent.Data(player, owner, level, crate, this, simulate)).isFail()) {
+            return stack;
+        }
+
         boolean update = false;
 
         int nAttempts = stack.getCount();
