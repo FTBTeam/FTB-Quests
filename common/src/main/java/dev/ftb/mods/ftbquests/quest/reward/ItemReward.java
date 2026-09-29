@@ -20,6 +20,7 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.item.ItemStack;
@@ -149,7 +150,7 @@ public class ItemReward extends Reward {
 		}
 
 		int size = count + player.level().getRandom().nextInt(randomBonus + 1);
-		var eventResult = ClaimRewardEvent.GrantItem.EVENT.invoker().onClaimItem(player, player.getUUID(), item.copyWithCount(size));
+		var eventResult = ClaimRewardEvent.GrantItem.EVENT.invoker().onClaimItem(player, player.getUUID(), player.serverLevel(), null, item.copyWithCount(size));
 		if (eventResult.isFalse()) {
 			return false;
 		}
@@ -167,7 +168,7 @@ public class ItemReward extends Reward {
 	public boolean automatedClaimPre(BlockEntity blockEntity, List<ItemStack> items, RandomSource random, UUID playerId, @Nullable ServerPlayer player) {
 		int size = count + random.nextInt(randomBonus + 1);
 
-		var eventResult = ClaimRewardEvent.GrantItem.EVENT.invoker().onClaimItem(player, playerId, item.copyWithCount(size));
+		var eventResult = ClaimRewardEvent.GrantItem.EVENT.invoker().onClaimItem(player, playerId, (ServerLevel) blockEntity.getLevel(), blockEntity, item.copyWithCount(size));
 		if (eventResult.isFalse()) {
 			return false;
 		}

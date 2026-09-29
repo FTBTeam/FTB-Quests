@@ -604,7 +604,6 @@ public class TeamData {
 	}
 
 	public void claimReward(ServerPlayer player, Reward reward, boolean notify, long when) {
-//		if (markRewardAsClaimed(player.getUUID(), reward, when)) {
         if (isRewardReadyToClaim(player.getUUID(), reward) && reward.tryClaim(player, notify)) {
             markRewardAsClaimed(player.getUUID(), reward, when);
         }

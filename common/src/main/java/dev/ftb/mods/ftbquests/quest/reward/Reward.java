@@ -144,7 +144,7 @@ public abstract class Reward extends QuestObjectBase {
 	}
 
 	public final boolean tryClaim(ServerPlayer player, boolean notify) {
-		var result = ClaimRewardEvent.Pre.EVENT.invoker().onClaim(this, player, null);
+		var result = ClaimRewardEvent.Pre.EVENT.invoker().onClaim(this, player);
         return !result.isFalse() && claim(player, notify);
     }
 

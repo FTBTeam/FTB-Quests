@@ -1,9 +1,11 @@
 package dev.ftb.mods.ftbquests.item;
 
+import dev.architectury.event.CompoundEventResult;
 import dev.architectury.platform.Platform;
 import dev.ftb.mods.ftbquests.FTBQuests;
 import dev.ftb.mods.ftbquests.client.ClientQuestFile;
 import dev.ftb.mods.ftbquests.client.gui.RewardNotificationsScreen;
+import dev.ftb.mods.ftbquests.events.OpenLootCrateEvent;
 import dev.ftb.mods.ftbquests.quest.loot.LootCrate;
 import dev.ftb.mods.ftbquests.quest.loot.WeightedReward;
 import dev.ftb.mods.ftbquests.registry.ModDataComponents;
@@ -26,10 +28,13 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Rarity;
 import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
 
 public class LootCrateItem extends Item {
 	public LootCrateItem() {
@@ -61,6 +66,16 @@ public class LootCrateItem extends Item {
 		}
 
 		int nItems = player.isCrouching() ? stack.getCount() : 1;
+
+		var result = OpenLootCrateEvent.EVENT.invoker().onOpenLootCrate(player, player.getUUID(), player.level(), crate, null, false);
+		if (result.isFalse()) {
+			result.object().ifPresent(msg -> {
+				if (world.isClientSide) {
+					player.displayClientMessage(msg, false);
+				}
+			});
+			return new InteractionResultHolder<>(InteractionResult.FAIL, stack);
+		}
 
 		if (!world.isClientSide) {
 			for (WeightedReward wr : crate.getTable().generateWeightedRandomRewards(player.getRandom(), nItems, true)) {
