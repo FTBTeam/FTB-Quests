@@ -46,9 +46,9 @@ public class LootCrateOpenerBlockEntity extends BlockEntity {
         super.loadAdditional(valueInput);
 
         outputs.clear();
-        valueInput.read("Items", StackWithAmount.CODEC).ifPresent(stack -> {
-            outputs.put(new ItemEntry(stack.stack()), stack.amount());
-        });
+        valueInput.read("Items", StackWithAmount.CODEC.listOf()).ifPresent(stacks ->
+                stacks.forEach(stack -> outputs.put(new ItemEntry(stack.stack()), stack.amount()))
+        );
 
         owner = valueInput.read("Owner", UUIDUtil.CODEC).orElse(Util.NIL_UUID);
     }
@@ -57,12 +57,9 @@ public class LootCrateOpenerBlockEntity extends BlockEntity {
     protected void saveAdditional(ValueOutput valueOutput) {
         super.saveAdditional(valueOutput);
 
-        List<StackWithAmount> stacks = new ArrayList<>();
-        outputs.forEach((item, amount) -> {
-            var entry = new StackWithAmount(item.stack, amount);
-            stacks.add(entry);
-        });
-
+        var stacks = outputs.entrySet().stream()
+                .map(e -> new StackWithAmount(e.getKey().stack().copyWithCount(1), e.getValue()))
+                .toList();
         if (!stacks.isEmpty()) {
             valueOutput.store("Items", StackWithAmount.CODEC.listOf(), stacks);
         }
