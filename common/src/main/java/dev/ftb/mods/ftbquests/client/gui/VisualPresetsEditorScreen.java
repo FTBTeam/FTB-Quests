@@ -165,7 +165,7 @@ public class VisualPresetsEditorScreen extends AbstractButtonListScreen {
         }
     }
 
-    private class EditDelButton extends SimpleButton {
+    private static class EditDelButton extends SimpleButton {
         public EditDelButton(Panel panel, Component text, Icon icon, Callback c) {
             super(panel, text, icon, c);
         }

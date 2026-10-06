@@ -87,6 +87,18 @@ public abstract class RegisteredQuestObjectType<T extends QuestObjectBase> {
         }
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if (o == null || getClass() != o.getClass()) return false;
+        RegisteredQuestObjectType<?> that = (RegisteredQuestObjectType<?>) o;
+        return Objects.equals(typeId, that.typeId);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hashCode(typeId);
+    }
+
     @FunctionalInterface
     public interface Provider<T> {
         T create(long id, Quest quest);

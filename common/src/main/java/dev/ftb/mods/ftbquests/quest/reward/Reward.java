@@ -204,7 +204,7 @@ public abstract class Reward extends QuestObjectBase {
 	}
 
 	public final boolean isTeamReward() {
-		return team.get(quest.getQuestFile().isDefaultPerTeamReward());
+		return team.get(quest.getQuestFile().isDefaultPerTeamReward(getType()));
 	}
 
 	public final RewardAutoClaim getAutoClaimType() {

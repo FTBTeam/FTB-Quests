@@ -1,6 +1,7 @@
 package dev.ftb.mods.ftbquests.quest;
 
 import com.mojang.logging.LogUtils;
+import com.mojang.serialization.Codec;
 import de.marhali.json5.Json5Array;
 import de.marhali.json5.Json5Element;
 import de.marhali.json5.Json5Object;
@@ -22,6 +23,7 @@ import dev.ftb.mods.ftbquests.api.event.progress.ProgressEventData;
 import dev.ftb.mods.ftbquests.api.event.progress.ProgressType;
 import dev.ftb.mods.ftbquests.client.FTBQuestsClient;
 import dev.ftb.mods.ftbquests.client.config.EditableLocaleConfig;
+import dev.ftb.mods.ftbquests.client.config.EditableTeamRewardByType;
 import dev.ftb.mods.ftbquests.client.config.EditableVisualPresets;
 import dev.ftb.mods.ftbquests.integration.RecipeModHelper;
 import dev.ftb.mods.ftbquests.net.DeleteObjectResponseMessage;
@@ -52,6 +54,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.resources.Identifier;
 import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
 import net.minecraft.util.Util;
@@ -99,6 +102,7 @@ public abstract class BaseQuestFile extends QuestObject implements QuestFile {
 	private int fileVersion;
 
 	private boolean defaultPerTeamReward;
+	private final Map<Identifier, Boolean> defaultPerTeamRewardByType;
 	private boolean defaultTeamConsumeItems;
 	private RewardAutoClaim defaultRewardAutoClaim;
 	private String defaultQuestShape;
@@ -143,6 +147,7 @@ public abstract class BaseQuestFile extends QuestObject implements QuestFile {
 		emergencyItemsCooldown = DEF_EMERGENCY_ITEMS_COOLDOWN;
 
 		defaultPerTeamReward = false;
+		defaultPerTeamRewardByType = new HashMap<>();
 		defaultTeamConsumeItems = false;
 		defaultRewardAutoClaim = RewardAutoClaim.DISABLED;
 		defaultQuestShape = "circle";
@@ -408,6 +413,9 @@ public abstract class BaseQuestFile extends QuestObject implements QuestFile {
 	public final void writeData(Json5Object json, HolderLookup.Provider provider) {
 		super.writeData(json, provider);
 		json.addProperty("default_reward_team", defaultPerTeamReward);
+		if (!defaultPerTeamRewardByType.isEmpty()) {
+			Json5Util.store(json, "default_reward_team_by_type", Codec.unboundedMap(Identifier.CODEC, Codec.BOOL), defaultPerTeamRewardByType);
+		}
 		json.addProperty("default_consume_items", defaultTeamConsumeItems);
 		json.addProperty("default_autoclaim_rewards", defaultRewardAutoClaim.getId());
 		json.addProperty("default_quest_shape", defaultQuestShape);
@@ -441,6 +449,9 @@ public abstract class BaseQuestFile extends QuestObject implements QuestFile {
 		super.readData(json, provider);
 
 		defaultPerTeamReward = Json5Util.getBoolean(json, "default_reward_team").orElseThrow();
+		defaultPerTeamRewardByType.clear();
+		Json5Util.fetch(json, "default_reward_team_by_type", Codec.unboundedMap(Identifier.CODEC, Codec.BOOL))
+				.ifPresent(defaultPerTeamRewardByType::putAll);
 		defaultTeamConsumeItems = Json5Util.getBoolean(json, "default_consume_items").orElseThrow();
 		defaultRewardAutoClaim = RewardAutoClaim.NAME_MAP_NO_DEFAULT.get(json.get("default_autoclaim_rewards").getAsString());
 		defaultQuestShape = Json5Util.getString(json, "default_quest_shape").orElseThrow();
@@ -844,6 +855,7 @@ public abstract class BaseQuestFile extends QuestObject implements QuestFile {
 		ItemStack.OPTIONAL_STREAM_CODEC.apply(ByteBufCodecs.list()).encode(buffer, emergencyItems);
 		buffer.writeVarInt(emergencyItemsCooldown);
 		buffer.writeBoolean(defaultPerTeamReward);
+		buffer.writeMap(defaultPerTeamRewardByType, Identifier.STREAM_CODEC, ByteBufCodecs.BOOL);
 		buffer.writeBoolean(defaultTeamConsumeItems);
 		RewardAutoClaim.NAME_MAP_NO_DEFAULT.write(buffer, defaultRewardAutoClaim);
 		buffer.writeUtf(defaultQuestShape, Short.MAX_VALUE);
@@ -872,6 +884,8 @@ public abstract class BaseQuestFile extends QuestObject implements QuestFile {
 		emergencyItems.addAll(ItemStack.OPTIONAL_STREAM_CODEC.apply(ByteBufCodecs.list()).decode(buffer));
 		emergencyItemsCooldown = Math.max(buffer.readVarInt(), 0);
 		defaultPerTeamReward = buffer.readBoolean();
+		defaultPerTeamRewardByType.clear();
+		defaultPerTeamRewardByType.putAll(buffer.readMap(Identifier.STREAM_CODEC, ByteBufCodecs.BOOL));
 		defaultTeamConsumeItems = buffer.readBoolean();
 		defaultRewardAutoClaim = RewardAutoClaim.NAME_MAP_NO_DEFAULT.read(buffer);
 		defaultQuestShape = buffer.readUtf(Short.MAX_VALUE);
@@ -1191,6 +1205,10 @@ public abstract class BaseQuestFile extends QuestObject implements QuestFile {
 
 		EditableConfigGroup defaultsGroup = config.getOrCreateSubgroup("defaults");
 		defaultsGroup.addBool("reward_team", defaultPerTeamReward, v -> defaultPerTeamReward = v, false);
+		defaultsGroup.add("reward_team_by_type", new EditableTeamRewardByType(), defaultPerTeamRewardByType, v -> {
+            defaultPerTeamRewardByType.clear();
+			defaultPerTeamRewardByType.putAll(v);
+        }, new HashMap<>());
 		defaultsGroup.addBool("consume_items", defaultTeamConsumeItems, v -> defaultTeamConsumeItems = v, false);
 		defaultsGroup.addEnum("autoclaim_rewards", defaultRewardAutoClaim, v -> defaultRewardAutoClaim = v, RewardAutoClaim.NAME_MAP_NO_DEFAULT);
 		defaultsGroup.addEnum("quest_shape", defaultQuestShape, v -> defaultQuestShape = v, QuestShape.idMap);
@@ -1467,8 +1485,8 @@ public abstract class BaseQuestFile extends QuestObject implements QuestFile {
 		return hideExcludedQuests;
 	}
 
-	public boolean isDefaultPerTeamReward() {
-		return defaultPerTeamReward;
+	public boolean isDefaultPerTeamReward(RewardType type) {
+		return defaultPerTeamRewardByType.getOrDefault(type.getTypeId(), defaultPerTeamReward);
 	}
 
 	public boolean isDefaultTeamConsumeItems() {

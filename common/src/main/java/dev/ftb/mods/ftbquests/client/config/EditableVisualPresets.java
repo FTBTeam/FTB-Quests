@@ -36,6 +36,4 @@ public class EditableVisualPresets extends EditableConfigValue<VisualPresets> {
     public Color4I getColor(VisualPresets value, Theme theme) {
         return theme.hasDarkBackground() ? EditableString.COLOR_HI : EditableString.COLOR_LO;
     }
-
-
 }

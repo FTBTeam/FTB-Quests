@@ -167,6 +167,7 @@
 	"ftbquests.file.progression_mode.linear": "Linear",
 	"ftbquests.file.progression_mode.flexible": "Flexible",
 	"ftbquests.file.presets": "Visual Presets",
+	"ftbquests.file.defaults.reward_team_by_type": "Team Reward by Type",
 	"ftbquests.loot.entitydrops": "Entity Drops",
 	"ftbquests.loot.entitytype.passive": "Passive",
 	"ftbquests.loot.entitytype.monster": "Monster",
