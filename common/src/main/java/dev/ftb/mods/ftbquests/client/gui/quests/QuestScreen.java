@@ -71,6 +71,7 @@ public class QuestScreen extends BaseScreen {
 	boolean movingObjects = false;
 	int zoom = 16;
 	static boolean grid = false;
+	private boolean firstTick = true;
 	@Nullable
 	private PersistedData pendingPersistedData;
 	private final Deque<Long> questViewHistory = new ArrayDeque<>();
@@ -99,8 +100,6 @@ public class QuestScreen extends BaseScreen {
 		// defer restoring data till the first tick; things like scroll pos etc. are dependent
 		// on all the widgets being present
 		this.pendingPersistedData = persistedData;
-
-		selectChapter(null);
 	}
 
 	public static QuestScreen reopen(ClientQuestFile file, PersistedData persistedData) {
@@ -759,25 +758,8 @@ public class QuestScreen extends BaseScreen {
 	private void openQuestSelectionGUI() {
 		EditableQuestObject<QuestObject> c = new EditableQuestObject<>(QuestObjectType.CHAPTER.or(QuestObjectType.QUEST).or(QuestObjectType.QUEST_LINK));
 		new SelectQuestObjectScreen<>(c, accepted -> {
-			if (accepted) {
-				switch (c.getValue()) {
-					case Chapter chapter -> selectChapter(chapter);
-					case Quest quest -> {
-						zoom = 20;
-						selectChapter(quest.getChapter());
-						questPanel.scrollTo(quest.getX(), quest.getY());
-						open(quest, true);
-					}
-					case QuestLink link -> {
-						zoom = 20;
-						selectChapter(link.getChapter());
-						questPanel.scrollTo(link.getX(), link.getY());
-						open(link, true);
-						link.getQuest().ifPresent(this::viewQuest);
-					}
-					default -> {
-					}
-				}
+			if (accepted && c.getValue() != null) {
+				open(c.getValue(), true);
 			}
 			QuestScreen.this.openGui();
 		}).openGui();
@@ -785,6 +767,11 @@ public class QuestScreen extends BaseScreen {
 
 	@Override
 	public void tick() {
+		if (firstTick) {
+			questPanel.resetScroll();
+			firstTick = false;
+		}
+
 		if (!refreshPending.isEmpty()) {
 			refreshPending.forEach(Panel::refreshWidgets);
 			refreshPending.clear();
