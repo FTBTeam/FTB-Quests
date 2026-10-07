@@ -1,6 +1,5 @@
 package dev.ftb.mods.ftbquests.client.gui;
 
-import de.marhali.json5.Json5Object;
 import dev.ftb.mods.ftblibrary.client.config.editable.EditableString;
 import dev.ftb.mods.ftblibrary.client.config.gui.EditStringConfigOverlay;
 import dev.ftb.mods.ftblibrary.client.gui.input.Key;
@@ -26,7 +25,6 @@ import dev.ftb.mods.ftbquests.quest.QuestObjectBase;
 import dev.ftb.mods.ftbquests.quest.loot.LootCrate;
 import dev.ftb.mods.ftbquests.quest.loot.RewardTable;
 import dev.ftb.mods.ftbquests.quest.reward.RandomReward;
-import dev.ftb.mods.ftbquests.quest.translation.TranslationKey;
 import dev.ftb.mods.ftbquests.registry.ModItems;
 import it.unimi.dsi.fastutil.ints.IntOpenHashSet;
 import it.unimi.dsi.fastutil.ints.IntSet;
@@ -34,10 +32,8 @@ import net.minecraft.ChatFormatting;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
-import net.minecraft.util.Util;
 import net.minecraft.world.item.Items;
 import org.apache.commons.lang3.mutable.MutableInt;
-import org.jetbrains.annotations.NotNull;
 import org.lwjgl.glfw.GLFW;
 
 import java.util.ArrayList;
@@ -319,7 +315,6 @@ public class RewardTablesScreen extends AbstractButtonListScreen {
 			}
 		}
 
-		@NotNull
 		private Component getLootCrateText() {
 			return Component.translatable("ftbquests.reward_table." +
 					(table.getLootCrate() != null ? "disable_loot_crate" : "enable_loot_crate"));

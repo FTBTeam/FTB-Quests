@@ -42,7 +42,6 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.storage.ValueInput;
 import net.minecraft.world.level.storage.ValueOutput;
-import org.jetbrains.annotations.NotNull;
 import org.jspecify.annotations.Nullable;
 
 import java.util.Optional;
@@ -134,7 +133,7 @@ public class TaskScreenBlockEntity extends EditableBlockEntity implements ITaskS
         this.textShadow = textShadow;
     }
 
-    public void setTeamId(@NotNull UUID teamId) {
+    public void setTeamId(UUID teamId) {
         this.teamId = teamId;
         cachedTeamData = null;
     }

@@ -12,7 +12,6 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.storage.ValueInput;
 import net.minecraft.world.level.storage.ValueOutput;
-import org.jetbrains.annotations.NotNull;
 import org.jspecify.annotations.Nullable;
 
 import java.lang.ref.WeakReference;
@@ -20,7 +19,6 @@ import java.util.Optional;
 import java.util.UUID;
 
 public class TaskScreenAuxBlockEntity extends BlockEntity implements ITaskScreen, Nameable {
-    @NotNull
     private WeakReference<TaskScreenBlockEntity> coreScreen = new WeakReference<>(null);
     @Nullable
     private BlockPos corePosPending;  // non-null after NBT load & before querying/resolving
@@ -52,7 +50,7 @@ public class TaskScreenAuxBlockEntity extends BlockEntity implements ITaskScreen
         return Optional.ofNullable(coreScreen.get());
     }
 
-    public void setCoreScreen(@NotNull TaskScreenBlockEntity coreScreen) {
+    public void setCoreScreen(TaskScreenBlockEntity coreScreen) {
         // this must ONLY be called from TaskScreenBlock#onPlacedBy() !
         if (this.coreScreen.get() != null) throw new IllegalStateException("coreScreen is already set and can't be changed!");
 
