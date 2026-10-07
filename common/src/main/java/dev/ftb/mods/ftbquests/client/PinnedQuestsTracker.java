@@ -19,7 +19,7 @@ import net.minecraft.network.chat.FormattedText;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.Style;
 import net.minecraft.util.FormattedCharSequence;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -33,8 +33,7 @@ public enum PinnedQuestsTracker {
     private int ticker = 0;
     private boolean showChapterTitle;
     private boolean refreshNeeded = true;
-    @Nullable
-    private PinnedQuestsTracker.RenderData renderData;
+    private PinnedQuestsTracker.@Nullable RenderData renderData;
 
     public void tick(ClientQuestFile file) {
         if (ticker < INTERVAL) {

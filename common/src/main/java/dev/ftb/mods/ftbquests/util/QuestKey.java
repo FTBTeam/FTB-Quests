@@ -11,10 +11,8 @@ import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.util.Util;
-import org.jetbrains.annotations.NotNull;
 
 import java.util.UUID;
-import java.util.function.Function;
 
 public record QuestKey(UUID uuid, long id) implements Comparable<QuestKey> {
 	public static final Codec<QuestKey> CODEC = RecordCodecBuilder.create(builder -> builder.group(
@@ -62,7 +60,7 @@ public record QuestKey(UUID uuid, long id) implements Comparable<QuestKey> {
 	}
 
 	@Override
-	public int compareTo(@NotNull QuestKey key) {
+	public int compareTo(QuestKey key) {
 		int i = uuid.compareTo(key.uuid);
 		return i == 0 ? Long.compareUnsigned(id, key.id) : i;
 	}

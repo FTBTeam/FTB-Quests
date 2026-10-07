@@ -11,6 +11,7 @@ import dev.ftb.mods.ftblibrary.icon.Icon;
 import dev.ftb.mods.ftblibrary.json5.Json5Util;
 import dev.ftb.mods.ftblibrary.platform.network.Play2ServerNetworking;
 import dev.ftb.mods.ftblibrary.util.TooltipList;
+import dev.ftb.mods.ftbquests.api.event.ClaimRewardEvent;
 import dev.ftb.mods.ftbquests.client.gui.quests.QuestScreen;
 import dev.ftb.mods.ftbquests.integration.RecipeModHelper;
 import dev.ftb.mods.ftbquests.net.ClaimRewardMessage;
@@ -64,7 +65,6 @@ public abstract class Reward extends QuestObjectBase {
 	}
 
 	@Override
-	@Nullable
 	public final Chapter getQuestChapter() {
 		return quest.getChapter();
 	}
@@ -138,7 +138,12 @@ public abstract class Reward extends QuestObjectBase {
 				.setNameKey("ftbquests.reward.disable_reward_screen_blur");
 	}
 
-	public abstract void claim(ServerPlayer player, boolean notify);
+	public final boolean tryClaim(ServerPlayer player, boolean notify) {
+		return ClaimRewardEvent.Pre.TYPE.post(new ClaimRewardEvent.Pre.Data(this, player))
+				&& claim(player, notify);
+    }
+
+	public abstract boolean claim(ServerPlayer player, boolean notify);
 
 	/**
 	 * Called by the Loot Crate Opener when it's about to open a crate. Can be overridden to add any itemstacks the
@@ -199,7 +204,7 @@ public abstract class Reward extends QuestObjectBase {
 	}
 
 	public final boolean isTeamReward() {
-		return team.get(quest.getQuestFile().isDefaultPerTeamReward());
+		return team.get(quest.getQuestFile().isDefaultPerTeamReward(getType()));
 	}
 
 	public final RewardAutoClaim getAutoClaimType() {

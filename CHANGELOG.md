@@ -4,6 +4,24 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [26.1.2.9]
+
+### Added
+* New task type: Interaction task
+  * Completes when player right-clicks a block or entity
+  * Matches can be specficed as block/block tag/blockstate (with properties)/entity/entity tag
+* Added some new cancellable events related to reward claiming:
+  * `ClaimRewardEvent.Pre` - fired before any reward is claimed
+  * `ClaimRewardEvent.GrantItem` - fired for item rewards specifically, just before the item is given to the player
+  * `OpenLootCrateEvent` - fired when a player or Loot Crate Opener is about to open a loot crate
+* Quest book gui now notes the scroll position per-chapter and returns to that position when the chapter is revisited
+
+### Fixed
+* Fixed a bug preventing chapters being marked complete if they contain a Quest Link
+* Fixed Biome Tasks crashing when a biome tag is being used
+* Fixed quest dependencies not being restored when a quest deletion was undone
+* Fixed Loot Crate Opener not preserving stored loot crate rewards on world restart
+
 ## [26.1.2.8]
 
 ### Added

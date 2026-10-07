@@ -17,7 +17,8 @@ public class ChoiceReward extends RandomReward {
 	}
 
 	@Override
-	public void claim(ServerPlayer player, boolean notify) {
+	public boolean claim(ServerPlayer player, boolean notify) {
+		return true;
 	}
 
 	@Override

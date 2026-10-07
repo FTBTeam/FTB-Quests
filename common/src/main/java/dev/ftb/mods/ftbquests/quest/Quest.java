@@ -103,6 +103,8 @@ public final class Quest extends QuestObject implements Movable, Excludable {
 	private ProgressionMode progressionMode;
 	private final Set<Long> dependantIDs;
 	@Nullable
+	private Collection<QuestLink> cachedQuestLinks;
+	@Nullable
 	private List<QuestObjectBase> allChildren = null;
 
 	public Quest(long id, Chapter chapter) {
@@ -136,6 +138,7 @@ public final class Quest extends QuestObject implements Movable, Excludable {
 		ignoreRewardBlocking = false;
 		progressionMode = ProgressionMode.DEFAULT;
 		dependantIDs = new HashSet<>();
+		cachedQuestLinks = null;
 		requireSequentialTasks = Tristate.DEFAULT;
 		iconScale = 1d;
 		hideLockIcon = false;
@@ -517,13 +520,18 @@ public final class Quest extends QuestObject implements Movable, Excludable {
 				data.notifyPlayers(id);
 			}
 
-			if (!data.teamData().isCompleted(chapter) && chapter.isCompletedRaw(data.teamData())) {
-				chapter.onCompleted(data.withObject(chapter));
-			}
+			checkForChapterCompletion(data, chapter);
+			getQuestLinks().forEach(link -> checkForChapterCompletion(data, link.getChapter()));
 
 			data.teamData().checkAutoCompletion(this);
 
 			checkForDependantCompletion(data.teamData());
+		}
+	}
+
+	private void checkForChapterCompletion(ProgressEventData<?> data, Chapter ch) {
+		if (!data.teamData().isCompleted(ch) && ch.isCompletedRaw(data.teamData())) {
+			ch.onCompleted(data.withObject(ch));
 		}
 	}
 
@@ -577,13 +585,7 @@ public final class Quest extends QuestObject implements Movable, Excludable {
 		List.copyOf(getChildren()).forEach(QuestObjectBase::deleteSelf);  // copy to avoid CME
 
 		// clean up any quest links which point to this quest
-		List<QuestLink> linksToDel = new ArrayList<>();
-		getQuestFile().forAllQuestLinks(link -> {
-			if (link.linksTo(this)) {
-				linksToDel.add(link);
-			}
-		});
-		linksToDel.forEach(QuestLink::deleteSelf);
+		getQuestLinks().forEach(QuestLink::deleteSelf);
 	}
 
 	@Override
@@ -651,6 +653,18 @@ public final class Quest extends QuestObject implements Movable, Excludable {
 		misc.addBool("ignore_reward_blocking", ignoreRewardBlocking, v -> ignoreRewardBlocking = v, false);
 		misc.addEnum("progression_mode", progressionMode, v -> progressionMode = v, ProgressionMode.NAME_MAP);
 		misc.addTristate("require_sequential_tasks", requireSequentialTasks, v -> requireSequentialTasks = v);
+	}
+
+	public Collection<QuestLink> getQuestLinks() {
+		if (cachedQuestLinks == null) {
+			cachedQuestLinks = new HashSet<>();
+			getQuestFile().forAllQuestLinks(link -> {
+				if (link.isValid() && link.linksTo(this)) {
+					cachedQuestLinks.add(link);
+				}
+			});
+		}
+		return cachedQuestLinks;
 	}
 
 	public boolean shouldHideDependencyLines() {
@@ -750,6 +764,7 @@ public final class Quest extends QuestObject implements Movable, Excludable {
 		cachedSubtitle = null;
 		cachedDescription = null;
 		cachedPreset = null;
+		cachedQuestLinks = null;
 
 		getChildren().forEach(QuestObjectBase::clearCachedData);
 		allChildren = null;

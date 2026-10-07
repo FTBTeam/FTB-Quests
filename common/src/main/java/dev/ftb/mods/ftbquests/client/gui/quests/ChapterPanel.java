@@ -42,7 +42,7 @@ import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.Style;
 import net.minecraft.network.chat.TextColor;
 import net.minecraft.util.Mth;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -469,11 +469,9 @@ public class ChapterPanel extends Panel {
 						FTBQuestsClient.showInfoToast(Component.translatable("ftbquests.quest.copied"), Component.literal(chapter.getTitle().getString()));
 					} else if (chapterPanel.questScreen.selectedChapter != chapter) {
 						chapterPanel.questScreen.open(chapter, false);
-						chapter.getAutofocus().ifPresent(chapterPanel.questScreen::scrollTo);
 					}
 				} else if (chapterPanel.questScreen.selectedChapter != chapter) {
 					chapterPanel.questScreen.open(chapter, false);
-					chapter.getAutofocus().ifPresent(chapterPanel.questScreen::scrollTo);
 				}
 			}
 

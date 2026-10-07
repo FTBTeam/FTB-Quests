@@ -1,16 +1,14 @@
 package dev.ftb.mods.ftbquests;
 
 import com.mojang.brigadier.CommandDispatcher;
+import com.mojang.datafixers.util.Either;
 import dev.ftb.mods.ftblibrary.platform.Platform;
 import dev.ftb.mods.ftblibrary.util.Lazy;
 import dev.ftb.mods.ftbquests.api.event.ClearFileCacheEvent;
 import dev.ftb.mods.ftbquests.block.QuestBarrierBlock;
 import dev.ftb.mods.ftbquests.command.FTBQuestsCommands;
 import dev.ftb.mods.ftbquests.quest.ServerQuestFile;
-import dev.ftb.mods.ftbquests.quest.task.CustomTask;
-import dev.ftb.mods.ftbquests.quest.task.DimensionTask;
-import dev.ftb.mods.ftbquests.quest.task.KillTask;
-import dev.ftb.mods.ftbquests.quest.task.Task;
+import dev.ftb.mods.ftbquests.quest.task.*;
 import dev.ftb.mods.ftbquests.registry.ModItems;
 import dev.ftb.mods.ftbquests.util.DeferredInventoryDetection;
 import dev.ftb.mods.ftbquests.util.FTBQuestsInventoryListener;
@@ -20,9 +18,11 @@ import dev.ftb.mods.ftbteams.api.event.TeamPlayerLoggedInEvent;
 import net.minecraft.commands.CommandBuildContext;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
+import net.minecraft.core.BlockPos;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.Container;
+import net.minecraft.world.InteractionResult;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
@@ -39,6 +39,8 @@ public class FTBQuestsEventHandler {
 			ServerQuestFile.getInstance().collect(KillTask.class));
 	private final Lazy<List<DimensionTask>> dimensionTasks = Lazy.of(() ->
 			ServerQuestFile.getInstance().collect(DimensionTask.class));
+	private final Lazy<List<InteractionTask>> interactionTasks = Lazy.of(() ->
+			ServerQuestFile.getInstance().collect(InteractionTask.class));
 	private final Lazy<List<Task>> autoSubmitTasks = Lazy.of(() ->
 			ServerQuestFile.getInstance().collect(Task.class, t -> t.autoSubmitOnPlayerTick() > 0));
 
@@ -73,6 +75,7 @@ public class FTBQuestsEventHandler {
 	public void clearCachedData() {
 		killTasks.invalidate();
 		dimensionTasks.invalidate();
+		interactionTasks.invalidate();
 		autoSubmitTasks.invalidate();
 	}
 
@@ -114,6 +117,28 @@ public class FTBQuestsEventHandler {
 				});
 			}
 		}
+	}
+
+	public InteractionResult onPlayerInteractBlock(Player player, BlockPos blockPos) {
+		return playerInteract(player, Either.left(blockPos));
+	}
+
+	public InteractionResult onPlayerInteractEntity(Player player, Entity entity) {
+		return playerInteract(player, Either.right(entity));
+	}
+
+	private InteractionResult playerInteract(Player player, Either<BlockPos, Entity> either) {
+		if (!player.level().isClientSide() && !Platform.get().misc().isFakePlayer(player) && !interactionTasks.get().isEmpty()) {
+			ServerQuestFile.ifExists(sqf -> sqf.getTeamData(player).ifPresent(data -> {
+				for (var task : interactionTasks.get()) {
+					if (data.getProgress(task) < task.getMaxProgress() && data.canStartTasks(task.getQuest())) {
+						either.ifLeft(pos -> task.interacted(data, player.level(), pos))
+								.ifRight(entity -> task.interacted(data, entity));
+					}
+				}
+			}));
+		}
+		return InteractionResult.PASS;
 	}
 
 	public void onPlayerTick(Player player) {

@@ -83,19 +83,21 @@ public class AdvancementReward extends Reward {
 	}
 
 	@Override
-	public void claim(ServerPlayer player, boolean notify) {
+	public boolean claim(ServerPlayer player, boolean notify) {
 		AdvancementHolder advancementHolder = player.level().getServer().getAdvancements().get(advancement);
+        if (advancementHolder == null) {
+            return false;
+        }
 
-		if (advancementHolder != null) {
-			if (criterion.isEmpty()) {
-				for (String s : advancementHolder.value().criteria().keySet()) {
-					player.getAdvancements().award(advancementHolder, s);
-				}
-			} else {
-				player.getAdvancements().award(advancementHolder, criterion);
-			}
-		}
-	}
+        if (criterion.isEmpty()) {
+            for (String s : advancementHolder.value().criteria().keySet()) {
+                player.getAdvancements().award(advancementHolder, s);
+            }
+        } else {
+            player.getAdvancements().award(advancementHolder, criterion);
+        }
+        return true;
+    }
 
 	@Override
 	public Component getAltTitle() {

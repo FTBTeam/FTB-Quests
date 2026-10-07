@@ -323,33 +323,33 @@ public class QuestPanel extends Panel {
 			questScreen.file.getChangelog().draw(graphics, questScreen);
 		}
 
+		double dx = (questMaxX - questMinX);
+		double dy = (questMaxY - questMinY);
+
+		double px = getX() - getScrollX();
+		double py = getY() - getScrollY();
+
+		questXunsnapped = (questScreen.getMouseX() - px) / questScreen.scrollWidth * dx + questMinX;
+		questYunsnapped = (questScreen.getMouseY() - py) / questScreen.scrollHeight * dy + questMinY;
+		centerQuestX = (questScreen.width / 2D - px) / questScreen.scrollWidth * dx + questMinX;
+		centerQuestY = (questScreen.height / 2D - py) / questScreen.scrollHeight * dy + questMinY;
+
+		if (isShiftKeyDown()) {
+			questX = questXunsnapped;
+			questY = questYunsnapped;
+		} else {
+			// grid-snapping size is based on the smallest selected item
+			//   although images always act as if they were size 1
+			double minSize = questScreen.selectedObjects.stream()
+					.map(m -> m instanceof ChapterImage ? 1d : m.getWidth())
+					.min(Double::compare)
+					.orElse(1d);
+			double snap = 1D / (questScreen.file.getGridScale() * minSize);
+			questX = Mth.floor(questXunsnapped * snap + 0.5D) / snap;
+			questY = Mth.floor(questYunsnapped * snap + 0.5D) / snap;
+		}
+
 		if (questScreen.selectedChapter != null && isMouseOver()) {
-			double dx = (questMaxX - questMinX);
-			double dy = (questMaxY - questMinY);
-
-			double px = getX() - getScrollX();
-			double py = getY() - getScrollY();
-
-			questXunsnapped = (questScreen.getMouseX() - px) / questScreen.scrollWidth * dx + questMinX;
-			questYunsnapped = (questScreen.getMouseY() - py) / questScreen.scrollHeight * dy + questMinY;
-			centerQuestX = (questScreen.width / 2D - px) / questScreen.scrollWidth * dx + questMinX;
-			centerQuestY = (questScreen.height / 2D - py) / questScreen.scrollHeight * dy + questMinY;
-
-			if (isShiftKeyDown()) {
-				questX = questXunsnapped;
-				questY = questYunsnapped;
-			} else {
-				// grid-snapping size is based on the smallest selected item
-				//   although images always act as if they were size 1
-				double minSize = questScreen.selectedObjects.stream()
-						.map(m -> m instanceof ChapterImage ? 1d : m.getWidth())
-						.min(Double::compare)
-						.orElse(1d);
-				double snap = 1D / (questScreen.file.getGridScale() * minSize);
-				questX = Mth.floor(questXunsnapped * snap + 0.5D) / snap;
-				questY = Mth.floor(questYunsnapped * snap + 0.5D) / snap;
-			}
-
 			if (questScreen.file.canEdit()) {
 				if (bezierController.isActive()) {
 					var bezierHint = Component.translatable("ftbquests.gui.editing_bezier");
@@ -413,7 +413,6 @@ public class QuestPanel extends Panel {
 
 					if (QuestScreen.grid && !questScreen.isViewingQuest()) {
 						poseStack.pushMatrix();
-						poseStack.translate(0, 0);//, 1000);
 						IconHelper.renderIcon(Color4I.WHITE, graphics, (int) Math.round(sx), (int) Math.round(sy), 1, 1);
 						IconHelper.renderIcon(Color4I.WHITE.withAlpha(30), graphics, getX(), (int) sy, width, 1);
 						IconHelper.renderIcon(Color4I.WHITE.withAlpha(30), graphics, (int) Math.round(sx), getY(), 1, height);

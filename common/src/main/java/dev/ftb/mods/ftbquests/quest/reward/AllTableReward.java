@@ -16,13 +16,16 @@ public class AllTableReward extends LootReward {
     }
 
     @Override
-    public void claim(ServerPlayer player, boolean notify) {
+    public boolean claim(ServerPlayer player, boolean notify) {
         RewardTable table = getTable();
-
-        if (table != null) {
-            for (WeightedReward wr : table.getWeightedRewards()) {
-                wr.getReward().claim(player, notify);
-            }
+        if (table == null) {
+            return false;
         }
+
+        for (WeightedReward wr : table.getWeightedRewards()) {
+            wr.getReward().claim(player, notify);
+        }
+        return true;
+
     }
 }

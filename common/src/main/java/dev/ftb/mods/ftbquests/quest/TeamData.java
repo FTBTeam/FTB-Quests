@@ -278,6 +278,10 @@ public class TeamData {
 		return b == BOOL_TRUE;
 	}
 
+	public boolean isRewardReadyToClaim(UUID player, Reward reward) {
+		return !locked && !isRewardBlocked(reward) && !claimedRewards.containsKey(QuestKey.forReward(player, reward));
+	}
+
 	public boolean markRewardAsClaimed(UUID player, Reward reward, long date) {
 		if (locked || isRewardBlocked(reward)) {
 			return false;
@@ -478,11 +482,11 @@ public class TeamData {
 	}
 
 	public boolean isStarted(QuestObject object) {
-		return started.containsKey(object.id);
+		return started.containsKey(object.getEffectiveId());
 	}
 
 	public boolean isCompleted(QuestObject object) {
-		return completed.containsKey(object.id);
+		return completed.containsKey(object.getEffectiveId());
 	}
 
 	public int getCompletionCount(Quest quest) {
@@ -526,9 +530,9 @@ public class TeamData {
 	}
 
 	public void claimReward(ServerPlayer player, Reward reward, boolean notify, long when) {
-		if (markRewardAsClaimed(player.getUUID(), reward, when)) {
-			reward.claim(player, notify);
-		}
+        if (isRewardReadyToClaim(player.getUUID(), reward) && reward.tryClaim(player, notify)) {
+            markRewardAsClaimed(player.getUUID(), reward, when);
+        }
 	}
 
 	public void claimReward(ServerPlayer player, Reward reward, boolean notify) {

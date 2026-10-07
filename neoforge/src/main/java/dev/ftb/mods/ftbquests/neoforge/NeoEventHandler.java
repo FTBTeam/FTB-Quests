@@ -2,7 +2,6 @@ package dev.ftb.mods.ftbquests.neoforge;
 
 import dev.ftb.mods.ftblibrary.platform.Platform;
 import dev.ftb.mods.ftbquests.FTBQuestsEventHandler;
-import dev.ftb.mods.ftbquests.api.FTBQuestsTags;
 import dev.ftb.mods.ftbquests.api.neoforge.FTBQuestsEvent;
 import dev.ftb.mods.ftbquests.quest.ServerQuestFile;
 import dev.ftb.mods.ftbquests.registry.ModItems;
@@ -10,19 +9,17 @@ import dev.ftb.mods.ftbteams.api.neoforge.FTBTeamsEvent;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.item.ItemEntity;
-import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.gamerules.GameRules;
-import net.neoforged.bus.api.EventPriority;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.neoforge.common.NeoForge;
-import net.neoforged.neoforge.common.util.FakePlayer;
 import net.neoforged.neoforge.event.RegisterCommandsEvent;
 import net.neoforged.neoforge.event.entity.EntityJoinLevelEvent;
 import net.neoforged.neoforge.event.entity.living.LivingDeathEvent;
 import net.neoforged.neoforge.event.entity.living.LivingDropsEvent;
 import net.neoforged.neoforge.event.entity.player.PlayerContainerEvent;
 import net.neoforged.neoforge.event.entity.player.PlayerEvent;
+import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
 import net.neoforged.neoforge.event.level.LevelEvent;
 import net.neoforged.neoforge.event.server.ServerAboutToStartEvent;
 import net.neoforged.neoforge.event.server.ServerStartedEvent;
@@ -72,6 +69,10 @@ public class NeoEventHandler {
 				eventHandler.onEntityJoinLevel(event.getEntity()));
 		bus.addListener(PlayerContainerEvent.Open.class, event ->
 				eventHandler.onContainerOpened(event.getEntity(), event.getContainer()));
+		bus.addListener(PlayerInteractEvent.RightClickBlock.class, event ->
+				eventHandler.onPlayerInteractBlock(event.getEntity(), event.getPos()));
+		bus.addListener(PlayerInteractEvent.EntityInteract.class, event ->
+				eventHandler.onPlayerInteractEntity(event.getEntity(), event.getTarget()));
 
 		bus.addListener(ServerTickEvent.Post.class, event ->
 				eventHandler.onServerTickPost(event.getServer()));

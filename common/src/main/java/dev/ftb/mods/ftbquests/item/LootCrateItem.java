@@ -4,6 +4,7 @@ import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import dev.ftb.mods.ftblibrary.platform.Env;
 import dev.ftb.mods.ftblibrary.platform.Platform;
+import dev.ftb.mods.ftbquests.api.event.OpenLootCrateEvent;
 import dev.ftb.mods.ftbquests.client.ClientQuestFile;
 import dev.ftb.mods.ftbquests.client.gui.RewardNotificationsScreen;
 import dev.ftb.mods.ftbquests.quest.loot.LootCrate;
@@ -73,6 +74,17 @@ public class LootCrateItem extends Item {
 		}
 
 		int nItems = player.isCrouching() ? stack.getCount() : 1;
+
+		var result = OpenLootCrateEvent.TYPE.post(new OpenLootCrateEvent.Data(player, player.getUUID(), player.level(), crate, null, false));
+		if (result.isFail()) {
+			result.data().ifPresent(msg -> {
+				if (level.isClientSide()) {
+					player.sendSystemMessage(msg);
+				}
+			});
+			return InteractionResult.FAIL;
+		}
+
 		RandomSource random = level.getRandom();
 
 		if (!level.isClientSide()) {

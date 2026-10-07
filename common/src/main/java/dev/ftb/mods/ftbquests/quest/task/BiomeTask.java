@@ -97,7 +97,7 @@ public class BiomeTask extends AbstractBooleanTask {
 		return biome.map(
 				key -> biomeHolder.unwrapKey().map(k -> k == key).orElse(false),
 				tagKey -> {
-					var reg = player.level().registryAccess().getOrThrow(Registries.BIOME).value();
+					var reg = player.level().registryAccess().lookupOrThrow(Registries.BIOME);
 					return reg.get(tagKey).map(holderSet -> holderSet.contains(biomeHolder)).orElse(false);
 				}
 		);

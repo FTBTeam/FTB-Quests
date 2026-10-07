@@ -58,7 +58,8 @@ public class ToastReward extends Reward {
 	}
 
 	@Override
-	public void claim(ServerPlayer player, boolean notify) {
+	public boolean claim(ServerPlayer player, boolean notify) {
 		Server2PlayNetworking.send(player, new CustomToastMessage(getId()));
+		return true;
 	}
 }

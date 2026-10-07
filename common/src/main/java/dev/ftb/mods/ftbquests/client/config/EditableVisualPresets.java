@@ -12,7 +12,7 @@ import dev.ftb.mods.ftbquests.quest.preset.VisualPresets;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 
 public class EditableVisualPresets extends EditableConfigValue<VisualPresets> {
     @Override
@@ -36,6 +36,4 @@ public class EditableVisualPresets extends EditableConfigValue<VisualPresets> {
     public Color4I getColor(VisualPresets value, Theme theme) {
         return theme.hasDarkBackground() ? EditableString.COLOR_HI : EditableString.COLOR_LO;
     }
-
-
 }

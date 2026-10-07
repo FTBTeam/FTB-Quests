@@ -35,11 +35,12 @@ public record ClaimChoiceRewardMessage(long id, int index) implements CustomPack
 					RewardTable table = choiceReward.getTable();
 
                     if (table != null
-							&& data.isCompleted(reward.getQuest())
-							&& message.index >= 0 && message.index < table.getWeightedRewards().size()
-							&& data.markRewardAsClaimed(serverPlayer.getUUID(), reward, System.currentTimeMillis()))
+                            && data.isCompleted(reward.getQuest())
+                            && message.index >= 0 && message.index < table.getWeightedRewards().size()
+                            && data.isRewardReadyToClaim(serverPlayer.getUUID(), reward)
+							&& table.getWeightedRewards().get(message.index).getReward().tryClaim(serverPlayer, true))
 					{
-                        table.getWeightedRewards().get(message.index).getReward().claim(serverPlayer, true);
+                        data.markRewardAsClaimed(serverPlayer.getUUID(), reward, System.currentTimeMillis());
                     }
 				});
 			}

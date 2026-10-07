@@ -2,7 +2,9 @@ package dev.ftb.mods.ftbquests.neoforge;
 
 import dev.ftb.mods.ftblibrary.FTBLibrary;
 import dev.ftb.mods.ftblibrary.icon.Icon;
+import dev.ftb.mods.ftblibrary.platform.event.NativeEventPosting;
 import dev.ftb.mods.ftblibrary.util.neoforge.NeoEventHelper;
+import dev.ftb.mods.ftblibrary.util.result.DataOutcome;
 import dev.ftb.mods.ftbquests.FTBQuests;
 import dev.ftb.mods.ftbquests.api.FTBQuestsAPI;
 import dev.ftb.mods.ftbquests.api.event.*;
@@ -21,12 +23,15 @@ import dev.ftb.mods.ftbquests.quest.task.neoforge.ForgeEnergyTask;
 import dev.ftb.mods.ftbquests.registry.ModBlockEntityTypes;
 import dev.ftb.mods.ftbquests.registry.ModItems;
 import net.minecraft.world.item.ItemStack;
+import net.neoforged.bus.api.Event;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.common.Mod;
 import net.neoforged.neoforge.capabilities.Capabilities;
 import net.neoforged.neoforge.capabilities.RegisterCapabilitiesEvent;
 import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.event.BuildCreativeModeTabContentsEvent;
+
+import java.util.function.Function;
 
 @Mod(FTBQuestsAPI.MOD_ID)
 public class FTBQuestsNeoForge {
@@ -57,6 +62,15 @@ public class FTBQuestsNeoForge {
 		NeoEventHelper.registerNeoEventPoster(bus, ChapterProgressEvent.Data.class, FTBQuestsEvent.ChapterProgress::new);
 		NeoEventHelper.registerNeoEventPoster(bus, QuestProgressEvent.Data.class, FTBQuestsEvent.QuestProgress::new);
 		NeoEventHelper.registerNeoEventPoster(bus, TaskProgressEvent.Data.class, FTBQuestsEvent.TaskProgress::new);
+
+		NeoEventHelper.registerCancellableNeoEventPoster(bus, ClaimRewardEvent.Pre.TYPE, FTBQuestsEvent.ClaimReward.Pre::new);
+		NeoEventHelper.registerCancellableNeoEventPoster(bus, ClaimRewardEvent.GrantItem.TYPE, FTBQuestsEvent.ClaimReward.GrantItem::new);
+
+		NativeEventPosting.get().registerEventWithResult(OpenLootCrateEvent.TYPE, data -> {
+			var event = new FTBQuestsEvent.OpenLootCrate(data);
+			NeoForge.EVENT_BUS.post(event);
+			return event.isCanceled() ? DataOutcome.fail(event.getReason()) : DataOutcome.pass();
+		});
 	}
 
 	private void addCreativeTabContents(BuildCreativeModeTabContentsEvent event) {

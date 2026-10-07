@@ -4,6 +4,7 @@ import de.marhali.json5.Json5Object;
 import dev.ftb.mods.ftblibrary.client.config.EditableConfigGroup;
 import dev.ftb.mods.ftblibrary.client.util.ClientUtils;
 import dev.ftb.mods.ftblibrary.icon.Icon;
+import dev.ftb.mods.ftblibrary.icon.Icons;
 import dev.ftb.mods.ftblibrary.json5.Json5Util;
 import dev.ftb.mods.ftbquests.client.gui.quests.QuestScreen;
 import net.minecraft.core.HolderLookup;
@@ -34,6 +35,11 @@ public class QuestLink extends QuestObject implements Movable, Excludable {
     }
 
     @Override
+    public long getEffectiveId() {
+        return getQuest().map(QuestObjectBase::getId).orElse(super.getEffectiveId());
+    }
+
+    @Override
     @Nullable
     public Quest getRelatedQuest() {
         return getQuest().orElse(null);
@@ -56,7 +62,8 @@ public class QuestLink extends QuestObject implements Movable, Excludable {
 
     @Override
     public Icon<?> getAltIcon() {
-        return getQuest().map(Quest::getAltIcon).orElse(null);
+        // using .map() here doesn't work...
+        return getQuest().isPresent() ? getQuest().get().getAltIcon() : Icons.BARRIER;
     }
 
     @Override
@@ -65,8 +72,23 @@ public class QuestLink extends QuestObject implements Movable, Excludable {
     }
 
     @Override
+    public @Nullable Chapter getQuestChapter() {
+        return chapter;
+    }
+
+    @Override
     public int getRelativeProgressFromChildren(TeamData data) {
         return 0;
+    }
+
+    @Override
+    public boolean isOptionalForProgression(TeamData teamData) {
+        return getQuest().map(q -> q.isOptionalForProgression(teamData)).orElse(false);
+    }
+
+    @Override
+    public boolean isCompletedRaw(TeamData data) {
+        return getQuest().map(q -> q.isCompletedRaw(data)).orElse(false);
     }
 
     public Optional<Quest> getQuest() {
@@ -89,6 +111,7 @@ public class QuestLink extends QuestObject implements Movable, Excludable {
     public void deleteSelf() {
         super.deleteSelf();
 
+        getQuest().ifPresent(Quest::clearCachedData);
         chapter.removeQuestLink(this);
     }
 

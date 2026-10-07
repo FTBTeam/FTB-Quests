@@ -25,7 +25,7 @@ import net.minecraft.ChatFormatting;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.network.chat.Component;
 import org.apache.commons.lang3.math.NumberUtils;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import java.util.*;
 import java.util.function.Consumer;
@@ -165,7 +165,7 @@ public class VisualPresetsEditorScreen extends AbstractButtonListScreen {
         }
     }
 
-    private class EditDelButton extends SimpleButton {
+    private static class EditDelButton extends SimpleButton {
         public EditDelButton(Panel panel, Component text, Icon icon, Callback c) {
             super(panel, text, icon, c);
         }

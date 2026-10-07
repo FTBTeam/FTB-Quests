@@ -9,6 +9,7 @@ import dev.ftb.mods.ftblibrary.icon.ItemIcon;
 import dev.ftb.mods.ftblibrary.json5.Json5Util;
 import dev.ftb.mods.ftblibrary.platform.network.Server2PlayNetworking;
 import dev.ftb.mods.ftbquests.FTBQuests;
+import dev.ftb.mods.ftbquests.api.event.ClaimRewardEvent;
 import dev.ftb.mods.ftbquests.net.NotifyItemRewardMessage;
 import dev.ftb.mods.ftbquests.quest.Quest;
 import dev.ftb.mods.ftbquests.registry.ModItems;
@@ -17,6 +18,7 @@ import net.minecraft.core.HolderLookup;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
@@ -28,6 +30,7 @@ import org.jspecify.annotations.Nullable;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.function.Consumer;
 
 public class ItemReward extends Reward {
 	public static final int MAX_COUNT = 8192;
@@ -129,34 +132,43 @@ public class ItemReward extends Reward {
 	}
 
 	@Override
-	public void claim(ServerPlayer player, boolean notify) {
+	public boolean claim(ServerPlayer player, boolean notify) {
 		if (onlyOne && player.getInventory().contains(item)) {
-			return;
+			return false;
 		}
 
 		int size = count + player.level().getRandom().nextInt(randomBonus + 1);
-		while (size > 0) {
-			int s = Math.min(size, item.getMaxStackSize());
-			player.getInventory().placeItemBackInInventory(item.copyWithCount(s));
-			size -= s;
+		if (!ClaimRewardEvent.GrantItem.TYPE.post(new ClaimRewardEvent.GrantItem.Data(player, player.getUUID(), player.level(), null, item.copyWithCount(size)))) {
+			return false;
 		}
+
+		processItems(size, stack -> player.getInventory().placeItemBackInInventory(stack));
 
 		if (notify) {
 			Server2PlayNetworking.send(player, new NotifyItemRewardMessage(item, size, disableRewardScreenBlur));
 		}
+
+		return true;
 	}
 
 	@Override
 	public boolean automatedClaimPre(BlockEntity blockEntity, List<ItemStack> items, RandomSource random, UUID playerId, @Nullable ServerPlayer player) {
 		int size = count + random.nextInt(randomBonus + 1);
-
-		while (size > 0) {
-			int s = Math.min(size, item.getMaxStackSize());
-			items.add(item.copyWithCount(s));
-			size -= s;
+		if (!ClaimRewardEvent.GrantItem.TYPE.post(new ClaimRewardEvent.GrantItem.Data(player, playerId, (ServerLevel) blockEntity.getLevel(), blockEntity, item.copyWithCount(size)))) {
+			return false;
 		}
 
+		processItems(size, items::add);
+
 		return true;
+	}
+
+	private void processItems(int size, Consumer<ItemStack> consumer) {
+		while (size > 0) {
+			int s = Math.min(size, item.getMaxStackSize());
+			consumer.accept(item.copyWithCount(s));
+			size -= s;
+		}
 	}
 
 	@Override

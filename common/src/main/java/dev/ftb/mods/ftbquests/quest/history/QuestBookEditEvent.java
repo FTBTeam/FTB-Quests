@@ -8,7 +8,7 @@ import dev.ftb.mods.ftbquests.quest.QuestObjectBase;
 import dev.ftb.mods.ftbquests.quest.ServerQuestFile;
 import dev.ftb.mods.ftbquests.util.NetUtils;
 import net.minecraft.network.chat.Component;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import java.util.List;
 import java.util.Objects;
@@ -63,6 +63,7 @@ public interface QuestBookEditEvent {
                 qo.onCreated();
             }
             NetUtils.sendToQuestBookEditors(file.server, new CreateObjectResponseMessage(records, Optional.ofNullable(creatorId)));
+            file.clearCachedData();
             file.markDirty();
             return true;
         } catch (Exception ignored) {
@@ -74,6 +75,7 @@ public interface QuestBookEditEvent {
         List<Long> ids = records.stream().map(CreateOrDeleteRecord::id).toList();
         boolean deleted = file.deleteObjects(ids);
         if (deleted) {
+            file.clearCachedData();
             NetUtils.sendToQuestBookEditors(file.server, new DeleteObjectResponseMessage(ids));
         }
 

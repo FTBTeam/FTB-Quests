@@ -10,7 +10,6 @@ import it.unimi.dsi.fastutil.ints.Int2ObjectLinkedOpenHashMap;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.world.item.CreativeModeTabs;
 import net.minecraft.world.item.ItemStack;
-import org.jetbrains.annotations.NotNull;
 import org.jspecify.annotations.Nullable;
 
 import java.util.List;
@@ -61,7 +60,6 @@ public class DisplayStacksCache {
         extraCache = null;
     }
 
-    @NotNull
     private static List<ItemStack> getExtraDisplayCache() {
         if (extraCache == null) {
             ImmutableList.Builder<ItemStack> builder = ImmutableList.builder();

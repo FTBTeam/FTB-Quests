@@ -6,7 +6,9 @@ import dev.ftb.mods.ftblibrary.icon.Icons;
 import dev.ftb.mods.ftblibrary.integration.currency.CurrencyHelper;
 import dev.ftb.mods.ftblibrary.integration.currency.CurrencyProvider;
 import dev.ftb.mods.ftblibrary.json5.Json5Util;
+import dev.ftb.mods.ftblibrary.platform.network.Networking;
 import dev.ftb.mods.ftblibrary.platform.network.Server2PlayNetworking;
+import dev.ftb.mods.ftblibrary.util.NetworkHelper;
 import dev.ftb.mods.ftbquests.net.NotifyRewardMessage;
 import dev.ftb.mods.ftbquests.quest.Quest;
 import net.minecraft.ChatFormatting;
@@ -75,16 +77,20 @@ public class CurrencyReward extends Reward {
     }
 
     @Override
-    public void claim(ServerPlayer player, boolean notify) {
+    public boolean claim(ServerPlayer player, boolean notify) {
         CurrencyProvider provider = CurrencyHelper.getInstance().getProvider();
-
-        if (provider.isValidProvider()) {
-            provider.giveCurrency(player, coinAmount);
-
-            if (notify) {
-                Component msg = Component.literal(Integer.toString(coinAmount)).append(" ").append(provider.coinName(coinAmount > 1));
-                Server2PlayNetworking.send(player, new NotifyRewardMessage(id, msg, Icons.MONEY, disableRewardScreenBlur));
-            }
+        if (!provider.isValidProvider()) {
+            return false;
         }
+
+        provider.giveCurrency(player, coinAmount);
+
+        if (notify) {
+            Component msg = Component.literal(Integer.toString(coinAmount)).append(" ").append(provider.coinName(coinAmount > 1));
+            Server2PlayNetworking.send(player, new NotifyRewardMessage(id, msg, Icons.MONEY, disableRewardScreenBlur));
+        }
+
+        return true;
+
     }
 }

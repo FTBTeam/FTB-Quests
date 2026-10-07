@@ -165,7 +165,7 @@ public class ObservationTask extends AbstractBooleanTask {
 			}
 		} else if (result instanceof EntityHitResult entityResult) {
 			if (observeType == ObserveType.ENTITY_TYPE) {
-				return tryMatchEntity(entityResult.getEntity());
+				return tryMatchEntity(toObserve, entityResult.getEntity());
 			} else if (observeType == ObserveType.ENTITY_TYPE_TAG) {
 				return asTagId(toObserve)
 						.map(rl -> entityResult.getEntity().is(TagKey.create(Registries.ENTITY_TYPE, rl)))
@@ -176,14 +176,14 @@ public class ObservationTask extends AbstractBooleanTask {
 		return false;
 	}
 
-	private boolean tryMatchEntity(Entity entity) {
+	static boolean tryMatchEntity(String matchAgainst, Entity entity) {
 		Identifier typeId = BuiltInRegistries.ENTITY_TYPE.getKey(entity.getType());
 
-		int nbtStart = toObserve.indexOf('{');
-		int nbtEnd = nbtStart > 0 ? toObserve.indexOf('}', nbtStart) : -1;
+		int nbtStart = matchAgainst.indexOf('{');
+		int nbtEnd = nbtStart > 0 ? matchAgainst.indexOf('}', nbtStart) : -1;
 
-		String entityId = nbtStart < 0 ? toObserve : toObserve.substring(0, nbtStart);
-		String nbtFilter = nbtStart > 0 && nbtEnd > nbtStart ? toObserve.substring(nbtStart, nbtEnd + 1) : "";
+		String entityId = nbtStart < 0 ? matchAgainst : matchAgainst.substring(0, nbtStart);
+		String nbtFilter = nbtStart > 0 && nbtEnd > nbtStart ? matchAgainst.substring(nbtStart, nbtEnd + 1) : "";
 
 		return typeId.toString().equals(entityId) && matchEntityNBT(entity, nbtFilter);
 	}
@@ -203,7 +203,7 @@ public class ObservationTask extends AbstractBooleanTask {
 		}
 	}
 
-	private Optional<Identifier> asTagId(String str) {
+	static Optional<Identifier> asTagId(String str) {
 		try {
 			return Optional.ofNullable(Identifier.tryParse(str.startsWith("#") ? str.substring(1) : str));
 		} catch (IdentifierException e) {
@@ -212,7 +212,7 @@ public class ObservationTask extends AbstractBooleanTask {
 	}
 
 	@Nullable
-	private BlockInput tryMatchBlock(String string, boolean parseNbt) {
+	static BlockInput tryMatchBlock(String string, boolean parseNbt) {
 		try {
 			BlockStateParser.BlockResult blockStateParser = BlockStateParser.parseForBlock(BuiltInRegistries.BLOCK, new StringReader(string), false);
 			return new BlockInput(blockStateParser.blockState(), blockStateParser.properties().keySet(), parseNbt ? blockStateParser.nbt() : null);

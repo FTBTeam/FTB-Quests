@@ -1,24 +1,22 @@
 package dev.ftb.mods.ftbquests.fabric;
 
 import dev.ftb.mods.ftblibrary.icon.Icon;
+import dev.ftb.mods.ftblibrary.platform.event.NativeEventPosting;
 import dev.ftb.mods.ftblibrary.util.fabric.FabricEventHelper;
 import dev.ftb.mods.ftbquests.FTBQuests;
 import dev.ftb.mods.ftbquests.FTBQuestsEventHandler;
 import dev.ftb.mods.ftbquests.api.FTBQuestsAPI;
-import dev.ftb.mods.ftbquests.api.event.CustomFilterDisplayItemsEvent;
+import dev.ftb.mods.ftbquests.api.event.*;
+import dev.ftb.mods.ftbquests.api.event.progress.ChapterProgressEvent;
+import dev.ftb.mods.ftbquests.api.event.progress.FileProgressEvent;
+import dev.ftb.mods.ftbquests.api.event.progress.QuestProgressEvent;
+import dev.ftb.mods.ftbquests.api.event.progress.TaskProgressEvent;
 import dev.ftb.mods.ftbquests.api.fabric.FTBQuestsClientEvents;
 import dev.ftb.mods.ftbquests.api.fabric.FTBQuestsEvents;
 import dev.ftb.mods.ftbquests.block.fabric.FabricLootCrateOpenerBlockEntity;
 import dev.ftb.mods.ftbquests.block.fabric.FabricTaskScreenAuxBlockEntity;
 import dev.ftb.mods.ftbquests.block.fabric.FabricTaskScreenBlockEntity;
 import dev.ftb.mods.ftbquests.command.ChangeProgressArgument;
-import dev.ftb.mods.ftbquests.api.event.ClearFileCacheEvent;
-import dev.ftb.mods.ftbquests.api.event.CustomRewardEvent;
-import dev.ftb.mods.ftbquests.api.event.CustomTaskEvent;
-import dev.ftb.mods.ftbquests.api.event.progress.ChapterProgressEvent;
-import dev.ftb.mods.ftbquests.api.event.progress.FileProgressEvent;
-import dev.ftb.mods.ftbquests.api.event.progress.QuestProgressEvent;
-import dev.ftb.mods.ftbquests.api.event.progress.TaskProgressEvent;
 import dev.ftb.mods.ftbquests.quest.task.TaskTypes;
 import dev.ftb.mods.ftbquests.quest.task.TechRebornEnergyTask;
 import dev.ftb.mods.ftbquests.registry.ModBlockEntityTypes;
@@ -61,6 +59,9 @@ public class FTBQuestsFabric implements ModInitializer {
 		FabricEventHelper.registerFabricEventPoster(ChapterProgressEvent.Data.class, FTBQuestsEvents.CHAPTER_PROGRESS);
 		FabricEventHelper.registerFabricEventPoster(QuestProgressEvent.Data.class, FTBQuestsEvents.QUEST_PROGRESS);
 		FabricEventHelper.registerFabricEventPoster(TaskProgressEvent.Data.class, FTBQuestsEvents.TASK_PROGRESS);
+		FabricEventHelper.registerFabricEventPosterPredicate(ClaimRewardEvent.Pre.TYPE, FTBQuestsEvents.CLAIM_REWARD_PRE);
+		FabricEventHelper.registerFabricEventPosterPredicate(ClaimRewardEvent.GrantItem.TYPE, FTBQuestsEvents.CLAIM_REWARD_GRANT_ITEM);
+		FabricEventHelper.registerFabricEventPosterFunction(OpenLootCrateEvent.TYPE, FTBQuestsEvents.OPEN_LOOT_CRATE);
     }
 
 	private static void registerTransferHandlers() {
