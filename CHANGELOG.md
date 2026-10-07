@@ -20,6 +20,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 * Fixed a bug preventing chapters being marked complete if they contain a Quest Link
 * Fixed Biome Tasks crashing when a biome tag is being used
 * Fixed quest dependencies not being restored when a quest deletion was undone
+* Fixed Loot Crate Opener not preserving stored loot crate rewards on world restart
 
 ## [26.1.2.8]
 
