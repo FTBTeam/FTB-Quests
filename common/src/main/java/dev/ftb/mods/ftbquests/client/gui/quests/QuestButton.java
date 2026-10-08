@@ -69,12 +69,12 @@ public class QuestButton extends Button implements QuestPositionableButton {
 
 	@Override
 	public boolean isEnabled() {
-		return questScreen.file.canEdit() || quest.isVisible(FTBQuestsClient.getClientPlayerData());
+		return questScreen.file.canEdit() || theQuestObject().isVisible(FTBQuestsClient.getClientPlayerData());
 	}
 
 	@Override
 	public boolean shouldDraw() {
-		return questScreen.file.canEdit() || quest.isVisible(FTBQuestsClient.getClientPlayerData());
+		return isEnabled();
 	}
 
 	@Override

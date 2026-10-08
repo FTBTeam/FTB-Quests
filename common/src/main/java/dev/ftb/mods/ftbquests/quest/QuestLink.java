@@ -68,7 +68,7 @@ public class QuestLink extends QuestObject implements Movable, Excludable {
 
     @Override
     public boolean isVisible(TeamData data) {
-        return getQuest().map(q -> q.isVisible(data)).orElse(false);
+        return getQuest().map(q -> q.isVisible(data) && q.getChapter().isVisible(data)).orElse(false);
     }
 
     @Override
