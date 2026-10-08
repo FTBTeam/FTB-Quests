@@ -268,18 +268,20 @@ public class ViewQuestPanel extends ModalPanel {
 		add(buttonPin = new PinViewQuestButton());
 		buttonPin.setPosAndSize(w - iconSize * 2 - 4, 4, iconSize, iconSize);
 
-		if (questScreen.selectedChapter != null && questScreen.selectedChapter.id != quest.getChapter().id) {
+		if (questScreen.selectedChapter != null && questScreen.selectedChapter.id != quest.getChapter().id && (canEdit || quest.getChapter().isVisible(questScreen.file.selfTeamData))) {
 			GotoLinkedQuestButton b = new GotoLinkedQuestButton();
 			add(b);
-			b.setPosAndSize(iconSize + 4, 0, iconSize, iconSize);
+			b.setPosAndSize(iconSize + 4, 4, iconSize, iconSize);
 		}
 
-		List<QuestLink> links = quest.getQuestLinks().stream()
-				.filter(link -> quest.getQuestChapter() == questScreen.selectedChapter)
-				.toList();
-		var linksButton = new ViewQuestLinksButton(links);
-		add(linksButton);
-		linksButton.setPosAndSize(w - iconSize * 3 - 4, 0, iconSize, iconSize);
+		if (quest.getQuestChapter() == questScreen.selectedChapter) {
+			List<QuestLink> links = quest.getQuestLinks().stream()
+					.filter(link -> link.getQuest().map(q -> q.getChapter().isVisible(questScreen.file.selfTeamData)).orElse(false))
+					.toList();
+			var linksButton = new ViewQuestLinksButton(links);
+			add(linksButton);
+			linksButton.setPosAndSize(w - iconSize * 3 - 4, 4, iconSize, iconSize);
+		}
 
 		if (!quest.hasDependencies()) {
 			add(buttonOpenDependencies = new SimpleButton(this, Component.translatable("ftbquests.gui.no_dependencies"), Icon.getIcon(FTBQuestsAPI.MOD_ID + ":textures/gui/arrow_left.png").withTint(borderColor), (_, _) -> { }));
