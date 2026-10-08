@@ -64,12 +64,12 @@ public class QuestButton extends Button implements QuestPositionableButton {
 
 	@Override
 	public boolean isEnabled() {
-		return questScreen.file.canEdit() || quest.isVisible(questScreen.file.selfTeamData);
+		return questScreen.file.canEdit() || theQuestObject().isVisible(questScreen.file.selfTeamData);
 	}
 
 	@Override
 	public boolean shouldDraw() {
-		return questScreen.file.canEdit() || quest.isVisible(questScreen.file.selfTeamData);
+		return isEnabled();
 	}
 
 	@Override
