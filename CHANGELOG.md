@@ -9,12 +9,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 * New task type: Interaction task
   * Completes when player right-clicks a block or entity
-  * Matches can be specficed as block/block tag/blockstate (with properties)/entity/entity tag
+  * Matches can be specified as block, block tag, blockstate (with properties), entity, or entity tag
 * Quest book gui now notes the scroll position per-chapter and returns to that position when the chapter is revisited
-  
+* Added ability to define fallback per-team reward by reward type, e.g. make all item rewards default to per-team
+  * See new "Team Reward by Type" in top-level quest book setting (defaults section)
+  * Can be default, false or true for each known reward type; default uses the existing "Team Reward" fallback
+
 ### Fixed
 * Fixed a bug preventing chapters being marked complete if they contain a Quest Link
 * Fixed issues with running FTB Quests commands from mods like Custom NPCs (non-player command sources even with permission level >= 2)
+* Changed "Team Reward" text in the reward config to "Per-Team Reward"
+  * This makes the intent a little clearer; when true, this is one reward for the whole team
 
 ## [2101.1.36]
 
