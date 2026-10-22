@@ -64,7 +64,7 @@ public class XPLevelsReward extends Reward {
 	}
 
 	@Override
-	public void claim(ServerPlayer player, boolean notify) {
+	public boolean claim(ServerPlayer player, boolean notify) {
 		player.giveExperienceLevels(xpLevels);
 
 		if (notify) {
@@ -72,6 +72,8 @@ public class XPLevelsReward extends Reward {
 					.append(Component.literal("+" + xpLevels).withStyle(ChatFormatting.GREEN));
 			NetworkManager.sendToPlayer(player, new NotifyRewardMessage(id, text, Color4I.empty(), disableRewardScreenBlur));
 		}
+
+		return true;
 	}
 
 	@Override

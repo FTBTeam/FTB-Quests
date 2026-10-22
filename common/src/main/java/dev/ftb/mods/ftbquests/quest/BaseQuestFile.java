@@ -1,5 +1,6 @@
 package dev.ftb.mods.ftbquests.quest;
 
+import com.mojang.serialization.Codec;
 import dev.architectury.utils.Env;
 import dev.ftb.mods.ftblibrary.config.ConfigGroup;
 import dev.ftb.mods.ftblibrary.config.ItemStackConfig;
@@ -11,6 +12,7 @@ import dev.ftb.mods.ftblibrary.util.NetworkHelper;
 import dev.ftb.mods.ftbquests.FTBQuests;
 import dev.ftb.mods.ftbquests.api.QuestFile;
 import dev.ftb.mods.ftbquests.client.FTBQuestsClient;
+import dev.ftb.mods.ftbquests.client.config.EditableTeamRewardByType;
 import dev.ftb.mods.ftbquests.client.config.LocaleConfig;
 import dev.ftb.mods.ftbquests.client.config.VisualPresetsConfig;
 import dev.ftb.mods.ftbquests.events.*;
@@ -46,6 +48,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
@@ -96,6 +99,7 @@ public abstract class BaseQuestFile extends QuestObject implements QuestFile {
 	private int fileVersion;
 
 	private boolean defaultPerTeamReward;
+	private final Map<ResourceLocation, Boolean> defaultPerTeamRewardByType;
 	private boolean defaultTeamConsumeItems;
 	private RewardAutoClaim defaultRewardAutoClaim;
 	private String defaultQuestShape;
@@ -140,6 +144,7 @@ public abstract class BaseQuestFile extends QuestObject implements QuestFile {
 		emergencyItemsCooldown = 300;
 
 		defaultPerTeamReward = false;
+		defaultPerTeamRewardByType = new HashMap<>();
 		defaultTeamConsumeItems = false;
 		defaultRewardAutoClaim = RewardAutoClaim.DISABLED;
 		defaultQuestShape = "circle";
@@ -428,6 +433,9 @@ public abstract class BaseQuestFile extends QuestObject implements QuestFile {
 	public final void writeData(CompoundTag nbt, HolderLookup.Provider provider) {
 		super.writeData(nbt, provider);
 		nbt.putBoolean("default_reward_team", defaultPerTeamReward);
+		if (!defaultPerTeamRewardByType.isEmpty()) {
+			nbt.put("default_reward_team_by_type", Codec.unboundedMap(ResourceLocation.CODEC, Codec.BOOL).encodeStart(NbtOps.INSTANCE, defaultPerTeamRewardByType).getOrThrow());
+		}
 		nbt.putBoolean("default_consume_items", defaultTeamConsumeItems);
 		nbt.putString("default_autoclaim_rewards", defaultRewardAutoClaim.id);
 		nbt.putString("default_quest_shape", defaultQuestShape);
@@ -468,6 +476,8 @@ public abstract class BaseQuestFile extends QuestObject implements QuestFile {
 		super.readData(nbt, provider);
 
 		defaultPerTeamReward = nbt.getBoolean("default_reward_team");
+		defaultPerTeamRewardByType.clear();
+		Codec.unboundedMap(ResourceLocation.CODEC, Codec.BOOL).parse(NbtOps.INSTANCE, nbt.get("default_reward_team_by_type")).result().ifPresent(defaultPerTeamRewardByType::putAll);
 		defaultTeamConsumeItems = nbt.getBoolean("default_consume_items");
 		defaultRewardAutoClaim = RewardAutoClaim.NAME_MAP_NO_DEFAULT.get(nbt.getString("default_autoclaim_rewards"));
 		defaultQuestShape = nbt.getString("default_quest_shape");
@@ -951,6 +961,7 @@ public abstract class BaseQuestFile extends QuestObject implements QuestFile {
 		ItemStack.OPTIONAL_STREAM_CODEC.apply(ByteBufCodecs.list()).encode(buffer, emergencyItems);
 		buffer.writeVarInt(emergencyItemsCooldown);
 		buffer.writeBoolean(defaultPerTeamReward);
+		buffer.writeMap(defaultPerTeamRewardByType, ResourceLocation.STREAM_CODEC, ByteBufCodecs.BOOL);
 		buffer.writeBoolean(defaultTeamConsumeItems);
 		RewardAutoClaim.NAME_MAP_NO_DEFAULT.write(buffer, defaultRewardAutoClaim);
 		buffer.writeUtf(defaultQuestShape, Short.MAX_VALUE);
@@ -979,6 +990,8 @@ public abstract class BaseQuestFile extends QuestObject implements QuestFile {
 		emergencyItems.addAll(ItemStack.OPTIONAL_STREAM_CODEC.apply(ByteBufCodecs.list()).decode(buffer));
 		emergencyItemsCooldown = buffer.readVarInt();
 		defaultPerTeamReward = buffer.readBoolean();
+		defaultPerTeamRewardByType.clear();
+		defaultPerTeamRewardByType.putAll(buffer.readMap(ResourceLocation.STREAM_CODEC, ByteBufCodecs.BOOL));
 		defaultTeamConsumeItems = buffer.readBoolean();
 		defaultRewardAutoClaim = RewardAutoClaim.NAME_MAP_NO_DEFAULT.read(buffer);
 		defaultQuestShape = buffer.readUtf(Short.MAX_VALUE);
@@ -1314,6 +1327,10 @@ public abstract class BaseQuestFile extends QuestObject implements QuestFile {
 
 		ConfigGroup defaultsGroup = config.getOrCreateSubgroup("defaults");
 		defaultsGroup.addBool("reward_team", defaultPerTeamReward, v -> defaultPerTeamReward = v, false);
+		defaultsGroup.add("reward_team_by_type", new EditableTeamRewardByType(), defaultPerTeamRewardByType, v -> {
+            defaultPerTeamRewardByType.clear();
+			defaultPerTeamRewardByType.putAll(v);
+        }, new HashMap<>());
 		defaultsGroup.addBool("consume_items", defaultTeamConsumeItems, v -> defaultTeamConsumeItems = v, false);
 		defaultsGroup.addEnum("autoclaim_rewards", defaultRewardAutoClaim, v -> defaultRewardAutoClaim = v, RewardAutoClaim.NAME_MAP_NO_DEFAULT);
 		defaultsGroup.addEnum("quest_shape", defaultQuestShape, v -> defaultQuestShape = v, QuestShape.idMap);
@@ -1590,8 +1607,8 @@ public abstract class BaseQuestFile extends QuestObject implements QuestFile {
 		return hideExcludedQuests;
 	}
 
-	public boolean isDefaultPerTeamReward() {
-		return defaultPerTeamReward;
+	public boolean isDefaultPerTeamReward(RewardType type) {
+		return defaultPerTeamRewardByType.getOrDefault(type.getTypeId(), defaultPerTeamReward);
 	}
 
 	public boolean isDefaultTeamConsumeItems() {

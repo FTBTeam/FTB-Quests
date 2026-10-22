@@ -10,6 +10,7 @@ import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.chat.Component;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.Objects;
 import java.util.Optional;
@@ -31,6 +32,11 @@ public class QuestLink extends QuestObject implements Movable, Excludable {
 
         shape = "";
         size = 1D;
+    }
+
+    @Override
+    public long getEffectiveId() {
+        return getQuest().map(QuestObjectBase::getId).orElse(super.getEffectiveId());
     }
 
     @Override
@@ -64,8 +70,23 @@ public class QuestLink extends QuestObject implements Movable, Excludable {
     }
 
     @Override
+    public @Nullable Chapter getQuestChapter() {
+        return chapter;
+    }
+
+    @Override
     public int getRelativeProgressFromChildren(TeamData data) {
         return 0;
+    }
+
+    @Override
+    public boolean isOptionalForProgression(TeamData teamData) {
+        return getQuest().map(q -> q.isOptionalForProgression(teamData)).orElse(false);
+    }
+
+    @Override
+    public boolean isCompletedRaw(TeamData data) {
+        return getQuest().map(q -> q.isCompletedRaw(data)).orElse(false);
     }
 
     public Optional<Quest> getQuest() {
@@ -88,6 +109,7 @@ public class QuestLink extends QuestObject implements Movable, Excludable {
     public void deleteSelf() {
         super.deleteSelf();
 
+        getQuest().ifPresent(Quest::clearCachedData);
         chapter.removeQuestLink(this);
     }
 

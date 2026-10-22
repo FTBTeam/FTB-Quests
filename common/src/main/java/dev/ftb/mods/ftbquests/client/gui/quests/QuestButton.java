@@ -64,12 +64,12 @@ public class QuestButton extends Button implements QuestPositionableButton {
 
 	@Override
 	public boolean isEnabled() {
-		return questScreen.file.canEdit() || quest.isVisible(questScreen.file.selfTeamData);
+		return questScreen.file.canEdit() || theQuestObject().isVisible(questScreen.file.selfTeamData);
 	}
 
 	@Override
 	public boolean shouldDraw() {
-		return questScreen.file.canEdit() || quest.isVisible(questScreen.file.selfTeamData);
+		return isEnabled();
 	}
 
 	@Override
@@ -185,7 +185,7 @@ public class QuestButton extends Button implements QuestPositionableButton {
 			questScreen.movingObjects = false;
 
 			if (questScreen.getViewedQuest() != quest) {
-				questScreen.viewQuest(quest);
+				questScreen.open(theQuestObject(), false);
 			} else {
 				questScreen.closeQuest();
 			}

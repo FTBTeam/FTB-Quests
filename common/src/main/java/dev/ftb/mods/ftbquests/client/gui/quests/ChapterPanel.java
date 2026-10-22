@@ -463,11 +463,9 @@ public class ChapterPanel extends Panel {
 								Icons.INFO, Component.literal(chapter.getTitle().getString())));
 					} else if (chapterPanel.questScreen.selectedChapter != chapter) {
 						chapterPanel.questScreen.open(chapter, false);
-						chapter.getAutofocus().ifPresent(chapterPanel.questScreen::scrollTo);
 					}
 				} else if (chapterPanel.questScreen.selectedChapter != chapter) {
 					chapterPanel.questScreen.open(chapter, false);
-					chapter.getAutofocus().ifPresent(chapterPanel.questScreen::scrollTo);
 				}
 			}
 

@@ -67,6 +67,14 @@ public abstract class QuestObjectBase implements Comparable<QuestObjectBase> {
 		return id;
 	}
 
+	/**
+	 * In most cases, just the quest ID, but for quest links, the linked quest ID.
+	 * @return the effective ID, used for progression checking
+	 */
+	public long getEffectiveId() {
+		return getId();
+	}
+
 	public void invalidate() {
 		invalid = true;
 	}

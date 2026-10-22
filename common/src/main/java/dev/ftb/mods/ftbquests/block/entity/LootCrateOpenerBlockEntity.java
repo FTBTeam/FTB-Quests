@@ -1,5 +1,6 @@
 package dev.ftb.mods.ftbquests.block.entity;
 
+import dev.ftb.mods.ftbquests.events.OpenLootCrateEvent;
 import dev.ftb.mods.ftbquests.item.LootCrateItem;
 import dev.ftb.mods.ftbquests.quest.loot.LootCrate;
 import dev.ftb.mods.ftbquests.quest.loot.WeightedReward;
@@ -132,8 +133,13 @@ public class LootCrateOpenerBlockEntity extends BlockEntity {
         }
 
         ServerPlayer player = owner == null ? null : level.getServer().getPlayerList().getPlayer(owner);
-        boolean update = false;
 
+        var result = OpenLootCrateEvent.EVENT.invoker().onOpenLootCrate(player, owner, level, crate, this, simulate);
+        if (result.isFalse()) {
+            return stack;
+        }
+
+        boolean update = false;
         int nAttempts = stack.getCount();
         for (WeightedReward wr : crate.getTable().generateWeightedRandomRewards(level.getRandom(), nAttempts, true)) {
             List<ItemStack> stacks = new ArrayList<>();

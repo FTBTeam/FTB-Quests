@@ -4,6 +4,7 @@ import dev.architectury.platform.Platform;
 import dev.ftb.mods.ftbquests.FTBQuests;
 import dev.ftb.mods.ftbquests.client.ClientQuestFile;
 import dev.ftb.mods.ftbquests.client.gui.RewardNotificationsScreen;
+import dev.ftb.mods.ftbquests.events.OpenLootCrateEvent;
 import dev.ftb.mods.ftbquests.quest.loot.LootCrate;
 import dev.ftb.mods.ftbquests.quest.loot.WeightedReward;
 import dev.ftb.mods.ftbquests.registry.ModDataComponents;
@@ -61,6 +62,16 @@ public class LootCrateItem extends Item {
 		}
 
 		int nItems = player.isCrouching() ? stack.getCount() : 1;
+
+		var result = OpenLootCrateEvent.EVENT.invoker().onOpenLootCrate(player, player.getUUID(), player.level(), crate, null, false);
+		if (result.isFalse()) {
+			result.object().ifPresent(msg -> {
+				if (world.isClientSide) {
+					player.displayClientMessage(msg, false);
+				}
+			});
+			return new InteractionResultHolder<>(InteractionResult.FAIL, stack);
+		}
 
 		if (!world.isClientSide) {
 			for (WeightedReward wr : crate.getTable().generateWeightedRandomRewards(player.getRandom(), nItems, true)) {

@@ -19,10 +19,8 @@ public class PermissionsHelper {
      */
     public static boolean hasEditorPermission(CommandSourceStack source) {
         // has GM perm level or better, or has "ftbquests.editor" FTB Ranks node
-        return source.isPlayer() && (
-                source.hasPermission(Commands.LEVEL_GAMEMASTERS)
-                        || PermissionHelper.INSTANCE.getProvider().getBooleanPermission(source.getPlayer(), EDITOR_PERM, false)
-        );
+        return source.hasPermission(Commands.LEVEL_GAMEMASTERS) ||
+                source.isPlayer() && PermissionHelper.INSTANCE.getProvider().getBooleanPermission(source.getPlayer(), EDITOR_PERM, false);
     }
 
     /**

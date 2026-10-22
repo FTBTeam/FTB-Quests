@@ -15,7 +15,8 @@ public class CustomReward extends Reward {
 	}
 
 	@Override
-	public void claim(ServerPlayer player, boolean notify) {
+	public boolean claim(ServerPlayer player, boolean notify) {
 		CustomRewardEvent.EVENT.invoker().act(new CustomRewardEvent(this, player, notify));
+		return true;
 	}
 }

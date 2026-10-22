@@ -35,5 +35,4 @@ public class VisualPresetsConfig extends ConfigValue<VisualPresets> {
     public Color4I getColor(@Nullable VisualPresets v) {
         return ListConfig.COLOR;
     }
-
 }

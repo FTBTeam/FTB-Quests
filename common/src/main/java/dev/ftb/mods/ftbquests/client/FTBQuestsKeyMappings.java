@@ -1,12 +1,12 @@
 package dev.ftb.mods.ftbquests.client;
 
+import com.mojang.blaze3d.platform.InputConstants;
 import dev.ftb.mods.ftblibrary.util.client.ClientUtils;
 import dev.ftb.mods.ftblibrary.util.input.Input;
 import dev.ftb.mods.ftblibrary.util.input.KeyConflict;
 import dev.ftb.mods.ftblibrary.util.input.KeyMappingConfig;
 import dev.ftb.mods.ftblibrary.util.input.KeyModifier;
 import dev.ftb.mods.ftbquests.api.FTBQuestsAPI;
-import com.mojang.blaze3d.platform.InputConstants;
 import net.minecraft.client.KeyMapping;
 
 import java.util.ArrayList;

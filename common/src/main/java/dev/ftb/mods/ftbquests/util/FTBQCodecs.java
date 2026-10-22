@@ -1,19 +1,11 @@
 package dev.ftb.mods.ftbquests.util;
 
 import com.mojang.datafixers.util.Pair;
-import com.mojang.serialization.Codec;
-import com.mojang.serialization.DataResult;
-import dev.ftb.mods.ftbquests.quest.QuestObjectBase;
 import io.netty.buffer.ByteBuf;
-import it.unimi.dsi.fastutil.longs.*;
-import it.unimi.dsi.fastutil.objects.Object2LongOpenHashMap;
-import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 
 import java.util.List;
-import java.util.Map;
-import java.util.function.Function;
 
 public class FTBQCodecs {
     public static final StreamCodec<ByteBuf, List<Long>> LONG_LIST_STREAM_CODEC
