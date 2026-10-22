@@ -31,3 +31,6 @@ run-gametest
 .architectury-transformer/
 **/extra-mods-*
 .DS_Store
+
+# FTB Library/Teams 26.2 jars (copied from TCDev10/modpack Modpack/mods)
+libs/*.jar

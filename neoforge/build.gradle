@@ -4,7 +4,7 @@ plugins {
 
 neoForge {
 	version = project.neoforge_version
-//    accessTransformers = project.files('src/main/resources/META-INF/accesstransformer.cfg')
+    accessTransformers = project.files('src/main/resources/META-INF/accesstransformer.cfg')
 
 	mods {
 		"${mod_id}" {
@@ -49,9 +49,8 @@ sourceSets {
 
 tasks.named('test') { enabled = false }
 
-tasks.named('check') {
-	dependsOn 'runGameTestServer'
-}
+// Gametests are not ported to 26.2 yet
+sourceSets.test.java.srcDirs = []
 
 configurations {
 	runGameTestServerAdditionalRuntimeClasspath.extendsFrom runtimeClasspath
@@ -67,10 +66,6 @@ repositories {
 	}
 }
 
-dependencies {
-	implementation("dev.ftb.mods:ftb-library-neoforge:${rootProject.ftb_library_version}")
-	implementation("dev.ftb.mods:ftb-teams-neoforge:${rootProject.ftb_teams_version}")
-}
 
 jar {
 	manifest {

@@ -1,12 +1,10 @@
 pluginManagement {
 	repositories {
 		gradlePluginPortal()
-
-		maven { url = 'https://maven.fabricmc.net' }
 		maven { url = 'https://maven.neoforged.net/releases' }
 	}
 }
 
-include "common", "fabric", "neoforge"
+include "common", "neoforge"
 
-rootProject.name = 'FTB-Quests-26.1'
+rootProject.name = 'FTB-Quests-26.2'

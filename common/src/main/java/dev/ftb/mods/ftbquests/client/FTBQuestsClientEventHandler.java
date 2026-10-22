@@ -116,7 +116,7 @@ public class FTBQuestsClientEventHandler {
             // also save the cursor position and restore it after, since closing the screen will reset to the centre
             double mx = Minecraft.getInstance().mouseHandler.xpos();
             double my = Minecraft.getInstance().mouseHandler.ypos();
-            Minecraft.getInstance().setScreen(null);
+            Minecraft.getInstance().gui.setScreen(null);
             if (ClientQuestFile.openGui() != null) {
                 InputConstants.grabOrReleaseMouse(Minecraft.getInstance().getWindow(), GLFW.GLFW_CURSOR_NORMAL, mx, my);
             }

@@ -331,7 +331,7 @@ public abstract class BaseBarrierBlockEntity extends EditableBlockEntity {
 
 		public void teleportPlayer(@Nullable ServerPlayer player) {
             if (player != null && enabled) {
-                Vec3 dest = dest().getBottomCenter();
+                Vec3 dest = Vec3.atBottomCenterOf(dest());
                 Level destLevel = Objects.requireNonNullElse(getLevel(player.level().getServer()), player.level());
                 if (destLevel instanceof ServerLevel serverLevel) {
                     // TODO: @since 21.11: Relative.ALL might not be correct here.

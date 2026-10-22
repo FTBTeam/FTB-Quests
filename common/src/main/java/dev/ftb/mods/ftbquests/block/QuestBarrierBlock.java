@@ -62,7 +62,7 @@ public class QuestBarrierBlock extends BaseEntityBlock {
 				.isSuffocating((_, _, _) -> false)
 				.strength(-1, 6000000F)
 				.lightLevel(_ -> 3)
-				.emissiveRendering((_, _, _) -> true);
+				.emissiveRendering(_ -> true);
 	}
 
 	public QuestBarrierBlock(Properties props) {
