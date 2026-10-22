@@ -731,7 +731,6 @@ public class QuestScreen extends BaseScreen {
 		int index = visibleChapters.indexOf(selectedChapter) + offset;
 		if (selectedChapter != null && visibleChapters.size() > 1) {
 			selectChapter(visibleChapters.get(MathUtils.mod(index, visibleChapters.size())));
-//			selectedChapter.getAutofocus().ifPresent(this::scrollTo);
 		}
 		return true;
 	}
@@ -747,13 +746,11 @@ public class QuestScreen extends BaseScreen {
 					selectChapter(quest.getChapter());
 					questPanel.scrollTo(quest.getX(), quest.getY());
 					open(quest, true);
-//					viewQuest(quest);
 				} else if (c.getValue() instanceof QuestLink link) {
 					zoom = 20;
 					selectChapter(link.getChapter());
 					questPanel.scrollTo(link.getX(), link.getY());
 					open(link, true);
-//					link.getQuest().ifPresent(this::viewQuest);
 				}
 			}
 			QuestScreen.this.openGui();

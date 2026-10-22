@@ -3,7 +3,8 @@ package dev.ftb.mods.ftbquests.quest.theme;
 import dev.architectury.platform.Platform;
 import dev.ftb.mods.ftbquests.api.FTBQuestsAPI;
 import dev.ftb.mods.ftbquests.quest.QuestShape;
-import dev.ftb.mods.ftbquests.quest.theme.selector.*;
+import dev.ftb.mods.ftbquests.quest.theme.selector.AndSelector;
+import dev.ftb.mods.ftbquests.quest.theme.selector.ThemeSelector;
 import dev.ftb.mods.ftbquests.util.FileUtils;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.Resource;
@@ -13,7 +14,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.InputStream;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.function.Predicate;
 import java.util.regex.Pattern;
 
