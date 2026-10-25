@@ -1,5 +1,6 @@
 package dev.ftb.mods.ftbquests.client.config;
 
+import net.minecraft.world.entity.EntityTypes;
 import dev.ftb.mods.ftblibrary.client.config.ConfigCallback;
 import dev.ftb.mods.ftblibrary.client.config.editable.EditableEntityFace;
 import dev.ftb.mods.ftblibrary.client.config.editable.EditableImageResource;
@@ -92,7 +93,7 @@ public class EditableIconItemStack extends EditableItemStack {
 				new ContextMenuItem(Component.translatable("ftbquests.gui.icon_menu.image"),
 						Icons.ART, b -> openImageSelector(callback)),
 				new ContextMenuItem(Component.translatable("ftbquests.gui.icon_menu.entity"),
-						EntityIconLoader.getIcon(EntityType.PIG), b -> openEntitySelector(callback))
+						EntityIconLoader.getIcon(EntityTypes.PIG), b -> openEntitySelector(callback))
 		);
 	}
 }

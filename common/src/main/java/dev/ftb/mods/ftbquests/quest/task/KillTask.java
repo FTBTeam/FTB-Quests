@@ -1,5 +1,6 @@
 package dev.ftb.mods.ftbquests.quest.task;
 
+import net.minecraft.world.entity.EntityTypes;
 import de.marhali.json5.Json5Object;
 import dev.ftb.mods.ftblibrary.client.config.EditableConfigGroup;
 import dev.ftb.mods.ftblibrary.client.util.ClientUtils;
@@ -148,7 +149,7 @@ public class KillTask extends Task {
 			}
 
 			var entityType = entityTypeOpt.get().value();
-			if (entityType.equals(EntityType.PLAYER)) {
+			if (entityType.equals(EntityTypes.PLAYER)) {
 				return Icons.PLAYER;
 			}
 
