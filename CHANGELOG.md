@@ -4,6 +4,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2101.1.38]
+
+### Fixed
+* Fixed client crash during quest shape reload
+  * Appears to be triggered by badly behaved mixins from other mods; added some defensive coding for this
+
 ## [2101.1.37]
 
 ### Added
