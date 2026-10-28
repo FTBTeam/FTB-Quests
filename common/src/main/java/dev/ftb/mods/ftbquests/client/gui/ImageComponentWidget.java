@@ -4,6 +4,8 @@ import dev.ftb.mods.ftblibrary.config.ConfigCallback;
 import dev.ftb.mods.ftblibrary.config.ConfigGroup;
 import dev.ftb.mods.ftblibrary.config.ImageResourceConfig;
 import dev.ftb.mods.ftblibrary.icon.Icon;
+import dev.ftb.mods.ftblibrary.icon.WebPIcon;
+import dev.ftb.mods.ftblibrary.ui.AnimatedImageWidget;
 import dev.ftb.mods.ftblibrary.ui.Panel;
 import dev.ftb.mods.ftblibrary.ui.Theme;
 import dev.ftb.mods.ftblibrary.ui.Widget;
@@ -17,12 +19,16 @@ import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.HoverEvent;
 import net.minecraft.network.chat.MutableComponent;
+import org.jetbrains.annotations.Nullable;
 
 public class ImageComponentWidget extends Widget {
 	private final ImageComponent component;
 	private final MutableComponent mutableComponent;
 	private final ViewQuestPanel viewQuestPanel;
 	private final int index;
+	// handles playback and the play/pause overlay for animated (WebP) images; null for all other image types
+	private @Nullable AnimatedImageWidget animated;
+	private @Nullable Icon animatedFor;
 
 	public ImageComponentWidget(ViewQuestPanel viewQuestPanel, Panel panel, ImageComponent component, int index) {
 		super(panel);
@@ -42,7 +48,30 @@ public class ImageComponentWidget extends Widget {
 	}
 
 	public void draw(GuiGraphics graphics, Theme theme, int x, int y, int w, int h) {
-		component.getImage().draw(graphics, x, y, w, h);
+		Icon image = component.getImage();
+
+		if (image instanceof WebPIcon webp) {
+			if (animated == null || animatedFor != image) {
+				if (animated != null) {
+					animated.release();
+				}
+				animated = new AnimatedImageWidget(parent, webp);
+				animatedFor = image;
+			}
+			animated.setPosAndSize(posX, posY, width, height);
+			animated.updateMouseOver(getMouseX(), getMouseY());
+			animated.draw(graphics, theme, x, y, w, h);
+		} else {
+			image.draw(graphics, x, y, w, h);
+		}
+	}
+
+	@Override
+	public void onClosed() {
+		if (animated != null) {
+			animated.release();
+		}
+		super.onClosed();
 	}
 
 	public ImageComponent getComponent() {
@@ -51,7 +80,7 @@ public class ImageComponentWidget extends Widget {
 
 	@Override
 	public boolean mouseDoubleClicked(MouseButton button) {
-		if (isMouseOver() && viewQuestPanel.canEdit()) {
+		if (isMouseOver() && viewQuestPanel.canEdit() && (animated == null || !animated.isMouseOverControls())) {
 			viewQuestPanel.editDescLine(this, index, false, component);
 			return true;
 		}
@@ -62,6 +91,11 @@ public class ImageComponentWidget extends Widget {
 	@Override
 	public boolean mousePressed(MouseButton button) {
 		if (isMouseOver()) {
+			// clicks on the animation's play/pause/restart overlay are handled there and never reach the click action
+			if (animated != null && animated.mousePressed(button)) {
+				return true;
+			}
+
 			if (viewQuestPanel.canEdit() && button.isRight() || Screen.hasAltDown() && button.isLeft()) {
 				viewQuestPanel.editDescLine(this, index, button.isRight(), component);
 				return true;
