@@ -205,7 +205,7 @@ public class QuestPanel extends Panel {
 		}
 
 		double mt = -(System.currentTimeMillis() * 0.001D);
-		float lineWidth = (float) (questScreen.getZoom() * ThemeProperties.DEPENDENCY_LINE_THICKNESS.get(questScreen.selectedChapter) / 4D * 3D);
+		float lineWidth = Math.max(0.5f, (float) (questScreen.getZoom() * ThemeProperties.DEPENDENCY_LINE_THICKNESS.get(questScreen.selectedChapter) / 4D * 3D));
 
 		// pass 1: render connections for all visible quests
 		float mu = (float) ((mt * ThemeProperties.DEPENDENCY_LINE_UNSELECTED_SPEED.get(questScreen.selectedChapter)) % 1D);
@@ -292,14 +292,15 @@ public class QuestPanel extends Panel {
 			poseStack.pushMatrix();
 			poseStack.translate((float) p1.x(), (float) p1.y());
 			poseStack.rotate((float) Math.atan2(p2.y() - p1.y(), p2.x() - p1.x()));
+			poseStack.translate(0f, -s);
 
 			var texture = Minecraft.getInstance().getTextureManager().getTexture(icon.texture);
 			GuiElementRenderState state = new BlitRenderState(
 					RenderPipelines.GUI_TEXTURED,
 					TextureSetup.singleTexture(texture.getTextureView(), texture.getSampler()),
 					new Matrix3x2f(poseStack),
-					0, (int) -s,
-					(int) len, (int) s,
+					0, 0,
+					(int) len, (int) (s * 2),
 					len / s / 2F + mu, mu,
 					0f, 1f,
 					ARGB.color(a, r, g, b),
