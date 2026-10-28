@@ -5,11 +5,13 @@ import dev.ftb.mods.ftblibrary.client.config.EditableConfigGroup;
 import dev.ftb.mods.ftblibrary.client.config.editable.EditableImageResource;
 import dev.ftb.mods.ftblibrary.client.gui.input.MouseButton;
 import dev.ftb.mods.ftblibrary.client.gui.theme.Theme;
+import dev.ftb.mods.ftblibrary.client.gui.widget.AnimatedImageWidget;
 import dev.ftb.mods.ftblibrary.client.gui.widget.Panel;
 import dev.ftb.mods.ftblibrary.client.gui.widget.Widget;
 import dev.ftb.mods.ftblibrary.client.icon.IconHelper;
 import dev.ftb.mods.ftblibrary.client.util.ImageComponent;
 import dev.ftb.mods.ftblibrary.icon.Icon;
+import dev.ftb.mods.ftblibrary.icon.WebPIcon;
 import dev.ftb.mods.ftblibrary.util.TooltipList;
 import dev.ftb.mods.ftbquests.api.FTBQuestsAPI;
 import dev.ftb.mods.ftbquests.client.gui.quests.ViewQuestPanel;
@@ -19,12 +21,16 @@ import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.HoverEvent;
 import net.minecraft.network.chat.MutableComponent;
+import org.jspecify.annotations.Nullable;
 
 public class ImageComponentWidget extends Widget {
 	private final ImageComponent component;
 	private final MutableComponent mutableComponent;
 	private final ViewQuestPanel viewQuestPanel;
 	private final int index;
+	// handles playback and the play/pause overlay for animated (WebP) images; null for all other image types
+	private @Nullable AnimatedImageWidget animated;
+	private @Nullable Icon<?> animatedFor;
 
 	public ImageComponentWidget(ViewQuestPanel viewQuestPanel, Panel panel, ImageComponent component, int index) {
 		super(panel);
@@ -44,7 +50,30 @@ public class ImageComponentWidget extends Widget {
 	}
 
 	public void draw(GuiGraphicsExtractor graphics, Theme theme, int x, int y, int w, int h) {
-		IconHelper.renderIcon(component.getImage(), graphics, x, y, w, h);
+		Icon<?> image = component.getImage();
+
+		if (image instanceof WebPIcon webp) {
+			if (animated == null || animatedFor != image) {
+				if (animated != null) {
+					animated.release();
+				}
+				animated = new AnimatedImageWidget(parent, webp);
+				animatedFor = image;
+			}
+			animated.setPosAndSize(posX, posY, width, height);
+			animated.updateMouseOver(getMouseX(), getMouseY());
+			animated.draw(graphics, theme, x, y, w, h);
+		} else {
+			IconHelper.renderIcon(image, graphics, x, y, w, h);
+		}
+	}
+
+	@Override
+	public void onClosed() {
+		if (animated != null) {
+			animated.release();
+		}
+		super.onClosed();
 	}
 
 	public ImageComponent getComponent() {
@@ -53,7 +82,7 @@ public class ImageComponentWidget extends Widget {
 
 	@Override
 	public boolean mouseDoubleClicked(MouseButton button) {
-		if (isMouseOver() && viewQuestPanel.canEdit()) {
+		if (isMouseOver() && viewQuestPanel.canEdit() && (animated == null || !animated.isMouseOverControls())) {
 			viewQuestPanel.editDescLine(this, index, false, component);
 			return true;
 		}
@@ -64,6 +93,11 @@ public class ImageComponentWidget extends Widget {
 	@Override
 	public boolean mousePressed(MouseButton button) {
         if (isMouseOver()) {
+            // clicks on the animation's play/pause/restart overlay are handled there and never reach the click action
+            if (animated != null && animated.mousePressed(button)) {
+                return true;
+            }
+
             if (viewQuestPanel.canEdit() && button.isRight() || Minecraft.getInstance().hasAltDown() && button.isLeft()) {
                 viewQuestPanel.editDescLine(this, index, button.isRight(), component);
                 return true;
