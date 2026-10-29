@@ -378,7 +378,7 @@ public class QuestPanel extends Panel {
 					len / s / 2F + mu, mu,
 					0f, 1f,
 					ARGB.color(a, r, g, b),
-					null  // TODO is a null scissor area OK here?
+					((GuiGraphicsMixin) graphics).getScissorStack().peek()
 			);
 			((GuiGraphicsMixin) graphics).getGuiRenderState().addGuiElement(state);
 
