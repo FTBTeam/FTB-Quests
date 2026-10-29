@@ -228,6 +228,17 @@ public final class Quest extends QuestObject implements Movable, Excludable {
 		this.size = size;
 	}
 
+	@Override
+	public boolean isResizable() {
+		// a named visual preset overrides the quest's own size, so resizing would have no visible effect
+		return getVisualPreset() instanceof FallbackVisualPreset;
+	}
+
+	@Override
+	public void setDimensions(double width, double height) {
+		setSize(Mth.clamp(width, getMinSize(), getMaxSize()));
+	}
+
 	public boolean isOptional() {
 		return optional;
 	}

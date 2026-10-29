@@ -219,6 +219,16 @@ public class QuestLink extends QuestObject implements Movable, Excludable {
     }
 
     @Override
+    public boolean isResizable() {
+        return true;
+    }
+
+    @Override
+    public void setDimensions(double width, double height) {
+        size = Math.clamp(width, getMinSize(), getMaxSize());
+    }
+
+    @Override
     public double getWidth() {
         return size;
     }

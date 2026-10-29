@@ -146,7 +146,7 @@ public class QuestButton extends Button implements QuestPositionableButton {
 
 	@Override
 	public void onClicked(MouseButton button) {
-		if (questScreen.questPanel.bezierController.isActive()) {
+		if (questScreen.questPanel.isInteractiveEditActive()) {
 			return;
 		}
 
@@ -161,8 +161,12 @@ public class QuestButton extends Button implements QuestPositionableButton {
 				addMultiselectionContextMenuItems(contextMenu, selected);
 				getGui().openContextMenu(contextMenu);
 			} else {
-				ContextMenuBuilder.create(theQuestObject(), questScreen, this)
-						.withDeletionFocus(moveAndDeleteFocus())
+				ContextMenuBuilder builder = ContextMenuBuilder.create(theQuestObject(), questScreen, this)
+						.withDeletionFocus(moveAndDeleteFocus());
+				if (moveAndDeleteFocus().isResizable()) {
+					builder.insertAtTop(List.of(questScreen.questPanel.createResizeMenuItem(moveAndDeleteFocus(), theQuestObject())));
+				}
+				builder
 						.openContextMenu(getGui());
 			}
 		} else if (button.isLeft()) {

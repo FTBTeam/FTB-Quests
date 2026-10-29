@@ -335,6 +335,37 @@ public final class ChapterImage extends QuestObjectBase implements Movable {
 	}
 
 	@Override
+	public boolean isRotatable() {
+		return true;
+	}
+
+	@Override
+	public void setRotation(double degrees) {
+		rotation = Mth.clamp(degrees, -180D, 180D);
+	}
+
+	@Override
+	public boolean isResizable() {
+		return true;
+	}
+
+	@Override
+	public boolean isFreeformResizable() {
+		return true;
+	}
+
+	@Override
+	public double getMaxSize() {
+		return Double.POSITIVE_INFINITY;
+	}
+
+	@Override
+	public void setDimensions(double w, double h) {
+		width = Math.max(getMinSize(), w);
+		height = Math.max(getMinSize(), h);
+	}
+
+	@Override
 	public double getWidth() {
 		return width;
 	}
