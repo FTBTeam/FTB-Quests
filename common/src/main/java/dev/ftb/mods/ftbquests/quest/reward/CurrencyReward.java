@@ -6,9 +6,7 @@ import dev.ftb.mods.ftblibrary.icon.Icons;
 import dev.ftb.mods.ftblibrary.integration.currency.CurrencyHelper;
 import dev.ftb.mods.ftblibrary.integration.currency.CurrencyProvider;
 import dev.ftb.mods.ftblibrary.json5.Json5Util;
-import dev.ftb.mods.ftblibrary.platform.network.Networking;
 import dev.ftb.mods.ftblibrary.platform.network.Server2PlayNetworking;
-import dev.ftb.mods.ftblibrary.util.NetworkHelper;
 import dev.ftb.mods.ftbquests.net.NotifyRewardMessage;
 import dev.ftb.mods.ftbquests.quest.Quest;
 import net.minecraft.ChatFormatting;
@@ -18,7 +16,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 
 public class CurrencyReward extends Reward {
-    private int coinAmount;
+    private long coinAmount;
 
     public CurrencyReward(long id, Quest q) {
         this(id, q, 1);
@@ -29,7 +27,7 @@ public class CurrencyReward extends Reward {
         this.coinAmount = coinAmount;
     }
 
-    public int getCoinAmount() {
+    public long getCoinAmount() {
         return coinAmount;
     }
 
@@ -48,13 +46,13 @@ public class CurrencyReward extends Reward {
     @Override
     public void readData(Json5Object json, HolderLookup.Provider provider) {
         super.readData(json, provider);
-        coinAmount = Math.max(Json5Util.getInt(json,"amount").orElse(0), 1);
+        coinAmount = Math.max(Json5Util.getLong(json,"amount").orElse(0L), 1L);
     }
 
     @Override
     public void writeNetData(RegistryFriendlyByteBuf buffer) {
         super.writeNetData(buffer);
-        buffer.writeVarInt(coinAmount);
+        buffer.writeVarLong(coinAmount);
     }
 
     @Override
@@ -72,7 +70,7 @@ public class CurrencyReward extends Reward {
     public void fillConfigGroup(EditableConfigGroup config) {
         super.fillConfigGroup(config);
 
-        config.addInt("coins", coinAmount, v -> coinAmount = v, 100, 1, Integer.MAX_VALUE)
+        config.addLong("coins", coinAmount, v -> coinAmount = v, 100, 1, Integer.MAX_VALUE)
                 .setNameKey("ftbquests.reward.ftbquests.currency");
     }
 
@@ -86,7 +84,7 @@ public class CurrencyReward extends Reward {
         provider.giveCurrency(player, coinAmount);
 
         if (notify) {
-            Component msg = Component.literal(Integer.toString(coinAmount)).append(" ").append(provider.coinName(coinAmount > 1));
+            Component msg = Component.literal(String.format("%,d", coinAmount)).append(" ").append(provider.coinName(coinAmount > 1));
             Server2PlayNetworking.send(player, new NotifyRewardMessage(id, msg, Icons.MONEY, disableRewardScreenBlur));
         }
 
