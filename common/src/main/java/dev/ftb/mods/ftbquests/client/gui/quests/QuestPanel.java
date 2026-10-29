@@ -16,7 +16,6 @@ import dev.ftb.mods.ftblibrary.icon.Icons;
 import dev.ftb.mods.ftblibrary.icon.ImageIcon;
 import dev.ftb.mods.ftblibrary.math.MathUtils;
 import dev.ftb.mods.ftblibrary.platform.network.Play2ServerNetworking;
-import dev.ftb.mods.ftblibrary.util.TooltipList;
 import dev.ftb.mods.ftblibrary.util.Vec2d;
 import dev.ftb.mods.ftbquests.client.FTBQuestsClient;
 import dev.ftb.mods.ftbquests.client.FTBQuestsClientConfig;
@@ -237,27 +236,12 @@ public class QuestPanel extends Panel {
 		}
 	}
 
-	ContextMenuItem createRotateMenuItem(Movable movable, QuestObjectBase object) {
-		return new ContextMenuItem(Component.translatable("ftbquests.gui.rotate"), Icons.REFRESH,
-				_ -> rotationController.activate(movable, object)) {
-			@Override
-			public void addMouseOverText(TooltipList list) {
-				list.add(Component.translatable("ftbquests.gui.rotate_tooltip").withStyle(ChatFormatting.DARK_GRAY));
-			}
-		};
+	ContextMenuItem createRotateMenuItem(Movable movable) {
+		return new ContextMenuItem(Component.translatable("ftbquests.gui.rotate"), Icons.REFRESH, _ -> rotationController.activate(movable));
 	}
 
-	ContextMenuItem createResizeMenuItem(Movable movable, QuestObjectBase object) {
-		return new ContextMenuItem(Component.translatable("ftbquests.gui.resize"), Icons.ART,
-				_ -> resizeController.activate(movable, object)) {
-			@Override
-			public void addMouseOverText(TooltipList list) {
-				list.add(Component.translatable("ftbquests.gui.resize_tooltip").withStyle(ChatFormatting.DARK_GRAY));
-				if (movable.isFreeformResizable()) {
-					list.add(Component.translatable("ftbquests.gui.resize_tooltip_shift").withStyle(ChatFormatting.DARK_GRAY));
-				}
-			}
-		};
+	ContextMenuItem createResizeMenuItem(Movable movable) {
+		return new ContextMenuItem(Component.translatable("ftbquests.gui.resize"), Icons.RESIZE, _ -> resizeController.activate(movable));
 	}
 
 	@Override
@@ -682,8 +666,8 @@ public class QuestPanel extends Panel {
 	}
 
 	boolean isDraggingSelectionBox() {
-        return questScreen.file.canEdit() && questScreen.grabbed != null
-                && (questScreen.grabbed.isMiddle() || questScreen.grabbed.isLeft() && Minecraft.getInstance().hasAltDown());
+		return questScreen.file.canEdit() && questScreen.grabbed != null
+				&& (questScreen.grabbed.isMiddle() || questScreen.grabbed.isLeft() && Minecraft.getInstance().hasAltDown());
 	}
 
 	@Override
@@ -770,6 +754,23 @@ public class QuestPanel extends Panel {
 					Component.literal("\"").append(quest.getTitle()).append("\""),
 					Component.literal(QuestObjectBase.getCodeString(quest.id)).withStyle(ChatFormatting.DARK_GRAY)
 			);
+		}
+	}
+
+	private void drawHelpPanel(Theme theme, GuiGraphicsExtractor graphics, List<Component> lines) {
+		int textW = 0;
+		for (Component c : lines) {
+			textW = Math.max(textW, theme.getStringWidth(c));
+		}
+		int lineH = 10;
+		int boxW = textW + 8;
+		int boxH = lines.size() * lineH + 6;
+		int bx = getX() + getWidth() - boxW - 6;
+		int by = getY() + 6;
+
+		IconHelper.renderIcon(Color4I.BLACK.withAlpha(150), graphics, bx, by, boxW, boxH);
+		for (int i = 0; i < lines.size(); i++) {
+			graphics.text(theme.getFont(), lines.get(i), bx + 4, by + 4 + i * lineH, 0xFFFFFFFF);
 		}
 	}
 
@@ -981,9 +982,9 @@ public class QuestPanel extends Panel {
 			return data != null;
 		}
 
-		public void activate(Movable movable, QuestObjectBase object) {
+		public void activate(Movable movable) {
 			if (data == null && movable.isResizable()) {
-				data = new Data(movable, object, movable.getWidth(), movable.getHeight());
+				data = new Data(movable, movable.getWidth(), movable.getHeight());
 				boundsFrozen = true;
 				handle.active = true;
 				repositionHandle();
@@ -1000,7 +1001,10 @@ public class QuestPanel extends Panel {
 			handle.dragging = false;
 			if (accept) {
 				if (d.movable.getWidth() != d.savedW || d.movable.getHeight() != d.savedH) {
-					Play2ServerNetworking.send(EditObjectMessage.forQuestObject(d.object));
+					var qo = questScreen.file.getBase(d.movable.getMovableID());
+					if (qo != null) {
+						Play2ServerNetworking.send(EditObjectMessage.forQuestObject(qo));
+					}
 				}
 			} else {
 				d.movable.setDimensions(d.savedW, d.savedH);
@@ -1028,40 +1032,20 @@ public class QuestPanel extends Panel {
 			return s.contains(".") ? s.replaceAll("0+$", "").replaceAll("\\.$", "") : s;
 		}
 
-		/**
-		 * Show the current size and what the modifier keys do, top-right of the quest panel
-		 **/
-		public void drawHelp(GuiGraphicsExtractor graphics, Theme theme, int x, int y, int w) {
-			if (data == null) {
-				return;
-			}
-			Movable m = data.movable;
-			boolean freeform = m.isFreeformResizable();
+		private void drawHelp(GuiGraphicsExtractor graphics, Theme theme, int x, int y, int w) {
+			if (data != null) {
+				List<Component> lines = new ArrayList<>();
+				lines.add(Component.translatable("ftbquests.gui.resize_size",
+						fmt(data.movable.getWidth()), fmt(data.movable.getHeight())).withStyle(ChatFormatting.WHITE));
+				if (data.movable.isFreeformResizable()) {
+					lines.add(Component.translatable("ftbquests.gui.resize_hint_shift")
+							.withStyle(isShiftKeyDown() ? ChatFormatting.YELLOW : ChatFormatting.GRAY));
+				}
+				lines.add(Component.translatable("ftbquests.gui.resize_hint_ctrl")
+						.withStyle(isCtrlKeyDown() ? ChatFormatting.YELLOW : ChatFormatting.GRAY));
+				lines.add(Component.translatable("ftbquests.gui.resize_hint_cancel").withStyle(ChatFormatting.GRAY));
 
-			List<Component> lines = new ArrayList<>();
-			lines.add(Component.translatable("ftbquests.gui.resize_size",
-					fmt(m.getWidth()), fmt(m.getHeight())).withStyle(ChatFormatting.WHITE));
-			if (freeform) {
-				lines.add(Component.translatable("ftbquests.gui.resize_hint_shift")
-						.withStyle(isShiftKeyDown() ? ChatFormatting.YELLOW : ChatFormatting.GRAY));
-			}
-			lines.add(Component.translatable("ftbquests.gui.resize_hint_ctrl")
-					.withStyle(isCtrlKeyDown() ? ChatFormatting.YELLOW : ChatFormatting.GRAY));
-			lines.add(Component.translatable("ftbquests.gui.resize_hint_cancel").withStyle(ChatFormatting.GRAY));
-
-			int textW = 0;
-			for (Component c : lines) {
-				textW = Math.max(textW, theme.getStringWidth(c));
-			}
-			int lineH = 10;
-			int boxW = textW + 8;
-			int boxH = lines.size() * lineH + 6;
-			int bx = x + w - boxW - 6;
-			int by = y + 6;
-
-			IconHelper.renderIcon(Color4I.BLACK.withAlpha(150), graphics, bx, by, boxW, boxH);
-			for (int i = 0; i < lines.size(); i++) {
-				graphics.text(theme.getFont(), lines.get(i), bx + 4, by + 4 + i * lineH, 0xFFFFFFFF);
+				drawHelpPanel(theme, graphics, lines);
 			}
 		}
 
@@ -1161,7 +1145,7 @@ public class QuestPanel extends Panel {
 			alignWidgets();
 		}
 
-		private record Data(Movable movable, QuestObjectBase object, double savedW, double savedH) {
+		private record Data(Movable movable, double savedW, double savedH) {
 		}
 	}
 
@@ -1182,9 +1166,9 @@ public class QuestPanel extends Panel {
 			return data != null;
 		}
 
-		public void activate(Movable movable, QuestObjectBase object) {
+		public void activate(Movable movable) {
 			if (data == null && movable.isRotatable()) {
-				data = new Data(movable, object, movable.getRotation());
+				data = new Data(movable, movable.getRotation());
 				handle.active = true;
 				repositionHandle();
 			}
@@ -1200,7 +1184,10 @@ public class QuestPanel extends Panel {
 			handle.dragging = false;
 			if (accept) {
 				if (d.movable.getRotation() != d.savedRotation) {
-					Play2ServerNetworking.send(EditObjectMessage.forQuestObject(d.object));
+					var qo = questScreen.file.getBase(d.movable.getMovableID());
+					if (qo != null) {
+						Play2ServerNetworking.send(EditObjectMessage.forQuestObject(qo));
+					}
 				}
 			} else {
 				d.movable.setRotation(d.savedRotation);
@@ -1281,32 +1268,17 @@ public class QuestPanel extends Panel {
 			repositionHandle();
 		}
 
-		public void drawHelp(GuiGraphicsExtractor graphics, Theme theme, int x, int y, int w) {
-			if (data == null) {
-				return;
-			}
-			List<Component> lines = List.of(
-					Component.translatable("ftbquests.gui.rotate_angle", ResizeController.fmt(data.movable.getRotation())).withStyle(ChatFormatting.WHITE),
-					Component.translatable("ftbquests.gui.rotate_hint_ctrl").withStyle(isCtrlKeyDown() ? ChatFormatting.YELLOW : ChatFormatting.GRAY),
-					Component.translatable("ftbquests.gui.resize_hint_cancel").withStyle(ChatFormatting.GRAY)
-			);
-			int textW = 0;
-			for (Component c : lines) {
-				textW = Math.max(textW, theme.getStringWidth(c));
-			}
-			int lineH = 10;
-			int boxW = textW + 8;
-			int boxH = lines.size() * lineH + 6;
-			int bx = x + w - boxW - 6;
-			int by = y + 6;
-
-			IconHelper.renderIcon(Color4I.BLACK.withAlpha(150), graphics, bx, by, boxW, boxH);
-			for (int i = 0; i < lines.size(); i++) {
-				graphics.text(theme.getFont(), lines.get(i), bx + 4, by + 4 + i * lineH, 0xFFFFFFFF);
+		private void drawHelp(GuiGraphicsExtractor graphics, Theme theme, int x, int y, int w) {
+			if (data != null) {
+				drawHelpPanel(theme, graphics, List.of(
+						Component.translatable("ftbquests.gui.rotate_angle", ResizeController.fmt(data.movable.getRotation())).withStyle(ChatFormatting.WHITE),
+						Component.translatable("ftbquests.gui.rotate_hint_ctrl").withStyle(isCtrlKeyDown() ? ChatFormatting.YELLOW : ChatFormatting.GRAY),
+						Component.translatable("ftbquests.gui.resize_hint_cancel").withStyle(ChatFormatting.GRAY)
+				));
 			}
 		}
 
-		private record Data(Movable movable, QuestObjectBase object, double savedRotation) {
+		private record Data(Movable movable, double savedRotation) {
 		}
 	}
 

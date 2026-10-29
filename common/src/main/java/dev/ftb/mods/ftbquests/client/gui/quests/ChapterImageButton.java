@@ -127,8 +127,8 @@ public class ChapterImageButton extends Button implements QuestPositionableButto
 				});
 			}
 
-			contextMenu.add(questScreen.questPanel.createResizeMenuItem(chapterImage, chapterImage));
-			contextMenu.add(questScreen.questPanel.createRotateMenuItem(chapterImage, chapterImage));
+			contextMenu.add(questScreen.questPanel.createResizeMenuItem(chapterImage));
+			contextMenu.add(questScreen.questPanel.createRotateMenuItem(chapterImage));
 
 			contextMenu.add(new ContextMenuItem(Component.translatable("ftbquests.gui.copy_id"), Icons.INFO, _ -> chapterImage.copyToClipboard()) {
 				@Override

@@ -295,6 +295,9 @@ public class QuestScreen extends BaseScreen {
 					_ -> initiateMoving(movable),
 					Component.translatable("ftbquests.gui.move_tooltip").withStyle(ChatFormatting.DARK_GRAY))
 			);
+			if (movable.isResizable()) {
+				contextMenu.add(questPanel.createResizeMenuItem(movable));
+			}
 		}
 
 		if (object instanceof QuestLink link) {

@@ -154,20 +154,14 @@ public class QuestButton extends Button implements QuestPositionableButton {
 
 		boolean canEdit = questScreen.file.canEdit();
 		if (canEdit && button.isRight()) {
-			List<ContextMenuItem> contextMenu = new ArrayList<>();
-
 			Collection<Quest> selected = questScreen.getSelectedQuests();
 			if (!selected.isEmpty()) {
+				List<ContextMenuItem> contextMenu = new ArrayList<>();
 				addMultiselectionContextMenuItems(contextMenu, selected);
 				getGui().openContextMenu(contextMenu);
 			} else {
-				ContextMenuBuilder builder = ContextMenuBuilder.create(theQuestObject(), questScreen, this)
-						.withDeletionFocus(moveAndDeleteFocus());
-				if (moveAndDeleteFocus().isResizable()) {
-					builder.insertAtTop(List.of(questScreen.questPanel.createResizeMenuItem(moveAndDeleteFocus(), theQuestObject())));
-				}
-				builder
-						.openContextMenu(getGui());
+				ContextMenuBuilder.create(theQuestObject(), questScreen, this)
+						.withDeletionFocus(moveAndDeleteFocus()).openContextMenu(getGui());
 			}
 		} else if (button.isLeft()) {
 			if (isCtrlKeyDown() && canEdit) {
