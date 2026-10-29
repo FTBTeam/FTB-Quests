@@ -55,6 +55,8 @@ public class QuestButton extends Button implements QuestPositionableButton {
 	// bezier control points, mapped to screen coords
 	private final Long2ObjectMap<Pair<Vec2d, Vec2d>> controlPoints = new Long2ObjectOpenHashMap<>();
 	private final Long2ObjectMap<List<Vec2d>> bezierCache; // caches points for connection lines/curves
+	private double exactCenterX, exactCenterY; // unrounded center, relative to parent panel
+	private boolean hasExactCenter = false;
 
 	private final Lazy<Long2ObjectMap<QuestButton>> dependencies = Lazy.of(this::buildDependencies);
 	private final Lazy<QuestShape> shape = Lazy.of(() -> QuestShape.get(getShape()));
@@ -479,9 +481,30 @@ public class QuestButton extends Button implements QuestPositionableButton {
 		return (Movable) theQuestObject();
 	}
 
+	/**
+	 * Record the unrounded center of this widget, relative to its parent panel. Widget position and size are
+	 * rounded to whole pixels, so the center derived from them can be off by up to a pixel; connection lines need the
+	 * exact value to stay perfectly horizontal/vertical.
+	 */
+	public void setExactCenter(double cx, double cy) {
+		exactCenterX = cx;
+		exactCenterY = cy;
+		hasExactCenter = true;
+	}
+
+	/** Exact horizontal center in screen space (panel scroll offset included) */
+	public double getCenterX() {
+		return hasExactCenter ? getX() + (exactCenterX - getPosX()) : getX() + getWidth() / 2.0;
+	}
+
+	/** Exact vertical center in screen space (panel scroll offset included) */
+	public double getCenterY() {
+		return hasExactCenter ? getY() + (exactCenterY - getPosY()) : getY() + getHeight() / 2.0;
+	}
+
 	public List<Vec2d> getConnectionPoints(QuestButton other, double dist) {
-		Vec2d ourPos = new Vec2d((float) (getX() + getWidth() / 2), (float) (getY() + getHeight() / 2));
-		Vec2d otherPos = new Vec2d((float) (other.getX() + other.getWidth() / 2), (float) (other.getY() + other.getHeight() / 2));
+		Vec2d ourPos = new Vec2d((float) getCenterX(), (float) getCenterY());
+		Vec2d otherPos = new Vec2d((float) other.getCenterX(), (float) other.getCenterY());
 
 		List<Vec2d> list = bezierCache.get(other.quest.getId());
 		if (list == null) {

@@ -176,9 +176,15 @@ public class QuestPanel extends Panel {
 
 				double x = (qx - questMinX - qw / 2D) * (bs + bp) + bp / 2D + bp * (qw - 1D) / 2D;
 				double y = (qy - questMinY - qh / 2D) * (bs + bp) + bp / 2D + bp * (qh - 1D) / 2D;
-				w.setPosAndSize((int) Math.round(x), (int) Math.round(y), (int) Math.round(bs * qw), (int) Math.round(bs * qh));
+				// round edges rather than origin + size, so widgets sharing a center/edge round consistently
+				int left = (int) Math.round(x);
+				int top = (int) Math.round(y);
+				int right = (int) Math.round(x + bs * qw);
+				int bottom = (int) Math.round(y + bs * qh);
+				w.setPosAndSize(left, top, right - left, bottom - top);
 
 				if (w instanceof QuestButton qb) {
+					qb.setExactCenter(x + bs * qw / 2D, y + bs * qh / 2D);
 					qb.positionControlPoints();
 					bezierController.repositionControlButtons(qb);
 				}
@@ -273,10 +279,10 @@ public class QuestPanel extends Panel {
 			return;
 		}
 
-		float sx = startWidget.getX() + startWidget.width / 2.0f;
-		float sy = startWidget.getY() + startWidget.height / 2.0f;
-		float ex = endWidget.getX() + endWidget.width / 2.0f;
-		float ey = endWidget.getY() + endWidget.height / 2.0f;
+		float sx = (float) startWidget.getCenterX();
+		float sy = (float) startWidget.getCenterY();
+		float ex = (float) endWidget.getCenterX();
+		float ey = (float) endWidget.getCenterY();
 		float dist = (float) MathUtils.dist(sx, sy, ex, ey);
 
 		var points = startWidget.getConnectionPoints(endWidget, dist);
@@ -295,6 +301,8 @@ public class QuestPanel extends Panel {
 			poseStack.translate(0f, -s);
 
 			var texture = Minecraft.getInstance().getTextureManager().getTexture(icon.texture);
+			// draw the line as a whole-pixel-thick strip, centered on the (exact) line axis
+			int thickness = Math.max(1, Math.round(s));
 			GuiElementRenderState state = new BlitRenderState(
 					RenderPipelines.GUI_TEXTURED,
 					TextureSetup.singleTexture(texture.getTextureView(), texture.getSampler()),
