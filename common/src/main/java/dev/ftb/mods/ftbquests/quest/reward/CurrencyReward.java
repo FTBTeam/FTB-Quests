@@ -1,12 +1,12 @@
 package dev.ftb.mods.ftbquests.quest.reward;
 
-import dev.architectury.networking.NetworkManager;
 import dev.ftb.mods.ftblibrary.config.ConfigGroup;
 import dev.ftb.mods.ftblibrary.icon.Icons;
 import dev.ftb.mods.ftblibrary.integration.currency.CurrencyHelper;
 import dev.ftb.mods.ftblibrary.integration.currency.CurrencyProvider;
 import dev.ftb.mods.ftbquests.net.NotifyRewardMessage;
 import dev.ftb.mods.ftbquests.quest.Quest;
+import dev.architectury.networking.NetworkManager;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
@@ -15,18 +15,18 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 
 public class CurrencyReward extends Reward {
-    private int coinAmount;
+    private long coinAmount;
 
     public CurrencyReward(long id, Quest q) {
         this(id, q, 1);
     }
 
-    public CurrencyReward(long id, Quest q, int coinAmount) {
+    public CurrencyReward(long id, Quest q, long coinAmount) {
         super(id, q);
         this.coinAmount = coinAmount;
     }
 
-    public int getCoinAmount() {
+    public long getCoinAmount() {
         return coinAmount;
     }
 
@@ -38,25 +38,25 @@ public class CurrencyReward extends Reward {
     @Override
     public void writeData(CompoundTag nbt, HolderLookup.Provider provider) {
         super.writeData(nbt, provider);
-        nbt.putInt("amount", coinAmount);
+        nbt.putLong("amount", coinAmount);
     }
 
     @Override
     public void readData(CompoundTag nbt, HolderLookup.Provider provider) {
         super.readData(nbt, provider);
-        coinAmount = nbt.getInt("amount");
+        coinAmount = nbt.getLong("amount"); // This used to be an int. This should be okay?
     }
 
     @Override
     public void writeNetData(RegistryFriendlyByteBuf buffer) {
         super.writeNetData(buffer);
-        buffer.writeVarInt(coinAmount);
+        buffer.writeVarLong(coinAmount);
     }
 
     @Override
     public void readNetData(RegistryFriendlyByteBuf buffer) {
         super.readNetData(buffer);
-        coinAmount = buffer.readVarInt();
+        coinAmount = buffer.readVarLong();
     }
 
     @Override
@@ -68,7 +68,7 @@ public class CurrencyReward extends Reward {
     public void fillConfigGroup(ConfigGroup config) {
         super.fillConfigGroup(config);
 
-        config.addInt("coins", coinAmount, v -> coinAmount = v, 100, 1, Integer.MAX_VALUE)
+        config.addLong("coins", coinAmount, v -> coinAmount = v, 100, 1, Integer.MAX_VALUE)
                 .setNameKey("ftbquests.reward.ftbquests.currency");
     }
 
@@ -82,7 +82,7 @@ public class CurrencyReward extends Reward {
         provider.giveCurrency(player, coinAmount);
 
         if (notify) {
-            Component msg = Component.literal(Integer.toString(coinAmount)).append(" ").append(provider.coinName(coinAmount > 1));
+            Component msg = Component.literal(Long.toString(coinAmount)).append(" ").append(provider.coinName(coinAmount > 1));
             NetworkManager.sendToPlayer(player, new NotifyRewardMessage(id, msg, Icons.MONEY, disableRewardScreenBlur));
         }
 
