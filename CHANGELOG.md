@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 * Fixed client crash during quest shape reload
   * Appears to be triggered by badly behaved mixins from other mods; added some defensive coding for this
+* Fixed Currency Reward not functioning correctly with latest FTB Library / FTB XMod Compat releases
 
 ## [2101.1.37]
 
