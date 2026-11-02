@@ -15,7 +15,7 @@ import java.util.UUID;
 
 @FunctionalInterface
 public interface OpenLootCrateEvent {
-    Event<OpenLootCrateEvent> EVENT = EventFactory.createEventResult();
+    Event<OpenLootCrateEvent> EVENT = EventFactory.createCompoundEventResult();
 
     /**
      * Fired when a player or Loot Crate Opener is about to open a loot crate. This is fired before
