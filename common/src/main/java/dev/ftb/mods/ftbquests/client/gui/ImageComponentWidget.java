@@ -10,6 +10,7 @@ import dev.ftb.mods.ftblibrary.client.gui.widget.Panel;
 import dev.ftb.mods.ftblibrary.client.gui.widget.Widget;
 import dev.ftb.mods.ftblibrary.client.icon.IconHelper;
 import dev.ftb.mods.ftblibrary.client.util.ImageComponent;
+import dev.ftb.mods.ftblibrary.client.util.ImageComponent.AspectRatioHint;
 import dev.ftb.mods.ftblibrary.icon.Icon;
 import dev.ftb.mods.ftblibrary.icon.WebPIcon;
 import dev.ftb.mods.ftblibrary.util.TooltipList;
@@ -31,6 +32,8 @@ public class ImageComponentWidget extends Widget {
 	// handles playback and the play/pause overlay for animated (WebP) images; null for all other image types
 	private @Nullable AnimatedImageWidget animated;
 	private @Nullable Icon<?> animatedFor;
+	// true while the size depends on an aspect ratio which isn't known yet (image still loading asynchronously)
+	private boolean awaitingAspectRatio;
 
 	public ImageComponentWidget(ViewQuestPanel viewQuestPanel, Panel panel, ImageComponent component, int index) {
 		super(panel);
@@ -40,7 +43,33 @@ public class ImageComponentWidget extends Widget {
 		this.index = index;
 
 		mutableComponent = MutableComponent.create(this.component);
-		setSize(this.component.getWidth(), this.component.getHeight());
+
+		AspectRatioHint hint = this.component.getAspectRatioHint();
+		Icon<?> image = component.getImage();
+		if (image.getRenderer().isAspectRatioKnown() && hint != AspectRatioHint.NONE) {
+			awaitingAspectRatio = !IconHelper.isAspectRatioResolved(image);
+			double ratio = IconHelper.aspectRatio(image);
+            switch (hint) {
+				case ADJUST_WIDTH -> setSize((int) (component.getHeight() * ratio), component.getHeight());
+				case ADJUST_HEIGHT -> setSize(component.getWidth(), (int) (component.getWidth() / ratio));
+            }
+		} else {
+			setSize(component.getWidth(), component.getHeight());
+		}
+	}
+
+	public ImageComponentWidget layout(int availableWidth) {
+		if (getComponent().isFit()) {
+			double scale = availableWidth / (double) width;
+			setSize((int) (width * scale), (int) (height * scale));
+		} else if (getComponent().getAlign() == ImageComponent.ImageAlign.CENTER) {
+			setX((availableWidth - width) / 2);
+		} else if (getComponent().getAlign() == ImageComponent.ImageAlign.RIGHT) {
+			setX(availableWidth - width);
+		} else {
+			setX(0);
+		}
+		return this;
 	}
 
 	public void addMouseOverText(TooltipList list) {
@@ -51,6 +80,12 @@ public class ImageComponentWidget extends Widget {
 
 	public void draw(GuiGraphicsExtractor graphics, Theme theme, int x, int y, int w, int h) {
 		Icon<?> image = component.getImage();
+
+		if (awaitingAspectRatio && IconHelper.isAspectRatioResolved(image)) {
+			// image has finished loading, so the real size is now known: rebuild the panel (outside of this draw call)
+			awaitingAspectRatio = false;
+			Minecraft.getInstance().schedule(viewQuestPanel::refreshWidgets);
+		}
 
 		if (image instanceof WebPIcon webp) {
 			if (animated == null || animatedFor != image) {
@@ -121,6 +156,7 @@ public class ImageComponentWidget extends Widget {
 		config.addInt("width", component.getWidth(), component::setWidth, 0, 1, 1000);
 		config.addInt("height", component.getHeight(), component::setHeight, 0, 1, 1000);
 		config.addEnum("align", component.getAlign(), component::setAlign, ImageComponent.ImageAlign.NAME_MAP, ImageComponent.ImageAlign.CENTER);
+		config.addEnum("aspect", component.getAspectRatioHint(), component::setAspectRatioHint, ImageComponent.AspectRatioHint.NAME_MAP, AspectRatioHint.NONE);
 		config.addBool("fit", component.isFit(), component::setFit, false);
 		config.addEnum("click_action_type", clickAction.actionType(), v -> updateClickType(component, v), ImageClickAction.ActionType.NAME_MAP);
 		config.addString("click_action_data", clickAction.actionData(), v -> updateClickData(component, v), "");

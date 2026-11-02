@@ -894,7 +894,6 @@ public class QuestScreen extends BaseScreen {
 	public void drawForeground(GuiGraphicsExtractor graphics, Theme theme, int x, int y, int w, int h) {
 		Color4I borderColor = ThemeProperties.WIDGET_BORDER.get(selectedChapter);
 		GuiHelper.drawHollowRect(graphics, x, y, w, h, borderColor, false);
-		super.drawForeground(graphics, theme, x, y, w, h);
 	}
 
 	@Override

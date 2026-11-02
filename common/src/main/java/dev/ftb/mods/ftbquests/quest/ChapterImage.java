@@ -434,7 +434,10 @@ public final class ChapterImage extends QuestObjectBase implements Movable {
 			} else {
 				height = width / aspect;
 			}
-			Play2ServerNetworking.send(EditObjectMessage.forQuestObject(this));
+			// this can be called during client-side creation to get the aspect ratio right - don't send an edit packet in that case
+			if (getId() != 0L) {
+				Play2ServerNetworking.send(EditObjectMessage.forQuestObject(this));
+			}
 		}
 	}
 
