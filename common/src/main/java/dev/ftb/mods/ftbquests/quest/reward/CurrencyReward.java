@@ -61,7 +61,8 @@ public class CurrencyReward extends Reward {
 
     @Override
     public Component getAltTitle() {
-        return Component.empty().append(Component.literal("⬤ ").withStyle(ChatFormatting.YELLOW)).append(String.valueOf(coinAmount));
+        Component amount = Component.literal(String.format("%,d", coinAmount)).withStyle(ChatFormatting.WHITE);
+        return Component.translatable("ftbquests.reward.ftbquests.currency.title", amount);
     }
 
     @Override
