@@ -12,23 +12,17 @@ import dev.architectury.registry.client.rendering.BlockEntityRendererRegistry;
 import dev.architectury.registry.client.rendering.ColorHandlerRegistry;
 import dev.ftb.mods.ftblibrary.api.sidebar.ButtonOverlayRender;
 import dev.ftb.mods.ftblibrary.api.sidebar.SidebarButtonCreatedEvent;
-import dev.ftb.mods.ftblibrary.icon.Color4I;
 import dev.ftb.mods.ftblibrary.ui.CustomClickEvent;
-import dev.ftb.mods.ftblibrary.ui.GuiHelper;
 import dev.ftb.mods.ftbquests.api.FTBQuestsAPI;
 import dev.ftb.mods.ftbquests.block.entity.TaskScreenBlockEntity;
 import dev.ftb.mods.ftbquests.events.ClearFileCacheEvent;
 import dev.ftb.mods.ftbquests.item.LootCrateItem;
 import dev.ftb.mods.ftbquests.net.RequestTranslationTableMessage;
-import dev.ftb.mods.ftbquests.net.SubmitTaskMessage;
 import dev.ftb.mods.ftbquests.quest.BaseQuestFile;
-import dev.ftb.mods.ftbquests.quest.TeamData;
 import dev.ftb.mods.ftbquests.quest.loot.LootCrate;
-import dev.ftb.mods.ftbquests.quest.task.ObservationTask;
 import dev.ftb.mods.ftbquests.quest.task.StructureTask;
 import dev.ftb.mods.ftbquests.registry.ModBlockEntityTypes;
 import dev.ftb.mods.ftbquests.registry.ModItems;
-import net.minecraft.ChatFormatting;
 import net.minecraft.client.DeltaTracker;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
@@ -36,10 +30,8 @@ import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
 import net.minecraft.client.renderer.texture.TextureAtlas;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
-import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.inventory.InventoryMenu;
-import net.minecraft.world.phys.HitResult;
 import org.jetbrains.annotations.Nullable;
 import org.lwjgl.glfw.GLFW;
 
@@ -52,9 +44,7 @@ public class FTBQuestsClientEventHandler {
 
     static boolean creativeTabRebuildPending = false;
 
-    private List<ObservationTask> observationTasks = null;
-    private ObservationTask currentlyObserving = null;
-    private long currentlyObservingTicks = 0L;
+    private final ObservationClientHandler observationHandler = new ObservationClientHandler();
 
     public static TextureAtlasSprite inputOnlySprite;
     public static TextureAtlasSprite tankSprite;
@@ -126,7 +116,7 @@ public class FTBQuestsClientEventHandler {
 
     private void onFileCacheClear(BaseQuestFile file) {
         if (!file.isServerSide()) {
-            observationTasks = null;
+            observationHandler.clearCachedData();
         }
     }
 
@@ -160,41 +150,7 @@ public class FTBQuestsClientEventHandler {
         if (mc.level != null && ClientQuestFile.exists() && mc.player != null) {
             PinnedQuestsTracker.INSTANCE.tick(ClientQuestFile.INSTANCE);
 
-            if (observationTasks == null) {
-                observationTasks = ClientQuestFile.INSTANCE.collect(ObservationTask.class);
-            }
-
-            if (observationTasks.isEmpty()) {
-                return;
-            }
-
-            currentlyObserving = null;
-
-            TeamData selfTeamData = ClientQuestFile.INSTANCE.selfTeamData;
-            if (mc.hitResult != null && mc.hitResult.getType() != HitResult.Type.MISS) {
-                for (ObservationTask task : observationTasks) {
-                    if (!selfTeamData.isCompleted(task.getQuest()) && !selfTeamData.isCompleted(task) && task.observe(mc.player, mc.hitResult)
-                            && selfTeamData.canStartTasks(task.getQuest())) {
-                        currentlyObserving = task;
-                        break;
-                    }
-                }
-            }
-
-            if (currentlyObserving != null) {
-                if (!mc.isPaused()) {
-                    currentlyObservingTicks++;
-                }
-
-                if (currentlyObservingTicks >= currentlyObserving.getTimer()) {
-                    NetworkManager.sendToServer(new SubmitTaskMessage(currentlyObserving.id));
-                    selfTeamData.addProgress(currentlyObserving, 1L);
-                    currentlyObserving = null;
-                    currentlyObservingTicks = 0L;
-                }
-            } else {
-                currentlyObservingTicks = 0L;
-            }
+            observationHandler.tick(mc);
         }
     }
 
@@ -219,31 +175,8 @@ public class FTBQuestsClientEventHandler {
             return;
         }
 
-        if (currentlyObserving != null) {
-            renderCurrentlyObserving(Minecraft.getInstance(), graphics, tickDelta);
-        }
+        observationHandler.render(Minecraft.getInstance(), graphics, tickDelta);
 
         PinnedQuestsTracker.INSTANCE.render(Minecraft.getInstance(), graphics);
-    }
-
-    private void renderCurrentlyObserving(Minecraft mc, GuiGraphics graphics, DeltaTracker tickDelta) {
-        int cx = mc.getWindow().getGuiScaledWidth() / 2;
-        int cy = mc.getWindow().getGuiScaledHeight() / 2;
-
-        MutableComponent txt = currentlyObserving.getMutableTitle().withStyle(ChatFormatting.YELLOW, ChatFormatting.UNDERLINE);
-        int txtWidth = mc.font.width(txt);
-        int boxWidth = Math.max(txtWidth, 100);
-
-        Color4I.DARK_GRAY.withAlpha(130).draw(graphics, cx - boxWidth / 2 - 3, cy - 63, boxWidth + 6, 29);
-        GuiHelper.drawHollowRect(graphics, cx - boxWidth / 2 - 3, cy - 63, boxWidth + 6, 29, Color4I.DARK_GRAY, false);
-
-        graphics.drawString(mc.font, txt, cx - txtWidth / 2, cy - 60, 0xFFFFFF);
-        double completed = (currentlyObservingTicks + tickDelta.getGameTimeDeltaPartialTick(false)) / (double) currentlyObserving.getTimer();
-
-        GuiHelper.drawHollowRect(graphics, cx - boxWidth / 2, cy - 49, boxWidth, 12, Color4I.DARK_GRAY, false);
-        Color4I.LIGHT_BLUE.withAlpha(130).draw(graphics, cx - boxWidth / 2 + 1, cy - 48, (int) ((boxWidth - 2D) * completed), 10);
-
-        String pctTxt = (currentlyObservingTicks * 100L / currentlyObserving.getTimer()) + "%";
-        graphics.drawString(mc.font, pctTxt, cx - mc.font.width(pctTxt) / 2, cy - 47, 0xFFFFFF);
     }
 }
