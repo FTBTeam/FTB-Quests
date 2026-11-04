@@ -411,7 +411,8 @@ public final class ChapterImage extends QuestObjectBase implements Movable {
 	}
 
 	public boolean isAspectRatioOff() {
-		return !Mth.equal(image.aspectRatio(), width / height);
+		// an image which is still loading doesn't know its real aspect ratio yet
+		return image.isAspectRatioResolved() && !Mth.equal(image.aspectRatio(), width / height);
 	}
 
 	public void fixupAspectRatio(boolean adjustWidth) {
@@ -421,7 +422,10 @@ public final class ChapterImage extends QuestObjectBase implements Movable {
 			} else {
 				height = width / image.aspectRatio();
 			}
-			NetworkManager.sendToServer(EditObjectMessage.forQuestObject(this));
+			// this can be called during client-side creation to get the aspect ratio right - don't send an edit packet in that case
+			if (id != 0L) {
+				NetworkManager.sendToServer(EditObjectMessage.forQuestObject(this));
+			}
 		}
 	}
 

@@ -354,20 +354,13 @@ public class MultilineTextEditorScreen extends BaseScreen {
 		int cursor = textBox.cursorPos();
 
 		ImageComponent component = new ImageComponent();
-		ConfigGroup group = new ConfigGroup(FTBQuestsAPI.MOD_ID + ".gui.image", accepted -> {
+		ConfigGroup group = ImageComponentWidget.makeEditGroup(new ImageComponent(), accepted -> {
 			openGui();
 			if (accepted) {
 				textBox.seekCursor(Whence.ABSOLUTE, cursor);
 				insertAtEndOfLine("\n" + component);
 			}
 		});
-
-		group.add("image", new ImageResourceConfig(), ImageResourceConfig.getResourceLocation(component.getImage()),
-				v -> component.setImage(Icon.getIcon(v)), ImageResourceConfig.NONE).setOrder(-127);
-		group.addInt("width", component.getWidth(), component::setWidth, 0, 1, 1000);
-		group.addInt("height", component.getHeight(), component::setHeight, 0, 1, 1000);
-		group.addEnum("align", component.getAlign(), component::setAlign, ImageComponent.ImageAlign.NAME_MAP, ImageComponent.ImageAlign.CENTER);
-		group.addBool("fit", component.isFit(), component::setFit, false);
 
 		new EditConfigScreen(group).openGui();
 	}
