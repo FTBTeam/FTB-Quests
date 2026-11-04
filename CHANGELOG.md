@@ -13,6 +13,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 * Quest links that link to a quest in a hidden chapter no longer show the "links to" button in the quest view panel (unless in edit mode)
 * Fixed client crash during quest shape reload
   * Appears to be triggered by badly behaved mixins from other mods; added some defensive coding for this
+* Ensure response packets for create/delete/edit operations go to _all_ players, not just quest book editors
 
 ## [26.1.2.9]
 
