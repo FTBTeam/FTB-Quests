@@ -152,7 +152,7 @@ public class ImageComponentWidget extends Widget {
 		ImageClickAction clickAction = ImageClickAction.fromString(component.getClickAction());
 
 		config.add("image", new EditableImageResource(), EditableImageResource.getIdentifier(component.getImage()),
-				v -> component.setImage(Icon.getIcon(v)), EditableImageResource.NONE);
+				v -> component.setImage(Icon.getIcon(v)), EditableImageResource.NONE).setOrder(-127);
 		config.addInt("width", component.getWidth(), component::setWidth, 0, 1, 1000);
 		config.addInt("height", component.getHeight(), component::setHeight, 0, 1, 1000);
 		config.addEnum("align", component.getAlign(), component::setAlign, ImageComponent.ImageAlign.NAME_MAP, ImageComponent.ImageAlign.CENTER);
