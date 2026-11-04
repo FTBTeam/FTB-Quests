@@ -1,5 +1,6 @@
 package dev.ftb.mods.ftbquests.quest.history;
 
+import dev.ftb.mods.ftblibrary.util.NetworkHelper;
 import dev.ftb.mods.ftbquests.net.CreateObjectResponseMessage;
 import dev.ftb.mods.ftbquests.net.DeleteObjectResponseMessage;
 import dev.ftb.mods.ftbquests.net.EditObjectResponseMessage;
@@ -59,7 +60,7 @@ public interface QuestBookEditEvent {
                 file.getTranslationManager().processInitialTranslation(creationRec.extra(), qo);
                 qo.onCreated();
             }
-            NetUtils.sendToQuestBookEditors(file.server, new CreateObjectResponseMessage(records, Optional.ofNullable(creatorId)));
+            NetworkHelper.sendToAll(file.server, new CreateObjectResponseMessage(records, Optional.ofNullable(creatorId)));
             file.clearCachedData();
             file.markDirty();
             return true;
@@ -73,7 +74,7 @@ public interface QuestBookEditEvent {
         boolean deleted = file.deleteObjects(ids);
         if (deleted) {
             file.clearCachedData();
-            NetUtils.sendToQuestBookEditors(file.server, new DeleteObjectResponseMessage(ids));
+            NetworkHelper.sendToAll(file.server, new DeleteObjectResponseMessage(ids));
         }
 
         return deleted;
@@ -95,7 +96,7 @@ public interface QuestBookEditEvent {
                 object.clearCachedData();
             }
 
-            NetUtils.sendToQuestBookEditors(file.server, new EditObjectResponseMessage(records));
+            NetworkHelper.sendToAll(file.server, new EditObjectResponseMessage(records));
             file.markDirty();
             return true;
         } catch (Exception ignored) {
