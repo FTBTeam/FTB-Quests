@@ -6,8 +6,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [2101.1.39]
 
+### Added
+* Observation tasks now support fluid blocks, e.g. `minecraft:water`
+
 ### Fixed
 * Ensure response packets for create/delete/edit operations go to _all_ players, not just quest book editors
+* Fixed server being too trusting of client about observation task progress
 
 ## [2101.1.38]
 
