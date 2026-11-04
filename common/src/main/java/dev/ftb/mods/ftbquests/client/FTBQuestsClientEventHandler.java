@@ -4,30 +4,20 @@ import com.mojang.blaze3d.platform.InputConstants;
 import dev.ftb.mods.ftblibrary.api.event.client.CustomClickEvent;
 import dev.ftb.mods.ftblibrary.api.event.client.SidebarButtonCreatedEvent;
 import dev.ftb.mods.ftblibrary.api.sidebar.ButtonOverlayRender;
-import dev.ftb.mods.ftblibrary.client.gui.GuiHelper;
-import dev.ftb.mods.ftblibrary.client.icon.IconHelper;
 import dev.ftb.mods.ftblibrary.client.util.ClientUtils;
-import dev.ftb.mods.ftblibrary.icon.Color4I;
 import dev.ftb.mods.ftblibrary.platform.network.Play2ServerNetworking;
-import dev.ftb.mods.ftblibrary.util.Lazy;
 import dev.ftb.mods.ftbquests.api.FTBQuestsAPI;
 import dev.ftb.mods.ftbquests.api.event.ClearFileCacheEvent;
 import dev.ftb.mods.ftbquests.item.LootCrateItem;
 import dev.ftb.mods.ftbquests.net.RequestTranslationTableMessage;
-import dev.ftb.mods.ftbquests.net.SubmitTaskMessage;
-import dev.ftb.mods.ftbquests.quest.TeamData;
-import dev.ftb.mods.ftbquests.quest.task.ObservationTask;
 import dev.ftb.mods.ftbquests.quest.task.StructureTask;
-import net.minecraft.ChatFormatting;
 import net.minecraft.client.DeltaTracker;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.color.item.ItemTintSources;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.renderer.texture.TextureAtlas;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
-import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.resources.Identifier;
-import net.minecraft.world.phys.HitResult;
 import org.jspecify.annotations.Nullable;
 import org.lwjgl.glfw.GLFW;
 
@@ -40,10 +30,7 @@ public class FTBQuestsClientEventHandler {
 
     static boolean creativeTabRebuildPending = false;
 
-    private final Lazy<List<ObservationTask>> observationTasks = Lazy.of(() -> ClientQuestFile.getInstance().collect(ObservationTask.class));
-    @Nullable
-    private ObservationTask currentlyObserving = null;
-    private long currentlyObservingTicks = 0L;
+    private final ObservationClientHandler observationHandler = new ObservationClientHandler();
 
     @Nullable
     public static TextureAtlasSprite inputOnlySprite;
@@ -96,7 +83,7 @@ public class FTBQuestsClientEventHandler {
 
     public void onFileCacheClear(ClearFileCacheEvent.Data data) {
         if (!data.file().isServerSide()) {
-            observationTasks.invalidate();
+            observationHandler.clearCachedData();
         }
     }
 
@@ -130,41 +117,8 @@ public class FTBQuestsClientEventHandler {
         if (mc.level != null && ClientQuestFile.exists() && mc.player != null) {
             PinnedQuestsTracker.INSTANCE.tick(ClientQuestFile.getInstance());
 
-            if (observationTasks.get().isEmpty()) {
-                return;
-            }
-
-            TeamData selfTeamData = ClientQuestFile.getInstance().selfTeamData;
-
-            currentlyObserving = findObservationTask(mc, selfTeamData);
-            if (currentlyObserving != null) {
-                if (!mc.isPaused()) {
-                    currentlyObservingTicks++;
-                }
-
-                if (currentlyObservingTicks >= currentlyObserving.getTimer()) {
-                    Play2ServerNetworking.send(new SubmitTaskMessage(currentlyObserving.id));
-                    selfTeamData.addProgress(currentlyObserving, 1L);
-                    currentlyObserving = null;
-                    currentlyObservingTicks = 0L;
-                }
-            } else {
-                currentlyObservingTicks = 0L;
-            }
+            observationHandler.tick(mc);
         }
-    }
-
-    @Nullable
-    private ObservationTask findObservationTask(Minecraft mc, TeamData selfTeamData) {
-        if (mc.player != null && mc.hitResult != null && mc.hitResult.getType() != HitResult.Type.MISS) {
-            for (ObservationTask task : observationTasks.get()) {
-                if (!selfTeamData.isCompleted(task.getQuest()) && !selfTeamData.isCompleted(task) && task.observe(mc.player, mc.hitResult)
-                        && selfTeamData.canStartTasks(task.getQuest())) {
-                    return task;
-                }
-            }
-        }
-        return null;
     }
 
     public void onPlayerLogin() {
@@ -185,33 +139,8 @@ public class FTBQuestsClientEventHandler {
 
     public void renderGuiOverlay(GuiGraphicsExtractor graphics, DeltaTracker tickDelta) {
         if (ClientQuestFile.exists()) {
-            renderCurrentObservationTask(Minecraft.getInstance(), graphics, tickDelta);
+            observationHandler.render(Minecraft.getInstance(), graphics, tickDelta);
             PinnedQuestsTracker.INSTANCE.render(Minecraft.getInstance(), graphics);
         }
-    }
-
-    private void renderCurrentObservationTask(Minecraft mc, GuiGraphicsExtractor graphics, DeltaTracker tickDelta) {
-        if (currentlyObserving == null) {
-            return;
-        }
-
-        int cx = mc.getWindow().getGuiScaledWidth() / 2;
-        int cy = mc.getWindow().getGuiScaledHeight() / 2;
-
-        MutableComponent txt = currentlyObserving.getMutableTitle().withStyle(ChatFormatting.YELLOW, ChatFormatting.UNDERLINE);
-        int txtWidth = mc.font.width(txt);
-        int boxWidth = Math.max(txtWidth, 100);
-
-        IconHelper.renderIcon(Color4I.DARK_GRAY.withAlpha(130), graphics, cx - boxWidth / 2 - 3, cy - 63, boxWidth + 6, 29);
-        GuiHelper.drawHollowRect(graphics, cx - boxWidth / 2 - 3, cy - 63, boxWidth + 6, 29, Color4I.DARK_GRAY, false);
-
-        graphics.text(mc.font, txt, cx - txtWidth / 2, cy - 60, 0xFFFFFF);
-        double completed = (currentlyObservingTicks + tickDelta.getGameTimeDeltaPartialTick(false)) / (double) currentlyObserving.getTimer();
-
-        GuiHelper.drawHollowRect(graphics, cx - boxWidth / 2, cy - 49, boxWidth, 12, Color4I.DARK_GRAY, false);
-        IconHelper.renderIcon(Color4I.LIGHT_BLUE.withAlpha(130), graphics, cx - boxWidth / 2 + 1, cy - 48, (int) ((boxWidth - 2D) * completed), 10);
-
-        String pctTxt = (currentlyObservingTicks * 100L / currentlyObserving.getTimer()) + "%";
-        graphics.text(mc.font, pctTxt, cx - mc.font.width(pctTxt) / 2, cy - 47, 0xFFFFFF);
     }
 }
