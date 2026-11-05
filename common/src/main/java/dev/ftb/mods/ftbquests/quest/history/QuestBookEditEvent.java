@@ -1,12 +1,12 @@
 package dev.ftb.mods.ftbquests.quest.history;
 
+import dev.ftb.mods.ftblibrary.platform.network.Server2PlayNetworking;
 import dev.ftb.mods.ftbquests.net.CreateObjectResponseMessage;
 import dev.ftb.mods.ftbquests.net.DeleteObjectResponseMessage;
 import dev.ftb.mods.ftbquests.net.EditObjectResponseMessage;
 import dev.ftb.mods.ftbquests.quest.BaseQuestFile;
 import dev.ftb.mods.ftbquests.quest.QuestObjectBase;
 import dev.ftb.mods.ftbquests.quest.ServerQuestFile;
-import dev.ftb.mods.ftbquests.util.NetUtils;
 import net.minecraft.network.chat.Component;
 import org.jspecify.annotations.Nullable;
 
@@ -62,7 +62,7 @@ public interface QuestBookEditEvent {
                 file.getTranslationManager().processInitialTranslation(creationRec.metadata(), qo);
                 qo.onCreated();
             }
-            NetUtils.sendToQuestBookEditors(file.server, new CreateObjectResponseMessage(records, Optional.ofNullable(creatorId)));
+            Server2PlayNetworking.sendToAllPlayers(file.server, new CreateObjectResponseMessage(records, Optional.ofNullable(creatorId)));
             file.clearCachedData();
             file.markDirty();
             return true;
@@ -76,7 +76,7 @@ public interface QuestBookEditEvent {
         boolean deleted = file.deleteObjects(ids);
         if (deleted) {
             file.clearCachedData();
-            NetUtils.sendToQuestBookEditors(file.server, new DeleteObjectResponseMessage(ids));
+            Server2PlayNetworking.sendToAllPlayers(file.server, new DeleteObjectResponseMessage(ids));
         }
 
         return deleted;
@@ -98,7 +98,7 @@ public interface QuestBookEditEvent {
                 object.clearCachedData();
             }
 
-            NetUtils.sendToQuestBookEditors(file.server, new EditObjectResponseMessage(records));
+            Server2PlayNetworking.sendToAllPlayers(file.server, new EditObjectResponseMessage(records));
             file.markDirty();
             return true;
         } catch (Exception ignored) {

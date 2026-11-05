@@ -36,8 +36,50 @@ public interface Movable {
 
 	String getShape();
 
+	/**
+	 * {@return true if this object can be interactively resized in the quest screen}
+	 */
+	default boolean isResizable() {
+		return false;
+	}
+
+	/**
+	 * {@return true if width and height can be changed independently; if false, objects are always square}
+	 */
+	default boolean isFreeformResizable() {
+		return false;
+	}
+
+	default double getMinSize() {
+		return 0.0625D;
+	}
+
+	default double getMaxSize() {
+		return 8D;
+	}
+
+	/**
+	 * Set the size of this object, client-side only. Callers are responsible for sending the change to the server.
+	 * Square-only objects use the width and ignore the height.
+	 */
+	default void setDimensions(double width, double height) {
+	}
+
 	default double getRotation() {
 		return 0.0;
+	}
+
+	/**
+	 * {@return true if this object's rotation can be interactively changed in the quest screen}
+	 */
+	default boolean isRotatable() {
+		return false;
+	}
+
+	/**
+	 * Set the rotation of this object in degrees, client-side only. Callers are responsible for sending the change to the server.
+	 */
+	default void setRotation(double degrees) {
 	}
 
 	default boolean isAlignToCorner() {

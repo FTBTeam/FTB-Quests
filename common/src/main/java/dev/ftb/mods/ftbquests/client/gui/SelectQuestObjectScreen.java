@@ -114,7 +114,7 @@ public class SelectQuestObjectScreen<T extends QuestObjectBase> extends Abstract
 		callback.save(true);
 	}
 
-	private class QuestObjectButton extends SimpleTextButton {
+	private class QuestObjectButton extends SimpleTextButton implements ExtendedSearch {
 		@Nullable
 		public final T object;
 
@@ -197,6 +197,11 @@ public class SelectQuestObjectScreen<T extends QuestObjectBase> extends Abstract
 			playClickSound();
 			boolean changed = config.updateValue(object);
 			callback.save(changed);
+		}
+
+		@Override
+		public boolean extendedSearch(String filterText) {
+			return filterText.length() >= 5 && object != null && object.getCodeString().toLowerCase().contains(filterText);
 		}
 	}
 }

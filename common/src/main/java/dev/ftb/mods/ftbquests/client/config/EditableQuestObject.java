@@ -15,7 +15,7 @@ import java.util.function.Function;
 import java.util.function.Predicate;
 
 public class EditableQuestObject<T extends QuestObjectBase> extends EditableConfigValue<T> {
-	public final Predicate<QuestObjectBase> predicate;
+	public final Predicate<@Nullable QuestObjectBase> predicate;
 	@Nullable
 	private final Function<T, Component> formatter;
 

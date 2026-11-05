@@ -37,6 +37,12 @@ public final class QuestShape extends Icon<QuestShape> {
 	}
 
 	public static synchronized void reload(List<String> list) {
+		if (list.isEmpty()) {
+			// shouldn't normally happen, but badly behaved mixins can cause it, apparently
+			// https://github.com/FTBTeam/FTB-Mods-Issues/issues/2241
+			return;
+		}
+
 		MAP.clear();
 
 		list.forEach(s -> MAP.put(s, new QuestShape(s)));

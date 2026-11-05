@@ -268,18 +268,20 @@ public class ViewQuestPanel extends ModalPanel {
 		add(buttonPin = new PinViewQuestButton());
 		buttonPin.setPosAndSize(w - iconSize * 2 - 4, 4, iconSize, iconSize);
 
-		if (questScreen.selectedChapter != null && questScreen.selectedChapter.id != quest.getChapter().id) {
+		if (questScreen.selectedChapter != null && questScreen.selectedChapter.id != quest.getChapter().id && (canEdit || quest.getChapter().isVisible(questScreen.file.selfTeamData))) {
 			GotoLinkedQuestButton b = new GotoLinkedQuestButton();
 			add(b);
-			b.setPosAndSize(iconSize + 4, 0, iconSize, iconSize);
+			b.setPosAndSize(iconSize + 4, 4, iconSize, iconSize);
 		}
 
-		List<QuestLink> links = quest.getQuestLinks().stream()
-				.filter(link -> quest.getQuestChapter() == questScreen.selectedChapter)
-				.toList();
-		var linksButton = new ViewQuestLinksButton(links);
-		add(linksButton);
-		linksButton.setPosAndSize(w - iconSize * 3 - 4, 0, iconSize, iconSize);
+		if (quest.getQuestChapter() == questScreen.selectedChapter) {
+			List<QuestLink> links = quest.getQuestLinks().stream()
+					.filter(link -> link.getQuest().map(q -> q.getChapter().isVisible(questScreen.file.selfTeamData)).orElse(false))
+					.toList();
+			var linksButton = new ViewQuestLinksButton(links);
+			add(linksButton);
+			linksButton.setPosAndSize(w - iconSize * 3 - 4, 4, iconSize, iconSize);
+		}
 
 		if (!quest.hasDependencies()) {
 			add(buttonOpenDependencies = new SimpleButton(this, Component.translatable("ftbquests.gui.no_dependencies"), Icon.getIcon(FTBQuestsAPI.MOD_ID + ":textures/gui/arrow_left.png").withTint(borderColor), (_, _) -> { }));
@@ -430,7 +432,8 @@ public class ViewQuestPanel extends ModalPanel {
 
 			ImageComponent img = findImageComponent(component);
 			if (img != null) {
-				panelText.add(makeImageComponentWidget(img, i));
+				var w = new ImageComponentWidget(this, panelText, img, i).layout(panelText.width);
+				panelText.add(w);
 			} else {
 				final int line = i;
 				TextField field = new QuestDescriptionField(panelText, canEdit, TranslationKey.QUEST_DESC, (context, clickedW) -> editDescLine(clickedW, line, context, null))
@@ -439,22 +442,6 @@ public class ViewQuestPanel extends ModalPanel {
 				panelText.add(field);
 			}
 		}
-	}
-
-	private ImageComponentWidget makeImageComponentWidget(ImageComponent img, int idx) {
-		ImageComponentWidget cw = new ImageComponentWidget(this, panelText, img, idx);
-
-		if (cw.getComponent().isFit()) {
-			double scale = panelText.width / (double) cw.width;
-			cw.setSize((int) (cw.width * scale), (int) (cw.height * scale));
-		} else if (cw.getComponent().getAlign() == ImageComponent.ImageAlign.CENTER) {
-			cw.setX((panelText.width - cw.width) / 2);
-		} else if (cw.getComponent().getAlign() == ImageComponent.ImageAlign.RIGHT) {
-			cw.setX(panelText.width - cw.width);
-		} else {
-			cw.setX(0);
-		}
-		return cw;
 	}
 
 	private void addButtonBar(boolean canEdit) {

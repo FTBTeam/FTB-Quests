@@ -5,11 +5,14 @@ import dev.ftb.mods.ftblibrary.client.config.EditableConfigGroup;
 import dev.ftb.mods.ftblibrary.client.config.editable.EditableImageResource;
 import dev.ftb.mods.ftblibrary.client.gui.input.MouseButton;
 import dev.ftb.mods.ftblibrary.client.gui.theme.Theme;
+import dev.ftb.mods.ftblibrary.client.gui.widget.AnimatedImageWidget;
 import dev.ftb.mods.ftblibrary.client.gui.widget.Panel;
 import dev.ftb.mods.ftblibrary.client.gui.widget.Widget;
 import dev.ftb.mods.ftblibrary.client.icon.IconHelper;
 import dev.ftb.mods.ftblibrary.client.util.ImageComponent;
+import dev.ftb.mods.ftblibrary.client.util.ImageComponent.AspectRatioHint;
 import dev.ftb.mods.ftblibrary.icon.Icon;
+import dev.ftb.mods.ftblibrary.icon.WebPIcon;
 import dev.ftb.mods.ftblibrary.util.TooltipList;
 import dev.ftb.mods.ftbquests.api.FTBQuestsAPI;
 import dev.ftb.mods.ftbquests.client.gui.quests.ViewQuestPanel;
@@ -19,12 +22,18 @@ import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.HoverEvent;
 import net.minecraft.network.chat.MutableComponent;
+import org.jspecify.annotations.Nullable;
 
 public class ImageComponentWidget extends Widget {
 	private final ImageComponent component;
 	private final MutableComponent mutableComponent;
 	private final ViewQuestPanel viewQuestPanel;
 	private final int index;
+	// handles playback and the play/pause overlay for animated (WebP) images; null for all other image types
+	private @Nullable AnimatedImageWidget animated;
+	private @Nullable Icon<?> animatedFor;
+	// true while the size depends on an aspect ratio which isn't known yet (image still loading asynchronously)
+	private boolean awaitingAspectRatio;
 
 	public ImageComponentWidget(ViewQuestPanel viewQuestPanel, Panel panel, ImageComponent component, int index) {
 		super(panel);
@@ -34,7 +43,33 @@ public class ImageComponentWidget extends Widget {
 		this.index = index;
 
 		mutableComponent = MutableComponent.create(this.component);
-		setSize(this.component.getWidth(), this.component.getHeight());
+
+		AspectRatioHint hint = this.component.getAspectRatioHint();
+		Icon<?> image = component.getImage();
+		if (image.getRenderer().isAspectRatioKnown() && hint != AspectRatioHint.NONE) {
+			awaitingAspectRatio = !IconHelper.isAspectRatioResolved(image);
+			double ratio = IconHelper.aspectRatio(image);
+            switch (hint) {
+				case ADJUST_WIDTH -> setSize((int) (component.getHeight() * ratio), component.getHeight());
+				case ADJUST_HEIGHT -> setSize(component.getWidth(), (int) (component.getWidth() / ratio));
+            }
+		} else {
+			setSize(component.getWidth(), component.getHeight());
+		}
+	}
+
+	public ImageComponentWidget layout(int availableWidth) {
+		if (getComponent().isFit()) {
+			double scale = availableWidth / (double) width;
+			setSize((int) (width * scale), (int) (height * scale));
+		} else if (getComponent().getAlign() == ImageComponent.ImageAlign.CENTER) {
+			setX((availableWidth - width) / 2);
+		} else if (getComponent().getAlign() == ImageComponent.ImageAlign.RIGHT) {
+			setX(availableWidth - width);
+		} else {
+			setX(0);
+		}
+		return this;
 	}
 
 	public void addMouseOverText(TooltipList list) {
@@ -44,7 +79,36 @@ public class ImageComponentWidget extends Widget {
 	}
 
 	public void draw(GuiGraphicsExtractor graphics, Theme theme, int x, int y, int w, int h) {
-		IconHelper.renderIcon(component.getImage(), graphics, x, y, w, h);
+		Icon<?> image = component.getImage();
+
+		if (awaitingAspectRatio && IconHelper.isAspectRatioResolved(image)) {
+			// image has finished loading, so the real size is now known: rebuild the panel (outside of this draw call)
+			awaitingAspectRatio = false;
+			Minecraft.getInstance().schedule(viewQuestPanel::refreshWidgets);
+		}
+
+		if (image instanceof WebPIcon webp) {
+			if (animated == null || animatedFor != image) {
+				if (animated != null) {
+					animated.release();
+				}
+				animated = new AnimatedImageWidget(parent, webp);
+				animatedFor = image;
+			}
+			animated.setPosAndSize(posX, posY, width, height);
+			animated.updateMouseOver(getMouseX(), getMouseY());
+			animated.draw(graphics, theme, x, y, w, h);
+		} else {
+			IconHelper.renderIcon(image, graphics, x, y, w, h);
+		}
+	}
+
+	@Override
+	public void onClosed() {
+		if (animated != null) {
+			animated.release();
+		}
+		super.onClosed();
 	}
 
 	public ImageComponent getComponent() {
@@ -53,7 +117,7 @@ public class ImageComponentWidget extends Widget {
 
 	@Override
 	public boolean mouseDoubleClicked(MouseButton button) {
-		if (isMouseOver() && viewQuestPanel.canEdit()) {
+		if (isMouseOver() && viewQuestPanel.canEdit() && (animated == null || !animated.isMouseOverControls())) {
 			viewQuestPanel.editDescLine(this, index, false, component);
 			return true;
 		}
@@ -64,6 +128,11 @@ public class ImageComponentWidget extends Widget {
 	@Override
 	public boolean mousePressed(MouseButton button) {
         if (isMouseOver()) {
+            // clicks on the animation's play/pause/restart overlay are handled there and never reach the click action
+            if (animated != null && animated.mousePressed(button)) {
+                return true;
+            }
+
             if (viewQuestPanel.canEdit() && button.isRight() || Minecraft.getInstance().hasAltDown() && button.isLeft()) {
                 viewQuestPanel.editDescLine(this, index, button.isRight(), component);
                 return true;
@@ -83,10 +152,11 @@ public class ImageComponentWidget extends Widget {
 		ImageClickAction clickAction = ImageClickAction.fromString(component.getClickAction());
 
 		config.add("image", new EditableImageResource(), EditableImageResource.getIdentifier(component.getImage()),
-				v -> component.setImage(Icon.getIcon(v)), EditableImageResource.NONE);
+				v -> component.setImage(Icon.getIcon(v)), EditableImageResource.NONE).setOrder(-127);
 		config.addInt("width", component.getWidth(), component::setWidth, 0, 1, 1000);
 		config.addInt("height", component.getHeight(), component::setHeight, 0, 1, 1000);
 		config.addEnum("align", component.getAlign(), component::setAlign, ImageComponent.ImageAlign.NAME_MAP, ImageComponent.ImageAlign.CENTER);
+		config.addEnum("aspect", component.getAspectRatioHint(), component::setAspectRatioHint, ImageComponent.AspectRatioHint.NAME_MAP, AspectRatioHint.NONE);
 		config.addBool("fit", component.isFit(), component::setFit, false);
 		config.addEnum("click_action_type", clickAction.actionType(), v -> updateClickType(component, v), ImageClickAction.ActionType.NAME_MAP);
 		config.addString("click_action_data", clickAction.actionData(), v -> updateClickData(component, v), "");
