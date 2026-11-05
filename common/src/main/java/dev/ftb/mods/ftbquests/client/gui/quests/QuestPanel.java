@@ -642,7 +642,7 @@ public class QuestPanel extends Panel {
 				Play2ServerNetworking.send(CreateObjectMessage.requestCreation(image));
 			}
 			QuestPanel.this.questScreen.openGui();
-		}).openGui();
+		}).withGridSize(8, 12).openGui();
 	}
 
 	private void copyAndCreateTask(Task task, double qx, double qy) {
