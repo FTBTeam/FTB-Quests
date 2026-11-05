@@ -584,7 +584,7 @@ public class QuestPanel extends Panel {
 				NetworkManager.sendToServer(CreateObjectMessage.requestCreation(image));
 			}
 			QuestPanel.this.questScreen.openGui();
-		}).openGui();
+		}).withGridSize(12, 8).openGui();
 	}
 
 	private void copyAndCreateTask(Task task, double qx, double qy) {
