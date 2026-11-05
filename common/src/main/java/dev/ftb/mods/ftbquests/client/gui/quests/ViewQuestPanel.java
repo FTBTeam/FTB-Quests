@@ -410,7 +410,7 @@ public class ViewQuestPanel extends ModalPanel {
 
 			ImageComponent img = findImageComponent(component);
 			if (img != null) {
-				panelText.add(makeImageComponentWidget(img, i));
+				panelText.add(new ImageComponentWidget(this, panelText, img, i).layout(panelText.width));
 			} else {
 				final int line = i;
 				TextField field = new QuestDescriptionField(panelText, canEdit, TranslationKey.QUEST_DESC, (context, clickedW) -> editDescLine(clickedW, line, context, null))
@@ -419,22 +419,6 @@ public class ViewQuestPanel extends ModalPanel {
 				panelText.add(field);
 			}
 		}
-	}
-
-	private @NotNull ImageComponentWidget makeImageComponentWidget(ImageComponent img, int idx) {
-		ImageComponentWidget cw = new ImageComponentWidget(this, panelText, img, idx);
-
-		if (cw.getComponent().isFit()) {
-			double scale = panelText.width / (double) cw.width;
-			cw.setSize((int) (cw.width * scale), (int) (cw.height * scale));
-		} else if (cw.getComponent().getAlign() == ImageComponent.ImageAlign.CENTER) {
-			cw.setX((panelText.width - cw.width) / 2);
-		} else if (cw.getComponent().getAlign() == ImageComponent.ImageAlign.RIGHT) {
-			cw.setX(panelText.width - cw.width);
-		} else {
-			cw.setX(0);
-		}
-		return cw;
 	}
 
 	private void addButtonBar(boolean canEdit) {
