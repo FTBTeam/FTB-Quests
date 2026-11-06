@@ -184,6 +184,8 @@ public class QuestScreen extends BaseScreen {
 				questPanel.resetScroll();
 			}
 			questPanel.bezierController.deactivate(false);
+			questPanel.resizeController.cancelQuietly();
+			questPanel.rotationController.cancelQuietly();
 			chapterPanel.keepChapterInView(selectedChapter);
 			PinnedQuestsTracker.INSTANCE.refresh();
 		}
@@ -275,6 +277,9 @@ public class QuestScreen extends BaseScreen {
 					b -> initiateMoving(movable),
 					Component.translatable("ftbquests.gui.move_tooltip").withStyle(ChatFormatting.DARK_GRAY))
 			);
+			if (movable.isResizable()) {
+				contextMenu.add(questPanel.createResizeMenuItem(movable));
+			}
 		}
 
 		if (object instanceof QuestLink link) {
@@ -589,6 +594,12 @@ public class QuestScreen extends BaseScreen {
 					return true;
 				}
 			}
+			if (questPanel.isGeometryEditActive()) {
+				if (key.enter() || key.esc()) {
+					questPanel.finishInteractiveEdit(key.enter());
+					return true;
+				}
+			}
 
 			if (key.matches(FTBQuestsKeyMappings.KEY_GUI_RELOAD_THEME)) {
 				reloadTheme(!isShiftKeyDown());
@@ -652,7 +663,7 @@ public class QuestScreen extends BaseScreen {
 			}
 		}
 
-		if (key.esc() && !selectedObjects.isEmpty() && !anyModalPanelOpen() && !questPanel.bezierController.isActive()) {
+		if (key.esc() && !selectedObjects.isEmpty() && !anyModalPanelOpen() && !questPanel.isInteractiveEditActive()) {
 			selectedObjects.clear();
 			return true;
 		} else if (super.keyPressed(key)) {

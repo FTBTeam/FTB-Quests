@@ -35,6 +35,7 @@ import org.joml.Matrix4f;
 import org.lwjgl.glfw.GLFW;
 
 import java.util.*;
+import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
@@ -54,11 +55,16 @@ public class QuestPanel extends Panel {
 	private double questMaxX;
 	private double questMaxY;
 	final BezierController bezierController;
+	final ResizeController resizeController;
+	final RotationController rotationController;
+	private boolean boundsFrozen = false;
 
 	public QuestPanel(Panel panel) {
 		super(panel);
 		questScreen = (QuestScreen) panel.getGui();
 		bezierController = new BezierController();
+		resizeController = new ResizeController();
+		rotationController = new RotationController();
 	}
 
 	@Override
@@ -74,6 +80,11 @@ public class QuestPanel extends Panel {
 	}
 
 	public void updateMinMax() {
+		if (boundsFrozen) {
+			// while interactively resizing, keep the coordinate frame stable so the drag handle doesn't shift under the mouse
+			return;
+		}
+
 		questMinX = Double.POSITIVE_INFINITY;
 		questMinY = Double.POSITIVE_INFINITY;
 		questMaxX = Double.NEGATIVE_INFINITY;
@@ -142,6 +153,8 @@ public class QuestPanel extends Panel {
 
 		add(bezierController.control0);
 		add(bezierController.control1);
+		add(resizeController.handle);
+		add(rotationController.handle);
 	}
 
 	@Override
@@ -170,16 +183,59 @@ public class QuestPanel extends Panel {
 
 				double x = (qx - questMinX - qw / 2D) * (bs + bp) + bp / 2D + bp * (qw - 1D) / 2D;
 				double y = (qy - questMinY - qh / 2D) * (bs + bp) + bp / 2D + bp * (qh - 1D) / 2D;
-				w.setPosAndSize((int) Math.round(x), (int) Math.round(y), (int) Math.round(bs * qw), (int) Math.round(bs * qh));
+				// round edges rather than origin + size, so widgets sharing a center/edge round consistently
+				int left = (int) Math.round(x);
+				int top = (int) Math.round(y);
+				int right = (int) Math.round(x + bs * qw);
+				int bottom = (int) Math.round(y + bs * qh);
+				w.setPosAndSize(left, top, right - left, bottom - top);
 
 				if (w instanceof QuestButton qb) {
+					qb.setExactCenter(x + bs * qw / 2D, y + bs * qh / 2D);
 					qb.positionControlPoints();
 					bezierController.repositionControlButtons(qb);
 				}
 			}
 		}
 
+		resizeController.repositionHandle();
+		rotationController.repositionHandle();
+
 		setPosAndSize(20, 1, questScreen.width - 40, questScreen.height - 2);
+	}
+
+	/**
+	 * {@return true if the user is in the middle of an interactive edit (bezier control points or resizing)}
+	 */
+	boolean isInteractiveEditActive() {
+		return bezierController.isActive() || isGeometryEditActive();
+	}
+
+	/**
+	 * {@return true if a resize or rotate operation is in progress}
+	 */
+	boolean isGeometryEditActive() {
+		return resizeController.isActive() || rotationController.isActive();
+	}
+
+	void finishInteractiveEdit(boolean accepted) {
+		if (bezierController.isActive()) {
+			bezierController.deactivate(accepted);
+		}
+		if (resizeController.isActive()) {
+			resizeController.deactivate(accepted);
+		}
+		if (rotationController.isActive()) {
+			rotationController.deactivate(accepted);
+		}
+	}
+
+	ContextMenuItem createRotateMenuItem(Movable movable) {
+		return new ContextMenuItem(Component.translatable("ftbquests.gui.rotate"), Icons.REFRESH, b -> rotationController.activate(movable));
+	}
+
+	ContextMenuItem createResizeMenuItem(Movable movable) {
+		return new ContextMenuItem(Component.translatable("ftbquests.gui.resize"), Icons.RESIZE, b -> resizeController.activate(movable));
 	}
 
 	@Override
@@ -273,10 +329,10 @@ public class QuestPanel extends Panel {
 	}
 
 	private void renderConnection(QuestButton startWidget, QuestButton endWidget, PoseStack poseStack, float s, int r, int g, int b, int a, int a1, float mu, Tesselator tesselator) {
-		double sx = startWidget.getX() + startWidget.width / 2.0;
-		double sy = startWidget.getY() + startWidget.height / 2.0;
-		double ex = endWidget.getX() + endWidget.width / 2.0;
-		double ey = endWidget.getY() + endWidget.height / 2.0;
+		double sx = startWidget.getCenterX();
+		double sy = startWidget.getCenterY();
+		double ex = endWidget.getCenterX();
+		double ey = endWidget.getCenterY();
 		float dist = (float) MathUtils.dist(sx, sy, ex, ey);
 		var points = startWidget.getConnectionPoints(endWidget, dist);
 
@@ -345,6 +401,13 @@ public class QuestPanel extends Panel {
 			double snap = 1D / (questScreen.file.getGridScale() * minSize);
 			questX = Mth.floor(questXunsnapped * snap + 0.5D) / snap;
 			questY = Mth.floor(questYunsnapped * snap + 0.5D) / snap;
+		}
+
+		if (resizeController.isActive()) {
+			resizeController.drawHelp(graphics, theme, x, y, w);
+		}
+		if (rotationController.isActive()) {
+			rotationController.drawHelp(graphics, theme, x, y, w);
 		}
 
 		if (questScreen.selectedChapter != null && isMouseOver()) {
@@ -508,7 +571,7 @@ public class QuestPanel extends Panel {
 			return true;
 		}
 
-		if (button.isRight() && questScreen.file.canEdit() && !bezierController.isActive()) {
+		if (button.isRight() && questScreen.file.canEdit() && !isInteractiveEditActive()) {
 			playClickSound();
 			List<ContextMenuItem> contextMenu = new ArrayList<>();
 			double qx = questX;
@@ -691,6 +754,27 @@ public class QuestPanel extends Panel {
 					Component.literal(QuestObjectBase.getCodeString(quest.id)).withStyle(ChatFormatting.DARK_GRAY)
 			);
 		}
+	}
+
+	private void drawHelpPanel(Theme theme, GuiGraphics graphics, List<Component> lines) {
+		int textW = 0;
+		for (Component c : lines) {
+			textW = Math.max(textW, theme.getStringWidth(c));
+		}
+		int lineH = 10;
+		int boxW = textW + 8;
+		int boxH = lines.size() * lineH + 6;
+		int bx = getX() + getWidth() - boxW - 6;
+		int by = getY() + 6;
+
+		// lift above rendered items (which are drawn at an elevated Z level)
+		graphics.pose().pushPose();
+		graphics.pose().translate(0, 0, QuestScreen.Z_LEVEL + 100);
+		Color4I.BLACK.withAlpha(150).draw(graphics, bx, by, boxW, boxH);
+		for (int i = 0; i < lines.size(); i++) {
+			graphics.drawString(theme.getFont(), lines.get(i), bx + 4, by + 4 + i * lineH, 0xFFFFFFFF);
+		}
+		graphics.pose().popPose();
 	}
 
 	class BezierController {
@@ -889,6 +973,408 @@ public class QuestPanel extends Panel {
 				setPos((int) Math.round(startPosition.x()), (int) Math.round(startPosition.y()));
 			}
 			active = false;
+		}
+	}
+
+	class ResizeController {
+		private static final double SNAP = 0.0625D;
+
+		private final DragHandle handle = new DragHandle(this::dragTo, () -> deactivate(true));
+
+		@Nullable
+		private Data data = null;
+
+		public boolean isActive() {
+			return data != null;
+		}
+
+		public void activate(Movable movable) {
+			if (data == null && movable.isResizable()) {
+				data = new Data(movable, movable.getWidth(), movable.getHeight());
+				boundsFrozen = true;
+				handle.active = true;
+				repositionHandle();
+			}
+		}
+
+		public void deactivate(boolean accept) {
+			if (data == null) {
+				return;
+			}
+			Data d = data;
+			data = null;
+			handle.active = false;
+			handle.dragging = false;
+			if (accept) {
+				if (d.movable.getWidth() != d.savedW || d.movable.getHeight() != d.savedH) {
+					var qo = questScreen.file.getBase(d.movable.getMovableID());
+					if (qo != null) {
+						NetworkManager.sendToServer(EditObjectMessage.forQuestObject(qo));
+					}
+				}
+			} else {
+				d.movable.setDimensions(d.savedW, d.savedH);
+			}
+			boundsFrozen = false;
+			// bounds may have changed as a result of the resize; re-layout without visibly moving the view
+			withPreservedPos(QuestPanel::alignWidgets);
+		}
+
+		/**
+		 * Cancel without re-laying out, for use when the chapter is changing under us
+		 **/
+		public void cancelQuietly() {
+			if (data != null) {
+				data.movable.setDimensions(data.savedW, data.savedH);
+				data = null;
+				handle.active = false;
+				handle.dragging = false;
+				boundsFrozen = false;
+			}
+		}
+
+		static String fmt(double d) {
+			String s = String.format(java.util.Locale.ROOT, "%.4f", d);
+			return s.contains(".") ? s.replaceAll("0+$", "").replaceAll("\\.$", "") : s;
+		}
+
+		private void drawHelp(GuiGraphics graphics, Theme theme, int x, int y, int w) {
+			if (data != null) {
+				List<Component> lines = new ArrayList<>();
+				lines.add(Component.translatable("ftbquests.gui.resize_size",
+						fmt(data.movable.getWidth()), fmt(data.movable.getHeight())).withStyle(ChatFormatting.WHITE));
+				if (data.movable.isFreeformResizable()) {
+					lines.add(Component.translatable("ftbquests.gui.resize_hint_shift")
+							.withStyle(isShiftKeyDown() ? ChatFormatting.YELLOW : ChatFormatting.GRAY));
+				}
+				lines.add(Component.translatable("ftbquests.gui.resize_hint_ctrl")
+						.withStyle(isCtrlKeyDown() ? ChatFormatting.YELLOW : ChatFormatting.GRAY));
+				lines.add(Component.translatable("ftbquests.gui.resize_hint_cancel").withStyle(ChatFormatting.GRAY));
+
+				drawHelpPanel(theme, graphics, lines);
+			}
+		}
+
+		/**
+		 * Center of the resized object, in panel-local pixels
+		 **/
+		private Vec2d center(Movable m) {
+			double pitch = questScreen.getQuestButtonSize() + questScreen.getQuestButtonSpacing();
+			return new Vec2d((m.getX() - questMinX) * pitch, (m.getY() - questMinY) * pitch);
+		}
+
+		/**
+		 * Position the drag handle on the bottom-right corner of the object, taking rotation into account
+		 **/
+		public void repositionHandle() {
+			if (data == null) {
+				return;
+			}
+			Movable m = data.movable;
+			double bs = questScreen.getQuestButtonSize();
+			double pw = bs * m.getWidth();
+			double ph = bs * m.getHeight();
+			Vec2d c = center(m);
+			double rad = Math.toRadians(m.getRotation());
+			double cos = Math.cos(rad), sin = Math.sin(rad);
+
+			// pivot of rotation is the top-left corner for corner-aligned objects, otherwise the center
+			double hx, hy;
+			if (m.isAlignToCorner()) {
+				hx = c.x() - pw / 2D + (pw * cos - ph * sin);
+				hy = c.y() - ph / 2D + (pw * sin + ph * cos);
+			} else {
+				hx = c.x() + (pw / 2D * cos - ph / 2D * sin);
+				hy = c.y() + (pw / 2D * sin + ph / 2D * cos);
+			}
+			handle.setPos((int) Math.round(hx), (int) Math.round(hy));
+		}
+
+		/**
+		 * Called as the handle is dragged; (mx, my) is the mouse position in panel-local pixels
+		 **/
+		private void dragTo(double mx, double my) {
+			if (data == null) {
+				return;
+			}
+			Movable m = data.movable;
+			double bs = questScreen.getQuestButtonSize();
+			Vec2d c = center(m);
+			double dx = mx - c.x();
+			double dy = my - c.y();
+			double rad = Math.toRadians(m.getRotation());
+			double cos = Math.cos(rad), sin = Math.sin(rad);
+
+			// convert mouse offset into the object's own (unrotated) frame, giving full width/height in pixels
+			double pw, ph;
+			if (m.isAlignToCorner()) {
+				// solve (R - 0.5I)(w,h) = d; the rotation pivot (top-left corner) moves as the size changes
+				double a = cos - 0.5D;
+				double det = a * a + sin * sin;
+				pw = (a * dx + sin * dy) / det;
+				ph = (-sin * dx + a * dy) / det;
+			} else {
+				pw = 2D * Math.abs(dx * cos + dy * sin);
+				ph = 2D * Math.abs(-dx * sin + dy * cos);
+			}
+
+			double w = pw / bs;
+			double h = ph / bs;
+			double min = m.getMinSize();
+			double max = m.getMaxSize();
+
+			if (!m.isFreeformResizable()) {
+				w = h = (w + h) / 2D;
+			} else if (isShiftKeyDown()) {
+				// lock to the aspect ratio the object had when the resize started
+				double k = Math.max(w / data.savedW, h / data.savedH);
+				double kMin = Math.max(min / data.savedW, min / data.savedH);
+				double kMax = Math.min(max / data.savedW, max / data.savedH);
+				k = Mth.clamp(k, kMin, Math.max(kMin, kMax));
+				w = data.savedW * k;
+				h = data.savedH * k;
+			}
+
+			if (!isShiftKeyDown() || !m.isFreeformResizable()) {
+				if (!isCtrlKeyDown()) {
+					w = Math.round(w / SNAP) * SNAP;
+					h = Math.round(h / SNAP) * SNAP;
+				}
+				w = Mth.clamp(w, min, max);
+				h = Mth.clamp(h, min, max);
+				if (!m.isFreeformResizable()) {
+					h = w;
+				}
+			}
+
+			m.setDimensions(w, h);
+			alignWidgets();
+		}
+
+		private record Data(Movable movable, double savedW, double savedH) {
+		}
+	}
+
+	class RotationController {
+		private static final double SNAP_DEGREES = 15D;
+		private static final double HANDLE_DISTANCE = 24D;  // pixels beyond the top edge of the image
+
+		private final DragHandle handle = new DragHandle(this::dragTo, () -> deactivate(true));
+
+		@Nullable
+		private Data data = null;
+
+		RotationController() {
+			handle.lineFrom = () -> data == null ? Vec2d.ZERO : pivot(data.movable);
+		}
+
+		public boolean isActive() {
+			return data != null;
+		}
+
+		public void activate(Movable movable) {
+			if (data == null && movable.isRotatable()) {
+				data = new Data(movable, movable.getRotation());
+				handle.active = true;
+				repositionHandle();
+			}
+		}
+
+		public void deactivate(boolean accept) {
+			if (data == null) {
+				return;
+			}
+			Data d = data;
+			data = null;
+			handle.active = false;
+			handle.dragging = false;
+			if (accept) {
+				if (d.movable.getRotation() != d.savedRotation) {
+					var qo = questScreen.file.getBase(d.movable.getMovableID());
+					if (qo != null) {
+						NetworkManager.sendToServer(EditObjectMessage.forQuestObject(qo));
+					}
+				}
+			} else {
+				d.movable.setRotation(d.savedRotation);
+				alignWidgets();
+			}
+		}
+
+		public void cancelQuietly() {
+			if (data != null) {
+				data.movable.setRotation(data.savedRotation);
+				data = null;
+				handle.active = false;
+				handle.dragging = false;
+			}
+		}
+
+		private Vec2d center(Movable m) {
+			double pitch = questScreen.getQuestButtonSize() + questScreen.getQuestButtonSpacing();
+			return new Vec2d((m.getX() - questMinX) * pitch, (m.getY() - questMinY) * pitch);
+		}
+
+		/**
+		 * The point the image rotates about, in panel-local pixels: its top-left corner if corner-aligned, else its center
+		 **/
+		private Vec2d pivot(Movable m) {
+			Vec2d c = center(m);
+			if (m.isAlignToCorner()) {
+				double bs = questScreen.getQuestButtonSize();
+				return new Vec2d(c.x() - bs * m.getWidth() / 2D, c.y() - bs * m.getHeight() / 2D);
+			}
+			return c;
+		}
+
+		/**
+		 * Vector from the pivot to the handle when the image is unrotated
+		 **/
+		private Vec2d baseVector(Movable m) {
+			double bs = questScreen.getQuestButtonSize();
+			double pw = bs * m.getWidth();
+			double ph = bs * m.getHeight();
+			return m.isAlignToCorner() ?
+					new Vec2d(pw / 2D, -HANDLE_DISTANCE) :
+					new Vec2d(0D, -(ph / 2D + HANDLE_DISTANCE));
+		}
+
+		public void repositionHandle() {
+			if (data == null) {
+				return;
+			}
+			Movable m = data.movable;
+			Vec2d p = pivot(m);
+			Vec2d v = baseVector(m);
+			double rad = Math.toRadians(m.getRotation());
+			double cos = Math.cos(rad), sin = Math.sin(rad);
+			handle.setPos((int) Math.round(p.x() + v.x() * cos - v.y() * sin), (int) Math.round(p.y() + v.x() * sin + v.y() * cos));
+		}
+
+		private void dragTo(double mx, double my) {
+			if (data == null) {
+				return;
+			}
+			Movable m = data.movable;
+			Vec2d p = pivot(m);
+			Vec2d v = baseVector(m);
+			double deg = Math.toDegrees(Math.atan2(my - p.y(), mx - p.x()) - Math.atan2(v.y(), v.x()));
+
+			if (!isCtrlKeyDown()) {
+				deg = Math.round(deg / SNAP_DEGREES) * SNAP_DEGREES;
+			} else {
+				deg = Math.round(deg * 10D) / 10D;
+			}
+			// normalise into (-180, 180]
+			deg = deg % 360D;
+			if (deg > 180D) deg -= 360D;
+			if (deg <= -180D) deg += 360D;
+
+			m.setRotation(deg);
+			repositionHandle();
+		}
+
+		private void drawHelp(GuiGraphics graphics, Theme theme, int x, int y, int w) {
+			if (data != null) {
+				drawHelpPanel(theme, graphics, List.of(
+						Component.translatable("ftbquests.gui.rotate_angle", ResizeController.fmt(data.movable.getRotation())).withStyle(ChatFormatting.WHITE),
+						Component.translatable("ftbquests.gui.rotate_hint_ctrl").withStyle(isCtrlKeyDown() ? ChatFormatting.YELLOW : ChatFormatting.GRAY),
+						Component.translatable("ftbquests.gui.resize_hint_cancel").withStyle(ChatFormatting.GRAY)
+				));
+			}
+		}
+
+		private record Data(Movable movable, double savedRotation) {
+		}
+	}
+
+	/**
+	 * A small draggable marker used by the interactive resize and rotate controllers. Mouse positions passed to the
+	 * drag callback are in panel-local pixels; the release callback is invoked once at the end of a drag gesture.
+	 */
+	private class DragHandle extends Button {
+		private final BiConsumer<Double, Double> onDrag;
+		private final Runnable onRelease;
+		@Nullable
+		private Supplier<Vec2d> lineFrom = null;  // if set, draw a guide line from this panel-local point to the handle
+		private boolean active = false;
+		private boolean dragging = false;
+
+		public DragHandle(BiConsumer<Double, Double> onDrag, Runnable onRelease) {
+			super(QuestPanel.this, Component.empty(), Icons.MARKER);
+			this.onDrag = onDrag;
+			this.onRelease = onRelease;
+			setSize(12, 12);
+		}
+
+		@Override
+		public boolean checkMouseOver(int mouseX, int mouseY) {
+			return super.checkMouseOver(mouseX + width / 2, mouseY + height / 2);
+		}
+
+		@Override
+		public void drawBackground(GuiGraphics graphics, Theme theme, int x, int y, int w, int h) {
+		}
+
+		@Override
+		public void draw(GuiGraphics graphics, Theme theme, int x, int y, int w, int h) {
+			if (lineFrom != null) {
+				Vec2d from = lineFrom.get();
+				int x0 = QuestPanel.this.getX() + (int) Math.round(from.x());
+				int y0 = QuestPanel.this.getY() + (int) Math.round(from.y());
+				float angle = (float) Mth.atan2(y - y0, x - x0);
+				float len = (float) Math.sqrt((x - x0) * (x - x0) + (y - y0) * (y - y0));
+				graphics.pose().pushPose();
+				graphics.pose().translate(x0, y0, 0);
+				graphics.pose().mulPose(Axis.ZP.rotation(angle));
+				graphics.hLine(0, (int) len, 0, 0x40A0A0FF);
+				graphics.pose().popPose();
+			}
+			graphics.pose().pushPose();
+			graphics.pose().translate(0, 0, QuestScreen.Z_LEVEL);
+			super.draw(graphics, theme, x - w / 2, y - h / 2, w, h);
+			graphics.pose().popPose();
+		}
+
+		@Override
+		public boolean mouseDragged(int button, double dragX, double dragY) {
+			if (active && dragging) {
+				onDrag.accept((double) (getMouseX() - QuestPanel.this.getX()), (double) (getMouseY() - QuestPanel.this.getY()));
+				return true;
+			}
+			return super.mouseDragged(button, dragX, dragY);
+		}
+
+		@Override
+		public boolean mousePressed(MouseButton button) {
+			if (active && isMouseOver && button.isLeft()) {
+				dragging = true;
+				return true;
+			}
+			return super.mousePressed(button);
+		}
+
+		@Override
+		public void mouseReleased(MouseButton button) {
+			if (dragging) {
+				// one drag gesture = one resize; commit on release
+				dragging = false;
+				onRelease.run();
+			}
+		}
+
+		@Override
+		public void onClicked(MouseButton button) {
+		}
+
+		@Override
+		public boolean isEnabled() {
+			return active;
+		}
+
+		@Override
+		public boolean shouldDraw() {
+			return active;
 		}
 	}
 }
