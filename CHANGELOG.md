@@ -7,11 +7,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [2101.1.39]
 
 ### Added
+* Quests and images can now be interactively resized & rotated, via the context menu
+* WebP images, including animations, are now supported
+  * Animated images can be added to quest descriptions; background images only support static WebP images
 * Observation tasks now support fluid blocks, e.g. `minecraft:water`
+* Adding images with non-square aspect ratios now works much better; no need to manually resize images to fix aspect ratio anymore
+  * Thanks to changes around image discovery in FTB Library 2101.1.40+ 
 
 ### Fixed
 * Ensure response packets for create/delete/edit operations go to _all_ players, not just quest book editors
 * Fixed server being too trusting of client about observation task progress
+* Fixed some arithmetic issues causing quest connection lines to sometimes render crooked, based on button size and zoom level
+* Fixed "Insert Line" and "Insert Image" translations being swapped (showed up in the keybinds GUI)
 
 ## [2101.1.38]
 
