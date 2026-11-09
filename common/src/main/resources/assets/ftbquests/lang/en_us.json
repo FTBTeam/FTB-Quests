@@ -491,6 +491,8 @@
 	"ftbquests.task.ftbquests.tech_reborn_energy.value": "E",
 	"ftbquests.task.ftbquests.tech_reborn_energy.text": "%d E",
 	"ftbquests.task.ftbquests.custom": "Custom",
+	"ftbquests.task.ftbquests.custom.recipe_focus": "Recipe Focus Item",
+	"ftbquests.task.ftbquests.custom.recipe_focus.tooltip": "If non-empty, show recipes for this item in your active recipe viewer mod when the task is clicked\nMay be useful if there's a related item for this custom task",
 	"ftbquests.task.ftbquests.xp": "XP Levels",
 	"ftbquests.task.ftbquests.xp.value": "XP",
 	"ftbquests.task.ftbquests.xp.points": "Points",
