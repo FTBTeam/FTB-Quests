@@ -17,6 +17,7 @@ import dev.ftb.mods.ftblibrary.icon.Icon;
 import dev.ftb.mods.ftblibrary.json5.Json5Util;
 import dev.ftb.mods.ftblibrary.math.Bits;
 import dev.ftb.mods.ftblibrary.platform.event.NativeEventPosting;
+import dev.ftb.mods.ftblibrary.platform.network.Play2ServerNetworking;
 import dev.ftb.mods.ftblibrary.util.Vec2d;
 import dev.ftb.mods.ftbquests.FTBQuests;
 import dev.ftb.mods.ftbquests.api.event.progress.ProgressEventData;
@@ -26,6 +27,7 @@ import dev.ftb.mods.ftbquests.client.config.EditableQuestObject;
 import dev.ftb.mods.ftbquests.client.gui.MultilineTextEditorScreen;
 import dev.ftb.mods.ftbquests.client.gui.quests.QuestScreen;
 import dev.ftb.mods.ftbquests.integration.RecipeModHelper;
+import dev.ftb.mods.ftbquests.net.EditObjectMessage;
 import dev.ftb.mods.ftbquests.quest.preset.VisualPreset;
 import dev.ftb.mods.ftbquests.quest.reward.Reward;
 import dev.ftb.mods.ftbquests.quest.task.Task;
@@ -33,6 +35,7 @@ import dev.ftb.mods.ftbquests.quest.translation.TranslationKey;
 import dev.ftb.mods.ftbquests.util.FTBQCodecs;
 import dev.ftb.mods.ftbquests.util.ProgressChange;
 import dev.ftb.mods.ftbquests.util.TextUtils;
+import it.unimi.dsi.fastutil.longs.Long2BooleanOpenHashMap;
 import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.longs.LongOpenHashSet;
 import it.unimi.dsi.fastutil.longs.LongSet;
@@ -55,6 +58,8 @@ public final class Quest extends QuestObject implements Movable, Excludable {
 
 	public static final Codec<Map<Long, Pair<Vec2d, Vec2d>>> CONTROL_POINTS_CODEC
 			= Codec.unboundedMap(FTBQCodecs.QUEST_ID_CODEC, Vec2d.PAIR_CODEC);
+	public static final Codec<Map<Long, Boolean>> DEP_LINE_VIS_CODEC
+			= Codec.unboundedMap(FTBQCodecs.QUEST_ID_CODEC, Codec.BOOL);
 	public static final StreamCodec<FriendlyByteBuf, Map<Long, Pair<Vec2d, Vec2d>>> CONTROL_POINTS_STREAM_CODEC
 			= ByteBufCodecs.map(HashMap::new, ByteBufCodecs.VAR_LONG, FTBQCodecs.pair(Vec2d.STREAM_CODEC, Vec2d.STREAM_CODEC));
 
@@ -69,13 +74,14 @@ public final class Quest extends QuestObject implements Movable, Excludable {
 	private Tristate hideUntilDepsComplete;
 	private String shape;
 	private final List<QuestObject> dependencies;
-	private final Map<Long, Pair<Vec2d, Vec2d>> depControlPoints;  // for bezier curved depenendency lines
+	private final Map<Long, Pair<Vec2d, Vec2d>> depControlPoints;  // for bezier curved dependency lines
+	private final Map<Long, Boolean> depLineVisibility;  // dependency line visibility: absent => default to shouldHideDependencyLines()
 	private final List<Task> tasks;
 	private final List<Reward> rewards;
 	private DependencyRequirement dependencyRequirement;
 	private String guidePage;
-	private Tristate hideDependencyLines;
-	private boolean hideDependentLines;
+	private Tristate hideDependencyLines;  // dependency lines are lines pointing to us
+	private boolean hideDependentLines;    // dependent lines are lines pointing from us
 	private int minRequiredDependencies;
 	private Tristate hideTextUntilComplete;
 	private Tristate disableJEI;
@@ -117,6 +123,7 @@ public final class Quest extends QuestObject implements Movable, Excludable {
 		shape = "";
 		dependencies = new ArrayList<>(0);
 		depControlPoints = new Long2ObjectOpenHashMap<>();
+		depLineVisibility = new Long2BooleanOpenHashMap();
 		tasks = new ArrayList<>(1);
 		rewards = new ArrayList<>(1);
 		guidePage = "";
@@ -327,6 +334,7 @@ public final class Quest extends QuestObject implements Movable, Excludable {
 		if (maxCompletableDeps > 0) json.addProperty("max_completable_dependents", maxCompletableDeps);
 		if (repeatCooldown > 0) json.addProperty("repeat_cooldown", repeatCooldown);
 		if (!presetName.isEmpty()) json.addProperty("preset", presetName);
+		if (!depLineVisibility.isEmpty()) Json5Util.store(json, "dep_line_visibility", DEP_LINE_VIS_CODEC, depLineVisibility);
 	}
 
 	@Override
@@ -348,6 +356,7 @@ public final class Quest extends QuestObject implements Movable, Excludable {
 		clearDependencies();
 		Json5Util.fetch(json, "dependencies", FTBQCodecs.QUEST_ID_CODEC.listOf()).ifPresent(ids -> ids.forEach(this::addDependency));
 		Json5Util.fetch(json, "dep_control_pts", CONTROL_POINTS_CODEC).ifPresent(depControlPoints::putAll);
+		Json5Util.fetch(json, "dep_line_visibility", DEP_LINE_VIS_CODEC).ifPresent(depLineVisibility::putAll);
 
 		hideUntilDepsVisible = Tristate.read(json, "hide_until_deps_visible");
 		hideUntilDepsComplete = Tristate.read(json, "hide_until_deps_complete");
@@ -419,6 +428,7 @@ public final class Quest extends QuestObject implements Movable, Excludable {
 
 		FTBQCodecs.LONG_LIST_STREAM_CODEC.encode(buffer, dependencies.stream().filter(QuestObjectBase::isValid).map(QuestObject::getId).toList());
 		CONTROL_POINTS_STREAM_CODEC.encode(buffer, depControlPoints);
+		FTBQCodecs.LONG_BOOL_MAP_STREAM_CODEC.encode(buffer, depLineVisibility);
 
 		if (size != 0D) {
 			buffer.writeDouble(size);
@@ -467,6 +477,7 @@ public final class Quest extends QuestObject implements Movable, Excludable {
 		clearDependencies();
 		FTBQCodecs.LONG_LIST_STREAM_CODEC.decode(buffer).forEach(this::addDependency);
 		depControlPoints.putAll(CONTROL_POINTS_STREAM_CODEC.decode(buffer));
+		depLineVisibility.putAll(FTBQCodecs.LONG_BOOL_MAP_STREAM_CODEC.decode(buffer));
 
 		size = Bits.getFlag(flags, 0x04) ? Mth.clamp(buffer.readDouble(), 0, MAX_QUEST_SIZE) : 0D;
 		iconScale = Bits.getFlag(flags, 0x20000) ? Mth.clamp(buffer.readDouble(), MIN_ICON_SCALE, MAX_ICON_SCALE) : 1D;
@@ -680,6 +691,10 @@ public final class Quest extends QuestObject implements Movable, Excludable {
 
 	public boolean shouldHideDependencyLines() {
 		return hideDependencyLines.get(chapter.defaultHideDependencyLines);
+	}
+
+	public boolean shouldHideDependencyLines(Quest dep) {
+        return depLineVisibility.containsKey(dep.getId()) ? !depLineVisibility.get(dep.getId()) : shouldHideDependencyLines();
 	}
 
 	public boolean shouldHideLockIcon() {
@@ -994,6 +1009,7 @@ public final class Quest extends QuestObject implements Movable, Excludable {
 		if (object instanceof Quest q) {
 			q.removeDependant(id);
 			depControlPoints.remove(id);
+			depLineVisibility.remove(id);
 		}
 	}
 
@@ -1018,6 +1034,7 @@ public final class Quest extends QuestObject implements Movable, Excludable {
 		});
 		dependencies.clear();
 		depControlPoints.clear();
+		depLineVisibility.clear();
 	}
 
 	private void addDependant(long id) {
@@ -1075,6 +1092,30 @@ public final class Quest extends QuestObject implements Movable, Excludable {
 	public int getRepeatCooldown() {
 		return repeatCooldown;
 	}
+
+    public Map<Long, Tristate> depLineVisibilityAsTristateMap() {
+		Map<Long, Tristate> res = new HashMap<>();
+		streamDependencies().forEach(dep -> {
+			if (depLineVisibility.containsKey(dep.getId())) {
+				res.put(dep.getId(), Tristate.ofBoolean(depLineVisibility.get(dep.getId())));
+			} else {
+				res.put(dep.getId(), Tristate.DEFAULT);
+			}
+		});
+		return res;
+    }
+
+    public void updateDepLineVisibilityFromGui(Map<Long, Tristate> value) {
+        if (!getQuestFile().isServerSide()) {
+			depLineVisibility.clear();
+			value.forEach((id, val) -> {
+				if (val != Tristate.DEFAULT && getQuestFile().getQuest(id) != null) {
+					depLineVisibility.put(id, val.isTrue());
+				}
+			});
+			Play2ServerNetworking.send(EditObjectMessage.forQuestObject(this));
+		}
+    }
 
 	@FunctionalInterface
 	private interface DependencyChecker {

@@ -4,15 +4,18 @@ import dev.ftb.mods.ftblibrary.client.config.ConfigCallback;
 import dev.ftb.mods.ftblibrary.client.config.Tristate;
 import dev.ftb.mods.ftblibrary.client.gui.input.MouseButton;
 import dev.ftb.mods.ftblibrary.client.gui.screens.AbstractButtonListScreen;
+import dev.ftb.mods.ftblibrary.client.gui.theme.Theme;
 import dev.ftb.mods.ftblibrary.client.gui.widget.Button;
 import dev.ftb.mods.ftblibrary.client.gui.widget.Panel;
 import dev.ftb.mods.ftblibrary.client.gui.widget.SimpleButton;
 import dev.ftb.mods.ftblibrary.client.gui.widget.TextField;
+import dev.ftb.mods.ftblibrary.icon.Color4I;
 import dev.ftb.mods.ftblibrary.icon.Icon;
 import dev.ftb.mods.ftblibrary.icon.Icons;
 import dev.ftb.mods.ftbquests.client.config.EditableTeamRewardByType;
 import dev.ftb.mods.ftbquests.quest.reward.RewardType;
 import dev.ftb.mods.ftbquests.quest.reward.RewardTypes;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
 
@@ -95,7 +98,7 @@ public class TeamRewardByTypeEditorScreen extends AbstractButtonListScreen {
                     return super.mousePressed(mb);
                 }
             }.setText(type.getDisplayName()));
-            add(button = new CyclerButton(this, this.type, val));
+            add(button = new CyclerButton<>(this, Tristate.NAME_MAP, val, newVal -> editingMap.put(type, newVal)));
         }
 
         @Override
@@ -104,31 +107,10 @@ public class TeamRewardByTypeEditorScreen extends AbstractButtonListScreen {
             nameField.setPosAndSize(widestName - nameField.width + 10, (16 - nameField.height) / 2, widestName, nameField.height);
             button.setPosAndSize(nameField.width + 15, 0, 16, 16);
         }
-    }
 
-    private class CyclerButton extends SimpleButton {
-        private final RewardType type;
-        private Tristate value;
-
-        public CyclerButton(Panel panel, RewardType type, Tristate value) {
-            super(panel, Component.empty(), getIcon(value), (_, _) -> {});
-            this.type = type;
-            this.value = value;
-            setConsumer((_, mb) -> cycleValue(mb));
-        }
-
-        private void cycleValue(MouseButton mb) {
-            value = mb.isLeft() ? Tristate.NAME_MAP.getNext(value) : Tristate.NAME_MAP.getPrevious(value);
-            editingMap.put(type, value);
-            setIcon(getIcon(value));
-        }
-
-        private static Icon<?> getIcon(Tristate tristate) {
-            return switch (tristate) {
-                case TRUE -> Icons.ACCEPT;
-                case FALSE -> Icons.CANCEL;
-                case DEFAULT -> Icons.REMOVE_GRAY;
-            };
+        @Override
+        public void drawBackground(GuiGraphicsExtractor graphics, Theme theme, int x, int y, int w, int h) {
+            graphics.horizontalLine(x, x + w, y + h, Color4I.GRAY.withAlpha(30).rgba());
         }
     }
 }

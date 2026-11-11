@@ -6,6 +6,7 @@ import com.mojang.serialization.codecs.RecordCodecBuilder;
 import com.mojang.util.UndashedUuid;
 import dev.ftb.mods.ftbquests.quest.QuestObjectBase;
 import dev.ftb.mods.ftbquests.quest.reward.Reward;
+import io.netty.buffer.ByteBuf;
 import net.minecraft.core.UUIDUtil;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
@@ -28,7 +29,7 @@ public record QuestKey(UUID uuid, long id) implements Comparable<QuestKey> {
 				}
 			}, QuestKey::toString);
 
-	public static final StreamCodec<FriendlyByteBuf, QuestKey> STREAM_CODEC = StreamCodec.composite(
+	public static final StreamCodec<ByteBuf, QuestKey> STREAM_CODEC = StreamCodec.composite(
 			UUIDUtil.STREAM_CODEC, QuestKey::uuid,
 			ByteBufCodecs.LONG, QuestKey::id,
 			QuestKey::new

@@ -22,6 +22,7 @@ import dev.ftb.mods.ftblibrary.platform.network.Play2ServerNetworking;
 import dev.ftb.mods.ftblibrary.util.TooltipList;
 import dev.ftb.mods.ftbquests.api.FTBQuestsAPI;
 import dev.ftb.mods.ftbquests.client.*;
+import dev.ftb.mods.ftbquests.client.config.EditableDepLineVisibility;
 import dev.ftb.mods.ftbquests.client.config.EditableQuestObject;
 import dev.ftb.mods.ftbquests.client.gui.CustomToast;
 import dev.ftb.mods.ftbquests.client.gui.FTBQuestsTheme;
@@ -334,14 +335,14 @@ public class QuestScreen extends BaseScreen {
 			contextMenu.add(delete);
 		}
 
-        if (object instanceof QuestObject qo) {
-            if (file.selfTeamData.isStarted(qo)) {
-                contextMenu.add(new TooltipContextMenuItem(Component.translatable("ftbquests.gui.reset_progress"),
-                        ThemeProperties.UNDO_ICON.get(),
-                        _ -> handleProgressChange(object, true),
+		if (object instanceof QuestObject qo) {
+			if (file.selfTeamData.isStarted(qo)) {
+				contextMenu.add(new TooltipContextMenuItem(Component.translatable("ftbquests.gui.reset_progress"),
+						ThemeProperties.UNDO_ICON.get(),
+						_ -> handleProgressChange(object, true),
 						FTBQuestsKeyMappings.KEY_GUI_RESET_OBJ
-                ));
-            }
+				));
+			}
 			if (!file.selfTeamData.isCompleted(qo)) {
 				contextMenu.add(new TooltipContextMenuItem(Component.translatable("ftbquests.gui.complete_instantly"),
 						ThemeProperties.CHECK_ICON.get(),
@@ -349,7 +350,7 @@ public class QuestScreen extends BaseScreen {
 						FTBQuestsKeyMappings.KEY_GUI_COMPLETE_OBJ
 				));
 			}
-        }
+		}
 
 		if (selectedChapter != null) {
 			if (selectedChapter.isAutofocus(object.id)) {
@@ -364,6 +365,11 @@ public class QuestScreen extends BaseScreen {
 		}
 
 		if (button instanceof QuestButton qb) {
+			if (qb.quest.streamDependencies().findFirst().isPresent()) {
+				contextMenu.add(new ContextMenuItem(Component.translatable("ftbquests.gui.dependency_line_visibility").append("..."),
+						Icons.VISIBILITY_SHOW,
+						_ -> openDepLineVisibilityScreen(qb)));
+			}
 			addBezierControlEntries(contextMenu, qb);
 		}
 
@@ -380,6 +386,15 @@ public class QuestScreen extends BaseScreen {
 				_ -> setClipboardString(object.getCodeString()),
 				tooltip)
 		);
+	}
+
+	private static void openDepLineVisibilityScreen(QuestButton qb) {
+		var editable = new EditableDepLineVisibility(qb.quest);
+		editable.onClicked(qb, MouseButton.LEFT, accepted -> {
+			if (accepted) {
+				qb.quest.updateDepLineVisibilityFromGui(editable.getValue());
+			}
+		});
 	}
 
 	private void addBezierControlEntries(List<ContextMenuItem> contextMenu, QuestButton qb) {

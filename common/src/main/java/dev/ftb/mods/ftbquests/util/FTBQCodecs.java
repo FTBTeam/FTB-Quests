@@ -14,6 +14,7 @@ import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
@@ -26,7 +27,7 @@ public class FTBQCodecs {
 
     public static final Codec<Map<Long,Long>> LONG_LONG_MAP_CODEC
             = Codec.unboundedMap(Codec.LONG, Codec.LONG).xmap(Long2LongOpenHashMap::new, Function.identity());
-    public static final StreamCodec<FriendlyByteBuf, Map<Long,Long>> LONG_LONG_MAP_STREAM_CODEC
+    public static final StreamCodec<ByteBuf, Map<Long,Long>> LONG_LONG_MAP_STREAM_CODEC
             = ByteBufCodecs.map(Long2LongOpenHashMap::new, ByteBufCodecs.LONG, ByteBufCodecs.LONG);
 
     public static final Codec<Map<Long,Integer>> LONG_INT_MAP_CODEC
@@ -42,16 +43,15 @@ public class FTBQCodecs {
 
     public static final StreamCodec<ByteBuf, List<Long>> LONG_LIST_STREAM_CODEC
             = ByteBufCodecs.LONG.apply(ByteBufCodecs.list());
+    public static final StreamCodec<ByteBuf, Map<Long, Boolean>> LONG_BOOL_MAP_STREAM_CODEC
+            = ByteBufCodecs.map(HashMap::new, ByteBufCodecs.VAR_LONG, ByteBufCodecs.BOOL);
 
-    public static final Codec<Long> QUEST_ID_CODEC = Codec.STRING.comapFlatMap(s -> {
-        try {
-            return DataResult.success(QuestObjectBase.parseCodeString(s));
-        } catch (NumberFormatException e) {
-            return DataResult.error(e::getMessage);
-        }
-    }, QuestObjectBase::getCodeString);
+    public static final Codec<Long> QUEST_ID_CODEC = Codec.STRING.comapFlatMap(
+            s -> QuestObjectBase.parseHexId(s)
+                    .map(DataResult::success)
+                    .orElseGet(() -> DataResult.error(() -> "invalid hex quest ID: " + s)),
+            QuestObjectBase::getCodeString);
 
-    // TODO move to Json5NetPacker?
     public static final StreamCodec<ByteBuf, Json5Object> JSON5_OBJECT_STREAM_CODEC = StreamCodec.of(
             Json5NetPacker::pack,
             Json5NetPacker::unpack
