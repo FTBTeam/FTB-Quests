@@ -15,6 +15,7 @@ import dev.ftb.mods.ftblibrary.util.TooltipList;
 import dev.ftb.mods.ftblibrary.util.client.ClientUtils;
 import dev.ftb.mods.ftbquests.api.FTBQuestsAPI;
 import dev.ftb.mods.ftbquests.client.*;
+import dev.ftb.mods.ftbquests.client.config.EditableDepLineVisibility;
 import dev.ftb.mods.ftbquests.client.gui.CustomToast;
 import dev.ftb.mods.ftbquests.client.gui.FTBQuestsTheme;
 import dev.ftb.mods.ftbquests.client.gui.RewardTablesScreen;
@@ -346,6 +347,11 @@ public class QuestScreen extends BaseScreen {
 		}
 
 		if (button instanceof QuestButton qb) {
+			if (qb.quest.streamDependencies().findFirst().isPresent()) {
+				contextMenu.add(new ContextMenuItem(Component.translatable("ftbquests.gui.dependency_line_visibility").append("..."),
+						Icons.VISIBILITY_SHOW,
+						b -> openDepLineVisibilityScreen(qb)));
+			}
 			addBezierControlEntries(contextMenu, qb);
 		}
 
@@ -362,6 +368,15 @@ public class QuestScreen extends BaseScreen {
 				b -> setClipboardString(object.getCodeString()),
 				tooltip)
 		);
+	}
+
+	private static void openDepLineVisibilityScreen(QuestButton qb) {
+		var editable = new EditableDepLineVisibility(qb.quest);
+		editable.onClicked(qb, MouseButton.LEFT, accepted -> {
+			if (accepted) {
+				qb.quest.updateDepLineVisibilityFromGui(editable.getValue());
+			}
+		});
 	}
 
 	private void addBezierControlEntries(List<ContextMenuItem> contextMenu, QuestButton qb) {

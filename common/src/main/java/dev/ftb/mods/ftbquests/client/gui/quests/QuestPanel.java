@@ -270,7 +270,7 @@ public class QuestPanel extends Panel {
 		// pass 1: render connections for all visible quests
 		float mu = (float) ((mt * ThemeProperties.DEPENDENCY_LINE_UNSELECTED_SPEED.get(questScreen.selectedChapter)) % 1D);
 		for (Widget widget : widgets) {
-			if (widget.shouldDraw() && widget instanceof QuestButton qb && (!qb.quest.shouldHideDependencyLines() || qb.isMouseOver())) {
+			if (widget.shouldDraw() && widget instanceof QuestButton qb) {
 				boolean unavailable = !questScreen.file.selfTeamData.canStartTasks(qb.quest);
 				boolean complete = !unavailable && questScreen.file.selfTeamData.isCompleted(qb.quest);
 				Color4I c = complete ?
@@ -281,7 +281,7 @@ public class QuestPanel extends Panel {
 						);
 
 				for (QuestButton button : qb.getDependencies().values()) {
-					if (button.shouldDraw() && button.quest != selectedQuest && qb.quest != selectedQuest && !button.quest.shouldHideDependentLines()) {
+					if (button.shouldDraw() && button.quest != selectedQuest && qb.quest != selectedQuest && !button.quest.shouldHideDependentLines() && !qb.quest.shouldHideDependencyLines(button.quest)) {
 						renderConnection(qb, button, graphics.pose(), lineWidth,
 								c.redi(), c.greeni(), c.bluei(), c.alphai(), c.alphai(),
 								mu, tesselator);
