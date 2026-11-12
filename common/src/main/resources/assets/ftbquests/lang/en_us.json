@@ -255,6 +255,8 @@
 	"ftbquests.quest.appearance.shape": "Shape",
 	"ftbquests.quest.appearance.preset": "Visual Preset",
 	"ftbquests.quest.appearance.preset.tooltip": "Visual preset to be used by this quest\nIf empty, also checks for chapter and file defaults\nIf non-empty, overrides the \"Shape\" and \"Size\" settings for this quest",
+	"ftbquests.quest_link.hide_dependency_lines": "Hide Dependency Lines",
+	"ftbquests.quest_link.hide_dependency_lines.tooltip": "Controls display of dependency lines pointing to this link. Default: follow the linked quest",
 	"ftbquests.quest_link.shape": "Shape",
 	"ftbquests.quest_link.size": "Size",
 	"ftbquests.quest_link.x": "X",

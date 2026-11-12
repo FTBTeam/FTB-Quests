@@ -124,10 +124,10 @@ public class QuestButton extends Button implements QuestPositionableButton {
 	private Long2ObjectMap<QuestButton> buildDependencies() {
 		Long2ObjectMap<QuestButton> deps = new Long2ObjectOpenHashMap<>();
 		quest.streamDependencies().forEach(dependency -> {
-			if (dependency.isValid() && dependency instanceof Quest) {
+			if (dependency.isValid() && dependency instanceof Quest depQuest) {
 				for (Widget widget : questScreen.questPanel.getWidgets()) {
-					if (widget instanceof QuestButton qb && dependency == qb.quest) {
-						deps.put(dependency.getId(), qb);
+					if (widget instanceof QuestButton qb && qb.isForQuest(depQuest)) {
+						deps.put(qb.theQuestObject().getId(), qb);
 					}
 				}
 			}
@@ -514,9 +514,10 @@ public class QuestButton extends Button implements QuestPositionableButton {
 		Vec2d ourPos = new Vec2d((float) getCenterX(), (float) getCenterY());
 		Vec2d otherPos = new Vec2d((float) other.getCenterX(), (float) other.getCenterY());
 
-		List<Vec2d> list = bezierCache.get(other.quest.getId());
+		List<Vec2d> list = bezierCache.get(other.theQuestObject().getId());
 		if (list == null) {
-			var controlPts = controlPoints.get(other.quest.getId());
+			// links never use Bézier curves; only real quests do
+			var controlPts = other.supportsCurvedConnections() ? controlPoints.get(other.quest.getId()) : null;
 			if (controlPts == null) {
 				// simple case - no control points, just a straight line from them to us
 				list = List.of(Vec2d.ZERO, otherPos.sub(ourPos));
@@ -537,7 +538,7 @@ public class QuestButton extends Button implements QuestPositionableButton {
 				}
 				list.add(otherPos.sub(ourPos));  // ensure connection doesn't stop short
 			}
-			bezierCache.put(other.quest.getId(), list);
+			bezierCache.put(other.theQuestObject().getId(), list);
 		}
 		return list;
 	}
@@ -551,6 +552,10 @@ public class QuestButton extends Button implements QuestPositionableButton {
 		// convert control point data in the quest to coordinates in the widget's screen space
 		controlPoints.clear();
 		bezierCache.clear();
+
+		if (!supportsCurvedConnections()) {
+			return;
+		}
 
 		var questControlPoints = quest.getBezierControlPoints();
 		if (questControlPoints.isEmpty()) {
@@ -573,5 +578,28 @@ public class QuestButton extends Button implements QuestPositionableButton {
 
 			controlPoints.put(id.longValue(), Pair.of(new Vec2d(x0, y0), new Vec2d(x1, y1)));
 		});
+	}
+
+	/** Whether connections to/from this button may use the quest's bezier control points (false for quest links) */
+	protected boolean supportsCurvedConnections() {
+		return true;
+	}
+
+	/** {@return true if lines pointing to this button should be hidden (unless hovered)} */
+	public boolean shouldHideDependencyLines() {
+		return quest.shouldHideDependencyLines();
+	}
+
+	/** {@return true if the line from the given dependency to this button should be hidden} */
+	public boolean shouldHideDependencyLines(Quest dep) {
+		return quest.shouldHideDependencyLines(dep);
+	}
+
+	public DepLineVisibilityProvider getDepLineVisibilityProvider() {
+		return quest;
+	}
+
+	public boolean isForQuest(Quest quest) {
+		return quest == this.quest;
 	}
 }

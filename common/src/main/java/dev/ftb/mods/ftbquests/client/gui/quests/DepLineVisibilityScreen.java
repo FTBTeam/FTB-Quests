@@ -66,7 +66,7 @@ public class DepLineVisibilityScreen extends AbstractButtonListScreen {
     @Override
     public boolean onInit() {
         setSize(
-                Math.max(getTheme().getStringWidth(getTitle()), widestName + 50),
+                Math.max(getTheme().getStringWidth(getTitle()), widestName) + 30,
                 Math.min(20 * (editingMap.size() + 1) + 50, getWindow().getGuiScaledHeight() * 3 / 4)
         );
         return true;

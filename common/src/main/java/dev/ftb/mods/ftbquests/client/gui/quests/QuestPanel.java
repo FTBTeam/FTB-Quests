@@ -281,7 +281,7 @@ public class QuestPanel extends Panel {
 						);
 
 				for (QuestButton button : qb.getDependencies().values()) {
-					if (button.shouldDraw() && button.quest != selectedQuest && qb.quest != selectedQuest && !button.quest.shouldHideDependentLines() && !qb.quest.shouldHideDependencyLines(button.quest)) {
+					if (button.shouldDraw() && button.quest != selectedQuest && qb.quest != selectedQuest && !button.quest.shouldHideDependentLines() && !qb.shouldHideDependencyLines(button.quest)) {
 						renderConnection(qb, button, graphics.pose(), lineWidth,
 								c.redi(), c.greeni(), c.bluei(), c.alphai(), c.alphai(),
 								mu, tesselator);
@@ -295,7 +295,7 @@ public class QuestPanel extends Panel {
 		float ms = (float) ((mt * ThemeProperties.DEPENDENCY_LINE_SELECTED_SPEED.get(questScreen.selectedChapter)) % 1D);
 		List<QuestButton> toOutline = new ArrayList<>();
 		for (Widget widget : widgets) {
-			if (widget.shouldDraw() && widget instanceof QuestButton qb && (!qb.quest.shouldHideDependencyLines() || qb.isMouseOver())) {
+			if (widget.shouldDraw() && widget instanceof QuestButton qb && (!qb.shouldHideDependencyLines() || qb.isMouseOver())) {
 				for (QuestButton button : qb.getDependencies().values()) {
 					if (button.shouldDraw()) {
 						if (button.quest == selectedQuest || button.isMouseOver()) {

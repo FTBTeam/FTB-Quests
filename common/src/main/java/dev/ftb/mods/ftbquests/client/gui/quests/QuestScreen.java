@@ -352,7 +352,9 @@ public class QuestScreen extends BaseScreen {
 						Icons.VISIBILITY_SHOW,
 						b -> openDepLineVisibilityScreen(qb)));
 			}
-			addBezierControlEntries(contextMenu, qb);
+			if (!(button instanceof QuestLinkButton)) {
+				addBezierControlEntries(contextMenu, qb);
+			}
 		}
 
 		Component[] tooltip = object instanceof Quest ?
@@ -371,10 +373,11 @@ public class QuestScreen extends BaseScreen {
 	}
 
 	private static void openDepLineVisibilityScreen(QuestButton qb) {
-		var editable = new EditableDepLineVisibility(qb.quest);
+		DepLineVisibilityProvider provider = qb.getDepLineVisibilityProvider();
+		var editable = new EditableDepLineVisibility(provider.depLineVisibilityAsTristateMap());
 		editable.onClicked(qb, MouseButton.LEFT, accepted -> {
 			if (accepted) {
-				qb.quest.updateDepLineVisibilityFromGui(editable.getValue());
+				provider.updateDepLineVisibilityFromGui(editable.getValue());
 			}
 		});
 	}

@@ -1,6 +1,7 @@
 package dev.ftb.mods.ftbquests.client.gui.quests;
 
 import dev.ftb.mods.ftblibrary.ui.Theme;
+import dev.ftb.mods.ftbquests.quest.DepLineVisibilityProvider;
 import dev.ftb.mods.ftbquests.quest.Quest;
 import dev.ftb.mods.ftbquests.quest.QuestLink;
 import dev.ftb.mods.ftbquests.quest.QuestObject;
@@ -39,8 +40,37 @@ public class QuestLinkButton extends QuestButton {
         }
     }
 
+    public QuestLink getLink() {
+        return link;
+    }
+
     @Override
     protected String getShape() {
         return link.getShape();
+    }
+
+    @Override
+    protected boolean supportsCurvedConnections() {
+        return false;
+    }
+
+    @Override
+    public boolean shouldHideDependencyLines() {
+        return link.shouldHideDependencyLines();
+    }
+
+    @Override
+    public boolean shouldHideDependencyLines(Quest dep) {
+        return link.shouldHideDependencyLines(dep);
+    }
+
+    @Override
+    public DepLineVisibilityProvider getDepLineVisibilityProvider() {
+        return link;
+    }
+
+    @Override
+    public boolean isForQuest(Quest quest) {
+        return link.linksTo(quest);
     }
 }

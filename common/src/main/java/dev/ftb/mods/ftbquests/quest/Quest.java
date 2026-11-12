@@ -49,7 +49,7 @@ import java.util.*;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
 
-public final class Quest extends QuestObject implements Movable, Excludable {
+public final class Quest extends QuestObject implements Movable, Excludable, DepLineVisibilityProvider {
 	public static final String PAGEBREAK_CODE = "{@pagebreak}";
 
 	public static final StreamCodec<FriendlyByteBuf, Map<Long, Pair<Vec2d, Vec2d>>> CONTROL_POINTS_STREAM_CODEC
@@ -376,27 +376,8 @@ public final class Quest extends QuestObject implements Movable, Excludable {
 		if (!presetName.isEmpty()) nbt.putString("preset", presetName);
 
 		if (!depLineVisibility.isEmpty()) {
-			nbt.put("dep_line_visibility", writeDepLineVisibility());
+			nbt.put("dep_line_visibility", DepLineVisibilityProvider.writeDepLineVisibility(depLineVisibility));
 		}
-	}
-
-    private Tag writeDepLineVisibility() {
-		CompoundTag tag = new CompoundTag();
-		depLineVisibility.forEach((id, val) -> {
-			tag.putBoolean(QuestObject.getCodeString(id), val);
-		});
-		return tag;
-    }
-
-	private Map<Long, Boolean> readDepLineVisibility(CompoundTag tag) {
-		Map<Long, Boolean> res = new HashMap<>();
-		tag.getAllKeys().forEach(key -> {
-			long id = QuestObjectBase.parseCodeString(key);
-			if (id != 0L) {
-				res.put(id, tag.getBoolean(key));
-			}
-		});
-		return res;
 	}
 
 	private Tag writeDepControlPoints() {
@@ -471,7 +452,7 @@ public final class Quest extends QuestObject implements Movable, Excludable {
 			depControlPoints.putAll(readDepControlPoints(nbt.getCompound("dep_control_pts")));
 		}
 		if (nbt.contains("dep_line_visibility")) {
-			depLineVisibility.putAll(readDepLineVisibility(nbt.getCompound("dep_line_visibility")));
+			depLineVisibility.putAll(DepLineVisibilityProvider.readDepLineVisibility(nbt.getCompound("dep_line_visibility")));
 		}
 		if (nbt.contains("hide", Tag.TAG_BYTE)) {
 			// TODO legacy; remove in 1.22
@@ -1210,26 +1191,15 @@ public final class Quest extends QuestObject implements Movable, Excludable {
 		return repeatCooldown;
 	}
 
+	@Override
     public Map<Long, Tristate> depLineVisibilityAsTristateMap() {
-		Map<Long, Tristate> res = new HashMap<>();
-		streamDependencies().forEach(dep -> {
-			if (depLineVisibility.containsKey(dep.getId())) {
-				res.put(dep.getId(), depLineVisibility.get(dep.getId()) ? Tristate.TRUE : Tristate.FALSE);
-			} else {
-				res.put(dep.getId(), Tristate.DEFAULT);
-			}
-		});
-		return res;
+		return DepLineVisibilityProvider.depLineVisibilityAsTristateMap(streamDependencies(), depLineVisibility);
     }
 
+	@Override
     public void updateDepLineVisibilityFromGui(Map<Long, Tristate> value) {
 		if (!getQuestFile().isServerSide()) {
-			depLineVisibility.clear();
-			value.forEach((id, val) -> {
-				if (val != Tristate.DEFAULT && getQuestFile().getQuest(id) != null) {
-					depLineVisibility.put(id, val.isTrue());
-				}
-			});
+			DepLineVisibilityProvider.updateDepLineVisibility(depLineVisibility, value, getQuestFile());
 			NetworkManager.sendToServer(EditObjectMessage.forQuestObject(this));
 		}
     }
