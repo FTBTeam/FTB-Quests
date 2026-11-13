@@ -21,7 +21,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 
-public class QuestLink extends QuestObject implements Movable, Excludable, DepLineVisibilityProvider {
+public class QuestLink extends QuestObject implements Movable, Excludable, DependencyLineSettings {
     private Chapter chapter;
     private long linkId;
 
@@ -159,7 +159,7 @@ public class QuestLink extends QuestObject implements Movable, Excludable, DepLi
         }
         hideDependencyLines.write(nbt, "hide_dependency_lines");
         if (!depLineVisibility.isEmpty()) {
-            nbt.put("dep_line_visibility", DepLineVisibilityProvider.writeDepLineVisibility(depLineVisibility));
+            nbt.put("dep_line_visibility", DependencyLineSettings.writeDepLineVisibility(depLineVisibility));
         }
     }
 
@@ -178,7 +178,7 @@ public class QuestLink extends QuestObject implements Movable, Excludable, DepLi
         hideDependencyLines = Tristate.read(nbt, "hide_dependency_lines");
         depLineVisibility.clear();
         if (nbt.contains("dep_line_visibility")) {
-            depLineVisibility.putAll(DepLineVisibilityProvider.readDepLineVisibility(nbt.getCompound("dep_line_visibility")));
+            depLineVisibility.putAll(DependencyLineSettings.readDepLineVisibility(nbt.getCompound("dep_line_visibility")));
         }
     }
 
@@ -284,6 +284,7 @@ public class QuestLink extends QuestObject implements Movable, Excludable, DepLi
      * {@return true if lines pointing to this link should be hidden}. Unless overridden on the link itself, this
      * follows the linked quest's setting.
      */
+    @Override
     public boolean shouldHideDependencyLines() {
         return hideDependencyLines.get(getQuest().map(Quest::shouldHideDependencyLines).orElse(chapter.defaultHideDependencyLines));
     }
@@ -292,6 +293,7 @@ public class QuestLink extends QuestObject implements Movable, Excludable, DepLi
      * {@return true if the line from the given dependency to this link should be hidden}. A per-dependency setting on
      * this link takes priority, then the link's own setting, and finally the linked quest's setting.
      */
+    @Override
     public boolean shouldHideDependencyLines(Quest dep) {
         if (depLineVisibility.containsKey(dep.getId())) {
             return !depLineVisibility.get(dep.getId());
@@ -304,14 +306,23 @@ public class QuestLink extends QuestObject implements Movable, Excludable, DepLi
 
     @Override
     public Map<Long, Tristate> depLineVisibilityAsTristateMap() {
-        return DepLineVisibilityProvider.depLineVisibilityAsTristateMap(getQuest().stream().flatMap(Quest::streamDependencies), depLineVisibility);
+        return DependencyLineSettings.depLineVisibilityAsTristateMap(getQuest().stream().flatMap(Quest::streamDependencies), depLineVisibility);
     }
 
     @Override
     public void updateDepLineVisibilityFromGui(Map<Long, Tristate> value) {
         if (!getQuestFile().isServerSide()) {
-            DepLineVisibilityProvider.updateDepLineVisibility(depLineVisibility, value, getQuestFile());
+            DependencyLineSettings.updateDepLineVisibility(depLineVisibility, value, getQuestFile());
             NetworkManager.sendToServer(EditObjectMessage.forQuestObject(this));
         }
+    }
+
+    /**
+     * {@return true if lines pointing from this link to its dependents should be hidden}. Links have no setting of
+     * their own for this, so it always follows the linked quest.
+     */
+    @Override
+    public boolean shouldHideDependentLines() {
+        return getQuest().map(Quest::shouldHideDependentLines).orElse(false);
     }
 }

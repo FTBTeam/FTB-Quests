@@ -373,7 +373,7 @@ public class QuestScreen extends BaseScreen {
 	}
 
 	private static void openDepLineVisibilityScreen(QuestButton qb) {
-		DepLineVisibilityProvider provider = qb.getDepLineVisibilityProvider();
+		DependencyLineSettings provider = qb.getDependencyLineSettings();
 		var editable = new EditableDepLineVisibility(provider.depLineVisibilityAsTristateMap());
 		editable.onClicked(qb, MouseButton.LEFT, accepted -> {
 			if (accepted) {

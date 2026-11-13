@@ -49,7 +49,7 @@ import java.util.*;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
 
-public final class Quest extends QuestObject implements Movable, Excludable, DepLineVisibilityProvider {
+public final class Quest extends QuestObject implements Movable, Excludable, DependencyLineSettings {
 	public static final String PAGEBREAK_CODE = "{@pagebreak}";
 
 	public static final StreamCodec<FriendlyByteBuf, Map<Long, Pair<Vec2d, Vec2d>>> CONTROL_POINTS_STREAM_CODEC
@@ -174,6 +174,7 @@ public final class Quest extends QuestObject implements Movable, Excludable, Dep
 		return minRequiredDependencies;
 	}
 
+	@Override
 	public boolean shouldHideDependentLines() {
 		return hideDependentLines;
 	}
@@ -376,7 +377,7 @@ public final class Quest extends QuestObject implements Movable, Excludable, Dep
 		if (!presetName.isEmpty()) nbt.putString("preset", presetName);
 
 		if (!depLineVisibility.isEmpty()) {
-			nbt.put("dep_line_visibility", DepLineVisibilityProvider.writeDepLineVisibility(depLineVisibility));
+			nbt.put("dep_line_visibility", DependencyLineSettings.writeDepLineVisibility(depLineVisibility));
 		}
 	}
 
@@ -452,7 +453,7 @@ public final class Quest extends QuestObject implements Movable, Excludable, Dep
 			depControlPoints.putAll(readDepControlPoints(nbt.getCompound("dep_control_pts")));
 		}
 		if (nbt.contains("dep_line_visibility")) {
-			depLineVisibility.putAll(DepLineVisibilityProvider.readDepLineVisibility(nbt.getCompound("dep_line_visibility")));
+			depLineVisibility.putAll(DependencyLineSettings.readDepLineVisibility(nbt.getCompound("dep_line_visibility")));
 		}
 		if (nbt.contains("hide", Tag.TAG_BYTE)) {
 			// TODO legacy; remove in 1.22
@@ -788,10 +789,12 @@ public final class Quest extends QuestObject implements Movable, Excludable, Dep
 		return cachedQuestLinks;
 	}
 
+	@Override
 	public boolean shouldHideDependencyLines() {
 		return hideDependencyLines.get(chapter.defaultHideDependencyLines);
 	}
 
+	@Override
 	public boolean shouldHideDependencyLines(Quest dep) {
 		return depLineVisibility.containsKey(dep.getId()) ? !depLineVisibility.get(dep.getId()) : shouldHideDependencyLines();
 	}
@@ -1193,13 +1196,13 @@ public final class Quest extends QuestObject implements Movable, Excludable, Dep
 
 	@Override
     public Map<Long, Tristate> depLineVisibilityAsTristateMap() {
-		return DepLineVisibilityProvider.depLineVisibilityAsTristateMap(streamDependencies(), depLineVisibility);
+		return DependencyLineSettings.depLineVisibilityAsTristateMap(streamDependencies(), depLineVisibility);
     }
 
 	@Override
     public void updateDepLineVisibilityFromGui(Map<Long, Tristate> value) {
 		if (!getQuestFile().isServerSide()) {
-			DepLineVisibilityProvider.updateDepLineVisibility(depLineVisibility, value, getQuestFile());
+			DependencyLineSettings.updateDepLineVisibility(depLineVisibility, value, getQuestFile());
 			NetworkManager.sendToServer(EditObjectMessage.forQuestObject(this));
 		}
     }

@@ -585,17 +585,7 @@ public class QuestButton extends Button implements QuestPositionableButton {
 		return true;
 	}
 
-	/** {@return true if lines pointing to this button should be hidden (unless hovered)} */
-	public boolean shouldHideDependencyLines() {
-		return quest.shouldHideDependencyLines();
-	}
-
-	/** {@return true if the line from the given dependency to this button should be hidden} */
-	public boolean shouldHideDependencyLines(Quest dep) {
-		return quest.shouldHideDependencyLines(dep);
-	}
-
-	public DepLineVisibilityProvider getDepLineVisibilityProvider() {
+	public DependencyLineSettings getDependencyLineSettings() {
 		return quest;
 	}
 
