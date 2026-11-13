@@ -53,7 +53,7 @@ import java.util.*;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
 
-public final class Quest extends QuestObject implements Movable, Excludable {
+public final class Quest extends QuestObject implements Movable, Excludable, DependencyLineSettings {
 	public static final String PAGEBREAK_CODE = "{@pagebreak}";
 
 	public static final Codec<Map<Long, Pair<Vec2d, Vec2d>>> CONTROL_POINTS_CODEC
@@ -190,6 +190,7 @@ public final class Quest extends QuestObject implements Movable, Excludable {
 		return minRequiredDependencies;
 	}
 
+	@Override
 	public boolean shouldHideDependentLines() {
 		return hideDependentLines;
 	}
@@ -689,10 +690,12 @@ public final class Quest extends QuestObject implements Movable, Excludable {
 		return cachedQuestLinks;
 	}
 
+	@Override
 	public boolean shouldHideDependencyLines() {
 		return hideDependencyLines.get(chapter.defaultHideDependencyLines);
 	}
 
+	@Override
 	public boolean shouldHideDependencyLines(Quest dep) {
         return depLineVisibility.containsKey(dep.getId()) ? !depLineVisibility.get(dep.getId()) : shouldHideDependencyLines();
 	}
@@ -1093,26 +1096,15 @@ public final class Quest extends QuestObject implements Movable, Excludable {
 		return repeatCooldown;
 	}
 
+	@Override
     public Map<Long, Tristate> depLineVisibilityAsTristateMap() {
-		Map<Long, Tristate> res = new HashMap<>();
-		streamDependencies().forEach(dep -> {
-			if (depLineVisibility.containsKey(dep.getId())) {
-				res.put(dep.getId(), Tristate.ofBoolean(depLineVisibility.get(dep.getId())));
-			} else {
-				res.put(dep.getId(), Tristate.DEFAULT);
-			}
-		});
-		return res;
+		return DependencyLineSettings.depLineVisibilityAsTristateMap(streamDependencies(), depLineVisibility);
     }
 
+	@Override
     public void updateDepLineVisibilityFromGui(Map<Long, Tristate> value) {
         if (!getQuestFile().isServerSide()) {
-			depLineVisibility.clear();
-			value.forEach((id, val) -> {
-				if (val != Tristate.DEFAULT && getQuestFile().getQuest(id) != null) {
-					depLineVisibility.put(id, val.isTrue());
-				}
-			});
+			DependencyLineSettings.updateDepLineVisibility(depLineVisibility, value, getQuestFile());
 			Play2ServerNetworking.send(EditObjectMessage.forQuestObject(this));
 		}
     }

@@ -9,15 +9,14 @@ import dev.ftb.mods.ftblibrary.client.gui.theme.Theme;
 import dev.ftb.mods.ftblibrary.client.gui.widget.Widget;
 import dev.ftb.mods.ftblibrary.icon.Color4I;
 import dev.ftb.mods.ftbquests.client.gui.DepLineVisibilityScreen;
-import dev.ftb.mods.ftbquests.quest.Quest;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
 
 import java.util.Map;
 
 public class EditableDepLineVisibility extends EditableConfigValue<Map<Long, Tristate>> {
-    public EditableDepLineVisibility(Quest quest) {
-        setValue(quest.depLineVisibilityAsTristateMap());
+    public EditableDepLineVisibility(Map<Long, Tristate> visibility) {
+        setValue(visibility);
     }
 
     @Override

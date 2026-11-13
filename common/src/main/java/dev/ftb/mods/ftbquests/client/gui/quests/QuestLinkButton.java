@@ -2,6 +2,7 @@ package dev.ftb.mods.ftbquests.client.gui.quests;
 
 import dev.ftb.mods.ftblibrary.client.gui.theme.Theme;
 import dev.ftb.mods.ftblibrary.client.icon.IconHelper;
+import dev.ftb.mods.ftbquests.quest.DependencyLineSettings;
 import dev.ftb.mods.ftbquests.quest.Quest;
 import dev.ftb.mods.ftbquests.quest.QuestLink;
 import dev.ftb.mods.ftbquests.quest.QuestObject;
@@ -40,8 +41,27 @@ public class QuestLinkButton extends QuestButton {
         }
     }
 
+    public QuestLink getLink() {
+        return link;
+    }
+
     @Override
     protected String getShape() {
         return link.getShape();
+    }
+
+    @Override
+    protected boolean supportsCurvedConnections() {
+        return false;
+    }
+
+    @Override
+    public DependencyLineSettings getDependencyLineSettings() {
+        return link;
+    }
+
+    @Override
+    public boolean isForQuest(Quest quest) {
+        return link.linksTo(quest);
     }
 }

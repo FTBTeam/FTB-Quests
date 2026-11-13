@@ -276,22 +276,23 @@ public class QuestPanel extends Panel {
 								ThemeProperties.DEPENDENCY_LINE_UNCOMPLETED_COLOR.get(questScreen.selectedChapter)
 						);
 
+				DependencyLineSettings ourSettings = qb.getDependencyLineSettings();
 				for (QuestButton button : qb.getDependencies().values()) {
-					if (button.shouldDraw() && button.quest != selectedQuest && qb.quest != selectedQuest && !button.quest.shouldHideDependentLines() && !qb.quest.shouldHideDependencyLines(button.quest)) {
+					DependencyLineSettings theirSettings = button.getDependencyLineSettings();
+					if (button.shouldDraw() && button.quest != selectedQuest && qb.quest != selectedQuest && !theirSettings.shouldHideDependentLines() && !ourSettings.shouldHideDependencyLines(button.quest)) {
 						renderConnection(graphics, dependencyLineTexture, qb, button, graphics.pose(), lineWidth,
 								c.redi(), c.greeni(), c.bluei(), c.alphai(), c.alphai(),
 								mu);
 					}
 				}
 			}
-
 		}
 
 		// pass 2: render highlighted connections for hovered quest(s) dependencies/dependents
 		float ms = (float) ((mt * ThemeProperties.DEPENDENCY_LINE_SELECTED_SPEED.get(questScreen.selectedChapter)) % 1D);
 		List<QuestButton> toOutline = new ArrayList<>();
 		for (Widget widget : widgets) {
-			if (widget.shouldDraw() && widget instanceof QuestButton qb && (!qb.quest.shouldHideDependencyLines() || qb.isMouseOver())) {
+			if (widget.shouldDraw() && widget instanceof QuestButton qb && (!qb.getDependencyLineSettings().shouldHideDependencyLines() || qb.isMouseOver())) {
 				for (QuestButton button : qb.getDependencies().values()) {
 					if (button.shouldDraw()) {
 						if (button.quest == selectedQuest || button.isMouseOver()) {

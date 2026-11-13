@@ -2,20 +2,26 @@ package dev.ftb.mods.ftbquests.quest;
 
 import de.marhali.json5.Json5Object;
 import dev.ftb.mods.ftblibrary.client.config.EditableConfigGroup;
+import dev.ftb.mods.ftblibrary.client.config.Tristate;
 import dev.ftb.mods.ftblibrary.client.util.ClientUtils;
 import dev.ftb.mods.ftblibrary.icon.Icon;
 import dev.ftb.mods.ftblibrary.icon.Icons;
 import dev.ftb.mods.ftblibrary.json5.Json5Util;
+import dev.ftb.mods.ftblibrary.platform.network.Play2ServerNetworking;
 import dev.ftb.mods.ftbquests.client.gui.quests.QuestScreen;
+import dev.ftb.mods.ftbquests.net.EditObjectMessage;
+import dev.ftb.mods.ftbquests.util.FTBQCodecs;
+import it.unimi.dsi.fastutil.longs.Long2BooleanOpenHashMap;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import org.jspecify.annotations.Nullable;
 
+import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 
-public class QuestLink extends QuestObject implements Movable, Excludable {
+public class QuestLink extends QuestObject implements Movable, Excludable, DependencyLineSettings {
     private Chapter chapter;
     private long linkId;
 
@@ -23,6 +29,8 @@ public class QuestLink extends QuestObject implements Movable, Excludable {
     private double y;
     private String shape;
     private double size;
+    private Tristate hideDependencyLines;  // lines pointing to this link; default => follow the linked quest
+    private final Map<Long, Boolean> depLineVisibility;  // per-dependency override; absent => use hideDependencyLines
 
     public QuestLink(long id, Chapter chapter, long linkId) {
         super(id);
@@ -32,6 +40,8 @@ public class QuestLink extends QuestObject implements Movable, Excludable {
 
         shape = "";
         size = 1D;
+        hideDependencyLines = Tristate.DEFAULT;
+        depLineVisibility = new Long2BooleanOpenHashMap();
     }
 
     @Override
@@ -123,6 +133,7 @@ public class QuestLink extends QuestObject implements Movable, Excludable {
         config.addDouble("size", size, v -> size = v, 1, 0.0625D, 8D);
         config.addDouble("x", x, v -> x = v, 0, Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY);
         config.addDouble("y", y, v -> y = v, 0, Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY);
+        config.addTristate("hide_dependency_lines", hideDependencyLines, v -> hideDependencyLines = v);
     }
 
     @Override
@@ -143,6 +154,10 @@ public class QuestLink extends QuestObject implements Movable, Excludable {
         json.addProperty("y", y);
         if (!shape.isEmpty()) json.addProperty("shape", shape);
         if (size != 1D) json.addProperty("size", size);
+        hideDependencyLines.write(json, "hide_dependency_lines");
+        if (!depLineVisibility.isEmpty()) {
+            Json5Util.store(json, "dep_line_visibility", Quest.DEP_LINE_VIS_CODEC, depLineVisibility);
+        }
     }
 
     @Override
@@ -157,6 +172,9 @@ public class QuestLink extends QuestObject implements Movable, Excludable {
             shape = "";
         }
         size = Json5Util.getDouble(json, "size").orElse(1D);
+        hideDependencyLines = Tristate.read(json, "hide_dependency_lines");
+        depLineVisibility.clear();
+        Json5Util.fetch(json, "dep_line_visibility", Quest.DEP_LINE_VIS_CODEC).ifPresent(depLineVisibility::putAll);
     }
 
     @Override
@@ -168,6 +186,8 @@ public class QuestLink extends QuestObject implements Movable, Excludable {
         buffer.writeDouble(y);
         buffer.writeDouble(size);
         buffer.writeUtf(shape);
+        hideDependencyLines.write(buffer);
+        FTBQCodecs.LONG_BOOL_MAP_STREAM_CODEC.encode(buffer, depLineVisibility);
     }
 
     @Override
@@ -179,6 +199,9 @@ public class QuestLink extends QuestObject implements Movable, Excludable {
         y = buffer.readDouble();
         size = buffer.readDouble();
         shape = buffer.readUtf(64);
+        hideDependencyLines = Tristate.read(buffer);
+        depLineVisibility.clear();
+        depLineVisibility.putAll(FTBQCodecs.LONG_BOOL_MAP_STREAM_CODEC.decode(buffer));
     }
 
     @Override
@@ -250,5 +273,39 @@ public class QuestLink extends QuestObject implements Movable, Excludable {
     @Override
     public boolean isQuestObjectExcluded(TeamData teamData) {
         return getQuest().map(q -> q.isQuestObjectExcluded(teamData)).orElse(false);
+    }
+
+    @Override
+    public boolean shouldHideDependencyLines() {
+        return hideDependencyLines.get(getQuest().map(Quest::shouldHideDependencyLines).orElse(chapter.defaultHideDependencyLines));
+    }
+
+    @Override
+    public boolean shouldHideDependencyLines(Quest dep) {
+        if (depLineVisibility.containsKey(dep.getId())) {
+            return !depLineVisibility.get(dep.getId());
+        } else if (hideDependencyLines != Tristate.DEFAULT) {
+            return hideDependencyLines.isTrue();
+        } else {
+            return getQuest().map(q -> q.shouldHideDependencyLines(dep)).orElse(chapter.defaultHideDependencyLines);
+        }
+    }
+
+    @Override
+    public Map<Long, Tristate> depLineVisibilityAsTristateMap() {
+        return DependencyLineSettings.depLineVisibilityAsTristateMap(getQuest().stream().flatMap(Quest::streamDependencies), depLineVisibility);
+    }
+
+    @Override
+    public void updateDepLineVisibilityFromGui(Map<Long, Tristate> value) {
+        if (!getQuestFile().isServerSide()) {
+            DependencyLineSettings.updateDepLineVisibility(depLineVisibility, value, getQuestFile());
+            Play2ServerNetworking.send(EditObjectMessage.forQuestObject(this));
+        }
+    }
+
+    @Override
+    public boolean shouldHideDependentLines() {
+        return getQuest().map(Quest::shouldHideDependentLines).orElse(false);
     }
 }
