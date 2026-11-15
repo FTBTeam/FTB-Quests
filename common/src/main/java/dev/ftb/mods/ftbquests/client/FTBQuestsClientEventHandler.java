@@ -156,7 +156,7 @@ public class FTBQuestsClientEventHandler {
 
     private void onPlayerLogin(LocalPlayer localPlayer) {
         if (creativeTabRebuildPending) {
-            FTBQuestsClient.rebuildCreativeTabs();
+            FTBQuestsClient.rebuildFTBAndSearchTabs();
             creativeTabRebuildPending = false;
         }
 
