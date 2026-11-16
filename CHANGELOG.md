@@ -12,13 +12,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   * Animated images can be added to quest descriptions; background images only support static WebP images
 * Observation tasks now support fluid blocks, e.g. `minecraft:water`
 * Adding images with non-square aspect ratios now works much better; no need to manually resize images to fix aspect ratio anymore
-  * Thanks to changes around image discovery in FTB Library 2101.1.40+ 
+  * Thanks to changes around image discovery in FTB Library 2101.1.40+
+* Visibility of quest dependency lines can now be individually controlled per dependency
+  * Added new "Dependency Line Visibility..." context menu entries for quest buttons
+  * "Default" setting means use quest's existing "Hide Dependency Lines" property, "true" means always show, "false" means never show
+  * Quest Links dependency line visibility can now be controlled independently of the linked quest's settings  
+* Custom tasks now have a "Recipe Focus Item" setting, which opens that item in the current recipe viewer mod (JEI/REI)
 
 ### Fixed
 * Ensure response packets for create/delete/edit operations go to _all_ players, not just quest book editors
 * Fixed server being too trusting of client about observation task progress
 * Fixed some arithmetic issues causing quest connection lines to sometimes render crooked, based on button size and zoom level
 * Fixed "Insert Line" and "Insert Image" translations being swapped (showed up in the keybinds GUI)
+* Fixed creative mode issue where viewing a quest before opening the creative mode inventory could break creative mode search
+* Fixed context menu tooltips rendering behind the context menu in a few cases
 
 ## [2101.1.38]
 
