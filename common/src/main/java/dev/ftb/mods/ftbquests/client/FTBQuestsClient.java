@@ -67,7 +67,6 @@ import java.nio.file.Path;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
-import java.util.Optional;
 
 public class FTBQuestsClient {
 	public static void init() {
@@ -188,7 +187,7 @@ public class FTBQuestsClient {
 	 * Called to ensure the right loot crates are shown; call when a loot crate is toggled via GUI, or when a
 	 * quest book sync is done from the server.
 	 */
-	public static void rebuildCreativeTabs() {
+	public static void rebuildFTBAndSearchTabs() {
 		LocalPlayer player = Minecraft.getInstance().player;
 		if (player == null) {
 			// It's possible for the client player to still be null here, since quest book sync can be processed
@@ -207,15 +206,6 @@ public class FTBQuestsClient {
 			CreativeModeTabs.searchTab().buildContents(params);
 		}
 	}
-
-	public static Optional<CreativeModeTab.ItemDisplayParameters> creativeTabDisplayParams() {
-		LocalPlayer player = Minecraft.getInstance().player;
-		if (player != null) {
-			return Optional.of(new CreativeModeTab.ItemDisplayParameters(player.connection.enabledFeatures(), Minecraft.getInstance().options.operatorItemsTab().get(), player.clientLevel.registryAccess()));
-		}
-		return Optional.empty();
-	}
-
 
 	public static void copyToClipboard(QuestObjectBase qo) {
 		Widget.setClipboardString(qo.getCodeString());

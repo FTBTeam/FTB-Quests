@@ -1,10 +1,9 @@
 package dev.ftb.mods.ftbquests.integration.item_filtering;
 
 import com.google.common.collect.ImmutableList;
-import dev.ftb.mods.ftbquests.FTBQuests;
+import dev.ftb.mods.ftblibrary.util.client.ClientUtils;
 import dev.ftb.mods.ftbquests.api.ItemFilterAdapter;
 import dev.ftb.mods.ftbquests.api.event.CustomFilterDisplayItemsEvent;
-import dev.ftb.mods.ftbquests.client.FTBQuestsClient;
 import it.unimi.dsi.fastutil.ints.Int2ObjectLinkedOpenHashMap;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.world.item.CreativeModeTabs;
@@ -35,11 +34,7 @@ public class DisplayStacksCache {
     }
 
     private static List<ItemStack> computeMatchingStacks(ItemFilterAdapter.Matcher matcher) {
-        FTBQuestsClient.creativeTabDisplayParams().ifPresent(params -> {
-            if (CreativeModeTabs.tryRebuildTabContents(params.enabledFeatures(), params.hasPermissions(), params.holders())) {
-                FTBQuests.LOGGER.debug("creative tabs rebuilt, search tab now has {} items", CreativeModeTabs.searchTab().getSearchTabDisplayItems().size());
-            }
-        });
+        ClientUtils.rebuildAllCreativeTabsIfNeeded();
 
         ImmutableList.Builder<ItemStack> builder = ImmutableList.builder();
 

@@ -1,6 +1,7 @@
 package dev.ftb.mods.ftbquests.quest;
 
 import com.mojang.datafixers.util.Pair;
+import dev.architectury.networking.NetworkManager;
 import dev.ftb.mods.ftblibrary.config.*;
 import dev.ftb.mods.ftblibrary.icon.Icon;
 import dev.ftb.mods.ftblibrary.icon.IconAnimation;
@@ -17,6 +18,7 @@ import dev.ftb.mods.ftbquests.events.ObjectCompletedEvent;
 import dev.ftb.mods.ftbquests.events.ObjectStartedEvent;
 import dev.ftb.mods.ftbquests.events.QuestProgressEventData;
 import dev.ftb.mods.ftbquests.integration.RecipeModHelper;
+import dev.ftb.mods.ftbquests.net.EditObjectMessage;
 import dev.ftb.mods.ftbquests.quest.preset.VisualPreset;
 import dev.ftb.mods.ftbquests.quest.reward.Reward;
 import dev.ftb.mods.ftbquests.quest.reward.RewardType;
@@ -27,6 +29,7 @@ import dev.ftb.mods.ftbquests.util.ConfigQuestObject;
 import dev.ftb.mods.ftbquests.util.FTBQCodecs;
 import dev.ftb.mods.ftbquests.util.ProgressChange;
 import dev.ftb.mods.ftbquests.util.TextUtils;
+import it.unimi.dsi.fastutil.longs.Long2BooleanOpenHashMap;
 import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.longs.LongOpenHashSet;
 import it.unimi.dsi.fastutil.longs.LongSet;
@@ -46,7 +49,7 @@ import java.util.*;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
 
-public final class Quest extends QuestObject implements Movable, Excludable {
+public final class Quest extends QuestObject implements Movable, Excludable, DependencyLineSettings {
 	public static final String PAGEBREAK_CODE = "{@pagebreak}";
 
 	public static final StreamCodec<FriendlyByteBuf, Map<Long, Pair<Vec2d, Vec2d>>> CONTROL_POINTS_STREAM_CODEC
@@ -59,12 +62,13 @@ public final class Quest extends QuestObject implements Movable, Excludable {
 	private String shape;
 	private final List<QuestObject> dependencies;
 	private final Map<Long, Pair<Vec2d, Vec2d>> depControlPoints;  // for bezier curved depenendency lines
+	private final Map<Long, Boolean> depLineVisibility;  // dependency line visibility: absent => default to shouldHideDependencyLines()
 	private final List<Task> tasks;
 	private final List<Reward> rewards;
 	private DependencyRequirement dependencyRequirement;
 	private String guidePage;
-	private Tristate hideDependencyLines;
-	private boolean hideDependentLines;
+	private Tristate hideDependencyLines;  // dependency lines are lines pointing to us
+	private boolean hideDependentLines;    // dependent lines are lines pointing from us
 	private int minRequiredDependencies;
 	private Tristate hideTextUntilComplete;
 	private Tristate disableJEI;
@@ -103,6 +107,7 @@ public final class Quest extends QuestObject implements Movable, Excludable {
 		shape = "";
 		dependencies = new ArrayList<>(0);
 		depControlPoints = new Long2ObjectOpenHashMap<>();
+		depLineVisibility = new Long2BooleanOpenHashMap();
 		tasks = new ArrayList<>(1);
 		rewards = new ArrayList<>(1);
 		guidePage = "";
@@ -169,6 +174,7 @@ public final class Quest extends QuestObject implements Movable, Excludable {
 		return minRequiredDependencies;
 	}
 
+	@Override
 	public boolean shouldHideDependentLines() {
 		return hideDependentLines;
 	}
@@ -212,6 +218,17 @@ public final class Quest extends QuestObject implements Movable, Excludable {
 
 	public void setSize(double size) {
 		this.size = size;
+	}
+
+	@Override
+	public boolean isResizable() {
+		// a named visual preset overrides the quest's own size, so resizing would have no visible effect
+		return getVisualPreset() instanceof FallbackVisualPreset;
+	}
+
+	@Override
+	public void setDimensions(double width, double height) {
+		setSize(Math.clamp(width, getMinSize(), getMaxSize()));
 	}
 
 	public boolean isOptional() {
@@ -358,6 +375,10 @@ public final class Quest extends QuestObject implements Movable, Excludable {
 		}
 
 		if (!presetName.isEmpty()) nbt.putString("preset", presetName);
+
+		if (!depLineVisibility.isEmpty()) {
+			nbt.put("dep_line_visibility", DependencyLineSettings.writeDepLineVisibility(depLineVisibility));
+		}
 	}
 
 	private Tag writeDepControlPoints() {
@@ -431,7 +452,9 @@ public final class Quest extends QuestObject implements Movable, Excludable {
 		if (nbt.contains("dep_control_pts", Tag.TAG_COMPOUND)) {
 			depControlPoints.putAll(readDepControlPoints(nbt.getCompound("dep_control_pts")));
 		}
-
+		if (nbt.contains("dep_line_visibility")) {
+			depLineVisibility.putAll(DependencyLineSettings.readDepLineVisibility(nbt.getCompound("dep_line_visibility")));
+		}
 		if (nbt.contains("hide", Tag.TAG_BYTE)) {
 			// TODO legacy; remove in 1.22
 			hideUntilDepsVisible = Tristate.read(nbt, "hide");
@@ -503,6 +526,7 @@ public final class Quest extends QuestObject implements Movable, Excludable {
 
 		FTBQCodecs.LONG_LIST_STREAM_CODEC.encode(buffer, dependencies.stream().map(QuestObject::getId).toList());
 		CONTROL_POINTS_STREAM_CODEC.encode(buffer, depControlPoints);
+		FTBQCodecs.LONG_BOOL_MAP_STREAM_CODEC.encode(buffer, depLineVisibility);
 
 		if (size != 0D) {
 			buffer.writeDouble(size);
@@ -551,6 +575,7 @@ public final class Quest extends QuestObject implements Movable, Excludable {
 		clearDependencies();
 		FTBQCodecs.LONG_LIST_STREAM_CODEC.decode(buffer).forEach(this::addDependency);
 		depControlPoints.putAll(CONTROL_POINTS_STREAM_CODEC.decode(buffer));
+		depLineVisibility.putAll(FTBQCodecs.LONG_BOOL_MAP_STREAM_CODEC.decode(buffer));
 
 		size = Bits.getFlag(flags, 0x04) ? buffer.readDouble() : 0D;
 		iconScale = Bits.getFlag(flags, 0x20000) ? buffer.readDouble() : 1D;
@@ -764,8 +789,14 @@ public final class Quest extends QuestObject implements Movable, Excludable {
 		return cachedQuestLinks;
 	}
 
+	@Override
 	public boolean shouldHideDependencyLines() {
 		return hideDependencyLines.get(chapter.defaultHideDependencyLines);
+	}
+
+	@Override
+	public boolean shouldHideDependencyLines(Quest dep) {
+		return depLineVisibility.containsKey(dep.getId()) ? !depLineVisibility.get(dep.getId()) : shouldHideDependencyLines();
 	}
 
 	public boolean shouldHideLockIcon() {
@@ -1104,6 +1135,7 @@ public final class Quest extends QuestObject implements Movable, Excludable {
 		});
 		dependencies.clear();
 		depControlPoints.clear();
+		depLineVisibility.clear();
 	}
 
 	private void addDependant(long id) {
@@ -1161,6 +1193,19 @@ public final class Quest extends QuestObject implements Movable, Excludable {
 	public int getRepeatCooldown() {
 		return repeatCooldown;
 	}
+
+	@Override
+    public Map<Long, Tristate> depLineVisibilityAsTristateMap() {
+		return DependencyLineSettings.depLineVisibilityAsTristateMap(streamDependencies(), depLineVisibility);
+    }
+
+	@Override
+    public void updateDepLineVisibilityFromGui(Map<Long, Tristate> value) {
+		if (!getQuestFile().isServerSide()) {
+			DependencyLineSettings.updateDepLineVisibility(depLineVisibility, value, getQuestFile());
+			NetworkManager.sendToServer(EditObjectMessage.forQuestObject(this));
+		}
+    }
 
 	@FunctionalInterface
 	private interface DependencyChecker {

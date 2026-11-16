@@ -1,8 +1,12 @@
 package dev.ftb.mods.ftbquests.quest.task;
 
 import dev.architectury.networking.NetworkManager;
+import dev.ftb.mods.ftblibrary.config.ConfigGroup;
+import dev.ftb.mods.ftblibrary.icon.Icon;
+import dev.ftb.mods.ftblibrary.icon.ItemIcon;
 import dev.ftb.mods.ftblibrary.ui.Button;
 import dev.ftb.mods.ftblibrary.util.NetworkHelper;
+import dev.ftb.mods.ftbquests.FTBQuests;
 import dev.ftb.mods.ftbquests.net.EditObjectResponseMessage;
 import dev.ftb.mods.ftbquests.net.SubmitTaskMessage;
 import dev.ftb.mods.ftbquests.quest.Quest;
@@ -13,6 +17,8 @@ import it.unimi.dsi.fastutil.longs.LongOpenHashSet;
 import it.unimi.dsi.fastutil.longs.LongSet;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.core.HolderLookup;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
@@ -27,6 +33,7 @@ public class CustomTask extends Task {
 	private int checkTimer;
 	private long maxProgress;
 	private boolean enableButton;
+	private ItemStack recipeFocus;
 
 	public CustomTask(long id, Quest quest) {
 		super(id, quest);
@@ -35,6 +42,12 @@ public class CustomTask extends Task {
 		checkTimer = 1;
 		maxProgress = 1L;
 		enableButton = false;
+		recipeFocus = ItemStack.EMPTY;
+	}
+
+	@Override
+	public Icon getAltIcon() {
+		return recipeFocus.isEmpty() ? super.getAltIcon() : ItemIcon.getItemIcon(recipeFocus);
 	}
 
 	public void setCheck(Check check) {
@@ -78,12 +91,28 @@ public class CustomTask extends Task {
 		if (enableButton && canClick) {
 			button.playClickSound();
 			NetworkManager.sendToServer(new SubmitTaskMessage(id));
+		} else if (!recipeFocus.isEmpty()) {
+			FTBQuests.getRecipeModHelper().showRecipes(recipeFocus);
 		}
 	}
-
+  
 	@Override
 	public int autoSubmitOnPlayerTick() {
 		return check == null ? 0 : checkTimer;
+	}
+
+	@Override
+	public void writeData(CompoundTag nbt, HolderLookup.Provider provider) {
+		super.writeData(nbt, provider);
+
+		if (!recipeFocus.isEmpty()) nbt.put("recipe_focus", saveItemSingleLine(recipeFocus));
+	}
+
+	@Override
+	public void readData(CompoundTag nbt, HolderLookup.Provider provider) {
+		super.readData(nbt, provider);
+
+		recipeFocus = nbt.contains("recipe_focus") ? itemOrMissingFromNBT(nbt.get("recipe_focus"), provider) : ItemStack.EMPTY;
 	}
 
 	@Override
@@ -92,6 +121,7 @@ public class CustomTask extends Task {
 		buffer.writeVarInt(checkTimer);
 		buffer.writeVarLong(maxProgress);
 		buffer.writeBoolean(enableButton);
+		ItemStack.OPTIONAL_STREAM_CODEC.encode(buffer, recipeFocus);
 	}
 
 	@Override
@@ -100,6 +130,14 @@ public class CustomTask extends Task {
 		checkTimer = buffer.readVarInt();
 		maxProgress = buffer.readVarLong();
 		enableButton = buffer.readBoolean();
+		recipeFocus = ItemStack.OPTIONAL_STREAM_CODEC.decode(buffer);
+	}
+
+	@Override
+	public void fillConfigGroup(ConfigGroup config) {
+		super.fillConfigGroup(config);
+
+		config.addItemStack("recipe_focus", recipeFocus, v -> recipeFocus = v, ItemStack.EMPTY, true, true);
 	}
 
 	@Override
@@ -131,6 +169,10 @@ public class CustomTask extends Task {
 	@FunctionalInterface
 	public interface Check {
 		void check(CustomTask.Data taskData, ServerPlayer player);
+	}
+
+	public ItemStack getRecipeFocus() {
+		return recipeFocus;
 	}
 
 	public static class TaskSync {

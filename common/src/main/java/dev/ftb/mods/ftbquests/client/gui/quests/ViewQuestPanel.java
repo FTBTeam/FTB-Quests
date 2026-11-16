@@ -20,6 +20,7 @@ import dev.ftb.mods.ftblibrary.util.client.ImageComponent;
 import dev.ftb.mods.ftbquests.api.FTBQuestsAPI;
 import dev.ftb.mods.ftbquests.client.ClientQuestFile;
 import dev.ftb.mods.ftbquests.client.FTBQuestsClientConfig;
+import dev.ftb.mods.ftbquests.client.FTBQuestsKeyMappings;
 import dev.ftb.mods.ftbquests.client.gui.ImageComponentWidget;
 import dev.ftb.mods.ftbquests.client.gui.MultilineTextEditorScreen;
 import dev.ftb.mods.ftbquests.net.EditObjectMessage;
@@ -410,7 +411,7 @@ public class ViewQuestPanel extends ModalPanel {
 
 			ImageComponent img = findImageComponent(component);
 			if (img != null) {
-				panelText.add(makeImageComponentWidget(img, i));
+				panelText.add(new ImageComponentWidget(this, panelText, img, i).layout(panelText.width));
 			} else {
 				final int line = i;
 				TextField field = new QuestDescriptionField(panelText, canEdit, TranslationKey.QUEST_DESC, (context, clickedW) -> editDescLine(clickedW, line, context, null))
@@ -419,22 +420,6 @@ public class ViewQuestPanel extends ModalPanel {
 				panelText.add(field);
 			}
 		}
-	}
-
-	private @NotNull ImageComponentWidget makeImageComponentWidget(ImageComponent img, int idx) {
-		ImageComponentWidget cw = new ImageComponentWidget(this, panelText, img, idx);
-
-		if (cw.getComponent().isFit()) {
-			double scale = panelText.width / (double) cw.width;
-			cw.setSize((int) (cw.width * scale), (int) (cw.height * scale));
-		} else if (cw.getComponent().getAlign() == ImageComponent.ImageAlign.CENTER) {
-			cw.setX((panelText.width - cw.width) / 2);
-		} else if (cw.getComponent().getAlign() == ImageComponent.ImageAlign.RIGHT) {
-			cw.setX(panelText.width - cw.width);
-		} else {
-			cw.setX(0);
-		}
-		return cw;
 	}
 
 	private void addButtonBar(boolean canEdit) {
@@ -591,16 +576,24 @@ public class ViewQuestPanel extends ModalPanel {
 		if (quest == null) return;
 
 		if (questScreen.file.canEdit()) {
-			switch (key.keyCode) {
-				case GLFW.GLFW_KEY_S -> editSubtitle();
-				case GLFW.GLFW_KEY_T -> editTitle();
-				case GLFW.GLFW_KEY_D -> editDescription();
-				case GLFW.GLFW_KEY_P -> addPageBreak();
-				case GLFW.GLFW_KEY_L -> editDescLine0(this, -1, null);
-				case GLFW.GLFW_KEY_I -> editDescLine0(this, -1, new ImageComponent());
-				case GLFW.GLFW_KEY_Q -> quest.onEditButtonClicked(questScreen);
-				case GLFW.GLFW_KEY_LEFT -> moveTasksAndRewards(false);
-				case GLFW.GLFW_KEY_RIGHT -> moveTasksAndRewards(true);
+			if (key.matches(FTBQuestsKeyMappings.KEY_GUI_EDIT_TITLE)) {
+				editTitle();
+			} else if (key.matches(FTBQuestsKeyMappings.KEY_GUI_EDIT_SUBTITLE)) {
+				editSubtitle();
+			} else if (key.matches(FTBQuestsKeyMappings.KEY_GUI_EDIT_DESC)) {
+				editDescription();
+			} else if (key.matches(FTBQuestsKeyMappings.KEY_GUI_ADD_PAGE_BREAK)) {
+				addPageBreak();
+			} else if (key.matches(FTBQuestsKeyMappings.KEY_GUI_ADD_LINE)) {
+				editDescLine0(this, -1, null);
+			} else if (key.matches(FTBQuestsKeyMappings.KEY_GUI_ADD_IMAGE)) {
+				editDescLine0(this, -1, new ImageComponent());
+			} else if (key.matches(FTBQuestsKeyMappings.KEY_GUI_EDIT_QUEST_PROPS)) {
+				quest.onEditButtonClicked(questScreen);
+			} else if (key.matches(FTBQuestsKeyMappings.KEY_GUI_LEFT)) {
+				moveTasksAndRewards(false);
+			} else if (key.matches(FTBQuestsKeyMappings.KEY_GUI_RIGHT)) {
+				moveTasksAndRewards(true);
 			}
 		} else {
 			switch (key.keyCode) {

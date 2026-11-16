@@ -30,6 +30,8 @@ dependencies {
 	}
 
 	modApi("dev.ftb.mods:ftb-library-fabric:${rootProject.ftb_library_version}") { transitive false }
+	// dev runtime only: in production this comes from FTB Library's jar-in-jar
+	runtimeOnly "org.glavo:webp:${rootProject.jwebp_version}"
 
 	modApi("dev.ftb.mods:ftb-teams-fabric:${rootProject.ftb_teams_version}") { transitive false }
 

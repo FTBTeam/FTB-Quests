@@ -95,7 +95,7 @@ public class ChapterImageButton extends Button implements QuestPositionableButto
 
 	@Override
 	public void onClicked(MouseButton button) {
-		if (questScreen.questPanel.bezierController.isActive()) {
+		if (questScreen.questPanel.isInteractiveEditActive()) {
 			return;
 		}
 
@@ -117,6 +117,9 @@ public class ChapterImageButton extends Button implements QuestPositionableButto
 					}
 				});
 			}
+
+			contextMenu.add(questScreen.questPanel.createResizeMenuItem(chapterImage));
+			contextMenu.add(questScreen.questPanel.createRotateMenuItem(chapterImage));
 
 			contextMenu.add(new ContextMenuItem(Component.translatable("ftbquests.gui.copy_id"), Icons.INFO, b -> chapterImage.copyToClipboard()) {
 				@Override

@@ -30,6 +30,8 @@ dependencies {
 	modApi "dev.architectury:architectury-neoforge:${rootProject.architectury_api_version}"
 
 	modApi("dev.ftb.mods:ftb-library-neoforge:${rootProject.ftb_library_version}") { transitive false }
+	// dev runtime only: in production this comes from FTB Library's jar-in-jar
+	forgeRuntimeLibrary "org.glavo:webp:${rootProject.jwebp_version}"
 	modApi("dev.ftb.mods:ftb-teams-neoforge:${rootProject.ftb_teams_version}") { transitive false }
 
 	common(project(path: ":common", configuration: "namedElements")) { transitive false }

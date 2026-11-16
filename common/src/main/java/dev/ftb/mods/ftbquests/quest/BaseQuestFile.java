@@ -945,7 +945,7 @@ public abstract class BaseQuestFile extends QuestObject implements QuestFile {
 		}
 
 		if (!isServerSide() && !prevCrateNames.equals(lootCrates.keySet())) {
-			FTBQuestsClient.rebuildCreativeTabs();
+			FTBQuestsClient.rebuildFTBAndSearchTabs();
 			FTBQuests.getRecipeModHelper().updateItemsDynamic(oldStacks, LootCrate.allCrateStacks(!isServerSide()));
 		}
 

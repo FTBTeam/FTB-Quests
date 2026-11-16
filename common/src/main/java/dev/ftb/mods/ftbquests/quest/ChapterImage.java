@@ -353,6 +353,37 @@ public final class ChapterImage extends QuestObjectBase implements Movable {
 	}
 
 	@Override
+	public boolean isRotatable() {
+		return true;
+	}
+
+	@Override
+	public void setRotation(double degrees) {
+		rotation = Mth.clamp(degrees, -180D, 180D);
+	}
+
+	@Override
+	public boolean isResizable() {
+		return true;
+	}
+
+	@Override
+	public boolean isFreeformResizable() {
+		return true;
+	}
+
+	@Override
+	public double getMaxSize() {
+		return Double.POSITIVE_INFINITY;
+	}
+
+	@Override
+	public void setDimensions(double w, double h) {
+		width = Math.max(getMinSize(), w);
+		height = Math.max(getMinSize(), h);
+	}
+
+	@Override
 	public double getWidth() {
 		return width;
 	}
@@ -411,7 +442,8 @@ public final class ChapterImage extends QuestObjectBase implements Movable {
 	}
 
 	public boolean isAspectRatioOff() {
-		return !Mth.equal(image.aspectRatio(), width / height);
+		// an image which is still loading doesn't know its real aspect ratio yet
+		return image.isAspectRatioResolved() && !Mth.equal(image.aspectRatio(), width / height);
 	}
 
 	public void fixupAspectRatio(boolean adjustWidth) {
@@ -421,7 +453,10 @@ public final class ChapterImage extends QuestObjectBase implements Movable {
 			} else {
 				height = width / image.aspectRatio();
 			}
-			NetworkManager.sendToServer(EditObjectMessage.forQuestObject(this));
+			// this can be called during client-side creation to get the aspect ratio right - don't send an edit packet in that case
+			if (id != 0L) {
+				NetworkManager.sendToServer(EditObjectMessage.forQuestObject(this));
+			}
 		}
 	}
 
