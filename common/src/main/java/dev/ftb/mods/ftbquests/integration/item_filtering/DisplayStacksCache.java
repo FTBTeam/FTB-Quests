@@ -1,6 +1,7 @@
 package dev.ftb.mods.ftbquests.integration.item_filtering;
 
 import com.google.common.collect.ImmutableList;
+import dev.ftb.mods.ftblibrary.client.util.ClientUtils;
 import dev.ftb.mods.ftblibrary.platform.event.NativeEventPosting;
 import dev.ftb.mods.ftbquests.FTBQuests;
 import dev.ftb.mods.ftbquests.api.ItemFilterAdapter;
@@ -36,11 +37,7 @@ public class DisplayStacksCache {
     }
 
     private static List<ItemStack> computeMatchingStacks(ItemFilterAdapter.Matcher matcher) {
-        FTBQuestsClient.creativeTabDisplayParams().ifPresent(params -> {
-            if (CreativeModeTabs.tryRebuildTabContents(params.enabledFeatures(), params.hasPermissions(), params.holders())) {
-                FTBQuests.LOGGER.debug("creative tabs rebuilt, search tab now has {} items", CreativeModeTabs.searchTab().getSearchTabDisplayItems().size());
-            }
-        });
+        ClientUtils.rebuildAllCreativeTabsIfNeeded();
 
         ImmutableList.Builder<ItemStack> builder = ImmutableList.builder();
 
