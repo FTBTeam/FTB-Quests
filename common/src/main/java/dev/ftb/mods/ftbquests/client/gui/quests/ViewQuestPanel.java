@@ -29,6 +29,7 @@ import dev.ftb.mods.ftbquests.net.TogglePinnedMessage;
 import dev.ftb.mods.ftbquests.quest.*;
 import dev.ftb.mods.ftbquests.quest.reward.Reward;
 import dev.ftb.mods.ftbquests.quest.reward.RewardAutoClaim;
+import dev.ftb.mods.ftbquests.quest.task.ItemTask;
 import dev.ftb.mods.ftbquests.quest.task.Task;
 import dev.ftb.mods.ftbquests.quest.theme.QuestTheme;
 import dev.ftb.mods.ftbquests.quest.theme.property.ThemeProperties;
@@ -42,6 +43,7 @@ import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.network.chat.*;
 import net.minecraft.util.Mth;
 import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.TooltipFlag;
 import org.jetbrains.annotations.NotNull;
@@ -131,6 +133,16 @@ public class ViewQuestPanel extends ModalPanel {
 		if (quest != null) {
 			currentPages.put(quest.id, page);
 		}
+	}
+
+	public List<ItemStack> getItemTaskItems() {
+		List<ItemStack> res = new ArrayList<>();
+		for (var w : panelTasks.getWidgets()) {
+			if (w instanceof TaskButton tb && tb.task instanceof ItemTask itemTask) {
+				res.add(itemTask.getItemStack());
+			}
+		}
+		return res;
 	}
 
 	public void setCurrentPage(long questId, int page) {
