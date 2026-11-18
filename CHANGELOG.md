@@ -6,7 +6,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [2101.1.40]
 
-...
+### Fixed
+* Better width calculation for the reward selector screen (button text in some languages could overflow the panel width)
 
 ## [2101.1.39]
 
