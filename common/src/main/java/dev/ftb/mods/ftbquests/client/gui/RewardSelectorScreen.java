@@ -21,7 +21,6 @@ import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Items;
@@ -120,7 +119,8 @@ public class RewardSelectorScreen extends AbstractGroupedButtonListScreen<Chapte
 
     @Override
     public boolean onInit() {
-        setSize(Mth.clamp(widestQuestName + maxRewardCount * 20 + 50, 220, getWindow().getGuiScaledWidth() * 4 / 5),
+        int wanted = Math.max(((CustomBottomPanel) bottomPanel).requiredWidth(), widestQuestName + maxRewardCount * 20 + 50);
+        setSize(Mth.clamp(wanted, 220, getWindow().getGuiScaledWidth() * 4 / 5),
                 getWindow().getGuiScaledHeight() * 4 / 5);
         return true;
     }
@@ -232,8 +232,8 @@ public class RewardSelectorScreen extends AbstractGroupedButtonListScreen<Chapte
     }
 
     private class CustomBottomPanel extends Panel {
-        private Button buttonClaimAll;
-        private Button buttonClaimXP;
+        private final Button buttonClaimAll;
+        private final Button buttonClaimXP;
         private final Button buttonClose;
 
         public CustomBottomPanel() {
@@ -241,23 +241,22 @@ public class RewardSelectorScreen extends AbstractGroupedButtonListScreen<Chapte
 
             buttonClose = SimpleTextButton.create(this, Component.translatable("gui.close"),
                     Icons.CANCEL, mb -> doCancel(), hotkeyTooltip("ESC"));
+            buttonClaimAll = Button.builder(this, mb -> doClaimAll(false))
+                    .withLabel(Component.translatable("ftbquests.reward.claim_all"))
+                    .withIcon(Icons.MONEY_BAG)
+                    .enabledWhen(() -> !ClientQuestFile.INSTANCE.shouldSuppressAllAutoclaiming())
+                    .withExtraTooltipLines(lines -> {
+                        if (excludedRewards > 0) {
+                            lines.add(Component.translatable("ftbquests.gui.claim_all_exclusion", excludedRewards));
+                        }
+                    })
+                    .build();
+            buttonClaimXP = SimpleTextButton.create(this, Component.translatable("ftbquests.reward.claim_xp"),
+                    ItemIcon.getItemIcon(Items.EXPERIENCE_BOTTLE),mb -> doClaimAll(true));
         }
 
         @Override
         public void addWidgets() {
-            MutableComponent claimAllTitle = Component.translatable("ftbquests.reward.claim_all");
-            List<Component> tooltip = new ArrayList<>();
-            if (ClientQuestFile.INSTANCE.shouldSuppressAllAutoclaiming()) {
-                tooltip.add(Component.literal("Suppressed by quest book configuration"));
-                claimAllTitle.withStyle(ChatFormatting.STRIKETHROUGH);
-            } else if (excludedRewards > 0) {
-                tooltip.add(Component.translatable("ftbquests.gui.claim_all_exclusion", excludedRewards));
-            }
-            buttonClaimAll = SimpleTextButton.create(this, claimAllTitle,
-                    Icons.MONEY_BAG, mb -> doClaimAll(false), tooltip.toArray(new Component[0]));
-            buttonClaimXP = SimpleTextButton.create(this, Component.translatable("ftbquests.reward.claim_xp"),
-                    ItemIcon.getItemIcon(Items.EXPERIENCE_BOTTLE),mb -> doClaimAll(true));
-
             add(buttonClose);
             if (totalRewards - excludedRewards > 0) {
                 add(buttonClaimAll);
@@ -278,6 +277,10 @@ public class RewardSelectorScreen extends AbstractGroupedButtonListScreen<Chapte
         public void drawBackground(GuiGraphics graphics, Theme theme, int x, int y, int w, int h) {
             theme.drawPanelBackground(graphics, x, y, w, h);
             Color4I.BLACK.withAlpha(80).draw(graphics, x, y + h - 1, w, 1);
+        }
+
+        int requiredWidth() {
+            return buttonClose.width + buttonClaimAll.width + buttonClaimXP.width + 20;
         }
     }
 }
