@@ -8,6 +8,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 * Fixed creative mode issue where viewing a quest before opening the creative mode inventory could break creative mode search
+* Fixed potential client crash in conjunction with FTB Filter System and auto-creating OR filters
+* Fixed quest object tag lists sometimes becoming immutable, preventing saving of quests/chapters/etc. with modified tags
+* Prevent italic quest description text from getting clipped by one pixel on the left edge
+* Better width calculation for the reward selector screen (button text in some languages could overflow the panel width)
+* Fixed quest dependency line rendering overshooting the quest button in some cases - thanks @MR-kartoshki
 
 ## [26.1.2.10]
 
