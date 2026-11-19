@@ -147,6 +147,9 @@ public class ViewQuestPanel extends ModalPanel {
 	}
 
 	public List<ItemStack> getItemTaskItems() {
+		if (panelTasks == null) {
+			return List.of();
+		}
 		List<ItemStack> res = new ArrayList<>();
 		for (var w : panelTasks.getWidgets()) {
 			if (w instanceof TaskButton tb && tb.task instanceof ItemTask itemTask) {
