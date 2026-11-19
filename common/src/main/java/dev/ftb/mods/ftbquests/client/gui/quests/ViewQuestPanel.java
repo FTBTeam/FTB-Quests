@@ -431,7 +431,8 @@ public class ViewQuestPanel extends ModalPanel {
 				final int line = i;
 				TextField field = new QuestDescriptionField(panelText, canEdit, TranslationKey.QUEST_DESC, (context, clickedW) -> editDescLine(clickedW, line, context, null))
 						.setMaxWidth(panelText.width).setSpacing(9).setText(component);
-				field.setWidth(panelText.width);
+				field.setX(1);  // avoids italic text getting clipped on the left edge
+				field.setWidth(panelText.width - 1);
 				panelText.add(field);
 			}
 		}
