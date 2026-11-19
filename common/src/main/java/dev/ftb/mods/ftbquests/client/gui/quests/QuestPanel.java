@@ -345,7 +345,10 @@ public class QuestPanel extends Panel {
 		for (int i = 0; i < points.size() - 1; i++) {
 			Vec2d p1 = points.get(i);
 			Vec2d p2 = points.get(i + 1);
-			float len = (float) (Math.sqrt(p1.distanceToSqr(p2)) * 1.04f);
+			float len = (float) Math.sqrt(p1.distanceToSqr(p2));
+			if (i < points.size() - 2) {
+				len *= 1.04f;
+			}
 			int col1 = FastColor.ARGB32.lerp((float) i / points.size(), startCol, endCol);
 			int col2 = FastColor.ARGB32.lerp((i + 1f) / points.size(), startCol, endCol);
 
