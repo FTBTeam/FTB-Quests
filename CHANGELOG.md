@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 * Better width calculation for the reward selector screen (button text in some languages could overflow the panel width)
+* Prevent italic quest description text from getting clipped by one pixel on the left edge
 
 ## [2101.1.39]
 
