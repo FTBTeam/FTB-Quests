@@ -47,7 +47,7 @@ public abstract class QuestObjectBase implements Comparable<QuestObjectBase> {
 
 	private boolean invalid = false;
 	private ItemStack rawIcon = ItemStack.EMPTY;
-	private List<String> tags = new ArrayList<>(0);
+	private final List<String> tags = new ArrayList<>(0);
 
 	@Nullable
 	private Icon<?> cachedIcon = null;
@@ -289,9 +289,8 @@ public abstract class QuestObjectBase implements Comparable<QuestObjectBase> {
 	public void readData(Json5Object json, HolderLookup.Provider provider) {
 		Json5Util.getJson5Object(json, "icon").ifPresent(icon -> rawIcon = itemOrMissingFromJson(icon, provider));
 
-		tags = Json5Util.fetch(json, "tags", Codec.STRING.listOf())
-				.map(list -> list.stream().filter(tag -> TAG_PATTERN.matcher(tag).matches()).toList())
-				.orElseGet(ArrayList::new);
+		tags.clear();
+		Json5Util.fetch(json, "tags", Codec.STRING.listOf()).ifPresent(tags::addAll);
 	}
 
 	public void writeNetData(RegistryFriendlyByteBuf buffer) {
@@ -313,11 +312,13 @@ public abstract class QuestObjectBase implements Comparable<QuestObjectBase> {
 	public void readNetData(RegistryFriendlyByteBuf buffer) {
 		int flags = buffer.readVarInt();
 		rawIcon = Bits.getFlag(flags, 2) ? ItemStack.OPTIONAL_STREAM_CODEC.decode(buffer) : ItemStack.EMPTY;
-		tags = new ArrayList<>(0);
 
+		tags.clear();
 		if (Bits.getFlag(flags, 4)) {
-			NetUtils.readStrings(buffer, tags);
-			tags.removeIf(tag -> !TAG_PATTERN.matcher(tag).matches());
+			List<String> list = new ArrayList<>();
+			NetUtils.readStrings(buffer, list);
+			list.removeIf(tag -> !TAG_PATTERN.matcher(tag).matches());
+			tags.addAll(list);
 		}
 	}
 
