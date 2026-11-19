@@ -344,7 +344,8 @@ public class QuestPanel extends Panel {
 		for (int i = 0; i < points.size() - 1; i++) {
 			Vec2d p1 = points.get(i);
 			Vec2d p2 = points.get(i + 1);
-			float len = (float) (Math.sqrt(p1.distanceToSqr(p2)) * 1.04f);
+			float kludge = i < points.size() - 2 ? 1.04f : 1f;
+			float len = (float) (Math.sqrt(p1.distanceToSqr(p2)) * kludge);
 
 			poseStack.pushMatrix();
 			poseStack.translate((float) p1.x(), (float) p1.y());
